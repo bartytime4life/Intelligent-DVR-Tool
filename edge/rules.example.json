@@ -1,0 +1,10 @@
+[
+  {
+    "name": "Dock zone",
+    "label": "person",
+    "rect": [0.1, 0.3, 0.8, 0.65],
+    "dwell": 2,
+    "threshold": 0.7,
+    "max_gap": 2
+  }
+]
