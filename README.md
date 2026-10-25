@@ -37,14 +37,15 @@ ONNX contract, scope limits and receipt format. See
 ## Checks
 
 ```bash
-npm test
 npm run build
+npm test
+npm run test:sites
 python3 -m unittest discover -s tests -p 'test_*.py'
 ```
 
 Pure rule tests require only Python. For synthetic inference integration install
 `edge/requirements-test.txt` in an isolated environment; otherwise those tests
-are explicitly skipped. `npm test` also checks the retained Sites-ready Worker
+are explicitly skipped. `npm run test:sites` checks the retained Sites-ready Worker
 packaging. This repository is prepared for a later private Sites deployment;
 no Site is registered or published by this implementation.
 

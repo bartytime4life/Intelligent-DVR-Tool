@@ -17,7 +17,8 @@ final result: passed
 1. Initial full and focused comparison found P2 density drift in the right review queue: text and evidence previews were too small, and the queue was narrower than the reference. Fixed desktop queue width to 450 px, evidence preview to 125 px, and increased event and source typography. A fresh combined browser capture shows the corrected queue proportions and readable actions.
 2. P2 sample overlays did not align with the newly generated camera scenes. Corrected source-normalized sample boxes and projected geometry through the same cover/crop transform as the image. Removed artificial box drift over static imagery. Rechecked full-view and mobile scenes.
 3. P1 interaction failure: simulated event generation used secure-context-only randomUUID on the HTTP preview. Replaced the sample-only identifier path and generated the ID before the React state updater. Retested save rule → try simulated event → queue count increase, followed by reset.
-4. Post-fix comparison: no actionable P0/P1/P2 visual or interaction findings remain in the tested core flows.
+4. P2 desktop height regression after enlarging queue content: footer could move below a 936 px viewport. Fixed desktop monitor height to available viewport space and gave only the queue its own overflow, retaining normal page scrolling on phones. Rechecked full-view desktop with the footer in view.
+5. Post-fix comparison: no actionable P0/P1/P2 visual or interaction findings remain in the tested core flows.
 
 ## Required fidelity surfaces
 
@@ -61,3 +62,5 @@ P3: add optional density controls for very large monitoring displays after pilot
 - [x] Compare source and implementation together, fix issues, capture again.
 - [x] Run domain, packaging, edge integration and build checks.
 - [ ] Qualify real model and camera hardware in a separately scoped pilot.
+
+CI follow-up: the initial packaging check ran before build output existed on a clean runner. Domain and packaging test commands are now separate; CI builds before the packaging check.

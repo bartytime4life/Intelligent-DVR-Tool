@@ -1527,3 +1527,21 @@ textarea::placeholder {
   transform: scale(2.8);
   transform-origin: 60% 50%;
 }
+@media (min-width: 701px) {
+  .tab-monitor {
+    height: calc(100dvh - 122px);
+    min-height: 0;
+  }
+  .monitor-layout {
+    min-height: 0;
+    overflow: hidden;
+  }
+  .camera-wall {
+    grid-template-rows: repeat(2, minmax(0, 1fr));
+    min-height: 0;
+  }
+  .review-queue {
+    min-height: 0;
+    overflow-y: auto;
+  }
+}
