@@ -12,3 +12,11 @@
 Model weights and training datasets are not included; their licenses and
 commercial use conditions require separate review. Generated sample camera
 scenes are not evidence of real events.
+
+The optional OpenCV Zoo YOLOX-S candidate and its COCO80 class ordering are
+documented in [model qualification research](model-qualification-20261026.md).
+The exact model directory states that all its files use Apache-2.0. The upstream
+license is preserved in [Apache-2.0-YOLOX.txt](model-qualification/Apache-2.0-YOLOX.txt).
+Class names were transcribed from the pinned upstream demo; no trained weights
+or upstream runtime implementation are bundled. This third-party notice does
+not assign a license to BARTA's repository.

@@ -1,0 +1,5 @@
+# Exact runtime used for the recorded Linux/Python 3.12 compatibility smoke test.
+# Recognition/evaluation datasets and model files are deliberately separate.
+opencv-python-headless==4.14.0
+numpy==2.5.4
+onnx==1.23.2

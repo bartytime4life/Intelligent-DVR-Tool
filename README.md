@@ -33,6 +33,9 @@ The optional Inter font uses Google Fonts; the system fallback works offline.
 See [edge/README.md](edge/README.md) for the recording-analysis CLI, supported
 ONNX contract, scope limits and receipt format. See
 [docs/pilot-scope.md](docs/pilot-scope.md) for qualification and service scope.
+The [model qualification research](docs/model-qualification-20261026.md) compares
+free local detectors and records a hash-verified YOLOX-S synthetic-input
+compatibility check. Recognition accuracy remains unmeasured.
 
 ## Checks
 
