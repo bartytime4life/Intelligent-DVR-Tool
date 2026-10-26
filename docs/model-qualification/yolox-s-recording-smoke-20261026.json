@@ -1,0 +1,32 @@
+{
+  "schema": "intelligent-dvr.manual-check.v1",
+  "source": "Ten explicitly generated alternating black/gray MJPG frames, 320x240, 10 FPS; temporary source deleted after test.",
+  "scope": "Trained model through offline recording CLI; synthetic inputs only",
+  "recognition_accuracy": "unmeasured",
+  "runtime_threads": 1,
+  "receipt": {
+    "schema": "intelligent-dvr.receipt.v1",
+    "mode": "offline-model",
+    "state": "completed",
+    "events": [],
+    "model_sha256": "c5c2d13e59ae883e6af3b45daea64af4833a4951c92d116ec270d9ddbe998063",
+    "source_sha256": "9a817879146c0551caaac8590c93ae35ebf74ea317d4e50722873fa72065e062",
+    "camera": "synthetic-offline-check",
+    "inference_profile": "opencv-zoo-yolox-s-2022nov",
+    "labels_sha256": "76ce1473f01bd271bab54429737358a97160629cf970c5ec8384c2777dd0bae9",
+    "frames_read": 10,
+    "frames_analyzed": 2,
+    "fps_metadata": 10.0,
+    "stride": 5,
+    "timing": {
+      "scope": "local inference and postprocessing only; not end-to-end camera latency",
+      "p50_ms": 782.2176150002633,
+      "p95_ms": 865.0897209954564
+    },
+    "limitations": [
+      "No identity tracking: dwell is continuous class presence, not the same object.",
+      "Frame timing assumes a constant-frame-rate recording; verify variable-rate sources.",
+      "No camera compatibility or production detection quality has been qualified."
+    ]
+  }
+}

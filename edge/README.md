@@ -30,11 +30,33 @@ Keep model files, footage, receipts and credentials out of Git.
 classes in that order. Do not substitute that example for a COCO model's labels.
 Review the model and training-data licenses before any commercial use.
 
-Only raw YOLOv8-style outputs `[1,4+C,N]` are implemented: 640×640 letterboxed RGB
+The default `--profile yolov8-raw-640` accepts raw outputs `[1,4+C,N]`: 640×640 letterboxed RGB
 input, xywh boxes in input pixels, post-sigmoid scores, no objectness column,
 no embedded NMS. YOLOv5, end-to-end NMS exports, segmentation, other input sizes,
 normalized output coordinates and multiple output heads are unsupported.
 The shape check cannot prove all those semantics: qualify your actual export.
+
+An additional **explicit, hash-bound** profile, `opencv-zoo-yolox-s-2022nov`,
+supports the pinned OpenCV Zoo FP32 YOLOX-S artifact. It uses RGB **0–255**,
+top-left letterbox placement, floor resize dimensions, raw `[1,8400,85]` output,
+stride/grid decoding and objectness × class scoring. This differs from the
+upstream Megvii demo's default BGR input. Do not substitute another YOLOX export,
+INT8 model or a legacy normalized model. Model hash and all 80 labels in exact
+order must match. The existing YOLOv8 profile remains the default.
+
+See [the model comparison and reproducible qualification path](../docs/model-qualification-20261026.md)
+for license evidence, the pinned download, a bounded synthetic-input check and
+the remaining accuracy gates. No model download occurs inside either CLI.
+
+After obtaining and checking that specific artifact, an approved local recording
+can be analyzed with the existing command plus:
+
+```bash
+--profile opencv-zoo-yolox-s-2022nov --labels edge/labels/coco80.json
+```
+
+Replace the original `--labels` argument rather than supplying it twice. This
+enables offline analysis only, not automatic capture or operational acceptance.
 
 Rule JSON is an array of named rules; browser rule exports have a separate
 schema and are intentionally not silently accepted by this CLI. Map a browser

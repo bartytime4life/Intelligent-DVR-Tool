@@ -1,7 +1,7 @@
 """Analyze an explicitly supplied local recording with an owner-supplied ONNX model.
 
-Only YOLOv8-style raw output [1, 4+C, N], 640px square letterbox input,
-xywh pixel boxes and post-sigmoid class scores are supported. No model download,
+Default: YOLOv8-style raw output [1, 4+C, N], 640px square letterbox input.
+An explicit hash-bound OpenCV Zoo YOLOX profile is also supported. No model download,
 camera probing, cloud calls, face identification or automatic response.
 """
 import argparse
@@ -12,6 +12,8 @@ from pathlib import Path
 import statistics
 import time
 from .rules import Rule, RuleEngine
+from .model_profiles import (DEFAULT_PROFILE, YOLOX_PROFILE, PROFILES, prepare,
+                             validate_binding, yolox_to_yolov8)
 
 
 def digest(path):
@@ -22,7 +24,11 @@ def digest(path):
     return h.hexdigest()
 
 
-def decode(raw, labels, frame_shape, scale, padding, cv2, np):
+def decode(raw, labels, frame_shape, scale, padding, cv2, np, profile=DEFAULT_PROFILE):
+    if profile == YOLOX_PROFILE:
+        raw = yolox_to_yolov8(raw, labels, np)
+    elif profile != DEFAULT_PROFILE:
+        raise ValueError('Unknown inference profile')
     if raw.ndim != 3 or raw.shape[0] != 1 or raw.shape[1] != 4+len(labels):
         raise ValueError('Unsupported ONNX output: expected [1,4+number_of_labels,N]')
     if raw.shape[2] > 100000 or not np.isfinite(raw).all():
@@ -61,6 +67,7 @@ def main(argv=None):
     parser.add_argument('--video',type=Path,required=True)
     parser.add_argument('--model',type=Path,required=True)
     parser.add_argument('--labels',type=Path,required=True,help='JSON array matching ONNX class order')
+    parser.add_argument('--profile',choices=PROFILES,default=DEFAULT_PROFILE)
     parser.add_argument('--rules',type=Path,required=True,help='JSON array of edge Rule objects; see example')
     parser.add_argument('--output',type=Path,required=True,help='New receipt path (will not overwrite)')
     parser.add_argument('--camera',default='offline-camera')
@@ -75,8 +82,11 @@ def main(argv=None):
     if args.output.exists() or args.output.is_symlink():
         parser.error('Output must be a new file')
     labels=json.loads(args.labels.read_text())
-    if not isinstance(labels,list) or not 1 <= len(labels) <= 1000 or any(not isinstance(x,str) or not 1 <= len(x) <= 80 for x in labels) or len(set(labels)) != len(labels):
-        parser.error('labels must be a unique JSON array of 1–1000 class names')
+    model_hash=digest(args.model)
+    try:
+        validate_binding(args.profile,model_hash,labels)
+    except ValueError as error:
+        parser.error(str(error))
     config=json.loads(args.rules.read_text())
     if not isinstance(config,list) or not 1 <= len(config) <= 100:
         parser.error('Use 1–100 explicit rules')
@@ -88,7 +98,7 @@ def main(argv=None):
         import numpy as np
     except ImportError:
         parser.error('Install the optional edge requirements first; see edge/README.md')
-    source_hash=digest(args.video);model_hash=digest(args.model)
+    source_hash=digest(args.video)
     run_id=hashlib.sha256((source_hash+model_hash).encode()).hexdigest()
     engine=RuleEngine(rules,args.camera,run_id)
     capture=cv2.VideoCapture(str(args.video))
@@ -111,14 +121,11 @@ def main(argv=None):
                 continue
             if frame.shape[0]*frame.shape[1] > 3840*2160:
                 raise ValueError('Video exceeds the 4K pixel bound')
-            h,w=frame.shape[:2];scale=min(640/w,640/h)
-            rw,rh=round(w*scale),round(h*scale);left=(640-rw)//2;top=(640-rh)//2
-            image=np.full((640,640,3),114,dtype=np.uint8)
-            image[top:top+rh,left:left+rw]=cv2.resize(frame,(rw,rh))
+            blob,scale,padding=prepare(frame,args.profile,cv2,np)
             began=time.perf_counter()
-            net.setInput(cv2.dnn.blobFromImage(image,1/255,(640,640),swapRB=True,crop=False))
+            net.setInput(blob)
             raw=net.forward()
-            detections=decode(raw,labels,frame.shape,scale,(left,top),cv2,np)
+            detections=decode(raw,labels,frame.shape,scale,padding,cv2,np,args.profile)
             latencies.append((time.perf_counter()-began)*1000)
             processed+=1;events.extend(engine.update(index/fps,detections))
             if len(events) >= 1000:
@@ -133,6 +140,7 @@ def main(argv=None):
     receipt={'schema':'intelligent-dvr.receipt.v1','mode':'offline-model',
              'state':'partial' if partial else 'completed','events':events,
              'model_sha256':model_hash,'source_sha256':source_hash,'camera':args.camera,
+             'inference_profile':args.profile,'labels_sha256':digest(args.labels),
              'frames_read':frames,'frames_analyzed':processed,'fps_metadata':fps,'stride':args.stride,
              'timing':{'scope':'local inference and postprocessing only; not end-to-end camera latency',
                        'p50_ms':statistics.median(ordered),'p95_ms':ordered[math.ceil(.95*len(ordered))-1]},
