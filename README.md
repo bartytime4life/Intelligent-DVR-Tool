@@ -55,7 +55,7 @@ The browser prototype needs no subscription, paid inference, API key, camera cre
 | Claim | Evidence | Boundary |
 | --- | --- | --- |
 | Review, zone and facility logic passes the current JavaScript checks | **27 passed**, plus **4 packaging tests passed**, October 27, 2026 | Automated tests cover their assertions; browser checks are recorded separately |
-| Python rules, evaluation and scheduler checks run in this environment | **55 run: 47 passed, 8 skipped** | Native inference dependencies were unavailable; skipped tests are not passes |
+| Python rules, evaluation and synthetic inference integration checks | **CI: 55 passed, no skips.** Local: 47 passed, 8 skipped | [CI evidence](docs/verification/2026-10-27/README.md#ci-follow-through) records the tested commit and native dependencies |
 | The production package builds | Fresh build completed | Vite reports a large lazy-loaded facility bundle; no load-time claim follows |
 | A pretrained YOLOX-S artifact previously ran through compatibility probes | [October 26 model report](docs/model-qualification-20261026.md) and JSON receipts | Historical synthetic-input/recording smoke tests; no recognition-quality result |
 | The scheduler can be exercised with 100 synthetic source IDs | [Fresh load-model reports](docs/verification/2026-10-27/README.md) | Virtual time, assumed service costs and synthetic payloads; no camera throughput measured |

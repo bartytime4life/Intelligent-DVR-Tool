@@ -107,3 +107,9 @@ The fresh build emitted a lazy facility JavaScript chunk of about **1.79 MB mini
 A structured code/documentation review checked the refresh for changed runtime behavior, untrusted input, external media dependencies, fabricated screenshots, unsupported capability language and broken navigation. Runtime application/edge code is unchanged by the refresh; the new scripts only compose local screenshot artifacts and validate documentation. The CI workflow adds one standard-library documentation check. No full security scan or security certification is claimed.
 
 Historical model evidence remains in the [October 26 report](../../model-qualification-20261026.md) and its original JSON files. That evidence establishes a selected pretrained artifact's compatibility on synthetic inputs and a generated recording, not representative-scene accuracy, target-host latency, five-camera throughput or 100-camera operation.
+
+## CI follow-through
+
+Both [push CI](https://github.com/bartytime4life/Intelligent-DVR-Tool/actions/runs/40559417348) and [PR CI](https://github.com/bartytime4life/Intelligent-DVR-Tool/actions/runs/40559454533) completed successfully at refresh commit `a00c9c76a1ada57eb786a23778e1c1bcaab3547a`. GitHub's runner installed the native test dependencies. **27 JavaScript + 4 packaging + 55 Python = 86 tests passed, with no skips.** Build, documentation integrity and wiki-mirror checks also passed.
+
+[Machine-readable CI result](ci-results.json) · [Timestamped test-log excerpt](ci-test-excerpt.log). This addendum updates the evidence presentation; application and edge code remain unchanged. Read the workflow for later documentation commits separately. Native cases use synthetic ONNX/recording fixtures and do not establish representative recognition accuracy, real camera compatibility or 100-camera throughput.
