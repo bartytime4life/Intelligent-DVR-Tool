@@ -179,9 +179,21 @@ area, not its full enclosing rectangle. Building translation/save and restoratio
 of sample data were exercised. No real device-location permission was requested.
 Initial public Overpass attempts returned 502/timeouts, so live retrieval is not
 qualified by the successful offline fixture; that external-service gap is retained
-explicitly. Local build and all 30 frontend/Sites checks passed. No fresh application
+explicitly. Local build and all 31 frontend/Sites checks passed. No fresh application
 console warnings/errors appeared in the post-fix drawing check. Mobile, full
 accessibility, actual GPS and complex building geometry remain outside this pass.
 
 Desktop drawing/offline-review visual result: passed. Live-service qualification
 remains pending; do not describe automatic loading as verified in this environment.
+
+
+Replacement-preview review fix: preview and Apply now share the same validated
+plan constructor, clearing old buildings/cameras/rooms/labels/route for a clean
+replacement. Additive over-capacity selections display an explicit limit message.
+A 98-draft / three-existing-building regression verifies the replacement contract
+and that the old plan is unchanged. This addresses the independent review P2.
+Browser retest: additive selection was disabled at 101 total buildings; selecting
+clean replacement enabled Apply and removed the old Warehouse label from the map
+while showing synthetic draft labels. Applying produced zero cameras; Undo
+restored five cameras and the original Warehouse. No console errors/warnings
+were captured in this final tab.

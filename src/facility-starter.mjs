@@ -1,4 +1,9 @@
-import { fromLngLat, toLngLat, validPolygon, polygonArea } from "./facility.mjs";
+import { fromLngLat, toLngLat, validPolygon, polygonArea, validateFacility } from "./facility.mjs";
+
+export function draftFacility(plan, buildings, replace = false) {
+  const base = replace ? {...plan,buildings:[],cameras:[],rooms:[],labels:[],route:[]} : plan;
+  return validateFacility({...base,buildings:[...base.buildings,...buildings]});
+}
 const SHAPES = ["Rectangle", "L wing", "T wing", "U wing", "Cross", "Octagon", "Round"];
 const OSM_ENDPOINT = "https://overpass.private.coffee/api/interpreter";
 const OSM_SERVERS = [OSM_ENDPOINT];

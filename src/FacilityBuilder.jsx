@@ -40,6 +40,7 @@ import {
 } from "./facility.mjs";
 import { createFacilityMap } from "./facility-map.mjs";
 import { OpenMapStarter, ShapeBuilder, MeasurementSummary, ConstructionGuide } from './FacilityStarter.jsx';
+import { draftFacility } from './facility-starter.mjs';
 const STORAGE = "dvr.facility.v1";
 const keyOf = { building: "buildings", camera: "cameras", room: "rooms", label: "labels" };
 const round = (n) => Math.round(n * 100) / 100;
@@ -71,6 +72,8 @@ ot be read. The sample is open; export it or make a deliberate edit to replace s
   }
   const [pasteOpen, setPasteOpen] = useState(false);
   const [mapDrafts, setMapDrafts] = useState([]), [searchArea, setSearchArea] = useState(null);
+  const [replaceDrafts, setReplaceDrafts] = useState(false);
+  const [draftPreviewError, setDraftPreviewError] = useState('');
   const [plan, setPlan] = useState(initial.current.plan), [step, setStep] = useState(0), [selected, setSelected] = useState(
     { kind: "camera", id: "C-07" }
   ), [draft, setDraft] = useState(null), [view, setView] = useState("3d"), [floor, setFloor] = useState(
@@ -226,11 +229,13 @@ onReady", "onError"].map((k) => [k, (...args) => latest.current[k](...args)])), 
   }, [plan, draft, selected]);
   useEffect(() => {
     let displayed = preview;
+    let failure = '';
     if (mapDrafts.length) {
-      try { displayed = validateFacility({...preview, buildings: [...preview.buildings, ...mapDrafts]}); } catch { /* Keep the committed plan visible. */ }
+      try { displayed = draftFacility(preview, mapDrafts, replaceDrafts); } catch(e) { failure = e.message; }
     }
+    setDraftPreviewError(failure);
     api.current?.update(displayed, selected.id, view, floor);
-  }, [preview, mapDrafts, selected.id, view, floor, ready]);
+  }, [preview, mapDrafts, replaceDrafts, selected.id, view, floor, ready]);
   useEffect(() => api.current?.setArea(searchArea), [searchArea, ready]);
   useEffect(() => api.current?.setTrack(step === 5 ? position : null), [step, seconds, plan, ready]);
   useEffect(() => {
@@ -396,7 +401,7 @@ label." };
   current?.center()}><Crosshair size={18} /></button></div>
       <div className="facility-map-context"><span className="facility-local-dot" />{plan.name}<small>{streets ? "Online \
 street map \xB7 OpenStreetMap" : "Local grid \xB7 20 m spacing \xB7 no external tiles"}</small></div>
-      {!!mapDrafts.length && <div className="facility-draft-banner" role="status">Preview: {mapDrafts.length} building drafts · review before saving</div>}
+      {!!mapDrafts.length && <div className="facility-draft-banner" role="status">{draftPreviewError ? `Draft preview unavailable: ${draftPreviewError}` : `Preview: ${mapDrafts.length} building drafts · review before saving`}</div>}
       {mapError && <div className="facility-map-error" role="alert"><WarningCircle /><span>{mapError}</span><button aria-label="Dismiss graphics message" onClick={() => setMapError(
     ""
   )}><X /></button></div>}
@@ -437,7 +442,7 @@ pect its modeled view.", "Draw a route and review proposed camera transitions."]
     api.current?.setBasemap(e.target.checked);
   }} />Online street map<small>Sends the visible map area to OpenStreetMap. No offline tile download.</small></label>}
       {step === 0 && <SiteForm plan={plan} commit={commit} center={() => api.current?.center()} />} 
-      {step === 0 && <OpenMapStarter plan={plan} commit={commit} onPreview={setMapDrafts} onArea={setSearchArea} disabled={dirty} />}
+      {step === 0 && <OpenMapStarter plan={plan} commit={commit} onPreview={(buildings,replace) => {setMapDrafts(buildings);setReplaceDrafts(!!replace);}} onArea={setSearchArea} disabled={dirty} />}
       {step === 0 && <><div className="facility-section-note"><MapPin /><p>This map starts with a fictional layout and no external map services. Coordinates anchor your plan; they do not verify a real building.</p></div><button className="facility-secondary" onClick={() => {
     commit(blankFacility(), "New plan \u2014 Undo is available");
     setSelected({ kind: "camera", id: "" });

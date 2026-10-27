@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { SHAPES, shapeFootprint, dimensions, searchBounds, osmHeight, osmQuery, parseOsmBuildings, fetchOsmBuildings } from "../src/facility-starter.mjs";
-import { validPolygon, blankFacility, validateFacility, toLngLat } from "../src/facility.mjs";
+import { SHAPES, shapeFootprint, dimensions, searchBounds, osmHeight, osmQuery, parseOsmBuildings, fetchOsmBuildings, draftFacility } from "../src/facility-starter.mjs";
+import { validPolygon, blankFacility, validateFacility, toLngLat, exampleFacility } from "../src/facility.mjs";
 const origin = [-98, 38.5], bounds = searchBounds(origin, 0, 0, 250, 250);
 const way = (id = 1, tags = { building: "yes" }, ring = shapeFootprint("Rectangle", 32, 40, 8)) => ({ type: "way", id, tags,
 geometry: ring.map((p) => {
@@ -84,4 +84,16 @@ test("network adapter caps response bytes and reports service failure", async ()
   assert.match(request.body.get("data"), /maxsize/);
   await assert.rejects(() => fetchOsmBuildings(bounds, void 0, async () => new Response("", { status: 429 })), /busy/);
   await assert.rejects(() => fetchOsmBuildings(bounds, void 0, async () => new Response(" ".repeat(2000001))), /2 MB/);
+});
+
+// Replacement must use the same contract for preview and application.
+test('replacement previews accept 98 drafts without retaining the old 3 buildings or cameras',()=>{
+  const plan=exampleFacility(),before=structuredClone(plan);
+  const drafts=Array.from({length:98},(_,i)=>({id:'draft-'+i,name:'Draft '+i,footprint:shapeFootprint('Rectangle',10,10,2),height:6,floors:1}));
+  assert.throws(()=>draftFacility(plan,drafts,false));
+  const replacement=draftFacility(plan,drafts,true);
+  assert.equal(replacement.buildings.length,98);
+  for(const k of ['cameras','rooms','labels','route'])assert.equal(replacement[k].length,0);
+  assert.deepEqual(plan,before);
+  assert.throws(()=>draftFacility(plan,[...drafts,...Array.from({length:3},(_,i)=>({...drafts[0],id:'extra-'+i}))],true));
 });

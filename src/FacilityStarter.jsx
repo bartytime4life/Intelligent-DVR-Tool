@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { SHAPES, OSM_SERVERS, shapeFootprint, dimensions, searchBounds, parseOsmBuildings, fetchOsmBuildings } from "./facility-starter.mjs";
+import { SHAPES, OSM_SERVERS, shapeFootprint, dimensions, searchBounds, parseOsmBuildings, fetchOsmBuildings, draftFacility } from "./facility-starter.mjs";
 function Numeric({ label, value, onChange, min, max, step = "any" }) {
   return <label className="facility-field"><span>{label}</span><input type="number" aria-label={label} required value={value} min={min} max={max} step={step} onChange={(e) => onChange(
   e.target.value === "" ? "" : Number(e.target.value))} /></label>;
@@ -71,8 +71,8 @@ function OpenMapStarter({ plan, commit, onPreview, onArea, disabled }) {
   }, [plan.origin, east, north, width, depth]);
   const chosen = useMemo(() => result?.buildings.filter((b) => checked.includes(b.id)) || [], [result, checked]);
   useEffect(() => {
-    callbacks.current.onPreview(open ? chosen : []);
-  }, [chosen, open]);
+    callbacks.current.onPreview(open ? chosen : [], mode === 'new');
+  }, [chosen, open, mode]);
   useEffect(() => {
     callbacks.current.onArea(open ? bounds : null);
   }, [bounds, open]);
@@ -152,14 +152,16 @@ ary; the whole footprint will be kept." : ""} Source updated: {b.source.updated}
       <label className="facility-field"><span>Apply drafts</span><select aria-label="Apply building drafts" value={mode} onChange={(e) => setMode(
   e.target.value)}><option value="append">Add to existing plan</option><option value="new">Replace with a clean site</option></select></label>
       {mode === "new" && <p className="facility-caption">Replaces all existing buildings, cameras, rooms, labels and route. Undo restores the prior plan.</p>}
+      {chosen.length + (mode === 'append' ? plan.buildings.length : 0) > 100 && <p className="facility-caption" role="alert">The selection exceeds the 100-building limit. Reduce it or choose a clean replacement site.</p>}
       <button className="facility-primary" disabled={disabled || !chosen.length || chosen.length + (mode === "append" ? plan.
   buildings.length : 0) > 100} onClick={() => {
-    const base = mode === "new" ? { ...plan, buildings: [], cameras: [], rooms: [], labels: [], route: [] } : plan;
-    if (commit({ ...base, buildings: [...base.buildings, ...chosen.map(({ crossing, ...b }) => b)] }, "Reviewed map buil\
+    try {
+    if (commit(draftFacility(plan, chosen, mode === 'new'), "Reviewed map buil\
 dings added \u2014 Undo available")) {
       setResult(null);
       setChecked([]);
     }
+    } catch(e) { setMessage(e.message); }
   }}>Use {chosen.length} selected buildings</button></>}
     <details><summary>Import an offline OSM extract</summary><p className="facility-caption">Paste Overpass JSON with complete way geometry. Uses the same area origin and review checks. No network request.</p><textarea aria-label="OSM extract JSON" rows={5} maxLength={2e6} value={paste} onChange={(e) => setPaste(
   e.target.value)} /><button className="facility-secondary" disabled={!bounds || busy || disabled} onClick={() => {
