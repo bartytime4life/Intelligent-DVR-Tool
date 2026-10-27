@@ -1,0 +1,40 @@
+{
+  "license": "ODbL-1.0",
+  "attribution": "\u00a9 OpenStreetMap contributors",
+  "licenseUrl": "https://www.openstreetmap.org/copyright",
+  "acquired": "2026-10-27",
+  "liveService": false,
+  "transformation": "Resolved node references using only coordinates present in the pinned source. Retained way IDs, building tags and source edit timestamps where supplied. Resolved member geometry where present, never interpolated missing vertices. Kept courtyard parent relations. Omitted usernames, account IDs, changesets, unrelated roads and private address fields. No imagery or interior geometry.",
+  "files": [
+    {
+      "file": "eppan-exteriors.json",
+      "repository": "tyrasd/osmtogeojson",
+      "commit": "c97381a0c86c0a021641dd47d7bea01fb5514716",
+      "path": "test-cli/data/map.json",
+      "description": "Two complete exterior ways 105582211 and 106227181 near Eppan / Appiano; anonymous exterior-only examples, no occupancy assertions.",
+      "upstreamRawSha256": "fa77dbd22a538b70d4d8d2a71fc4b5265be74a9546f66b13c1f0a2cd2d2ce43a",
+      "sha256": "674682fd4087ba4ee9ae1f82f4fccccd4998bdcfad307dbc3482350b9ddef747",
+      "upstreamUrl": "https://github.com/tyrasd/osmtogeojson/blob/c97381a0c86c0a021641dd47d7bea01fb5514716/test-cli/data/map.json"
+    },
+    {
+      "file": "eppan-courtyard.json",
+      "repository": "tyrasd/osmtogeojson",
+      "commit": "c97381a0c86c0a021641dd47d7bea01fb5514716",
+      "path": "test-cli/data/map.json",
+      "description": "Pfarrkirche Sankt Michael outer way 33748706 and parent multipolygon 121733, including inner role. Parent lacks building tag; must exclude outer, never fill courtyard.",
+      "upstreamRawSha256": "fa77dbd22a538b70d4d8d2a71fc4b5265be74a9546f66b13c1f0a2cd2d2ce43a",
+      "sha256": "265614560b0385cfbe14885df47b5ae833a323cdae6590b165f93160f6fb92d9",
+      "upstreamUrl": "https://github.com/tyrasd/osmtogeojson/blob/c97381a0c86c0a021641dd47d7bea01fb5514716/test-cli/data/map.json"
+    },
+    {
+      "file": "recorded-block.json",
+      "repository": "rapkin/osm2geojson",
+      "commit": "0091edcf414c90a2903b33e1c3b8b741de5d2fdd",
+      "path": "tests/data/map.json",
+      "description": "Historical OSM block near 26.243 E, 50.6134 N, exterior ways plus courtyard relation. Address fields removed; no occupancy or current-condition assertion.",
+      "upstreamRawSha256": "f608ab4cc1d9b430bc221cc845b8bafab3843fa89d90edec08da8db61aa5edf7",
+      "sha256": "51601c3b6ea2150f29438cccaae68b6460053c72c4ddc6825cf6e3034fe72661",
+      "upstreamUrl": "https://github.com/rapkin/osm2geojson/blob/0091edcf414c90a2903b33e1c3b8b741de5d2fdd/tests/data/map.json"
+    }
+  ]
+}

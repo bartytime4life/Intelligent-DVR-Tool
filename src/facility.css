@@ -1221,3 +1221,9 @@
 .facility-paste-modal form > .error {
   margin-bottom: 14px;
 }
+
+.facility-place-results {list-style:none;padding:0;display:grid;gap:8px;}
+.facility-place-results button {width:100%;white-space:normal;text-align:left;display:block;}
+.facility-place-results small {display:block;margin-top:5px;color:#a4c5d0;}
+.facility-starter-progress {padding-left:20px;font-size:12px;line-height:1.8;color:#a4c5d0;}
+.facility-starter input:focus-visible,.facility-starter button:focus-visible,.facility-starter select:focus-visible,.facility-starter summary:focus-visible {outline:2px solid #35e0e3;outline-offset:3px;}
