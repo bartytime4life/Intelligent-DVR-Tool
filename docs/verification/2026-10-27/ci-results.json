@@ -1,0 +1,23 @@
+{
+  "commit": "a00c9c76a1ada57eb786a23778e1c1bcaab3547a",
+  "run_url": "https://github.com/bartytime4life/Intelligent-DVR-Tool/actions/runs/40559417348",
+  "pr_run_url": "https://github.com/bartytime4life/Intelligent-DVR-Tool/actions/runs/40559454533",
+  "conclusion": "success",
+  "node": {
+    "passed": 27,
+    "failed": 0,
+    "skipped": 0
+  },
+  "sites": {
+    "passed": 4,
+    "failed": 0,
+    "skipped": 0
+  },
+  "python": {
+    "run": 55,
+    "passed": 55,
+    "failed": 0,
+    "skipped": 0
+  },
+  "scope": "synthetic contract/integration tests and documentation checks; no live-camera or representative-quality qualification"
+}

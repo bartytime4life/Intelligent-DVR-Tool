@@ -1,5 +1,7 @@
 # Performance preparation for at least 100 simultaneous cameras
 
+[Evidence-led roadmap](roadmap.md) · [Fresh 100-source model results](verification/2026-10-27/README.md#100-source-load-model) · [Architecture](architecture.md)
+
 Owner requirement, 2026-10-27: **at least 100 concurrently active cameras** in a
 locally deployed system without subscriptions or paid inference services. Five
 generated scenes are UI fixtures, not a product capacity limit. The

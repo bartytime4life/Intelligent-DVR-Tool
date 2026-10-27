@@ -1,0 +1,103 @@
+{
+  "schema": "intelligent-dvr.documentation-media.v1",
+  "captured": "2026-10-27",
+  "source": "actual local-browser screenshots; synthetic scene fixtures; simulated rehearsal",
+  "assets": [
+    {
+      "path": "docs/media/building-shapes.gif",
+      "bytes": 251928,
+      "sha256": "4076e8b3fe6256b75242abc474255d7770651e9421e7166f35006bf78cdb2102",
+      "width": 1100,
+      "height": 919,
+      "frames": 3
+    },
+    {
+      "path": "docs/media/cover.webp",
+      "bytes": 267126,
+      "sha256": "c9ff5c7483b2273285a15d6f326073791ea1387c974ef50c146ff372f0340468",
+      "width": 1600,
+      "height": 1403,
+      "frames": 1
+    },
+    {
+      "path": "docs/media/facility-rehearsal.gif",
+      "bytes": 239502,
+      "sha256": "c821aec32879916b2296162f71d07d02e1be9c36aa7ec9565b0413201ea6a90d",
+      "width": 1100,
+      "height": 919,
+      "frames": 31
+    },
+    {
+      "path": "docs/media/facility.webp",
+      "bytes": 76266,
+      "sha256": "51b38200e5189355ea266a51de8d4a1631589bb4df101119376799359636467c",
+      "width": 1400,
+      "height": 1027,
+      "frames": 1
+    },
+    {
+      "path": "docs/media/history.webp",
+      "bytes": 23846,
+      "sha256": "f30175bb5d3bd6419410b7e3a33fbcb75e288fa3d57511a4a57bbba1c04c2e0c",
+      "width": 1400,
+      "height": 1027,
+      "frames": 1
+    },
+    {
+      "path": "docs/media/map-starter.webp",
+      "bytes": 88422,
+      "sha256": "85989aad433c46d4aee2f589a815a36c8507dca3ae9884f0491bfd0db6d09527",
+      "width": 1400,
+      "height": 1027,
+      "frames": 1
+    },
+    {
+      "path": "docs/media/monitor.webp",
+      "bytes": 227662,
+      "sha256": "720ee97b5cfe73e55fd77e07d1cf843b3e7e673a8635c4a330e345f358d8b86a",
+      "width": 1400,
+      "height": 1027,
+      "frames": 1
+    },
+    {
+      "path": "docs/media/review.webp",
+      "bytes": 55068,
+      "sha256": "03d73823da20e1c7cc4a7631a862965398ad8b05a1bdf675fa30628498676efa",
+      "width": 1400,
+      "height": 1027,
+      "frames": 1
+    },
+    {
+      "path": "docs/media/route-15.webp",
+      "bytes": 76034,
+      "sha256": "8550445c9f670604de07bdf66e3cfd0f8e798be4290912ad242741a78c52cb28",
+      "width": 1400,
+      "height": 1027,
+      "frames": 1
+    },
+    {
+      "path": "docs/media/shape-u.webp",
+      "bytes": 72856,
+      "sha256": "a1af33df11d8cb55c538cff0bbc1cdc70c334426715e44cfbaee972a13558bf4",
+      "width": 1400,
+      "height": 1027,
+      "frames": 1
+    },
+    {
+      "path": "docs/media/workspace-tour.gif",
+      "bytes": 769718,
+      "sha256": "d8fb028acc3226ae66e2390bc6834a776717843e9c26a54f84813dce2a42a2d8",
+      "width": 1100,
+      "height": 919,
+      "frames": 5
+    },
+    {
+      "path": "docs/media/zones.webp",
+      "bytes": 97660,
+      "sha256": "a42e64d74b428cea9575d337cfe1f2ce3d0168f32b1c5f5aa5866127ce0f95a3",
+      "width": 1400,
+      "height": 1027,
+      "frames": 1
+    }
+  ]
+}

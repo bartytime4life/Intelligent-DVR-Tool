@@ -1,0 +1,30 @@
+{
+  "date": "2026-10-27",
+  "source_commit": "5fbb604cd0a2962a0bb830fefe8475a161a9b737",
+  "environment": {
+    "node": "22.13.1",
+    "python": "3.14.4",
+    "host_scope": "restricted local executor; not a target-host performance qualification"
+  },
+  "node": {
+    "passed": 27,
+    "failed": 0,
+    "skipped": 0
+  },
+  "sites": {
+    "passed": 4,
+    "failed": 0,
+    "skipped": 0
+  },
+  "python": {
+    "run": 55,
+    "passed": 47,
+    "failed": 0,
+    "skipped": 8,
+    "skip_reason": "cv2, numpy and onnx native inference dependencies unavailable"
+  },
+  "build": "passed with facility chunk-size warning",
+  "live_camera_capacity": "unqualified",
+  "recognition_accuracy": "unqualified",
+  "new_pretrained_model_execution": "not run"
+}
