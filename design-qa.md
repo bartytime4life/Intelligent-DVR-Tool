@@ -4,6 +4,9 @@ Reviewed 2026-10-27. Scope: desktop planning prototype against the selected firs
 concept, plus core browser interactions. This is not live-camera, tracking-model,
 survey-accuracy, complete accessibility or production-capacity qualification.
 
+The prior Monitor workspace report is preserved in
+[monitor-design-qa.md](docs/qa/monitor-design-qa.md).
+
 ## Findings
 
 No actionable P0/P1/P2 visual differences remain in the desktop scope after the
