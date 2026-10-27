@@ -6,6 +6,18 @@
   background: #091a27;
   color: #e7edf4;
 }
+.facility-starter { border-block: 1px solid #294351; padding: 14px 0; margin: 15px 0; }
+.facility-draft-banner { position: absolute; top: 85px; left: 20px; max-width: calc(100% - 40px); background: #24313b; border: 1px solid #bb8c3d; color: #ffcb70; padding: 8px 12px; font-size: 11px; border-radius: 4px; pointer-events: none; }
+.facility-starter > summary { cursor: pointer; color: #c9e3eb; font-size: 12px; font-weight: 600; margin-bottom: 12px; }
+.facility-starter a { color: #70dce1; }
+.facility-starter ul { padding-left: 18px; }
+.facility-starter li { margin-bottom: 9px; }
+.facility-starter select, .facility-starter textarea { width: 100%; max-width: 100%; background: #102b39; color: #dfedf5; border: 1px solid #36515f; padding: 9px; border-radius: 4px; }
+.facility-starter textarea { resize: vertical; }
+.facility-import-list { max-height: 340px; overflow: auto; margin: 12px 0; }
+.facility-draft-choice { display: flex; gap: 9px; padding: 12px 0; border-bottom: 1px solid #294351; font-size: 12px; }
+.facility-draft-choice input { align-self: flex-start; accent-color: #35e0e3; }
+.facility-draft-choice small { display: block; font-size: 10px; line-height: 1.6; color: #a6becb; }
 .facility-guide {
   display: flex;
   flex-direction: column;

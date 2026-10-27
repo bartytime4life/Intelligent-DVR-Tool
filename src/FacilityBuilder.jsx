@@ -39,6 +39,8 @@ import {
   polygonArea
 } from "./facility.mjs";
 import { createFacilityMap } from "./facility-map.mjs";
+import { OpenMapStarter, ShapeBuilder, MeasurementSummary, ConstructionGuide } from './FacilityStarter.jsx';
+import { draftFacility } from './facility-starter.mjs';
 const STORAGE = "dvr.facility.v1";
 const keyOf = { building: "buildings", camera: "cameras", room: "rooms", label: "labels" };
 const round = (n) => Math.round(n * 100) / 100;
@@ -69,6 +71,9 @@ ot be read. The sample is open; export it or make a deliberate edit to replace s
     }
   }
   const [pasteOpen, setPasteOpen] = useState(false);
+  const [mapDrafts, setMapDrafts] = useState([]), [searchArea, setSearchArea] = useState(null);
+  const [replaceDrafts, setReplaceDrafts] = useState(false);
+  const [draftPreviewError, setDraftPreviewError] = useState('');
   const [plan, setPlan] = useState(initial.current.plan), [step, setStep] = useState(0), [selected, setSelected] = useState(
     { kind: "camera", id: "C-07" }
   ), [draft, setDraft] = useState(null), [view, setView] = useState("3d"), [floor, setFloor] = useState(
@@ -86,7 +91,7 @@ ot be read. The sample is open; export it or make a deliberate edit to replace s
   ), [decisions, setDecisions] = useState({});
   const mapEl = useRef(), api = useRef(), input = useRef(), latest = useRef();
   const selectedItem = plan[keyOf[selected.kind]]?.find((x) => x.id === selected.id);
-  const dirty = !!(draft && selectedItem && JSON.stringify(draft) !== JSON.stringify(selectedItem));
+  const dirty = !!(draft && selectedItem && draft.id === selectedItem.id && JSON.stringify(draft) !== JSON.stringify(selectedItem));
   useEffect(() => setDraft(selectedItem ? structuredClone(selectedItem) : null), [selectedItem]);
   const b = plan.buildings.find((x) => x.id === floorBuilding) || plan.buildings[0];
   const rehearsal = useMemo(() => plan.route.length > 1 ? rehearse(plan) : [], [plan]);
@@ -222,7 +227,16 @@ onReady", "onError"].map((k) => [k, (...args) => latest.current[k](...args)])), 
       return plan;
     }
   }, [plan, draft, selected]);
-  useEffect(() => api.current?.update(preview, selected.id, view, floor), [preview, selected.id, view, floor, ready]);
+  useEffect(() => {
+    let displayed = preview;
+    let failure = '';
+    if (mapDrafts.length) {
+      try { displayed = draftFacility(preview, mapDrafts, replaceDrafts); } catch(e) { failure = e.message; }
+    }
+    setDraftPreviewError(failure);
+    api.current?.update(displayed, selected.id, view, floor);
+  }, [preview, mapDrafts, replaceDrafts, selected.id, view, floor, ready]);
+  useEffect(() => api.current?.setArea(searchArea), [searchArea, ready]);
   useEffect(() => api.current?.setTrack(step === 5 ? position : null), [step, seconds, plan, ready]);
   useEffect(() => {
     const stop = (e) => {
@@ -387,6 +401,7 @@ label." };
   current?.center()}><Crosshair size={18} /></button></div>
       <div className="facility-map-context"><span className="facility-local-dot" />{plan.name}<small>{streets ? "Online \
 street map \xB7 OpenStreetMap" : "Local grid \xB7 20 m spacing \xB7 no external tiles"}</small></div>
+      {!!mapDrafts.length && <div className="facility-draft-banner" role="status">{draftPreviewError ? `Draft preview unavailable: ${draftPreviewError}` : `Preview: ${mapDrafts.length} building drafts · review before saving`}</div>}
       {mapError && <div className="facility-map-error" role="alert"><WarningCircle /><span>{mapError}</span><button aria-label="Dismiss graphics message" onClick={() => setMapError(
     ""
   )}><X /></button></div>}
@@ -418,7 +433,7 @@ street map \xB7 OpenStreetMap" : "Local grid \xB7 20 m spacing \xB7 no external 
     <aside className="facility-properties">
       <header><p className="eyebrow">STEP {step + 1} OF 6</p><h2>{["Locate your facility", "Shape a building", "Define f\
 loors & labels", "Aim this camera", "Check estimated coverage", "Test camera handoffs"][step]}</h2><p>{["Set a geographi\
-c origin; the sample layout uses local meters.", "Trace a footprint or add a rectangle, then set its dimensions.", "Add \
+c origin; the sample layout uses local meters.", "Trace a footprint or choose a common shape, then set its dimensions.", "Add \
 rooms and labels one floor at a time.", "Adjust the camera\u2019s position and viewing volume.", "Select a camera to ins\
 pect its modeled view.", "Draw a route and review proposed camera transitions."][step]}</p></header>
       <div className="facility-property-body">
@@ -427,6 +442,7 @@ pect its modeled view.", "Draw a route and review proposed camera transitions."]
     api.current?.setBasemap(e.target.checked);
   }} />Online street map<small>Sends the visible map area to OpenStreetMap. No offline tile download.</small></label>}
       {step === 0 && <SiteForm plan={plan} commit={commit} center={() => api.current?.center()} />} 
+      {step === 0 && <OpenMapStarter plan={plan} commit={commit} onPreview={(buildings,replace) => {setMapDrafts(buildings);setReplaceDrafts(!!replace);}} onArea={setSearchArea} disabled={dirty} />}
       {step === 0 && <><div className="facility-section-note"><MapPin /><p>This map starts with a fictional layout and no external map services. Coordinates anchor your plan; they do not verify a real building.</p></div><button className="facility-secondary" onClick={() => {
     commit(blankFacility(), "New plan \u2014 Undo is available");
     setSelected({ kind: "camera", id: "" });
@@ -437,7 +453,15 @@ pect its modeled view.", "Draw a route and review proposed camera transitions."]
       {step === 1 && <><div className="facility-action-row"><button className="facility-primary" disabled={!ready} onClick={() => startTool(
     "building"
   )}><Polygon />Draw building</button><button className="facility-secondary" onClick={addRectangle}><Plus />Add rectangle</button></div>
-        {selected.kind === "building" && draft && <form onSubmit={saveSelected}>
+        <ShapeBuilder disabled={dirty} add={item => {
+          const building = {...item,id:uid('b')};
+          if(commit({...plan,buildings:[...plan.buildings,building]},'Building shape added')) {select(building.id,'building');return true;}
+          return false;
+        }}/>
+        <ConstructionGuide />
+        {selected.kind === "building" && draft?.id === selected.id && <form onSubmit={saveSelected}>
+          <MeasurementSummary ring={draft.footprint}/>
+          {draft.source&&<p className="facility-caption">OpenStreetMap source {draft.source.id}. Original height basis: {draft.source.heightBasis}; original floors: {draft.source.floorsBasis}. Source updated: {draft.source.updated}. Edits below are user supplied and do not update the source map.</p>}
           <Field label="Building name" type="text" value={draft.name} onChange={(v) => change("name", v)} />
           <div className="facility-field-pair"><Field label="Building height" suffix="m" value={draft.height} min={1} max={150} onChange={(v) => change(
     "height",
@@ -453,11 +477,11 @@ pect its modeled view.", "Draw a route and review proposed camera transitions."]
     "y",
     v
   )} /></div>
-          <div className="facility-field-pair"><Field label="Footprint width" suffix="m" value={round(Math.max(...draft.
+          <div className="facility-field-pair"><Field label="East-west span" suffix="m" value={round(Math.max(...draft.
   footprint.map((p) => p[0])) - Math.min(...draft.footprint.map((p) => p[0])))} min={1} max={1e3} onChange={(v) => resizeBuilding(
     "x",
     v
-  )} /><Field label="Footprint depth" suffix="m" value={round(Math.max(...draft.footprint.map((p) => p[1])) - Math.min(...draft.
+  )} /><Field label="North-south span" suffix="m" value={round(Math.max(...draft.footprint.map((p) => p[1])) - Math.min(...draft.
   footprint.map((p) => p[1])))} min={1} max={1e3} onChange={(v) => resizeBuilding("y", v)} /></div>
           <p className="facility-caption">Footprint area: {Math.round(polygonArea(draft.footprint))} m². Existing rooms must remain inside the footprint.</p><button className="facility-primary" type="submit">Save building<Check /></button>
         </form>}
@@ -472,7 +496,7 @@ pect its modeled view.", "Draw a route and review proposed camera transitions."]
     (l) => <button key={l.id} className={selected.id === l.id ? "selected" : ""} onClick={() => select(l.id, "label")}><MapPin /><span>{l.
     name}</span></button>
   )}</div>
-        {["room", "label"].includes(selected.kind) && draft && <form onSubmit={saveSelected}><Field label={selected.kind ===
+        {["room", "label"].includes(selected.kind) && draft?.id === selected.id && <form onSubmit={saveSelected}><Field label={selected.kind ===
   "room" ? "Room name" : "Label text"} type="text" value={draft.name} onChange={(v) => change("name", v)} />{selected.kind ===
   "room" ? <Field label="Room wall height" suffix="m" value={draft.wallHeight} min={0.2} max={10} onChange={(v) => change(
     "wallHeight",
@@ -492,7 +516,7 @@ pect its modeled view.", "Draw a route and review proposed camera transitions."]
         <label className="facility-field"><span>Selected camera</span><select aria-label="Selected camera" value={selected.
   kind === "camera" ? selected.id : ""} onChange={(e) => select(e.target.value, "camera")}><option value="">Choose a camera…</option>{plan.
   cameras.map((c) => <option key={c.id} value={c.id}>{c.id} · {c.name}</option>)}</select></label>
-        {selected.kind === "camera" && draft ? <form className="facility-camera-form" onSubmit={saveSelected}>
+        {selected.kind === "camera" && draft?.id === selected.id ? <form className="facility-camera-form" onSubmit={saveSelected}>
           <Field label="Camera name" type="text" value={draft.name} onChange={(v) => change("name", v)} />
           
           <Field label="Mount elevation above ground" suffix="m" value={draft.z} min={0.5} max={150} onChange={(v) => change(

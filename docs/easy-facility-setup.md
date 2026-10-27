@@ -5,8 +5,10 @@ implementation and usability study, not a claim of a working automatic importer.
 Requested by the owner on 2026-10-27. Sources checked on that date.
 
 Increment delivered: the Locate site form now has an optional one-shot browser
-location suggestion, accuracy text, cancellation and manual fallbacks. Area
-selection, address search and automatic building drafts remain queued.
+location suggestion, accuracy text, cancellation and manual fallbacks. The initial
+OSM simple-way draft importer, numeric search area and common shapes are now
+implemented; see [map-measurements-and-shapes.md](map-measurements-and-shapes.md).
+Address search, holes/parts and assisted imagery remain queued.
 
 ## Recommended experience
 

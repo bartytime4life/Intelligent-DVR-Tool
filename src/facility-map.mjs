@@ -104,7 +104,9 @@ function createFacilityMap(container, callbacks, initialPlan) {
     style: { version: 8, sources: {}, layers: [{ id: "background", type: "background", paint: { "background-color": "#0d\
 2029" } }] }
   });
-  map.addControl(new AttributionControl({ compact: false }), "bottom-right");
+  let attribution = new AttributionControl({ compact: false }), hasOsm = false;
+  map.addControl(attribution, "bottom-right");
+  const osmCredit = '© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap contributors</a> · ODbL';
   map.addControl(new NavigationControl({ visualizePitch: true }), "bottom-right");
   map.addControl(new ScaleControl({ unit: "metric" }), "bottom-left");
   const volumes = new CameraVolumes();
@@ -114,13 +116,14 @@ select", markers = [];
   map.on("webglcontextlost", () => callbacks.onError("3D graphics were interrupted. Save or export the plan, then reload\
  to recover."));
   map.on("load", () => {
-    const sources = ["grid", "site", "buildings", "rooms", "coverage", "cameras", "route", "track"];
+    const sources = ["grid", "site", "buildings", "rooms", "coverage", "cameras", "route", "track", "search-area"];
     for (const id of sources) map.addSource(id, { type: "geojson", data: empty() });
     map.addLayer({ id: "grid", type: "line", source: "grid", paint: { "line-color": "#36505c", "line-opacity": 0.26, "li\
 ne-width": 0.6 } });
     map.addLayer({ id: "site", type: "fill", source: "site", paint: { "fill-color": "#1b323c", "fill-opacity": 0.8 } });
     map.addLayer({ id: "site-edge", type: "line", source: "site", paint: { "line-color": "#607a83", "line-width": 1, "li\
 ne-dasharray": [3, 4] } });
+    map.addLayer({id:'search-area',type:'line',source:'search-area',paint:{'line-color':'#ffbd45','line-width':2,'line-dasharray':[4,2]}});
     map.addLayer({ id: "coverage", type: "fill", source: "coverage", paint: { "fill-color": [
       "case",
       ["get", "selected"],
@@ -261,6 +264,13 @@ oom" : "building");
       addTo(map));
     }
     volumes.update(plan, selected, mode, floor);
+    const nextHasOsm = plan.buildings.some(b=>b.source?.provider==='OpenStreetMap');
+    if(nextHasOsm!==hasOsm) {
+      map.removeControl(attribution);
+      attribution = new AttributionControl({compact:false,customAttribution:nextHasOsm?osmCredit:[]});
+      map.addControl(attribution,'bottom-right');
+      hasOsm=nextHasOsm;
+    }
   }
   function fitPlan(animate = true) {
     if (!ready) return;
@@ -283,6 +293,11 @@ oom" : "building");
   }
   return {
     update,
+    setArea(bounds) {
+      if(!ready)return;
+      const ring = bounds ? [[bounds[1],bounds[0]],[bounds[3],bounds[0]],[bounds[3],bounds[2]],[bounds[1],bounds[2]],[bounds[1],bounds[0]]] : null;
+      map.getSource('search-area').setData(fc(ring?[feat('Polygon',[ring])]:[]));
+    },
     setTool(next) {
       if (!ready) return;
       tool = next;
