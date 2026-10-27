@@ -138,3 +138,50 @@ Build and the same 23 checks passed. Real location permission/success/denial and
 timeout callbacks were not exercised in the user's browser, to avoid requesting
 their precise location during QA. Cancellation and stale-result guards were
 reviewed in source. This check does not qualify the automatic building importer.
+
+## Open-map dimensions and shapes follow-up
+
+The Buildings state now adds common shapes and dimension summaries; Locate site
+adds bounded area selection and reviewed OSM simple-way drafts. Source truth for
+the shared composition remains `docs/qa/facility-concept.jpg` (1487 × 1058).
+Final Buildings evidence: `docs/qa/starter-shapes.jpg` (1487 × 1058), at the same
+1487 × 1058 CSS viewport, DPR 1, with no density scaling. The original source
+shows the Cameras step; this is a deliberate new Buildings state, so content and
+photorealistic imagery differences are not treated as pixel-fidelity defects.
+
+Joint full-view comparison was opened at `/tmp/dvr-starter-comparison.jpg`, with
+an original-scale right-panel comparison at `/tmp/dvr-starter-focus.jpg`. These
+show retained typography, dark navy surfaces, teal selection, amber actions,
+numbered guide and editor/map proportions. Actual editable shells remain the
+expected alternative to the concept's illustrative photograph. Long dimension
+copy wraps inside the property panel; actions remain reachable in its scroll
+region. New copy distinguishes measured footprint estimates, enclosing spans,
+code guidance, source tags and placeholders. No new decorative assets replace
+source imagery or icons. There is no separate visual source for the added forms.
+
+Findings and fixes during this iteration:
+- P1: attribution methods assumed an API the renderer does not provide, causing
+  a blank editor. Replaced with supported attribution control replacement; source
+  import and removal were retested successfully with visible OSM credit.
+- P1: switching camera → Buildings briefly rendered the previous camera draft as
+  a footprint. Gates now require matching selected/draft IDs. Retested navigation,
+  shape addition and building property editing without exceptions.
+- P2: expanded shape creation pushed selected properties down. Picker now starts
+  collapsed and collapses after successful addition. Final screenshot shows the
+  compact editor with dimensions and Save reachable. Axis-aligned resize fields
+  are labelled east-west/north-south spans to distinguish them from oriented size.
+
+Browser verification used a deliberately synthetic offline OSM-shaped extract:
+reviewed dimensions, unchecked it (Apply disabled), rechecked, applied additively,
+and observed the sourced shell plus attribution. A rotated L wing was added.
+A feet-input U wing at 120 × 160 ft with 20 ft wings produced 8,000 ft² of polygon
+area, not its full enclosing rectangle. Building translation/save and restoration
+of sample data were exercised. No real device-location permission was requested.
+Initial public Overpass attempts returned 502/timeouts, so live retrieval is not
+qualified by the successful offline fixture; that external-service gap is retained
+explicitly. Local build and all 29 frontend/Sites checks passed. No fresh application
+console warnings/errors appeared in the post-fix drawing check. Mobile, full
+accessibility, actual GPS and complex building geometry remain outside this pass.
+
+Desktop drawing/offline-review visual result: passed. Live-service qualification
+remains pending; do not describe automatic loading as verified in this environment.

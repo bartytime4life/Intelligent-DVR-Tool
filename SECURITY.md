@@ -32,3 +32,11 @@ enabling any external basemap. No camera connection, capture, inference or perso
 identity association is started by the planner. Rehearsal links are simulated,
 unverified, session-only decisions. Model/image imports and arbitrary remote map
 URLs are intentionally not accepted by this implementation.
+
+The open-map starter uses a fixed HTTPS Overpass provider after an explicit user
+action and disclosure. It sends selected geographic bounds, with no cameras or
+recordings. Responses are streamed with a 2 MB cap and timeouts. Simple geometry
+and bounded source records are validated before a reviewed transaction; no
+provider-supplied HTML or media URLs are executed. Public data availability and
+metadata are not authenticated survey evidence. Offline extracts use the same
+review path. Use local extracts for sites whose bounds should not leave the host.

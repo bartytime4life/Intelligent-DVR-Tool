@@ -8,7 +8,7 @@
     "build": "vite build && node scripts/prepare-sites-build.mjs",
     "preview": "vite preview",
     "test:sites": "node --test tests/sites-worker.test.mjs",
-    "test": "node --test tests/domain.test.mjs tests/facility.test.mjs",
+    "test": "node --test tests/domain.test.mjs tests/facility.test.mjs tests/facility-starter.test.mjs",
     "test:edge": "python3 -m unittest discover -s tests -p test_*.py"
   },
   "dependencies": {

@@ -114,7 +114,13 @@ test result does not substitute for browser verification.
 
 ## Queued next
 
+An initial OSM simple-way importer, numeric search-area selector, dimension
+summaries and seven parametric shapes are now implemented. See
+[map-measurements-and-shapes.md](map-measurements-and-shapes.md) for the current
+workflow, construction references, provenance and unsupported geometry.
+
 The requested location/address → area selection → reviewed building draft flow is
 researched in [easy-facility-setup.md](easy-facility-setup.md) and tracked in
 [issue #6](https://github.com/bartytime4life/Intelligent-DVR-Tool/issues/6).
-Automatic drafting is not part of the initial editor.
+The later simple-way OSM starter implements an initial reviewed drafting path;
+advanced geometry, imagery assistance and address search remain future work.
