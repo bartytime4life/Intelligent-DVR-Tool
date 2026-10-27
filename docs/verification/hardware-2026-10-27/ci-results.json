@@ -1,0 +1,81 @@
+{
+  "schema": "intelligent-dvr.machine-setup-ci.v1",
+  "tested_commit": "094bfa74ab28a677d0bd35772fda7a048117eaba",
+  "run_url": "https://github.com/bartytime4life/Intelligent-DVR-Tool/actions/runs/40568316193",
+  "event": "pull_request",
+  "jobs": [
+    {
+      "platform": "ubuntu-latest",
+      "job_id": 122415426025,
+      "conclusion": "success",
+      "node": {
+        "passed": 37,
+        "failed": 0,
+        "skipped": 0
+      },
+      "sites": {
+        "passed": 4,
+        "failed": 0,
+        "skipped": 0
+      },
+      "python": {
+        "run": 66,
+        "passed": 66,
+        "failed": 0,
+        "skipped": 0
+      },
+      "evidence": [
+        "2026-10-27T19:21:33.7750695Z # tests 37",
+        "2026-10-27T19:21:33.7751012Z # pass 37",
+        "2026-10-27T19:21:33.7751166Z # fail 0",
+        "2026-10-27T19:21:33.7751544Z # skipped 0",
+        "2026-10-27T19:21:33.9784365Z # tests 4",
+        "2026-10-27T19:21:33.9784873Z # pass 4",
+        "2026-10-27T19:21:33.9785116Z # fail 0",
+        "2026-10-27T19:21:33.9785987Z # skipped 0",
+        "2026-10-27T19:21:43.1226220Z Ran 66 tests in 1.681s",
+        "2026-10-27T19:21:43.1226432Z OK",
+        "2026-10-27T19:21:43.2066323Z Documentation checks passed: 180 local links, 14 media hashes, 2,381,700 media bytes, test-count consistency.",
+        "2026-10-27T19:21:43.2734643Z Wiki mirrors checked: 15 files.",
+        "2026-10-27T19:21:43.3290849Z Node 22 and Python 3.12 detected. No installation or server start performed."
+      ]
+    },
+    {
+      "platform": "windows-latest",
+      "job_id": 122415426563,
+      "conclusion": "success",
+      "node": {
+        "passed": 37,
+        "failed": 0,
+        "skipped": 0
+      },
+      "sites": {
+        "passed": 4,
+        "failed": 0,
+        "skipped": 0
+      },
+      "python": {
+        "run": 66,
+        "passed": 63,
+        "failed": 0,
+        "skipped": 3
+      },
+      "evidence": [
+        "2026-10-27T19:22:03.9123602Z # tests 37",
+        "2026-10-27T19:22:03.9125574Z # pass 37",
+        "2026-10-27T19:22:03.9126146Z # fail 0",
+        "2026-10-27T19:22:03.9127508Z # skipped 0",
+        "2026-10-27T19:22:04.9399869Z # tests 4",
+        "2026-10-27T19:22:04.9401952Z # pass 4",
+        "2026-10-27T19:22:04.9402608Z # fail 0",
+        "2026-10-27T19:22:04.9404690Z # skipped 0",
+        "2026-10-27T19:22:28.5858646Z Ran 66 tests in 2.884s",
+        "2026-10-27T19:22:28.5858905Z OK (skipped=3)",
+        "2026-10-27T19:22:29.1528912Z Documentation checks passed: 180 local links, 14 media hashes, 2,381,700 media bytes, test-count consistency.",
+        "2026-10-27T19:22:29.7051386Z Wiki mirrors checked: 15 files.",
+        "2026-10-27T19:22:30.3486258Z Node 22 and Python 3.12 detected. No install or server start performed."
+      ]
+    }
+  ],
+  "limits": "Synthetic software contracts and launcher prerequisite paths; no physical-camera, GPU acceleration or 100-camera acceptance."
+}

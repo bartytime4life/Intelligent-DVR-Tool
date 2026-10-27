@@ -60,13 +60,13 @@ The browser prototype needs no subscription, paid inference, API key, camera cre
 
 | Claim | Evidence | Boundary |
 | --- | --- | --- |
-| Earlier documentation-refresh review/zone/facility checks | **27 passed**, plus **4 packaging tests passed**, October 27, 2026 | Automated tests cover their assertions; browser checks are recorded separately |
-| Earlier documentation-refresh Python checks | **CI: 55 passed, no skips.** Local: 47 passed, 8 skipped | [CI evidence](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Evidence-and-validation#ci-follow-through) records the tested commit and native dependencies |
+| Review, facility and System logic checks | **37 passed**, plus **4 packaging tests passed** on Linux and Windows | Automated tests cover their assertions; browser checks are recorded separately |
+| Python rules, evaluation, resource policy and synthetic inference checks | **Linux CI: 66 passed. Windows CI: 63 passed, 3 Linux-only skips.** Local: 58 passed, 8 skipped | [Machine-setup CI evidence](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/hardware-2026-10-27/README.md#ci-follow-through) records the tested commit and native checks |
 | The production package builds | Fresh build completed | Vite reports a large lazy-loaded facility bundle; no load-time claim follows |
 | A pretrained YOLOX-S artifact previously ran through compatibility probes | [October 26 model report](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/model-qualification-20261026.md) and JSON receipts | Historical synthetic-input/recording smoke tests; no recognition-quality result |
 | The scheduler can be exercised with 100 synthetic source IDs | [Fresh load-model reports](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Evidence-and-validation) | Virtual time, assumed service costs and synthetic payloads; no camera throughput measured |
 
-The [machine-setup verification record](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/hardware-2026-10-27/README.md) adds 37 passing JavaScript tests, 4 packaging tests and a local Python run of 58 passes / 8 explicit skips. Its CI follow-through records native Linux/Windows results when available. **No detector weights or representative recordings are bundled.**
+The [machine-setup verification record](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/hardware-2026-10-27/README.md) records **107 passing tests on Linux** and **104 on Windows**, with 3 explicit Linux-only skips on Windows. It includes local logs, source hashes, browser observations and limits. [Earlier documentation-refresh evidence](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Evidence-and-validation) is retained separately. **No detector weights or representative recordings are bundled.**
 
 ## From a recording to evidence
 

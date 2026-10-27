@@ -17,7 +17,7 @@ Node.js 22.13.1 and Python 3.12.3 were used for the fresh checks.
 | Linux launcher | Bash syntax and actual `--check` passed | Node/Python prerequisites; no install or service started |
 
 The [JavaScript](node-tests.log), [packaging](sites-tests.log) and
-[Python](python-tests.log) logs are retained. The shared
+[Python](python-tests.log) logs and [source hashes](source-hashes.json) are retained. The shared
 [policy fixture](../../../tests/fixtures/resource-policy.json) is asserted against
 both the actual JS exporter and Python validator. Tests exercise scheduler byte,
 slot and dispatch-age enforcement, strict bounds and exact policy-file hashes.
@@ -84,4 +84,18 @@ fixture-integrity checks: automatic CRLF conversion changed hash-bound source
 bytes. The follow-up pins text checkout to LF and makes fixture generation write
 explicit UTF-8/LF on either platform. It also checks oversized integer policy
 values before floating-point conversion. The matrix is rerun for these fixes;
-final results will be recorded here.
+final results follow.
+
+The [pull-request run](https://github.com/bartytime4life/Intelligent-DVR-Tool/actions/runs/40568316193)
+for fixed implementation commit `094bfa74ab28a677d0bd35772fda7a048117eaba`
+completed successfully on both platforms. [Extracted CI evidence](ci-results.json)
+retains job IDs, timestamps and result lines.
+
+| CI job | JavaScript | Packaging | Python | Total passed |
+| --- | ---: | ---: | ---: | ---: |
+| Ubuntu | 37 passed | 4 passed | 66 passed, no skips | **107** |
+| Windows | 37 passed | 4 passed | 63 passed, 3 Linux-only skips | **104** |
+
+Both jobs built the production package, checked documentation/media integrity and
+all 15 generated wiki files, then passed the appropriate Bash/PowerShell launcher
+prerequisite check. No physical target-machine or accelerated workload was tested.
