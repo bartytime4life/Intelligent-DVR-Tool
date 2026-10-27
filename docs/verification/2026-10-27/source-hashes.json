@@ -1,0 +1,185 @@
+{
+  "source_commit": "5fbb604cd0a2962a0bb830fefe8475a161a9b737",
+  "files": {
+    "edge/README.md": {
+      "sha256": "6773a18e913b4e508ebb2e2e200fd29d2c3f486c520ea89902f7bc7ee6089180",
+      "git_blob": "61985f84c03f5cc00ff49e9ae1b14e7efd62b5a9"
+    },
+    "edge/__init__.py": {
+      "sha256": "7c8e3351ef857fa0376cc31bddd44af1aae362d9c4096b814f12a95b3235d461",
+      "git_blob": "81e1e29443602d560a998eaef0d8aaeded067a7a"
+    },
+    "edge/analyze.py": {
+      "sha256": "eb9def7dd3c3185e28231b981737e933acc07e89c34183be22c0d0c409306905",
+      "git_blob": "5ffe2d78e7a2692e5bdac327e2ae9e36c16669a5"
+    },
+    "edge/candidates/opencv-zoo-yolox-s-2022nov.json": {
+      "sha256": "04f4f39fe62bc9927e96e2de9a84d0bce69704f9bdbdd0853ef54a0877f92963",
+      "git_blob": "7930251089036f495666b4dd7f069944523aff97"
+    },
+    "edge/capacity-target.json": {
+      "sha256": "30bf9f5cdccbbe957469b32d78da2120b6a149e9c14a8493c3076bf5406420d1",
+      "git_blob": "68ce1764f51683987325abd0aebd7c51cd6ae48c"
+    },
+    "edge/capacity.py": {
+      "sha256": "37743b28b7073be326acfb598f0e4b26066c037c81283526b92c9a6da2b54d6f",
+      "git_blob": "4871bebf5cd3094b9684a8085281ce80ab68a02b"
+    },
+    "edge/evaluate.py": {
+      "sha256": "5d8bb0bd8dd24d5016b769cef4fd3dd580445c28fddc0c98b90b2bfd5fe0c805",
+      "git_blob": "25ef153871e1a3dbfb55435d12ef042f9e5f77a9"
+    },
+    "edge/evaluation.py": {
+      "sha256": "762d1b59df14bcb859dbc6193d918a8e3e904d0b4ff5aea4abf8214a196342e3",
+      "git_blob": "4b19ebaea337fd3c3989a9ee3d113ce16176bd01"
+    },
+    "edge/labels/coco80.json": {
+      "sha256": "76ce1473f01bd271bab54429737358a97160629cf970c5ec8384c2777dd0bae9",
+      "git_blob": "6563bd3e0e71a8245e00faad8c7a74f1cab70cef"
+    },
+    "edge/model_profiles.py": {
+      "sha256": "9a0cfffa5a0fbb7312de96d49c894106a92f5bbc3fec6fa9a5594c0bab06e6b2",
+      "git_blob": "5cb3704e7c7d31ed71ca42c17e22abb13d6788a7"
+    },
+    "edge/qualify.py": {
+      "sha256": "1c58016e7cef6e770a1bd545a52e0c808c2de89d9d57d4b05b9f8d371323cf54",
+      "git_blob": "ca9fd47e25fd5dd34a18baad7c37e3566772e02b"
+    },
+    "edge/requirements-qualification.txt": {
+      "sha256": "ee44a4652d5d9a30d538530e6c7a14a69454655171271a6d3fb27cb2dfe488a9",
+      "git_blob": "cc50518b9aef1c82928cba6012607a8fcc674144"
+    },
+    "edge/requirements-test.txt": {
+      "sha256": "63065af0dc96dc4937df7dc05e08731f3fcad175aa2c61ca99a7343ea8c1e5e7",
+      "git_blob": "3abdf8d09470c6d4bd7ea602e7ece667bbf669c5"
+    },
+    "edge/requirements.txt": {
+      "sha256": "33813156c2bf9daa9b9b9c75d934e021491d84a4e3c5db6955ae67842b4186e5",
+      "git_blob": "baf969fcfc549c3b4b9fb11eeca0e090aab7e76d"
+    },
+    "edge/rules.example.json": {
+      "sha256": "1bcb777f5d4a6c0b888bcfc1aa413993576dd353359096c7a31d3da20300515a",
+      "git_blob": "edcc34bb82e7e3a07c494992bf0d508031753a0c"
+    },
+    "edge/rules.py": {
+      "sha256": "1c4105a69c36fb1ff8a2ae6fe35c2f1ed9f3b3c94821850a32384ae9eafbf391",
+      "git_blob": "b6a328dfe0063e69ab37ada70840577e1be4bae9"
+    },
+    "edge/scheduler.py": {
+      "sha256": "915cd9757a14d54abb5e1bc249ccd91d7ce37d6713786c31025307e87f661eb1",
+      "git_blob": "3b8033bc13e4e50759291bdf1ab868259b614763"
+    },
+    "src/App.jsx": {
+      "sha256": "efead269bd4f229da541c60993ad526315fdf90d4883d365811b2eaac6636e25",
+      "git_blob": "02abf3497fcf35f790f1684b372ad728ca07e9d8"
+    },
+    "src/FacilityBuilder.jsx": {
+      "sha256": "b8da2e395852b5dec17bdf6591ffa3562d5acf69742ff5253cf3749266aca511",
+      "git_blob": "ea4531918a7ae1daf2b9a9fbcafcea61909ce731"
+    },
+    "src/FacilityStarter.jsx": {
+      "sha256": "78511fd329f686d06d29c36c463aa8fe8b068a72ce7173116dc2340b82b5a514",
+      "git_blob": "61545b5ecf48b86f07634a41ae3cf6755ca62411"
+    },
+    "src/data.mjs": {
+      "sha256": "fbd973e67882b80f8423af51d78e628340934d59d5c8fcd914298462d79c2019",
+      "git_blob": "2339845f6fdd73426b12393fe8305585721ff41a"
+    },
+    "src/facility-map.mjs": {
+      "sha256": "54990e7b4f4da07f656753d0565a4b9d5bd82e9fb4da3970d978abec2292cc58",
+      "git_blob": "454e884e74f08436d3e2feed31a8e671fe08553a"
+    },
+    "src/facility-starter.mjs": {
+      "sha256": "3f414491829b378bd7d7b3000a4d10650e6d383ff2f21f688424897fd92ab60f",
+      "git_blob": "cbb05cc1ff1267829c8c44b8f2d540cc57edf1ec"
+    },
+    "src/facility.css": {
+      "sha256": "ad6bff78860d3d34db7878f411bfbfaf8c0817cf3f641f1664de5899b13acb84",
+      "git_blob": "08299f00d82d1492efee421f37691f2c51e3aa37"
+    },
+    "src/facility.mjs": {
+      "sha256": "570ef6260db6a4f969f01339057d406bcf0d27b44c863ba36a76c575b09d1afe",
+      "git_blob": "f094b4fb85c840f88b03c9528df25150f6ba9a68"
+    },
+    "src/main.jsx": {
+      "sha256": "832f752c6b6a454a26dbc4f2654f5bd633f2b103516c8c0abac648308c133a7e",
+      "git_blob": "78c0e05d2b00a8e971fca21460e5b6a5552bb2cb"
+    },
+    "src/styles.css": {
+      "sha256": "bb1d48f32740ba37dc497899b0d60548ac41544bcfc3203675f6ac52016502f3",
+      "git_blob": "b0301921ed1e782659aae92c2bf4640692649ce4"
+    },
+    "src/vendor/manifest.json": {
+      "sha256": "070da62f6e48602c3365fd93fc4036360ca86ad7dfd09e88d2ca61027dbe89ad",
+      "git_blob": "15a62032a9f1a931fa5da3a228fd68e52f844321"
+    },
+    "src/vendor/terra-draw.mjs": {
+      "sha256": "154b067067bceac0a518f818e1840c86ee5059600199c98371c7bf552600e15b",
+      "git_blob": "0537230eec81ecc42729cab4e2956433c7bfe476"
+    },
+    "src/vendor/terra-maplibre.mjs": {
+      "sha256": "091859a5e0ba979bdc9bcac64062d4c81c7877ee31f786e3b632efc8c33a4eac",
+      "git_blob": "1612a178e1f7639b6f079546ebd5fcdf9c2c5077"
+    },
+    "tests/domain.test.mjs": {
+      "sha256": "f4e9d8a430f2cdef33035624bfbe267e8385b4725c9858013aec06452fa3f587",
+      "git_blob": "42fe5e44c6f6593b026f455cabb058f9ac2a4ae7"
+    },
+    "tests/evaluation_fixtures.py": {
+      "sha256": "67c92e7d3f37b3b7da576880fce9fc0f76cf8aa5acbb56e637281cf4b0ccbf61",
+      "git_blob": "0d8a9cbc2ebd02b49893298c5faef5ad92a2374e"
+    },
+    "tests/facility-starter.test.mjs": {
+      "sha256": "39019262e2399dd730c485e841799998189985c540e90bc54de6e80eb4e699d9",
+      "git_blob": "c2ddb75c3eaa41aa2134c9d55348dde13dd1ca6c"
+    },
+    "tests/facility.test.mjs": {
+      "sha256": "d68f22550da2ee8867e1ebdeb9d9d82d69968cad9b2f9b0c5287841c3ccd853c",
+      "git_blob": "bf071f5978e9530df08105a11355868f7bb5c78b"
+    },
+    "tests/fixtures/evaluation/labels.json": {
+      "sha256": "3ee03641b29d38d58531f7045d7ffe4bd32af682e96aa81de81e672c5ce93166",
+      "git_blob": "96c2537b15e5e3eb45a5c3a497b1324ccd0c6643"
+    },
+    "tests/fixtures/evaluation/manifest.json": {
+      "sha256": "c299621164cbf13c882af3c9256dfb5b8948df3ee976d07f7512c55cf301ac19",
+      "git_blob": "fde7bca6a9b4adc07b8973a3e0a9fec2edac5506"
+    },
+    "tests/fixtures/evaluation/reviews.json": {
+      "sha256": "c80ea4ce42b389a1347cb528660b54a047d65b4e9686c4b5dd4c9176adc58f9a",
+      "git_blob": "eb7cd3341be762e6037509799023181b9f05e6ab"
+    },
+    "tests/fixtures/evaluation/source.synthetic.txt": {
+      "sha256": "5bef66240434877e0affbe3fbe5d1c3cdc27546cb4dc9cdd1da70a8441fb0b5f",
+      "git_blob": "705c71550c187b911c1a4a783f99b1f59e701adb"
+    },
+    "tests/fixtures/evaluation/trace.json": {
+      "sha256": "6766735a32d9e0edcd83c51f44f08394cacfd731da858f718c0e305986879c1a",
+      "git_blob": "abe5671eb9da8d37271dee214557ddf1767a4ecc"
+    },
+    "tests/sites-worker.test.mjs": {
+      "sha256": "96af7b48906c6460c793356d7b6952f7d5026dbf5a502bec0d9297ff04201c26",
+      "git_blob": "64f277e76964cd78f59ec5c31dfbd4cf1e92015f"
+    },
+    "tests/test_capacity.py": {
+      "sha256": "936034806d4a7cbe64c73aee7b40d0846e217b9a020324edd5f8d0d5c2884897",
+      "git_blob": "ea7eb3149308bf16b6529874210a0c0cb0554365"
+    },
+    "tests/test_edge.py": {
+      "sha256": "2fa993a099f25ec455ad4e8623383a0e94007a8f5d2ee89c1f9a88a9eb7a248d",
+      "git_blob": "d58fdc30782c4d422b1443cbf16731ad6949fe7b"
+    },
+    "tests/test_evaluation.py": {
+      "sha256": "e122d5825886e6ae4f91ee1d7e7a0b6411ffcde5691adfa81001906d7ee750e1",
+      "git_blob": "621b1ee9ed165682194f1494e39d12e6bb93d29a"
+    },
+    "tests/test_inference.py": {
+      "sha256": "b41b52eff132b21804b96ec584e1e80341247bf8ffb4e6108eee7a79ee4aec58",
+      "git_blob": "d1da37abfe55bd0c328caed0b30b46ab68def274"
+    },
+    "tests/test_model_qualification.py": {
+      "sha256": "0b33fd3e048aef6c132ae3158952db151caa1d9ab68a42b23107e940917785a2",
+      "git_blob": "2df35cb0c569f5479f2d6ffcda11bc6db7e72a04"
+    }
+  }
+}

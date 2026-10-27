@@ -1,5 +1,9 @@
 # Guided facility builder
 
+[Visual tour](visual-tour.md) · [Getting started](getting-started.md) · [Fresh verification](verification/2026-10-27/README.md)
+
+![Actual fictional sample facility in the 3D planner. Coverage is estimated.](media/facility.webp)
+
 The **Facility** navigation item opens a browser-local, subscription-free planning
 editor. Direct entry is `/#facility`. The existing camera wall and event review
 remain available. This is an editable planning prototype, not a calibrated digital

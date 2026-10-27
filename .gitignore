@@ -10,3 +10,6 @@ recordings/
 models/
 receipts/
 qa-local/
+
+# Transient documentation capture inputs
+/docs/media/captures/

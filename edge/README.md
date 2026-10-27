@@ -1,5 +1,7 @@
 # Offline analysis foundation
 
+[Architecture and data](../docs/architecture.md) · [Evaluation](../docs/offline-evaluation.md) · [Fresh verification](../docs/verification/2026-10-27/README.md)
+
 This tool reads one explicitly supplied local recording. It does not connect to
 cameras, start background services, download models, send footage, or call an API.
 No trained model is supplied. Camera compatibility, recognition accuracy and

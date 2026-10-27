@@ -1,0 +1,283 @@
+{
+  "schema": "intelligent-dvr.evaluation.v1",
+  "state": "evaluated",
+  "data_kind": "synthetic",
+  "capacity_target_cameras": 100,
+  "manifest_sha256": "c299621164cbf13c882af3c9256dfb5b8948df3ee976d07f7512c55cf301ac19",
+  "reviews_sha256": "c80ea4ce42b389a1347cb528660b54a047d65b4e9686c4b5dd4c9176adc58f9a",
+  "evaluator_sha256": "762d1b59df14bcb859dbc6193d918a8e3e904d0b4ff5aea4abf8214a196342e3",
+  "approval_declarations": {
+    "approved_by": "synthetic-fixture",
+    "source_rights": "generated text; no footage",
+    "annotated_by": "deterministic-fixture-generator",
+    "split": "regression-only",
+    "annotation_policy": "exhaustive classes on listed frames; supplied synthetic boxes"
+  },
+  "rule_engine_sha256": "1c4105a69c36fb1ff8a2ae6fe35c2f1ed9f3b3c94821850a32384ae9eafbf391",
+  "model_profiles_sha256": "9a0cfffa5a0fbb7312de96d49c894106a92f5bbc3fec6fa9a5594c0bab06e6b2",
+  "inference_profile": "yolov8-raw-640",
+  "model_sha256": "1509018e1104ec84ed6a6b03ac933956b77c402f3889ada753db806ea9918b88",
+  "labels_sha256": "3ee03641b29d38d58531f7045d7ffe4bd32af682e96aa81de81e672c5ce93166",
+  "model_provenance": null,
+  "method": {
+    "score_threshold": 0.5,
+    "iou_threshold": 0.5,
+    "matching": "score-descending greedy, same-class one-to-one IoU; input-order ties",
+    "boxes": "normalized [left,top,width,height]; exhaustive evaluated-class labels on annotated frames",
+    "timing": "per-frame inference and decode only; nearest-rank quantiles; pooled samples",
+    "warmup_frames_excluded_per_clip_from_timing_only": 0,
+    "alerts": "existing class/zone/dwell rules; false only by explicit human adjudication"
+  },
+  "frames_annotated": 4,
+  "per_class": {
+    "person": {
+      "TP": 2,
+      "FP": 2,
+      "FN": 1,
+      "precision": 0.5,
+      "recall": 0.6666666666666666
+    },
+    "car": {
+      "TP": 1,
+      "FP": 1,
+      "FN": 0,
+      "precision": 0.5,
+      "recall": 1.0
+    },
+    "bicycle": {
+      "TP": 0,
+      "FP": 0,
+      "FN": 0,
+      "precision": null,
+      "recall": null
+    }
+  },
+  "micro": {
+    "TP": 3,
+    "FP": 3,
+    "FN": 1,
+    "precision": 0.5,
+    "recall": 0.75
+  },
+  "timing": {
+    "count": 4,
+    "min_ms": 10,
+    "mean_ms": 25,
+    "p50_ms": 20,
+    "p90_ms": 40,
+    "p95_ms": 40,
+    "p99_ms": 40,
+    "max_ms": 40
+  },
+  "clips": [
+    {
+      "camera": "synthetic-camera",
+      "source_sha256": "5bef66240434877e0affbe3fbe5d1c3cdc27546cb4dc9cdd1da70a8441fb0b5f",
+      "trace_sha256": "6766735a32d9e0edcd83c51f44f08394cacfd731da858f718c0e305986879c1a",
+      "source_hash_verified": true,
+      "frames_analyzed": 4,
+      "frames_annotated": 4,
+      "rules_sha256": "dba029ebc66d546789d00d4a219878b27957990233e858633bbe1bbbcb4bb4d7",
+      "rules": [
+        {
+          "name": "fixture zone",
+          "label": "person",
+          "rect": [
+            0,
+            0,
+            1,
+            1
+          ],
+          "threshold": 0.7,
+          "dwell": 0,
+          "max_gap": 2
+        }
+      ],
+      "rules_file_sha256": null,
+      "runtime": {
+        "scope": "supplied synthetic timing values; no model execution"
+      },
+      "timing": {
+        "count": 4,
+        "min_ms": 10,
+        "mean_ms": 25,
+        "p50_ms": 20,
+        "p90_ms": 40,
+        "p95_ms": 40,
+        "p99_ms": 40,
+        "max_ms": 40
+      },
+      "alert_review_intervals": [
+        [
+          0,
+          4
+        ]
+      ],
+      "reviewed_camera_hours": 0.0011111111111111111,
+      "covered_alerts": 2,
+      "pending_alert_reviews": 0,
+      "reviewed_false_alerts": 1,
+      "false_alerts_per_camera_hour": 900.0,
+      "false_alert_rate_status": "available",
+      "alerts": [
+        {
+          "id": "4eeaed2dd797b958d4f69c4f6b11d7d2",
+          "camera": "synthetic-camera",
+          "label": "person",
+          "score": 0.9,
+          "seconds": 0.0,
+          "started_seconds": 0.0,
+          "rule": "person present in fixture zone for 0s",
+          "review_required": true,
+          "source_sha256": "5bef66240434877e0affbe3fbe5d1c3cdc27546cb4dc9cdd1da70a8441fb0b5f",
+          "trace_sha256": "6766735a32d9e0edcd83c51f44f08394cacfd731da858f718c0e305986879c1a",
+          "frame_index": 0,
+          "in_review_coverage": true,
+          "review": {
+            "trace_sha256": "6766735a32d9e0edcd83c51f44f08394cacfd731da858f718c0e305986879c1a",
+            "event_id": "4eeaed2dd797b958d4f69c4f6b11d7d2",
+            "verdict": "confirmed",
+            "reviewer": "synthetic-fixture-reviewer",
+            "rationale": "Supplied synthetic decision, not an actual human scene review.",
+            "reviewed_at": "2026-10-27T00:00:00Z"
+          }
+        },
+        {
+          "id": "fdba1a2c0b40b70cf76da5dbd9907b47",
+          "camera": "synthetic-camera",
+          "label": "person",
+          "score": 0.9,
+          "seconds": 3.0,
+          "started_seconds": 3.0,
+          "rule": "person present in fixture zone for 0s",
+          "review_required": true,
+          "source_sha256": "5bef66240434877e0affbe3fbe5d1c3cdc27546cb4dc9cdd1da70a8441fb0b5f",
+          "trace_sha256": "6766735a32d9e0edcd83c51f44f08394cacfd731da858f718c0e305986879c1a",
+          "frame_index": 3,
+          "in_review_coverage": true,
+          "review": {
+            "trace_sha256": "6766735a32d9e0edcd83c51f44f08394cacfd731da858f718c0e305986879c1a",
+            "event_id": "fdba1a2c0b40b70cf76da5dbd9907b47",
+            "verdict": "false_alert",
+            "reviewer": "synthetic-fixture-reviewer",
+            "rationale": "Supplied synthetic decision, not an actual human scene review.",
+            "reviewed_at": "2026-10-27T00:00:00Z"
+          }
+        }
+      ]
+    }
+  ],
+  "reviewed_camera_hours": 0.0011111111111111111,
+  "reviewed_false_alerts": 1,
+  "false_alerts_per_camera_hour": 900.0,
+  "detection_evidence": [
+    {
+      "label": "person",
+      "outcome": "TP",
+      "prediction_index": 0,
+      "truth_index": 0,
+      "iou": 1.0000000000000004,
+      "score": 0.9,
+      "camera": "synthetic-camera",
+      "source_sha256": "5bef66240434877e0affbe3fbe5d1c3cdc27546cb4dc9cdd1da70a8441fb0b5f",
+      "trace_sha256": "6766735a32d9e0edcd83c51f44f08394cacfd731da858f718c0e305986879c1a",
+      "frame_index": 0,
+      "seconds": 0.0
+    },
+    {
+      "label": "person",
+      "outcome": "FP",
+      "prediction_index": 1,
+      "truth_index": null,
+      "iou": 0,
+      "score": 0.8,
+      "camera": "synthetic-camera",
+      "source_sha256": "5bef66240434877e0affbe3fbe5d1c3cdc27546cb4dc9cdd1da70a8441fb0b5f",
+      "trace_sha256": "6766735a32d9e0edcd83c51f44f08394cacfd731da858f718c0e305986879c1a",
+      "frame_index": 0,
+      "seconds": 0.0
+    },
+    {
+      "label": "car",
+      "outcome": "FP",
+      "prediction_index": 2,
+      "truth_index": null,
+      "iou": 0,
+      "score": 0.8,
+      "camera": "synthetic-camera",
+      "source_sha256": "5bef66240434877e0affbe3fbe5d1c3cdc27546cb4dc9cdd1da70a8441fb0b5f",
+      "trace_sha256": "6766735a32d9e0edcd83c51f44f08394cacfd731da858f718c0e305986879c1a",
+      "frame_index": 0,
+      "seconds": 0.0
+    },
+    {
+      "label": "person",
+      "outcome": "TP",
+      "prediction_index": 0,
+      "truth_index": 0,
+      "iou": 1.0000000000000004,
+      "score": 0.9,
+      "camera": "synthetic-camera",
+      "source_sha256": "5bef66240434877e0affbe3fbe5d1c3cdc27546cb4dc9cdd1da70a8441fb0b5f",
+      "trace_sha256": "6766735a32d9e0edcd83c51f44f08394cacfd731da858f718c0e305986879c1a",
+      "frame_index": 1,
+      "seconds": 1.0
+    },
+    {
+      "label": "person",
+      "outcome": "FN",
+      "prediction_index": null,
+      "truth_index": 1,
+      "iou": null,
+      "score": null,
+      "camera": "synthetic-camera",
+      "source_sha256": "5bef66240434877e0affbe3fbe5d1c3cdc27546cb4dc9cdd1da70a8441fb0b5f",
+      "trace_sha256": "6766735a32d9e0edcd83c51f44f08394cacfd731da858f718c0e305986879c1a",
+      "frame_index": 1,
+      "seconds": 1.0
+    },
+    {
+      "label": "car",
+      "outcome": "TP",
+      "prediction_index": 1,
+      "truth_index": 2,
+      "iou": 1.000000000000001,
+      "score": 0.8,
+      "camera": "synthetic-camera",
+      "source_sha256": "5bef66240434877e0affbe3fbe5d1c3cdc27546cb4dc9cdd1da70a8441fb0b5f",
+      "trace_sha256": "6766735a32d9e0edcd83c51f44f08394cacfd731da858f718c0e305986879c1a",
+      "frame_index": 1,
+      "seconds": 1.0
+    },
+    {
+      "label": "person",
+      "outcome": "FP",
+      "prediction_index": 0,
+      "truth_index": null,
+      "iou": 0,
+      "score": 0.9,
+      "camera": "synthetic-camera",
+      "source_sha256": "5bef66240434877e0affbe3fbe5d1c3cdc27546cb4dc9cdd1da70a8441fb0b5f",
+      "trace_sha256": "6766735a32d9e0edcd83c51f44f08394cacfd731da858f718c0e305986879c1a",
+      "frame_index": 3,
+      "seconds": 3.0
+    }
+  ],
+  "human_review_required": true,
+  "qualification": {
+    "representative_scene_accuracy": "unqualified",
+    "target_hardware_performance": "unqualified",
+    "concurrent_camera_capacity": "unqualified",
+    "five_camera_capacity": "unqualified",
+    "camera_compatibility": "unqualified"
+  },
+  "limitations": [
+    "Synthetic metrics validate arithmetic and plumbing, not recognition.",
+    "Real metrics describe only supplied annotations, thresholds, sampling and review coverage.",
+    "No AP/mAP, tracking, event recall, unsampled-frame accuracy or reliable recognition claim.",
+    "Source FPS/frame count and exhaustive labels/coverage are human declarations; verify CFR and media integrity.",
+    "Traces and human reviews are unsigned local evidence, not an authenticated audit trail.",
+    "Timings exclude capture, preprocessing, rendering and review; sequential clips do not measure camera concurrency.",
+    "No cameras, continuous monitoring, footage transmission or paid services are used."
+  ]
+}

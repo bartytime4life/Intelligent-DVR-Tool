@@ -1,0 +1,1072 @@
+{
+  "schema": "intelligent-dvr.capacity-simulation.v1",
+  "state": "simulation-completed",
+  "minimum_camera_target": 100,
+  "assumptions": {
+    "cameras": 100,
+    "samples_per_camera_second": 2.0,
+    "workers": 8,
+    "constant_worker_service_ms": 10.0,
+    "offered_duration_seconds": 10,
+    "max_sample_age_at_dispatch_seconds": 2,
+    "arrival_pattern": "all cameras at each sample tick; virtual clock",
+    "payload": "shared synthetic text, not decoded image memory"
+  },
+  "modeled_offered_samples_per_second": 200.0,
+  "idealized_worker_service_samples_per_second": 800.0,
+  "modeled_overload": false,
+  "worker_equivalents_at_70_percent_utilization": 3,
+  "modeled_drain_finished_seconds": 9.63,
+  "totals": {
+    "received": 2000,
+    "accepted": 2000,
+    "replaced": 0,
+    "stale": 0,
+    "budget_dropped": 0,
+    "dispatched": 2000,
+    "completed": 2000,
+    "failed": 0
+  },
+  "cameras_served": 100,
+  "modeled_max_first_dispatch_seconds": 0.12,
+  "modeled_completion_age": {
+    "count": 2000,
+    "min_ms": 9.999999999999787,
+    "mean_ms": 67.59999999999994,
+    "p50_ms": 69.99999999999996,
+    "p90_ms": 120.0,
+    "p95_ms": 120.00000000000011,
+    "p99_ms": 130.0,
+    "max_ms": 130.0000000000008
+  },
+  "scheduler": {
+    "admitted_cameras": 100,
+    "workers": 8,
+    "pending": 0,
+    "inflight": 0,
+    "buffered_payload_bytes": 0,
+    "peak_buffered_payload_bytes": 2700,
+    "peak_pending": 100,
+    "peak_inflight": 8,
+    "max_sample_bytes": 1024,
+    "max_buffer_bytes": 110592,
+    "max_age_seconds": 2,
+    "per_camera": {
+      "camera-0001": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0002": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0003": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0004": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0005": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0006": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0007": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0008": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0009": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0010": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0011": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0012": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0013": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0014": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0015": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0016": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0017": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0018": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0019": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0020": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0021": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0022": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0023": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0024": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0025": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0026": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0027": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0028": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0029": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0030": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0031": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0032": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0033": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0034": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0035": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0036": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0037": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0038": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0039": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0040": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0041": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0042": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0043": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0044": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0045": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0046": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0047": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0048": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0049": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0050": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0051": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0052": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0053": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0054": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0055": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0056": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0057": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0058": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0059": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0060": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0061": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0062": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0063": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0064": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0065": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0066": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0067": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0068": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0069": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0070": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0071": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0072": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0073": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0074": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0075": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0076": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0077": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0078": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0079": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0080": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0081": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0082": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0083": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0084": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0085": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0086": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0087": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0088": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0089": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0090": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0091": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0092": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0093": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0094": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0095": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0096": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0097": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0098": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0099": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      },
+      "camera-0100": {
+        "received": 20,
+        "accepted": 20,
+        "replaced": 0,
+        "stale": 0,
+        "budget_dropped": 0,
+        "dispatched": 20,
+        "completed": 20,
+        "failed": 0
+      }
+    }
+  },
+  "scheduler_sha256": "915cd9757a14d54abb5e1bc249ccd91d7ce37d6713786c31025307e87f661eb1",
+  "simulation_sha256": "37743b28b7073be326acfb598f0e4b26066c037c81283526b92c9a6da2b54d6f",
+  "qualification": {
+    "concurrent_camera_capacity": "unqualified",
+    "target_hardware_performance": "unqualified",
+    "recognition_accuracy": "unqualified"
+  },
+  "limitations": [
+    "Virtual time and assumed constant service costs are not measured throughput.",
+    "Worker equivalents are abstract capacity, not a CPU-core or GPU purchase recommendation.",
+    "No real frames, decoding, GPU contention, networking, recording or UI load are modeled.",
+    "Replacing or expiring samples loses coverage; quality and dwell must be requalified.",
+    "Freshness is checked at dispatch; in-flight work has no cancellation or hard deadline.",
+    "The scheduler does not create workers, capture sources or a production monitoring service."
+  ]
+}

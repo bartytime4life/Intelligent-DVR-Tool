@@ -1,0 +1,145 @@
+TAP version 13
+# Subtest: zone geometry cannot extend beyond image
+ok 1 - zone geometry cannot extend beyond image
+  ---
+  duration_ms: 0.578964
+  ...
+# Subtest: review records decision without contaminating another event
+ok 2 - review records decision without contaminating another event
+  ---
+  duration_ms: 0.35275
+  ...
+# Subtest: offline receipts remain separate from simulated camera evidence
+ok 3 - offline receipts remain separate from simulated camera evidence
+  ---
+  duration_ms: 0.166752
+  ...
+# Subtest: invalid receipts and duplicate ids are rejected
+ok 4 - invalid receipts and duplicate ids are rejected
+  ---
+  duration_ms: 0.091081
+  ...
+# Subtest: receipt provenance rejects malformed metadata rather than rendering objects
+ok 5 - receipt provenance rejects malformed metadata rather than rendering objects
+  ---
+  duration_ms: 0.108503
+  ...
+# Subtest: corrupt browser snapshots recover to the initial workspace
+ok 6 - corrupt browser snapshots recover to the initial workspace
+  ---
+  duration_ms: 0.243756
+  ...
+# Subtest: all common footprints remain simple and dimensioned after rotation
+ok 7 - all common footprints remain simple and dimensioned after rotation
+  ---
+  duration_ms: 2.018709
+  ...
+# Subtest: bounded search does not accept blank, oversized or invalid coordinates
+ok 8 - bounded search does not accept blank, oversized or invalid coordinates
+  ---
+  duration_ms: 0.118131
+  ...
+# Subtest: height tags honor meter and foot units without guessing unparseable heights
+ok 9 - height tags honor meter and foot units without guessing unparseable heights
+  ---
+  duration_ms: 0.265317
+  ...
+# Subtest: OSM shells preserve provenance and distinguish tags from placeholder dimensions
+ok 10 - OSM shells preserve provenance and distinguish tags from placeholder dimensions
+  ---
+  duration_ms: 0.87066
+  ...
+# Subtest: relations never become solid courtyards, and invalid/duplicate/outside features are bounded
+ok 11 - relations never become solid courtyards, and invalid/duplicate/outside features are bounded
+  ---
+  duration_ms: 0.393687
+  ...
+# Subtest: raised and uncertain bases are not flattened into ground-level shells
+ok 12 - raised and uncertain bases are not flattened into ground-level shells
+  ---
+  duration_ms: 0.108914
+  ...
+# Subtest: network adapter caps response bytes and reports service failure
+ok 13 - network adapter caps response bytes and reports service failure
+  ---
+  duration_ms: 10.553374
+  ...
+# Subtest: replacement previews accept 98 drafts without retaining the old 3 buildings or cameras
+ok 14 - replacement previews accept 98 drafts without retaining the old 3 buildings or cameras
+  ---
+  duration_ms: 1.553888
+  ...
+# Subtest: sample and empty facility round trip through the bounded public contract
+ok 15 - sample and empty facility round trip through the bounded public contract
+  ---
+  duration_ms: 0.434163
+  ...
+# Subtest: coordinate projection preserves local-meter geometry at Kansas latitude
+ok 16 - coordinate projection preserves local-meter geometry at Kansas latitude
+  ---
+  duration_ms: 0.049683
+  ...
+# Subtest: polygons reject self crossings, degenerate areas and unclosed rings
+ok 17 - polygons reject self crossings, degenerate areas and unclosed rings
+  ---
+  duration_ms: 0.035256
+  ...
+# Subtest: ground plane coverage respects direction, near limit, far limit and enabled state
+ok 18 - ground plane coverage respects direction, near limit, far limit and enabled state
+  ---
+  duration_ms: 0.151724
+  ...
+# Subtest: opaque walls block lines of sight while a low obstacle can be seen over
+ok 19 - opaque walls block lines of sight while a low obstacle can be seen over
+  ---
+  duration_ms: 0.195225
+  ...
+# Subtest: narrow downward views cannot claim ground coverage before their near distance
+ok 20 - narrow downward views cannot claim ground coverage before their near distance
+  ---
+  duration_ms: 0.089818
+  ...
+# Subtest: route interpolation follows distance, including repeated points
+ok 21 - route interpolation follows distance, including repeated points
+  ---
+  duration_ms: 0.082064
+  ...
+# Subtest: rehearsal returns explicit gaps instead of inferred observations
+ok 22 - rehearsal returns explicit gaps instead of inferred observations
+  ---
+  duration_ms: 0.221514
+  ...
+# Subtest: bad imports reject non-finite values, duplicates, invalid room floor and oversize JSON
+ok 23 - bad imports reject non-finite values, duplicates, invalid room floor and oversize JSON
+  ---
+  duration_ms: 0.931904
+  ...
+# Subtest: import only retains declared geometry and text fields, never media URLs or HTML properties
+ok 24 - import only retains declared geometry and text fields, never media URLs or HTML properties
+  ---
+  duration_ms: 0.590004
+  ...
+# Subtest: 100-camera metadata inventory remains valid without making a video throughput claim
+ok 25 - 100-camera metadata inventory remains valid without making a video throughput claim
+  ---
+  duration_ms: 0.510316
+  ...
+# Subtest: room must stay within its building footprint and building deletion cannot leave orphan rooms
+ok 26 - room must stay within its building footprint and building deletion cannot leave orphan rooms
+  ---
+  duration_ms: 0.125505
+  ...
+# Subtest: rooms cannot bridge outside a concave building even when every vertex is inside
+ok 27 - rooms cannot bridge outside a concave building even when every vertex is inside
+  ---
+  duration_ms: 0.084509
+  ...
+1..27
+# tests 27
+# suites 0
+# pass 27
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 34.776506
