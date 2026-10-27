@@ -78,4 +78,10 @@ manufacturer specifications, not a comparative reliability or performance test.
 
 ## CI follow-through
 
-Pending the exact implementation commit's Ubuntu and Windows jobs.
+Initial commit `e847d629adeb588754283d62d7e5c20802f8960b` passed all 107 tests on
+Ubuntu. Windows ran 66 Python cases with three Linux-only skips but failed two
+fixture-integrity checks: automatic CRLF conversion changed hash-bound source
+bytes. The follow-up pins text checkout to LF and makes fixture generation write
+explicit UTF-8/LF on either platform. It also checks oversized integer policy
+values before floating-point conversion. The matrix is rerun for these fixes;
+final results will be recorded here.

@@ -31,6 +31,7 @@ class ResourcePolicyTest(unittest.TestCase):
                      lambda p: p['analysis'].update(opencv_threads=True),
                      lambda p: p['analysis'].update(opencv_threads=9),
                      lambda p: p['analysis'].update(max_age_seconds=float('nan')),
+                     lambda p: p['analysis'].update(max_age_seconds=10**1000),
                      lambda p: p['analysis'].update(max_buffer_bytes=2**40),
                      lambda p: p['analysis'].update(max_buffer_bytes=1),
                      lambda p: p['analysis'].update(thread_budget=1),

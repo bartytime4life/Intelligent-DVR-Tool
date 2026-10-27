@@ -16,7 +16,7 @@ def fields(value, expected, label):
 
 
 def numeric(value, lo, hi, label, integer=False):
-    if (type(value) not in (int, float) or not math.isfinite(value) or not lo <= value <= hi
+    if (type(value) not in (int, float) or not lo <= value <= hi or not math.isfinite(value)
             or (integer and int(value) != value)):
         raise ValueError(f'{label}: use a finite {"integer" if integer else "number"} in {lo}–{hi}')
 
