@@ -7,6 +7,7 @@ import statistics
 
 from .model_profiles import ASSETS, YOLOX_PROFILE, validate_binding
 from .rules import Rule, RuleEngine, finite
+from .scheduler import MINIMUM_CAMERA_TARGET
 
 SCHEMA = 'intelligent-dvr.evaluation.v1'
 TRACE_SCHEMA = 'intelligent-dvr.detection-trace.v1'
@@ -324,6 +325,7 @@ def evaluate(manifest_path, reviews_path=None, score_threshold=.5, iou_threshold
     if identity[0] == YOLOX_PROFILE:
         provenance = read_json(ASSETS / 'candidates' / (YOLOX_PROFILE + '.json'))
     return {'schema': SCHEMA, 'state': 'evaluated', 'data_kind': kind,
+            'capacity_target_cameras': MINIMUM_CAMERA_TARGET,
             'manifest_sha256': digest(manifest_path), 'reviews_sha256': review_hash,
             'evaluator_sha256': digest(Path(__file__)), 'approval_declarations': approval,
             'rule_engine_sha256': digest(ASSETS / 'rules.py'),
@@ -345,6 +347,7 @@ def evaluate(manifest_path, reviews_path=None, score_threshold=.5, iou_threshold
             'detection_evidence': evidence, 'human_review_required': True,
             'qualification': {'representative_scene_accuracy': 'unqualified',
                               'target_hardware_performance': 'unqualified',
+                              'concurrent_camera_capacity': 'unqualified',
                               'five_camera_capacity': 'unqualified', 'camera_compatibility': 'unqualified'},
             'limitations': ['Synthetic metrics validate arithmetic and plumbing, not recognition.',
                             'Real metrics describe only supplied annotations, thresholds, sampling and review coverage.',

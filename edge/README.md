@@ -11,6 +11,12 @@ precision/recall and timing distributions, and computes false alerts per reviewe
 camera-hour only when all covered alerts have explicit decisions. Deterministic
 synthetic fixtures validate the infrastructure, not recognition quality.
 
+The product requirement is now at least 100 simultaneous cameras. The
+[performance preparation guide](../docs/performance-100-cameras.md) documents
+the bounded scheduler and offline load model. `edge.capacity` is a virtual-time
+diagnostic using an explicit assumed service cost; it never opens a source or
+executes a detector. `edge.analyze` still processes one local recording per run.
+
 ## Run
 
 Python 3.11+ is recommended. From the repository root:

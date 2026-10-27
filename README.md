@@ -1,12 +1,19 @@
 # Intelligent DVR Tool
 
-An edge-first camera-analysis pilot for BARTA AI Solutions. The first working
-version combines a polished five-camera sample workspace with explicit zone
-rules, human review, local video preview and an optional offline ONNX adapter.
+An edge-first camera-analysis project for BARTA AI Solutions, with an owner-required
+minimum of **100 simultaneously active cameras**. The current prototype combines
+a five-scene sample workspace with explicit zone rules, human review, local video
+preview and an optional offline ONNX adapter. The five scenes are UI fixtures.
 
 **Status:** functional review prototype and analysis foundation. No real cameras
-are connected. No trained detector, deployment, real-time performance, detection
-accuracy or camera compatibility is claimed.
+are connected. Trained weights are not bundled; live deployment, 100-camera
+capacity, real-time performance, detection accuracy and camera compatibility
+remain unqualified.
+
+The [100-camera performance preparation](docs/performance-100-cameras.md) adds a
+bounded fair scheduler, deterministic 100-source load simulation, workload
+budgets and staged acceptance. This prepares scaling work; it does not activate
+camera capture or establish sustained detector performance.
 
 ## Start the review workspace
 

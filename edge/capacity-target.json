@@ -1,0 +1,18 @@
+{
+  "schema": "intelligent-dvr.capacity-target.v1",
+  "minimum_simultaneous_cameras": 100,
+  "decision_date": "2026-10-27",
+  "authority": "owner requirement",
+  "scope": "At least 100 concurrently active cameras with explicitly qualified per-camera recording and analytics workloads.",
+  "deployment": "local; no subscriptions or paid inference services",
+  "camera_capacity": "unqualified",
+  "target_hardware_performance": "unqualified",
+  "acceptance_workload": {
+    "codec_resolution_and_source_fps": null,
+    "analysis_fps_per_camera": null,
+    "maximum_event_delay_seconds": null,
+    "retention_days": null,
+    "hardware_and_worker_count": null
+  },
+  "note": "Null workload fields require measured pilot decisions; simulation examples are not accepted production settings. Five generated scenes remain UI fixtures only."
+}

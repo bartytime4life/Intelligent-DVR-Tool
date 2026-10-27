@@ -1,4 +1,10 @@
-# Five-camera pilot and service scope
+# 100-camera minimum and pilot service scope
+
+Owner decision, 2026-10-27: support **at least 100 simultaneously active cameras**.
+Five generated scenes remain sample UI assets. The capacity target is mandatory;
+the current single-recording adapter and offline scheduling tests do not qualify
+live 100-camera operation. See [performance preparation](performance-100-cameras.md)
+and the [machine-readable target](../edge/capacity-target.json).
 
 ## Service area
 
@@ -23,7 +29,7 @@ this prototype determines identity, intent or whether someone is authorized.
 | Edge hardware       | CPU/GPU, RAM, thermals, storage and network budget                                    |
 | Targets             | Exact model classes, normal scenes, zones and permitted times                         |
 | Training/evaluation | Approved collection, consistent labels, provenance and held-out recordings            |
-| Timing              | Agreed maximum event delay; measured capture-to-review p50/p95 under five-camera load |
+| Timing              | Agreed per-camera analytics cadence and maximum event delay; measured p50/p95/p99 under 100-camera load |
 | Quality             | Per-class precision/recall, missed events and false alerts per camera-hour            |
 | Review              | Named operator role, evidence handling, retention and escalation rules                |
 | Commercial          | Hardware, storage, support and third-party costs; no assumed savings                  |
@@ -43,8 +49,10 @@ this prototype determines identity, intent or whether someone is authorized.
    No credentials or RTSP URLs should reach the hosted frontend or repository.
 4. Add bounded capture queues with drop/backpressure reporting, reconnection,
    per-camera health, storage/retention limits and measured end-to-end latency.
-5. Test one camera, then the five-camera pilot, including disconnects, low light,
-   occlusion, camera movement, empty scenes and resource contention.
+5. Qualify staged concurrent loads of 1, 5, 25, 50 and at least 100 cameras,
+   including disconnects, low light, occlusion, camera movement, empty scenes,
+   noisy sources, worker failures and resource contention. Measure connection,
+   recording, analytics and browser-view workloads separately and together.
 6. Agree the remaining scope and support before any operational reliance.
 
 ## Architecture boundary
