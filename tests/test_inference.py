@@ -41,7 +41,8 @@ class InferenceTest(unittest.TestCase):
             (root/'rules.json').write_text('[{"name":"fixture","label":"person","rect":[0,0,1,1],"dwell":1}]')
             command=[sys.executable,'-m','edge.analyze','--video',str(root/'sample.avi'),
                      '--model',str(root/'fixture.onnx'),'--labels',str(root/'labels.json'),
-                     '--rules',str(root/'rules.json'),'--output',str(root/'receipt.json'),'--stride','5']
+                     '--rules',str(root/'rules.json'),'--output',str(root/'receipt.json'),'--stride','5',
+                     '--trace-output',str(root/'trace.json')]
             subprocess.run(command,check=True,capture_output=True,text=True)
             receipt=json.loads((root/'receipt.json').read_text())
             self.assertEqual(receipt['state'],'completed')
@@ -51,9 +52,46 @@ class InferenceTest(unittest.TestCase):
             self.assertEqual(len(receipt['model_sha256']),64)
             self.assertEqual(len(receipt['source_sha256']),64)
             self.assertTrue(receipt['events'][0]['review_required'])
+            from edge.evaluation import evaluate, digest, MANIFEST_SCHEMA
+            trace=json.loads((root/'trace.json').read_text())
+            self.assertEqual([f['frame_index'] for f in trace['frames']],[0,5,10,15,20,25])
+            self.assertEqual(trace['events'],receipt['events'])
+            self.assertEqual(trace['runtime']['threads'],1)
+            self.assertEqual(trace['runtime']['backend'],'OpenCV CPU')
+            # Independently specified geometry for the constant network output.
+            # Perfect fixture scores demonstrate plumbing, never recognition.
+            manifest={'schema':MANIFEST_SCHEMA,'data_kind':'synthetic',
+                      'approval':{'approved_by':'test','source_rights':'generated synthetic pixels',
+                                  'annotated_by':'test','annotation_policy':'constant output geometry',
+                                  'split':'regression-only'},
+                      'labels':'labels.json','classes':['person'],
+                      'clips':[{'camera':'offline-camera','source':'sample.avi',
+                                'source_sha256':digest(root/'sample.avi'),'frame_count':30,'fps':10,
+                                'trace':'trace.json','alert_review_intervals':[[0,3]],
+                                'frames':[{'frame_index':i,'objects':[
+                                    {'label':'person','box':[.375,1/3,.25,1/3]}]} for i in (0,10)]}]}
+            (root/'manifest.json').write_text(json.dumps(manifest))
+            result=evaluate(root/'manifest.json')
+            self.assertEqual(result['per_class']['person']['precision'],1)
+            self.assertEqual(result['per_class']['person']['recall'],1)
+            self.assertEqual(result['timing']['count'],6)
+            self.assertIsNone(result['false_alerts_per_camera_hour'])
+            self.assertEqual(result['qualification']['representative_scene_accuracy'],'unqualified')
             # The tool must never overwrite prior evidence.
             again=subprocess.run(command,capture_output=True)
             self.assertNotEqual(again.returncode,0)
+            # A trace collision must not create a second receipt.
+            changed=command.copy()
+            changed[changed.index('--output')+1]=str(root/'other-receipt.json')
+            self.assertNotEqual(subprocess.run(changed,capture_output=True).returncode,0)
+            self.assertFalse((root/'other-receipt.json').exists())
+            # Receipt-only callers retain the existing schema and review events.
+            legacy=command[:-2]
+            legacy[legacy.index('--output')+1]=str(root/'receipt-only.json')
+            subprocess.run(legacy,check=True,capture_output=True)
+            receipt_only=json.loads((root/'receipt-only.json').read_text())
+            self.assertEqual(receipt_only['schema'],'intelligent-dvr.receipt.v1')
+            self.assertEqual(receipt_only['events'],receipt['events'])
 
     def test_decoder_rejects_unsupported_shape_and_maps_letterbox(self):
         import cv2

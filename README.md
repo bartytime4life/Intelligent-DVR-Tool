@@ -36,6 +36,10 @@ ONNX contract, scope limits and receipt format. See
 The [model qualification research](docs/model-qualification-20261026.md) compares
 free local detectors and records a hash-verified YOLOX-S synthetic-input
 compatibility check. Recognition accuracy remains unmeasured.
+The [offline evaluation guide](docs/offline-evaluation.md) provides a reproducible
+synthetic corpus and a path to measured local-recording precision/recall, timing
+distributions and human-reviewed false-alert rates. No representative-scene or
+target-hardware qualification has been established.
 
 ## Checks
 

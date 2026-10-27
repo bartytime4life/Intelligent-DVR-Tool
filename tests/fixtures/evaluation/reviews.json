@@ -1,0 +1,22 @@
+{
+  "schema": "intelligent-dvr.alert-reviews.v1",
+  "manifest_sha256": "c299621164cbf13c882af3c9256dfb5b8948df3ee976d07f7512c55cf301ac19",
+  "decisions": [
+    {
+      "trace_sha256": "6766735a32d9e0edcd83c51f44f08394cacfd731da858f718c0e305986879c1a",
+      "event_id": "4eeaed2dd797b958d4f69c4f6b11d7d2",
+      "verdict": "confirmed",
+      "reviewer": "synthetic-fixture-reviewer",
+      "rationale": "Supplied synthetic decision, not an actual human scene review.",
+      "reviewed_at": "2026-10-27T00:00:00Z"
+    },
+    {
+      "trace_sha256": "6766735a32d9e0edcd83c51f44f08394cacfd731da858f718c0e305986879c1a",
+      "event_id": "fdba1a2c0b40b70cf76da5dbd9907b47",
+      "verdict": "false_alert",
+      "reviewer": "synthetic-fixture-reviewer",
+      "rationale": "Supplied synthetic decision, not an actual human scene review.",
+      "reviewed_at": "2026-10-27T00:00:00Z"
+    }
+  ]
+}

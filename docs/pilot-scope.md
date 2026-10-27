@@ -34,6 +34,11 @@ this prototype determines identity, intent or whether someone is authorized.
 2. Qualify a licensed model/export on labeled held-out recordings; record hashes.
    Start with the [model research and compatibility-only evidence](model-qualification-20261026.md).
    A synthetic-input pass does not complete this step.
+   The [offline evaluation infrastructure](offline-evaluation.md) supports
+   annotated-frame precision/recall, per-frame timing distributions and explicitly
+   reviewed false alerts per camera-hour. Its committed synthetic fixtures qualify
+   metric arithmetic and evidence links only; representative recordings, quality
+   budgets and owner-hardware measurements remain outstanding.
 3. Implement a credential-protected, allowlisted camera adapter on an edge host.
    No credentials or RTSP URLs should reach the hosted frontend or repository.
 4. Add bounded capture queues with drop/backpressure reporting, reconnection,
