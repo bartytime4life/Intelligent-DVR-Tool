@@ -179,7 +179,7 @@ area, not its full enclosing rectangle. Building translation/save and restoratio
 of sample data were exercised. No real device-location permission was requested.
 Initial public Overpass attempts returned 502/timeouts, so live retrieval is not
 qualified by the successful offline fixture; that external-service gap is retained
-explicitly. Local build and all 29 frontend/Sites checks passed. No fresh application
+explicitly. Local build and all 30 frontend/Sites checks passed. No fresh application
 console warnings/errors appeared in the post-fix drawing check. Mobile, full
 accessibility, actual GPS and complex building geometry remain outside this pass.
 

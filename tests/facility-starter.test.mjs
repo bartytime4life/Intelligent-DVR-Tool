@@ -63,6 +63,16 @@ inner" }] };
   assert.equal(r2.buildings[0].crossing, true);
   assert.equal(r2.buildings[0].footprint.length, 5);
 });
+test('raised and uncertain bases are not flattened into ground-level shells', () => {
+  const result = parseOsmBuildings({elements:[
+    way(11,{building:'yes',min_height:'0.5'}),
+    way(12,{building:'yes',min_height:'unknown'}),
+    way(13,{building:'yes','building:min_level':'1'}),
+    way(14,{building:'yes',min_height:'0 m'}),
+  ]},origin,bounds);
+  assert.deepEqual(result.buildings.map(b=>b.id),['osm-way-14']);
+  assert.equal(result.skipped,3);
+});
 test("network adapter caps response bytes and reports service failure", async () => {
   let request;
   const result = await fetchOsmBuildings(bounds, void 0, async (url, options) => {

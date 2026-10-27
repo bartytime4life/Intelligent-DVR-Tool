@@ -62,13 +62,13 @@ way["building"]["building"!="no"](${box})->.footprints;
 relation(bw.footprints)["type"="multipolygon"];);
 out meta geom 301;`;
 }
-function osmHeight(raw) {
+function osmHeight(raw, minimum = 1) {
   if (typeof raw !== "string") return null;
   let m = raw.trim().match(/^(\d+(?:\.\d+)?)\s*(m|ft)?$/);
   let n = m ? +m[1] * (m[2] === "ft" ? 0.3048 : 1) : NaN;
   const f = raw.match(/^(\d+)'(?:(\d+(?:\.\d+)?)")?$/);
   if (f) n = +f[1] * 0.3048 + +(f[2] || 0) * 0.0254;
-  return Number.isFinite(n) && n >= 1 && n <= 150 ? n : null;
+  return Number.isFinite(n) && n >= minimum && n <= 150 ? n : null;
 }
 function parseOsmBuildings(data, origin, bounds, now = (/* @__PURE__ */ new Date()).toISOString()) {
   if (!data || !Array.isArray(data.elements) || data.elements.length > 300 || data.remark) throw Error("Incomplete or ov\
@@ -85,7 +85,9 @@ ersized response. Reduce the area and try again.");
     }
     if (!Number.isSafeInteger(e.id) || e.id <= 0 || seen.has(e.id) || !e.tags?.building || e.tags.building === "no") continue;
     seen.add(e.id);
-    if (e.tags["building:part"] || (osmHeight(e.tags.min_height) ?? 0) > 0 || !Array.isArray(e.geometry) || e.geometry.length >
+    const raisedBase = e.tags.min_height !== undefined && osmHeight(e.tags.min_height, 0) !== 0;
+    const raisedLevel = e.tags['building:min_level'] !== undefined && e.tags['building:min_level'] !== '0';
+    if (e.tags["building:part"] || raisedBase || raisedLevel || !Array.isArray(e.geometry) || e.geometry.length >
     201) {
       skipped++;
       continue;
