@@ -1,0 +1,14 @@
+{
+  "upstream": "https://github.com/JamesLMilner/terra-draw",
+  "commit": "18ca034880232b8b618ef1ca843d8e0b6c82f1ab",
+  "packages": {
+    "terra-draw": "1.38.0",
+    "terra-draw-maplibre-gl-adapter": "1.5.0"
+  },
+  "compiler": "esbuild 0.25.12",
+  "license": "../../public/licenses/terra-draw-LICENSE.txt",
+  "sha256": {
+    "terra-draw.mjs": "154b067067bceac0a518f818e1840c86ee5059600199c98371c7bf552600e15b",
+    "terra-maplibre.mjs": "091859a5e0ba979bdc9bcac64062d4c81c7877ee31f786e3b632efc8c33a4eac"
+  }
+}
