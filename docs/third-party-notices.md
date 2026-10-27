@@ -20,3 +20,23 @@ license is preserved in [Apache-2.0-YOLOX.txt](model-qualification/Apache-2.0-YO
 Class names were transcribed from the pinned upstream demo; no trained weights
 or upstream runtime implementation are bundled. This third-party notice does
 not assign a license to BARTA's repository.
+
+
+## Facility editor
+
+- MapLibre GL JS 6.9.0 — BSD-3-Clause; full upstream combined notice:
+  [maplibre-gl-LICENSE.txt](../public/licenses/maplibre-gl-LICENSE.txt).
+- Three.js 0.186.1 — MIT:
+  [three-LICENSE.txt](../public/licenses/three-LICENSE.txt).
+- Terra Draw 1.38.0 and MapLibre adapter 1.5.0 — MIT, upstream commit
+  `18ca034880232b8b618ef1ca843d8e0b6c82f1ab` from
+  https://github.com/JamesLMilner/terra-draw. Compiled source snapshots are in
+  `src/vendor/`; both retain full MIT headers. Full notice:
+  [terra-draw-LICENSE.txt](../public/licenses/terra-draw-LICENSE.txt).
+- The optional online street map uses OpenStreetMap data and tiles. Visible
+  attribution is supplied when enabled. Data and hosted tile-service terms are
+  separate from the renderer license; see https://www.openstreetmap.org/copyright
+  and https://operations.osmfoundation.org/policies/tiles/.
+
+The editable sample facility is fictional. No external building model, person
+identity, trained association model or real camera recording is bundled here.

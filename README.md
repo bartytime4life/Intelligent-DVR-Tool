@@ -24,6 +24,10 @@ npm run dev -- --host 0.0.0.0 --port 4173
 
 - **Monitor:** four-view wall, five selectable camera sources, sample scrubbers,
   overlay visibility and expanded camera view. Playback is simulated over stills.
+- **Facility:** guided 3D buildings, floors/rooms and labels; camera placement,
+  estimated ground-plane coverage, and a simulated camera-handoff rehearsal.
+  Plans save in this browser and can be exported/imported. See
+  [the facility guide](docs/facility-builder.md) for geometry and evidence limits.
 - **Events:** confirm or dismiss observations with notes; filter, search and
   export review history. Imported offline observations never borrow sample images.
 - **Zones:** draw rectangular zones or use numeric geometry controls, choose
@@ -73,3 +77,4 @@ not a screenshot pasted into a page.
 
 The repository does not assign a software license on the owner's behalf.
 Third-party notices are in [docs/third-party-notices.md](docs/third-party-notices.md).
+

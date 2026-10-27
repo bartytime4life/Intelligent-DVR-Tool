@@ -1,6 +1,8 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { lazy, Suspense, useEffect, useRef, useState } from "react";
+const FacilityBuilder = lazy(() => import("./FacilityBuilder.jsx").then(m => ({default:m.FacilityBuilder})));
 import {
   Monitor,
+  Buildings,
   ListBullets,
   Selection,
   GearSix,
@@ -309,7 +311,7 @@ function EventRow({ event, review, zone }) {
   );
 }
 export function App() {
-  const [tab, setTab] = useState("Monitor"),
+  const [tab, setTab] = useState(window.location.hash === "#facility" ? "Facility" : "Monitor"),
     [selected, setSelected] = useState(1),
     [slots, setSlots] = useState([1, 2, 3, 4]),
     [events, setEvents] = useStored("dvr.events.v1", initialEvents),
@@ -461,7 +463,7 @@ export function App() {
         </div>
         <div className="wordmark">Intelligent DVR</div>
         <span className="header-divider" />
-        <span className="pilot-label">Five-camera pilot</span>
+        <span className="pilot-label">{tab === "Facility" ? "Guided facility builder" : "Review prototype"}</span>
         <button className="workspace-select" onClick={() => setTab("Settings")}>
           Demo workspace
           <CaretDown size={14} />
@@ -482,6 +484,7 @@ export function App() {
       <nav className="sidebar" aria-label="Main navigation">
         {[
           [Monitor, "Monitor"],
+          [Buildings, "Facility"],
           [ListBullets, "Events"],
           [Selection, "Zones"],
           [GearSix, "Settings"],
@@ -508,6 +511,7 @@ export function App() {
         </button>
       </nav>
       <main id="workspace" className={`workspace tab-${tab.toLowerCase()}`}>
+        {tab === "Facility" && <Suspense fallback={<div className="content-page"><h1>Opening facility builder…</h1></div>}><FacilityBuilder /></Suspense>}
         {tab === "Monitor" && (
           <>
             <div className="monitor-layout">
@@ -1181,3 +1185,4 @@ export function App() {
     </div>
   );
 }
+
