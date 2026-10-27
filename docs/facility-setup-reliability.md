@@ -115,7 +115,7 @@ The app does not accept arbitrary GeoJSON/CAD/BIM or infer building interiors.
 The v1 renderer/coverage contract represents one simple ground-level ring per
 shell. Complete multipolygon relations containing only outer ways can now stitch
 segments (including reversed segments). Disjoint outers become separate editable
-shells with stable component IDs and the same relation source ID. The complete
+shells with deterministic component IDs per extract and the same relation source ID. The complete
 set is rejected if rings overlap or nest, connectivity is incomplete/branching,
 coordinates are invalid, or the 201-vertex ring limit is exceeded. Members are
 never independently imported after their parent is excluded.
@@ -151,8 +151,7 @@ The local execution sandbox denies listening sockets (EPERM), and its visible
 existing preview did not serve the changed build. Local browser qualification is
 therefore blocked. The dedicated GitHub Actions browser workflow runs Chromium and
 uploads JSON results, failure screenshots/traces and scripted-effort attachments.
-Record that workflow's exact outcome before describing these browser checks as
-passed. Local production build and deterministic tests passed during implementation.
+The completed CI receipt below records the tested code revision and outcomes. Local production build and deterministic tests also passed during implementation.
 
 **Unverified targets:** the #6 proposal remains 80% unaided completion and median
 under three minutes for a simple site, to be measured with 5–8 novice users across
@@ -171,3 +170,22 @@ explicit outcomes, not invented completed facilities.
 - [Microsoft Global ML release](https://github.com/microsoft/GlobalMLBuildingFootprints) and [separate U.S. release](https://github.com/microsoft/USBuildingFootprints)
 - [Overture attribution and licensing](https://docs.overturemaps.org/attribution/)
 - [Pinned extract manifest](../tests/fixtures/facility/manifest.json)
+
+## Completed CI receipt
+
+Code revision: `c39961338478d535abeed45257be7685c84f34f2` (2026-10-27).
+[Chromium run 40571593636](https://github.com/bartytime4life/Intelligent-DVR-Tool/actions/runs/40571593636)
+passed all **6 browser scenarios**, including actual map readiness, with zero retries.
+The uploaded evidence includes the JSON report and `reviewed-exteriors.png`.
+[Cross-platform run 40571602245](https://github.com/bartytime4life/Intelligent-DVR-Tool/actions/runs/40571602245)
+passed on **Linux and Windows**: **46 frontend tests, 4 Sites tests, 66 Python tests**
+per platform, production builds, documentation links/media checks and wiki drift checks.
+
+One automated ready-page numeric/offline flow reported **5.926 seconds** from
+entering the recorded origin through selecting/applying two exterior shells.
+A prescribed correction of one building-height field followed by one Save reported
+**1.944 seconds**. The flow also verified both Undo steps and unchanged camera/room
+metadata. Page startup, source acquisition, human review time and field verification
+are excluded. The address suggestion test used a mocked Photon result; these
+numbers do not measure live geocoding/retrieval or how many corrections an actual
+site requires. The 80%/three-minute novice targets remain untested.
