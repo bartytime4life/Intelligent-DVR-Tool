@@ -7,7 +7,7 @@ detections, labels, timings and review decisions**. Its text source is not a
 recording. These fixtures establish arithmetic and evidence plumbing only.
 
 Representative-scene accuracy, target-workstation performance, physical camera
-compatibility and five-camera capacity remain **unqualified**. An evaluation
+compatibility and the required 100-camera capacity remain **unqualified**. An evaluation
 report never automatically promotes those states, including on real recordings.
 
 ## Reproduce the deterministic evaluation
@@ -154,7 +154,7 @@ still does not establish persistence of the same person or object.
   These times cover `setInput`, inference and decoding/NMS, excluding media
   reads, preprocessing, rendering and human review. A latency distribution is
   neither sustained throughput nor end-to-end delay. Pooled sequential clips
-  never establish concurrent five-camera capacity or target-host performance.
+  never establish concurrent 100-camera capacity or target-host performance.
 - **Alert review:** existing class/zone/dwell events, source hash, trace hash,
   event ID, originating frame/time and explicit human decision metadata. A
   detector FP box is not automatically a false rule alert. Pending decisions
@@ -208,6 +208,12 @@ proof or proof that declared rights/labels/reviews are correct.
 Collect the approved held-out recordings and labels, review errors and alert
 decisions, agree quality/error budgets, and execute the pinned runtime on the
 owner's hardware. Record sample sizes, coverage, scene conditions and sampling
-choices alongside results. Qualify sustained performance, five-camera load and
+choices alongside results. Qualify sustained performance, at least 100-camera load and
 physical camera compatibility separately before operational reliance. No
 quality threshold is silently selected and no automatic enforcement is added.
+
+The current capacity requirement and staged optimization plan are in
+[100-camera performance preparation](performance-100-cameras.md). Reports add
+`capacity_target_cameras: 100` and `qualification.concurrent_camera_capacity`.
+The legacy `five_camera_capacity` field remains unqualified for compatibility
+with existing report readers; it no longer describes the product target.
