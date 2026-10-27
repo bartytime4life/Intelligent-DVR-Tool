@@ -10,13 +10,14 @@ from edge.rules import Rule, RuleEngine
 
 
 def write_json(path, value):
-    path.write_text(json.dumps(value, indent=2, allow_nan=False)+'\n', encoding='utf-8')
+    path.write_text(json.dumps(value, indent=2, allow_nan=False)+'\n', encoding='utf-8', newline='\n')
 
 
 def make_fixture(root):
     root = Path(root)
     root.mkdir(parents=True, exist_ok=True)
-    (root/'source.synthetic.txt').write_text('SYNTHETIC metadata source. This is not a recording.\n')
+    (root/'source.synthetic.txt').write_text('SYNTHETIC metadata source. This is not a recording.\n',
+                                           encoding='utf-8', newline='\n')
     write_json(root/'labels.json', ['person', 'car', 'bicycle'])
     model_hash = hashlib.sha256(b'synthetic fixture; no trained detector').hexdigest()
     source_hash = digest(root/'source.synthetic.txt')

@@ -85,6 +85,10 @@ flowchart TD
 
 Every box after the first is work needed for an operational capacity claim. This refresh introduces no production recorder, GPU worker service, multi-host inference system or authenticated review backend. [Roadmap](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Roadmap).
 
+## Local machine setup and resource policy
+
+System adds explicit setup arithmetic and browser performance preferences. A read-only `edge.host` snapshot can be imported locally without exposing a privileged host API. Exported policies are consumed by the offline analyzer for OpenCV threads and frame caps, and by a separate scheduler adapter for retained bytes, slots and dispatch age. RAM, VRAM, disk and power estimates are not native quotas. GPU presets do not change the CPU backend. See [control scopes](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Resource-controls), [Linux](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Linux-setup), [Windows](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Windows-setup) and [GPU planning](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/GPU-planning).
+
 ---
 
 [Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/architecture.md) · Documentation refresh: October 27, 2026.

@@ -1,5 +1,7 @@
 import React, { lazy, Suspense, useEffect, useRef, useState } from "react";
 const FacilityBuilder = lazy(() => import("./FacilityBuilder.jsx").then(m => ({default:m.FacilityBuilder})));
+const SystemSetup = lazy(() => import("./SystemSetup.jsx"));
+import { DEFAULT_SETUP, parseSetup, sampleShouldRun, visibleCameraSlots } from "./resources.mjs";
 import {
   Monitor,
   Buildings,
@@ -27,6 +29,7 @@ import {
   Camera,
   WarningCircle,
   SlidersHorizontal,
+  Cpu,
 } from "@phosphor-icons/react";
 import {
   cameras,
@@ -110,6 +113,7 @@ function Overlay({
   edit = false,
   onRect,
   time = 0,
+  pixelScale = 2,
 }) {
   const ref = useRef(),
     start = useRef();
@@ -119,9 +123,9 @@ function Overlay({
     function draw() {
       const w = el.clientWidth,
         h = el.clientHeight;
-      el.width = w * 2;
-      el.height = h * 2;
-      ctx.scale(2, 2);
+      el.width = w * pixelScale;
+      el.height = h * pixelScale;
+      ctx.scale(pixelScale, pixelScale);
       ctx.clearRect(0, 0, w, h);
       if (!visible) return;
       const { iw, ih, ox, oy } = project(w, h);
@@ -146,7 +150,7 @@ function Overlay({
     const o = new ResizeObserver(draw);
     o.observe(el);
     return () => o.disconnect();
-  }, [camera, rule, visible, edit, time]);
+  }, [camera, rule, visible, edit, time, pixelScale]);
   function point(e) {
     const r = e.currentTarget.getBoundingClientRect(),
       { iw, ih, ox, oy } = project(r.width, r.height);
@@ -192,15 +196,15 @@ function Overlay({
     />
   );
 }
-function CameraTile({ camera, selected, select, expand, rule, large = false }) {
+function CameraTile({ camera, selected, select, expand, rule, large = false, pageHidden = false, pauseHidden = true, overlayScale = 2 }) {
   const [playing, setPlaying] = useState(false),
     [time, setTime] = useState(0),
     [overlays, setOverlays] = useState(true);
   useEffect(() => {
-    if (!playing) return;
+    if (!sampleShouldRun(playing, pageHidden, pauseHidden)) return;
     const id = setInterval(() => setTime((t) => (t >= 20 ? 0 : t + 0.25)), 250);
     return () => clearInterval(id);
-  }, [playing]);
+  }, [playing, pageHidden, pauseHidden]);
   return (
     <article
       className={`camera-tile ${selected ? "selected" : ""} ${large ? "large" : ""}`}
@@ -210,7 +214,7 @@ function CameraTile({ camera, selected, select, expand, rule, large = false }) {
           src={camera.image}
           alt={`Synthetic sample scene: ${camera.name}`}
         />
-        <Overlay camera={camera} rule={rule} visible={overlays} time={time} />
+        <Overlay camera={camera} rule={rule} visible={overlays} time={time} pixelScale={overlayScale} />
         <div className="camera-title">
           Cam {camera.id}
           <span>—</span>
@@ -311,7 +315,7 @@ function EventRow({ event, review, zone }) {
   );
 }
 export function App() {
-  const [tab, setTab] = useState(window.location.hash === "#facility" ? "Facility" : "Monitor"),
+  const [tab, setTab] = useState(window.location.hash === "#facility" ? "Facility" : window.location.hash === "#system" ? "System" : "Monitor"),
     [selected, setSelected] = useState(1),
     [slots, setSlots] = useState([1, 2, 3, 4]),
     [events, setEvents] = useStored("dvr.events.v1", initialEvents),
@@ -324,6 +328,25 @@ export function App() {
     [error, setError] = useState(""),
     [note, setNote] = useState(""),
     [video, setVideo] = useState(null);
+  const [resourceState, setResourceState] = useState(() => {
+    try {
+      const saved = localStorage.getItem("dvr.setup.v1");
+      return { setup: saved ? parseSetup(saved) : structuredClone(DEFAULT_SETUP), error: "" };
+    } catch {
+      return { setup: structuredClone(DEFAULT_SETUP), error: "Saved machine setup was unavailable or invalid. Defaults are shown; export your plan if storage is unavailable." };
+    }
+  });
+  const [pageHidden, setPageHidden] = useState(document.hidden);
+  const resources = resourceState.setup;
+  useEffect(() => {
+    const changed = () => setPageHidden(document.hidden);
+    document.addEventListener("visibilitychange", changed);
+    return () => document.removeEventListener("visibilitychange", changed);
+  }, []);
+  useEffect(() => {
+    try { localStorage.setItem("dvr.setup.v1", JSON.stringify(resources)); }
+    catch { setResourceState(s => ({ ...s, error: "Machine setup could not be saved in this browser. Export the setup plan to keep it." })); }
+  }, [resources]);
   const importRef = useRef(),
     videoRef = useRef(),
     pending = events.filter((e) => e.status === "pending");
@@ -487,6 +510,7 @@ export function App() {
           [Buildings, "Facility"],
           [ListBullets, "Events"],
           [Selection, "Zones"],
+          [Cpu, "System"],
           [GearSix, "Settings"],
         ].map(([Icon, label]) => (
           <button
@@ -512,11 +536,13 @@ export function App() {
       </nav>
       <main id="workspace" className={`workspace tab-${tab.toLowerCase()}`}>
         {tab === "Facility" && <Suspense fallback={<div className="content-page"><h1>Opening facility builder…</h1></div>}><FacilityBuilder /></Suspense>}
+        {tab === "System" && <Suspense fallback={<div className="content-page"><h1>Opening machine setup…</h1></div>}><SystemSetup setup={resources}
+          onApply={setup => setResourceState({ setup, error: "" })} storageError={resourceState.error} download={download} /></Suspense>}
         {tab === "Monitor" && (
           <>
             <div className="monitor-layout">
-              <section className="camera-wall" aria-label="Sample camera wall">
-                {slots.map((id) => (
+              <section className={`camera-wall wall-${resources.browser.visibleTiles}`} aria-label="Sample camera wall">
+                {visibleCameraSlots(slots, selected, resources.browser.visibleTiles).map((id) => (
                   <CameraTile
                     key={id}
                     camera={cameras.find((c) => c.id === id)}
@@ -524,6 +550,9 @@ export function App() {
                     select={setSelected}
                     expand={(c) => setModal({ type: "camera", camera: c })}
                     rule={rules.find((r) => r.camera === id)}
+                    pageHidden={pageHidden}
+                    pauseHidden={resources.browser.pauseHidden}
+                    overlayScale={resources.browser.overlayScale}
                   />
                 ))}
               </section>
@@ -886,7 +915,7 @@ export function App() {
                 </p>
                 <div className="setting-row">
                   <span>Connected cameras</span>
-                  <strong>0 of 5</strong>
+                  <strong>0 connected</strong>
                 </div>
                 <div className="setting-row">
                   <span>Detection model</span>
@@ -939,6 +968,7 @@ export function App() {
               <section>
                 <SlidersHorizontal size={28} />
                 <h2>From pilot to real operation</h2>
+                <button className="button" onClick={() => setTab("System")}><Cpu />Plan this machine</button>
                 <p>
                   Qualify a supported ONNX model on approved recordings. Define
                   object labels and zones, then measure false alerts and
@@ -1010,6 +1040,9 @@ export function App() {
             camera={modal.camera}
             large
             rule={rules.find((r) => r.camera === modal.camera.id)}
+            pageHidden={pageHidden}
+            pauseHidden={resources.browser.pauseHidden}
+            overlayScale={resources.browser.overlayScale}
           />
           <p className="hint">
             Simulated playback animates a timeline over a generated still. No

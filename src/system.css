@@ -1,0 +1,72 @@
+.system-page { max-width: 1800px; margin: 0 auto; }
+.system-heading { align-items: center; }
+.system-platform { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 18px; padding-bottom: 26px; }
+.system-platform fieldset { display: flex; flex-wrap: wrap; gap: 10px; border: 0; padding: 0; margin: 0; }
+.system-platform legend { color: var(--muted); font-size: 12px; padding: 0 0 10px; }
+.system-platform label { padding: 12px 16px; border: 1px solid #324a5b; border-radius: 5px; background: #0c2030; display: flex; align-items: center; gap: 9px; font-size: 12px; }
+.system-platform label.selected { border-color: var(--cyan); background: #102f3b; }
+.system-platform input { accent-color: var(--cyan); }
+.system-grid { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 20px; }
+.system-card { border: 1px solid var(--line); border-radius: 7px; padding: 24px; background: #0a1c2b; min-width: 0; }
+.system-card header { display: flex; gap: 12px; margin-bottom: 24px; align-items: flex-start; }
+.system-card header > svg { color: var(--cyan); flex-shrink: 0; margin-top: 2px; }
+.system-card header p { font-size: 12px; line-height: 1.7; color: var(--muted); margin-top: 6px; }
+.system-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.system-fields.four { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.system-fields.three, .system-array-fields { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.system-array-fields { margin-top: 22px; padding-top: 22px; border-top: 1px solid var(--line); }
+.system-field { display: flex; flex-direction: column; gap: 9px; min-width: 0; font-size: 12px; color: #c7d8e7; }
+.system-field > span { line-height: 1.5; }
+.system-field input, .system-field select { width: 100%; min-width: 0; border: 1px solid #3b5264; border-radius: 4px; background: #102738; color: #edf4f8; padding: 10px; min-height: 40px; font-variant-numeric: tabular-nums; }
+.system-capacity { margin: 26px 0 23px; }
+.system-capacity-label { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; font-size: 11px; color: var(--muted); }
+.system-capacity-label strong { font-size: 15px; color: #edf4f8; padding-left: 6px; }
+.system-capacity-track { background: #243e4d; height: 13px; margin: 12px 0; border-radius: 3px; overflow: hidden; }
+.system-capacity-track span { display: block; height: 100%; background: var(--cyan); transition: width .2s; }
+.system-capacity-track span.over { background: var(--amber); }
+.system-capacity p { font-size: 11px; line-height: 1.7; color: var(--muted); }
+.system-metrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 15px; padding: 0 0 20px; }
+.system-metrics small { display: block; font-size: 11px; color: var(--muted); line-height: 1.7; }
+.system-metrics strong { font-size: 27px; font-weight: 550; line-height: 1.8; font-variant-numeric: tabular-nums; }
+.system-metrics em { font-size: 12px; font-style: normal; color: var(--muted); white-space: nowrap; }
+.system-card details { border-top: 1px solid var(--line); padding-top: 18px; }
+.system-card summary { font-size: 12px; color: #cae0ec; cursor: pointer; line-height: 1.7; }
+.system-card details[open] summary { margin-bottom: 18px; }
+.system-card .hint { font-size: 11px; line-height: 1.8; margin-top: 18px; }
+.system-card .checkbox-label { font-size: 12px; margin-top: 22px; }
+.system-overlay-field { margin-top: 18px; }
+.system-reading { font-size: 12px; color: var(--muted); line-height: 1.9; padding-top: 22px; }
+.system-reading strong { color: #e7edf4; font-size: 17px; font-weight: 550; }
+.system-power { grid-column: auto; }
+.system-host { grid-column: 1 / -1; }
+.system-command { display: block; padding: 12px 0; margin-top: 10px; font-size: 11px; line-height: 1.9; color: #99cbd5; overflow-wrap: anywhere; }
+.system-snapshot p { font-size: 12px; line-height: 1.8; color: var(--muted); margin-top: 8px; overflow-wrap: anywhere; }
+.system-snapshot .text-button { margin-top: 12px; }
+.system-warnings { border: 1px solid #786138; background: #29271d; padding: 20px; border-radius: 5px; margin-top: 22px; }
+.system-warnings h2 { display: flex; align-items: center; gap: 10px; font-size: 15px; color: #ffcd79; }
+.system-warnings ul { font-size: 12px; line-height: 1.9; margin: 14px 0 0; padding-left: 20px; color: #e4d8bd; }
+.system-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 25px; align-items: center; }
+.system-actions .button { font-size: 12px; }
+.system-save-state { font-size: 12px; color: var(--muted); margin-top: 16px; line-height: 1.8; }
+.system-docs { display: flex; align-items: center; flex-wrap: wrap; justify-content: space-between; gap: 22px; margin-top: 32px; border-top: 1px solid var(--line); padding-top: 26px; }
+.system-docs p { font-size: 12px; color: var(--muted); line-height: 1.9; margin-top: 7px; }
+.system-docs a { display: block; font-size: 12px; margin-top: 10px; color: #85dce1; }
+.camera-wall.wall-1 { grid-template-columns: 1fr; grid-template-rows: 1fr; }
+.camera-wall.wall-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: 1fr; }
+@media (min-width: 1600px) { .system-fields.four { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+@media (max-width: 1050px) { .system-grid { grid-template-columns: 1fr; } .system-power { grid-column: auto; } }
+@media (max-width: 700px) {
+  .system-card { padding: 18px; }
+  .system-platform label { width: 100%; min-height: 44px; }
+  .system-platform fieldset { width: 100%; }
+  .system-fields, .system-fields.three, .system-array-fields { grid-template-columns: 1fr; }
+  .system-fields.four { grid-template-columns: 1fr; }
+  .system-metrics { grid-template-columns: 1fr; gap: 5px; }
+  .system-metrics > div { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .system-metrics strong { font-size: 23px; }
+  .system-field input, .system-field select { font-size: 16px; min-height: 44px; }
+  .system-card .checkbox-label { min-height: 44px; }
+  .system-actions .button, .system-actions .text-button { min-height: 44px; }
+  .camera-wall.wall-2 { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) { .system-capacity-track span { transition: none; } }

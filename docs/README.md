@@ -7,6 +7,7 @@
 | Journey | Guides |
 | --- | --- |
 | See it | [Visual tour](visual-tour.md), [animation provenance and stills](media/README.md) |
+| Set up a machine | [Hardware / disks / RAM / CPU / PSU](hardware-guide.md), [GPUs](gpu-planning.md), [Linux](setup-linux.md), [Windows](setup-windows.md), [resource controls](resource-controls.md) |
 | Try it | [Getting started](getting-started.md), [facility builder](facility-builder.md), [maps and shapes](map-measurements-and-shapes.md) |
 | Understand it | [Architecture and data](architecture.md), [pilot scope](pilot-scope.md), [security boundary](../SECURITY.md) |
 | Measure it | [Fresh verification](verification/2026-10-27/README.md), [offline evaluation](offline-evaluation.md), [historical model qualification](model-qualification-20261026.md) |

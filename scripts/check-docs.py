@@ -16,16 +16,17 @@ def check():
     errors = []
     docs = [ROOT / 'README.md', ROOT / 'docs/README.md',
             *[ROOT / ('docs/' + n + '.md') for n in
-              ('visual-tour', 'getting-started', 'architecture', 'roadmap')],
+              ('visual-tour', 'getting-started', 'architecture', 'roadmap', 'hardware-guide', 'gpu-planning', 'setup-linux', 'setup-windows', 'resource-controls')],
             ROOT / 'docs/media/README.md', ROOT / 'docs/wiki/README.md',
             ROOT / 'docs/verification/2026-10-27/README.md',
+            ROOT / 'docs/verification/hardware-2026-10-27/README.md',
             *sorted((ROOT / 'docs/wiki').glob('*.md'))]
     links = 0
     for file in set(docs):
         if not file.is_file():
             errors.append(f'Missing documentation: {file.relative_to(ROOT)}')
             continue
-        content = re.sub(r'```.*?```', '', file.read_text(), flags=re.S)
+        content = re.sub(r'```.*?```', '', file.read_text(encoding="utf-8"), flags=re.S)
         for target in re.findall(r'\]\(([^)]+)\)', content):
             target = target.strip().strip('<>')
             parts = urlsplit(target)
@@ -37,12 +38,12 @@ def check():
                 errors.append(f'{file.relative_to(ROOT)}: broken local link {target}')
             elif parts.fragment and destination.suffix == '.md':
                 headings = []
-                for heading in re.findall(r'^#{1,6}\s+(.+)$', destination.read_text(), re.M):
+                for heading in re.findall(r'^#{1,6}\s+(.+)$', destination.read_text(encoding="utf-8"), re.M):
                     headings.append(re.sub(r'[^\w\- ]', '', heading.lower()).replace(' ', '-'))
                 if unquote(parts.fragment) not in headings:
                     errors.append(f'{file.relative_to(ROOT)}: missing heading {target}')
 
-    manifest = json.loads((ROOT / 'docs/media/manifest.json').read_text())
+    manifest = json.loads((ROOT / 'docs/media/manifest.json').read_text(encoding="utf-8"))
     total = 0
     for entry in manifest['assets']:
         p = ROOT / entry['path']
@@ -58,17 +59,17 @@ def check():
         errors.append('Published documentation media exceeds the 3 MB budget.')
 
     v = ROOT / 'docs/verification/2026-10-27'
-    result = json.loads((v / 'summary.json').read_text())
+    result = json.loads((v / 'summary.json').read_text(encoding="utf-8"))
     for name in ('node', 'sites'):
-        log = (v / (name + '-tests.log')).read_text()
+        log = (v / (name + '-tests.log')).read_text(encoding="utf-8")
         if f'# pass {result[name]["passed"]}\n' not in log or '# fail 0\n' not in log:
             errors.append(f'{name} result disagrees with test log')
-    log = (v / 'python-tests.log').read_text()
+    log = (v / 'python-tests.log').read_text(encoding="utf-8")
     p = result['python']
     if f'Ran {p["run"]} tests' not in log or f'OK (skipped={p["skipped"]})' not in log or p['passed'] + p['skipped'] != p['run']:
         errors.append('Python counts disagree with the test log')
     for name in ('overloaded', 'idealized'):
-        report = json.loads((v / (name + '.json')).read_text())
+        report = json.loads((v / (name + '.json')).read_text(encoding="utf-8"))
         if report['qualification']['concurrent_camera_capacity'] != 'unqualified':
             errors.append('Simulation must not claim qualified camera capacity')
     if errors:

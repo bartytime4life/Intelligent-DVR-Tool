@@ -125,3 +125,7 @@ The fixtures are created in a temporary directory and removed after tests.
 
 Primary implementation reference:
 https://docs.opencv.org/4.13.0/d6/d0f/group__dnn.html
+
+## Machine setup and exported limits
+
+Use [Linux](../docs/setup-linux.md) or [Windows](../docs/setup-windows.md) launch/setup guidance. The [System controls](../docs/resource-controls.md) export a validated resource policy; pass `--resource-policy FILE` to this analyzer to cap OpenCV threads and decoded frames. Explicit overrides can lower but not exceed policy caps. The policy hash and applied caps are recorded in successful receipts and traces. Other scheduler, GPU and RAM planning values are not misreported as analyzer enforcement. `python -m edge.host` creates an explicit read-only local snapshot; `python -m edge.resources --policy FILE` validates a policy without starting inference. The current inference backend remains OpenCV CPU.

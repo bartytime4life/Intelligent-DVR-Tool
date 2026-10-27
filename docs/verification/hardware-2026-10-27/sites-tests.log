@@ -1,0 +1,19 @@
+
+> intelligent-dvr@0.0.0 test:sites
+> node --test tests/sites-worker.test.mjs
+
+TAP version 13
+# Subtest: tests/sites-worker.test.mjs
+ok 1 - tests/sites-worker.test.mjs
+  ---
+  duration_ms: 36.505523
+  ...
+1..1
+# tests 1
+# suites 0
+# pass 1
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 40.530295

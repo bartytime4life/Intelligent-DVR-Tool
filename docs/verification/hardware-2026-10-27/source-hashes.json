@@ -1,0 +1,38 @@
+{
+  "src/App.jsx": {
+    "sha256": "b9e05e109577a54f1b002a2a699c5549e7a121a9cc911cbbc57d17a8426bca5e",
+    "git_blob_sha1": "2b18760f6ac112c1ba201f7cc827c02faf839648"
+  },
+  "src/SystemSetup.jsx": {
+    "sha256": "aad6670edf8876211bbb5fc4e2c16b884766d6ecad543dbc7ac14f33a31257eb",
+    "git_blob_sha1": "2d8c94adcd9505c784a4103f30983c4ddb0e777e"
+  },
+  "src/styles.css": {
+    "sha256": "224c51d45ee36c8397efce30d64800361e24474d674c2e4e87bab9c7665d6711",
+    "git_blob_sha1": "3cea452125aac24cfdd1a761bdca740a9e68b68f"
+  },
+  "src/system.css": {
+    "sha256": "01c4060a0c204d46311a916023dd0e6c96a3b8a6ada03b7acb6c8b31b9d78960",
+    "git_blob_sha1": "f1b10ddbec6c06725227b937c838ecb8ee0bdc19"
+  },
+  "src/resources.mjs": {
+    "sha256": "1dc45c36b73b3c6d97e9bb49b1baba5a4b0884ca808d0882a5b86ddce347d2bd",
+    "git_blob_sha1": "53bd66383159c3e73dc44ceb4343f7dcc50dfca1"
+  },
+  "edge/resources.py": {
+    "sha256": "0322dd803e78481f8d48f15d1b19565a37a03566de1ec0b1622ad3e29065e5ce",
+    "git_blob_sha1": "c37ea83da82d3ad3a0131f5ff3ecc281f1654375"
+  },
+  "edge/host.py": {
+    "sha256": "757fce5d443c95dcc472d0ff02ef94a147e3890fef6ef9172c2facaed62b65d4",
+    "git_blob_sha1": "8dec5b16cd748b7356c23e852bbdbc6506e979ea"
+  },
+  "edge/analyze.py": {
+    "sha256": "7f378f0c6950f52b34b6a3a3282ac9275d06de770e5e1ab4ff152c41ed60b5cb",
+    "git_blob_sha1": "efaa9f2a584f0c463c87ada5ae78de920dce7e12"
+  },
+  "tests/fixtures/resource-policy.json": {
+    "sha256": "f7773b98685dbf2357298eb54957e705482af418303f5716a2b99a2c47c9bfc2",
+    "git_blob_sha1": "3612d7a6e2f015987889482369653fdc3b6bc9a0"
+  }
+}

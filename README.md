@@ -37,6 +37,12 @@ A local camera-analysis foundation and visual review prototype from BARTA AI Sol
 
 Footprints are approximate map geometry. Unknown heights/floors can be placeholders. Interiors are not inferred, and planning references do not establish code compliance. [Map and shape guide](docs/map-measurements-and-shapes.md).
 
+## Set up a Linux or Windows machine
+
+The new **System** workspace combines recording/retention sizing, RAM and VRAM budgets, GPU candidates, startup-power arithmetic and explicit resource-policy export. Applied browser limits control visible tiles, overlay pixel scale and background sample playback. The offline analyzer accepts exported OpenCV thread and decoded-frame caps.
+
+[Hardware and drive shortlist](docs/hardware-guide.md) · [Linux setup](docs/setup-linux.md) · [Windows setup](docs/setup-windows.md) · [GPU planning](docs/gpu-planning.md) · [Control scopes](docs/resource-controls.md)
+
 ## Run the review prototype
 
 Use Node.js 22 and npm. From the repository root:
@@ -46,7 +52,7 @@ npm ci
 npm run dev -- --host 127.0.0.1 --port 4173
 ```
 
-Open the address Vite prints. **Monitor**, **Facility**, **Events**, **Zones** and **Settings** are the five workspace areas. Start with the [five-minute walkthrough](docs/getting-started.md).
+Open the address Vite prints. **Monitor**, **Facility**, **Events**, **Zones**, **System** and **Settings** are the workspace areas. Start with the [five-minute walkthrough](docs/getting-started.md).
 
 The browser prototype needs no subscription, paid inference, API key, camera credentials or remote backend. Review decisions, rules and plans save in this browser's localStorage; they are editable and can be lost when storage is cleared. Export anything you need to keep. The optional Google Font and explicitly enabled online maps are external requests. [Data boundaries](docs/architecture.md#where-data-goes).
 
@@ -54,13 +60,13 @@ The browser prototype needs no subscription, paid inference, API key, camera cre
 
 | Claim | Evidence | Boundary |
 | --- | --- | --- |
-| Review, zone and facility logic passes the current JavaScript checks | **27 passed**, plus **4 packaging tests passed**, October 27, 2026 | Automated tests cover their assertions; browser checks are recorded separately |
-| Python rules, evaluation and synthetic inference integration checks | **CI: 55 passed, no skips.** Local: 47 passed, 8 skipped | [CI evidence](docs/verification/2026-10-27/README.md#ci-follow-through) records the tested commit and native dependencies |
+| Review, facility and System logic checks | **37 passed**, plus **4 packaging tests passed** on Linux and Windows | Automated tests cover their assertions; browser checks are recorded separately |
+| Python rules, evaluation, resource policy and synthetic inference checks | **Linux CI: 66 passed. Windows CI: 63 passed, 3 Linux-only skips.** Local: 58 passed, 8 skipped | [Machine-setup CI evidence](docs/verification/hardware-2026-10-27/README.md#ci-follow-through) records the tested commit and native checks |
 | The production package builds | Fresh build completed | Vite reports a large lazy-loaded facility bundle; no load-time claim follows |
 | A pretrained YOLOX-S artifact previously ran through compatibility probes | [October 26 model report](docs/model-qualification-20261026.md) and JSON receipts | Historical synthetic-input/recording smoke tests; no recognition-quality result |
 | The scheduler can be exercised with 100 synthetic source IDs | [Fresh load-model reports](docs/verification/2026-10-27/README.md) | Virtual time, assumed service costs and synthetic payloads; no camera throughput measured |
 
-The test record includes commands, raw logs, source hashes, browser observations and limitations. **No detector weights or representative recordings are bundled.**
+The [machine-setup verification record](docs/verification/hardware-2026-10-27/README.md) records **107 passing tests on Linux** and **104 on Windows**, with 3 explicit Linux-only skips on Windows. It includes local logs, source hashes, browser observations and limits. [Earlier documentation-refresh evidence](docs/verification/2026-10-27/README.md) is retained separately. **No detector weights or representative recordings are bundled.**
 
 ## From a recording to evidence
 

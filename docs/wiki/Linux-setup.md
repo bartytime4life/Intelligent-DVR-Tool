@@ -1,0 +1,89 @@
+# Run on Linux
+
+[Hardware and storage](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Hardware-guide) · [GPU plan](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/GPU-planning) · [Resource limits](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Resource-controls) · [Windows](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Windows-setup)
+
+Reference target: **Ubuntu 24.04 LTS x86-64**, Node.js **22**, Python **3.12**, a WebGL-capable desktop browser. Canonical lists standard security maintenance for Ubuntu 24.04 through May 2029 [L1]. A desktop is convenient for review; a future recorder service can be headless, but no such service is installed by these instructions.
+
+## Prepare the machine
+
+1. Verify CPU cooling, motherboard firmware/RAM QVL, disk/HBA/backplane compatibility, PCIe lane allocation and UPS behavior. Start with the [hardware candidates and arithmetic](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Hardware-guide), not a claimed camera count.
+2. Install the OS to its own SSD. Have the storage operator provision the selected recording array/filesystem and mount it at a deliberate stable path. Keep recordings and model files outside the repository. The launcher never partitions, formats or mounts disks.
+3. Install Node.js 22 from the [official Node distribution](https://nodejs.org/en/download) and Git/Python 3.12 with venv support through the OS's supported package tooling. Check `node --version` and `python3.12 --version`. The launcher validates these major/minor versions.
+4. Use an unprivileged account. Review encryption, recoverable backup keys, permissions and restore procedures for the data store. Do not expose the development preview directly to the internet.
+
+## Install and run the local prototype
+
+From the repository root:
+
+```bash
+bash scripts/run-linux.sh --check
+bash scripts/run-linux.sh --install
+```
+
+`--check` only checks Node/Python prerequisites. `--install` deliberately runs `npm ci`, creates `.venv` if absent, installs `edge/requirements-test.txt`, builds the current app and starts a **loopback-only production preview** on port 4173. Dependency installation needs network access. It does not download detector weights, connect cameras, enable monitoring, install a system service or modify host limits.
+
+On later runs:
+
+```bash
+bash scripts/run-linux.sh
+```
+
+Open the address printed by Vite, select **System**, choose Linux, review the workload/storage/CPU/RAM/GPU/power plan and apply browser limits. `/#system` opens that workspace directly. Stop the foreground preview with Ctrl+C. A different port can be selected with `DVR_PORT=4175`; `DVR_PYTHON` can identify a Python 3.12 executable. An existing `.venv` is retained, not silently rebuilt.
+
+## Compare with the host
+
+Select an existing path on the actual recording volume, not merely the OS/project disk. Use a new output filename each time:
+
+```bash
+.venv/bin/python -m edge.host --path /srv/dvr/recordings --gpu \
+  --output /tmp/dvr-host-001.json
+```
+
+The path must already exist. The fixed optional GPU query reads NVIDIA names/VRAM only; it does not install a driver or change power/clocks. Import the file locally using **System → Import local host snapshot**. Hostnames, usernames, IPs, serials and selected disk paths are omitted. A snapshot reports point-in-time OS totals/free space; it does not establish RAID health, CPU entitlement, decode throughput or 100-camera support.
+
+Use **Use reported CPU count & RAM in draft** only after checking the snapshot's origin/date. Physical RAM is not necessarily available to this process under containers/cgroups. Disk selections may refer to the same filesystem; do not sum them without checking.
+
+## Export and use explicit analyzer limits
+
+Export **dvr-resource-policy.json** from System to a private local path. Validate without starting inference:
+
+```bash
+.venv/bin/python -m edge.resources --policy /private/dvr/dvr-resource-policy.json
+```
+
+After deliberately obtaining the compatible model and approved recording described in the [edge guide](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/edge/README.md), an example invocation is:
+
+```bash
+.venv/bin/python -m edge.analyze \
+  --video /private/dvr/dock.avi \
+  --model /private/models/object_detection_yolox_2022nov.onnx \
+  --labels edge/labels/coco80.json --profile opencv-zoo-yolox-s-2022nov \
+  --rules edge/rules.example.json --camera dock-01 --stride 5 \
+  --resource-policy /private/dvr/dvr-resource-policy.json \
+  --output /private/dvr/receipt-001.json \
+  --trace-output /private/dvr/trace-001.json
+```
+
+Paths are examples; input files and output directories must exist, and output files must be new. Review the example rule for the intended recording before using it. Policy caps apply to OpenCV threads and decoded-frame count; explicit flags may lower but cannot exceed them. Rule max-gap checks still apply. This is **offline CPU analysis**, not live capture or GPU inference.
+
+## Optional OS containment, separate from the app
+
+For a deliberately launched offline task, an operator can wrap its full command in a transient `systemd-run --user --scope` with reviewed `CPUQuota`, `MemoryHigh` and `MemoryMax` properties. For example, `CPUQuota=400%` means approximately four CPUs' worth of execution time, not 400% of the whole host. `MemoryMax` can terminate a task under pressure; choose it after measuring native/model allocations and preserve source recordings [L2]. Availability depends on controller delegation and the host's systemd/cgroup configuration.
+
+These OS controls are not set by System, its policy or the launcher. Do not infer a process-wide CPU cap from `opencv_threads`, or a RAM cap from the retained-payload queue. No service unit is installed or enabled here.
+
+## Before relying on the machine
+
+Run the repository checks, then qualify the actual storage/decoder/model workload. Test long writes and concurrent reads, full-disk handling, disk/worker failures, UPS shutdown/recovery, reconnect behavior once ingest exists, time synchronization and retention deletion. Keep recording separate from analytics sample drops. Follow the [100-camera qualification ladder](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/performance-100-cameras.md).
+
+GPU driver/backend installation and acceleration parity remain deliberate separate work; see [GPU planning](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/GPU-planning). Confirm system sleep/power/reboot policy with the owner before unattended operation; the launcher changes none of it.
+
+## Primary OS references
+
+- **L1:** [Canonical release cycle](https://ubuntu.com/about/release-cycle), [Ubuntu 24.04 release notes](https://documentation.ubuntu.com/release-notes/24.04/).
+- **L2:** [systemd resource control](https://www.freedesktop.org/software/systemd/man/latest/systemd.resource-control.html).
+- [OpenZFS Ubuntu installation reference](https://openzfs.github.io/openzfs-docs/Getting%20Started/Ubuntu/index.html); storage provisioning is outside the launcher.
+
+---
+
+[Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/setup-linux.md) · Documentation refresh: October 27, 2026.

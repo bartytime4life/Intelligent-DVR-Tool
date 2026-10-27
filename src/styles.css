@@ -1545,3 +1545,8 @@ textarea::placeholder {
     overflow-y: auto;
   }
 }
+
+/* Applied browser camera-wall budget; no camera capacity claim. */
+.camera-wall.wall-1 { grid-template-columns: 1fr; grid-template-rows: 1fr; }
+.camera-wall.wall-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: 1fr; }
+@media(max-width:700px) { .camera-wall.wall-2 { grid-template-columns:1fr; } }

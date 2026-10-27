@@ -92,6 +92,24 @@ class InferenceTest(unittest.TestCase):
             receipt_only=json.loads((root/'receipt-only.json').read_text())
             self.assertEqual(receipt_only['schema'],'intelligent-dvr.receipt.v1')
             self.assertEqual(receipt_only['events'],receipt['events'])
+            # A browser-exported policy applies real analyzer caps, not just UI labels.
+            policy=json.loads((Path(__file__).parent/'fixtures/resource-policy.json').read_text())
+            policy['analysis']['max_frames']=10
+            (root/'policy.json').write_text(json.dumps(policy))
+            bounded=command.copy()
+            bounded[bounded.index('--output')+1]=str(root/'bounded.json')
+            bounded[bounded.index('--trace-output')+1]=str(root/'bounded-trace.json')
+            bounded += ['--resource-policy',str(root/'policy.json')]
+            subprocess.run(bounded,check=True,capture_output=True)
+            limited=json.loads((root/'bounded.json').read_text())
+            self.assertEqual(limited['frames_read'],10)
+            self.assertEqual(limited['frames_analyzed'],2)
+            self.assertEqual(limited['resource_policy']['opencv_threads'],1)
+            self.assertEqual(limited['resource_policy']['max_frames'],10)
+            self.assertEqual(len(limited['resource_policy']['sha256']),64)
+            failed=subprocess.run(bounded+['--threads','2'],capture_output=True)
+            self.assertNotEqual(failed.returncode,0)
+            self.assertIn(b'exceed',failed.stderr)
 
     def test_decoder_rejects_unsupported_shape_and_maps_letterbox(self):
         import cv2

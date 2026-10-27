@@ -2,6 +2,8 @@
 
 [Home](../README.md) · [Visual tour](visual-tour.md) · [Architecture](architecture.md)
 
+For OS-specific launchers and machine sizing, use [Linux setup](setup-linux.md), [Windows setup](setup-windows.md) and the [hardware guide](hardware-guide.md). **System** in the main navigation opens the machine planner and resource-policy controls.
+
 ## Start locally
 
 The current JavaScript checks use Node.js 22. Install with the lockfile, then start a loopback-only development server:
