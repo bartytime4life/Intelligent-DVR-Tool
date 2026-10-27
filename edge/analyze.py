@@ -11,7 +11,11 @@ import math
 from pathlib import Path
 import statistics
 import time
+import platform
+from contextlib import ExitStack
 from .rules import Rule, RuleEngine
+from .evaluation import (TRACE_SCHEMA, MAX_FRAMES, MAX_DETECTIONS, canonical_hash,
+                         local_file)
 from .model_profiles import (DEFAULT_PROFILE, YOLOX_PROFILE, PROFILES, prepare,
                              validate_binding, yolox_to_yolov8)
 
@@ -70,17 +74,29 @@ def main(argv=None):
     parser.add_argument('--profile',choices=PROFILES,default=DEFAULT_PROFILE)
     parser.add_argument('--rules',type=Path,required=True,help='JSON array of edge Rule objects; see example')
     parser.add_argument('--output',type=Path,required=True,help='New receipt path (will not overwrite)')
+    parser.add_argument('--trace-output',type=Path,
+                        help='Optional new frame-level evaluation trace; metadata only')
+    parser.add_argument('--threads',type=int,default=1,help='OpenCV CPU threads, 1–8')
     parser.add_argument('--camera',default='offline-camera')
     parser.add_argument('--stride',type=int,default=5)
     parser.add_argument('--max-frames',type=int,default=6000)
     args=parser.parse_args(argv)
     if not 1 <= args.stride <= 120 or not 1 <= args.max_frames <= 100000:
         parser.error('stride must be 1–120 and max-frames 1–100000')
+    if not 1 <= args.threads <= 8:
+        parser.error('threads must be 1–8')
     for path in [args.video,args.model,args.labels,args.rules]:
-        if path.is_symlink() or not path.is_file():
-            parser.error('Use existing local regular input files, not streams or symlinks')
-    if args.output.exists() or args.output.is_symlink():
+        try:
+            local_file(path)
+        except ValueError as error:
+            parser.error(str(error))
+    outputs = [args.output] + ([args.trace_output] if args.trace_output is not None else [])
+    if len({p.resolve() for p in outputs}) != len(outputs):
+        parser.error('Receipt and trace require distinct output paths')
+    if any(p.exists() or p.is_symlink() for p in outputs):
         parser.error('Output must be a new file')
+    if args.trace_output is not None and math.ceil(args.max_frames/args.stride) > MAX_FRAMES:
+        parser.error('Trace mode permits up to 10,000 sampled frames; reduce max-frames or increase stride')
     labels=json.loads(args.labels.read_text())
     model_hash=digest(args.model)
     try:
@@ -109,8 +125,12 @@ def main(argv=None):
         capture.release();parser.error('A valid frame rate is required for recording timestamps')
     if any(args.stride/fps > r.max_gap for r in rules):
         capture.release();parser.error('Sampling interval exceeds a rule max_gap; reduce stride')
+    cv2.setNumThreads(args.threads)
     net=cv2.dnn.readNetFromONNX(str(args.model))
+    net.setPreferableBackend(cv2.dnn.DNN_BACKEND_OPENCV)
+    net.setPreferableTarget(cv2.dnn.DNN_TARGET_CPU)
     frames=0;processed=0;events=[];latencies=[];partial=False
+    trace_frames=[];detection_count=0
     try:
         while frames < args.max_frames:
             ok,frame=capture.read()
@@ -126,8 +146,15 @@ def main(argv=None):
             net.setInput(blob)
             raw=net.forward()
             detections=decode(raw,labels,frame.shape,scale,padding,cv2,np,args.profile)
-            latencies.append((time.perf_counter()-began)*1000)
+            elapsed=(time.perf_counter()-began)*1000
+            latencies.append(elapsed)
             processed+=1;events.extend(engine.update(index/fps,detections))
+            if args.trace_output is not None:
+                detection_count += len(detections)
+                if detection_count > MAX_DETECTIONS:
+                    raise ValueError('Evaluation trace exceeds 100,000 detections; split the recording')
+                trace_frames.append({'frame_index':index,'seconds':index/fps,
+                                     'detections':detections,'inference_decode_ms':elapsed})
             if len(events) >= 1000:
                 events=events[:1000];partial=True;break
         else:
@@ -141,14 +168,46 @@ def main(argv=None):
              'state':'partial' if partial else 'completed','events':events,
              'model_sha256':model_hash,'source_sha256':source_hash,'camera':args.camera,
              'inference_profile':args.profile,'labels_sha256':digest(args.labels),
+             'rules_sha256':canonical_hash(config),'rules_file_sha256':digest(args.rules),
              'frames_read':frames,'frames_analyzed':processed,'fps_metadata':fps,'stride':args.stride,
              'timing':{'scope':'local inference and postprocessing only; not end-to-end camera latency',
                        'p50_ms':statistics.median(ordered),'p95_ms':ordered[math.ceil(.95*len(ordered))-1]},
              'limitations':['No identity tracking: dwell is continuous class presence, not the same object.',
                             'Frame timing assumes a constant-frame-rate recording; verify variable-rate sources.',
                             'No camera compatibility or production detection quality has been qualified.']}
-    with args.output.open('x',encoding='utf-8') as stream:
-        json.dump(receipt,stream,indent=2,allow_nan=False)
+    documents = [(args.output, receipt)]
+    if args.trace_output is not None:
+        from .model_profiles import ASSETS
+        trace = {'schema':TRACE_SCHEMA,'origin':'offline-analyzer','state':receipt['state'],
+                 'source_sha256':source_hash,'model_sha256':model_hash,
+                 'labels_sha256':digest(args.labels),'inference_profile':args.profile,
+                 'rules_sha256':canonical_hash(config),'rules_file_sha256':digest(args.rules),
+                 'rule_engine_sha256':digest(ASSETS/'rules.py'),
+                 'rules':config,'camera':args.camera,'run_id':run_id,'frames_read':frames,
+                 'fps_metadata':fps,'stride':args.stride,'frames':trace_frames,'events':events,
+                 'runtime':{'python':platform.python_version(),'opencv':cv2.__version__,
+                            'numpy':np.__version__,'machine':platform.machine(),
+                            'backend':'OpenCV CPU','threads':args.threads},
+                 'timing_scope':receipt['timing']['scope'],'human_review_required':True}
+        documents.append((args.trace_output, trace))
+    # Reserve every destination exclusively before writing either document.
+    # On a write failure, remove only files created by this invocation.
+    created=[]
+    try:
+        with ExitStack() as stack:
+            streams=[]
+            for path,document in documents:
+                streams.append((stack.enter_context(path.open('x',encoding='utf-8')),document))
+                created.append(path)
+            for stream,document in streams:
+                json.dump(document,stream,indent=2,allow_nan=False)
+                stream.write('\n')
+                if document.get('schema') == TRACE_SCHEMA and stream.tell() > 32*1024**2:
+                    raise ValueError('Evaluation trace exceeds the 32 MiB JSON bound; split the recording')
+    except BaseException:
+        for path in created:
+            path.unlink()
+        raise
     print(f'Wrote {len(events)} observations; state={receipt["state"]}; human review required.')
 
 

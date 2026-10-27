@@ -5,6 +5,12 @@ cameras, start background services, download models, send footage, or call an AP
 No trained model is supplied. Camera compatibility, recognition accuracy and
 production latency are unqualified.
 
+An [offline evaluation harness](../docs/offline-evaluation.md) now compares
+frame-level traces with approved local labels, reports fixed-threshold per-class
+precision/recall and timing distributions, and computes false alerts per reviewed
+camera-hour only when all covered alerts have explicit decisions. Deterministic
+synthetic fixtures validate the infrastructure, not recognition quality.
+
 ## Run
 
 Python 3.11+ is recommended. From the repository root:
@@ -57,6 +63,13 @@ can be analyzed with the existing command plus:
 
 Replace the original `--labels` argument rather than supplying it twice. This
 enables offline analysis only, not automatic capture or operational acceptance.
+
+Add `--trace-output /private/pilot/trace.json` to retain sampled detections and
+per-frame timing for evaluation. `--threads 1` (default; range 1–8) explicitly
+selects OpenCV CPU thread count. Receipt import remains unchanged. Evaluation
+traces are separate metadata files and are not browser receipts. See the
+[evaluation guide](../docs/offline-evaluation.md) for coverage requirements,
+new output paths, bounds, labels and review decisions.
 
 Rule JSON is an array of named rules; browser rule exports have a separate
 schema and are intentionally not silently accepted by this CLI. Map a browser

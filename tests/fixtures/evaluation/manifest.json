@@ -1,0 +1,89 @@
+{
+  "schema": "intelligent-dvr.evaluation-manifest.v1",
+  "data_kind": "synthetic",
+  "approval": {
+    "approved_by": "synthetic-fixture",
+    "source_rights": "generated text; no footage",
+    "annotated_by": "deterministic-fixture-generator",
+    "split": "regression-only",
+    "annotation_policy": "exhaustive classes on listed frames; supplied synthetic boxes"
+  },
+  "labels": "labels.json",
+  "classes": [
+    "person",
+    "car",
+    "bicycle"
+  ],
+  "clips": [
+    {
+      "camera": "synthetic-camera",
+      "source": "source.synthetic.txt",
+      "source_sha256": "5bef66240434877e0affbe3fbe5d1c3cdc27546cb4dc9cdd1da70a8441fb0b5f",
+      "frame_count": 4,
+      "fps": 1,
+      "trace": "trace.json",
+      "alert_review_intervals": [
+        [
+          0,
+          4
+        ]
+      ],
+      "frames": [
+        {
+          "frame_index": 0,
+          "objects": [
+            {
+              "label": "person",
+              "box": [
+                0.1,
+                0.1,
+                0.2,
+                0.2
+              ]
+            }
+          ]
+        },
+        {
+          "frame_index": 1,
+          "objects": [
+            {
+              "label": "person",
+              "box": [
+                0.1,
+                0.1,
+                0.2,
+                0.2
+              ]
+            },
+            {
+              "label": "person",
+              "box": [
+                0.4,
+                0.1,
+                0.2,
+                0.2
+              ]
+            },
+            {
+              "label": "car",
+              "box": [
+                0.6,
+                0.6,
+                0.2,
+                0.2
+              ]
+            }
+          ]
+        },
+        {
+          "frame_index": 2,
+          "objects": []
+        },
+        {
+          "frame_index": 3,
+          "objects": []
+        }
+      ]
+    }
+  ]
+}

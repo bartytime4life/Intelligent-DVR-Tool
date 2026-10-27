@@ -1,0 +1,155 @@
+{
+  "schema": "intelligent-dvr.detection-trace.v1",
+  "origin": "precomputed-synthetic",
+  "state": "completed",
+  "source_sha256": "5bef66240434877e0affbe3fbe5d1c3cdc27546cb4dc9cdd1da70a8441fb0b5f",
+  "model_sha256": "1509018e1104ec84ed6a6b03ac933956b77c402f3889ada753db806ea9918b88",
+  "labels_sha256": "3ee03641b29d38d58531f7045d7ffe4bd32af682e96aa81de81e672c5ce93166",
+  "inference_profile": "yolov8-raw-640",
+  "rules_sha256": "dba029ebc66d546789d00d4a219878b27957990233e858633bbe1bbbcb4bb4d7",
+  "rules": [
+    {
+      "name": "fixture zone",
+      "label": "person",
+      "rect": [
+        0,
+        0,
+        1,
+        1
+      ],
+      "threshold": 0.7,
+      "dwell": 0,
+      "max_gap": 2
+    }
+  ],
+  "run_id": "03e1b4e50430695f74d45b5662ffb3ed98694f59697e8aef78f930756b94e1b4",
+  "rule_engine_sha256": "1c4105a69c36fb1ff8a2ae6fe35c2f1ed9f3b3c94821850a32384ae9eafbf391",
+  "camera": "synthetic-camera",
+  "frames_read": 4,
+  "fps_metadata": 1,
+  "stride": 1,
+  "frames": [
+    {
+      "frame_index": 0,
+      "seconds": 0.0,
+      "detections": [
+        {
+          "label": "person",
+          "score": 0.9,
+          "box": [
+            0.1,
+            0.1,
+            0.2,
+            0.2
+          ]
+        },
+        {
+          "label": "person",
+          "score": 0.8,
+          "box": [
+            0.1,
+            0.1,
+            0.2,
+            0.2
+          ]
+        },
+        {
+          "label": "car",
+          "score": 0.8,
+          "box": [
+            0.6,
+            0.6,
+            0.2,
+            0.2
+          ]
+        }
+      ],
+      "inference_decode_ms": 10
+    },
+    {
+      "frame_index": 1,
+      "seconds": 1.0,
+      "detections": [
+        {
+          "label": "person",
+          "score": 0.9,
+          "box": [
+            0.1,
+            0.1,
+            0.2,
+            0.2
+          ]
+        },
+        {
+          "label": "car",
+          "score": 0.8,
+          "box": [
+            0.6,
+            0.6,
+            0.2,
+            0.2
+          ]
+        },
+        {
+          "label": "person",
+          "score": 0.2,
+          "box": [
+            0.1,
+            0.1,
+            0.2,
+            0.2
+          ]
+        }
+      ],
+      "inference_decode_ms": 20
+    },
+    {
+      "frame_index": 2,
+      "seconds": 2.0,
+      "detections": [],
+      "inference_decode_ms": 30
+    },
+    {
+      "frame_index": 3,
+      "seconds": 3.0,
+      "detections": [
+        {
+          "label": "person",
+          "score": 0.9,
+          "box": [
+            0.1,
+            0.1,
+            0.2,
+            0.2
+          ]
+        }
+      ],
+      "inference_decode_ms": 40
+    }
+  ],
+  "events": [
+    {
+      "id": "4eeaed2dd797b958d4f69c4f6b11d7d2",
+      "camera": "synthetic-camera",
+      "label": "person",
+      "score": 0.9,
+      "seconds": 0.0,
+      "started_seconds": 0.0,
+      "rule": "person present in fixture zone for 0s",
+      "review_required": true
+    },
+    {
+      "id": "fdba1a2c0b40b70cf76da5dbd9907b47",
+      "camera": "synthetic-camera",
+      "label": "person",
+      "score": 0.9,
+      "seconds": 3.0,
+      "started_seconds": 3.0,
+      "rule": "person present in fixture zone for 0s",
+      "review_required": true
+    }
+  ],
+  "runtime": {
+    "scope": "supplied synthetic timing values; no model execution"
+  }
+}
