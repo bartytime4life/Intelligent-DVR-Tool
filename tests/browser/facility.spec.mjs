@@ -58,7 +58,7 @@ test('real pinned shells review, select, append, edit and undo without changing 
   expect(after.buildings).toHaveLength(5);expect(after.cameras).toEqual(before.cameras);expect(after.rooms).toEqual(before.rooms);
   expect(after.buildings.at(-1).source.license).toBe('ODbL-1.0');
   const draftMs=Date.now()-start, correctionStart=Date.now();
-  await page.getByRole('button',{name:'2 Buildings',exact:true}).click();
+  await page.getByRole('button',{name:/^2 Buildings/}).click();
   await page.getByRole('button',{name:/Mapped building 105582211/}).click();
   await page.getByLabel('Building height',{exact:true}).fill('7');
   await page.getByRole('button',{name:'Save building',exact:true}).click();
