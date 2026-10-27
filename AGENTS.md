@@ -14,3 +14,5 @@ Build app UI in `src/`. Keep `.openai/hosting.json`, `worker/index.js`, `scripts
 
 
 Owner facility-editor decision (2026-10-27): build the recommended MapLibre + Three.js + Terra Draw guided facility builder within this workspace. Use the first facility-editor concept as layout guidance. Support editable buildings, floors/rooms, labels, camera placement and explicit estimated coverage, with a route rehearsal for proposed cross-camera handoffs. The rehearsal is simulated; do not present it as actual person tracking, identity verification or calibrated visibility. Keep external map access off by default and retain export/undo.
+
+Owner next-work request (2026-10-27): queue easy facility creation using a location button or address/map selection, an area of interest, and an automatically drafted facility from overhead information. Explore Google Maps and subscription-free alternatives for a novice-friendly flow. See docs/easy-facility-setup.md for researched options and the proposed open-footprint-first implementation; automatic drafting is not implemented by the initial editor.

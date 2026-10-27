@@ -257,7 +257,7 @@ oom" : "building");
       const el = document.createElement("span");
       el.className = "facility-map-label selected-camera-label";
       el.textContent = cam.id + " \xB7 " + cam.name;
-      markers.push(new Marker({ element: el, anchor: "bottom", offset: [0, -14] }).setLngLat(toLngLat([cam.x, cam.y], o)).
+      markers.push(new Marker({ element: el, anchor: "top", offset: [0, 14] }).setLngLat(toLngLat([cam.x, cam.y], o)).
       addTo(map));
     }
     volumes.update(plan, selected, mode, floor);
@@ -270,12 +270,12 @@ oom" : "building");
       map.easeTo({ center: current.origin, zoom: 17.4, pitch: view === "2d" ? 0 : 52, duration: 300 });
       return;
     }
-    const min = [Math.min(...points.map((p) => p[0])) - 25, Math.min(...points.map((p) => p[1])) - 25], max = [Math.max(
+    const min = [Math.min(...points.map((p) => p[0])) - 12, Math.min(...points.map((p) => p[1])) - 12], max = [Math.max(
       ...points.map((p) => p[0])
-    ) + 25, Math.max(...points.map((p) => p[1])) + 25];
+    ) + 12, Math.max(...points.map((p) => p[1])) + 12];
     map.fitBounds([toLngLat(min, current.origin), toLngLat(max, current.origin)], {
-      padding: 45,
-      maxZoom: 18.1,
+      padding: 28,
+      maxZoom: 19.4,
       bearing: -27,
       pitch: view === "2d" ? 0 : 52,
       duration: animate ? 400 : 0
