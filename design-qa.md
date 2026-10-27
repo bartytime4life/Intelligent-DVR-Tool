@@ -127,3 +127,14 @@ crop. Findings were based on those visible comparisons, not code alone.
 - [x] Record the next location/AOI workflow in `docs/easy-facility-setup.md` and issue #6.
 
 final result: passed
+
+## Location shortcut follow-up
+
+Added an optional one-shot location suggestion to the existing Locate site form.
+Browser inspection at 2004 × 1036 CSS px confirmed the new button, disclosure,
+manual fields and Save site remain readable and reachable; captured at
+`/tmp/dvr-location-form.jpg`. No new console warnings/errors were captured.
+Build and the same 23 checks passed. Real location permission/success/denial and
+timeout callbacks were not exercised in the user's browser, to avoid requesting
+their precise location during QA. Cancellation and stale-result guards were
+reviewed in source. This check does not qualify the automatic building importer.

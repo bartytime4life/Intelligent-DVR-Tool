@@ -4,6 +4,10 @@ Status: researched and queued after the guided editor. This document is a propos
 implementation and usability study, not a claim of a working automatic importer.
 Requested by the owner on 2026-10-27. Sources checked on that date.
 
+Increment delivered: the Locate site form now has an optional one-shot browser
+location suggestion, accuracy text, cancellation and manual fallbacks. Area
+selection, address search and automatic building drafts remain queued.
+
 ## Recommended experience
 
 Keep MapLibre, Three.js and the existing editor. Add a **Create from location**

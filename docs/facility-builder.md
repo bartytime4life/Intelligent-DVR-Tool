@@ -9,6 +9,11 @@ twin or an operational multi-camera tracking service.
 
 1. Set the facility name and geographic origin. Coordinates are longitude then
    latitude; local geometry is meters east/north of that origin.
+   **Use my location** requests one browser position after a click. It fills a
+   suggestion, reports accuracy and requires Save site to commit. Denied,
+   unavailable and timed-out requests retain manual coordinate entry. Cancel
+   ignores late results. No location request starts on page load or continuously.
+   Changing the origin relocates all existing local geometry geographically.
 2. Trace building footprints with Terra Draw or add a rectangle. Edit name,
    footprint position/dimensions, height and number of floors. Save the building.
 3. Choose a building and floor. Trace rooms within its footprint, name rooms,

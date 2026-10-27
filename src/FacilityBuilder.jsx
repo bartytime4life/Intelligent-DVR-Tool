@@ -567,6 +567,37 @@ Kept as separate tracks."} This does not verify identity.</p>}</div>) : <p class
 }
 function SiteForm({ plan, commit, center }) {
   const [name, setName] = useState(plan.name), [lng, setLng] = useState(plan.origin[0]), [lat, setLat] = useState(plan.origin[1]);
+  const [locating, setLocating] = useState(false), [locationNote, setLocationNote] = useState("");
+  const locationRequest = useRef(0);
+  useEffect(() => () => { locationRequest.current++; }, []);
+  function locate() {
+    if (locating) return;
+    if (!window.isSecureContext || !navigator.geolocation) {
+      setLocationNote("Location is unavailable here. Enter longitude and latitude below.");
+      return;
+    }
+    const request = ++locationRequest.current;
+    setLocating(true);
+    setLocationNote("Waiting for your location permission. You can use coordinates instead.");
+    navigator.geolocation.getCurrentPosition(({ coords }) => {
+      if (request !== locationRequest.current) return;
+      setLocating(false);
+      if (!Number.isFinite(coords.longitude) || !Number.isFinite(coords.latitude) || Math.abs(coords.latitude) > 80) {
+        setLocationNote("This position is outside the supported map range. Enter site coordinates below.");
+        return;
+      }
+      setLng(Number(coords.longitude.toFixed(7)));
+      setLat(Number(coords.latitude.toFixed(7)));
+      const accuracy = Number.isFinite(coords.accuracy) ? ` Reported accuracy: ±${Math.ceil(coords.accuracy)} m.` : "";
+      setLocationNote("Suggested device position only." + accuracy + " Confirm this is your facility before saving. Existing shapes keep their local positions.");
+    }, (error) => {
+      if (request !== locationRequest.current) return;
+      setLocating(false);
+      setLocationNote(error.code === 1 ? "Location permission was declined. Enter site coordinates below." :
+        error.code === 3 ? "Location timed out. Try again or enter site coordinates below." :
+        "Your location could not be determined. Enter site coordinates below.");
+    }, { enableHighAccuracy: false, timeout: 10000, maximumAge: 0 });
+  }
   useEffect(() => {
     setName(plan.name);
     setLng(plan.origin[0]);
@@ -575,7 +606,11 @@ function SiteForm({ plan, commit, center }) {
   return <form onSubmit={(e) => {
     e.preventDefault();
     if (commit({ ...plan, name, origin: [lng, lat] }, "Site origin saved")) center();
-  }}><Field label="Facility name" type="text" value={name} onChange={setName} /><Field label="Longitude" value={lng} min={-180} max={180} onChange={setLng} /><Field label="Latitude" value={lat} min={-80} max={80} onChange={setLat} /><p className="facility-caption">Building and camera positions are meters east and north of this origin. This is a local planning coordinate system, not a surveyed model.</p><button className="facility-primary" type="submit">Save site<Check /></button></form>;
+  }}><button type="button" className="facility-secondary" disabled={locating} onClick={locate}>{locating ? "Finding location…" : "Use my location"}</button>
+  {locating && <button type="button" className="facility-secondary" onClick={() => { locationRequest.current++; setLocating(false); setLocationNote("Location suggestion cancelled. Enter site coordinates below."); }}>Cancel location</button>}
+  <p className="facility-caption">Uses your browser’s location service once, only when requested. Review the suggestion before Save site. This does not find building outlines.</p>
+  {locationNote && <p className="facility-caption" role="status">{locationNote}</p>}
+  <Field label="Facility name" type="text" value={name} onChange={setName} /><Field label="Longitude" value={lng} min={-180} max={180} onChange={setLng} /><Field label="Latitude" value={lat} min={-80} max={80} onChange={setLat} /><p className="facility-caption">Building and camera positions are meters east and north of this origin. Changing the origin moves the whole plan geographically. This is a local planning coordinate system, not a surveyed model.</p><button className="facility-primary" type="submit" disabled={locating}>Save site<Check /></button></form>;
 }
 function PlanPasteDialog({ close, onImport }) {
   const ref = useRef();
