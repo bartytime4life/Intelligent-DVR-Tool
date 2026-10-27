@@ -1,0 +1,90 @@
+{
+  "version": 0.6,
+  "generator": "Pinned 2014 OSM exterior extract; offline, not live",
+  "osm3s": {
+    "timestamp_osm_base": "2014-03-13T12:44:02Z",
+    "copyright": "The data included in this document is from www.openstreetmap.org. The data is made available under ODbL."
+  },
+  "elements": [
+    {
+      "type": "way",
+      "id": 105582211,
+      "tags": {
+        "building": "yes"
+      },
+      "timestamp": "2013-01-13T22:55:41Z",
+      "geometry": [
+        {
+          "lon": 11.2579365,
+          "lat": 46.4550159
+        },
+        {
+          "lon": 11.2579094,
+          "lat": 46.4551715
+        },
+        {
+          "lon": 11.2580235,
+          "lat": 46.4551816
+        },
+        {
+          "lon": 11.2580373,
+          "lat": 46.4551161
+        },
+        {
+          "lon": 11.2580278,
+          "lat": 46.4551126
+        },
+        {
+          "lon": 11.2580442,
+          "lat": 46.4550251
+        },
+        {
+          "lon": 11.2579365,
+          "lat": 46.4550159
+        }
+      ]
+    },
+    {
+      "type": "way",
+      "id": 106227181,
+      "tags": {
+        "building": "yes"
+      },
+      "timestamp": "2013-01-13T22:55:42Z",
+      "geometry": [
+        {
+          "lon": 11.2570676,
+          "lat": 46.4555039
+        },
+        {
+          "lon": 11.2572652,
+          "lat": 46.4554875
+        },
+        {
+          "lon": 11.2572186,
+          "lat": 46.4553667
+        },
+        {
+          "lon": 11.2570496,
+          "lat": 46.4553857
+        },
+        {
+          "lon": 11.2570586,
+          "lat": 46.4554554
+        },
+        {
+          "lon": 11.256879,
+          "lat": 46.4554532
+        },
+        {
+          "lon": 11.2568826,
+          "lat": 46.4554992
+        },
+        {
+          "lon": 11.2570676,
+          "lat": 46.4555039
+        }
+      ]
+    }
+  ]
+}

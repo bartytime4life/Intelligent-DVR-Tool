@@ -5,14 +5,13 @@ API key, recording upload or live person tracking is required.
 
 ## Workflow
 
-1. Facility → Locate site → use GPS or manual coordinates → review → Save site.
+1. Facility → Locate site → submit an address/place search, use GPS or manual coordinates → review → Save site.
    GPS suggests device location; it does not measure buildings. Changing the
    origin moves the whole local plan geographically.
 2. Open **Draft buildings from OpenStreetMap**. Select a rectangular search area
    by width/depth and east/north offsets. Its boundary appears in amber. Numeric
    controls support keyboard input; pointer-drawn AOIs remain future work.
-3. **Load open building drafts** sends the selected bounds to Private.coffee's
-   Overpass endpoint. It does not send local rooms, cameras, routes or recordings.
+3. **Load open building drafts** sends selected bounds to the chosen Overpass provider (Private.coffee by default; the main public instance or a configured local service are selectable). It does not send local rooms, cameras, routes or recordings.
    Nothing is requested on page load or merely by opening the panel.
 4. Review map shells, dimensions and height/floor assumptions. Uncheck unwanted
    buildings. Boundary-crossing footprints are kept whole. Explicitly choose
@@ -22,8 +21,7 @@ API key, recording upload or live person tracking is required.
    Octagon and Round. Set width, depth, wing thickness, rotation, position,
    height and floors. Inputs support meters/feet; stored geometry uses meters.
 
-Offline fallback: paste an Overpass JSON extract with complete way geometry into
-the same review flow. This is not a generic GeoJSON, imagery or BIM importer.
+Offline fallback: open a JSON file or paste an Overpass JSON extract with complete way/member geometry into the same review flow. This is not a generic GeoJSON, imagery or BIM importer.
 
 ## Measurements and assumptions
 
@@ -72,15 +70,13 @@ require a future holes-capable geometry schema.
   are linked in the UI. It is not a critical-infrastructure dependency or SLA.
   Private/larger deployments should prepare self-hosted extracts.
 - 20–500 m per search side; area corners within 1,800 m of origin; no date-line
-  crossing. Server/client timeouts: 20/45 seconds. Minimum request interval:
+  crossing. Server/client timeouts: 20/30 seconds. Minimum request interval:
   15 seconds. Response cap: 300 elements and 2 MB streamed bytes. No auto-retry.
 - Cancel/unmount or changed plan/area invalidates late responses. Partial/runtime
   error responses are rejected. Existing source IDs are excluded on repeat imports.
   Final plans still obey the 100-building and ±2 km limits.
-- Only complete simple building ways are supported. Relations and their member
-  ways, courtyards, parts, elevated, invalid and excessive-vertex geometries are
-  skipped with a count, never silently filled as solid buildings.
-- Bounded per-building source records preserve OSM provider/way ID, ODbL license,
+- Complete simple ways and complete outer-only multipolygon relations are supported. Relation segments may be joined or disjoint outer rings split into editable shells. Courtyards, incomplete/overlapping/nested relations and their members, parts, raised bases and invalid geometry are excluded with reasons.
+- Bounded per-building source records preserve OSM provider/way or relation ID, ODbL license,
   retrieval/source timestamps and original height/floor basis through JSON export.
   Unknown fields/media URLs are discarded; labels render as text. Attribution is
   visible on the map even when street tiles are off.
@@ -97,3 +93,5 @@ require a future holes-capable geometry schema.
 - [2024 IBC §1208.2](https://codes.iccsafe.org/s/IBC2024P1/chapter-12-interior-environment/IBC2024P1-Ch12-Sec1208.2) (official indexed text verified; full-page access returned 403)
 - [U.S. Access Board ADA chapter 4](https://www.access-board.gov/ada/chapter/ch04/)
 - [SCI industrial-building examples](https://steelconstruction.info/topics/cost-of-structural-steelwork/cost-planning-industrial-buildings)
+
+See [facility setup reliability](facility-setup-reliability.md) for address-search privacy, local-service paths, licensed source evaluation, pinned real extracts, browser regressions and the distinction between scripted effort and unmeasured novice usability.

@@ -60,11 +60,16 @@ function segmentIntersection(a, b, c, d) {
 function validPolygon(p) {
   if (!Array.isArray(p) || p.length < 4 || p.length > 201 || !p.every(pointOK) || !eq(p[0], p.at(-1)) || polygonArea(p) <
   1) return false;
+  const vertices=p.slice(0,-1);
+  if(new Set(vertices.map(q=>q.join(','))).size!==vertices.length)return false;
+  const onSegment=(q,a,b)=>Math.abs((q[0]-a[0])*(b[1]-a[1])-(q[1]-a[1])*(b[0]-a[0]))<1e-9 && q[0]>=Math.min(a[0],b[0]) && q[0]<=Math.max(a[0],b[0]) && q[1]>=Math.min(a[1],b[1]) && q[1]<=Math.max(a[1],b[1]);
   for (let i = 0; i < p.length - 1; i++) {
     if (eq(p[i], p[i + 1])) return false;
+    const a=p[i],b=p[i+1],c=vertices[(i+2)%vertices.length];
+    if(Math.abs((b[0]-a[0])*(c[1]-b[1])-(b[1]-a[1])*(c[0]-b[0]))<1e-9 && (b[0]-a[0])*(c[0]-b[0])+(b[1]-a[1])*(c[1]-b[1])<0)return false;
     for (let j = i + 2; j < p.length - 1; j++) {
       if (i === 0 && j === p.length - 2) continue;
-      if (segmentIntersection(p[i], p[i + 1], p[j], p[j + 1]) !== null) return false;
+      if (segmentIntersection(p[i], p[i + 1], p[j], p[j + 1]) !== null || onSegment(p[i],p[j],p[j+1]) || onSegment(p[i+1],p[j],p[j+1]) || onSegment(p[j],p[i],p[i+1]) || onSegment(p[j+1],p[i],p[i+1])) return false;
     }
   }
   return true;
@@ -84,7 +89,7 @@ haracters.");
   for (const b of d.buildings) if (!validPolygon(b.footprint) || !finite(b.height, 1, 150) || !Number.isInteger(b.floors) ||
   !finite(b.floors, 1, 40)) throw Error("Buildings need a simple closed footprint, height 1\u2013150 m, and 1\u201340 floors.");
   for (const b of d.buildings) if (b.source !== undefined && (!b.source || b.source.provider !== 'OpenStreetMap' ||
-    !/^way\/[1-9]\d{0,15}$/.test(b.source.id) || b.source.license !== 'ODbL-1.0' ||
+    !/^(way|relation)\/[1-9]\d{0,15}$/.test(b.source.id) || b.source.license !== 'ODbL-1.0' ||
     !['retrieved','updated','heightBasis','floorsBasis'].every(k => typeof b.source[k] === 'string' && b.source[k].length <= 80)))
       throw Error('Invalid building source record.');
   for (const c of d.cameras) if (!pointOK([c.x, c.y]) || !finite(c.z, 0.5, 150) || !finite(c.bearing, 0, 359.99) || !finite(

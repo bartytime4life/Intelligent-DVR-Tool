@@ -38,5 +38,19 @@ not assign a license to BARTA's repository.
   separate from the renderer license; see https://www.openstreetmap.org/copyright
   and https://operations.osmfoundation.org/policies/tiles/.
 
-The editable sample facility is fictional. No external building model, person
-identity, trained association model or real camera recording is bundled here.
+The editable sample facility is fictional. No person identity, trained association model or real camera recording is bundled here. Historical OSM exterior extracts are included only in the regression fixtures described below.
+
+## Facility setup data and optional services
+
+The historical OSM regression extracts in `tests/fixtures/facility/` are
+© OpenStreetMap contributors, licensed under ODbL-1.0. Their exact upstream
+commits, transformations and hashes are in `manifest.json`; the database notice
+is in `README.md`. These extracts are test data and are not loaded into the app
+or used as evidence of current dimensions. Source OSM data remains under ODbL,
+separate from the converters' software licenses.
+
+Optional submitted address search uses Photon, an Apache-2.0 geocoder for OSM
+data. No Photon code or database is bundled. Public demo terms and OSM credit
+are linked beside search. Private deployment can serve a local Photon instance.
+See [facility setup reliability](facility-setup-reliability.md) for service limits,
+privacy and source evaluation. Public Nominatim is not used by this app.

@@ -41,6 +41,7 @@ import {
 import { createFacilityMap } from "./facility-map.mjs";
 import { OpenMapStarter, ShapeBuilder, MeasurementSummary, ConstructionGuide } from './FacilityStarter.jsx';
 import { draftFacility } from './facility-starter.mjs';
+import { AddressSearch } from "./AddressSearch.jsx";
 const STORAGE = "dvr.facility.v1";
 const keyOf = { building: "buildings", camera: "cameras", room: "rooms", label: "labels" };
 const round = (n) => Math.round(n * 100) / 100;
@@ -627,14 +628,14 @@ function SiteForm({ plan, commit, center }) {
     setLng(plan.origin[0]);
     setLat(plan.origin[1]);
   }, [plan]);
-  return <form onSubmit={(e) => {
+  return <><AddressSearch onChoose={p=>{locationRequest.current++;setLocating(false);setLng(+p.origin[0].toFixed(7));setLat(+p.origin[1].toFixed(7));setLocationNote('Suggested: '+p.label+'. Review before saving. Existing plan positions remain unchanged until Save site.');}} /><form onSubmit={(e) => {
     e.preventDefault();
-    if (commit({ ...plan, name, origin: [lng, lat] }, "Site origin saved")) center();
+    if (commit({ ...plan, name, origin: [lng, lat] }, "Site origin saved — choose an area and review building outlines below")) center();
   }}><button type="button" className="facility-secondary" disabled={locating} onClick={locate}>{locating ? "Finding location…" : "Use my location"}</button>
   {locating && <button type="button" className="facility-secondary" onClick={() => { locationRequest.current++; setLocating(false); setLocationNote("Location suggestion cancelled. Enter site coordinates below."); }}>Cancel location</button>}
   <p className="facility-caption">Uses your browser’s location service once, only when requested. Review the suggestion before Save site. This does not find building outlines.</p>
   {locationNote && <p className="facility-caption" role="status">{locationNote}</p>}
-  <Field label="Facility name" type="text" value={name} onChange={setName} /><Field label="Longitude" value={lng} min={-180} max={180} onChange={setLng} /><Field label="Latitude" value={lat} min={-80} max={80} onChange={setLat} /><p className="facility-caption">Building and camera positions are meters east and north of this origin. Changing the origin moves the whole plan geographically. This is a local planning coordinate system, not a surveyed model.</p><button className="facility-primary" type="submit" disabled={locating}>Save site<Check /></button></form>;
+  <Field label="Facility name" type="text" value={name} onChange={setName} /><Field label="Longitude" value={lng} min={-180} max={180} onChange={setLng} /><Field label="Latitude" value={lat} min={-80} max={80} onChange={setLat} /><p className="facility-caption">Building and camera positions are meters east and north of this origin. Changing the origin moves the whole plan geographically. This is a local planning coordinate system, not a surveyed model.</p><button className="facility-primary" type="submit" disabled={locating}>Save site<Check /></button></form></>;
 }
 function PlanPasteDialog({ close, onImport }) {
   const ref = useRef();

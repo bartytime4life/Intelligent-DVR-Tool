@@ -1,0 +1,196 @@
+{
+  "version": 0.6,
+  "generator": "Pinned OSM courtyard exclusion extract; offline, not live",
+  "osm3s": {
+    "timestamp_osm_base": "2014-03-13T12:44:02Z",
+    "copyright": "The data included in this document is from www.openstreetmap.org. The data is made available under ODbL."
+  },
+  "elements": [
+    {
+      "type": "way",
+      "id": 33748706,
+      "tags": {
+        "amenity": "place_of_worship",
+        "building": "yes",
+        "denomination": "catholic",
+        "name": "Pfarrkirche Sankt Michael",
+        "old_name": "Kapuzinerkirche zur Heimsuchung Mariens",
+        "religion": "christian",
+        "wheelchair": "yes"
+      },
+      "geometry": [
+        {
+          "lon": 11.2570937,
+          "lat": 46.4552187
+        },
+        {
+          "lon": 11.2571261,
+          "lat": 46.4549719
+        },
+        {
+          "lon": 11.2574846,
+          "lat": 46.4549942
+        },
+        {
+          "lon": 11.2574786,
+          "lat": 46.4550395
+        },
+        {
+          "lon": 11.2575715,
+          "lat": 46.4550453
+        },
+        {
+          "lon": 11.2576569,
+          "lat": 46.4550506
+        },
+        {
+          "lon": 11.257641,
+          "lat": 46.4551715
+        },
+        {
+          "lon": 11.2577565,
+          "lat": 46.4551787
+        },
+        {
+          "lon": 11.2577374,
+          "lat": 46.4553249
+        },
+        {
+          "lon": 11.257567,
+          "lat": 46.4553143
+        },
+        {
+          "lon": 11.2575566,
+          "lat": 46.4553937
+        },
+        {
+          "lon": 11.2573601,
+          "lat": 46.4553814
+        },
+        {
+          "lon": 11.2573703,
+          "lat": 46.4553036
+        },
+        {
+          "lon": 11.2570345,
+          "lat": 46.4552827
+        },
+        {
+          "lon": 11.2570433,
+          "lat": 46.4552155
+        },
+        {
+          "lon": 11.2570937,
+          "lat": 46.4552187
+        }
+      ]
+    },
+    {
+      "type": "relation",
+      "id": 121733,
+      "tags": {
+        "type": "multipolygon"
+      },
+      "members": [
+        {
+          "type": "way",
+          "ref": 33748707,
+          "role": "inner",
+          "geometry": [
+            {
+              "lon": 11.2572168,
+              "lat": 46.4551937
+            },
+            {
+              "lon": 11.2573593,
+              "lat": 46.4552032
+            },
+            {
+              "lon": 11.2573757,
+              "lat": 46.4550871
+            },
+            {
+              "lon": 11.2572332,
+              "lat": 46.4550776
+            },
+            {
+              "lon": 11.2572168,
+              "lat": 46.4551937
+            }
+          ]
+        },
+        {
+          "type": "way",
+          "ref": 33748706,
+          "role": "outer",
+          "geometry": [
+            {
+              "lon": 11.2570937,
+              "lat": 46.4552187
+            },
+            {
+              "lon": 11.2571261,
+              "lat": 46.4549719
+            },
+            {
+              "lon": 11.2574846,
+              "lat": 46.4549942
+            },
+            {
+              "lon": 11.2574786,
+              "lat": 46.4550395
+            },
+            {
+              "lon": 11.2575715,
+              "lat": 46.4550453
+            },
+            {
+              "lon": 11.2576569,
+              "lat": 46.4550506
+            },
+            {
+              "lon": 11.257641,
+              "lat": 46.4551715
+            },
+            {
+              "lon": 11.2577565,
+              "lat": 46.4551787
+            },
+            {
+              "lon": 11.2577374,
+              "lat": 46.4553249
+            },
+            {
+              "lon": 11.257567,
+              "lat": 46.4553143
+            },
+            {
+              "lon": 11.2575566,
+              "lat": 46.4553937
+            },
+            {
+              "lon": 11.2573601,
+              "lat": 46.4553814
+            },
+            {
+              "lon": 11.2573703,
+              "lat": 46.4553036
+            },
+            {
+              "lon": 11.2570345,
+              "lat": 46.4552827
+            },
+            {
+              "lon": 11.2570433,
+              "lat": 46.4552155
+            },
+            {
+              "lon": 11.2570937,
+              "lat": 46.4552187
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
