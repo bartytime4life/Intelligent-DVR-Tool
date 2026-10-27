@@ -75,8 +75,12 @@ def read_json(path, limit=32 * 1024**2):
         return result
     def bad_constant(value):
         raise ValueError(f'Nonfinite JSON constant: {value}')
+    def finite_float(value):
+        result = float(value)
+        require(math.isfinite(result), 'Nonfinite JSON number')
+        return result
     return json.loads(path.read_text(encoding='utf-8'), object_pairs_hook=unique,
-                      parse_constant=bad_constant)
+                      parse_constant=bad_constant, parse_float=finite_float)
 
 
 def relative_file(base, value):

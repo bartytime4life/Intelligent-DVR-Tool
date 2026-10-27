@@ -18,13 +18,17 @@ def main(argv=None):
     args = parser.parse_args(argv)
     if args.output.exists() or args.output.is_symlink():
         parser.error('Output must be a new file')
+    created = False
     try:
         report = evaluate(args.manifest, args.reviews, args.score_threshold,
                           args.iou_threshold, args.warmup_frames)
+        encoded = json.dumps(report, indent=2, allow_nan=False)+'\n'
         with args.output.open('x', encoding='utf-8') as stream:
-            json.dump(report, stream, indent=2, allow_nan=False)
-            stream.write('\n')
+            created = True
+            stream.write(encoded)
     except (ValueError, TypeError, KeyError, OSError) as error:
+        if created:
+            args.output.unlink()
         parser.error(str(error))
     print(f'Evaluated {report["frames_annotated"]} annotated frames; '
           f'data_kind={report["data_kind"]}; operational qualification remains incomplete.')

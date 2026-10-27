@@ -152,7 +152,7 @@ class EvaluationTest(unittest.TestCase):
             with self.assertRaises(ValueError):
                 self.run_eval(False)
 
-    def test_changed_labels_and_mixed_models_are_rejected(self):
+    def test_changed_labels_hash_is_rejected(self):
         self.trace['labels_sha256'] = '0'*64
         self.save_trace()
         with self.assertRaises(ValueError):
@@ -228,7 +228,7 @@ class EvaluationTest(unittest.TestCase):
         (self.root/'parent').symlink_to(self.root, target_is_directory=True)
         with self.assertRaises(ValueError):
             read_json(self.root/'parent'/'labels.json')
-        for content in ('{"a":1,"a":2}', '{"a":NaN}', '{"a":Infinity}'):
+        for content in ('{"a":1,"a":2}', '{"a":NaN}', '{"a":Infinity}', '{"a":1e999}'):
             (self.root/'bad.json').write_text(content)
             with self.assertRaises(ValueError):
                 read_json(self.root/'bad.json')
