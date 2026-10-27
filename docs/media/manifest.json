@@ -98,6 +98,22 @@
       "width": 1400,
       "height": 1027,
       "frames": 1
+    },
+    {
+      "path": "docs/media/system-setup.webp",
+      "bytes": 68756,
+      "sha256": "b95b3566c9f0e11962ce50ef9cc94669912f5d9ce86ef5c5bc24a88533d0db8e",
+      "width": 1600,
+      "height": 827,
+      "frames": 1
+    },
+    {
+      "path": "docs/media/gpu-setup.webp",
+      "bytes": 66856,
+      "sha256": "8fadaba551ccf6ceed63f82fa97845354cd9124d9cf871d89259360f5b431fa6",
+      "width": 1600,
+      "height": 827,
+      "frames": 1
     }
   ]
 }

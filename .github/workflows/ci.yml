@@ -1,10 +1,14 @@
-name: Pilot checks
+name: Cross-platform checks
 on: [push, pull_request]
 permissions:
   contents: read
 jobs:
   validate:
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
@@ -23,3 +27,16 @@ jobs:
       - run: python -m unittest discover -s tests -p 'test_*.py'
       - run: python scripts/check-docs.py
       - run: python scripts/build-wiki.py --check
+      - name: Linux launcher prerequisites
+        if: runner.os == 'Linux'
+        run: |
+          bash -n scripts/run-linux.sh
+          DVR_PYTHON=python bash scripts/run-linux.sh --check
+      - name: Windows launcher prerequisites
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $ParseErrors = $null
+          [System.Management.Automation.Language.Parser]::ParseFile((Join-Path $PWD 'scripts/Start-IntelligentDvr.ps1'), [ref]$null, [ref]$ParseErrors) | Out-Null
+          if ($ParseErrors.Count) { throw ($ParseErrors | Out-String) }
+          ./scripts/Start-IntelligentDvr.ps1 -Check -Python python

@@ -20,6 +20,11 @@ PAGES = {
     'docs/architecture.md': 'Architecture-and-data',
     'docs/verification/2026-10-27/README.md': 'Evidence-and-validation',
     'docs/roadmap.md': 'Roadmap',
+    'docs/hardware-guide.md': 'Hardware-guide',
+    'docs/gpu-planning.md': 'GPU-planning',
+    'docs/setup-linux.md': 'Linux-setup',
+    'docs/setup-windows.md': 'Windows-setup',
+    'docs/resource-controls.md': 'Resource-controls',
 }
 
 
@@ -44,7 +49,7 @@ def generated():
                 url += '#' + parts.fragment
             return '](' + url + ')'
 
-        text = re.sub(r'\]\(([^)]+)\)', rewrite, file.read_text())
+        text = re.sub(r'\]\(([^)]+)\)', rewrite, file.read_text(encoding="utf-8"))
         text += f'\n---\n\n[Canonical source]({BASE}/blob/main/{source}) · Documentation refresh: October 27, 2026.\n'
         output[title + '.md'] = text
     output['_Sidebar.md'] = ('## Intelligent DVR\n\n' + '\n'.join(
@@ -67,10 +72,10 @@ def main():
     for name, text in generated().items():
         path = dest / name
         if args.check:
-            if not path.is_file() or path.read_text() != text:
+            if not path.is_file() or path.read_text(encoding="utf-8") != text:
                 raise ValueError(f'Wiki mirror drift: {name}; run python3 scripts/build-wiki.py')
         else:
-            path.write_text(text)
+            path.write_text(text, encoding="utf-8", newline="\n")
     print(f'Wiki mirrors {"checked" if args.check else "generated"}: {len(generated())} files.')
 
 

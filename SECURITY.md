@@ -40,3 +40,15 @@ and bounded source records are validated before a reviewed transaction; no
 provider-supplied HTML or media URLs are executed. Public data availability and
 metadata are not authenticated survey evidence. Offline extracts use the same
 review path. Use local extracts for sites whose bounds should not leave the host.
+
+System imports setup/host JSON up to 64 KiB and validates numeric bounds before
+using declared fields. Snapshot labels render as text; imported commands or URLs
+are never executed. Snapshots and plans stay local to this browser until an
+explicit export. The optional `edge.host` probe reports only CPU/RAM totals,
+capacity at selected paths and an opt-in fixed read-only NVIDIA inventory. It
+omits host/user names, paths, serials and network addresses and refuses overwrite.
+Exported analyzer policies have strict fields, bounded values and exact-file
+hashes. They limit OpenCV threads/frames and the scheduler's retained sample
+bytes/slots/dispatch age. They are not OS quotas, a native-code sandbox, a GPU
+backend or a hard wall-clock deadline. No storage provisioning or host tuning
+is performed by System or the supplied launchers.

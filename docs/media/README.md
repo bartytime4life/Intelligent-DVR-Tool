@@ -23,3 +23,14 @@ The preview source was local facility revision `2b6290e`; the displayed `App.jsx
 6. Inspect all assets and refresh `manifest.json` hashes deliberately. Do not treat regeneration as a detector or capacity test.
 
 Raw source captures are transient and excluded from Git. Published media has SHA-256 hashes, dimensions and frame counts in [manifest.json](manifest.json). The three animations together are about 1.3 MB; they are documentation assets, not included in the application bundle. Static alternatives support readers who prefer no looping motion. GitHub's GIF renderer has no project-controlled reduced-motion setting.
+
+## System workspace addition
+
+[System setup](system-setup.webp) and [GPU setup](gpu-setup.webp) are actual
+1994×1031 / 2004×1036-pixel Chrome captures of the newly built System workspace,
+resized to 1600 pixels wide and encoded as WebP. No interface content was drawn
+or changed. The existing preview's static files were replaced with the fresh
+production build from this change; they are separate from the earlier facility
+captures described above. The selected RTX 5080, RAM, storage and power values
+are editable planning defaults, not detected hardware or benchmark results.
+See the [machine-setup verification record](../verification/hardware-2026-10-27/README.md).

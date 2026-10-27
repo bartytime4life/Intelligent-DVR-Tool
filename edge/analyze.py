@@ -18,6 +18,7 @@ from .evaluation import (TRACE_SCHEMA, MAX_FRAMES, MAX_DETECTIONS, canonical_has
                          local_file)
 from .model_profiles import (DEFAULT_PROFILE, YOLOX_PROFILE, PROFILES, prepare,
                              validate_binding, yolox_to_yolov8)
+from .resources import load_policy, analyzer_limits
 
 
 def digest(path):
@@ -76,11 +77,21 @@ def main(argv=None):
     parser.add_argument('--output',type=Path,required=True,help='New receipt path (will not overwrite)')
     parser.add_argument('--trace-output',type=Path,
                         help='Optional new frame-level evaluation trace; metadata only')
-    parser.add_argument('--threads',type=int,default=1,help='OpenCV CPU threads, 1–8')
+    parser.add_argument('--threads',type=int,help='OpenCV CPU threads, 1–8; default 1 or policy cap')
+    parser.add_argument('--resource-policy',type=Path,help='Explicit local resource policy exported from System')
     parser.add_argument('--camera',default='offline-camera')
     parser.add_argument('--stride',type=int,default=5)
-    parser.add_argument('--max-frames',type=int,default=6000)
+    parser.add_argument('--max-frames',type=int,help='Decoded-frame ceiling; default 6000 or policy cap')
     args=parser.parse_args(argv)
+    policy_hash = None
+    try:
+        policy = None
+        if args.resource_policy is not None:
+            policy, policy_hash = load_policy(args.resource_policy)
+        limits = analyzer_limits(policy, args.threads, args.max_frames)
+        args.threads, args.max_frames = limits['threads'], limits['max_frames']
+    except (ValueError, OSError) as exc:
+        parser.error(str(exc))
     if not 1 <= args.stride <= 120 or not 1 <= args.max_frames <= 100000:
         parser.error('stride must be 1–120 and max-frames 1–100000')
     if not 1 <= args.threads <= 8:
@@ -176,6 +187,10 @@ def main(argv=None):
                             'Frame timing assumes a constant-frame-rate recording; verify variable-rate sources.',
                             'No camera compatibility or production detection quality has been qualified.']}
     documents = [(args.output, receipt)]
+    if policy_hash is not None:
+        receipt['resource_policy'] = {'sha256': policy_hash, 'opencv_threads': args.threads,
+                                      'max_frames': args.max_frames,
+                                      'scope': 'Analyzer thread and decoded-frame limits only; no OS/GPU quota or worker pool.'}
     if args.trace_output is not None:
         from .model_profiles import ASSETS
         trace = {'schema':TRACE_SCHEMA,'origin':'offline-analyzer','state':receipt['state'],
@@ -189,6 +204,8 @@ def main(argv=None):
                             'numpy':np.__version__,'machine':platform.machine(),
                             'backend':'OpenCV CPU','threads':args.threads},
                  'timing_scope':receipt['timing']['scope'],'human_review_required':True}
+        if policy_hash is not None:
+            trace['runtime']['resource_policy_sha256'] = policy_hash
         documents.append((args.trace_output, trace))
     # Reserve every destination exclusively before writing either document.
     # On a write failure, remove only files created by this invocation.

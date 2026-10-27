@@ -2,6 +2,8 @@
 
 [Home](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Home) · [Visual tour](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-tour) · [Architecture](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Architecture-and-data)
 
+For OS-specific launchers and machine sizing, use [Linux setup](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Linux-setup), [Windows setup](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Windows-setup) and the [hardware guide](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Hardware-guide). **System** in the main navigation opens the machine planner and resource-policy controls.
+
 ## Start locally
 
 The current JavaScript checks use Node.js 22. Install with the lockfile, then start a loopback-only development server:

@@ -37,6 +37,12 @@ A local camera-analysis foundation and visual review prototype from BARTA AI Sol
 
 Footprints are approximate map geometry. Unknown heights/floors can be placeholders. Interiors are not inferred, and planning references do not establish code compliance. [Map and shape guide](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Maps-and-shapes).
 
+## Set up a Linux or Windows machine
+
+The new **System** workspace combines recording/retention sizing, RAM and VRAM budgets, GPU candidates, startup-power arithmetic and explicit resource-policy export. Applied browser limits control visible tiles, overlay pixel scale and background sample playback. The offline analyzer accepts exported OpenCV thread and decoded-frame caps.
+
+[Hardware and drive shortlist](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Hardware-guide) · [Linux setup](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Linux-setup) · [Windows setup](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Windows-setup) · [GPU planning](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/GPU-planning) · [Control scopes](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Resource-controls)
+
 ## Run the review prototype
 
 Use Node.js 22 and npm. From the repository root:
@@ -46,7 +52,7 @@ npm ci
 npm run dev -- --host 127.0.0.1 --port 4173
 ```
 
-Open the address Vite prints. **Monitor**, **Facility**, **Events**, **Zones** and **Settings** are the five workspace areas. Start with the [five-minute walkthrough](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Getting-started).
+Open the address Vite prints. **Monitor**, **Facility**, **Events**, **Zones**, **System** and **Settings** are the workspace areas. Start with the [five-minute walkthrough](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Getting-started).
 
 The browser prototype needs no subscription, paid inference, API key, camera credentials or remote backend. Review decisions, rules and plans save in this browser's localStorage; they are editable and can be lost when storage is cleared. Export anything you need to keep. The optional Google Font and explicitly enabled online maps are external requests. [Data boundaries](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Architecture-and-data#where-data-goes).
 
@@ -54,13 +60,13 @@ The browser prototype needs no subscription, paid inference, API key, camera cre
 
 | Claim | Evidence | Boundary |
 | --- | --- | --- |
-| Review, zone and facility logic passes the current JavaScript checks | **27 passed**, plus **4 packaging tests passed**, October 27, 2026 | Automated tests cover their assertions; browser checks are recorded separately |
-| Python rules, evaluation and synthetic inference integration checks | **CI: 55 passed, no skips.** Local: 47 passed, 8 skipped | [CI evidence](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Evidence-and-validation#ci-follow-through) records the tested commit and native dependencies |
+| Earlier documentation-refresh review/zone/facility checks | **27 passed**, plus **4 packaging tests passed**, October 27, 2026 | Automated tests cover their assertions; browser checks are recorded separately |
+| Earlier documentation-refresh Python checks | **CI: 55 passed, no skips.** Local: 47 passed, 8 skipped | [CI evidence](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Evidence-and-validation#ci-follow-through) records the tested commit and native dependencies |
 | The production package builds | Fresh build completed | Vite reports a large lazy-loaded facility bundle; no load-time claim follows |
 | A pretrained YOLOX-S artifact previously ran through compatibility probes | [October 26 model report](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/model-qualification-20261026.md) and JSON receipts | Historical synthetic-input/recording smoke tests; no recognition-quality result |
 | The scheduler can be exercised with 100 synthetic source IDs | [Fresh load-model reports](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Evidence-and-validation) | Virtual time, assumed service costs and synthetic payloads; no camera throughput measured |
 
-The test record includes commands, raw logs, source hashes, browser observations and limitations. **No detector weights or representative recordings are bundled.**
+The [machine-setup verification record](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/hardware-2026-10-27/README.md) adds 37 passing JavaScript tests, 4 packaging tests and a local Python run of 58 passes / 8 explicit skips. Its CI follow-through records native Linux/Windows results when available. **No detector weights or representative recordings are bundled.**
 
 ## From a recording to evidence
 

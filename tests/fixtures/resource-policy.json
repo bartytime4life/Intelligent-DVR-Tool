@@ -1,0 +1,14 @@
+{
+  "schema": "intelligent-dvr.resource-policy.v1",
+  "platform": "linux",
+  "browser": { "visible_tiles": 4, "pause_when_hidden": true, "overlay_scale": 2 },
+  "analysis": {
+    "opencv_threads": 1,
+    "worker_slots": 8,
+    "thread_budget": 16,
+    "max_sample_bytes": 1228800,
+    "max_buffer_bytes": 268435456,
+    "max_age_seconds": 2,
+    "max_frames": 6000
+  }
+}
