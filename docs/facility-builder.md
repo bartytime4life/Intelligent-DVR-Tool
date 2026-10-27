@@ -106,3 +106,10 @@ executors that cannot spawn test children can use Node's
 `--experimental-test-isolation=none` with the same test files. Visual and browser
 interaction evidence is recorded separately in `design-qa.md`; a build or unit
 test result does not substitute for browser verification.
+
+## Queued next
+
+The requested location/address → area selection → reviewed building draft flow is
+researched in [easy-facility-setup.md](easy-facility-setup.md) and tracked in
+[issue #6](https://github.com/bartytime4life/Intelligent-DVR-Tool/issues/6).
+Automatic drafting is not part of the initial editor.
