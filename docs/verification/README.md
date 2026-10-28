@@ -18,6 +18,7 @@ own CI checks; this index does not automatically certify future source or deploy
 
 | Record | Scope and results | Interpretation |
 | --- | --- | --- |
+| [Native execution/runtime repair, October 28](native-2026-10-28/README.md) | 77 Python passes with no skips; pinned pretrained probes and a 20-frame synthetic recording | Actual local CPU execution; synthetic inputs, no representative quality or owner-hardware/capacity result |
 | [Merged facility baseline](facility-2026-10-27/README.md) | 46 frontend + 4 packaging per platform; Python 66 Linux / 63 Windows + 3 skips; 6 separate Chromium scenarios | Software and mocked-service browser checks at the recorded merge revision |
 | [Machine setup](hardware-2026-10-27/README.md) | Earlier CI: 107 Linux / 104 Windows passes + 3 Windows skips | Retains its original implementation revision, local skips and target-machine limits |
 | [Documentation refresh](2026-10-27/README.md) | Earlier CI: 86 passes; separate local run had 8 native skips | Retains historical source/media/simulation provenance |

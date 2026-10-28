@@ -1,0 +1,6 @@
+ml_dtypes==0.6.0
+numpy==2.5.4
+onnx==1.23.2
+opencv-python-headless==4.13.0.92
+protobuf==7.36.2
+typing_extensions==4.16.0

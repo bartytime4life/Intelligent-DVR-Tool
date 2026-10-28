@@ -1,0 +1,12 @@
+[
+  {
+    "check": "python-tests-verified-runtime.log",
+    "exit_code": 0,
+    "elapsed_seconds": 2.051
+  },
+  {
+    "check": "model-smoke.log",
+    "exit_code": 0,
+    "elapsed_seconds": 2.19
+  }
+]

@@ -17,6 +17,7 @@ def check():
     docs = [ROOT / 'README.md', ROOT / 'SECURITY.md', ROOT / 'docs/README.md',
             ROOT / 'docs/verification/README.md',
             ROOT / 'docs/verification/facility-2026-10-27/README.md',
+            ROOT / 'docs/verification/native-2026-10-28/README.md',
             ROOT / 'docs/offline-qualification.md',
             *[ROOT / ('docs/' + n + '.md') for n in
               ('product-status', 'visual-tour', 'getting-started', 'architecture', 'roadmap', 'hardware-guide', 'gpu-planning', 'setup-linux', 'setup-windows', 'resource-controls', 'facility-builder', 'facility-setup-reliability', 'easy-facility-setup', 'map-measurements-and-shapes')],
@@ -117,6 +118,21 @@ def check():
     if (browser['novice_study'] is not False or browser['accuracy_measured'] is not False
             or any(value != 'unqualified' for value in receipt['qualification'].values())):
         errors.append('Baseline software checks must retain unqualified operational dimensions')
+    native = ROOT / 'docs/verification/native-2026-10-28'
+    native_summary = json.loads((native / 'summary.json').read_text(encoding="utf-8"))
+    native_log = (native / 'python-tests-verified-runtime.log').read_text(encoding="utf-8")
+    counts = native_summary['checks']['python']
+    if (counts['discovered'] != counts['passed'] or counts['failed'] or counts['skipped']
+            or f"Ran {counts['discovered']} tests" not in native_log
+            or not re.search(r'^OK\s*$', native_log, re.M)):
+        errors.append('Native-runtime success counts disagree with the original log')
+    model = json.loads((native / 'yolox-s-contract.json').read_text(encoding="utf-8"))
+    recording = json.loads((native / 'yolox-s-recording.json').read_text(encoding="utf-8"))
+    if (model['state'] != 'contract-smoke-passed' or model['recognition_accuracy'] != 'unmeasured'
+            or recording['state'] != 'completed'
+            or recording['frames_analyzed'] != native_summary['checks']['recording_frames']
+            or any(v not in ('unqualified', 'unmeasured') for v in native_summary['qualification'].values())):
+        errors.append('Native probe must retain its synthetic and unqualified evidence boundary')
     if errors:
         raise ValueError('\n'.join(errors))
     print(f'Documentation checks passed: {links} local links, {len(manifest["assets"])} media hashes, {total:,} media bytes, test-count consistency.')

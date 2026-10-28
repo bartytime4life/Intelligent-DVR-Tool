@@ -1,0 +1,62 @@
+{
+  "schema": "intelligent-dvr.native-verification.v1",
+  "date": "2026-10-28",
+  "environment": "isolated cloud runner, not owner hardware",
+  "application_commit": "c9fb19a82a56de04f77b194cf62ed51992674816",
+  "python": "3.12.14",
+  "packages": {
+    "opencv-python-headless": "4.13.0.92",
+    "numpy": "2.5.4",
+    "onnx": "1.23.2",
+    "ml_dtypes": "0.6.0",
+    "protobuf": "7.36.2",
+    "typing_extensions": "4.16.0"
+  },
+  "opencv_binary": {
+    "bytes": 69423057,
+    "sha256": "77c35d710dfde2c3154b156156d32eaec7a8a9bbe11c025422768a7f0bc45d31",
+    "record_hash_matches": true
+  },
+  "checks": {
+    "python": {
+      "discovered": 77,
+      "passed": 77,
+      "failed": 0,
+      "skipped": 0
+    },
+    "contract_probes": 3,
+    "recording_frames": 20
+  },
+  "attempts": [
+    {
+      "runtime_pin": "opencv-python-headless==4.14.0",
+      "outcome": "No matching distribution in configured index"
+    },
+    {
+      "runtime_pin": "opencv-python-headless==4.14.0.94",
+      "outcome": "Installed cv2 binary failed RECORD checksum comparison; import terminated with SIGBUS (-7). Root cause not established; no upstream defect claim."
+    },
+    {
+      "runtime_pin": "opencv-python-headless==4.13.0.92",
+      "outcome": "Native binary matches installed RECORD; import, full tests and pinned model probes passed."
+    }
+  ],
+  "dataset_attempt": {
+    "url": "https://images.cocodataset.org/annotations/annotations_trainval2017.zip",
+    "observed": "HTTP 503 on HEAD and GET; no labeled data obtained; not evidence of a global outage"
+  },
+  "qualification": {
+    "recognition_accuracy": "unmeasured",
+    "target_owner_hardware": "unqualified",
+    "concurrent_camera_capacity": "unqualified"
+  },
+  "source_sha256": {
+    "edge/requirements-qualification.txt": "69626cc337da457d421cceb9503eb59758d00fe75f831794d76bd335a03d9c25",
+    "edge/analyze.py": "7f378f0c6950f52b34b6a3a3282ac9275d06de770e5e1ab4ff152c41ed60b5cb",
+    "edge/model_profiles.py": "9a0cfffa5a0fbb7312de96d49c894106a92f5bbc3fec6fa9a5594c0bab06e6b2",
+    "edge/qualify.py": "1c58016e7cef6e770a1bd545a52e0c808c2de89d9d57d4b05b9f8d371323cf54",
+    "edge/rules.py": "1c4105a69c36fb1ff8a2ae6fe35c2f1ed9f3b3c94821850a32384ae9eafbf391",
+    "edge/evaluation.py": "762d1b59df14bcb859dbc6193d918a8e3e904d0b4ff5aea4abf8214a196342e3",
+    "edge/qualification.py": "0736a50552a90b8722ddac67638fa83e647ca1a85759430a6ad3bde06aec57df"
+  }
+}
