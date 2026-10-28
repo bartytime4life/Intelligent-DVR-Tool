@@ -69,7 +69,7 @@ For an explicitly approved recording/model and new output files:
   --trace-output 'R:\ApprovedPilot\trace-001.json'
 ```
 
-Paths are examples; validate the rule and ensure directories exist. The selected pretrained artifact must have the exact profile's verified hash. Analysis is CPU-only; the policy enforces OpenCV threads and decoded-frame count. It does not impose Windows CPU-rate, total-process-memory, disk-bandwidth or GPU-power limits.
+Paths are examples; validate the rule and ensure directories exist. The selected pretrained artifact must have the exact profile's verified hash. This example uses the default CPU route; the policy enforces OpenCV threads and decoded-frame count. It does not impose Windows CPU-rate, total-process-memory, disk-bandwidth or GPU-power limits. The [optional CUDA route](../edge/README.md#optional-explicit-cuda-backend) was qualified only on the recorded Linux owner PC; Windows CUDA remains unqualified.
 
 ## Windows containment boundary
 

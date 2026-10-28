@@ -13,6 +13,16 @@ Model weights and training datasets are not included; their licenses and
 commercial use conditions require separate review. Generated sample camera
 scenes are not evidence of real events.
 
+The explicit optional CUDA environment adds ONNX Runtime GPU 1.31.1
+([upstream](https://github.com/microsoft/onnxruntime/tree/v1.31.1)) and NVIDIA
+CUDA/cuDNN/math runtime wheels. These are separate installed dependencies;
+no runtime binaries or model weights are vendored by this change. Preserve
+the licenses/notices included in each installed wheel. NVIDIA components have
+their own vendor agreements, including the CUDA Toolkit and cuDNN SDK terms;
+the repository does not relicense them. Exact dependency versions and usage
+limits are in the [CUDA operator guide](../edge/README.md#optional-explicit-cuda-backend)
+and [qualification record](verification/cuda-2026-10-28/README.md).
+
 The optional OpenCV Zoo YOLOX-S candidate and its COCO80 class ordering are
 documented in [model qualification research](model-qualification-20261026.md).
 The exact model directory states that all its files use Apache-2.0. The upstream

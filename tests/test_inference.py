@@ -52,6 +52,8 @@ class InferenceTest(unittest.TestCase):
             self.assertEqual(len(receipt['model_sha256']),64)
             self.assertEqual(len(receipt['source_sha256']),64)
             self.assertTrue(receipt['events'][0]['review_required'])
+            self.assertEqual(receipt['runtime']['backend_id'],'opencv-cpu')
+            self.assertEqual(receipt['runtime']['fallback'],'none')
             from edge.evaluation import evaluate, digest, MANIFEST_SCHEMA
             trace=json.loads((root/'trace.json').read_text())
             self.assertEqual([f['frame_index'] for f in trace['frames']],[0,5,10,15,20,25])
