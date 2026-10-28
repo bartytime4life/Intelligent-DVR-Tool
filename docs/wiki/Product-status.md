@@ -44,6 +44,11 @@ scenarios ran separately. See the [exact record](https://github.com/bartytime4li
 
 ## Reconciliation and operational gates
 
+The later [offline evidence checklist](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/offline-qualification.md) provides a local
+source/log collector, listed-file integrity verification and a workload-plan
+preflight. These preparation tools do not run inference or qualify any operating
+capacity; their tests belong to their own revision, not the baseline counts above.
+
 Separately reported local AI adapter/runner and threshold-study work is awaiting
 an accessible source revision, diff, dependencies/profiles and exact test receipts.
 It is not included in this baseline. Keep native execution, GPU behavior and

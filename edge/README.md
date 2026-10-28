@@ -1,5 +1,9 @@
 # Offline analysis foundation
 
+For read-only source/log reconciliation and an explicit workload-plan preflight,
+use the [offline qualification checklist](../docs/offline-qualification.md).
+It runs separately from this analyzer and does not execute inference.
+
 [Architecture and data](../docs/architecture.md) · [Evaluation](../docs/offline-evaluation.md) · [Fresh verification](../docs/verification/2026-10-27/README.md)
 
 This tool reads one explicitly supplied local recording. It does not connect to

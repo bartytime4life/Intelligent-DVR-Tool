@@ -17,6 +17,7 @@ def check():
     docs = [ROOT / 'README.md', ROOT / 'SECURITY.md', ROOT / 'docs/README.md',
             ROOT / 'docs/verification/README.md',
             ROOT / 'docs/verification/facility-2026-10-27/README.md',
+            ROOT / 'docs/offline-qualification.md',
             *[ROOT / ('docs/' + n + '.md') for n in
               ('product-status', 'visual-tour', 'getting-started', 'architecture', 'roadmap', 'hardware-guide', 'gpu-planning', 'setup-linux', 'setup-windows', 'resource-controls', 'facility-builder', 'facility-setup-reliability', 'easy-facility-setup', 'map-measurements-and-shapes')],
             ROOT / 'docs/media/README.md', ROOT / 'docs/wiki/README.md',
