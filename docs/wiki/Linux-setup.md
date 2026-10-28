@@ -86,4 +86,4 @@ GPU driver/backend installation and acceleration parity remain deliberate separa
 
 ---
 
-[Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/setup-linux.md) · Documentation refresh: October 27, 2026.
+[Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/setup-linux.md) · Documentation refresh: October 28, 2026.

@@ -85,4 +85,4 @@ Keep the future recording service and the interactive review UI separate. Qualif
 
 ---
 
-[Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/setup-windows.md) · Documentation refresh: October 27, 2026.
+[Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/setup-windows.md) · Documentation refresh: October 28, 2026.

@@ -33,13 +33,30 @@ identity association is started by the planner. Rehearsal links are simulated,
 unverified, session-only decisions. Model/image imports and arbitrary remote map
 URLs are intentionally not accepted by this implementation.
 
-The open-map starter uses a fixed HTTPS Overpass provider after an explicit user
-action and disclosure. It sends selected geographic bounds, with no cameras or
-recordings. Responses are streamed with a 2 MB cap and timeouts. Simple geometry
-and bounded source records are validated before a reviewed transaction; no
-provider-supplied HTML or media URLs are executed. Public data availability and
-metadata are not authenticated survey evidence. Offline extracts use the same
-review path. Use local extracts for sites whose bounds should not leave the host.
+Submitted address/place search sends only the submitted text to the selected
+Photon public demo or configured same-origin local search. Typing, opening a
+panel or changing provider sends no request. No GPS bias, camera plan or recordings
+are sent by search. Search responses have a 100 KB streamed cap and 12-second
+deadline; queries/results have a bounded session-memory cache, not a disk cache.
+Avoid private addresses on public services.
+
+The open-map starter sends selected geographic bounds to the chosen fixed
+Private.coffee/OSM public Overpass endpoint or configured same-origin local service
+only after an explicit Load action and disclosure. Cameras, rooms, routes and
+recordings are not sent by the adapter. Responses have a 2 MB streamed cap and
+timeouts. Supported simple ways and complete outer-only relations, plus bounded
+source records, are validated before a reviewed transaction. Unsupported
+courtyards/parts and invalid geometry are excluded; provider HTML/media URLs are
+not executed. Public map data is not authenticated survey evidence.
+
+Both request paths omit credentials and referrers, reject redirects, and have no
+automatic retries or provider failover. Default local paths are `/geo/search` and
+`/geo/overpass`; an operator must configure fixed upstreams and appropriate access
+and logging controls. The Sites Worker does not supply these services. Same-origin
+requests do not certify the operator's downstream routing or egress. Offline JSON
+file/paste review avoids search/footprint-provider requests when coordinates are
+entered manually; online tiles and optional fonts remain separate external paths.
+Use prepared local extracts/services when site addresses or bounds must stay local.
 
 System imports setup/host JSON up to 64 KiB and validates numeric bounds before
 using declared fields. Snapshot labels render as text; imported commands or URLs

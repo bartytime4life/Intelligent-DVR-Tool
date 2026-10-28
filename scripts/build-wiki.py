@@ -13,12 +13,14 @@ BASE = 'https://github.com/bartytime4life/Intelligent-DVR-Tool'
 RAW = 'https://raw.githubusercontent.com/bartytime4life/Intelligent-DVR-Tool/main/'
 PAGES = {
     'README.md': 'Home',
+    'docs/product-status.md': 'Product-status',
     'docs/visual-tour.md': 'Visual-tour',
     'docs/getting-started.md': 'Getting-started',
     'docs/facility-builder.md': 'Facility-planning',
     'docs/map-measurements-and-shapes.md': 'Maps-and-shapes',
+    'docs/facility-setup-reliability.md': 'Facility-setup-reliability',
     'docs/architecture.md': 'Architecture-and-data',
-    'docs/verification/2026-10-27/README.md': 'Evidence-and-validation',
+    'docs/verification/README.md': 'Evidence-and-validation',
     'docs/roadmap.md': 'Roadmap',
     'docs/hardware-guide.md': 'Hardware-guide',
     'docs/gpu-planning.md': 'GPU-planning',
@@ -50,7 +52,7 @@ def generated():
             return '](' + url + ')'
 
         text = re.sub(r'\]\(([^)]+)\)', rewrite, file.read_text(encoding="utf-8"))
-        text += f'\n---\n\n[Canonical source]({BASE}/blob/main/{source}) · Documentation refresh: October 27, 2026.\n'
+        text += f'\n---\n\n[Canonical source]({BASE}/blob/main/{source}) · Documentation refresh: October 28, 2026.\n'
         output[title + '.md'] = text
     output['_Sidebar.md'] = ('## Intelligent DVR\n\n' + '\n'.join(
         f'- [{title.replace("-", " ")}]({BASE}/wiki/{title})' for title in PAGES.values())

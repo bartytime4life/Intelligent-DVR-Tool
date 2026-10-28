@@ -14,9 +14,11 @@ ROOT = Path(__file__).resolve().parents[1]
 
 def check():
     errors = []
-    docs = [ROOT / 'README.md', ROOT / 'docs/README.md',
+    docs = [ROOT / 'README.md', ROOT / 'SECURITY.md', ROOT / 'docs/README.md',
+            ROOT / 'docs/verification/README.md',
+            ROOT / 'docs/verification/facility-2026-10-27/README.md',
             *[ROOT / ('docs/' + n + '.md') for n in
-              ('visual-tour', 'getting-started', 'architecture', 'roadmap', 'hardware-guide', 'gpu-planning', 'setup-linux', 'setup-windows', 'resource-controls')],
+              ('product-status', 'visual-tour', 'getting-started', 'architecture', 'roadmap', 'hardware-guide', 'gpu-planning', 'setup-linux', 'setup-windows', 'resource-controls', 'facility-builder', 'facility-setup-reliability', 'easy-facility-setup', 'map-measurements-and-shapes')],
             ROOT / 'docs/media/README.md', ROOT / 'docs/wiki/README.md',
             ROOT / 'docs/verification/2026-10-27/README.md',
             ROOT / 'docs/verification/hardware-2026-10-27/README.md',
@@ -72,6 +74,48 @@ def check():
         report = json.loads((v / (name + '.json')).read_text(encoding="utf-8"))
         if report['qualification']['concurrent_camera_capacity'] != 'unqualified':
             errors.append('Simulation must not claim qualified camera capacity')
+
+    baseline = ROOT / 'docs/verification/facility-2026-10-27'
+    receipt = json.loads((baseline / 'ci-results.json').read_text(encoding="utf-8"))
+    excerpts = (baseline / 'ci-test-excerpts.log').read_text(encoding="utf-8")
+    if not re.fullmatch(r'[0-9a-f]{40}', receipt['source_commit']) or receipt['source_commit'] not in excerpts:
+        errors.append('Baseline source revision disagrees with CI excerpts')
+    for platform, label in (('linux', 'Linux'), ('windows', 'Windows')):
+        counts = receipt['platforms'][platform]
+        marker = f"{label} job {counts['job_id']}\n"
+        section = excerpts.split(marker, 1)[-1].split('\n\n', 1)[0] if marker in excerpts else ''
+        for suite in ('frontend', 'packaging', 'python'):
+            c = counts[suite]
+            if any(not isinstance(c[k], int) or isinstance(c[k], bool) or c[k] < 0
+                   for k in ('discovered', 'passed', 'failed', 'skipped')):
+                errors.append(f'{platform}/{suite}: invalid test counts')
+                continue
+            if c['discovered'] != c['passed'] + c['failed'] + c['skipped'] or c['failed']:
+                errors.append(f'{platform}/{suite}: skips/failures must not be counted as passes')
+            if suite == 'python':
+                ending = f"OK (skipped={c['skipped']})" if c['skipped'] else 'OK'
+                if f"Ran {c['discovered']} tests" not in section or not any(line.endswith('Z ' + ending) for line in section.splitlines()):
+                    errors.append(f'{platform}/python: counts disagree with CI excerpts')
+            elif not all(f'# {key} {c[field]}' in section for key, field in
+                         (('tests', 'discovered'), ('pass', 'passed'), ('fail', 'failed'), ('skipped', 'skipped'))):
+                errors.append(f'{platform}/{suite}: counts disagree with CI excerpts')
+        if counts['total_passed'] != sum(counts[s]['passed'] for s in ('frontend', 'packaging', 'python')):
+            errors.append(f'{platform}: total passed disagrees with suite counts')
+    browser = receipt['browser']
+    marker = f"Chromium job {browser['job_id']}\n"
+    section = excerpts.split(marker, 1)[-1] if marker in excerpts else ''
+    if (browser['discovered'] != browser['passed'] + browser['failed'] + browser['skipped']
+            or browser['failed'] or browser['skipped']
+            or f"Running {browser['discovered']} tests" not in section
+            or f"  {browser['passed']} passed (" not in section):
+        errors.append('Browser counts disagree with CI excerpts')
+    for key in ('scripted_draft_ms', 'scripted_correction_ms'):
+        field = 'draftMs' if key == 'scripted_draft_ms' else 'correctionMs'
+        if f'"{field}":{browser[key]}' not in section:
+            errors.append(f'{key} disagrees with browser excerpt')
+    if (browser['novice_study'] is not False or browser['accuracy_measured'] is not False
+            or any(value != 'unqualified' for value in receipt['qualification'].values())):
+        errors.append('Baseline software checks must retain unqualified operational dimensions')
     if errors:
         raise ValueError('\n'.join(errors))
     print(f'Documentation checks passed: {links} local links, {len(manifest["assets"])} media hashes, {total:,} media bytes, test-count consistency.')

@@ -178,8 +178,10 @@ Code revision: `c39961338478d535abeed45257be7685c84f34f2` (2026-10-27).
 passed all **6 browser scenarios**, including actual map readiness, with zero retries.
 The uploaded evidence includes the JSON report and `reviewed-exteriors.png`.
 [Cross-platform run 40571602245](https://github.com/bartytime4life/Intelligent-DVR-Tool/actions/runs/40571602245)
-passed on **Linux and Windows**: **46 frontend tests, 4 Sites tests, 66 Python tests**
-per platform, production builds, documentation links/media checks and wiki drift checks.
+passed on **Linux and Windows**: **46 frontend and 4 Sites tests** per platform;
+Python **66 passed on Linux, 63 passed with 3 Linux-only skips on Windows**
+(66 discovered on each). Production builds, documentation links/media checks and
+wiki drift checks passed. Skipped cases are not counted as passes.
 
 One automated ready-page numeric/offline flow reported **5.926 seconds** from
 entering the recorded origin through selecting/applying two exterior shells.
@@ -189,3 +191,12 @@ metadata. Page startup, source acquisition, human review time and field verifica
 are excluded. The address suggestion test used a mocked Photon result; these
 numbers do not measure live geocoding/retrieval or how many corrections an actual
 site requires. The 80%/three-minute novice targets remain untested.
+
+## Merged-main follow-through
+
+The October 28 audit also checked the merged-main runs at
+`82c862c68735720b8840461fc624e8dbe148a53a`: **116 passed on Linux; 113 passed and
+3 skipped on Windows**, plus **6 separate Chromium scenarios**. The
+[main-baseline record](verification/facility-2026-10-27/README.md) contains exact
+run/job URLs, timestamped excerpts and distinct scripted effort observations.
+Earlier timings above remain attributed to their original run.

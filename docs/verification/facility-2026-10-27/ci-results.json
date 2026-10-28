@@ -1,0 +1,77 @@
+{
+  "schema": "intelligent-dvr.ci-baseline.v1",
+  "source_commit": "82c862c68735720b8840461fc624e8dbe148a53a",
+  "run_date_utc": "2026-10-27",
+  "inspected_date": "2026-10-28",
+  "inspection_timezone": "America/Chicago",
+  "cross_platform_run": 40603794970,
+  "cross_platform_url": "https://github.com/bartytime4life/Intelligent-DVR-Tool/actions/runs/40603794970",
+  "platforms": {
+    "linux": {
+      "job_id": 122538171805,
+      "frontend": {
+        "discovered": 46,
+        "passed": 46,
+        "failed": 0,
+        "skipped": 0
+      },
+      "packaging": {
+        "discovered": 4,
+        "passed": 4,
+        "failed": 0,
+        "skipped": 0
+      },
+      "python": {
+        "discovered": 66,
+        "passed": 66,
+        "failed": 0,
+        "skipped": 0
+      },
+      "total_passed": 116
+    },
+    "windows": {
+      "job_id": 122538171432,
+      "frontend": {
+        "discovered": 46,
+        "passed": 46,
+        "failed": 0,
+        "skipped": 0
+      },
+      "packaging": {
+        "discovered": 4,
+        "passed": 4,
+        "failed": 0,
+        "skipped": 0
+      },
+      "python": {
+        "discovered": 66,
+        "passed": 63,
+        "failed": 0,
+        "skipped": 3
+      },
+      "total_passed": 113
+    }
+  },
+  "browser": {
+    "run_id": 40603794987,
+    "job_id": 122538171745,
+    "url": "https://github.com/bartytime4life/Intelligent-DVR-Tool/actions/runs/40603794987",
+    "discovered": 6,
+    "passed": 6,
+    "failed": 0,
+    "skipped": 0,
+    "scripted_draft_ms": 3666,
+    "scripted_correction_ms": 1216,
+    "novice_study": false,
+    "accuracy_measured": false,
+    "external_services": "mocked; recorded OSM geometry"
+  },
+  "qualification": {
+    "live_camera_operation": "unqualified",
+    "recognition_accuracy": "unqualified",
+    "concurrent_camera_capacity": "unqualified",
+    "live_provider_retrieval": "unqualified",
+    "target_hardware_performance": "unqualified"
+  }
+}
+

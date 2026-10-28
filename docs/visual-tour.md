@@ -1,6 +1,6 @@
 # A workspace you can see through
 
-[Home](../README.md) · [Try it](getting-started.md) · [Test evidence](verification/2026-10-27/README.md)
+[Home](../README.md) · [Try it](getting-started.md) · [Test evidence](verification/README.md)
 
 These visuals are captured from the actual React program. All camera scenes are generated artwork; detection overlays and sample playback are simulated. The facility is fictional. These demonstrations establish interface behavior, not operational surveillance or recognition quality.
 
@@ -54,9 +54,9 @@ Seven shapes are available. Rotation and metric/imperial inputs help with starte
 
 ![OSM draft panel with bounded area fields, provider disclosure, offline import and source attribution.](media/map-starter.webp)
 
-The initial starter can request simple building ways from a fixed Overpass provider or import an offline extract. The user reviews candidate footprints before applying them. The adapter preserves provider, way ID, ODbL license and height/floor basis.
+The current starter offers submitted address search, GPS/numeric origin, selectable public/local Overpass services and offline JSON file/paste review. It supports complete simple ways and selected outer-only relations, preserving provider, way/relation ID, ODbL license and height/floor basis. Review precedes explicit additive/replacement apply. The image above captures an earlier panel; its [media provenance](media/README.md) is unchanged.
 
-This sweep inspected the panel and ran adapter tests. It did **not** establish live provider availability, completeness of a real facility, GPS accuracy, interior reconstruction or building-code compliance. Relations, courtyards, parts, raised bases and unsupported geometry can be skipped. [Dimensions and source limits](map-measurements-and-shapes.md).
+The original capture sweep inspected the panel and ran adapter tests. It did **not** establish live provider availability, completeness of a real facility, GPS accuracy, interior reconstruction or building-code compliance. Supported outer-only relations were added later; courtyards, parts, raised bases and invalid/incomplete geometry remain excluded. [Current evidence](facility-setup-reliability.md) · [Dimensions and source limits](map-measurements-and-shapes.md).
 
 ## 6. Rehearse the handoff
 
@@ -70,4 +70,4 @@ The model excludes floor/roof slabs, doors, windows, furniture, terrain, lens di
 
 ## Beyond the pictures
 
-The offline analyzer, annotation evaluator and synthetic capacity model run separately from the browser. The browser does not open camera streams or perform detector inference. Read the [architecture](architecture.md) and [verification record](verification/2026-10-27/README.md) before interpreting a demonstration as a deployment result.
+The offline analyzer, annotation evaluator and synthetic capacity model run separately from the browser. The browser does not open camera streams or perform detector inference. Read the [architecture](architecture.md) and [verification index](verification/README.md) before interpreting a demonstration as a deployment result.

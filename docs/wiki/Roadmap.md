@@ -1,6 +1,6 @@
 # Build the next claim with evidence
 
-[Home](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Home) · [Verification](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Evidence-and-validation) · [100-camera plan](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/performance-100-cameras.md)
+[Home](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Home) · [Product status](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Product-status) · [Verification](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Evidence-and-validation) · [100-camera plan](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/performance-100-cameras.md)
 
 The minimum capacity goal is **100 simultaneously active cameras**. Five generated scenes are interface fixtures, not the product target.
 
@@ -8,12 +8,14 @@ The minimum capacity goal is **100 simultaneously active cameras**. Five generat
 | --- | --- | --- |
 | Review | Wall, queue, notes, history, rules and exports | Accessibility/mobile/long-session acceptance; durable authenticated records |
 | Facility | Buildings/floors/rooms/labels, cameras, estimates and rehearsal | Site measurements, optical calibration and qualified visibility |
-| Easy setup | GPS suggestion, area fields, OSM simple-way drafts, seven shapes | Live-provider qualification, complex geometry/holes, address search |
+| Easy setup | Submitted address search, GPS/numeric origin, rectangular area, selectable services, offline-file review, supported outer-only OSM relations, seven shapes | Live-provider/local-deployment and real-site qualification; holes/parts and polygon AOI; novice-user study |
 | Detection | Offline ONNX adapter; prior YOLOX-S compatibility probes | Independent labels, precision/recall, false alerts and held-out scenes |
 | Performance | Bounded scheduler, budgets, synthetic overload model | Sustained decode/inference/end-to-end rates on intended hardware |
 | 100-camera operation | Owner requirement and staged acceptance design | Ingest/recording/worker implementation and simultaneous-source qualification |
 
 ## Priorities and acceptance
+
+The [facility reliability guide](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Facility-setup-reliability) records the implemented search/review path and its limits. Separately reported local AI work needs a matching source revision and test receipt before it joins this published baseline.
 
 1. **Define the workload.** Agree resolution, codec, recording/retention, analysis cadence, maximum delay, allowed loss and quality targets. “100 cameras” alone is not a sufficient benchmark.
 2. **Build representative evaluation.** Use approved recordings with independent labels and reviewed alert coverage. Separate tuning/final scenes. The synthetic corpus checks arithmetic only.
@@ -29,8 +31,8 @@ No finish dates or hardware guarantees are implied. Use [pilot scope](https://gi
 
 The fresh 100-source simulation offers 2,000 synthetic samples over ten virtual seconds. With eight assumed 650 ms workers it completes 144, replaces 1,780 and expires 76. With assumed 10 ms service it completes all 2,000. These are modeled outcomes, not measurements of either model or hardware.
 
-Both retain `concurrent_camera_capacity: unqualified`. Serving every source eventually does not satisfy an analysis cadence. [Raw reports and commands](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Evidence-and-validation#100-source-load-model).
+Both retain `concurrent_camera_capacity: unqualified`. Serving every source eventually does not satisfy an analysis cadence. [Raw reports and commands](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/2026-10-27/README.md#100-source-load-model).
 
 ---
 
-[Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/roadmap.md) · Documentation refresh: October 27, 2026.
+[Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/roadmap.md) · Documentation refresh: October 28, 2026.
