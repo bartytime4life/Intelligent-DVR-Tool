@@ -1,0 +1,27 @@
+{
+  "schema": "intelligent-dvr.receipt.v1",
+  "mode": "offline-model",
+  "state": "completed",
+  "events": [],
+  "model_sha256": "c5c2d13e59ae883e6af3b45daea64af4833a4951c92d116ec270d9ddbe998063",
+  "source_sha256": "e10cb21815c8e0218c79bf7c6a9f3a5074e9174fec332900fc4e92151246c35d",
+  "camera": "synthetic-native-probe",
+  "inference_profile": "opencv-zoo-yolox-s-2022nov",
+  "labels_sha256": "76ce1473f01bd271bab54429737358a97160629cf970c5ec8384c2777dd0bae9",
+  "rules_sha256": "c9f2cc6fe0f771da00fcb25c2e900c5e85fe33c24753b0922fa339c899f1dad3",
+  "rules_file_sha256": "1bcb777f5d4a6c0b888bcfc1aa413993576dd353359096c7a31d3da20300515a",
+  "frames_read": 20,
+  "frames_analyzed": 20,
+  "fps_metadata": 5.0,
+  "stride": 1,
+  "timing": {
+    "scope": "local inference and postprocessing only; not end-to-end camera latency",
+    "p50_ms": 503.0926625004213,
+    "p95_ms": 524.858826000127
+  },
+  "limitations": [
+    "No identity tracking: dwell is continuous class presence, not the same object.",
+    "Frame timing assumes a constant-frame-rate recording; verify variable-rate sources.",
+    "No camera compatibility or production detection quality has been qualified."
+  ]
+}

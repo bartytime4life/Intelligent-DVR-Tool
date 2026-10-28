@@ -1,0 +1,13 @@
+{
+  "input_kind": "synthetic pixels; not recognition evidence",
+  "frames_offered": 20,
+  "dimensions": [
+    320,
+    240
+  ],
+  "source_fps": 5,
+  "seed": 20261028,
+  "exit_code": 0,
+  "wall_seconds": 10.1672,
+  "scope": "one local synthetic recording on this runner; no camera throughput or quality qualification"
+}

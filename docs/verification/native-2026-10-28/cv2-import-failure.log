@@ -1,0 +1,21 @@
+Fatal Python error: Bus error
+
+Current thread 0x00007fa5990a4740 (most recent call first):
+  File "<frozen importlib._bootstrap>", line 488 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap_external>", line 1293 in create_module
+  File "<frozen importlib._bootstrap>", line 813 in module_from_spec
+  File "<frozen importlib._bootstrap>", line 921 in _load_unlocked
+  File "<frozen importlib._bootstrap>", line 1331 in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 1360 in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1387 in _gcd_import
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/importlib/__init__.py", line 90 in import_module
+  File "/workspace/scratch/2ff0ab63b68b/dvr-native-env/lib/python3.12/site-packages/cv2/__init__.py", line 153 in bootstrap
+  File "/workspace/scratch/2ff0ab63b68b/dvr-native-env/lib/python3.12/site-packages/cv2/__init__.py", line 181 in <module>
+  File "<frozen importlib._bootstrap>", line 488 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap_external>", line 999 in exec_module
+  File "<frozen importlib._bootstrap>", line 935 in _load_unlocked
+  File "<frozen importlib._bootstrap>", line 1331 in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 1360 in _find_and_load
+  File "<string>", line 1 in <module>
+
+Extension modules: numpy._core._multiarray_umath, numpy.linalg._umath_linalg (total: 2)

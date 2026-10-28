@@ -42,6 +42,12 @@ The latest audited baseline has 46 frontend + 4 packaging passes per platform,
 66 Python passes on Linux, and 63 Python passes/3 skips on Windows. Six browser
 scenarios ran separately. See the [exact record](verification/facility-2026-10-27/README.md).
 
+Later [October 28 native execution](verification/native-2026-10-28/README.md)
+ran all 77 Python cases without skips, the actual pinned pretrained model, and
+a 20-frame synthetic recording on an isolated cloud CPU. Its repaired package
+pins, measured timings and failures are recorded separately. It does not measure
+representative accuracy, owner-hardware performance or 100-camera operation.
+
 ## Reconciliation and operational gates
 
 The later [offline evidence checklist](offline-qualification.md) provides a local
