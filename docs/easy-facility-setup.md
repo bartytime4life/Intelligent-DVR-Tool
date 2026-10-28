@@ -1,8 +1,9 @@
-# Next: easy facility setup from a map
+# Facility setup research and remaining work
 
-Status: researched and queued after the guided editor. This document is a proposed
-implementation and usability study, not a claim of a working automatic importer.
-Requested by the owner on 2026-10-27. Sources checked on that date.
+This page preserves design research requested on 2026-10-27, with sources checked
+on that date. The progress summary below identifies delivered increments; later
+proposals and the usability study remain separate from implemented scope. Use the
+[product-status register](product-status.md) for the published baseline.
 
 Increment delivered: the Locate site form now has an optional one-shot browser
 location suggestion, accuracy text, cancellation and manual fallbacks. The initial
@@ -87,7 +88,14 @@ the Google Maps API; it requires a secure context and the user's location permis
 These are engineering decisions based on published terms, not a determination of
 every possible negotiated or regional license. Recheck the terms before integration.
 
-## Implementation sequence
+## Original implementation proposal
+
+This sequence records the earlier research proposal. Current delivery uses
+submitted Photon search and complete Overpass JSON ways/supported outer-only
+relations. Nominatim, imagery assistance and generic GIS/BIM adapters are not
+implemented. Use the [current product status](product-status.md) and
+[facility reliability guide](facility-setup-reliability.md) to distinguish
+completed work from remaining research.
 
 1. Add the location/address/manual-pin entry point and area selector. Use a
    replaceable geocoder interface. If public Nominatim is used in a small pilot,

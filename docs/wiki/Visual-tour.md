@@ -54,9 +54,9 @@ Seven shapes are available. Rotation and metric/imperial inputs help with starte
 
 ![OSM draft panel with bounded area fields, provider disclosure, offline import and source attribution.](https://raw.githubusercontent.com/bartytime4life/Intelligent-DVR-Tool/main/docs/media/map-starter.webp)
 
-The initial starter can request simple building ways from a fixed Overpass provider or import an offline extract. The user reviews candidate footprints before applying them. The adapter preserves provider, way ID, ODbL license and height/floor basis.
+The current starter offers submitted address search, GPS/numeric origin, selectable public/local Overpass services and offline JSON file/paste review. It supports complete simple ways and selected outer-only relations, preserving provider, way/relation ID, ODbL license and height/floor basis. Review precedes explicit additive/replacement apply. The image above captures an earlier panel; its [media provenance](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/media/README.md) is unchanged.
 
-This sweep inspected the panel and ran adapter tests. It did **not** establish live provider availability, completeness of a real facility, GPS accuracy, interior reconstruction or building-code compliance. Relations, courtyards, parts, raised bases and unsupported geometry can be skipped. [Dimensions and source limits](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Maps-and-shapes).
+The original capture sweep inspected the panel and ran adapter tests. It did **not** establish live provider availability, completeness of a real facility, GPS accuracy, interior reconstruction or building-code compliance. Supported outer-only relations were added later; courtyards, parts, raised bases and invalid/incomplete geometry remain excluded. [Current evidence](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Facility-setup-reliability) · [Dimensions and source limits](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Maps-and-shapes).
 
 ## 6. Rehearse the handoff
 
@@ -70,8 +70,8 @@ The model excludes floor/roof slabs, doors, windows, furniture, terrain, lens di
 
 ## Beyond the pictures
 
-The offline analyzer, annotation evaluator and synthetic capacity model run separately from the browser. The browser does not open camera streams or perform detector inference. Read the [architecture](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Architecture-and-data) and [verification record](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Evidence-and-validation) before interpreting a demonstration as a deployment result.
+The offline analyzer, annotation evaluator and synthetic capacity model run separately from the browser. The browser does not open camera streams or perform detector inference. Read the [architecture](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Architecture-and-data) and [verification index](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Evidence-and-validation) before interpreting a demonstration as a deployment result.
 
 ---
 
-[Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/visual-tour.md) · Documentation refresh: October 27, 2026.
+[Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/visual-tour.md) · Documentation refresh: October 28, 2026.

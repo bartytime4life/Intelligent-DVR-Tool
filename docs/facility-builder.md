@@ -1,6 +1,6 @@
 # Guided facility builder
 
-[Visual tour](visual-tour.md) · [Getting started](getting-started.md) · [Fresh verification](verification/2026-10-27/README.md)
+[Visual tour](visual-tour.md) · [Getting started](getting-started.md) · [Verification index](verification/README.md)
 
 ![Actual fictional sample facility in the 3D planner. Coverage is estimated.](media/facility.webp)
 
@@ -17,8 +17,13 @@ twin or an operational multi-camera tracking service.
    suggestion, reports accuracy and requires Save site to commit. Denied,
    unavailable and timed-out requests retain manual coordinate entry. Cancel
    ignores late results. No location request starts on page load or continuously.
-   Changing the origin relocates all existing local geometry geographically.
-2. Trace building footprints with Terra Draw or add a rectangle. Edit name,
+   Submitted address/place search is another route: choose a provider, submit,
+   select a suggestion, review coordinates and Save site. Nothing is sent while
+   typing. Changing the origin relocates all existing local geometry geographically.
+2. Review a bounded OSM area and supported exterior drafts, use an offline JSON
+   file/paste extract, trace with Terra Draw, or add one of seven common shapes.
+   Map drafts require explicit selection and apply; additive import preserves
+   cameras/rooms, while a clean replacement explicitly clears them. Edit name,
    footprint position/dimensions, height and number of floors. Save the building.
 3. Choose a building and floor. Trace rooms within its footprint, name rooms,
    place labels, and inspect the floor view. Floors divide building height evenly.
@@ -116,15 +121,18 @@ executors that cannot spawn test children can use Node's
 interaction evidence is recorded separately in `design-qa.md`; a build or unit
 test result does not substitute for browser verification.
 
-## Queued next
+## Map setup and remaining work
 
-An initial OSM simple-way importer, numeric search-area selector, dimension
-summaries and seven parametric shapes are now implemented. See
-[map-measurements-and-shapes.md](map-measurements-and-shapes.md) for the current
-workflow, construction references, provenance and unsupported geometry.
+Submitted address search, GPS/numeric origin, a bounded rectangular area, selectable
+public/local services, direct offline JSON review, supported complete outer-only
+OSM relations and seven common shapes are implemented. See the
+[map/measurement guide](map-measurements-and-shapes.md) and
+[facility reliability guide](facility-setup-reliability.md) for workflow,
+disclosures, provenance, preservation/Undo behavior and scoped evidence.
 
-The requested location/address → area selection → reviewed building draft flow is
-researched in [easy-facility-setup.md](easy-facility-setup.md) and tracked in
-[issue #6](https://github.com/bartytime4life/Intelligent-DVR-Tool/issues/6).
-The later simple-way OSM starter implements an initial reviewed drafting path;
-advanced geometry, imagery assistance and address search remain future work.
+Courtyards/holes, building parts, raised bases and invalid/incomplete geometry are
+excluded. A polygon AOI, imagery assistance, generic GIS/BIM adapters, live-provider
+and local-service deployment qualification, current-site accuracy and the novice
+study remain open. [Issue #6](https://github.com/bartytime4life/Intelligent-DVR-Tool/issues/6)
+tracks remaining acceptance; [setup research](easy-facility-setup.md) retains dated
+proposals. Address search is implemented, with external availability unqualified.

@@ -6,7 +6,7 @@
 
 A local camera-analysis foundation and visual review prototype from BARTA AI Solutions.
 
-[Visual tour](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-tour) · [Start here](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Getting-started) · [Wiki](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki) · [Test evidence](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Evidence-and-validation)
+[Visual tour](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-tour) · [Start here](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Getting-started) · [Product status](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Product-status) · [Wiki](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki) · [Test evidence](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Evidence-and-validation)
 
 ![Actual camera-wall interface, with generated sample scenes and a human review queue. No cameras are connected.](https://raw.githubusercontent.com/bartytime4life/Intelligent-DVR-Tool/main/docs/media/cover.webp)
 
@@ -31,11 +31,11 @@ A local camera-analysis foundation and visual review prototype from BARTA AI Sol
 
 *A planned route, scrubbed across 31 captured states and played faster for this illustration. Proposed camera transitions are simulated and unverified. [Static view](https://raw.githubusercontent.com/bartytime4life/Intelligent-DVR-Tool/main/docs/media/route-15.webp) · [Visibility-model limits](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Facility-planning#visibility-model-and-evidence-limits).*
 
-- **Start from a map:** optional one-shot location suggestion, bounded search area, OpenStreetMap simple building drafts, dimensions and a review step before applying. An offline extract can be imported instead.
+- **Start from a map:** submit an address/place search, use a one-shot location suggestion or enter coordinates; review a bounded area and supported OpenStreetMap exterior drafts before applying. Choose a disclosed public/local service or import an offline JSON file.
 - **Start from a shape:** rectangle, L wing, T wing, U wing, cross, octagon or round, with editable dimensions and rotation.
 - **Refine the plan:** add floors, rooms and labels; place and aim cameras; inspect estimated ground-plane visibility; undo edits and export the plan.
 
-Footprints are approximate map geometry. Unknown heights/floors can be placeholders. Interiors are not inferred, and planning references do not establish code compliance. [Map and shape guide](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Maps-and-shapes).
+Footprints are approximate map geometry. Unknown heights/floors can be placeholders. Interiors are not inferred, and planning references do not establish code compliance. [Map and shape guide](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Maps-and-shapes) · [Address search and offline recovery](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Facility-setup-reliability).
 
 ## Set up a Linux or Windows machine
 
@@ -60,13 +60,14 @@ The browser prototype needs no subscription, paid inference, API key, camera cre
 
 | Claim | Evidence | Boundary |
 | --- | --- | --- |
-| Review, facility and System logic checks | **37 passed**, plus **4 packaging tests passed** on Linux and Windows | Automated tests cover their assertions; browser checks are recorded separately |
-| Python rules, evaluation, resource policy and synthetic inference checks | **Linux CI: 66 passed. Windows CI: 63 passed, 3 Linux-only skips.** Local: 58 passed, 8 skipped | [Machine-setup CI evidence](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/hardware-2026-10-27/README.md#ci-follow-through) records the tested commit and native checks |
-| The production package builds | Fresh build completed | Vite reports a large lazy-loaded facility bundle; no load-time claim follows |
+| Review, facility and System logic checks | **46 frontend + 4 packaging tests passed** on each platform | [Audited baseline](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/facility-2026-10-27/README.md) binds results to commit `82c862c68735720b8840461fc624e8dbe148a53a` |
+| Python rules, evaluation, resource policy and synthetic inference checks | **Linux: 66 passed. Windows: 63 passed, 3 Linux-only skips** | Synthetic native-inference checks do not establish recognition quality |
+| Facility browser scenarios | **6 passed** in a separate Chromium job | Recorded geometry and mocked services; no live-provider or novice-user qualification |
+| The production package builds | Passed on Linux and Windows at that baseline | Vite reports a large lazy-loaded facility bundle; no load-time claim follows |
 | A pretrained YOLOX-S artifact previously ran through compatibility probes | [October 26 model report](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/model-qualification-20261026.md) and JSON receipts | Historical synthetic-input/recording smoke tests; no recognition-quality result |
-| The scheduler can be exercised with 100 synthetic source IDs | [Fresh load-model reports](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Evidence-and-validation) | Virtual time, assumed service costs and synthetic payloads; no camera throughput measured |
+| The scheduler can be exercised with 100 synthetic source IDs | [Fresh load-model reports](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/2026-10-27/README.md) | Virtual time, assumed service costs and synthetic payloads; no camera throughput measured |
 
-The [machine-setup verification record](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/hardware-2026-10-27/README.md) records **107 passing tests on Linux** and **104 on Windows**, with 3 explicit Linux-only skips on Windows. It includes local logs, source hashes, browser observations and limits. [Earlier documentation-refresh evidence](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Evidence-and-validation) is retained separately. **No detector weights or representative recordings are bundled.**
+The [verification index](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Evidence-and-validation) separates the latest audited application baseline (**116 passing tests on Linux; 113 on Windows with 3 skips**) from earlier dated runs. The six browser scenarios are reported separately. [Machine-setup evidence](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/hardware-2026-10-27/README.md) and [earlier documentation-refresh evidence](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/2026-10-27/README.md) retain their original revisions and counts. **No detector weights or representative recordings are bundled.**
 
 ## From a recording to evidence
 
@@ -93,6 +94,7 @@ Connection count, recording continuity, analysis cadence and visible browser til
 
 | I want to… | Read |
 | --- | --- |
+| Check implemented, simulated and pending scope | [Product status](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Product-status) |
 | See what the program does | [Visual tour](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-tour) |
 | Try the prototype and preserve my work | [Getting started](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Getting-started) |
 | Draw buildings and place cameras | [Facility builder](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Facility-planning) |
@@ -100,7 +102,7 @@ Connection count, recording continuity, analysis cadence and visible browser til
 | Understand evidence, storage and trust boundaries | [Architecture](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Architecture-and-data) |
 | Analyze an approved recording locally | [Edge CLI](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/edge/README.md) |
 | Evaluate quality and false alerts | [Offline evaluation](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/offline-evaluation.md) |
-| Reproduce the published checks | [Verification record](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Evidence-and-validation) |
+| Reproduce the published checks | [Verification index](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Evidence-and-validation) |
 | Understand implementation priorities | [Roadmap](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Roadmap) |
 
 ## Checks and project terms
@@ -113,10 +115,10 @@ python3 -m unittest discover -s tests -p 'test_*.py'
 python3 scripts/check-docs.py
 ```
 
-Install `edge/requirements-test.txt` in an isolated Python environment to enable synthetic native-inference integration tests. Without them, those cases are explicitly skipped. Restricted runners can use the [single-process Node commands](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Evidence-and-validation#reproduce).
+Install `edge/requirements-test.txt` in an isolated Python environment to enable synthetic native-inference integration tests. Without them, those cases are explicitly skipped. Restricted runners can use the [single-process Node commands](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/2026-10-27/README.md#reproduce).
 
 This repository does **not** currently assign a software license. No open-source licensing grant is implied by public availability. [Third-party notices](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/third-party-notices.md) cover separately licensed components and model sources; [SECURITY.md](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/SECURITY.md) describes the prototype boundary. Camera imagery is generated sample artwork, not a record of a real workplace.
 
 ---
 
-[Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/README.md) · Documentation refresh: October 27, 2026.
+[Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/README.md) · Documentation refresh: October 28, 2026.

@@ -4,7 +4,8 @@ permissions:
   contents: read
 jobs:
   facility-browser:
-    runs-on: ubuntu-latest
+    # Playwright 1.56.1 cannot install Chromium on the Ubuntu 26.04 latest image.
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4

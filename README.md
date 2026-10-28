@@ -6,7 +6,7 @@
 
 A local camera-analysis foundation and visual review prototype from BARTA AI Solutions.
 
-[Visual tour](docs/visual-tour.md) · [Start here](docs/getting-started.md) · [Wiki](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki) · [Test evidence](docs/verification/2026-10-27/README.md)
+[Visual tour](docs/visual-tour.md) · [Start here](docs/getting-started.md) · [Product status](docs/product-status.md) · [Wiki](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki) · [Test evidence](docs/verification/README.md)
 
 ![Actual camera-wall interface, with generated sample scenes and a human review queue. No cameras are connected.](docs/media/cover.webp)
 
@@ -31,11 +31,11 @@ A local camera-analysis foundation and visual review prototype from BARTA AI Sol
 
 *A planned route, scrubbed across 31 captured states and played faster for this illustration. Proposed camera transitions are simulated and unverified. [Static view](docs/media/route-15.webp) · [Visibility-model limits](docs/facility-builder.md#visibility-model-and-evidence-limits).*
 
-- **Start from a map:** optional one-shot location suggestion, bounded search area, OpenStreetMap simple building drafts, dimensions and a review step before applying. An offline extract can be imported instead.
+- **Start from a map:** submit an address/place search, use a one-shot location suggestion or enter coordinates; review a bounded area and supported OpenStreetMap exterior drafts before applying. Choose a disclosed public/local service or import an offline JSON file.
 - **Start from a shape:** rectangle, L wing, T wing, U wing, cross, octagon or round, with editable dimensions and rotation.
 - **Refine the plan:** add floors, rooms and labels; place and aim cameras; inspect estimated ground-plane visibility; undo edits and export the plan.
 
-Footprints are approximate map geometry. Unknown heights/floors can be placeholders. Interiors are not inferred, and planning references do not establish code compliance. [Map and shape guide](docs/map-measurements-and-shapes.md).
+Footprints are approximate map geometry. Unknown heights/floors can be placeholders. Interiors are not inferred, and planning references do not establish code compliance. [Map and shape guide](docs/map-measurements-and-shapes.md) · [Address search and offline recovery](docs/facility-setup-reliability.md).
 
 ## Set up a Linux or Windows machine
 
@@ -60,13 +60,14 @@ The browser prototype needs no subscription, paid inference, API key, camera cre
 
 | Claim | Evidence | Boundary |
 | --- | --- | --- |
-| Review, facility and System logic checks | **37 passed**, plus **4 packaging tests passed** on Linux and Windows | Automated tests cover their assertions; browser checks are recorded separately |
-| Python rules, evaluation, resource policy and synthetic inference checks | **Linux CI: 66 passed. Windows CI: 63 passed, 3 Linux-only skips.** Local: 58 passed, 8 skipped | [Machine-setup CI evidence](docs/verification/hardware-2026-10-27/README.md#ci-follow-through) records the tested commit and native checks |
-| The production package builds | Fresh build completed | Vite reports a large lazy-loaded facility bundle; no load-time claim follows |
+| Review, facility and System logic checks | **46 frontend + 4 packaging tests passed** on each platform | [Audited baseline](docs/verification/facility-2026-10-27/README.md) binds results to commit `82c862c68735720b8840461fc624e8dbe148a53a` |
+| Python rules, evaluation, resource policy and synthetic inference checks | **Linux: 66 passed. Windows: 63 passed, 3 Linux-only skips** | Synthetic native-inference checks do not establish recognition quality |
+| Facility browser scenarios | **6 passed** in a separate Chromium job | Recorded geometry and mocked services; no live-provider or novice-user qualification |
+| The production package builds | Passed on Linux and Windows at that baseline | Vite reports a large lazy-loaded facility bundle; no load-time claim follows |
 | A pretrained YOLOX-S artifact previously ran through compatibility probes | [October 26 model report](docs/model-qualification-20261026.md) and JSON receipts | Historical synthetic-input/recording smoke tests; no recognition-quality result |
 | The scheduler can be exercised with 100 synthetic source IDs | [Fresh load-model reports](docs/verification/2026-10-27/README.md) | Virtual time, assumed service costs and synthetic payloads; no camera throughput measured |
 
-The [machine-setup verification record](docs/verification/hardware-2026-10-27/README.md) records **107 passing tests on Linux** and **104 on Windows**, with 3 explicit Linux-only skips on Windows. It includes local logs, source hashes, browser observations and limits. [Earlier documentation-refresh evidence](docs/verification/2026-10-27/README.md) is retained separately. **No detector weights or representative recordings are bundled.**
+The [verification index](docs/verification/README.md) separates the latest audited application baseline (**116 passing tests on Linux; 113 on Windows with 3 skips**) from earlier dated runs. The six browser scenarios are reported separately. [Machine-setup evidence](docs/verification/hardware-2026-10-27/README.md) and [earlier documentation-refresh evidence](docs/verification/2026-10-27/README.md) retain their original revisions and counts. **No detector weights or representative recordings are bundled.**
 
 ## From a recording to evidence
 
@@ -93,6 +94,7 @@ Connection count, recording continuity, analysis cadence and visible browser til
 
 | I want to… | Read |
 | --- | --- |
+| Check implemented, simulated and pending scope | [Product status](docs/product-status.md) |
 | See what the program does | [Visual tour](docs/visual-tour.md) |
 | Try the prototype and preserve my work | [Getting started](docs/getting-started.md) |
 | Draw buildings and place cameras | [Facility builder](docs/facility-builder.md) |
@@ -100,7 +102,7 @@ Connection count, recording continuity, analysis cadence and visible browser til
 | Understand evidence, storage and trust boundaries | [Architecture](docs/architecture.md) |
 | Analyze an approved recording locally | [Edge CLI](edge/README.md) |
 | Evaluate quality and false alerts | [Offline evaluation](docs/offline-evaluation.md) |
-| Reproduce the published checks | [Verification record](docs/verification/2026-10-27/README.md) |
+| Reproduce the published checks | [Verification index](docs/verification/README.md) |
 | Understand implementation priorities | [Roadmap](docs/roadmap.md) |
 
 ## Checks and project terms

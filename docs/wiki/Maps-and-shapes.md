@@ -94,8 +94,8 @@ require a future holes-capable geometry schema.
 - [U.S. Access Board ADA chapter 4](https://www.access-board.gov/ada/chapter/ch04/)
 - [SCI industrial-building examples](https://steelconstruction.info/topics/cost-of-structural-steelwork/cost-planning-industrial-buildings)
 
-See [facility setup reliability](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/facility-setup-reliability.md) for address-search privacy, local-service paths, licensed source evaluation, pinned real extracts, browser regressions and the distinction between scripted effort and unmeasured novice usability.
+See [facility setup reliability](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Facility-setup-reliability) for address-search privacy, local-service paths, licensed source evaluation, pinned real extracts, browser regressions and the distinction between scripted effort and unmeasured novice usability.
 
 ---
 
-[Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/map-measurements-and-shapes.md) · Documentation refresh: October 27, 2026.
+[Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/map-measurements-and-shapes.md) · Documentation refresh: October 28, 2026.

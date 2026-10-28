@@ -1,0 +1,46 @@
+Audited source: 82c862c68735720b8840461fc624e8dbe148a53a
+Run date: 2026-10-27 UTC; inspected: 2026-10-28 America/Chicago
+Selected original timestamped lines; not complete job logs.
+
+Linux job 122538171805
+2026-10-27T23:41:12.6341286Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +82c862c68735720b8840461fc624e8dbe148a53a:refs/remotes/origin/main
+2026-10-27T23:41:13.3085479Z  * [new ref]         82c862c68735720b8840461fc624e8dbe148a53a -> origin/main
+2026-10-27T23:41:13.3659315Z 82c862c68735720b8840461fc624e8dbe148a53a
+2026-10-27T23:41:29.5786521Z # tests 46
+2026-10-27T23:41:29.5787378Z # pass 46
+2026-10-27T23:41:29.5787957Z # fail 0
+2026-10-27T23:41:29.5789156Z # skipped 0
+2026-10-27T23:41:29.8318975Z # tests 4
+2026-10-27T23:41:29.8321207Z # pass 4
+2026-10-27T23:41:29.8322195Z # fail 0
+2026-10-27T23:41:29.8324160Z # skipped 0
+2026-10-27T23:41:39.1596578Z Ran 66 tests in 2.146s
+2026-10-27T23:41:39.1596864Z OK
+2026-10-27T23:41:39.2579227Z Documentation checks passed: 183 local links, 14 media hashes, 2,381,700 media bytes, test-count consistency.
+2026-10-27T23:41:39.3382856Z Wiki mirrors checked: 15 files.
+
+Windows job 122538171432
+2026-10-27T23:41:15.4200576Z [command]"C:\Program Files\Git\bin\git.exe" -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +82c862c68735720b8840461fc624e8dbe148a53a:refs/remotes/origin/main
+2026-10-27T23:41:16.8738124Z  * [new ref]         82c862c68735720b8840461fc624e8dbe148a53a -> origin/main
+2026-10-27T23:41:17.1488772Z 82c862c68735720b8840461fc624e8dbe148a53a
+2026-10-27T23:41:47.1520230Z # tests 46
+2026-10-27T23:41:47.1521432Z # pass 46
+2026-10-27T23:41:47.1521787Z # fail 0
+2026-10-27T23:41:47.1522627Z # skipped 0
+2026-10-27T23:41:47.9740441Z # tests 4
+2026-10-27T23:41:47.9741571Z # pass 4
+2026-10-27T23:41:47.9741978Z # fail 0
+2026-10-27T23:41:47.9742772Z # skipped 0
+2026-10-27T23:42:06.4948882Z Ran 66 tests in 2.104s
+2026-10-27T23:42:06.4949283Z OK (skipped=3)
+2026-10-27T23:42:06.9351339Z Documentation checks passed: 183 local links, 14 media hashes, 2,381,700 media bytes, test-count consistency.
+2026-10-27T23:42:07.3215470Z Wiki mirrors checked: 15 files.
+
+Chromium job 122538171745
+2026-10-27T23:41:12.3392961Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +82c862c68735720b8840461fc624e8dbe148a53a:refs/remotes/origin/main
+2026-10-27T23:41:13.3072073Z  * [new ref]         82c862c68735720b8840461fc624e8dbe148a53a -> origin/main
+2026-10-27T23:41:13.3552247Z 82c862c68735720b8840461fc624e8dbe148a53a
+2026-10-27T23:41:42.6949886Z Running 6 tests using 1 worker
+2026-10-27T23:41:54.9258998Z SCRIPTED_FACILITY_EFFORT {"draftMs":3666,"correctionMs":1216,"scriptedCorrectionFields":1,"scriptedCorrectionSaves":1,"noviceStudy":false,"accuracyMeasured":false}
+2026-10-27T23:42:10.1944000Z   6 passed (28.1s)
+

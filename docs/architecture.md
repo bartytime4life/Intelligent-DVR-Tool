@@ -1,6 +1,6 @@
 # Architecture, evidence and data
 
-[Home](../README.md) · [Edge CLI](../edge/README.md) · [Security boundary](../SECURITY.md)
+[Home](../README.md) · [Product status](product-status.md) · [Edge CLI](../edge/README.md) · [Security boundary](../SECURITY.md)
 
 ## The current pieces
 
@@ -28,7 +28,8 @@ This diagram describes implemented paths. The reusable scheduler and synthetic l
 | Workspace | `src/App.jsx`, `src/data.mjs` | Review, rules, local video preview, explicit receipt import |
 | Facility model | `src/facility.mjs` | Bounded plan validation, local-meter projection, estimated visibility and rehearsal |
 | Facility renderer | `src/FacilityBuilder.jsx`, `src/facility-map.mjs` | Guided controls, MapLibre and selected-camera Three.js volume |
-| Map starter | `src/FacilityStarter.jsx`, `src/facility-starter.mjs` | Common shapes, dimensions, bounded OSM drafts and source records |
+| Map starter | `src/FacilityStarter.jsx`, `src/facility-starter.mjs` | Common shapes, dimensions, reviewed simple ways/supported outer-only relations and source records |
+| Place search and services | `src/AddressSearch.jsx`, `src/facility-services.mjs` | Explicit submitted search, selectable public/local services and bounded responses |
 | Analyzer | `edge/analyze.py`, `edge/model_profiles.py`, `edge/rules.py` | Explicit recording analysis and profile-bound decoding |
 | Evaluation | `edge/evaluation.py`, `edge/evaluate.py` | Annotation matching, review coverage and timing summaries |
 | Scaling preparation | `edge/scheduler.py`, `edge/capacity.py` | Fair bounded sample admission and virtual-time load simulation |
@@ -43,11 +44,13 @@ This diagram describes implemented paths. The reusable scheduler and synthetic l
 | Import receipt/plan | Browser memory/localStorage after validation | Bounds and declared fields are checked |
 | Export reviews/rules/plan | Explicit browser download | User-controlled file copies |
 | Enable online street map | OSM receives visible tile requests | Off by default; no bulk/offline tile downloads |
-| Load building drafts | Fixed Overpass provider receives selected bounds | No cameras, rooms or recordings sent by the adapter |
+| Submit address/place search | Selected Photon public demo or configured same-origin local search receives submitted text | No request while typing; no device-position bias, camera plan or recordings sent |
+| Load building drafts | Selected Private.coffee/OSM public Overpass or configured same-origin local service receives selected bounds | Explicit Load; no cameras, rooms, routes or recordings sent by the adapter |
+| Open offline OSM JSON | Browser file/paste review | Does not contact a footprint provider; online tiles remain a separate choice |
 | Use my location | Browser location service after a click | Review the suggestion; no continuous tracking |
 | Load optional font | Google Fonts, when available | External request with a system-font fallback |
 
-Local analysis does not make every optional browser asset/provider offline. See [SECURITY.md](../SECURITY.md) and provider disclosures before enabling network features.
+Local analysis does not make every optional browser asset/provider offline. Default local paths are `/geo/search` and `/geo/overpass`; the operator must configure their fixed upstream services. The Sites Worker does not implement them. Same-origin routing does not certify downstream egress, and failure never silently switches to a public provider. See [service contracts](facility-setup-reliability.md#local-and-offline-delivery), [SECURITY.md](../SECURITY.md) and the provider disclosures.
 
 ## Evidence contracts
 

@@ -22,3 +22,12 @@ Owner measurement/shape request (2026-10-27): implement an open-map starter usin
 Owner machine-setup decision (2026-10-27): provide practical Linux and Windows builds for the 100-camera target, including disks/SSDs, RAM, CPU, GPUs/VRAM, power supplies, cooling and storage arithmetic. Integrate a System workspace using the existing dark/teal visual language. Browser preview limits must take effect; exported local policies must have explicit enforced scopes. Hardware and GPU presets are planning candidates, never benchmarks or activated GPU backends. Keep purchasing/installation details in documentation. No disk formatting, RAID provisioning, host tuning, driver installation, camera activation or monitoring starts from the browser.
 
 Owner facility-reliability decision (2026-10-27): advance location-to-editable-footprint setup with submitted address search, explicit provider/privacy choices, deterministic offline extracts, safe advanced geometry and browser regressions. Preserve camera plans, source attribution, editable dimensions and Undo. Exclude unsupported holes/parts instead of inventing geometry. Report live retrieval, scripted effort, novice-user success and survey accuracy as separate evidence.
+
+Documentation reconciliation (2026-10-28): use `docs/product-status.md` for the
+published capability baseline and `docs/verification/README.md` for revision-bound
+checks. The dated decisions above are historical context. PR #11 implemented
+submitted address search, selectable services, offline file review and supported
+outer-only OSM relations; holes/parts, live-provider/site qualification and novice
+acceptance remain open. Reconcile separately reported local AI work with source
+and receipts before presenting it as shipped. Retain synthetic/estimated and
+100-camera qualification boundaries in documentation updates.

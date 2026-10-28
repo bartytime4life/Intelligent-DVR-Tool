@@ -1,6 +1,6 @@
 # Build the next claim with evidence
 
-[Home](../README.md) · [Verification](verification/2026-10-27/README.md) · [100-camera plan](performance-100-cameras.md)
+[Home](../README.md) · [Product status](product-status.md) · [Verification](verification/README.md) · [100-camera plan](performance-100-cameras.md)
 
 The minimum capacity goal is **100 simultaneously active cameras**. Five generated scenes are interface fixtures, not the product target.
 
@@ -8,12 +8,14 @@ The minimum capacity goal is **100 simultaneously active cameras**. Five generat
 | --- | --- | --- |
 | Review | Wall, queue, notes, history, rules and exports | Accessibility/mobile/long-session acceptance; durable authenticated records |
 | Facility | Buildings/floors/rooms/labels, cameras, estimates and rehearsal | Site measurements, optical calibration and qualified visibility |
-| Easy setup | GPS suggestion, area fields, OSM simple-way drafts, seven shapes | Live-provider qualification, complex geometry/holes, address search |
+| Easy setup | Submitted address search, GPS/numeric origin, rectangular area, selectable services, offline-file review, supported outer-only OSM relations, seven shapes | Live-provider/local-deployment and real-site qualification; holes/parts and polygon AOI; novice-user study |
 | Detection | Offline ONNX adapter; prior YOLOX-S compatibility probes | Independent labels, precision/recall, false alerts and held-out scenes |
 | Performance | Bounded scheduler, budgets, synthetic overload model | Sustained decode/inference/end-to-end rates on intended hardware |
 | 100-camera operation | Owner requirement and staged acceptance design | Ingest/recording/worker implementation and simultaneous-source qualification |
 
 ## Priorities and acceptance
+
+The [facility reliability guide](facility-setup-reliability.md) records the implemented search/review path and its limits. Separately reported local AI work needs a matching source revision and test receipt before it joins this published baseline.
 
 1. **Define the workload.** Agree resolution, codec, recording/retention, analysis cadence, maximum delay, allowed loss and quality targets. “100 cameras” alone is not a sufficient benchmark.
 2. **Build representative evaluation.** Use approved recordings with independent labels and reviewed alert coverage. Separate tuning/final scenes. The synthetic corpus checks arithmetic only.

@@ -50,9 +50,11 @@ An evaluation report is **not** a review receipt. `intelligent-dvr.evaluation.v1
 
 ## Maps and location
 
-Facility opens with a local grid. **Use my location** requests one browser position after a click. Review its accuracy and save deliberately; manual coordinates remain available. Location alone does not find buildings.
+Facility opens with a local grid. In **Locate site**, expand **Find an address or place**, choose a disclosed public/local provider, enter text and submit **Search address** (or Enter). Nothing is sent while typing. Select a suggestion, review coordinates and **Save site**. **Use my location** offers a one-shot position and accuracy; numeric coordinates remain available. Saving a changed origin relocates the whole existing plan.
 
-Online street tiles and **Load open building drafts** are separate network actions. The panel describes the coordinates sent. An offline OSM extract avoids the draft-provider request. Unknown floor counts/heights can be placeholders; interiors are not inferred. [Map starter](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Maps-and-shapes).
+Review the bounded rectangular area, choose a building source and **Load open building drafts**, or use **Offline OSM file** / paste a complete Overpass JSON extract. Review selected shells and height/floor assumptions before applying. **Add to existing plan** preserves cameras/rooms; **Replace with a clean site** clears them explicitly. Undo restores the prior plan.
+
+Online street tiles, address search and draft loading are separate actions. Public services receive submitted text or selected bounds; local choices require operator configuration. An offline extract with manually entered coordinates avoids those two provider requests. Unknown heights/floors can be placeholders; interiors are not inferred. [Map starter](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Maps-and-shapes) · [Recovery and test limits](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Facility-setup-reliability).
 
 ## Troubleshooting
 
@@ -60,13 +62,13 @@ Online street tiles and **Load open building drafts** are separate network actio
 | --- | --- |
 | Facility cannot render | A working WebGL-capable browser is required; inspect its visible error and preserve the plan export |
 | Online map/building request fails | Keep the local grid or use an offline extract; provider availability varies |
-| Location fails | Enter coordinates manually; no continuous tracking is required |
+| Address search or location fails | Enter coordinates manually and use an offline extract; a local provider works only after operator configuration |
 | Plan import fails | Check its validation message and [bounded contract](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Facility-planning#bounds-and-capacity) |
 | Another browser lacks your edits | Data belongs to the browser and origin; import an exported copy |
 | Native Python checks skip | Install `edge/requirements-test.txt` in isolation; retain skip counts in reports |
 
-Room drawing currently requires a pointer. Numeric building/camera controls do not remove that accessibility gap. This refresh's browser sweep used a desktop viewport; mobile, screen-reader and long-session acceptance remain separate work.
+Room drawing currently requires a pointer. Numeric building/camera controls do not remove that accessibility gap. The later [facility regression suite](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/facility-2026-10-27/README.md) includes a narrow viewport and keyboard search with mocked services. Full mobile, screen-reader, room-drawing keyboard and long-session acceptance remain separate work.
 
 ---
 
-[Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/getting-started.md) · Documentation refresh: October 27, 2026.
+[Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/getting-started.md) · Documentation refresh: October 28, 2026.
