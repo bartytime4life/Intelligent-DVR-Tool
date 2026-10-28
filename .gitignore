@@ -10,6 +10,8 @@ recordings/
 models/
 receipts/
 qa-local/
+local-evidence*.json
+qualification-preflight*.json
 
 # Transient documentation capture inputs
 /docs/media/captures/

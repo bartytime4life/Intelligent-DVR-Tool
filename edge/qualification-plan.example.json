@@ -1,0 +1,44 @@
+{
+  "schema": "intelligent-dvr.qualification-plan.v1",
+  "minimum_simultaneous_cameras": 100,
+  "stages": [
+    1,
+    5,
+    25,
+    50,
+    100
+  ],
+  "workload": {
+    "codec": null,
+    "width": null,
+    "height": null,
+    "source_fps": null,
+    "analysis_fps_per_camera": null,
+    "maximum_event_delay_seconds": null,
+    "recording_required": null,
+    "retention_days": null,
+    "duration_minutes": null,
+    "maximum_analytics_drop_fraction": null
+  },
+  "hardware": {
+    "host_count": null,
+    "cpu_label": null,
+    "ram_gib": null,
+    "gpu_label": null,
+    "worker_count": null
+  },
+  "quality": {
+    "classes": null,
+    "score_threshold": null,
+    "iou_threshold": null,
+    "minimum_precision": null,
+    "minimum_recall": null,
+    "maximum_false_alerts_per_camera_hour": null,
+    "minimum_reviewed_camera_hours": null
+  },
+  "approvals": {
+    "recording_permission_confirmed": false,
+    "annotation_review_confirmed": false,
+    "workload_accepted": false
+  }
+}
