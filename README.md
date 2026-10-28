@@ -56,6 +56,10 @@ Open the address Vite prints. **Monitor**, **Facility**, **Events**, **Zones**, 
 
 The browser prototype needs no subscription, paid inference, API key, camera credentials or remote backend. Review decisions, rules and plans save in this browser's localStorage; they are editable and can be lost when storage is cleared. Export anything you need to keep. The optional Google Font and explicitly enabled online maps are external requests. [Data boundaries](docs/architecture.md#where-data-goes).
 
+## Owner-PC qualification follow-up
+
+The [October 28 PC report](docs/verification/host-2026-10-28/README.md) records an isolated RTX 5080 trial, short public-feed loads up to 30 active sources and a 300-image person reference benchmark, including two rejected quality experiments. Recordings/images stayed local. This documents local experiments and unpublished work; it does not ship a GPU backend, establish field accuracy or qualify 100 cameras.
+
 ## Claims you can check
 
 | Claim | Evidence | Boundary |

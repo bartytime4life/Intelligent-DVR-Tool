@@ -1,0 +1,92 @@
+{
+  "scope": "Locally tested source; uncommitted files are not claimed to exist in published PR14.",
+  "local_head": "2b6290ee0529eca1d4f4578634e28d8f58cc6709",
+  "files": [
+    {
+      "path": "edge/analyze.py",
+      "sha256": "fd57ca3252e17f5bda96613ac0c7ece5ff69d25c4c8d0d2acd371bdd50515255"
+    },
+    {
+      "path": "edge/model_profiles.py",
+      "sha256": "9a0cfffa5a0fbb7312de96d49c894106a92f5bbc3fec6fa9a5594c0bab06e6b2"
+    },
+    {
+      "path": "edge/scheduler.py",
+      "sha256": "915cd9757a14d54abb5e1bc249ccd91d7ce37d6713786c31025307e87f661eb1"
+    },
+    {
+      "path": "edge/evaluation.py",
+      "sha256": "b3b26e6411ab7a3dd439b275dd6ea9f77b74e7e3d52d937b91d50d01c0206cb7"
+    },
+    {
+      "path": "edge/local_ai.py",
+      "sha256": "8a674fff04c1cd8ba4eb5267de86838372927495e3fc5ac046bbd0f8148b8089"
+    },
+    {
+      "path": "tests/test_local_ai.py",
+      "sha256": "c70dec9bbea0268ac534073da7cb4466019ba4022cea664f560f8c61ea3ff307"
+    },
+    {
+      "path": "src/local-ai.mjs",
+      "sha256": "1dd5dfbcceac90c2d1b8ca194b211df04870c6326a245cac21fcb9e97109ed52"
+    },
+    {
+      "path": "src/LocalAIReview.jsx",
+      "sha256": "73a9c8b52d2aa03d9fe7ee3136ada9e3bbd163ebbf03d181ebbe42efe11b993f"
+    },
+    {
+      "path": "src/local-ai.css",
+      "sha256": "6279f8acb5baf17d0c05e7f495b9b94422f0a4c6f237f25adae444adc4e20b5f"
+    },
+    {
+      "path": "tests/local-ai.test.mjs",
+      "sha256": "ca3e2f1f35b394b2ef561adb0ae68960d33cd0f15fa8a7635af8f0a9696e9e3a"
+    },
+    {
+      "path": "docs/local-ai.md",
+      "sha256": "648a722c015d8e62a0c34392de2d9017c0912602feee6721608148b4386bd588"
+    }
+  ],
+  "private_harnesses": [
+    {
+      "name": "gpu-qualification-20261028/gpu_runtime.py",
+      "sha256": "fe6a2ea19eb649f1512dafec910f78ddc1fdefef27aa137c59b14d7f20c2aa72"
+    },
+    {
+      "name": "gpu-qualification-20261028/parity.py",
+      "sha256": "8d9e023418e6161edbd28eb9e476eb8adbdde2c79fcd8bb66fe3ca567df87f04"
+    },
+    {
+      "name": "gpu-qualification-20261028/live_load_gpu.py",
+      "sha256": "7538699d4a0153199efd4659a27b9f9c344c5a6629e895222c589e27357621fd"
+    },
+    {
+      "name": "gpu-qualification-20261028/live_load_gpu_alternate.py",
+      "sha256": "e0d81cead2281ee1d7bf1a253358564af69d954bd70d9e43f1ebd6a5d3ba08a8"
+    },
+    {
+      "name": "person-reference-20261028/prepare.py",
+      "sha256": "06f8c8334275bbe3444cfb4f4f62d6e47ceae45c982e1b9c53ce033744705391"
+    },
+    {
+      "name": "person-reference-20261028/score.py",
+      "sha256": "488b130b3d543928e18841d059f43228315df46b90bb653e6e89139d86bdb67b"
+    },
+    {
+      "name": "person-tiling-20261028/prepare.py",
+      "sha256": "267d2a8ff674768b4ac4e3b0cd5c46ed808f9edfac806f32c294deb0d91730a4"
+    },
+    {
+      "name": "person-tiling-20261028/score.py",
+      "sha256": "b3cd2f4a732cdd4713005f93f0843917dbdf19bbfb05907885d80a473a18bfce"
+    },
+    {
+      "name": "person-threshold-20261028/prepare.py",
+      "sha256": "9c83f2fc1cb5b040c24abfa64e93f2d07e05c9bcfc4fc6ca3b2bb87bb0438a8e"
+    },
+    {
+      "name": "person-threshold-20261028/score.py",
+      "sha256": "00791ace0a74627ccf631dda8b609d61934142bcd844fcff24cf82594c8771be"
+    }
+  ]
+}

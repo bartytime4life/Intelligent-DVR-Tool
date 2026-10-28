@@ -1,0 +1,31 @@
+{
+  "checks": [
+    {
+      "name": "python",
+      "scope": "Local uncommitted source, separate from published baseline and documentation PR CI.",
+      "run": 136,
+      "passed": 136,
+      "skipped": 0,
+      "log_sha256": "fd345ad80e08b332e86c1b4dde98d1721b13a5ed095620a3ef58c86b851780f3"
+    },
+    {
+      "name": "frontend",
+      "scope": "Local uncommitted source, separate from published baseline and documentation PR CI.",
+      "run": 106,
+      "passed": 106,
+      "skipped": 0,
+      "log_sha256": "26b7413f55f9ca03678c5b63d794d369c5fbac08a54b77e37b0125f8053b3a96"
+    },
+    {
+      "name": "packaging",
+      "scope": "Local uncommitted source, separate from published baseline and documentation PR CI.",
+      "run": 4,
+      "passed": 4,
+      "skipped": 0,
+      "log_sha256": "40cb5561f1fb6db812edc45279260f711e3a6daaa9bc563e40b44121b4fbed1f"
+    }
+  ],
+  "ui_build_exit_code": 0,
+  "build_log_sha256": "54aea87d64a7c2a39b64d71cfcdd9e9119a52638b3288f848721a1ee8064327d",
+  "manual_browser": "Actual in-app walkthrough; not a standalone Playwright/full accessibility/cross-browser claim."
+}

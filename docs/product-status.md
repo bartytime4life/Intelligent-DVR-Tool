@@ -55,10 +55,7 @@ source/log collector, listed-file integrity verification and a workload-plan
 preflight. These preparation tools do not run inference or qualify any operating
 capacity; their tests belong to their own revision, not the baseline counts above.
 
-Separately reported local AI adapter/runner and threshold-study work is awaiting
-an accessible source revision, diff, dependencies/profiles and exact test receipts.
-It is not included in this baseline. Keep native execution, GPU behavior and
-100-camera claims unqualified until their own measurements exist.
+The [owner-PC continuation](verification/host-2026-10-28/README.md) now records local AI execution, isolated GPU output agreement, short public-feed loads and fixed person-image metrics with source hashes and sanitized receipts. The local adapter/UI changes and private GPU harness are not included in this published implementation baseline. Production integration, representative video/event accuracy, sustained recording and 100-camera acceptance remain unqualified.
 
 [Issue #6](https://github.com/bartytime4life/Intelligent-DVR-Tool/issues/6) retains
 polygon AOI/complex geometry, production/local-service delivery, real-site checks

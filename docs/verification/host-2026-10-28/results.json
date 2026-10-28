@@ -1,0 +1,2647 @@
+{
+  "schema": "intelligent-dvr.host-qualification-summary.v1",
+  "date": "2026-10-28",
+  "publication_scope": "Documentation and sanitized numeric/selection metadata only; no runtime implementation promotion.",
+  "source": {
+    "published_pr": 14,
+    "pr_merge": "f2d4ed075903d6a2a83b1820d6120f640491b7d5",
+    "local_head": "2b6290ee0529eca1d4f4578634e28d8f58cc6709",
+    "local_branch": "codex/open-map-facility-starter",
+    "local_worktree_was_dirty": true,
+    "local_workflow_changes_in_documentation_pr": false
+  },
+  "hardware": {
+    "cpu": "AMD Ryzen 9 9950X",
+    "physical_cores": 16,
+    "logical_processors": 32,
+    "os_usable_ram_bytes": 130149392384,
+    "gpu": "NVIDIA GeForce RTX 5080",
+    "gpu_vram_mib": 16303,
+    "driver": "580.178.04",
+    "os": "Linux x86_64 7.0.0-38-generic",
+    "resource_context": "Shared desktop; around 6-7 GiB available RAM and effectively full 8 GiB swap. No host tuning."
+  },
+  "detector": {
+    "profile": "opencv-zoo-yolox-s-2022nov",
+    "model_sha256": "c5c2d13e59ae883e6af3b45daea64af4833a4951c92d116ec270d9ddbe998063",
+    "model_bytes": 35858002,
+    "labels_sha256": "76ce1473f01bd271bab54429737358a97160629cf970c5ec8384c2777dd0bae9",
+    "input": "RGB FP32 unnormalized 0..255, 640x640 top-left letterbox; exact project YOLOX preparation/decoder",
+    "native_runtime_pins": [
+      "opencv-python-headless==4.13.0.92",
+      "numpy==2.5.4",
+      "onnx==1.23.2",
+      "ml_dtypes==0.6.0",
+      "protobuf==7.36.2",
+      "typing_extensions==4.16.0"
+    ],
+    "production_backend": "OpenCV CPU",
+    "gpu_candidate": "Isolated ONNX Runtime CUDA, FP32, TF32 disabled"
+  },
+  "vision": {
+    "runtime": "Ollama 0.35.1, fixed loopback endpoint",
+    "failed_baseline": {
+      "model": "qwen3-vl:4b",
+      "profile": "baseline",
+      "num_ctx": 4096,
+      "num_predict": 512,
+      "completion": "length",
+      "generated_tokens": 512,
+      "final_content_characters": 0,
+      "thinking_characters": 2076
+    },
+    "working_explicit_candidate": {
+      "model": "qwen3.5:4b",
+      "digest": "d8b0f5e9760cd1682034f292d7ef72ec46f432149be0df7574bf2d6e92e38c04",
+      "profile": "baseline",
+      "synthetic_wall_ms": 2954,
+      "synthetic_load_ms": 2449.01,
+      "synthetic_output_tokens": 62,
+      "person_frame_wall_ms": 4706,
+      "person_frame_load_ms": 3635,
+      "person_frame_output_tokens": 69
+    },
+    "quality_or_concurrent_residency_qualified": false,
+    "baseline_defaults_changed": false
+  },
+  "cpu_thread_vehicle_comparison": [
+    {
+      "threads": 1,
+      "p50_ms": 280.29,
+      "p95_ms": 460.64,
+      "command_wall_seconds": 13.5467
+    },
+    {
+      "threads": 2,
+      "p50_ms": 160.84,
+      "p95_ms": 166.67,
+      "command_wall_seconds": 7.5836
+    },
+    {
+      "threads": 4,
+      "p50_ms": 96.86,
+      "p95_ms": 102.5,
+      "command_wall_seconds": 5.0278
+    }
+  ],
+  "cpu_thread_detection_outputs_identical": true,
+  "gpu_parity": {
+    "passed": true,
+    "frames": 100,
+    "failed_frames": 0,
+    "samples_by_kind": {
+      "vehicle": 40,
+      "person": 60
+    },
+    "minimum_matched_iou": 0.9999956908415983,
+    "maximum_matched_score_delta": 3.6441184114721636e-06,
+    "raw_output_max_absolute_delta": 0.0001729726791381836,
+    "latencies_ms": {
+      "cpu": {
+        "p50": 101.97766602504998,
+        "p95": 111.9886550004594
+      },
+      "gpu": {
+        "p50": 11.474099999759346,
+        "p95": 15.02893801080063
+      }
+    },
+    "session_creation_ms": 524.4646520004608,
+    "warmups_excluded": [
+      {
+        "backend": "cpu",
+        "runs": 3,
+        "total_ms": 309.78211300680414
+      },
+      {
+        "backend": "gpu",
+        "runs": 3,
+        "total_ms": 253.43684299150482
+      }
+    ],
+    "requested_options": {
+      "device_id": 0,
+      "use_tf32": 0,
+      "gpu_mem_limit": 1073741824,
+      "arena_extend_strategy": "kSameAsRequested",
+      "cudnn_conv_algo_search": "HEURISTIC",
+      "cudnn_conv_use_max_workspace": "0"
+    },
+    "versions": {
+      "onnxruntime": "1.31.1",
+      "opencv": "4.13.0",
+      "numpy": "2.5.4"
+    },
+    "network_guard": true,
+    "limitations": [
+      "100 frozen frames from two clips; no accuracy or general numerical-equivalence claim.",
+      "Timings include preprocessing, output transfer, decoder and input hashing; exclude recording decode.",
+      "Shared desktop host, one sequential run, not sustained capacity.",
+      "CUDA arena limit is 1 GiB; total device memory can exceed it."
+    ]
+  },
+  "cpu_live_load": [
+    {
+      "requested": 5,
+      "active_peak": 5,
+      "sources_without_errors": 5,
+      "measured_seconds": 12.029549764993135,
+      "decoded_frames": 905,
+      "decoded_frames_per_second": 75.23141079091886,
+      "offered_samples": 115,
+      "completed_samples": 112,
+      "completed_samples_per_second": 9.310406639318135,
+      "replaced_pending_samples": 1,
+      "stale_samples": 0,
+      "pending_at_stop": 2,
+      "budget_dropped": 0,
+      "inference_ms_p50": 96.81824903236702,
+      "inference_ms_p95": 106.30653501721099,
+      "local_decoded_sample_age_ms_p95": 495.86150131653994,
+      "sampled_peak_combined_rss_bytes": 439074816,
+      "retained_fragment_bytes": 960499,
+      "verified_fragment_files": 19,
+      "source_errors": [],
+      "observed_profile_variations": {
+        "[480, 270, '5580000/371983']": 1,
+        "[480, 270, '5580000/371981']": 1,
+        "[480, 270, '930000/61997']": 1,
+        "[480, 270, '7470000/497921']": 1,
+        "[480, 270, '3090000/205967']": 1,
+        "[480, 270, '5940000/395977']": 2,
+        "[480, 270, '270000/17999']": 3,
+        "[480, 270, '237600/15839']": 1,
+        "[480, 270, '1980000/131993']": 2
+      },
+      "resolution_counts_distinct_sources": {
+        "480x270": 5
+      },
+      "observed_segment_frame_rate_range": [
+        15.000685515198276,
+        15.002403297615638
+      ]
+    },
+    {
+      "requested": 10,
+      "active_peak": 10,
+      "sources_without_errors": 10,
+      "measured_seconds": 12.033436911995523,
+      "decoded_frames": 1810,
+      "decoded_frames_per_second": 150.41421775317596,
+      "offered_samples": 230,
+      "completed_samples": 120,
+      "completed_samples_per_second": 9.972213331702275,
+      "replaced_pending_samples": 103,
+      "stale_samples": 0,
+      "pending_at_stop": 7,
+      "budget_dropped": 0,
+      "inference_ms_p50": 95.8557190024294,
+      "inference_ms_p95": 104.76354596903548,
+      "local_decoded_sample_age_ms_p95": 607.2636495227925,
+      "sampled_peak_combined_rss_bytes": 481210368,
+      "retained_fragment_bytes": 1910575,
+      "verified_fragment_files": 39,
+      "source_errors": [],
+      "observed_profile_variations": {
+        "[480, 270, '5580000/371981']": 1,
+        "[480, 270, '930000/61997']": 1,
+        "[480, 270, '657000/43793']": 1,
+        "[480, 270, '12060000/803869']": 1,
+        "[480, 270, '297000/19799']": 2,
+        "[480, 270, '247500/16499']": 2,
+        "[480, 270, '5940000/395977']": 3,
+        "[480, 270, '270000/17999']": 4,
+        "[480, 270, '1980000/131993']": 3,
+        "[480, 270, '110000/7333']": 1,
+        "[480, 270, '5940000/395981']": 1,
+        "[480, 270, '1440000/96017']": 1,
+        "[480, 270, '640000/42663']": 1,
+        "[480, 270, '2880000/191983']": 1
+      },
+      "resolution_counts_distinct_sources": {
+        "480x270": 10
+      },
+      "observed_segment_frame_rate_range": [
+        14.997344220294323,
+        15.002444428134435
+      ]
+    },
+    {
+      "requested": 25,
+      "active_peak": 24,
+      "sources_without_errors": 24,
+      "measured_seconds": 12.013835147023201,
+      "decoded_frames": 4464,
+      "decoded_frames_per_second": 371.57160435201195,
+      "offered_samples": 553,
+      "completed_samples": 117,
+      "completed_samples_per_second": 9.738771888258377,
+      "replaced_pending_samples": 414,
+      "stale_samples": 0,
+      "pending_at_stop": 22,
+      "budget_dropped": 0,
+      "inference_ms_p50": 98.45732903340831,
+      "inference_ms_p95": 105.53543298738077,
+      "local_decoded_sample_age_ms_p95": 614.8592418758199,
+      "sampled_peak_combined_rss_bytes": 648863744,
+      "retained_fragment_bytes": 6089148,
+      "verified_fragment_files": 96,
+      "source_errors": [
+        {
+          "id": "camera-13",
+          "publisher_id": "59644941",
+          "errors": [
+            "TimeoutError: The read operation timed out"
+          ]
+        }
+      ],
+      "observed_profile_variations": {
+        "[480, 270, '279000/18599']": 1,
+        "[480, 270, '348750/23249']": 1,
+        "[480, 270, '930000/61997']": 1,
+        "[480, 270, '7920000/527917']": 1,
+        "[480, 270, '1590000/105983']": 1,
+        "[480, 270, '270000/17999']": 9,
+        "[480, 270, '5940000/395977']": 6,
+        "[480, 270, '1980000/131993']": 5,
+        "[480, 270, '297000/19799']": 6,
+        "[480, 270, '247500/16499']": 7,
+        "[480, 270, '5940000/395981']": 2,
+        "[480, 270, '237600/15839']": 4,
+        "[480, 270, '1152000/76793']": 1,
+        "[480, 270, '2880000/191983']": 1,
+        "[480, 270, '640000/42663']": 1,
+        "[800, 450, '247500/16499']": 1,
+        "[800, 450, '61875/4156']": 1,
+        "[800, 450, '41250/2729']": 1,
+        "[480, 270, '5580000/371981']": 1,
+        "[480, 270, '5580000/371983']": 1,
+        "[768, 432, '480000/19199']": 1,
+        "[768, 432, '462000/18479']": 1,
+        "[768, 432, '540000/21599']": 1,
+        "[768, 432, '600000/23999']": 1,
+        "[480, 270, '2970000/196489']": 1,
+        "[480, 270, '2970000/197987']": 1,
+        "[480, 270, '2790000/185989']": 1,
+        "[480, 270, '620000/41331']": 1
+      },
+      "resolution_counts_distinct_sources": {
+        "480x270": 22,
+        "800x450": 1,
+        "768x432": 1
+      },
+      "observed_segment_frame_rate_range": [
+        14.888113570741098,
+        25.00135288706099
+      ]
+    },
+    {
+      "requested": 30,
+      "active_peak": 28,
+      "sources_without_errors": 28,
+      "measured_seconds": 12.028177268977743,
+      "decoded_frames": 5152,
+      "decoded_frames_per_second": 428.32757489263884,
+      "offered_samples": 644,
+      "completed_samples": 117,
+      "completed_samples_per_second": 9.727159600628639,
+      "replaced_pending_samples": 501,
+      "stale_samples": 0,
+      "pending_at_stop": 26,
+      "budget_dropped": 0,
+      "inference_ms_p50": 97.9296889854595,
+      "inference_ms_p95": 106.28911602543667,
+      "local_decoded_sample_age_ms_p95": 613.6274150339887,
+      "sampled_peak_combined_rss_bytes": 677167104,
+      "retained_fragment_bytes": 7111370,
+      "verified_fragment_files": 114,
+      "source_errors": [
+        {
+          "id": "camera-13",
+          "publisher_id": "59644941",
+          "errors": [
+            "HTTPError: HTTP Error 404: Not Found"
+          ]
+        },
+        {
+          "id": "camera-30",
+          "publisher_id": "59645007",
+          "errors": [
+            "HTTPError: HTTP Error 404: Not Found"
+          ]
+        }
+      ],
+      "observed_profile_variations": {
+        "[480, 270, '5580000/407983']": 1,
+        "[480, 270, '5580000/371981']": 2,
+        "[480, 270, '930000/61997']": 1,
+        "[480, 270, '630000/43367']": 1,
+        "[480, 270, '90000/5999']": 1,
+        "[480, 270, '93600/6239']": 1,
+        "[480, 270, '5940000/395977']": 5,
+        "[480, 270, '1980000/131993']": 7,
+        "[480, 270, '270000/17999']": 6,
+        "[480, 270, '297000/19799']": 5,
+        "[480, 270, '110000/7333']": 1,
+        "[480, 270, '247500/16499']": 8,
+        "[480, 270, '1152000/76793']": 1,
+        "[480, 270, '640000/42663']": 1,
+        "[800, 450, '5940000/395977']": 1,
+        "[800, 450, '270000/17999']": 1,
+        "[800, 450, '2970000/197987']": 1,
+        "[480, 270, '5580000/371983']": 1,
+        "[480, 270, '348750/23249']": 1,
+        "[768, 432, '455625/18224']": 1,
+        "[768, 432, '450000/17999']": 1,
+        "[768, 432, '720000/28799']": 1,
+        "[480, 270, '237600/15839']": 6,
+        "[480, 270, '5940000/395981']": 1,
+        "[480, 270, '2970000/197987']": 2,
+        "[480, 270, '2790000/185989']": 1,
+        "[768, 432, '3600000/287999']": 1,
+        "[768, 432, '25/2']": 1,
+        "[768, 432, '1800000/143999']": 1
+      },
+      "resolution_counts_distinct_sources": {
+        "480x270": 25,
+        "800x450": 1,
+        "768x432": 2
+      },
+      "observed_segment_frame_rate_range": [
+        12.5,
+        25.00138896605367
+      ]
+    }
+  ],
+  "gpu_live_load": [
+    {
+      "requested": 5,
+      "active_peak": 5,
+      "sources_without_errors": 5,
+      "measured_seconds": 12.001099250977859,
+      "decoded_frames": 905,
+      "decoded_frames_per_second": 75.40975881240712,
+      "offered_samples": 115,
+      "completed_samples": 115,
+      "completed_samples_per_second": 9.582455539698142,
+      "replaced_pending_samples": 0,
+      "stale_samples": 0,
+      "pending_at_stop": 0,
+      "budget_dropped": 0,
+      "inference_ms_p50": 10.274273983668536,
+      "inference_ms_p95": 15.503097034525126,
+      "local_decoded_sample_age_ms_p95": 103.61130995443091,
+      "sampled_peak_combined_rss_bytes": 1319501824,
+      "retained_fragment_bytes": 819047,
+      "verified_fragment_files": 20,
+      "source_errors": [],
+      "observed_profiles": [
+        {
+          "source": "camera-01",
+          "dimensions": [
+            [
+              480,
+              270,
+              "930000/61997"
+            ],
+            [
+              480,
+              270,
+              "279000/18599"
+            ],
+            [
+              480,
+              270,
+              "348750/23249"
+            ]
+          ]
+        },
+        {
+          "source": "camera-02",
+          "dimensions": [
+            [
+              480,
+              270,
+              "652500/43493"
+            ],
+            [
+              480,
+              270,
+              "395000/26329"
+            ],
+            [
+              480,
+              270,
+              "294000/19597"
+            ]
+          ]
+        },
+        {
+          "source": "camera-03",
+          "dimensions": [
+            [
+              480,
+              270,
+              "5940000/395977"
+            ],
+            [
+              480,
+              270,
+              "270000/17999"
+            ],
+            [
+              480,
+              270,
+              "2970000/199489"
+            ]
+          ]
+        },
+        {
+          "source": "camera-04",
+          "dimensions": [
+            [
+              480,
+              270,
+              "270000/17999"
+            ],
+            [
+              480,
+              270,
+              "1980000/131993"
+            ]
+          ]
+        },
+        {
+          "source": "camera-05",
+          "dimensions": [
+            [
+              480,
+              270,
+              "1980000/131993"
+            ],
+            [
+              480,
+              270,
+              "270000/17999"
+            ]
+          ]
+        }
+      ],
+      "attempt": "stage-5",
+      "sampled_peak_worker_gpu_memory_mib": null,
+      "minimum_host_available_bytes": 6778748928,
+      "all_sources_without_errors": true
+    },
+    {
+      "requested": 10,
+      "active_peak": 10,
+      "sources_without_errors": 10,
+      "measured_seconds": 12.001285717007704,
+      "decoded_frames": 1805,
+      "decoded_frames_per_second": 150.40055228766298,
+      "offered_samples": 230,
+      "completed_samples": 230,
+      "completed_samples_per_second": 19.164613310893344,
+      "replaced_pending_samples": 0,
+      "stale_samples": 0,
+      "pending_at_stop": 0,
+      "budget_dropped": 0,
+      "inference_ms_p50": 9.969813982024789,
+      "inference_ms_p95": 10.684872046113014,
+      "local_decoded_sample_age_ms_p95": 179.23185805557296,
+      "sampled_peak_combined_rss_bytes": 1359032320,
+      "retained_fragment_bytes": 1756678,
+      "verified_fragment_files": 40,
+      "source_errors": [],
+      "observed_profiles": [
+        {
+          "source": "camera-01",
+          "dimensions": [
+            [
+              480,
+              270,
+              "279000/18599"
+            ],
+            [
+              480,
+              270,
+              "174375/12562"
+            ],
+            [
+              480,
+              270,
+              "930000/61997"
+            ]
+          ]
+        },
+        {
+          "source": "camera-02",
+          "dimensions": [
+            [
+              480,
+              270,
+              "1023750/68239"
+            ],
+            [
+              480,
+              270,
+              "410000/27329"
+            ],
+            [
+              480,
+              270,
+              "91875/6124"
+            ]
+          ]
+        },
+        {
+          "source": "camera-03",
+          "dimensions": [
+            [
+              480,
+              270,
+              "5940000/395977"
+            ]
+          ]
+        },
+        {
+          "source": "camera-04",
+          "dimensions": [
+            [
+              480,
+              270,
+              "270000/17999"
+            ],
+            [
+              480,
+              270,
+              "1980000/131993"
+            ]
+          ]
+        },
+        {
+          "source": "camera-05",
+          "dimensions": [
+            [
+              480,
+              270,
+              "270000/17999"
+            ],
+            [
+              480,
+              270,
+              "1980000/131993"
+            ]
+          ]
+        },
+        {
+          "source": "camera-06",
+          "dimensions": [
+            [
+              480,
+              270,
+              "297000/19799"
+            ],
+            [
+              480,
+              270,
+              "247500/16499"
+            ],
+            [
+              480,
+              270,
+              "1980000/131993"
+            ]
+          ]
+        },
+        {
+          "source": "camera-07",
+          "dimensions": [
+            [
+              480,
+              270,
+              "297000/19799"
+            ]
+          ]
+        },
+        {
+          "source": "camera-08",
+          "dimensions": [
+            [
+              480,
+              270,
+              "1980000/131993"
+            ],
+            [
+              480,
+              270,
+              "270000/17999"
+            ]
+          ]
+        },
+        {
+          "source": "camera-09",
+          "dimensions": [
+            [
+              480,
+              270,
+              "237600/15839"
+            ],
+            [
+              480,
+              270,
+              "5940000/395977"
+            ],
+            [
+              480,
+              270,
+              "247500/16499"
+            ]
+          ]
+        },
+        {
+          "source": "camera-10",
+          "dimensions": [
+            [
+              480,
+              270,
+              "2880000/191983"
+            ],
+            [
+              480,
+              270,
+              "640000/42663"
+            ]
+          ]
+        }
+      ],
+      "attempt": "stage-10",
+      "sampled_peak_worker_gpu_memory_mib": null,
+      "minimum_host_available_bytes": 6735179776,
+      "all_sources_without_errors": true
+    },
+    {
+      "requested": 25,
+      "active_peak": 25,
+      "sources_without_errors": 24,
+      "measured_seconds": 12.00518734200159,
+      "decoded_frames": 4394,
+      "decoded_frames_per_second": 366.0084490832611,
+      "offered_samples": 558,
+      "completed_samples": 555,
+      "completed_samples_per_second": 46.230015758126974,
+      "replaced_pending_samples": 0,
+      "stale_samples": 0,
+      "pending_at_stop": 3,
+      "budget_dropped": 0,
+      "inference_ms_p50": 10.344495007302612,
+      "inference_ms_p95": 11.418977985158563,
+      "local_decoded_sample_age_ms_p95": 285.69141909247264,
+      "sampled_peak_combined_rss_bytes": 1508298752,
+      "retained_fragment_bytes": 5664987,
+      "verified_fragment_files": 98,
+      "source_errors": [
+        {
+          "camera": "camera-17",
+          "publisher_id": "59645492",
+          "decoded_frames_before_stop": 80,
+          "errors": [
+            "HTTPError: HTTP Error 404: Not Found"
+          ]
+        }
+      ],
+      "observed_profiles": [
+        {
+          "source": "camera-01",
+          "dimensions": [
+            [
+              480,
+              270,
+              "279000/18599"
+            ],
+            [
+              480,
+              270,
+              "348750/23249"
+            ],
+            [
+              480,
+              270,
+              "930000/61997"
+            ]
+          ]
+        },
+        {
+          "source": "camera-02",
+          "dimensions": [
+            [
+              480,
+              270,
+              "637500/42493"
+            ],
+            [
+              480,
+              270,
+              "910000/60657"
+            ],
+            [
+              480,
+              270,
+              "150000/9799"
+            ]
+          ]
+        },
+        {
+          "source": "camera-03",
+          "dimensions": [
+            [
+              480,
+              270,
+              "237600/16439"
+            ],
+            [
+              480,
+              270,
+              "297000/19799"
+            ],
+            [
+              480,
+              270,
+              "247500/16499"
+            ]
+          ]
+        },
+        {
+          "source": "camera-04",
+          "dimensions": [
+            [
+              480,
+              270,
+              "270000/17999"
+            ],
+            [
+              480,
+              270,
+              "1980000/131993"
+            ],
+            [
+              480,
+              270,
+              "5940000/395977"
+            ]
+          ]
+        },
+        {
+          "source": "camera-05",
+          "dimensions": [
+            [
+              480,
+              270,
+              "270000/17999"
+            ],
+            [
+              480,
+              270,
+              "1980000/131993"
+            ]
+          ]
+        },
+        {
+          "source": "camera-06",
+          "dimensions": [
+            [
+              480,
+              270,
+              "5940000/395977"
+            ],
+            [
+              480,
+              270,
+              "270000/17999"
+            ]
+          ]
+        },
+        {
+          "source": "camera-07",
+          "dimensions": [
+            [
+              480,
+              270,
+              "297000/19799"
+            ],
+            [
+              480,
+              270,
+              "5940000/395981"
+            ]
+          ]
+        },
+        {
+          "source": "camera-08",
+          "dimensions": [
+            [
+              480,
+              270,
+              "270000/17999"
+            ],
+            [
+              480,
+              270,
+              "1980000/131993"
+            ]
+          ]
+        },
+        {
+          "source": "camera-09",
+          "dimensions": [
+            [
+              480,
+              270,
+              "247500/16499"
+            ],
+            [
+              480,
+              270,
+              "237600/15839"
+            ],
+            [
+              480,
+              270,
+              "5940000/395977"
+            ]
+          ]
+        },
+        {
+          "source": "camera-10",
+          "dimensions": [
+            [
+              480,
+              270,
+              "640000/42663"
+            ],
+            [
+              480,
+              270,
+              "1152000/76793"
+            ]
+          ]
+        },
+        {
+          "source": "camera-11",
+          "dimensions": [
+            [
+              800,
+              450,
+              "5940000/461971"
+            ],
+            [
+              800,
+              450,
+              "660000/49997"
+            ],
+            [
+              800,
+              450,
+              "5940000/395977"
+            ]
+          ]
+        },
+        {
+          "source": "camera-12",
+          "dimensions": [
+            [
+              480,
+              270,
+              "297000/19799"
+            ],
+            [
+              480,
+              270,
+              "1980000/131993"
+            ]
+          ]
+        },
+        {
+          "source": "camera-13",
+          "dimensions": [
+            [
+              480,
+              270,
+              "1485000/98993"
+            ],
+            [
+              480,
+              270,
+              "237600/15839"
+            ],
+            [
+              480,
+              270,
+              "247500/16499"
+            ]
+          ]
+        },
+        {
+          "source": "camera-14",
+          "dimensions": [
+            [
+              480,
+              270,
+              "270000/17999"
+            ],
+            [
+              480,
+              270,
+              "297000/19799"
+            ]
+          ]
+        },
+        {
+          "source": "camera-15",
+          "dimensions": [
+            [
+              480,
+              270,
+              "5940000/395977"
+            ],
+            [
+              480,
+              270,
+              "247500/16499"
+            ],
+            [
+              480,
+              270,
+              "1980000/131993"
+            ]
+          ]
+        },
+        {
+          "source": "camera-16",
+          "dimensions": [
+            [
+              480,
+              270,
+              "279000/18599"
+            ],
+            [
+              480,
+              270,
+              "5580000/383981"
+            ],
+            [
+              480,
+              270,
+              "5580000/371983"
+            ]
+          ]
+        },
+        {
+          "source": "camera-17",
+          "dimensions": [
+            [
+              768,
+              432,
+              "3600000/143993"
+            ]
+          ]
+        },
+        {
+          "source": "camera-18",
+          "dimensions": [
+            [
+              480,
+              270,
+              "1980000/131993"
+            ],
+            [
+              480,
+              270,
+              "61875/4156"
+            ],
+            [
+              480,
+              270,
+              "5940000/392977"
+            ]
+          ]
+        },
+        {
+          "source": "camera-19",
+          "dimensions": [
+            [
+              480,
+              270,
+              "5940000/395977"
+            ],
+            [
+              480,
+              270,
+              "247500/16499"
+            ]
+          ]
+        },
+        {
+          "source": "camera-20",
+          "dimensions": [
+            [
+              480,
+              270,
+              "270000/17999"
+            ],
+            [
+              480,
+              270,
+              "247500/16499"
+            ],
+            [
+              480,
+              270,
+              "5940000/395977"
+            ]
+          ]
+        },
+        {
+          "source": "camera-21",
+          "dimensions": [
+            [
+              480,
+              270,
+              "5940000/395977"
+            ],
+            [
+              480,
+              270,
+              "1980000/131993"
+            ]
+          ]
+        },
+        {
+          "source": "camera-22",
+          "dimensions": [
+            [
+              480,
+              270,
+              "620000/41331"
+            ],
+            [
+              480,
+              270,
+              "2790000/185989"
+            ]
+          ]
+        },
+        {
+          "source": "camera-23",
+          "dimensions": [
+            [
+              480,
+              270,
+              "5940000/395977"
+            ],
+            [
+              480,
+              270,
+              "270000/17999"
+            ],
+            [
+              480,
+              270,
+              "247500/16499"
+            ]
+          ]
+        },
+        {
+          "source": "camera-24",
+          "dimensions": [
+            [
+              480,
+              270,
+              "237600/15839"
+            ],
+            [
+              480,
+              270,
+              "247500/16499"
+            ]
+          ]
+        },
+        {
+          "source": "camera-25",
+          "dimensions": [
+            [
+              480,
+              270,
+              "237600/15839"
+            ],
+            [
+              480,
+              270,
+              "247500/16499"
+            ]
+          ]
+        }
+      ],
+      "attempt": "stage-25",
+      "sampled_peak_worker_gpu_memory_mib": 722,
+      "minimum_host_available_bytes": 6540591104,
+      "all_sources_without_errors": false
+    },
+    {
+      "requested": 30,
+      "active_peak": 29,
+      "sources_without_errors": 29,
+      "measured_seconds": 12.007270284986589,
+      "decoded_frames": 5334,
+      "decoded_frames_per_second": 444.2308595875801,
+      "offered_samples": 667,
+      "completed_samples": 655,
+      "completed_samples_per_second": 54.550283657642474,
+      "replaced_pending_samples": 4,
+      "stale_samples": 0,
+      "pending_at_stop": 8,
+      "budget_dropped": 0,
+      "inference_ms_p50": 10.159850004129112,
+      "inference_ms_p95": 11.166897020302713,
+      "local_decoded_sample_age_ms_p95": 325.87702583987266,
+      "sampled_peak_combined_rss_bytes": 1562021888,
+      "retained_fragment_bytes": 8110271,
+      "verified_fragment_files": 118,
+      "source_errors": [
+        {
+          "camera": "camera-30",
+          "publisher_id": "59645007",
+          "decoded_frames_before_stop": 0,
+          "errors": [
+            "HTTPError: HTTP Error 404: Not Found"
+          ]
+        }
+      ],
+      "observed_profiles": [
+        {
+          "source": "camera-01",
+          "dimensions": [
+            [
+              480,
+              270,
+              "5580000/371897"
+            ],
+            [
+              480,
+              270,
+              "5580000/371983"
+            ],
+            [
+              480,
+              270,
+              "279000/18599"
+            ]
+          ]
+        },
+        {
+          "source": "camera-02",
+          "dimensions": [
+            [
+              480,
+              270,
+              "90000/5999"
+            ],
+            [
+              480,
+              270,
+              "2745000/182971"
+            ]
+          ]
+        },
+        {
+          "source": "camera-03",
+          "dimensions": [
+            [
+              480,
+              270,
+              "247500/16499"
+            ],
+            [
+              480,
+              270,
+              "297000/19799"
+            ]
+          ]
+        },
+        {
+          "source": "camera-04",
+          "dimensions": [
+            [
+              480,
+              270,
+              "247500/16499"
+            ],
+            [
+              480,
+              270,
+              "1980000/131993"
+            ],
+            [
+              480,
+              270,
+              "270000/17999"
+            ]
+          ]
+        },
+        {
+          "source": "camera-05",
+          "dimensions": [
+            [
+              480,
+              270,
+              "270000/17999"
+            ],
+            [
+              480,
+              270,
+              "1980000/131993"
+            ]
+          ]
+        },
+        {
+          "source": "camera-06",
+          "dimensions": [
+            [
+              480,
+              270,
+              "5940000/395977"
+            ],
+            [
+              480,
+              270,
+              "1980000/131993"
+            ],
+            [
+              480,
+              270,
+              "270000/17999"
+            ]
+          ]
+        },
+        {
+          "source": "camera-07",
+          "dimensions": [
+            [
+              480,
+              270,
+              "297000/19799"
+            ],
+            [
+              480,
+              270,
+              "110000/7333"
+            ]
+          ]
+        },
+        {
+          "source": "camera-08",
+          "dimensions": [
+            [
+              480,
+              270,
+              "270000/17999"
+            ],
+            [
+              480,
+              270,
+              "1980000/131993"
+            ]
+          ]
+        },
+        {
+          "source": "camera-09",
+          "dimensions": [
+            [
+              480,
+              270,
+              "247500/16499"
+            ],
+            [
+              480,
+              270,
+              "5940000/395977"
+            ]
+          ]
+        },
+        {
+          "source": "camera-10",
+          "dimensions": [
+            [
+              480,
+              270,
+              "640000/42663"
+            ],
+            [
+              480,
+              270,
+              "2880000/191983"
+            ],
+            [
+              480,
+              270,
+              "180000/11999"
+            ]
+          ]
+        },
+        {
+          "source": "camera-11",
+          "dimensions": [
+            [
+              800,
+              450,
+              "61875/4156"
+            ],
+            [
+              800,
+              450,
+              "41250/2729"
+            ],
+            [
+              800,
+              450,
+              "27500/1861"
+            ]
+          ]
+        },
+        {
+          "source": "camera-12",
+          "dimensions": [
+            [
+              480,
+              270,
+              "5940000/395981"
+            ],
+            [
+              480,
+              270,
+              "1980000/131993"
+            ],
+            [
+              480,
+              270,
+              "297000/19799"
+            ]
+          ]
+        },
+        {
+          "source": "camera-13",
+          "dimensions": [
+            [
+              480,
+              270,
+              "247500/16499"
+            ],
+            [
+              480,
+              270,
+              "5940000/395977"
+            ],
+            [
+              480,
+              270,
+              "2970000/197987"
+            ]
+          ]
+        },
+        {
+          "source": "camera-14",
+          "dimensions": [
+            [
+              480,
+              270,
+              "297000/19799"
+            ],
+            [
+              480,
+              270,
+              "270000/17999"
+            ]
+          ]
+        },
+        {
+          "source": "camera-15",
+          "dimensions": [
+            [
+              480,
+              270,
+              "270000/17999"
+            ],
+            [
+              480,
+              270,
+              "5940000/395977"
+            ],
+            [
+              480,
+              270,
+              "1980000/131993"
+            ]
+          ]
+        },
+        {
+          "source": "camera-16",
+          "dimensions": [
+            [
+              480,
+              270,
+              "5580000/371983"
+            ],
+            [
+              480,
+              270,
+              "5580000/371981"
+            ]
+          ]
+        },
+        {
+          "source": "camera-17",
+          "dimensions": [
+            [
+              768,
+              432,
+              "42000/1789"
+            ],
+            [
+              768,
+              432,
+              "450000/17999"
+            ],
+            [
+              768,
+              432,
+              "3600000/143993"
+            ],
+            [
+              768,
+              432,
+              "480000/19199"
+            ]
+          ]
+        },
+        {
+          "source": "camera-18",
+          "dimensions": [
+            [
+              480,
+              270,
+              "5940000/395977"
+            ],
+            [
+              480,
+              270,
+              "237600/15839"
+            ],
+            [
+              480,
+              270,
+              "247500/16499"
+            ]
+          ]
+        },
+        {
+          "source": "camera-19",
+          "dimensions": [
+            [
+              480,
+              270,
+              "247500/16499"
+            ],
+            [
+              480,
+              270,
+              "5940000/395977"
+            ]
+          ]
+        },
+        {
+          "source": "camera-20",
+          "dimensions": [
+            [
+              480,
+              270,
+              "5940000/395977"
+            ]
+          ]
+        },
+        {
+          "source": "camera-21",
+          "dimensions": [
+            [
+              480,
+              270,
+              "297000/19799"
+            ],
+            [
+              480,
+              270,
+              "1980000/131993"
+            ]
+          ]
+        },
+        {
+          "source": "camera-22",
+          "dimensions": [
+            [
+              480,
+              270,
+              "2790000/185989"
+            ]
+          ]
+        },
+        {
+          "source": "camera-23",
+          "dimensions": [
+            [
+              480,
+              270,
+              "5940000/395977"
+            ],
+            [
+              480,
+              270,
+              "2970000/197987"
+            ],
+            [
+              480,
+              270,
+              "270000/17999"
+            ]
+          ]
+        },
+        {
+          "source": "camera-24",
+          "dimensions": [
+            [
+              480,
+              270,
+              "247500/16499"
+            ],
+            [
+              480,
+              270,
+              "237600/15839"
+            ]
+          ]
+        },
+        {
+          "source": "camera-25",
+          "dimensions": [
+            [
+              480,
+              270,
+              "2970000/197987"
+            ],
+            [
+              480,
+              270,
+              "247500/16499"
+            ],
+            [
+              480,
+              270,
+              "237600/15839"
+            ]
+          ]
+        },
+        {
+          "source": "camera-26",
+          "dimensions": [
+            [
+              768,
+              432,
+              "3690000/295199"
+            ],
+            [
+              768,
+              432,
+              "3600000/287999"
+            ],
+            [
+              768,
+              432,
+              "25/2"
+            ]
+          ]
+        },
+        {
+          "source": "camera-27",
+          "dimensions": [
+            [
+              480,
+              270,
+              "1980000/131993"
+            ],
+            [
+              480,
+              270,
+              "297000/19799"
+            ]
+          ]
+        },
+        {
+          "source": "camera-28",
+          "dimensions": [
+            [
+              480,
+              270,
+              "2970000/197987"
+            ],
+            [
+              480,
+              270,
+              "270000/17999"
+            ],
+            [
+              480,
+              270,
+              "5940000/395977"
+            ]
+          ]
+        },
+        {
+          "source": "camera-29",
+          "dimensions": [
+            [
+              480,
+              270,
+              "237600/15839"
+            ],
+            [
+              480,
+              270,
+              "2970000/197987"
+            ],
+            [
+              480,
+              270,
+              "247500/16499"
+            ]
+          ]
+        },
+        {
+          "source": "camera-30",
+          "dimensions": []
+        }
+      ],
+      "attempt": "stage-30",
+      "sampled_peak_worker_gpu_memory_mib": 722,
+      "minimum_host_available_bytes": 6954266624,
+      "all_sources_without_errors": false
+    },
+    {
+      "requested": 30,
+      "active_peak": 30,
+      "sources_without_errors": 30,
+      "measured_seconds": 12.012176790973172,
+      "decoded_frames": 5636,
+      "decoded_frames_per_second": 469.19056371492155,
+      "offered_samples": 691,
+      "completed_samples": 679,
+      "completed_samples_per_second": 56.52597458524339,
+      "replaced_pending_samples": 3,
+      "stale_samples": 0,
+      "pending_at_stop": 9,
+      "budget_dropped": 0,
+      "inference_ms_p50": 10.146407992579043,
+      "inference_ms_p95": 11.032879003323615,
+      "local_decoded_sample_age_ms_p95": 339.5464764907956,
+      "sampled_peak_combined_rss_bytes": 1565716480,
+      "retained_fragment_bytes": 7741751,
+      "verified_fragment_files": 122,
+      "source_errors": [],
+      "observed_profiles": [
+        {
+          "source": "camera-01",
+          "dimensions": [
+            [
+              480,
+              270,
+              "5580000/371983"
+            ],
+            [
+              480,
+              270,
+              "930000/61997"
+            ]
+          ]
+        },
+        {
+          "source": "camera-02",
+          "dimensions": [
+            [
+              480,
+              270,
+              "285000/18997"
+            ],
+            [
+              480,
+              270,
+              "90000/5999"
+            ],
+            [
+              480,
+              270,
+              "9810000/653897"
+            ]
+          ]
+        },
+        {
+          "source": "camera-03",
+          "dimensions": [
+            [
+              480,
+              270,
+              "5940000/395977"
+            ],
+            [
+              480,
+              270,
+              "1980000/131993"
+            ]
+          ]
+        },
+        {
+          "source": "camera-04",
+          "dimensions": [
+            [
+              480,
+              270,
+              "1980000/131993"
+            ],
+            [
+              480,
+              270,
+              "270000/17999"
+            ],
+            [
+              480,
+              270,
+              "5940000/395977"
+            ]
+          ]
+        },
+        {
+          "source": "camera-05",
+          "dimensions": [
+            [
+              480,
+              270,
+              "1980000/131993"
+            ],
+            [
+              480,
+              270,
+              "270000/17999"
+            ],
+            [
+              480,
+              270,
+              "297000/19799"
+            ]
+          ]
+        },
+        {
+          "source": "camera-06",
+          "dimensions": [
+            [
+              480,
+              270,
+              "270000/17999"
+            ],
+            [
+              480,
+              270,
+              "5940000/395981"
+            ],
+            [
+              480,
+              270,
+              "237600/15839"
+            ]
+          ]
+        },
+        {
+          "source": "camera-07",
+          "dimensions": [
+            [
+              480,
+              270,
+              "5940000/395981"
+            ],
+            [
+              480,
+              270,
+              "110000/7333"
+            ]
+          ]
+        },
+        {
+          "source": "camera-08",
+          "dimensions": [
+            [
+              480,
+              270,
+              "1980000/131993"
+            ],
+            [
+              480,
+              270,
+              "270000/17999"
+            ]
+          ]
+        },
+        {
+          "source": "camera-09",
+          "dimensions": [
+            [
+              480,
+              270,
+              "247500/16499"
+            ],
+            [
+              480,
+              270,
+              "5940000/395977"
+            ]
+          ]
+        },
+        {
+          "source": "camera-10",
+          "dimensions": [
+            [
+              480,
+              270,
+              "1152000/76793"
+            ],
+            [
+              480,
+              270,
+              "2880000/191983"
+            ],
+            [
+              480,
+              270,
+              "640000/42663"
+            ]
+          ]
+        },
+        {
+          "source": "camera-11",
+          "dimensions": [
+            [
+              800,
+              450,
+              "5940000/395977"
+            ],
+            [
+              800,
+              450,
+              "270000/17999"
+            ],
+            [
+              800,
+              450,
+              "2970000/197987"
+            ]
+          ]
+        },
+        {
+          "source": "camera-12",
+          "dimensions": [
+            [
+              480,
+              270,
+              "1980000/131993"
+            ],
+            [
+              480,
+              270,
+              "297000/19799"
+            ]
+          ]
+        },
+        {
+          "source": "camera-13",
+          "dimensions": [
+            [
+              480,
+              270,
+              "5940000/395977"
+            ],
+            [
+              480,
+              270,
+              "1485000/98993"
+            ],
+            [
+              480,
+              270,
+              "2970000/200989"
+            ]
+          ]
+        },
+        {
+          "source": "camera-14",
+          "dimensions": [
+            [
+              480,
+              270,
+              "270000/17999"
+            ],
+            [
+              480,
+              270,
+              "297000/19799"
+            ],
+            [
+              480,
+              270,
+              "1980000/131993"
+            ]
+          ]
+        },
+        {
+          "source": "camera-15",
+          "dimensions": [
+            [
+              480,
+              270,
+              "5940000/395977"
+            ],
+            [
+              480,
+              270,
+              "270000/17999"
+            ]
+          ]
+        },
+        {
+          "source": "camera-16",
+          "dimensions": [
+            [
+              480,
+              270,
+              "930000/61997"
+            ],
+            [
+              480,
+              270,
+              "5580000/371981"
+            ],
+            [
+              480,
+              270,
+              "5580000/371983"
+            ]
+          ]
+        },
+        {
+          "source": "camera-17",
+          "dimensions": [
+            [
+              768,
+              432,
+              "7200000/287987"
+            ],
+            [
+              768,
+              432,
+              "480000/19199"
+            ],
+            [
+              768,
+              432,
+              "6930000/277183"
+            ],
+            [
+              768,
+              432,
+              "7200000/287981"
+            ]
+          ]
+        },
+        {
+          "source": "camera-18",
+          "dimensions": [
+            [
+              480,
+              270,
+              "247500/16499"
+            ]
+          ]
+        },
+        {
+          "source": "camera-19",
+          "dimensions": [
+            [
+              480,
+              270,
+              "237600/15839"
+            ],
+            [
+              480,
+              270,
+              "247500/16499"
+            ]
+          ]
+        },
+        {
+          "source": "camera-20",
+          "dimensions": [
+            [
+              480,
+              270,
+              "5940000/395977"
+            ],
+            [
+              480,
+              270,
+              "270000/17999"
+            ]
+          ]
+        },
+        {
+          "source": "camera-21",
+          "dimensions": [
+            [
+              480,
+              270,
+              "1980000/131993"
+            ],
+            [
+              480,
+              270,
+              "297000/19799"
+            ],
+            [
+              480,
+              270,
+              "270000/17999"
+            ]
+          ]
+        },
+        {
+          "source": "camera-22",
+          "dimensions": [
+            [
+              480,
+              270,
+              "5580000/371977"
+            ],
+            [
+              480,
+              270,
+              "2790000/185989"
+            ]
+          ]
+        },
+        {
+          "source": "camera-23",
+          "dimensions": [
+            [
+              480,
+              270,
+              "5940000/395977"
+            ],
+            [
+              480,
+              270,
+              "247500/16499"
+            ]
+          ]
+        },
+        {
+          "source": "camera-24",
+          "dimensions": [
+            [
+              480,
+              270,
+              "237600/15839"
+            ],
+            [
+              480,
+              270,
+              "247500/16499"
+            ]
+          ]
+        },
+        {
+          "source": "camera-25",
+          "dimensions": [
+            [
+              480,
+              270,
+              "237600/15839"
+            ],
+            [
+              480,
+              270,
+              "247500/16499"
+            ]
+          ]
+        },
+        {
+          "source": "camera-26",
+          "dimensions": [
+            [
+              768,
+              432,
+              "1200000/95999"
+            ],
+            [
+              768,
+              432,
+              "3600000/287999"
+            ],
+            [
+              768,
+              432,
+              "3690000/295199"
+            ],
+            [
+              768,
+              432,
+              "3600000/288001"
+            ]
+          ]
+        },
+        {
+          "source": "camera-27",
+          "dimensions": [
+            [
+              480,
+              270,
+              "1980000/131993"
+            ]
+          ]
+        },
+        {
+          "source": "camera-28",
+          "dimensions": [
+            [
+              480,
+              270,
+              "270000/17999"
+            ],
+            [
+              480,
+              270,
+              "237600/15839"
+            ],
+            [
+              480,
+              270,
+              "247500/16499"
+            ]
+          ]
+        },
+        {
+          "source": "camera-29",
+          "dimensions": [
+            [
+              480,
+              270,
+              "237600/15839"
+            ],
+            [
+              480,
+              270,
+              "660000/43997"
+            ],
+            [
+              480,
+              270,
+              "247500/16499"
+            ]
+          ]
+        },
+        {
+          "source": "camera-30",
+          "dimensions": [
+            [
+              768,
+              432,
+              "3000000/119993"
+            ],
+            [
+              768,
+              432,
+              "450000/17999"
+            ],
+            [
+              768,
+              432,
+              "562500/22499"
+            ]
+          ]
+        }
+      ],
+      "attempt": "stage-30-alternate",
+      "sampled_peak_worker_gpu_memory_mib": null,
+      "minimum_host_available_bytes": 6793154560,
+      "all_sources_without_errors": true
+    }
+  ],
+  "person_benchmarks": [
+    {
+      "images": 100,
+      "published_person_boxes": 142,
+      "method": {
+        "dataset": "COCO val2017",
+        "class": "person",
+        "image_license_ids": [
+          4
+        ],
+        "license": "Publisher-declared CC BY 2.0 images; annotations CC BY 4.0.",
+        "selection": "Sort each stratum by SHA256(dvr-person-qualification-v1|image_id), take first 50.",
+        "strata": {
+          "person": 50,
+          "no_annotated_person": 50
+        },
+        "exclude_images_with_person_crowd": true,
+        "score_threshold": 0.5,
+        "iou_threshold": 0.5,
+        "decoder_threshold": 0.1,
+        "matching": "Existing edge.evaluation.match_frame, score-descending same-class one-to-one IoU.",
+        "threshold_tuning": false,
+        "model_training": false,
+        "scope": "Still-image reference benchmark, not video/event/field accuracy or a standard full COCO AP score."
+      },
+      "manifest_sha256": "2ab97a892d3366434bed1f7ed50c2eb2fc75fdf53ddb5aa8ff2c2c54790a16f0",
+      "model_sha256": "c5c2d13e59ae883e6af3b45daea64af4833a4951c92d116ec270d9ddbe998063",
+      "network_guard": true,
+      "production_defaults_changed": false,
+      "limitations": [
+        "Public validation benchmark related to model training domain; no independence from upstream model development is asserted.",
+        "Published annotations are the reference, not infallible real-world truth.",
+        "Balanced person/no-person sampling changes prevalence; aggregate precision is specific to this subset.",
+        "Crowd images excluded to avoid unsafely scoring incomplete individual boxes.",
+        "No public redistribution of image bytes; original source links and license metadata retained.",
+        "Presence false-positive fraction is per sampled image, not false alerts per hour.",
+        "No timing/temporal alignment is needed for these independently keyed still images; MEVA video annotation alignment remains unresolved.",
+        "This stratified 100-image subset does not establish full COCO AP, real CCTV accuracy, event recall or operational approval."
+      ],
+      "name": "reference",
+      "result_artifact_sha256": "1e066b2702f0c9155f1a8417f35c60e4b74f0db61d305f38e59c7c38455bad09",
+      "trace_artifact_sha256": "225a799b37ff04eacaaa76c9dd7a1a3d6c45b2fd8cf41d0b8255dbceb1cedf5f",
+      "cuda_node_execution_counts": {
+        "CUDAExecutionProvider": 20909
+      },
+      "person_detection": {
+        "cpu": {
+          "TP": 95,
+          "FP": 10,
+          "FN": 47,
+          "precision": 0.9047619047619048,
+          "recall": 0.6690140845070423,
+          "f1": 0.7692307692307693
+        },
+        "gpu": {
+          "TP": 95,
+          "FP": 10,
+          "FN": 47,
+          "precision": 0.9047619047619048,
+          "recall": 0.6690140845070423,
+          "f1": 0.7692307692307693
+        }
+      },
+      "person_presence_per_image": {
+        "cpu": {
+          "TP": 47,
+          "FP": 0,
+          "FN": 3,
+          "TN": 50
+        },
+        "gpu": {
+          "TP": 47,
+          "FP": 0,
+          "FN": 3,
+          "TN": 50
+        }
+      },
+      "gpu_recall_by_published_person_area": {
+        "small": {
+          "TP": 15,
+          "FN": 29,
+          "recall": 0.3409090909090909
+        },
+        "medium": {
+          "TP": 35,
+          "FN": 12,
+          "recall": 0.7446808510638298
+        },
+        "large": {
+          "TP": 45,
+          "FN": 6,
+          "recall": 0.8823529411764706
+        }
+      },
+      "cpu_gpu_count_agreement_images": 100
+    },
+    {
+      "images": 100,
+      "published_person_boxes": 164,
+      "method": {
+        "dataset": "COCO val2017",
+        "class": "person",
+        "image_license_ids": [
+          4
+        ],
+        "license": "Publisher-declared CC BY 2.0 images; annotations CC BY 4.0.",
+        "selection": "Sort each stratum by SHA256(dvr-person-qualification-v1|image_id), take positions 50 through 99 (zero-based), disjoint from earlier 0 through 49.",
+        "strata": {
+          "person": 50,
+          "no_annotated_person": 50
+        },
+        "exclude_images_with_person_crowd": true,
+        "score_threshold": 0.5,
+        "iou_threshold": 0.5,
+        "decoder_threshold": 0.1,
+        "matching": "Existing edge.evaluation.match_frame, score-descending same-class one-to-one IoU.",
+        "threshold_tuning": false,
+        "model_training": false,
+        "scope": "Reserved still-image subset for one fixed tiling candidate; no threshold tuning or field claim.",
+        "candidate": {
+          "passes": "one full frame plus four corner crops each 60 percent of source width/height",
+          "overlap": "20 percent of source width/height",
+          "merge_nms_iou": 0.45,
+          "gate": "recall improvement with precision reduction no more than 5 percentage points; report compute cost",
+          "automatic_adoption": false
+        }
+      },
+      "manifest_sha256": "e4ebb141b8591aa11b1744424ddbd88eafd2928c530b66ac951f9b7058755820",
+      "model_sha256": "c5c2d13e59ae883e6af3b45daea64af4833a4951c92d116ec270d9ddbe998063",
+      "network_guard": true,
+      "production_defaults_changed": false,
+      "limitations": [
+        "Public validation benchmark related to model training domain; no independence from upstream model development is asserted.",
+        "Published annotations are the reference, not infallible real-world truth.",
+        "Balanced person/no-person sampling changes prevalence; aggregate precision is specific to this subset.",
+        "Crowd images excluded to avoid unsafely scoring incomplete individual boxes.",
+        "No public redistribution of image bytes; original source links and license metadata retained.",
+        "One fixed spatial candidate on one reserved subset, no threshold sweep or adoption.",
+        "Tiled timing includes full-frame inference plus four crop passes and global NMS; excludes image decoding.",
+        "Full-frame result reused in tiling and counted once in tiling time; warm cache/order can influence paired latency.",
+        "Exact image IDs and bytes differ from earlier subset; semantic scene/source independence is not proven.",
+        "This does not measure sustained five-pass camera capacity, event accuracy or full COCO AP."
+      ],
+      "name": "tiling",
+      "result_artifact_sha256": "99b5561fe4141063700c8708bed1b7f8db6f544dfefcbd7ade2cee6dc647c439",
+      "trace_artifact_sha256": "4250429ed89e5d5f7aec0fab937a3cce9cab1b4fa0818334728e6428ffa57f07",
+      "cuda_node_execution_counts": {
+        "CUDAExecutionProvider": 609
+      },
+      "metrics": {
+        "baseline": {
+          "TP": 111,
+          "FP": 7,
+          "FN": 53,
+          "precision": 0.940677966101695,
+          "recall": 0.676829268292683,
+          "f1": 0.7872340425531915
+        },
+        "tiled": {
+          "TP": 113,
+          "FP": 118,
+          "FN": 51,
+          "precision": 0.48917748917748916,
+          "recall": 0.6890243902439024,
+          "f1": 0.5721518987341773
+        }
+      },
+      "person_presence_per_image": {
+        "baseline": {
+          "TP": 43,
+          "FP": 1,
+          "FN": 7,
+          "TN": 49
+        },
+        "tiled": {
+          "TP": 45,
+          "FP": 3,
+          "FN": 5,
+          "TN": 47
+        }
+      },
+      "recall_by_published_person_area": {
+        "baseline": {
+          "small": {
+            "TP": 6,
+            "FN": 28,
+            "recall": 0.17647058823529413
+          },
+          "medium": {
+            "TP": 42,
+            "FN": 17,
+            "recall": 0.711864406779661
+          },
+          "large": {
+            "TP": 63,
+            "FN": 8,
+            "recall": 0.8873239436619719
+          }
+        },
+        "tiled": {
+          "small": {
+            "TP": 10,
+            "FN": 24,
+            "recall": 0.29411764705882354
+          },
+          "medium": {
+            "TP": 42,
+            "FN": 17,
+            "recall": 0.711864406779661
+          },
+          "large": {
+            "TP": 61,
+            "FN": 10,
+            "recall": 0.8591549295774648
+          }
+        }
+      },
+      "declared_gate_met": false,
+      "recall_delta_percentage_points": 1.2195121951219412,
+      "precision_delta_percentage_points": -45.15004769242058,
+      "latencies_ms": {
+        "baseline": {
+          "p50": 10.183579986914992,
+          "p95": 10.920379951130599
+        },
+        "tiled": {
+          "p50": 51.42167198937386,
+          "p95": 54.23320893896744
+        }
+      }
+    },
+    {
+      "images": 100,
+      "published_person_boxes": 143,
+      "method": {
+        "dataset": "COCO val2017",
+        "class": "person",
+        "image_license_ids": [
+          4
+        ],
+        "license": "Publisher-declared CC BY 2.0 images; annotations CC BY 4.0.",
+        "selection": "Sort each stratum by SHA256(dvr-person-qualification-v1|image_id), take positions 100 through 149 (zero-based), excluding both earlier image subsets.",
+        "strata": {
+          "person": 50,
+          "no_annotated_person": 50
+        },
+        "exclude_images_with_person_crowd": true,
+        "score_threshold": 0.5,
+        "iou_threshold": 0.5,
+        "decoder_threshold": 0.1,
+        "matching": "Existing edge.evaluation.match_frame, score-descending same-class one-to-one IoU.",
+        "threshold_tuning": false,
+        "model_training": false,
+        "scope": "One fixed confidence candidate on a third reserved subset, not field accuracy or full COCO AP.",
+        "candidate": {
+          "baseline_score_threshold": 0.5,
+          "candidate_score_threshold": 0.3,
+          "extra_model_passes": 0,
+          "gate": "recall gain at least 5 percentage points and precision loss no more than 5 percentage points",
+          "automatic_adoption": false
+        }
+      },
+      "manifest_sha256": "dd714ccb08a2439f1b61dbc5d78e8c41ced40f40774cae53b104790b0bcfdf9e",
+      "model_sha256": "c5c2d13e59ae883e6af3b45daea64af4833a4951c92d116ec270d9ddbe998063",
+      "network_guard": true,
+      "production_defaults_changed": false,
+      "limitations": [
+        "Public validation benchmark related to model training domain; no independence from upstream model development is asserted.",
+        "Published annotations are the reference, not infallible real-world truth.",
+        "Balanced person/no-person sampling changes prevalence; aggregate precision is specific to this subset.",
+        "Crowd images excluded to avoid unsafely scoring incomplete individual boxes.",
+        "No public redistribution of image bytes; original source links and license metadata retained.",
+        "One fixed lower threshold on one reserved subset; no continuous threshold search.",
+        "No extra inference pass; filtering/rule/event costs and new capacity are not measured.",
+        "Image IDs/bytes differ from earlier sets; semantic scene and upstream model-development independence are not proven.",
+        "A benchmark gate is not operational approval; video event and facility accuracy remain unqualified."
+      ],
+      "name": "confidence",
+      "result_artifact_sha256": "6d224a5cdc02cdb718f8b5d6f9fda118aa07e05a86421a5f498bf37235872f50",
+      "trace_artifact_sha256": "60fd8a6438858aebe2c865d0a3b7a62ddc1148e44182b423d12b808b541e28fe",
+      "cuda_node_execution_counts": {
+        "CUDAExecutionProvider": 609
+      },
+      "metrics": {
+        "baseline": {
+          "TP": 82,
+          "FP": 5,
+          "FN": 61,
+          "precision": 0.9425287356321839,
+          "recall": 0.5734265734265734,
+          "f1": 0.7130434782608696
+        },
+        "candidate": {
+          "TP": 97,
+          "FP": 17,
+          "FN": 46,
+          "precision": 0.8508771929824561,
+          "recall": 0.6783216783216783,
+          "f1": 0.754863813229572
+        }
+      },
+      "person_presence_per_image": {
+        "baseline": {
+          "TP": 41,
+          "FP": 1,
+          "FN": 9,
+          "TN": 49
+        },
+        "candidate": {
+          "TP": 45,
+          "FP": 3,
+          "FN": 5,
+          "TN": 47
+        }
+      },
+      "recall_by_published_person_area": {
+        "baseline": {
+          "small": {
+            "TP": 13,
+            "FN": 48,
+            "recall": 0.21311475409836064
+          },
+          "medium": {
+            "TP": 38,
+            "FN": 10,
+            "recall": 0.7916666666666666
+          },
+          "large": {
+            "TP": 31,
+            "FN": 3,
+            "recall": 0.9117647058823529
+          }
+        },
+        "candidate": {
+          "small": {
+            "TP": 25,
+            "FN": 36,
+            "recall": 0.4098360655737705
+          },
+          "medium": {
+            "TP": 41,
+            "FN": 7,
+            "recall": 0.8541666666666666
+          },
+          "large": {
+            "TP": 31,
+            "FN": 3,
+            "recall": 0.9117647058823529
+          }
+        }
+      },
+      "declared_gate_met": false,
+      "recall_delta_percentage_points": 10.48951048951049,
+      "precision_delta_percentage_points": -9.165154264972774
+    }
+  ],
+  "pooled_baseline_300_images": {
+    "images": 300,
+    "published_person_boxes": 449,
+    "metrics": {
+      "TP": 288,
+      "FP": 22,
+      "FN": 161,
+      "precision": 0.9290322580645162,
+      "recall": 0.6414253897550112
+    },
+    "person_presence_per_image": {
+      "TP": 131,
+      "FP": 2,
+      "FN": 19,
+      "TN": 148
+    },
+    "recall_by_published_area": {
+      "small": {
+        "TP": 34,
+        "FN": 105,
+        "recall": 0.2446043165467626
+      },
+      "medium": {
+        "TP": 115,
+        "FN": 39,
+        "recall": 0.7467532467532467
+      },
+      "large": {
+        "TP": 139,
+        "FN": 17,
+        "recall": 0.8910256410256411
+      }
+    },
+    "interpretation": "Fixed 0.5 confidence and IoU 0.5, stratified public image benchmark, not field/event accuracy."
+  },
+  "recordings_kept_local": true,
+  "production_defaults_changed": false,
+  "camera_capacity_100_qualified": false,
+  "privacy_exclusions": [
+    "Recording/image bytes, private filesystem/user/host identifiers, raw model responses/reasoning, signed media URLs/headers, credentials, local browser state."
+  ]
+}
