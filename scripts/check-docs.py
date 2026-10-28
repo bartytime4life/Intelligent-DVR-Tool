@@ -21,6 +21,8 @@ def check():
             ROOT / 'docs/verification/native-2026-10-28/README.md',
             ROOT / 'docs/verification/host-2026-10-28/README.md',
             ROOT / 'docs/verification/cuda-2026-10-28/README.md',
+            ROOT / 'docs/verification/workers-2026-10-28/README.md',
+            ROOT / 'docs/performance-100-cameras.md',
             ROOT / 'edge/README.md', ROOT / 'docs/third-party-notices.md',
             ROOT / 'docs/offline-qualification.md',
             *[ROOT / ('docs/' + n + '.md') for n in
@@ -141,6 +143,7 @@ def check():
         raise ValueError('\n'.join(errors))
     runpy.run_path(str(ROOT / 'docs/verification/host-2026-10-28/verify-results.py'))['check']()
     runpy.run_path(str(ROOT / 'docs/verification/cuda-2026-10-28/verify-results.py'))['check']()
+    runpy.run_path(str(ROOT / 'docs/verification/workers-2026-10-28/verify-results.py'))['check']()
     print(f'Documentation checks passed: {links} local links, {len(manifest["assets"])} media hashes, {total:,} media bytes, test-count consistency.')
 
 

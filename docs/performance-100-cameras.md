@@ -8,10 +8,13 @@ generated scenes are UI fixtures, not a product capacity limit. The
 [capacity target](../edge/capacity-target.json) records this decision separately
 from workload values still requiring pilot decisions.
 
-Current state: a single-recording analyzer, hash-bound YOLOX profile, evaluation
-harness, reusable sample scheduler and synthetic load model. No live ingest,
-recording service, GPU inference backend, distributed worker service or
-100-camera hardware qualification is implemented or activated by this change.
+Current state: a single-recording analyzer with an explicit optional CUDA backend,
+hash-bound YOLOX profile, evaluation harness, reusable sample scheduler, bounded
+local execution adapter and synthetic load model. The
+[CUDA record](verification/cuda-2026-10-28/README.md) and
+[worker record](verification/workers-2026-10-28/README.md) retain measured scope.
+Live ingest, a recording service, distributed/supervised workers and 100-camera
+hardware acceptance remain open.
 
 ## Separate the workloads
 
@@ -47,8 +50,8 @@ more IDs (up to 10,000 for this component). It offers:
   dispatched, completed and failed work, plus queue/worker/payload high-water marks.
 
 The scheduler is thread-safe and creates no capture, inference or worker threads.
-Future adapters submit immutable byte payloads and execute returned `Work`
-items in separately bounded workers, then return each token. Omit explicit
+The local adapter below executes returned `Work` items in bounded threads and
+returns each token. Omit explicit
 `now` in threaded use so the shared monotonic clock is read inside the lock.
 The default payload bound fits 640×640×3 byte images, not raw 1080p buffers or
 float32 model tensors. Decoders, preprocessing, workers, results and copies
@@ -60,6 +63,36 @@ cancellation here; future process supervision is a separate requirement. The
 scheduler is deliberately not wired into the recording analyzer: dropped or
 skipped samples can change dwell behavior and detection quality, so that
 integration needs its own ordered, per-camera trace and gap/reset tests.
+
+## Bounded local execution adapter
+
+`edge.workers.LocalWorkers(scheduler, processors)` adds 1–4 explicit local
+processors. Each callable receives one immutable `Sample`; give each native
+processor its own model session. Processor count must match scheduler slots.
+Construction rejects an already busy scheduler. The adapter exclusively owns
+dispatch/completion; producer threads may continue submitting samples.
+
+One controlling thread calls `step()` to collect completed `Outcome` records
+and dispatch into free slots. There is at most one active call per processor,
+no additional executor backlog, and no concurrent calls for one camera. The
+scheduler continues counting active payloads against its retained-byte budget.
+Results remain associated with their original camera, sequence and token.
+
+An exception is returned in `Outcome.error`, marks that token failed and stops
+new dispatch. Other active calls may finish; pending work is retained in the
+scheduler counters. There is no retry, substitution or CPU fallback.
+`close()` waits for active calls, returns their remaining outcomes and does not
+dispatch pending work. It is idempotent. The caller constructs/cleans up its
+processors and must consume all outcomes, including those returned by `close()`.
+The context manager closes workers but does not return remaining outcomes;
+call `close()` explicitly when those results are needed.
+
+Thread execution cannot kill a hung native GPU call. Supervised process
+deadlines/restarts, result-size budgets, durable outcomes, per-camera rules and
+live recording remain separate work. The adapter does not change analyzer CLI
+defaults or the browser's planning controls. Four sessions are an explicit
+tested candidate on one PC, not a new universal/default worker count. See the
+[dated comparison and limits](verification/workers-2026-10-28/README.md).
 
 ## Reproduce the load model
 
