@@ -1,0 +1,63 @@
+{
+  "base_commit": "e0a0a12e68613b16dd9df68153bd0f95f5e88437",
+  "bindings": {
+    "implementation": [
+      {
+        "path": "edge/workers.py",
+        "sha256": "790392890fd13f4131c640b9ee0c263e40ba6661edbd55f06f3ff2660cca9f38"
+      },
+      {
+        "path": "tests/test_workers.py",
+        "sha256": "d17b72f689d825b13f95fc7d02e31aebd0eb40de6574dcbbf077b9a93ad653f3"
+      },
+      {
+        "path": "edge/inference.py",
+        "sha256": "8393956c8c994da89f074b9fb9a49071d1ebe0868f26d13892c9a8159c305f8b"
+      },
+      {
+        "path": "edge/scheduler.py",
+        "sha256": "915cd9757a14d54abb5e1bc249ccd91d7ce37d6713786c31025307e87f661eb1"
+      },
+      {
+        "path": "edge/model_profiles.py",
+        "sha256": "9a0cfffa5a0fbb7312de96d49c894106a92f5bbc3fec6fa9a5594c0bab06e6b2"
+      }
+    ],
+    "private_harnesses": [
+      {
+        "path": "replay_pool.py",
+        "sha256": "ce0970e17a4437392c94324f4f309b2bcfbd69fef95dec55bbe05a486055fd2f"
+      },
+      {
+        "path": "session_trial.py",
+        "sha256": "af595e4facd6b145dbcb7800e50b65e56d6af4df05fbf49f77fab81b4bef3cc1"
+      },
+      {
+        "path": "pool_parity.py",
+        "sha256": "ce40dbc33b44da32cb4943e7cf013bbf3847433e1e5af7b10ea74af45e293b68"
+      },
+      {
+        "path": "run_final.py",
+        "sha256": "a25b903465d2b44f24adb0a7f5a5531239a12e837cb3823362bbdcd0687c6567"
+      },
+      {
+        "path": "workers-initial-load-snapshot.py",
+        "sha256": "e0753b8124b46c8a5f3e28938468e040adff6096344b34e9e5b3042f191c63f1"
+      },
+      {
+        "path": "export_results.py",
+        "sha256": "54d3835dfd715ed510691708fa1446ce9ef49bf1dabba69ab2b97b13010b64b6"
+      }
+    ],
+    "private_logs": [
+      {
+        "path": "python-cpu-env-final.log",
+        "sha256": "238619b1ee9cfd4788670196900f2b71b4620b7744843ee5360c5e7749554669"
+      },
+      {
+        "path": "python-gpu-env-final.log",
+        "sha256": "25afa20524745985fed7e56e884f392a263301bf1ad68dfdeabcba171119dd39"
+      }
+    ]
+  }
+}

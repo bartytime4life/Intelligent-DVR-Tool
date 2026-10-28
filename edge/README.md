@@ -134,6 +134,12 @@ browser imports events and does not execute or select this backend. See
 [GPU guidance](../docs/gpu-planning.md) and the
 [backend qualification record](../docs/verification/cuda-2026-10-28/README.md).
 
+The separate `edge.workers.LocalWorkers` adapter executes 1–4 explicitly
+supplied processors against the existing bounded scheduler. It is a local
+integration component, not a new analyzer flag, GPU default or camera service.
+Its ownership, outcome/failure handling, native-call limits and measured replay
+scope are in the [worker guide](../docs/performance-100-cameras.md#bounded-local-execution-adapter).
+
 Rule JSON is an array of named rules; browser rule exports have a separate
 schema and are intentionally not silently accepted by this CLI. Map a browser
 zone's normalized `rect` into an edge rule with an actual model label, and review

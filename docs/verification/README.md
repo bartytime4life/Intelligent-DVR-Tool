@@ -18,6 +18,7 @@ own CI checks; this index does not automatically certify future source or deploy
 
 | Record | Scope and results | Interpretation |
 | --- | --- | --- |
+| [Bounded local workers, October 28](workers-2026-10-28/README.md) | Explicit 1–4 execution adapter, native parity and 100-stream replay | Offline experiments with repeated public recordings; capacity, hard native-call cancellation and live-service acceptance remain open |
 | [Optional CUDA analyzer, October 28](cuda-2026-10-28/README.md) | Explicit backend; 86 Python passes in each CPU/GPU environment, 100-frame analyzer parity, 120-second 30-feed run and 50/100-stream replay | CPU default preserved; replay queue replacements expose unmet cadence, not qualified 100-camera capacity |
 | [Owner-PC continuation, October 28](host-2026-10-28/README.md) | CPU/GPU parity, 5/10/25/30 public-feed experiments, 300-image person benchmark and rejected crop/confidence trials | Local experiment records; media remains private, unpublished source is not promoted, field/sustained/100-camera acceptance remains open |
 | [Native execution/runtime repair, October 28](native-2026-10-28/README.md) | 77 Python passes with no skips; pinned pretrained probes and a 20-frame synthetic recording | Actual local CPU execution; synthetic inputs, no representative quality or owner-hardware/capacity result |
