@@ -4,7 +4,12 @@
 
 **If you already own an RTX 5080, use it for the first qualification work.** Buying a larger GPU before measuring decode, inference and memory use could spend money on the wrong bottleneck. This recommendation is an engineering judgment, not a measured performance ranking.
 
-The current analyzer explicitly selects **OpenCV CPU**. System's GPU presets estimate VRAM/power; they install no drivers, allocate no GPU memory and switch no inference backend. An NVIDIA driver or a successful `nvidia-smi` command does not make the current analyzer accelerated.
+The analyzer defaults to **OpenCV CPU**. The explicit optional
+`--backend onnxruntime-cuda` route is limited to the pinned YOLOX-S profile and
+separate qualified runtime; see the [operator commands](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/edge/README.md#optional-explicit-cuda-backend)
+and [backend verification](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/cuda-2026-10-28/README.md). System's GPU
+presets remain planning controls: they install no drivers, allocate no GPU
+memory and switch no inference backend. Hardware inventory alone does not prove acceleration.
 
 ![Actual GPU and RAM planning controls in System. The values are editable planning assumptions, not measurements.](https://raw.githubusercontent.com/bartytime4life/Intelligent-DVR-Tool/main/docs/media/gpu-setup.webp)
 
@@ -64,7 +69,7 @@ The [October 28 owner-PC trial](https://github.com/bartytime4life/Intelligent-DV
 ## Qualification before GPU adoption
 
 1. Record OS, driver, toolkit/backend versions, GPU model, usable VRAM and exact ONNX/profile/labels hashes. Use an accelerator runtime that explicitly supports the GPU architecture; ordinary OpenCV CPU wheels are not a CUDA deployment.
-2. Compare CPU and candidate GPU outputs with fixed inputs, preprocessing, score semantics, class order and NMS. Use tolerances justified for the selected precision; preserve original receipts and a CPU fallback.
+2. Compare CPU and candidate GPU outputs with fixed inputs, preprocessing, score semantics, class order and NMS. Use tolerances justified for the selected precision; preserve original receipts and keep the explicit CPU route available. The CUDA command never falls back silently.
 3. Evaluate independent labeled recordings, including low light, occlusion and overload. Report precision/recall and reviewed false alerts separately from speed.
 4. Measure decode, transfers, preprocessing, inference, postprocessing and end-to-end queue age. Track sustained VRAM, utilization, temperature, power, per-camera delivered cadence and drops, not just one inference call.
 5. Ramp approved replay through 1/5/25/50/100+ sources, test worker/driver failures and a measured soak, then qualify separately authorized physical-camera ingest. Do not declare support from VRAM fit or manufacturer AI TOPS.

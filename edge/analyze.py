@@ -19,6 +19,7 @@ from .evaluation import (TRACE_SCHEMA, MAX_FRAMES, MAX_DETECTIONS, canonical_has
 from .model_profiles import (DEFAULT_PROFILE, YOLOX_PROFILE, PROFILES, prepare,
                              validate_binding, yolox_to_yolov8)
 from .resources import load_policy, analyzer_limits
+from .inference import BACKENDS, create_backend
 
 
 def digest(path):
@@ -73,6 +74,8 @@ def main(argv=None):
     parser.add_argument('--model',type=Path,required=True)
     parser.add_argument('--labels',type=Path,required=True,help='JSON array matching ONNX class order')
     parser.add_argument('--profile',choices=PROFILES,default=DEFAULT_PROFILE)
+    parser.add_argument('--backend',choices=BACKENDS,default='opencv-cpu',
+                        help='Explicit execution backend; CUDA requires the pinned YOLOX profile and separate runtime, with no fallback')
     parser.add_argument('--rules',type=Path,required=True,help='JSON array of edge Rule objects; see example')
     parser.add_argument('--output',type=Path,required=True,help='New receipt path (will not overwrite)')
     parser.add_argument('--trace-output',type=Path,
@@ -83,6 +86,8 @@ def main(argv=None):
     parser.add_argument('--stride',type=int,default=5)
     parser.add_argument('--max-frames',type=int,help='Decoded-frame ceiling; default 6000 or policy cap')
     args=parser.parse_args(argv)
+    if args.backend == 'onnxruntime-cuda' and args.profile != YOLOX_PROFILE:
+        parser.error('CUDA backend requires --profile '+YOLOX_PROFILE)
     policy_hash = None
     try:
         policy = None
@@ -137,9 +142,13 @@ def main(argv=None):
     if any(args.stride/fps > r.max_gap for r in rules):
         capture.release();parser.error('Sampling interval exceeds a rule max_gap; reduce stride')
     cv2.setNumThreads(args.threads)
-    net=cv2.dnn.readNetFromONNX(str(args.model))
-    net.setPreferableBackend(cv2.dnn.DNN_BACKEND_OPENCV)
-    net.setPreferableTarget(cv2.dnn.DNN_TARGET_CPU)
+    try:
+        backend=create_backend(args.backend,args.model,args.profile,cv2,np,args.threads)
+    except Exception:
+        capture.release()
+        raise
+    runtime={'python':platform.python_version(),'opencv':cv2.__version__,
+             'numpy':np.__version__,'machine':platform.machine(),**backend.runtime}
     frames=0;processed=0;events=[];latencies=[];partial=False
     trace_frames=[];detection_count=0
     try:
@@ -154,8 +163,7 @@ def main(argv=None):
                 raise ValueError('Video exceeds the 4K pixel bound')
             blob,scale,padding=prepare(frame,args.profile,cv2,np)
             began=time.perf_counter()
-            net.setInput(blob)
-            raw=net.forward()
+            raw=backend.forward(blob)
             detections=decode(raw,labels,frame.shape,scale,padding,cv2,np,args.profile)
             elapsed=(time.perf_counter()-began)*1000
             latencies.append(elapsed)
@@ -172,6 +180,7 @@ def main(argv=None):
             partial=True
     finally:
         capture.release()
+        backend.close()
     if not processed:
         raise ValueError('No frames were decoded; no receipt was written')
     ordered=sorted(latencies)
@@ -181,6 +190,7 @@ def main(argv=None):
              'inference_profile':args.profile,'labels_sha256':digest(args.labels),
              'rules_sha256':canonical_hash(config),'rules_file_sha256':digest(args.rules),
              'frames_read':frames,'frames_analyzed':processed,'fps_metadata':fps,'stride':args.stride,
+             'runtime':runtime,
              'timing':{'scope':'local inference and postprocessing only; not end-to-end camera latency',
                        'p50_ms':statistics.median(ordered),'p95_ms':ordered[math.ceil(.95*len(ordered))-1]},
              'limitations':['No identity tracking: dwell is continuous class presence, not the same object.',
@@ -200,9 +210,7 @@ def main(argv=None):
                  'rule_engine_sha256':digest(ASSETS/'rules.py'),
                  'rules':config,'camera':args.camera,'run_id':run_id,'frames_read':frames,
                  'fps_metadata':fps,'stride':args.stride,'frames':trace_frames,'events':events,
-                 'runtime':{'python':platform.python_version(),'opencv':cv2.__version__,
-                            'numpy':np.__version__,'machine':platform.machine(),
-                            'backend':'OpenCV CPU','threads':args.threads},
+                 'runtime':dict(runtime),
                  'timing_scope':receipt['timing']['scope'],'human_review_required':True}
         if policy_hash is not None:
             trace['runtime']['resource_policy_sha256'] = policy_hash

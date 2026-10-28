@@ -20,6 +20,8 @@ def check():
             ROOT / 'docs/verification/facility-2026-10-27/README.md',
             ROOT / 'docs/verification/native-2026-10-28/README.md',
             ROOT / 'docs/verification/host-2026-10-28/README.md',
+            ROOT / 'docs/verification/cuda-2026-10-28/README.md',
+            ROOT / 'edge/README.md', ROOT / 'docs/third-party-notices.md',
             ROOT / 'docs/offline-qualification.md',
             *[ROOT / ('docs/' + n + '.md') for n in
               ('product-status', 'visual-tour', 'getting-started', 'architecture', 'roadmap', 'hardware-guide', 'gpu-planning', 'setup-linux', 'setup-windows', 'resource-controls', 'facility-builder', 'facility-setup-reliability', 'easy-facility-setup', 'map-measurements-and-shapes')],
@@ -138,6 +140,7 @@ def check():
     if errors:
         raise ValueError('\n'.join(errors))
     runpy.run_path(str(ROOT / 'docs/verification/host-2026-10-28/verify-results.py'))['check']()
+    runpy.run_path(str(ROOT / 'docs/verification/cuda-2026-10-28/verify-results.py'))['check']()
     print(f'Documentation checks passed: {links} local links, {len(manifest["assets"])} media hashes, {total:,} media bytes, test-count consistency.')
 
 

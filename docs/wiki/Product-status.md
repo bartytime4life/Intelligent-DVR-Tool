@@ -2,16 +2,17 @@
 
 Updated October 28, 2026. Audited application baseline:
 [`82c862c68735720b8840461fc624e8dbe148a53a`](https://github.com/bartytime4life/Intelligent-DVR-Tool/commit/82c862c68735720b8840461fc624e8dbe148a53a)
-(the merged PR #11 revision). Later documentation checks are separate from this
-application-baseline evidence.
+(the merged PR #11 revision). Later native-runtime and optional-CUDA work has
+its own dated evidence in the verification index below.
 
 [Home](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Home) · [Verification index](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Evidence-and-validation) · [Roadmap](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Roadmap)
 
 Intelligent DVR is a local camera-analysis and human-review prototype with an
 editable facility planner and System resource-planning workspace. At least **100
 simultaneously active cameras** is the owner's requirement. Live ingest/recording,
-representative detection accuracy, accelerated inference and actual 100-camera
-capacity remain unqualified.
+representative field/event accuracy, cross-platform GPU deployment and actual
+100-camera capacity remain unqualified. The optional CUDA route has bounded
+owner-PC execution evidence in its dated record.
 
 ## Capability register
 
@@ -23,7 +24,7 @@ capacity remain unqualified.
 | Find and draft a site | Submitted Photon search, GPS/numeric origin, rectangular area, selectable services, offline JSON file/paste; [service source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/src/facility-services.mjs) | [Six Chromium scenarios](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/facility-2026-10-27/README.md) use recorded geometry/mocked services. External availability, real GPS and novice completion remain unqualified. |
 | OSM geometry | Complete simple ways and supported complete outer-only relations; [adapter](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/src/facility-starter.mjs) | Review and provenance survive apply/export. Holes/parts, raised bases and invalid/incomplete geometry are excluded. [Limits](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Facility-setup-reliability). |
 | System controls | Planning arithmetic, applied browser limits, setup/policy exports and host-snapshot import; [control contract](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Resource-controls) | Browser controls and analyzer thread/frame caps have explicit scopes. RAM/VRAM/power/storage estimates are not OS quotas or activated hardware. |
-| Offline detection | One local recording per run, OpenCV CPU, explicit ONNX profiles and bounded rule receipts/traces; [analyzer](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/edge/analyze.py) | Historical YOLOX compatibility probes are not representative accuracy or physical-camera evidence. No detector weights are bundled. |
+| Offline detection | One local recording per run, default OpenCV CPU and explicit pinned YOLOX-S CUDA option, bounded rule receipts/traces with backend metadata; [analyzer](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/edge/analyze.py) | [CUDA qualification](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/cuda-2026-10-28/README.md) covers the owner PC and bounded inputs. Field/event accuracy, sustained capacity and other GPU/OS combinations remain unqualified. No detector weights are bundled. |
 | Evaluation | Annotation matching, precision/recall, timing distributions and reviewed false alerts; [guide](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/offline-evaluation.md) | Synthetic fixtures verify calculation/evidence plumbing. Approved representative labels and held-out quality measurement remain required. |
 | Scale preparation | Bounded fair scheduler and virtual-time 100/125-source tests; [guide](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/performance-100-cameras.md) | No worker service, live ingest or recording integration. Assumed service costs are not hardware benchmarks. |
 | Linux/Windows delivery | Launch helpers, build and cross-platform CI; [verification](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Evidence-and-validation) | Full installation, intended hardware and deployed-version acceptance remain separate. |

@@ -1,0 +1,57 @@
+{
+  "base_commit": "ab148d94ad4b9b38470f37f9be02dfe532d2102d",
+  "files": [
+    {
+      "path": "edge/analyze.py",
+      "sha256": "f4efa1f5f412705cbc4dda7e9cb8b47e3c7f74804991b97c4c1ba38f6fa1df5f"
+    },
+    {
+      "path": "edge/inference.py",
+      "sha256": "8393956c8c994da89f074b9fb9a49071d1ebe0868f26d13892c9a8159c305f8b"
+    },
+    {
+      "path": "edge/requirements-gpu-qualification.txt",
+      "sha256": "a71dbb8ad7ec094fd9745194c06ba0fc2ebe190344c350e1945d5a3cf8baf30b"
+    },
+    {
+      "path": "edge/model_profiles.py",
+      "sha256": "9a0cfffa5a0fbb7312de96d49c894106a92f5bbc3fec6fa9a5594c0bab06e6b2"
+    },
+    {
+      "path": "edge/scheduler.py",
+      "sha256": "915cd9757a14d54abb5e1bc249ccd91d7ce37d6713786c31025307e87f661eb1"
+    },
+    {
+      "path": "tests/test_backends.py",
+      "sha256": "b58ac6257cf853a0ee645ba1cc75f16c4275db1edd9aa39f0d7c0196fad76064"
+    },
+    {
+      "path": "tests/test_inference.py",
+      "sha256": "2507eb8344c36f39900be1ded2be22a94645328c0b5250a96cbdf2f47aadedb0"
+    }
+  ],
+  "private_harnesses": [
+    {
+      "name": "load_backend.py",
+      "sha256": "8510fe5d32f0e8efd0f79d2d76b127bf556a474f8c711e1fc0baac2c9daf3420"
+    },
+    {
+      "name": "replay_backend.py",
+      "sha256": "5009b15c0da5a8dea61fca5b4efae71b2f0705c4b50c52948d5b9ef27b5b05bd"
+    }
+  ],
+  "test_logs": [
+    {
+      "name": "python-tests.log",
+      "sha256": "cac99e3046709dae555faccccc653adf18069b4e181fc9066ead21c5f5bcc315"
+    },
+    {
+      "name": "cpu-only-python-tests.log",
+      "sha256": "25c71a150a58e51b4608181c8e22823860e16f34d5741502be57eca686166a19"
+    },
+    {
+      "name": "frontend-tests.log",
+      "sha256": "94fb57cfec468b6cbc27545a68c633ba6e34710595381f36451fa4aff65bf19f"
+    }
+  ]
+}

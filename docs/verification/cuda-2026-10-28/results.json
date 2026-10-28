@@ -1,0 +1,279 @@
+{
+  "schema": "intelligent-dvr.optional-cuda-qualification.v1",
+  "base_commit": "ab148d94ad4b9b38470f37f9be02dfe532d2102d",
+  "backend_default": "opencv-cpu",
+  "cuda_optional": true,
+  "cpu_graph_and_runtime_fallback": false,
+  "cuda_warmup_probe": 1,
+  "startup_profiling_scope": "One synthetic zero input; not per-frame execution/perception/capacity attestation.",
+  "analyzer_parity": {
+    "frames_compared": 100,
+    "passed": true,
+    "minimum_matched_iou": 0.9999956908415983,
+    "maximum_matched_score_delta": 3.6441184114721636e-06,
+    "criteria": {
+      "minimum_iou": 0.99,
+      "maximum_score_delta": 0.001,
+      "matching_counts_labels": true,
+      "events_exactly_equal": true
+    },
+    "clips": [
+      {
+        "kind": "vehicle",
+        "frames": 40,
+        "cpu_timing": {
+          "scope": "local inference and postprocessing only; not end-to-end camera latency",
+          "p50_ms": 96.76189147285186,
+          "p95_ms": 108.59513800824061
+        },
+        "gpu_timing": {
+          "scope": "local inference and postprocessing only; not end-to-end camera latency",
+          "p50_ms": 9.210790012730286,
+          "p95_ms": 10.12163603445515
+        },
+        "event_counts": 0,
+        "events_identical": true,
+        "source_sha256": "7d51815f61ee9e0dd349171d02d9d08c74d9d166a2be58eab65895b1617ad6eb",
+        "model_sha256": "c5c2d13e59ae883e6af3b45daea64af4833a4951c92d116ec270d9ddbe998063",
+        "cuda_execution": {
+          "scope": "One synthetic zero-input startup probe, not per-frame profiling or capacity qualification.",
+          "warmup_runs_excluded": 1,
+          "node_execution_counts": {
+            "CUDAExecutionProvider": 203
+          },
+          "profile_sha256": "9e8f8e3a28a416a254e669139b68e0887cf2e703f28ec5b0695b703cbfb21ce7"
+        }
+      },
+      {
+        "kind": "person",
+        "frames": 60,
+        "cpu_timing": {
+          "scope": "local inference and postprocessing only; not end-to-end camera latency",
+          "p50_ms": 97.74255400407128,
+          "p95_ms": 105.1697229850106
+        },
+        "gpu_timing": {
+          "scope": "local inference and postprocessing only; not end-to-end camera latency",
+          "p50_ms": 8.738946518860757,
+          "p95_ms": 9.18458099476993
+        },
+        "event_counts": 1,
+        "events_identical": true,
+        "source_sha256": "9661a6f5602df23be9f013d3a1e3f8e03e7267e4f89a889cafc91f54e0994039",
+        "model_sha256": "c5c2d13e59ae883e6af3b45daea64af4833a4951c92d116ec270d9ddbe998063",
+        "cuda_execution": {
+          "scope": "One synthetic zero-input startup probe, not per-frame profiling or capacity qualification.",
+          "warmup_runs_excluded": 1,
+          "node_execution_counts": {
+            "CUDAExecutionProvider": 203
+          },
+          "profile_sha256": "a26bdf3ed5bd8b414cfd645e8e4c5bbdfd021f49560b4b6c61e608b615da85f5"
+        }
+      }
+    ],
+    "scope": "Actual edge.analyze command comparison; same source/model/labels/rules, no accuracy claim."
+  },
+  "load_experiments": [
+    {
+      "name": "live-30-120s",
+      "mode": "public-live",
+      "requested": 30,
+      "active_peak": 30,
+      "sources_without_errors": 30,
+      "distinct_recordings_or_publishers": 30,
+      "seconds": 120.00085878797108,
+      "decoded_frames": 55923,
+      "decoded_fps_aggregate": 466.02166488499944,
+      "offered": 6751,
+      "completed": 6615,
+      "completed_per_second": 55.12460549709907,
+      "replaced": 104,
+      "expired_pending": 21,
+      "budget_dropped": 0,
+      "pending_at_stop": 11,
+      "inference_p50_ms": 9.394956985488534,
+      "inference_p95_ms": 10.739936027675867,
+      "completion_age_p95_ms": 341.7092738673091,
+      "sampled_peak_combined_rss_bytes": 1653727232,
+      "minimum_host_available_bytes": 6698209280,
+      "per_stream_completion_min": 184,
+      "per_stream_completion_max": 225,
+      "source_errors": [],
+      "reported_hls_sequence_gaps": 0,
+      "retained_new_fragment_bytes": 77578192,
+      "verified_new_fragments": 884,
+      "runtime": {
+        "backend": "ONNX Runtime CUDA",
+        "backend_id": "onnxruntime-cuda",
+        "onnxruntime": "1.31.1",
+        "threads": 4,
+        "fallback": "disabled",
+        "precision": "FP32, TF32 disabled",
+        "provider_options": {
+          "device_id": 0,
+          "use_tf32": 0,
+          "gpu_mem_limit": 1073741824,
+          "arena_extend_strategy": "kSameAsRequested",
+          "cudnn_conv_algo_search": "HEURISTIC",
+          "cudnn_conv_use_max_workspace": "0"
+        },
+        "startup_execution": {
+          "scope": "One synthetic zero-input startup probe, not per-frame profiling or capacity qualification.",
+          "warmup_runs_excluded": 1,
+          "node_execution_counts": {
+            "CUDAExecutionProvider": 203
+          },
+          "profile_sha256": "d97cc44a3d74afd5dc102c677573fc234b9238f273bb69872a73ad5a085cf10d"
+        }
+      },
+      "worker_exit": 0,
+      "experiment_errors": [],
+      "summary_sha256": "8ff54e8dfe977a007f3d14af2fb91757ceeb9e63875ed031581cc5f63250f771",
+      "trace_sha256": "762ec55c619bf7933f6fd15e24d4856a9ffc76c6546d29907384ec292d35681e"
+    },
+    {
+      "name": "replay-50-30s",
+      "mode": "local-replay",
+      "requested": 50,
+      "active_peak": 50,
+      "sources_without_errors": 50,
+      "distinct_recordings_or_publishers": 30,
+      "seconds": 30.005558906996157,
+      "decoded_frames": 23369,
+      "decoded_fps_aggregate": 778.8223532990494,
+      "offered": 2846,
+      "completed": 2413,
+      "completed_per_second": 80.41843204718243,
+      "replaced": 392,
+      "expired_pending": 0,
+      "budget_dropped": 0,
+      "pending_at_stop": 41,
+      "inference_p50_ms": 9.352136985398829,
+      "inference_p95_ms": 10.953616991173476,
+      "completion_age_p95_ms": 524.3690136703663,
+      "sampled_peak_combined_rss_bytes": 1617424384,
+      "minimum_host_available_bytes": 5628145664,
+      "per_stream_completion_min": 37,
+      "per_stream_completion_max": 56,
+      "source_errors": [],
+      "reported_hls_sequence_gaps": 0,
+      "retained_new_fragment_bytes": 0,
+      "verified_new_fragments": 0,
+      "runtime": {
+        "backend": "ONNX Runtime CUDA",
+        "backend_id": "onnxruntime-cuda",
+        "onnxruntime": "1.31.1",
+        "threads": 4,
+        "fallback": "disabled",
+        "precision": "FP32, TF32 disabled",
+        "provider_options": {
+          "device_id": 0,
+          "use_tf32": 0,
+          "gpu_mem_limit": 1073741824,
+          "arena_extend_strategy": "kSameAsRequested",
+          "cudnn_conv_algo_search": "HEURISTIC",
+          "cudnn_conv_use_max_workspace": "0"
+        },
+        "startup_execution": {
+          "scope": "One synthetic zero-input startup probe, not per-frame profiling or capacity qualification.",
+          "warmup_runs_excluded": 1,
+          "node_execution_counts": {
+            "CUDAExecutionProvider": 203
+          },
+          "profile_sha256": "3fe5813e6b5278f6d2dcd35e02537f73062ad024ce59dba1592fb812dab6bdd4"
+        }
+      },
+      "worker_exit": 0,
+      "experiment_errors": [],
+      "summary_sha256": "c678a9e8061fab6f00d44bb568855c7f0b85a33942e0fffdbf0c7b55098455cb",
+      "trace_sha256": "749c5bdac8c11278820c9ea31bfff9db378daa9813bab035ec18fe51e9d41560"
+    },
+    {
+      "name": "replay-100-30s",
+      "mode": "local-replay",
+      "requested": 100,
+      "active_peak": 100,
+      "sources_without_errors": 100,
+      "distinct_recordings_or_publishers": 30,
+      "seconds": 30.007816191995516,
+      "decoded_frames": 46666,
+      "decoded_fps_aggregate": 1555.1281606572888,
+      "offered": 5691,
+      "completed": 2185,
+      "completed_per_second": 72.81436229880805,
+      "replaced": 3417,
+      "expired_pending": 0,
+      "budget_dropped": 0,
+      "pending_at_stop": 89,
+      "inference_p50_ms": 10.564138006884605,
+      "inference_p95_ms": 11.93374302238226,
+      "completion_age_p95_ms": 523.4907220001332,
+      "sampled_peak_combined_rss_bytes": 1945047040,
+      "minimum_host_available_bytes": 5871136768,
+      "per_stream_completion_min": 18,
+      "per_stream_completion_max": 28,
+      "source_errors": [],
+      "reported_hls_sequence_gaps": 0,
+      "retained_new_fragment_bytes": 0,
+      "verified_new_fragments": 0,
+      "runtime": {
+        "backend": "ONNX Runtime CUDA",
+        "backend_id": "onnxruntime-cuda",
+        "onnxruntime": "1.31.1",
+        "threads": 4,
+        "fallback": "disabled",
+        "precision": "FP32, TF32 disabled",
+        "provider_options": {
+          "device_id": 0,
+          "use_tf32": 0,
+          "gpu_mem_limit": 1073741824,
+          "arena_extend_strategy": "kSameAsRequested",
+          "cudnn_conv_algo_search": "HEURISTIC",
+          "cudnn_conv_use_max_workspace": "0"
+        },
+        "startup_execution": {
+          "scope": "One synthetic zero-input startup probe, not per-frame profiling or capacity qualification.",
+          "warmup_runs_excluded": 1,
+          "node_execution_counts": {
+            "CUDAExecutionProvider": 203
+          },
+          "profile_sha256": "6fccfa7582c05e349702c04f916cf49e9c98ee0be4ec1134c287137120242647"
+        }
+      },
+      "worker_exit": 0,
+      "experiment_errors": [],
+      "summary_sha256": "a013e98ef6714c56ca69cb62b6d626de683463f94c9b8d2e72c1e21977b9f2d8",
+      "trace_sha256": "e8cc72bfec336c86629eb07856f8d125f222f3103c0c3d91dd3bd6fd7818bfaa"
+    }
+  ],
+  "checks": {
+    "python_gpu_environment": {
+      "passed": 86,
+      "skipped": 0
+    },
+    "python_cpu_only_environment": {
+      "passed": 86,
+      "skipped": 0
+    },
+    "frontend": {
+      "passed": 46,
+      "skipped": 0
+    },
+    "missing_gpu_runtime": {
+      "exit": 1,
+      "receipt_written": false,
+      "missing_runtime_diagnostic": true
+    }
+  },
+  "recordings_kept_local": true,
+  "weights_bundled": false,
+  "operating_confidence_changed": false,
+  "capacity_100_qualified": false,
+  "notes": [
+    "Live case is 120 seconds with 30 real public low-resolution internet sources.",
+    "Replay cases are 30 seconds with 50/100 independent decoders cycling 30 frozen public recordings; network denied for parent and worker.",
+    "At most two offered samples/s per stream; actual counters include source-frame quantization.",
+    "GPU processing excludes video decode and startup; integrated scheduling includes copies, decoding and parent/worker overhead.",
+    "No field/event accuracy, camera-latency, recovery, sustained full-HD or 100-physical-camera claim."
+  ]
+}

@@ -78,10 +78,61 @@ enables offline analysis only, not automatic capture or operational acceptance.
 
 Add `--trace-output /private/pilot/trace.json` to retain sampled detections and
 per-frame timing for evaluation. `--threads 1` (default; range 1–8) explicitly
-selects OpenCV CPU thread count. Receipt import remains unchanged. Evaluation
+selects OpenCV CPU thread count and, on the optional CUDA route, the ONNX Runtime
+CPU thread-pool limit. It is not a GPU, codec or OS resource quota. Receipt import remains unchanged. Evaluation
 traces are separate metadata files and are not browser receipts. See the
 [evaluation guide](../docs/offline-evaluation.md) for coverage requirements,
 new output paths, bounds, labels and review decisions.
+
+## Optional explicit CUDA backend
+
+`--backend opencv-cpu` remains the default and does not import ONNX Runtime.
+An explicit `--backend onnxruntime-cuda` selects the optional local GPU path.
+It accepts only the exact hash-bound `opencv-zoo-yolox-s-2022nov` profile and
+COCO80 labels above. It does not download a model or runtime, start a camera,
+change confidence/rule settings, or fall back to CPU after a CUDA error.
+
+The separately pinned Linux/Python 3.12 environment was verified on the owner's
+RTX 5080. Install it in a separate environment; it is optional and is not added
+to the ordinary CPU requirements or CPU CI:
+
+```bash
+python3.12 -m venv .venv-cuda
+.venv-cuda/bin/python -m pip install -r edge/requirements-gpu-qualification.txt
+.venv-cuda/bin/python -m edge.analyze \
+  --video recordings/approved-clip.mp4 \
+  --model models/yolox-s.onnx --labels edge/labels/coco80.json \
+  --profile opencv-zoo-yolox-s-2022nov --backend onnxruntime-cuda \
+  --rules edge/rules.example.json --threads 4 \
+  --output receipts/cuda-clip.json --trace-output receipts/cuda-clip-trace.json
+```
+
+Review the actual rules/recording before running; `receipts` must exist and
+both output paths must be new. Vendor runtime libraries install inside the
+environment; driver installation and host tuning are separate actions. Other
+GPUs, operating systems and runtime versions remain unqualified.
+
+Each CUDA run disables TF32 and CPU graph/runtime fallback, verifies retained
+provider settings and the pinned model's input/output tensor contract, then
+profiles one synthetic zero-input startup probe. A CPU node event or missing
+CUDA execution aborts without a receipt. The private temporary profile is
+removed; its hash, node-event counts and scope are retained in `runtime` in
+both the receipt and optional trace. The startup probe is excluded from
+per-frame timing. It verifies startup graph execution, not frame-by-frame
+profiling, detection accuracy, end-to-end latency or camera capacity.
+
+The CUDA arena limit is 1 GiB, with heuristic convolution search and restricted
+workspace; total device use can exceed this arena. This is not a hard VRAM/RAM
+cap or inference deadline. Retained CPU-provider registration is distinct
+from graph execution; fallback is disabled and startup node execution must
+show CUDA only. Missing libraries/providers, incompatible shapes/settings or
+execution failures produce an error rather than silently rerouting.
+
+Receipts retain schema `intelligent-dvr.receipt.v1` and add `runtime` metadata
+for either backend. Existing event IDs/import behavior are preserved; the
+browser imports events and does not execute or select this backend. See
+[GPU guidance](../docs/gpu-planning.md) and the
+[backend qualification record](../docs/verification/cuda-2026-10-28/README.md).
 
 Rule JSON is an array of named rules; browser rule exports have a separate
 schema and are intentionally not silently accepted by this CLI. Map a browser
@@ -132,4 +183,4 @@ https://docs.opencv.org/4.13.0/d6/d0f/group__dnn.html
 
 ## Machine setup and exported limits
 
-Use [Linux](../docs/setup-linux.md) or [Windows](../docs/setup-windows.md) launch/setup guidance. The [System controls](../docs/resource-controls.md) export a validated resource policy; pass `--resource-policy FILE` to this analyzer to cap OpenCV threads and decoded frames. Explicit overrides can lower but not exceed policy caps. The policy hash and applied caps are recorded in successful receipts and traces. Other scheduler, GPU and RAM planning values are not misreported as analyzer enforcement. `python -m edge.host` creates an explicit read-only local snapshot; `python -m edge.resources --policy FILE` validates a policy without starting inference. The current inference backend remains OpenCV CPU.
+Use [Linux](../docs/setup-linux.md) or [Windows](../docs/setup-windows.md) launch/setup guidance. The [System controls](../docs/resource-controls.md) export a validated resource policy; pass `--resource-policy FILE` to this analyzer to cap CPU thread-pool size and decoded frames. Explicit overrides can lower but not exceed policy caps. The policy hash and applied caps are recorded in successful receipts and traces. Other scheduler, GPU and RAM planning values are not misreported as analyzer enforcement. `python -m edge.host` creates an explicit read-only local snapshot; `python -m edge.resources --policy FILE` validates a policy without starting inference. OpenCV CPU is the default; the optional CUDA command above requires its separate runtime and qualification.
