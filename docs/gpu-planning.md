@@ -59,6 +59,8 @@ python -m edge.host --path . --gpu --output host-with-gpu-001.json
 
 Use the appropriate environment interpreter from the OS guide. This explicitly opts in to a fixed read-only `nvidia-smi` name/VRAM query with a five-second timeout. No clocks, power limits, persistence mode, driver installation or camera access are changed. If the utility is missing/fails, GPU inventory stays **unknown**, not zero. Import locally in System and review before copying VRAM into the draft.
 
+The [October 28 owner-PC trial](verification/host-2026-10-28/README.md#cpu-settings-and-isolated-gpu-agreement) measured an isolated RTX 5080 CUDA candidate and bounded public-feed loads. It preserves the production CPU route and does not qualify sustained capacity or field quality.
+
 ## Qualification before GPU adoption
 
 1. Record OS, driver, toolkit/backend versions, GPU model, usable VRAM and exact ONNX/profile/labels hashes. Use an accelerator runtime that explicitly supports the GPU architecture; ordinary OpenCV CPU wheels are not a CUDA deployment.

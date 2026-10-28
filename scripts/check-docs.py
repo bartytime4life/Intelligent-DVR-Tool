@@ -6,6 +6,7 @@ import hashlib
 import json
 from pathlib import Path
 import re
+import runpy
 import sys
 from urllib.parse import unquote, urlsplit
 
@@ -18,6 +19,7 @@ def check():
             ROOT / 'docs/verification/README.md',
             ROOT / 'docs/verification/facility-2026-10-27/README.md',
             ROOT / 'docs/verification/native-2026-10-28/README.md',
+            ROOT / 'docs/verification/host-2026-10-28/README.md',
             ROOT / 'docs/offline-qualification.md',
             *[ROOT / ('docs/' + n + '.md') for n in
               ('product-status', 'visual-tour', 'getting-started', 'architecture', 'roadmap', 'hardware-guide', 'gpu-planning', 'setup-linux', 'setup-windows', 'resource-controls', 'facility-builder', 'facility-setup-reliability', 'easy-facility-setup', 'map-measurements-and-shapes')],
@@ -135,6 +137,7 @@ def check():
         errors.append('Native probe must retain its synthetic and unqualified evidence boundary')
     if errors:
         raise ValueError('\n'.join(errors))
+    runpy.run_path(str(ROOT / 'docs/verification/host-2026-10-28/verify-results.py'))['check']()
     print(f'Documentation checks passed: {links} local links, {len(manifest["assets"])} media hashes, {total:,} media bytes, test-count consistency.')
 
 
