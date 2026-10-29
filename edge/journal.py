@@ -80,7 +80,9 @@ class OutcomeJournal:
             if self._db.execute('PRAGMA journal_mode=WAL').fetchone()[0] != 'wal':
                 raise JournalError('Local WAL mode is required')
             self._db.execute('PRAGMA synchronous=FULL')
-            self._db.execute('PRAGMA wal_autocheckpoint=64')
+            # FULL still synchronizes every commit. Checkpoint less frequently
+            # to amortize page consolidation; this is not a WAL file quota.
+            self._db.execute('PRAGMA wal_autocheckpoint=512')
             with self._db:
                 self._db.execute('''CREATE TABLE IF NOT EXISTS entries (
                     id INTEGER PRIMARY KEY AUTOINCREMENT, run TEXT NOT NULL,

@@ -38,6 +38,9 @@ def main():
         require(run['inflight'] == 0 and not run['workers']['child_alive'], 'Unclosed work')
         require(run['peak_payload_bytes'] <= 64*1024**2 and run['peak_entries'] <= 1000, 'Resource bound')
         if run['journal']:
+            require(run['journal_policy']['synchronous'] == 2 and
+                    run['journal_policy']['journal_mode'] == 'wal', 'Durability policy')
+            require(run['sampled_peak_wal_bytes'] <= 4*1024**2, 'Synthetic sampled WAL bound')
             terminal = sum(run[k] for k in ('completed_in_window','failed_in_window','successful_drain','failed_drain'))
             require(run['unique_delivery_ids'] == terminal and run['journal']['unacknowledged'] == 0, 'Durable delivery')
         if run['profile']:
