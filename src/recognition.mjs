@@ -53,7 +53,11 @@ export function mergeRecognitionEvents(existing, added) {
       'An observation ID conflicts with different evidence already in the queue. Export and clear the queue before reviewing this file separately.');
   }
   const ids = new Set(added.map(e => e.id));
-  const merged = [...added.map(e => previous.get(e.id) || e), ...existing.filter(e => !ids.has(e.id))];
+  const merged = [...added.map(e => {
+    const old = previous.get(e.id);
+    // A restored decision fills a pending entry; current human decisions win.
+    return !old || (old.status === 'pending' && ['confirmed', 'dismissed'].includes(e.status)) ? e : old;
+  }), ...existing.filter(e => !ids.has(e.id))];
   require(merged.length <= 1000, 'The review queue would exceed 1,000 events. Export and clear earlier reviews before importing this run.');
   return merged;
 }
