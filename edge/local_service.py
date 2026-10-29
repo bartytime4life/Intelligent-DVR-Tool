@@ -24,14 +24,13 @@ from .evaluation import local_file, read_json, relative_file
 from .model_profiles import validate_binding
 from .rules import Rule, RuleEngine
 from .local_feeds import Feeds, FeedError, load_sources
+from .result_store import ResultStore, VIDEO_BYTES, REVIEW_BYTES as RESULT_BYTES, EXTENSIONS
 
 ROOT = Path(__file__).resolve().parents[1]
-VIDEO_BYTES = MODEL_BYTES = 512 * 1024**2
-RESULT_BYTES = 32 * 1024**2
+MODEL_BYTES = VIDEO_BYTES
 LIMITS = {'video_bytes': VIDEO_BYTES, 'wall_seconds': 300, 'max_frames': 6000,
           'stride': 5, 'threads': 2, 'active_jobs': 1, 'memory_bytes': 4 * 1024**3}
 TERMINAL = {'completed', 'failed', 'cancelled'}
-EXTENSIONS = {'.mp4', '.m4v', '.mov', '.avi', '.mkv', '.webm'}
 
 
 class JobError(Exception):
@@ -96,7 +95,7 @@ def load_catalog(config):
 
 
 class Jobs:
-    def __init__(self, recordings, catalog, *, wall_seconds=300, process_factory=subprocess.Popen):
+    def __init__(self, recordings, catalog, *, wall_seconds=300, process_factory=subprocess.Popen, state_dir=None):
         recordings = Path(recordings).absolute()
         if not recordings.is_dir() or any(p.is_symlink() for p in (recordings, *recordings.parents)):
             raise ValueError('Select a regular local recordings directory without symlinks')
@@ -109,6 +108,11 @@ class Jobs:
         self.choices = {}
         self.closed = False
         self.token = secrets.token_urlsafe(32)
+        self.store = ResultStore(state_dir) if state_dir is not None else None
+        self.store_failed = False
+        self.retained_directory = None
+        if self.store:
+            self.job, self.retained_directory = self.store.job, self.store.job_directory
 
     def available(self):
         with self.lock:
@@ -136,6 +140,7 @@ class Jobs:
             return {'recordings': [{'id': key, 'name': p.name, 'bytes': sig[2]} for key, (p, sig) in choices.items()],
                     'models': models, 'rules': rules, 'limits': LIMITS,
                     'backend': 'opencv-cpu', 'job': self.snapshot(),
+                    'retention': 'private-local-last-job' if self.store else 'temporary-until-service-exit',
                     'ready': all(importlib.util.find_spec(x) is not None for x in ('cv2', 'numpy'))}
 
     def snapshot(self, job_id=None):
@@ -148,6 +153,8 @@ class Jobs:
         with self.lock:
             if self.closed:
                 raise JobError('STOPPED', 'The local service is stopping.', 503)
+            if self.store_failed:
+                raise JobError('STORE_UNAVAILABLE', 'Result storage failed. Check free space and permissions, then restart the service before another job.', 503)
             if self.job and self.job['state'] not in TERMINAL:
                 raise JobError('BUSY', 'A recording is already processing. Wait or cancel it first.', 409)
             if not isinstance(request, dict) or set(request) != {'recording', 'model', 'rules'} or any(not isinstance(v, str) for v in request.values()):
@@ -160,15 +167,24 @@ class Jobs:
                     raise KeyError('incompatible')
             except KeyError:
                 raise JobError('SELECTION', 'Selection is unavailable or incompatible. Refresh the choices.') from None
-            if self.directory:
-                self.directory.cleanup()
-            self.directory = tempfile.TemporaryDirectory(prefix='intelligent-dvr-job-')
-            directory = Path(self.directory.name)
-            self.cancel_event = threading.Event()
-            self.job = {'id': secrets.token_hex(16), 'state': 'running', 'phase': 'preparing',
+            job = {'id': secrets.token_hex(16), 'state': 'running', 'phase': 'preparing',
                         'recording': source.name, 'model': model['name'], 'rules': rules['name'],
                         'frames_read': 0, 'frames_analyzed': 0, 'max_frames': LIMITS['max_frames'],
                         'elapsed_seconds': 0, 'error': None}
+            if self.store:
+                try:
+                    directory = self.store.begin(job)
+                except (OSError, ValueError):
+                    self.store_failed = True
+                    raise JobError('STORE_UNAVAILABLE', 'The new job could not be saved. Check result-store free space and permissions, then restart the service.', 503) from None
+                self.retained_directory = directory
+            else:
+                if self.directory:
+                    self.directory.cleanup()
+                self.directory = tempfile.TemporaryDirectory(prefix='intelligent-dvr-job-')
+                directory = Path(self.directory.name)
+            self.cancel_event = threading.Event()
+            self.job = job
             self.thread = threading.Thread(target=self._run, args=(directory, source, sig, model, rules), daemon=True)
             self.thread.start()
             return self.snapshot()
@@ -243,7 +259,8 @@ class Jobs:
             (directory / 'args.json').write_text(json.dumps(args), encoding='utf-8')
             self._check(began)
             self.process = self.process_factory([sys.executable, '-m', 'edge.analysis_worker', str(directory)], cwd=ROOT,
-                                               stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                                               stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                                               env={**os.environ, 'DVR_ANALYSIS_PARENT_PID': str(os.getpid())})
             while self.process.poll() is None:
                 self._check(began)
                 self._progress(directory, began)
@@ -276,13 +293,22 @@ class Jobs:
                 if self.cancel_event.is_set():
                     terminal, result_state = 'cancelled', None
                     error = {'code': 'CANCELLED', 'message': 'Analysis cancelled. No results were opened.'}
-                for name in ('model.onnx', 'labels.json', 'rules.json', 'args.json', 'receipt.json', 'progress.json', 'progress.tmp'):
-                    (directory / name).unlink(missing_ok=True)
-                if terminal != 'completed':
-                    for path in directory.iterdir():
-                        path.unlink()
-                self.job.update(state=terminal, phase=terminal, error=error, result_state=result_state,
-                                elapsed_seconds=round(time.monotonic() - began, 1))
+                finished = {**self.job, 'state':terminal, 'phase':terminal, 'error':error,
+                            'result_state':result_state, 'elapsed_seconds':round(time.monotonic() - began, 1)}
+                try:
+                    for name in ('model.onnx', 'labels.json', 'rules.json', 'args.json', 'receipt.json', 'progress.json', 'progress.tmp'):
+                        (directory / name).unlink(missing_ok=True)
+                    if terminal != 'completed':
+                        for path in directory.iterdir():
+                            path.unlink()
+                    if self.store:
+                        self.store.commit(finished, directory)
+                except (OSError, ValueError, KeyError, TypeError):
+                    self.store_failed = bool(self.store)
+                    finished.update(state='failed', phase='failed', result_state=None,
+                        error={'code':'STORE_WRITE_FAILED' if self.store else 'CLEANUP_FAILED',
+                               'message':'Analysis finished without a confirmed result. Check local storage and restart; no result was opened.'})
+                self.job.update(finished)
 
     def _progress(self, directory, began):
         with self.lock:
@@ -305,7 +331,7 @@ class Jobs:
             job = self.snapshot(job_id)
             if job['state'] != 'completed':
                 raise JobError('NOT_READY', 'Results are available only after successful analysis.', 409)
-            directory = Path(self.directory.name)
+            directory = self.retained_directory if self.store else Path(self.directory.name)
             if kind == 'result':
                 return regular(directory / 'review.json', RESULT_BYTES), 'application/json'
             source = next(directory.glob('source.*'))
@@ -319,6 +345,8 @@ class Jobs:
             self.thread.join(timeout=10)
         if self.directory and (not self.thread or not self.thread.is_alive()):
             self.directory.cleanup()
+        if self.store and (not self.thread or not self.thread.is_alive()):
+            self.store.close()
 
 
 class LocalServer(HTTPServer):
@@ -451,12 +479,15 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--recordings', type=Path, help='Explicit local folder; direct recordings only')
     parser.add_argument('--config', type=Path, help='Local model/rule allowlist; see edge/local-analysis.example.json')
+    parser.add_argument('--state-dir', type=Path, help='Opt-in Linux private last-job storage; no automatic analysis or resume')
     parser.add_argument('--feeds-config', type=Path, help='Trusted LAN RTSP channels; see edge/local-feeds.example.json')
     parser.add_argument('--port', type=int, default=4173)
     parser.add_argument('--open-browser', action='store_true', help='Open the local app after binding; never connects cameras')
     args = parser.parse_args(argv)
     if bool(args.recordings) != bool(args.config):
         parser.error('Use --recordings and --config together')
+    if args.state_dir and not args.config:
+        parser.error('--state-dir requires recording analysis configuration')
     if not args.config and not args.feeds_config:
         parser.error('Configure recording analysis, DVR feeds, or both')
     if not 1024 <= args.port <= 65535:
@@ -466,7 +497,7 @@ def main(argv=None):
     jobs = feeds = None
     try:
         if args.config:
-            jobs = Jobs(args.recordings, load_catalog(args.config.absolute()))
+            jobs = Jobs(args.recordings, load_catalog(args.config.absolute()), state_dir=args.state_dir)
         if args.feeds_config:
             feeds = Feeds(load_sources(args.feeds_config.absolute()))
         with LocalServer(args.port, jobs, ROOT / 'dist/client', feeds) as server:

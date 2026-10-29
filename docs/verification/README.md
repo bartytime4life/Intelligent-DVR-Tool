@@ -1,5 +1,9 @@
 # Verification index
 
+[Recording analysis restart recovery, October 29](analysis-recovery-2026-10-29/README.md):
+opt-in Linux last-job storage, native interruption and browser reopen checks;
+process restart evidence, not recording or power-loss durability.
+
 [Local feed integration, October 29](local-feeds-2026-10-29/README.md): webcam and
 RTSP preview lifecycle; synthetic transport tests, not physical-device acceptance.
 

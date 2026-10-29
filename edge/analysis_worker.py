@@ -72,7 +72,11 @@ def run(directory):
 
 if __name__ == '__main__':
     try:
-        run(sys.argv[1])
+        if sys.platform == 'linux':
+            from .supervision import _owned_child
+            _owned_child(int(os.environ['DVR_ANALYSIS_PARENT_PID']), run, sys.argv[1])
+        else:
+            run(sys.argv[1])
     except BaseException:
         # Never send native exceptions, paths or recording details to the browser.
         sys.exit(1)
