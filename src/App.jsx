@@ -3,6 +3,7 @@ const FacilityBuilder = lazy(() => import("./FacilityBuilder.jsx").then(m => ({d
 const SystemSetup = lazy(() => import("./SystemSetup.jsx"));
 const RecognitionReview = lazy(() => import("./RecognitionReview.jsx"));
 import { mergeRecognitionEvents } from './recognition.mjs';
+import { workspaceFromHash, readWorkspace, writeWorkspace, reviewExport, parseReviewExport, resetSamples } from './workspace-state.mjs';
 import { DEFAULT_SETUP, parseSetup, sampleShouldRun, visibleCameraSlots } from "./resources.mjs";
 import {
   Monitor,
@@ -54,20 +55,14 @@ function download(data, name) {
   setTimeout(() => URL.revokeObjectURL(u), 1000);
 }
 function useStored(key, initial) {
-  const [v, set] = useState(() => {
-    try {
-      const x = JSON.parse(localStorage.getItem(key));
-      return restoreSnapshot(key, x, initial);
-    } catch {
-      return initial;
-    }
-  });
+  const [loaded] = useState(() => readWorkspace({ getItem: key => localStorage.getItem(key) }, key, initial));
+  const [v, set] = useState(loaded.value);
+  const [storageError, setStorageError] = useState(loaded.error);
   useEffect(() => {
-    try {
-      localStorage.setItem(key, JSON.stringify(v));
-    } catch {}
-  }, [key, v]);
-  return [v, set];
+    if (loaded.error && v === loaded.value) return;
+    setStorageError(writeWorkspace({ setItem: (key, value) => localStorage.setItem(key, value) }, key, v));
+  }, [key, v, loaded]);
+  return [v, set, storageError];
 }
 function Modal({ title, close, children, wide = false }) {
   const ref = useRef();
@@ -317,11 +312,11 @@ function EventRow({ event, review, zone }) {
   );
 }
 export function App() {
-  const [tab, setTab] = useState(window.location.hash === "#recognition" ? "Recognition" : window.location.hash === "#facility" ? "Facility" : window.location.hash === "#system" ? "System" : "Monitor"),
+  const [tab, updateTab] = useState(() => workspaceFromHash(window.location.hash) || "Monitor"),
     [selected, setSelected] = useState(1),
     [slots, setSlots] = useState([1, 2, 3, 4]),
-    [events, setEvents] = useStored("dvr.events.v1", initialEvents),
-    [rules, setRules] = useStored("dvr.rules.v1", initialRules),
+    [events, setEvents, eventsStorageError] = useStored("dvr.events.v1", initialEvents),
+    [rules, setRules, rulesStorageError] = useStored("dvr.rules.v1", initialRules),
     [modal, setModal] = useState(null),
     [toast, setToast] = useState(""),
     [query, setQuery] = useState(""),
@@ -330,6 +325,44 @@ export function App() {
     [error, setError] = useState(""),
     [note, setNote] = useState(""),
     [video, setVideo] = useState(null);
+  const [recognitionOpened, setRecognitionOpened] = useState(tab === "Recognition");
+  const [clearedEvents, setClearedEvents] = useState(null);
+  const [eventMode, setEventMode] = useState("all");
+  // Read the latest queue after asynchronous file reads and rapid consecutive imports.
+  const eventsRef = useRef(events);
+  eventsRef.current = events;
+  function setTab(next) {
+    if (next === "Recognition") setRecognitionOpened(true);
+    updateTab(next);
+    const hash = `#${next.toLowerCase()}`;
+    if (window.location.hash !== hash) window.history.pushState(null, "", hash);
+  }
+  useEffect(() => {
+    const changed = () => {
+      const next = workspaceFromHash(window.location.hash);
+      if (!next) return; // Preserve the skip-to-workspace anchor.
+      if (next === "Recognition") setRecognitionOpened(true);
+      updateTab(next);
+    };
+    window.addEventListener("popstate", changed);
+    window.addEventListener("hashchange", changed);
+    return () => { window.removeEventListener("popstate", changed); window.removeEventListener("hashchange", changed); };
+  }, []);
+  function addObservations(added, openEvents = true) {
+    try {
+      const merged = mergeRecognitionEvents(eventsRef.current, added);
+      const newCount = merged.length - eventsRef.current.length;
+      eventsRef.current = merged;
+      setEvents(merged);
+      if (openEvents) { setFilter("all"); setEventMode("all"); setQuery(""); setTab("Events"); }
+      setToast(`${newCount} new observations added. Existing decisions kept. Footage stays local.`);
+      return true;
+    } catch (err) { setToast(err.message); return false; }
+  }
+  function exportReviews() { download(reviewExport(eventsRef.current), "dvr-reviews.json"); }
+  function undoClear() {
+    if (clearedEvents && addObservations(clearedEvents)) setClearedEvents(null);
+  }
   const [resourceState, setResourceState] = useState(() => {
     try {
       const saved = localStorage.getItem("dvr.setup.v1");
@@ -388,7 +421,7 @@ export function App() {
     setEvents((es) => reviewEvent(es, modal.event.id, status, note));
     setModal(null);
     setToast(
-      `${status === "confirmed" ? "Observation confirmed" : "Event dismissed"}. Review saved in this browser.`,
+      `${status === "confirmed" ? "Observation confirmed" : "Event dismissed"}. Review updated.`,
     );
   }
   function saveRule(e) {
@@ -400,7 +433,7 @@ export function App() {
     }
     setRules((rs) => rs.map((r) => (r.camera === selected ? draft : r)));
     setError("");
-    setToast("Review rule saved in this browser.");
+    setToast("Review rule updated.");
   }
   function tryRule() {
     const problem = validateRule(draft);
@@ -418,8 +451,7 @@ export function App() {
       return;
     }
     const sampleId = `sample-${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
-    setEvents((es) =>
-      [
+    const added = [
         {
           id: sampleId,
           camera: selected,
@@ -432,9 +464,8 @@ export function App() {
           rule: `${draft.label} observed in ${draft.name} for ${draft.dwell} seconds (simulated test)`,
           note: "",
         },
-        ...es,
-      ].slice(0, 1000),
-    );
+      ];
+    if (!addObservations(added, false)) return;
     setToast("Simulated rule event added to the review queue.");
   }
   async function importReceipt(e) {
@@ -442,19 +473,10 @@ export function App() {
     e.target.value = "";
     if (!file) return;
     try {
-      if (file.size > 1024 * 1024)
-        throw Error("Receipt exceeds the 1 MB limit.");
-      const added = parseReceipt(JSON.parse(await file.text()));
-      setEvents((es) =>
-        [
-          ...added,
-          ...es.filter((x) => !added.some((a) => a.id === x.id)),
-        ].slice(0, 1000),
-      );
-      setTab("Events");
-      setToast(
-        `Imported ${added.length} offline observations. No video was uploaded.`,
-      );
+      if (file.size > 8 * 1024 * 1024) throw Error("Review file exceeds the 8 MiB limit.");
+      const value = JSON.parse(await file.text());
+      const added = value?.schema === "intelligent-dvr.review-export.v1" ? parseReviewExport(value) : parseReceipt(value);
+      addObservations(added);
     } catch (err) {
       setToast(err.message);
     }
@@ -473,6 +495,7 @@ export function App() {
   const visible = events.filter(
     (e) =>
       (filter === "all" || e.status === filter) &&
+      (eventMode === "all" || e.mode === eventMode) &&
       `${e.title} ${cameraOf(e)?.name || e.cameraName} ${e.rule}`
         .toLowerCase()
         .includes(query.toLowerCase()),
@@ -538,12 +561,16 @@ export function App() {
         </button>
       </nav>
       <main id="workspace" className={`workspace tab-${tab.toLowerCase()}`}>
-        {tab === "Recognition" && <Suspense fallback={<div className="content-page"><h1>Opening recognition review…</h1></div>}><RecognitionReview onImport={added => {
-          try {
-            setEvents(mergeRecognitionEvents(events, added));
-            setToast(`Imported ${added.length} model observations. Review them in Events; footage stays local.`);
-          } catch (err) { setToast(err.message); }
-        }} /></Suspense>}
+        {(eventsStorageError || rulesStorageError) && <div className="workspace-storage-warning" role="alert">
+          <WarningCircle size={22} /><div><strong>Browser save needs attention</strong>
+          {eventsStorageError && <p>Reviews: {eventsStorageError}</p>}
+          {rulesStorageError && <p>Rules: {rulesStorageError}</p>}</div>
+          <button className="button" onClick={exportReviews}>Export reviews</button>
+          <button className="button" onClick={() => download({schema:"intelligent-dvr.rules.v1", rules}, "dvr-rules.json")}>Export rules</button>
+        </div>}
+        {recognitionOpened && <div hidden={tab !== "Recognition"}><Suspense fallback={<div className="content-page"><h1>Opening recognition review…</h1></div>}>
+          <RecognitionReview active={tab === "Recognition" && !pageHidden} onImport={addObservations} />
+        </Suspense></div>}
         {tab === "Facility" && <Suspense fallback={<div className="content-page"><h1>Opening facility builder…</h1></div>}><FacilityBuilder /></Suspense>}
         {tab === "System" && <Suspense fallback={<div className="content-page"><h1>Opening machine setup…</h1></div>}><SystemSetup setup={resources}
           onApply={setup => setResourceState({ setup, error: "" })} storageError={resourceState.error} download={download} /></Suspense>}
@@ -659,23 +686,18 @@ export function App() {
                   decision.
                 </p>
               </div>
-              <button
-                className="button"
-                onClick={() =>
-                  download(
-                    {
-                      schema: "intelligent-dvr.review-export.v1",
-                      exportedAt: new Date().toISOString(),
-                      events,
-                    },
-                    "dvr-reviews.json",
-                  )
-                }
-              >
-                <DownloadSimple />
-                Export reviews
-              </button>
+              <div className="review-actions">
+                <button className="button" onClick={exportReviews}><DownloadSimple />Export reviews</button>
+                <button className="button" disabled={!events.length} onClick={() => setModal({type:"clear-reviews"})}>Clear queue</button>
+              </div>
             </div>
+            <div className="review-summary" aria-label="Review queue summary">
+              <span><strong>{pending.length}</strong> awaiting review</span>
+              <span>{events.filter(e => e.mode === "offline-model").length} model observations</span>
+              <span>{events.filter(e => e.mode === "sample").length} samples</span>
+              <span>{events.length} / 1,000 records</span>
+            </div>
+            {clearedEvents && <div className="review-recovery" role="status"><span>Queue cleared. {clearedEvents.length} previous records can be restored until this page closes.</span><button className="button" onClick={undoClear}>Undo clear</button></div>}
             <div className="event-filters">
               <label className="search-field">
                 <MagnifyingGlass size={19} />
@@ -696,13 +718,10 @@ export function App() {
                 <option value="confirmed">Confirmed</option>
                 <option value="dismissed">Dismissed</option>
               </select>
-              <button
-                className="button"
-                onClick={() => importRef.current.click()}
-              >
-                <UploadSimple />
-                Import receipt
-              </button>
+              <select aria-label="Observation source" value={eventMode} onChange={e => setEventMode(e.target.value)}>
+                <option value="all">All sources</option><option value="offline-model">Model observations</option><option value="sample">Samples</option>
+              </select>
+              <button className="button" onClick={() => importRef.current.click()}><UploadSimple />Import receipt or reviews</button>
             </div>
             <div className="event-table">
               {visible.length ? (
@@ -737,8 +756,9 @@ export function App() {
               ) : (
                 <div className="empty-state">
                   <MagnifyingGlass size={30} />
-                  <h3>No matching events</h3>
-                  <p>Try a different search or status.</p>
+                  <h3>{events.length ? "No matching events" : "Your review queue is empty"}</h3>
+                  <p>{events.length ? "Change the filters to see other observations." : "Open recognition results or restore a review export to start."}</p>
+                  {events.length ? <button className="button" onClick={() => { setFilter("all"); setEventMode("all"); setQuery(""); }}>Clear filters</button> : <button className="button" onClick={() => setTab("Recognition")}>Open Recognition</button>}
                 </div>
               )}
             </div>
@@ -1019,6 +1039,7 @@ export function App() {
       <input
         hidden
         ref={importRef}
+        aria-label="Import receipt or review export"
         type="file"
         accept="application/json,.json"
         onChange={importReceipt}
@@ -1198,16 +1219,35 @@ export function App() {
           </button>
         </Modal>
       )}
+      {modal?.type === "clear-reviews" && (
+        <Modal title="Clear the review queue?" close={() => setModal(null)}>
+          <p>Export your {events.length} reviews first to keep decisions and notes. Clearing leaves an empty queue ready for a full analysis run. Video files and rules stay on this computer.</p>
+          <p className="hint">Undo is available until this page closes. Exported reviews can be imported again.</p>
+          {clearedEvents && <p className="hint">Clearing again replaces the previous undo copy. <button className="text-button" onClick={() => download(reviewExport(clearedEvents), "dvr-previous-reviews.json")}>Export previous cleared reviews</button></p>}
+          <div className="review-actions">
+            <button className="button" onClick={exportReviews}><DownloadSimple />Export all reviews</button>
+            <button className="button amber" onClick={() => {
+              setClearedEvents(eventsRef.current);
+              eventsRef.current = []; setEvents([]); setModal(null); setToast("Queue cleared. Undo is available in Event history.");
+            }}>Clear queue now</button>
+            <button className="button" onClick={() => setModal(null)}>Keep reviews</button>
+          </div>
+        </Modal>
+      )}
       {modal?.type === "reset" && (
         <Modal title="Reset the sample workspace?" close={() => setModal(null)}>
           <p>
-            This clears browser-saved reviews, imported observations, and sample
-            rules. Your video files are unaffected.
+            This resets pending sample events and sample rules. Imported observations,
+            reviewed samples, and review notes are kept. Your video files are unaffected.
           </p>
           <button
             className="button amber"
             onClick={() => {
-              setEvents(initialEvents);
+              try {
+                const reset = resetSamples(eventsRef.current);
+                eventsRef.current = reset;
+                setEvents(reset);
+              } catch (err) { setToast(err.message); return; }
               setRules(initialRules);
               setModal(null);
               setTab("Monitor");

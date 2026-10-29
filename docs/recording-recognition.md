@@ -101,3 +101,31 @@ operator acceptance and the 100-camera target remain separate gates.
 
 [Dated local evidence](verification/recognition-2026-10-29/README.md) separates
 actual model execution from synthetic contract/browser checks.
+
+
+## Review continuity and recovery
+
+Recognition keeps the chosen recording, sample position and display threshold in
+memory while you switch workspaces. Playback pauses when you leave Recognition
+or hide the browser tab. Returning does not resume playback automatically.
+Reloading or closing the page releases this session; footage is never saved to
+browser storage or uploaded.
+
+Sending observations opens Events with filters cleared. Receipt imports and
+recognition imports preserve existing decisions and notes for matching evidence.
+A reused ID with different source/model/observation fields is rejected. Queue
+capacity is 1,000 records across model and sample observations. Every insertion
+refuses overflow without truncating older records.
+
+Events includes source/status/search filters, queue counts, review export and an
+explicit **Clear queue** dialog. Export first to retain decisions outside the
+browser. Clear leaves an actually empty queue, allowing a full 1,000-observation
+run. **Undo clear** lasts until reload/close and merges with current decisions;
+it refuses overflow or conflicting evidence. Clearing again explicitly replaces
+the previous undo copy; the dialog offers its export first. Import a review export
+to restore decisions after a reload. Review file imports are bounded to 8 MiB.
+
+Sample reset keeps imported observations and all reviewed samples. Save failures
+produce a persistent banner with export actions. Success toasts say “updated”
+rather than claiming durable storage. Workspace URLs support bookmarks and browser
+Back/Forward; recognition metadata and footage are not encoded in URLs.

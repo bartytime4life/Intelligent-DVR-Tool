@@ -17,7 +17,7 @@ test('recognition keeps evidence separate, rejects wrong files, and sends observ
   await expect(page.getByText('No detections meet this display threshold.',{exact:false})).toBeVisible();
   await page.getByRole('button',{name:'Send 1 observations to Events'}).click();
   await page.getByRole('button',{name:'Events',exact:false}).first().click();
-  await expect(page.getByText('test-recording').first()).toBeVisible();
+  await expect(page.locator('.event-table-row').filter({hasText:'test-recording'})).toBeVisible();
   const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('dvr.events.v1')));
   expect(stored.find(e => e.id === 'import-fixture-observation')).toMatchObject({mode:'offline-model',camera:null});
 });
@@ -54,6 +54,12 @@ test('matching synthetic recording enables boxes only at paused analyzed samples
   await page.getByLabel('Match original recording').setInputFiles({name:'synthetic.webm',mimeType:'video/webm',buffer});
   await expect(page.getByRole('status')).toContainText('fingerprint matched');
   await expect(page.locator('.recognition-boxes rect')).toHaveCount(2);
+  await page.getByRole('navigation',{name:'Main navigation'}).getByRole('button',{name:/^Events/}).click();
+  await expect(page.locator('video')).not.toBeVisible();
+  expect(await page.locator('video').evaluate(el=>el.paused)).toBe(true);
+  await page.getByRole('navigation',{name:'Main navigation'}).getByRole('button',{name:'Recognition'}).click();
+  await expect(page.locator('.recognition-boxes rect')).toHaveCount(2);
+  await expect(page.getByText('Analyzer finished · recording fingerprint matched')).toBeVisible();
   await page.screenshot({path:'test-results/recognition-desktop.png',fullPage:true});
   await page.locator('video').evaluate(el=>el.play());
   await expect(page.locator('.recognition-boxes')).toHaveCount(0);

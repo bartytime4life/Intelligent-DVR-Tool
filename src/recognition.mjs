@@ -42,6 +42,16 @@ export function parseRecognition(value) {
 export function mergeRecognitionEvents(existing, added) {
   // Repeat imports preserve saved human decisions and notes for the same observation.
   const previous = new Map(existing.map(e => [e.id, e]));
+  require(previous.size === existing.length && new Set(added.map(e => e.id)).size === added.length, 'Duplicate observation IDs are not allowed.');
+  for (const event of added) {
+    const old = previous.get(event.id);
+    if (!old) continue;
+    // An ID alone is not evidence that two unsigned observations are the same.
+    const keys = ['mode', 'camera', 'cameraName', 'title', 'label', 'time', 'score', 'rule'];
+    require(keys.every(key => old[key] === event[key]) &&
+      ['source_sha256', 'model_sha256'].every(key => old.provenance?.[key] === event.provenance?.[key]),
+      'An observation ID conflicts with different evidence already in the queue. Export and clear the queue before reviewing this file separately.');
+  }
   const ids = new Set(added.map(e => e.id));
   const merged = [...added.map(e => previous.get(e.id) || e), ...existing.filter(e => !ids.has(e.id))];
   require(merged.length <= 1000, 'The review queue would exceed 1,000 events. Export and clear earlier reviews before importing this run.');

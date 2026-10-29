@@ -1,4 +1,13 @@
 .recognition-page { max-width: 1500px; margin: 0 auto; }
+.recognition-progress { display: flex; gap: 24px; padding: 18px 0; margin: 20px 0 0; list-style: none; border-block: 1px solid #304450; }
+.recognition-progress li { display: flex; gap: 10px; align-items: center; flex: 1; min-width: 0; color: #aabac5; font-size: 13px; }
+.recognition-progress li > span { display: grid; place-items: center; width: 28px; height: 28px; flex-shrink: 0; border-radius: 50%; background: #24333e; }
+.recognition-progress small { display: block; color: #aabac5; font-size: 12px; margin-top: 5px; overflow-wrap: anywhere; }
+.recognition-progress .current > span, .recognition-progress .complete > span { background: #12463f; color: #8be9d9; }
+.recognition-progress .current, .recognition-progress .complete { color: #e2ecef; }
+.recognition-session-note { color: #aabac5; font-size: 13px; line-height: 1.6; }
+.recognition-empty a { color: #8be9d9; text-underline-offset: 3px; }
+@media(max-width: 600px) { .recognition-progress { flex-direction: column; gap: 14px; } }
 .recognition-intro { max-width: 800px; color: #b4c1cb; line-height: 1.6; }
 .recognition-page h1 { margin: 10px 0 14px; }
 .recognition-page p + p { margin-top: 12px; }

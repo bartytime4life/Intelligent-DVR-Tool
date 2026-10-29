@@ -46,3 +46,10 @@ recording-to-human-review workflow, representative quality evaluation, explicit
 single-source ingest/recording, then staged 1/5/25/50/100-camera acceptance. Scene
 inventories are sampled class counts, not learned behavior or identity claims.
 Preserve existing local unpublished work while implementing against current main.
+
+Owner experience review (2026-10-29): streamline the existing dark/teal workflows
+and repair review continuity. All queue entry paths must preserve decisions and
+refuse overflow. Keep imported/reviewed records on sample reset, retain the
+Recognition session across workspace switches, pause hidden footage, and expose
+storage failures. See docs/experience-review-2026-10-29.md for verified fixes,
+qualification limits and the remaining local-deployment priorities.
