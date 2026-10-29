@@ -6,7 +6,7 @@
 
 A local camera-analysis foundation and visual review prototype from BARTA AI Solutions.
 
-[Visual tour](docs/visual-tour.md) · [Start here](docs/getting-started.md) · [Product status](docs/product-status.md) · [Wiki](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki) · [Test evidence](docs/verification/README.md)
+[Visual tour](docs/visual-tour.md) · [Install for PC testing](docs/pc-testing.md) · [Start here](docs/getting-started.md) · [Product status](docs/product-status.md) · [Wiki](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki) · [Test evidence](docs/verification/README.md)
 
 </div>
 

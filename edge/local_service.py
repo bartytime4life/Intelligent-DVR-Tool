@@ -324,7 +324,10 @@ class Jobs:
 class LocalServer(HTTPServer):
     # Sequential requests bound concurrent file transfers and memory. Analysis is
     # the one background worker; each connection has a short read/write timeout.
-    allow_reuse_address = False
+    # Linux TIME_WAIT sockets must not prevent a normal stop/restart. An active
+    # listener still owns its exact loopback address. Windows reuse has different
+    # semantics and remains disabled.
+    allow_reuse_address = sys.platform == 'linux'
     def __init__(self, port, jobs, static_root, feeds=None):
         self.jobs, self.static_root, self.feeds = jobs, Path(static_root).resolve(), feeds
         self.token = jobs.token if jobs else secrets.token_urlsafe(32)
@@ -450,6 +453,7 @@ def main(argv=None):
     parser.add_argument('--config', type=Path, help='Local model/rule allowlist; see edge/local-analysis.example.json')
     parser.add_argument('--feeds-config', type=Path, help='Trusted LAN RTSP channels; see edge/local-feeds.example.json')
     parser.add_argument('--port', type=int, default=4173)
+    parser.add_argument('--open-browser', action='store_true', help='Open the local app after binding; never connects cameras')
     args = parser.parse_args(argv)
     if bool(args.recordings) != bool(args.config):
         parser.error('Use --recordings and --config together')
@@ -467,6 +471,14 @@ def main(argv=None):
             feeds = Feeds(load_sources(args.feeds_config.absolute()))
         with LocalServer(args.port, jobs, ROOT / 'dist/client', feeds) as server:
             print(f'Local Intelligent DVR: {server.origin}/ — explicit connections and jobs only; Ctrl+C stops.', flush=True)
+            if args.open_browser:
+                import webbrowser
+                def open_browser():
+                    try:
+                        webbrowser.open(server.origin + '/')
+                    except Exception:
+                        print('Open the printed loopback address in your browser.', flush=True)
+                threading.Thread(target=open_browser, daemon=True).start()
             server.serve_forever()
     except KeyboardInterrupt:
         pass

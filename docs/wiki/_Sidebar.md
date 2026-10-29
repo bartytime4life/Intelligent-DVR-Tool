@@ -4,6 +4,7 @@
 - [Product status](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Product-status)
 - [Visual tour](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-tour)
 - [Getting started](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Getting-started)
+- [PC testing](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/PC-testing)
 - [Facility planning](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Facility-planning)
 - [Maps and shapes](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Maps-and-shapes)
 - [Facility setup reliability](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Facility-setup-reliability)

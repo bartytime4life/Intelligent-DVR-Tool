@@ -1,5 +1,9 @@
 # Product status and evidence
 
+[PC test installation](pc-testing.md) provides a prebuilt kit, pinned isolated CPU dependencies,
+readiness diagnostics and separate Install/Check/Start actions. CI installation
+checks do not establish compatibility with a particular physical PC or camera.
+
 The current Monitor starts empty and supports explicit browser webcam and bounded
 local RTSP previews. Generated camera images/default events are removed. See
 [connections, limits and device qualification](local-camera-feeds.md).
@@ -41,7 +45,7 @@ newer source/check scope separately from the historical baseline counts below.
 | Offline detection | One local recording per run, default OpenCV CPU and explicit pinned YOLOX-S CUDA option, bounded rule receipts/traces with backend metadata; [analyzer](../edge/analyze.py) | [CUDA qualification](verification/cuda-2026-10-28/README.md) covers the owner PC and bounded inputs. Field/event accuracy, sustained capacity and other GPU/OS combinations remain unqualified. No detector weights are bundled. |
 | Evaluation | Annotation matching, precision/recall, timing distributions and reviewed false alerts; [guide](offline-evaluation.md) | Synthetic fixtures verify calculation/evidence plumbing. Approved representative labels and held-out quality measurement remain required. |
 | Scale preparation | Bounded fair scheduler, explicit 1–4 thread processors, optional Linux process supervision/local outcome journal and virtual-time 100/125-source tests; [guide](performance-100-cameras.md) | [Thread trials](verification/workers-2026-10-28/README.md), [process recovery](verification/recovery-2026-10-28/README.md) and [parent-crash journal](verification/journal-2026-10-28/README.md) use bounded offline inputs. The [batching record](verification/batching-2026-10-28/README.md) separates atomic commits/index changes from consumer acknowledgment timing. Durable dispatched outcomes are optional; no distributed service, live ingest, rule-state or recording integration; physical/sustained 100-camera operation remains unqualified. |
-| Linux/Windows delivery | Launch helpers, build and cross-platform CI; [verification](verification/README.md) | Opt-in fixed-loopback geo middleware is implemented for native dev/preview; actual service installation, intended hardware and deployed-version acceptance remain separate. |
+| Linux/Windows delivery | Pinned isolated install, prebuilt PC kit, integrity/readiness checks and foreground loopback service; [PC guide](pc-testing.md) | Fresh extracted-kit installation, repeated install/settings preservation and HTTP startup are checked on Linux/Windows CI. Physical-device/target-PC and unattended service acceptance remain separate. |
 
 ## Read the status labels
 

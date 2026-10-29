@@ -1,0 +1,184 @@
+# Install for live PC testing
+
+This kit prepares an interactive **single-user local test installation** on
+Ubuntu 24.04 x86-64 or Windows 11 x64. It includes the built interface and local
+CPU service. Python, trained model weights, camera credentials and recordings
+are not included. This is a portable test folder, not a Windows MSI or background recorder.
+
+## Get the PC kit
+
+Open the [PC install kit workflow](https://github.com/bartytime4life/Intelligent-DVR-Tool/actions/workflows/pc-install.yml).
+Choose a successful run for the reviewed revision. Download **pc-test-kit** under
+Artifacts (GitHub sign-in required), extract that download, then extract the inner
+**Intelligent-DVR-PC.zip** completely into a new writable folder owned by your OS
+account. Do not run from inside a ZIP or a shared/public folder.
+
+The download includes **Intelligent-DVR-PC.zip.sha256** for checking a transferred
+archive. The inner **pc-kit.json** records the exact source commit and file hashes;
+Check detects missing/changed files. These are integrity checks, not signatures.
+Artifacts expire after 90 days; rerun the workflow for a new copy of the reviewed
+revision. Do not treat an unreviewed PR artifact as a trusted install.
+
+## Prerequisites
+
+- 64-bit **Python 3.12**, including pip and venv. On Ubuntu, use the supported
+  python3.12 and python3.12-venv packages. On Windows, install the standard
+  Python 3.12 distribution with its launcher; the embeddable ZIP is not intended.
+- Full Chrome, Edge or Firefox, and a working webcam for webcam tests.
+  WebGL is needed for the facility planner.
+- Internet access for the initial pinned Python dependency installation.
+  Local camera previews do not use cloud inference. Optional map requests are separate.
+- A writable local folder and temporary disk space. Reserve 2 GiB for installation
+  and several GiB more for recording analysis. Actual recording storage is separate.
+  Begin with one feed. No GPU is required for these previews.
+
+**Node.js and Git are not needed for the prebuilt kit.** A source checkout needs
+Node.js 22 and npm to build the interface. Scripts do not install drivers, change
+execution policy, open a firewall, provision disks, install autostart or activate cameras.
+
+Official references: [Python on Windows](https://docs.python.org/3.12/using/windows.html),
+[virtual environments](https://docs.python.org/3.12/library/venv.html),
+[Node for source builds](https://nodejs.org/en/download).
+
+## Windows: Install, Check, Start
+
+Inside the extracted **Intelligent-DVR-PC** folder:
+
+1. Double-click **Install-Windows.cmd**. It installs pinned CPU dependencies into
+   this folder's .venv, creates an empty local-feeds.json if absent, then exits.
+2. Double-click **Check-Windows.cmd**. Continue when it says
+   **READY for explicit PC testing**. Recording analysis may say NOT_CONFIGURED;
+   that is expected for webcam/DVR preview tests.
+3. Double-click **Start-Windows.cmd**. Keep its terminal open. It opens
+   **http://127.0.0.1:4173/** in your browser. Stop with Ctrl+C.
+
+If Windows or organizational policy blocks the download, have the operator
+review/approve it normally. Do not disable protections. The .cmd entry points do
+not require changing PowerShell execution policy.
+
+PowerShell alternatives, also supported in a source checkout:
+
+~~~powershell
+.\scripts\Start-IntelligentDvr.ps1 -Install
+.\scripts\Start-IntelligentDvr.ps1 -Check
+.\scripts\Start-IntelligentDvr.ps1
+~~~
+
+Add **-Python python** or a full Python 3.12 path when the py launcher does not
+select it. **-NoBrowser** suppresses browser opening.
+
+## Linux: Install, Check, Start
+
+Open a terminal inside the extracted folder:
+
+~~~bash
+bash scripts/run-linux.sh --install
+bash scripts/run-linux.sh --check
+bash scripts/run-linux.sh
+~~~
+
+The last command opens **http://127.0.0.1:4173/**. Keep its terminal open and stop
+with Ctrl+C. **DVR_PYTHON=/path/to/python3.12** selects an interpreter;
+**--no-browser** suppresses browser opening.
+
+An incompatible existing .venv is refused and retained. Install in a fresh folder
+instead of deleting an environment you may need. Reinstall preserves
+local-feeds.json. After updating a source checkout, rerun Install to rebuild it.
+
+## First real-device test
+
+1. **Webcam first:** Monitor → Connect source → This computer's webcam → Connect
+   webcam. Grant permission for this local app. No microphone is requested.
+   Verify moving frames, disconnect and reconnect. Leave Monitor or hide the
+   page and confirm capture stops.
+2. **DVR/IP camera:** stop the app and edit local-feeds.json using
+   edge/local-feeds.example.json as the shape. Enter the device's actual private
+   IPv4, RTSP/TCP port, exact substream path and viewer account locally. Restrict
+   this plaintext credentials file to your OS account. Run Check, Start, then
+   Set up local DVR → Load configured DVR sources → select channel → Connect DVR channel.
+3. **Recovery:** disconnect. Try an incorrect channel in a disposable test
+   configuration, observe the error, restore the settings, restart and reconnect.
+   Changing the source catalog requires restarting.
+4. **Short soak:** watch one source for several minutes and note freezes/errors.
+   DVR previews deliberately end after 15 minutes; reconnect explicitly. Test
+   1/2/4 visible tiles. The service has a four-preview cap; 100 configured choices
+   do not establish 100 active-source capacity.
+
+Check never contacts camera endpoints. Passing proves software setup, not device
+availability, firmware/codec compatibility or latency. Use a <=1080p substream.
+ONVIF discovery, vendor cloud accounts, RTSPS, public addresses, hostnames, IPv6
+and RTSP/UDP are not supported by this bridge. See the
+[camera guide](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/local-camera-feeds.md).
+
+## Optional recording recognition
+
+Previews do **not** record or run live AI. Recognition analyzes a deliberately
+selected existing recording. Bring your own verified compatible model; no weights
+are downloaded by the installer. Configure paths, labels and rules with
+edge/local-analysis.example.json and the
+[analysis guide](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/local-analysis-service.md).
+
+Linux:
+
+~~~bash
+DVR_RECORDINGS=/absolute/path/to/approved-recordings \
+DVR_ANALYSIS_CONFIG="$PWD/edge/local-analysis.example.json" \
+bash scripts/run-linux.sh --check
+
+DVR_RECORDINGS=/absolute/path/to/approved-recordings \
+DVR_ANALYSIS_CONFIG="$PWD/edge/local-analysis.example.json" \
+bash scripts/run-linux.sh --analysis
+~~~
+
+Windows:
+
+~~~powershell
+.\scripts\Start-IntelligentDvr.ps1 -Check -Recordings 'D:\ApprovedRecordings' -AnalysisConfig "$PWD\edge\local-analysis.example.json"
+.\scripts\Start-IntelligentDvr.ps1 -Analysis -Recordings 'D:\ApprovedRecordings' -AnalysisConfig "$PWD\edge\local-analysis.example.json"
+~~~
+
+Check validates the catalog and model hashes without inference. In Recognition,
+connect, select recording/model/rules, analyze, cancel one attempt and retry.
+Confirm source-matched results open. CPU jobs do not establish detection accuracy,
+identity tracking or live-camera analysis.
+
+## Reports and recovery
+
+Create a new report with Linux **--check --report readiness-001.json** or PowerShell
+**-Check -Report readiness-001.json**. Reports contain check statuses, runtime
+versions and source revision for a kit. They omit camera names, credentials,
+endpoints, hostnames and recording paths. Review before sharing; never share
+local-feeds.json or private recordings as diagnostics.
+
+| Failure | Recovery |
+| --- | --- |
+| Python missing/wrong version | Install/select 64-bit Python 3.12 with pip/venv |
+| Installation fails | Check network/free space and rerun Install; existing settings remain |
+| Kit missing/changed files | Extract a fresh complete kit; copy settings only after review |
+| Port occupied | Close the other app or choose --port 4175 / -Port 4175 |
+| Runtime probe fails | Rerun Install; use a fresh folder if the environment conflicts |
+| Config fails | Validate against examples; use only owner-approved private LAN endpoints |
+| Camera permission denied | Adjust permission for this local origin, then explicitly reconnect |
+| RTSP fails | Verify power/LAN, port/path, viewer credentials and <=1080p substream |
+| Browser cannot play analyzed video | Convert a copy to a supported codec, then analyze that copy |
+
+Use the same browser profile and exact **http://127.0.0.1:4173** origin for
+continuity. A changed port/origin has separate browser storage. Export reviews,
+rules and facility plans before updates; browser storage is not a backup.
+
+Stop before updating. Extract a new kit into a new folder, install its own
+environment and copy only reviewed settings. Keep footage/models outside the app
+folder. To uninstall, stop, export browser work and remove the extracted folder
+after preserving anything you added. No system service or machine-wide uninstall
+step is installed.
+
+## Acceptance boundary
+
+This is packaging for PC testing, not unattended DVR deployment. Record OS, kit
+revision, browser, device/firmware, codec/resolution and outcomes locally.
+Physical-device compatibility, sustained operation, recording/retention, live AI,
+tracking, independent detection quality and 100-camera capacity remain separate work.
+
+---
+
+[Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/pc-testing.md) · Documentation refresh: October 29, 2026.

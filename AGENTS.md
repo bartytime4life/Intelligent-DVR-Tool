@@ -68,3 +68,9 @@ visible errors, disconnection and bounded preview resources. Preserve reviewed
 legacy records without invented evidence. Camera preview, recording analysis,
 live inference, identity tracking and 100-camera qualification remain separate.
 This decision supersedes the earlier synthetic camera-wall imagery preference.
+
+Owner PC-test readiness request (2026-10-29): provide a reproducible Linux/Windows
+install path, pinned isolated CPU dependencies, an honest readiness check, and a
+prebuilt PC test kit with source identity. Install/check must not activate cameras
+or inference. Preserve local credentials/settings on reinstall; keep physical-PC
+and device acceptance separate from clean CI installation and synthetic checks.
