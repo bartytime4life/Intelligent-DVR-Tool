@@ -1529,8 +1529,8 @@ textarea::placeholder {
 }
 @media (min-width: 701px) {
   .tab-monitor {
-    height: calc(100dvh - 122px);
-    min-height: 0;
+    min-height: calc(100dvh - 122px);
+    height: auto;
   }
   .monitor-layout {
     min-height: 0;
