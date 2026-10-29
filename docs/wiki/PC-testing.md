@@ -2,7 +2,10 @@
 
 This kit prepares an interactive **single-user local test installation** on
 Ubuntu 24.04 x86-64 or Windows 11 x64. It includes the built interface and local
-CPU service. Python, trained model weights, camera credentials and recordings
+CPU service, including the pinned detector's candidate metadata and label order
+needed to validate an owner-supplied model. Packaging tests validate that binding
+from an extracted kit without borrowing files from a source checkout. Python,
+trained model weights, camera credentials and recordings
 are not included. This is a portable test folder, not a Windows MSI or background recorder.
 
 ## Get the PC kit
