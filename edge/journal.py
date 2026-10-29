@@ -85,10 +85,14 @@ class OutcomeJournal:
                     token INTEGER NOT NULL, status TEXT NOT NULL, acked INTEGER NOT NULL DEFAULT 0,
                     charge INTEGER NOT NULL, body TEXT NOT NULL, UNIQUE(run, token))''')
                 self._db.execute('CREATE INDEX IF NOT EXISTS delivery ON entries(status, acked, id)')
+                # Keep acknowledged history out of the unread delivery scan.
+                # Additive index: version-1 rows/API remain compatible.
+                self._db.execute("CREATE INDEX IF NOT EXISTS unread_delivery ON entries(id) WHERE acked=0 AND status!='dispatched'")
                 self._db.execute('PRAGMA user_version=1')
             self.max_entries, self.max_bytes = max_entries, max_bytes
             self.max_result_bytes = max_result_bytes
             self.run_id, self._attached = str(uuid.uuid4()), False
+            self._terminal_commits = self._terminal_rows = self._largest_terminal_batch = 0
             self._closed = False
             self.recovered = self._recover()
             self._count, self._bytes = self._query('SELECT COUNT(*), COALESCE(SUM(charge),0) FROM entries')[0]
@@ -169,25 +173,51 @@ class OutcomeJournal:
         self._bytes += len(rows)*(self.max_result_bytes+2048)
 
     def finish(self, token, *, result, error, processor):
-        rows = self._query('SELECT id,status,body,charge FROM entries WHERE run=? AND token=?', (self.run_id, token))
-        if not rows or rows[0][1] != 'dispatched':
+        return self.finish_many([dict(token=token, result=result, error=error, processor=processor)])[0]
+
+    def finish_many(self, completions):
+        """Atomically commit 1–4 terminal rows; return IDs in input order.
+
+        Validate the entire batch before writing. No outcome may be delivered
+        before this call returns. Existing finish() keeps its one-row contract.
+        """
+        completions = tuple(completions)
+        if (not 1 <= len(completions) <= 4 or any(not isinstance(c, dict) or
+                set(c) != {'token', 'result', 'error', 'processor'} for c in completions)):
+            raise ValueError('Use 1–4 explicit terminal records')
+        tokens = [c['token'] for c in completions]
+        if any(not integer(t, 1, 2**63-1) for t in tokens) or len(set(tokens)) != len(tokens):
+            raise JournalError('Invalid or duplicate terminal batch token')
+        placeholders = ','.join('?' for _ in tokens)
+        rows = self._query('SELECT token,id,status,body,charge FROM entries WHERE run=? AND token IN ('+
+                           placeholders+')', (self.run_id, *tokens))
+        existing = {r[0]: r[1:] for r in rows}
+        if set(existing) != set(tokens) or any(r[1] != 'dispatched' for r in existing.values()):
             raise JournalError('Unknown or already terminal journal token')
-        receipt_id, _, raw, previous_charge = rows[0]
-        try:
-            encoded = _json(result)
-        except (TypeError, ValueError, RecursionError) as exc:
-            raise JournalError('Result must be finite JSON') from exc
-        if len(encoded.encode()) > self.max_result_bytes:
-            raise JournalError('Result exceeds its reserved byte bound')
-        body = json.loads(raw)
-        body.update(status='succeeded' if error is None else 'failed', result=result,
-                    error=None if error is None else str(error)[:80], processor=processor,
-                    finished_ns=time.time_ns())
-        charge = len(encoded.encode())+2048
-        self._write('UPDATE entries SET status=?,body=?,charge=? WHERE id=?',
-                    [(body['status'], _json(body), charge, receipt_id)])
-        self._bytes += charge-previous_charge
-        return receipt_id
+        updates, ids, delta = [], [], 0
+        for item in completions:
+            receipt_id, _, raw, previous_charge = existing[item['token']]
+            try:
+                encoded = _json(item['result'])
+            except (TypeError, ValueError, RecursionError) as exc:
+                raise JournalError('Result must be finite JSON') from exc
+            size = len(encoded.encode())
+            if size > self.max_result_bytes:
+                raise JournalError('Result exceeds its reserved byte bound')
+            body = json.loads(raw)
+            body.update(status='succeeded' if item['error'] is None else 'failed', result=item['result'],
+                        error=None if item['error'] is None else str(item['error'])[:80],
+                        processor=item['processor'], finished_ns=time.time_ns())
+            charge = size+2048
+            updates.append((body['status'], _json(body), charge, receipt_id))
+            ids.append(receipt_id)
+            delta += charge-previous_charge
+        self._write('UPDATE entries SET status=?,body=?,charge=? WHERE id=?', updates)
+        self._bytes += delta
+        self._terminal_commits += 1
+        self._terminal_rows += len(ids)
+        self._largest_terminal_batch = max(self._largest_terminal_batch, len(ids))
+        return tuple(ids)
 
     def pending(self, limit=100):
         """Read terminal unacknowledged rows in stable ID order; never acknowledges."""
@@ -220,7 +250,9 @@ class OutcomeJournal:
         unread = self._query("SELECT COUNT(*) FROM entries WHERE status!='dispatched' AND acked=0")[0][0]
         return dict(run_id=self.run_id, entries=self._count, reserved_bytes=self._bytes,
                     max_entries=self.max_entries, max_bytes=self.max_bytes,
-                    recovered_interrupted=self.recovered, unacknowledged=unread, states=counts)
+                    recovered_interrupted=self.recovered, unacknowledged=unread, states=counts,
+                    terminal_commits=self._terminal_commits, terminal_rows=self._terminal_rows,
+                    largest_terminal_batch=self._largest_terminal_batch)
 
     def close(self):
         if self._closed:

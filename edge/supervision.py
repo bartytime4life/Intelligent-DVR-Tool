@@ -214,6 +214,7 @@ class ProcessWorkers:
         self._process = self._connection = None
         self._incoming, self._outgoing, self._outcomes = bytearray(), deque(), deque()
         self._inflight, self._events, self._metadata = {}, [], []
+        self._staged = {}  # At most one validated result per in-flight worker slot.
         self._completed = self._failed = self._process_failures = 0
         self._closing = False
         self._spawn()
@@ -276,11 +277,7 @@ class ProcessWorkers:
             self._process = None
         return reaped
 
-    def _terminal(self, work, result, error, processor):
-        receipt_id = None
-        if self.journal is not None and self._journal_error is None:
-            receipt_id = self.journal.finish(work.token, result=result,
-                error=getattr(error, 'code', 'processor-error') if error is not None else None, processor=processor)
+    def _terminal(self, work, result, error, processor, receipt_id=None):
         self.scheduler.complete(work.token, success=error is None)
         if error is None:
             self._completed += 1
@@ -288,16 +285,39 @@ class ProcessWorkers:
             self._failed += 1
         self._outcomes.append(ProcessOutcome(work, result, error, self._generation, processor, receipt_id))
 
+    def _flush_staged(self):
+        if not self._staged:
+            return
+        items = tuple(self._staged.items())
+        ids = self.journal.finish_many([dict(token=token, result=result, error=None, processor=slot)
+                                       for token, (result, slot) in items])
+        # Only committed rows release scheduler slots or become returned outcomes.
+        for (token, (result, slot)), receipt_id in zip(items, ids):
+            self._terminal(self._inflight.pop(token), result, None, slot, receipt_id)
+        self._staged.clear()
+
     def _fault(self, code, message=''):
         self._process_failures += 1
         self._event('failure', code=code)
-        for work in self._inflight.values():
+        # Preserve already validated responses before failing the rest, matching
+        # the nonbatched path. A storage failure instead leaves them unresolved.
+        if self._journal_error is None:
             try:
-                self._terminal(work, None, ProcessFailure(code, self._generation, message), None)
+                self._flush_staged()
             except JournalError as exc:
                 self._journal_error = str(exc)
-                self._terminal(work, None, ProcessFailure('journal-error', self._generation), None)
+        works = tuple(self._inflight.values())
+        ids = [None]*len(works)
+        if self.journal is not None and self._journal_error is None and works:
+            try:
+                ids = self.journal.finish_many([dict(token=w.token, result=None, error=code, processor=None) for w in works])
+            except JournalError as exc:
+                self._journal_error = str(exc)
+        failure_code = 'journal-error' if self._journal_error is not None else code
+        for work, receipt_id in zip(works, ids):
+            self._terminal(work, None, ProcessFailure(failure_code, self._generation, message), None, receipt_id)
         self._inflight.clear()
+        self._staged.clear()
         reaped = self._retire()
         if not self._closing and self._journal_error is None and reaped and self._restarts < self.max_restarts:
             self._restarts += 1
@@ -334,7 +354,7 @@ class ProcessWorkers:
             elif kind == 'result' and self._state == 'running':
                 token = value.get('token')
                 processor = value.get('processor')
-                if (type(token) is not int or token not in self._inflight or type(value.get('ok')) is not bool
+                if (type(token) is not int or token not in self._inflight or token in self._staged or type(value.get('ok')) is not bool
                         or not integer(processor, 0, self.scheduler.workers-1)):
                     raise ValueError('Duplicate or unknown result token')
                 work = self._inflight[token]
@@ -343,8 +363,11 @@ class ProcessWorkers:
                 elif not value['ok']:
                     self._fault(str(value.get('code', 'processor-error'))[:80], str(value.get('message', ''))[:200])
                 else:
-                    self._terminal(work, value.get('value'), None, processor)
-                    self._inflight.pop(token)
+                    if self.journal is None:
+                        self._terminal(work, value.get('value'), None, processor)
+                        self._inflight.pop(token)
+                    else:
+                        self._staged[token] = value.get('value'), processor
             else:
                 raise ValueError('Unexpected result state')
         except (ValueError, TypeError, KeyError, RecursionError, UnicodeError) as exc:
@@ -400,6 +423,7 @@ class ProcessWorkers:
             else:
                 self._outgoing[0] = view[count:]
         self._read()
+        self._flush_staged()
 
     def step(self):
         try:
@@ -448,6 +472,7 @@ class ProcessWorkers:
                 'process_failures': self._process_failures,
                 'journal_run_id': self.journal.run_id if self.journal is not None else None,
                 'journal_blocked': self._journal_blocked, 'journal_error': self._journal_error,
+                'received_uncommitted': len(self._staged),
                 'pid': self._process.pid if self._process is not None else None,
                 'child_alive': self._process.is_alive() if self._process is not None and self._process.pid else False,
                 'unsent_bytes': sum(len(view) for view in self._outgoing),

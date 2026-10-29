@@ -184,7 +184,9 @@ recovery measurements and limits are in the
 `edge.journal.OutcomeJournal` is a Linux-only SQLite outbox on an explicit private
 **local-disk** directory. Pass it to `ProcessWorkers(..., journal=journal)`; it is
 off by default. Each open journal owns a fresh UUID run and an exclusive file
-lock. One controlling thread and one worker adapter may use that open run.
+lock. One controlling thread and one worker adapter may use that open run. The version-1
+row schema and single-record `finish()` API remain compatible; an additive unread
+index is created on explicit open, without erasing or migrating rows.
 The lock file stays in place; do not delete it while an owner may be running.
 
 The directory must have owner-only permissions (new directories use 0700), and
@@ -203,6 +205,31 @@ not power-loss, failing-disk, network-filesystem or backup qualification.
 | Read with `pending(limit=100)` | Return terminal unacknowledged records in stable ID order, at most 1,000 per call. Reading never acknowledges. |
 | Explicit `acknowledge(ids)` | Persist acknowledgment of specified terminal rows. Repeating an acknowledgment before pruning is harmless. |
 | Explicit `prune()` | Remove only acknowledged terminal rows. Unread results and in-flight reservations are retained. IDs are not reused. |
+
+`finish_many(completions)` commits 1–4 terminal records atomically and returns IDs
+in input order. Each record has `token`, `result`, `error` and `processor`. The
+whole batch is validated before writing; a failed SQL statement rolls back the
+group. Existing `finish(token, ...)` delegates a one-row group.
+
+With an explicit journal, `ProcessWorkers` collects validated responses from one
+bounded IPC pump and commits those available together before releasing scheduler
+slots or returning outcomes. It adds no timer, sleeping or cross-poll batch wait.
+At most four parsed results are staged, still associated with in-flight payloads;
+encoded result limits remain per message and parsed Python overhead is additional.
+`received_uncommitted` exposes staging. A parent exit before commit can interrupt
+the whole received group; it does not turn reception into a durable success.
+
+A protocol/worker fault first commits already validated responses, then commits
+failures for remaining work as a group. If storage fails, dispatch/restarts stop,
+RAM-only failures have no journal ID, and unresolved rows remain for inspection/
+reopen recovery. No partial group is presented as durably delivered. The nonjournal
+path continues returning responses directly.
+
+Journal snapshots add `terminal_commits`, `terminal_rows` and
+`largest_terminal_batch`, covering successful terminal API commits in the current
+open run. They reset on reopen and exclude initialization/recovery, reservations,
+acknowledgments and pruning. They are not total SQLite transactions or fsync counts.
+The unread partial index keeps acknowledged history out of delivery scans.
 
 Delivery is **at least once**. A consumer can crash after acting on a read and
 before acknowledgment; the same IDs will be offered again. Use persisted
@@ -247,6 +274,17 @@ and `journal_blocked` is visible. Pending samples still replace/expire under the
 scheduler's policy. Existing oversized history can be read/acknowledged/pruned
 without admitting new work. SQLite pages, indexes, WAL and native caches add
 overhead; these bounds are not a filesystem quota or retention policy.
+
+Consumers may explicitly collect handled IDs and acknowledge them together at a
+bounded cadence, rather than issuing an acknowledgment transaction per response.
+For example, a caller can poll delivery every 25 ms with `pending(limit=1000)`,
+handle each record durably using its run/token key, then acknowledge those IDs in
+one call. If handling fails, leave the batch unacknowledged and deduplicate on
+redelivery. Do not infer durable handling merely from reading or receiving a row.
+Choose freshness/retention limits for the application and continue polling workers
+frequently. This changes acknowledgment timing, not SQLite durability. The
+[batching qualification](verification/batching-2026-10-28/README.md) separates
+component changes from that consumer-policy experiment.
 
 Only **dispatched** samples are journaled. Pending, replaced, stale or budget-
 dropped samples exist only in scheduler counters and may disappear with the

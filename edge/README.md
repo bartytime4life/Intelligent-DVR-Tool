@@ -154,6 +154,10 @@ and retains unacknowledged terminal records; consumers acknowledge/prune
 explicitly. Parent-death cleanup kills the owned worker child. See the
 [journal contract and limits](../docs/performance-100-cameras.md#optional-local-outcome-journal)
 and [parent-crash qualification](../docs/verification/journal-2026-10-28/README.md).
+Available terminal responses can commit in atomic groups of up to four within a
+bounded poll; an unread index avoids scanning acknowledged history. See the
+[batching qualification](../docs/verification/batching-2026-10-28/README.md) for
+matched measurements and atomic crash windows. SQLite durability is unchanged.
 This does not persist pending samples, recording continuity or per-camera rules.
 
 Rule JSON is an array of named rules; browser rule exports have a separate
