@@ -17,10 +17,18 @@ jobs:
       - run: npm install --no-save --package-lock=false @playwright/test@1.56.1
       - run: npx playwright install --with-deps chromium
       - run: npx playwright test --config=playwright.facility.config.mjs
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -r edge/requirements-qualification.txt
+      - run: npm run build
+      - name: Local service with real synthetic CPU inference and browser recovery
+        run: npx playwright test --config=playwright.analysis.config.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: facility-browser-evidence
           path: |
             qa-local/facility-browser-results.json
+            qa-local/analysis-browser-results.json
             test-results/

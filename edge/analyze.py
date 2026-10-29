@@ -68,7 +68,7 @@ def decode(raw, labels, frame_shape, scale, padding, cv2, np, profile=DEFAULT_PR
     return result
 
 
-def main(argv=None):
+def main(argv=None, progress=None, local_capture=False):
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--video',type=Path,required=True)
     parser.add_argument('--model',type=Path,required=True)
@@ -88,6 +88,8 @@ def main(argv=None):
     parser.add_argument('--stride',type=int,default=5)
     parser.add_argument('--max-frames',type=int,help='Decoded-frame ceiling; default 6000 or policy cap')
     args=parser.parse_args(argv)
+    report = progress or (lambda **fields: None)
+    report(phase='validating', frames_read=0, frames_analyzed=0)
     if args.backend == 'onnxruntime-cuda' and args.profile != YOLOX_PROFILE:
         parser.error('CUDA backend requires --profile '+YOLOX_PROFILE)
     policy_hash = None
@@ -137,7 +139,7 @@ def main(argv=None):
     source_hash=digest(args.video)
     run_id=hashlib.sha256((source_hash+model_hash).encode()).hexdigest()
     engine=RuleEngine(rules,args.camera,run_id)
-    capture=cv2.VideoCapture(str(args.video))
+    capture=cv2.VideoCapture(str(args.video), cv2.CAP_FFMPEG) if local_capture else cv2.VideoCapture(str(args.video))
     if not capture.isOpened():
         parser.error('Video could not be opened')
     fps=capture.get(cv2.CAP_PROP_FPS)
@@ -155,6 +157,7 @@ def main(argv=None):
              'numpy':np.__version__,'machine':platform.machine(),**backend.runtime}
     frames=0;processed=0;events=[];latencies=[];partial=False
     trace_frames=[];detection_count=0
+    report(phase='analyzing', frames_read=0, frames_analyzed=0)
     try:
         while frames < args.max_frames:
             ok,frame=capture.read()
@@ -172,6 +175,7 @@ def main(argv=None):
             elapsed=(time.perf_counter()-began)*1000
             latencies.append(elapsed)
             processed+=1;events.extend(engine.update(index/fps,detections))
+            report(phase='analyzing', frames_read=frames, frames_analyzed=processed)
             if retain_frames:
                 detection_count += len(detections)
                 if detection_count > MAX_DETECTIONS:
@@ -188,6 +192,7 @@ def main(argv=None):
         backend.close()
     if not processed:
         raise ValueError('No frames were decoded; no receipt was written')
+    report(phase='verifying', frames_read=frames, frames_analyzed=processed)
     if input_hashes and any(digest(p) != expected for p, expected in input_hashes.items()):
         raise ValueError('An input changed during analysis; no review result was written')
     ordered=sorted(latencies)
@@ -252,6 +257,7 @@ def main(argv=None):
             path.unlink()
         raise
     print(f'Wrote {len(events)} observations; state={receipt["state"]}; human review required.')
+    report(phase='completed', frames_read=frames, frames_analyzed=processed)
 
 
 if __name__=='__main__':

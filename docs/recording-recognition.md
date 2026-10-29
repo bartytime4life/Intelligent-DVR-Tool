@@ -1,5 +1,10 @@
 # Recording recognition pilot
 
+The local application now offers an explicit recording-to-analysis workflow with
+progress, cancellation and automatic source-matched result opening. See
+[local analysis setup and limits](local-analysis-service.md). The command-line
+workflow below remains available for existing receipt users.
+
 [Home](../README.md) · [Analyzer](../edge/README.md) · [Deployment path](roadmap.md#recognition-deployment-path--october-29-2026)
 
 The next deployment milestone is a complete **one-recording recognition and human

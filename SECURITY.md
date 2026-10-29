@@ -69,3 +69,7 @@ hashes. They limit OpenCV threads/frames and the scheduler's retained sample
 bytes/slots/dispatch age. They are not OS quotas, a native-code sandbox, a GPU
 backend or a hard wall-clock deadline. No storage provisioning or host tuning
 is performed by System or the supplied launchers.
+
+## Local recording job service
+
+The optional `edge.local_service` binds only to `127.0.0.1`, checks exact Host and browser origin, and requires a per-service token for jobs and artifacts. It accepts opaque catalog selections, never uploaded footage or client paths/commands. One isolated CPU worker invokes the existing analyzer with bounded local snapshots, time, memory, threads and frame/output limits. It is single-user software for owner-approved recordings and hash-pinned models, not a hostile-model sandbox. See [the full boundary and shutdown/recovery behavior](docs/local-analysis-service.md).

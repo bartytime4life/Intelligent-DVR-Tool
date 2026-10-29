@@ -53,3 +53,10 @@ refuse overflow. Keep imported/reviewed records on sample reset, retain the
 Recognition session across workspace switches, pause hidden footage, and expose
 storage failures. See docs/experience-review-2026-10-29.md for verified fixes,
 qualification limits and the remaining local-deployment priorities.
+
+Owner recording-workflow request (2026-10-29): connect Recognition to a bounded
+local analysis service after reconciling PR #25. Require explicit job start,
+recording/model/rule selection, progress/cancel, source-matched result opening,
+local-only files/inference, path/resource limits and a CPU path. Reuse analyzer
+and review contracts. Distinguish this from live cameras, tracking, measured
+recognition quality and 100-camera acceptance.

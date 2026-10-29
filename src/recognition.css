@@ -53,3 +53,19 @@
 .recognition-provenance code { overflow-wrap: anywhere; }
 @media(max-width: 1050px) { .recognition-layout { grid-template-columns: minmax(0, 1fr); } }
 @media(max-width: 600px) { .recognition-event { display: block; } .recognition-event span { display: block; } .recognition-loaders { flex-direction: column; } .recognition-timeline .button { font-size: 12px; padding: 9px; } }
+.local-analysis { margin: 24px 0; padding: 22px; border: 1px solid #34564f; background: linear-gradient(125deg, #142c2c, #15212b 70%); border-radius: 12px; }
+.local-analysis-heading { display: flex; align-items: center; justify-content: space-between; gap: 18px; }
+.local-analysis h2 { margin: 8px 0 16px; }
+.local-analysis p { color: #b4c1cb; line-height: 1.6; font-size: 13px; }
+.local-analysis-badge { border: 1px solid #36685f; border-radius: 20px; padding: 7px 12px; color: #8be9d9; font-size: 12px; white-space: nowrap; }
+.local-analysis-fields { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 16px; padding: 0; border: 0; margin: 20px 0 12px; min-width: 0; }
+.local-analysis-fields label { min-width: 0; color: #c4d6df; font-size: 13px; }
+.local-analysis-fields select { display: block; width: 100%; min-width: 0; margin-top: 8px; padding: 11px; border: 1px solid #3d5662; border-radius: 6px; background: #101d27; color: #e0ebef; }
+.local-analysis-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin: 16px 0; }
+.local-analysis-actions a { color: #8be9d9; font-size: 13px; }
+.local-analysis-job { padding: 16px; background: #0c191f; border-radius: 8px; margin: 18px 0; overflow-wrap: anywhere; }
+.local-analysis-job > span { display: block; color: #8be9d9; font-size: 13px; margin-top: 6px; }
+.local-analysis-job progress { width: 100%; accent-color: #58dccd; height: 8px; }
+.local-analysis .local-analysis-footnote { color: #9fadb8; font-size: 12px; margin-top: 18px; }
+.recognition-import-heading { margin-top: 30px; font-size: 16px; }
+@media(max-width: 760px) { .local-analysis-fields { grid-template-columns: minmax(0,1fr); } .local-analysis-heading { display: block; } .local-analysis-badge { display: inline-block; margin-bottom: 14px; } .local-analysis { padding: 18px; } }
