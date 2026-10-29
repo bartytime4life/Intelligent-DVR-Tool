@@ -122,3 +122,11 @@ test('selected polygon and floor path summaries are marked as required', () => {
   assert.equal(measurementLabels(plan,'b')[0].primary,true);
   assert.equal(measurementLabels(plan,'p',{view:'floors',floorBuildingId:'b',floor:0})[0].primary,true);
 });
+
+test('retained cutouts do not display measurements while their entire floor is open',()=>{
+  const plan={buildings:[{id:'b',footprint:box(0,0,10,10),openFloors:[1]}],rooms:[],route:[],openings:[{id:'o',buildingId:'b',level:1,footprint:box(2,2,2,2)}]};
+  assert.deepEqual(measurementLabels(plan,'o',{view:'floors',floorBuildingId:'b',floor:1}),[]);
+  assert.deepEqual(measurementLabels(plan,'o',{view:'3d'}),[]);
+  plan.buildings[0].openFloors=[];
+  assert.ok(measurementLabels(plan,'o',{view:'floors',floorBuildingId:'b',floor:1}).length>0);
+});

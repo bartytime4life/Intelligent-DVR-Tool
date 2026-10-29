@@ -38,7 +38,7 @@ Deleting a camera clears its image-region links while preserving zone geometry; 
 
 Base source: `eb925c8ad55686abdef33c4e882354bd75b987ce` (updated from the initial main revision while preserving public-webcam support).
 
-- All JavaScript test files: 155 passed, one existing socket-gated test skipped in the restricted runner.
+- All JavaScript test files: 156 passed, one existing socket-gated test skipped in the restricted runner.
 - Production/Sites build and four Sites packaging tests passed (existing large facility chunk warning remains).
 - Six Python rule-engine tests passed.
 - Actual Chrome checks: visible dimensions and measurement controls; floor copying and adding levels with 3.20 m floor spacing; click-to-aim changes bearing; camera draft guard; zone draft guard; camera deletion/Undo restores the image binding; 390px CSS layout without horizontal page overflow.
