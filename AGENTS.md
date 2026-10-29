@@ -60,3 +60,11 @@ recording/model/rule selection, progress/cancel, source-matched result opening,
 local-only files/inference, path/resource limits and a CPU path. Reuse analyzer
 and review contracts. Distinguish this from live cameras, tracking, measured
 recognition quality and 100-camera acceptance.
+
+Owner real-feed decision (2026-10-29): remove generated/stock camera imagery and
+simulated default events from the active interface. Start with honest empty
+states. Provide explicit local webcam and configured LAN DVR RTSP connections,
+visible errors, disconnection and bounded preview resources. Preserve reviewed
+legacy records without invented evidence. Camera preview, recording analysis,
+live inference, identity tracking and 100-camera qualification remain separate.
+This decision supersedes the earlier synthetic camera-wall imagery preference.

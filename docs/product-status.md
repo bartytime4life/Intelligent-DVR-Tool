@@ -1,5 +1,9 @@
 # Product status and evidence
 
+The current Monitor starts empty and supports explicit browser webcam and bounded
+local RTSP previews. Generated camera images/default events are removed. See
+[connections, limits and device qualification](local-camera-feeds.md).
+
 Local recording analysis now has a bounded same-origin CPU job service and
 Recognition controls for explicit selection, progress, cancellation and automatic
 source matching. See [setup, resource limits and recovery](local-analysis-service.md).
@@ -27,7 +31,7 @@ newer source/check scope separately from the historical baseline counts below.
 
 | Capability | Implemented baseline and source | Evidence and next gate |
 | --- | --- | --- |
-| Monitor/review | Wall, queue, notes, history, zones and exports; [workspace source](../src/App.jsx) | Five generated scenes and playback are fixtures. No connected cameras. [Visual tour](visual-tour.md). |
+| Monitor/review | Wall, queue, notes, history, zones and exports; [workspace source](../src/App.jsx) | Explicit webcam and configured LAN RTSP preview; no stock imagery or automatic camera activation. [Feed guide](local-camera-feeds.md). Physical-device compatibility and sustained operation remain unqualified. |
 | Local video and receipts | Explicit video preview and receipt import; [offline CLI](../edge/README.md) | Preview does not analyze. Imported events do not borrow sample images. |
 | Recording recognition | Explicit local CPU jobs with recording/model/rule selection, progress/cancel and automatic source-matched review; optional CLI bundle import, paused sample overlays, class counts and Event handoff; [guide](local-analysis-service.md) | HTTP/native/browser job qualification in the [service record](verification/local-analysis-2026-10-29/README.md); earlier CPU/contract checks in the [recognition record](verification/recognition-2026-10-29/README.md). Scene counts are sampled detections, not learned scene interpretation, identity or tracking. Live deployment/accuracy remain unqualified. |
 | Facility planning | Buildings/floors/rooms/labels, cameras, seven shapes, coverage estimates, route rehearsal, export and Undo; [guide](facility-builder.md) | Coverage is approximate geometry; handoffs are simulated. Survey/optical qualification remains open. |

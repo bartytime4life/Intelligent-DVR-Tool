@@ -1,19 +1,8 @@
+// Legacy plan IDs remain readable so existing rules and reviewed samples survive.
+// These are not connected cameras and contain no generated imagery.
 export const cameras = [
-  {
-    id: 1,
-    name: "Loading Dock",
-    image: "/assets/loading-dock.webp",
-    box: [0.58, 0.414, 0.056, 0.202],
-  },
-  { id: 2, name: "Front Entrance", image: "/assets/front-entrance.webp" },
-  {
-    id: 3,
-    name: "Warehouse Aisle",
-    image: "/assets/warehouse-aisle.webp",
-    box: [0.557, 0.336, 0.078, 0.132],
-  },
-  { id: 4, name: "Sales Floor", image: "/assets/sales-floor.webp" },
-  { id: 5, name: "Parking Lot", image: "/assets/parking-lot.webp" },
+  {id:1, name:'Loading Dock'}, {id:2, name:'Front Entrance'},
+  {id:3, name:'Warehouse Aisle'}, {id:4, name:'Sales Floor'}, {id:5, name:'Parking Lot'},
 ];
 export const initialRules = cameras.map((c) => ({
   camera: c.id,

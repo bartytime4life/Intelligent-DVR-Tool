@@ -1,10 +1,11 @@
 import React, { lazy, Suspense, useEffect, useRef, useState } from "react";
 const FacilityBuilder = lazy(() => import("./FacilityBuilder.jsx").then(m => ({default:m.FacilityBuilder})));
 const SystemSetup = lazy(() => import("./SystemSetup.jsx"));
+import LiveMonitor from "./LiveMonitor.jsx";
 const RecognitionReview = lazy(() => import("./RecognitionReview.jsx"));
 import { mergeRecognitionEvents } from './recognition.mjs';
-import { workspaceFromHash, readWorkspace, writeWorkspace, reviewExport, parseReviewExport, resetSamples } from './workspace-state.mjs';
-import { DEFAULT_SETUP, parseSetup, sampleShouldRun, visibleCameraSlots } from "./resources.mjs";
+import { workspaceFromHash, readWorkspace, writeWorkspace, reviewExport, parseReviewExport } from './workspace-state.mjs';
+import { DEFAULT_SETUP, parseSetup } from "./resources.mjs";
 import {
   Monitor,
   Buildings,
@@ -36,7 +37,6 @@ import {
 } from "@phosphor-icons/react";
 import {
   cameras,
-  initialEvents,
   initialRules,
   validateRule,
   parseReceipt,
@@ -193,89 +193,12 @@ function Overlay({
     />
   );
 }
-function CameraTile({ camera, selected, select, expand, rule, large = false, pageHidden = false, pauseHidden = true, overlayScale = 2 }) {
-  const [playing, setPlaying] = useState(false),
-    [time, setTime] = useState(0),
-    [overlays, setOverlays] = useState(true);
-  useEffect(() => {
-    if (!sampleShouldRun(playing, pageHidden, pauseHidden)) return;
-    const id = setInterval(() => setTime((t) => (t >= 20 ? 0 : t + 0.25)), 250);
-    return () => clearInterval(id);
-  }, [playing, pageHidden, pauseHidden]);
-  return (
-    <article
-      className={`camera-tile ${selected ? "selected" : ""} ${large ? "large" : ""}`}
-    >
-      <div className="camera-picture" onClick={() => select?.(camera.id)}>
-        <img
-          src={camera.image}
-          alt={`Synthetic sample scene: ${camera.name}`}
-        />
-        <Overlay camera={camera} rule={rule} visible={overlays} time={time} pixelScale={overlayScale} />
-        <div className="camera-title">
-          Cam {camera.id}
-          <span>—</span>
-          {camera.name}
-        </div>
-        <span className="sample-badge">SAMPLE</span>
-        {overlays && rule?.enabled && (
-          <span className="zone-caption">
-            {rule.name} <span>· configured</span>
-          </span>
-        )}
-      </div>
-      <div className="playback">
-        <button
-          className="icon-button"
-          aria-label={`${playing ? "Pause" : "Play"} sample for ${camera.name}`}
-          title="Simulated playback of a still image"
-          onClick={() => setPlaying((x) => !x)}
-        >
-          {playing ? <Pause weight="fill" /> : <Play weight="fill" />}
-        </button>
-        <span className="playback-time">
-          00:{String(Math.floor(time)).padStart(2, "0")}
-          <span> / 00:20</span>
-        </span>
-        <input
-          aria-label={`Sample position for ${camera.name}`}
-          type="range"
-          min="0"
-          max="20"
-          step=".25"
-          value={time}
-          onChange={(e) => setTime(+e.target.value)}
-        />
-        <button
-          className="icon-button"
-          aria-label={`${overlays ? "Hide" : "Show"} overlays for ${camera.name}`}
-          onClick={() => setOverlays((x) => !x)}
-        >
-          {overlays ? <Eye /> : <EyeSlash />}
-        </button>
-        {!large && (
-          <button
-            className="icon-button"
-            aria-label={`Expand ${camera.name}`}
-            onClick={() => expand(camera)}
-          >
-            <ArrowsOutSimple />
-          </button>
-        )}
-      </div>
-    </article>
-  );
-}
 function EventRow({ event, review, zone }) {
   const c = cameraOf(event);
   return (
     <article className="event-card">
       <div className="event-preview">
-        {c ? (
-          <img src={c.image} alt={`Generated sample evidence at ${c.name}`} />
-        ) : (
-          <Camera size={35} />
-        )}
+        <Camera size={35} />
         <span className="sample-badge">
           {event.mode === "sample" ? "SAMPLE" : "OFFLINE"}
         </span>
@@ -314,8 +237,7 @@ function EventRow({ event, review, zone }) {
 export function App() {
   const [tab, updateTab] = useState(() => workspaceFromHash(window.location.hash) || "Monitor"),
     [selected, setSelected] = useState(1),
-    [slots, setSlots] = useState([1, 2, 3, 4]),
-    [events, setEvents, eventsStorageError] = useStored("dvr.events.v1", initialEvents),
+    [events, setEvents, eventsStorageError] = useStored("dvr.events.v1", []),
     [rules, setRules, rulesStorageError] = useStored("dvr.rules.v1", initialRules),
     [modal, setModal] = useState(null),
     [toast, setToast] = useState(""),
@@ -325,6 +247,7 @@ export function App() {
     [error, setError] = useState(""),
     [note, setNote] = useState(""),
     [video, setVideo] = useState(null);
+  const [liveCount, setLiveCount] = useState(0);
   const [recognitionOpened, setRecognitionOpened] = useState(tab === "Recognition");
   const [clearedEvents, setClearedEvents] = useState(null);
   const [eventMode, setEventMode] = useState("all");
@@ -403,16 +326,6 @@ export function App() {
     setError("");
     setTab("Zones");
   }
-  function selectCamera(id) {
-    setSlots((s) =>
-      s.includes(id)
-        ? s
-        : s.map((v, i) =>
-            v === selected || (!s.includes(selected) && i === 0) ? id : v,
-          ),
-    );
-    setSelected(id);
-  }
   function review(e) {
     setNote(e.note || "");
     setModal({ type: "review", event: e });
@@ -434,39 +347,6 @@ export function App() {
     setRules((rs) => rs.map((r) => (r.camera === selected ? draft : r)));
     setError("");
     setToast("Review rule updated.");
-  }
-  function tryRule() {
-    const problem = validateRule(draft);
-    if (problem) {
-      setError(problem);
-      return;
-    }
-    if (!draft.enabled) {
-      setToast("Enable this rule to try a sample.");
-      return;
-    }
-    const score = draft.label === "person" ? 0.87 : 0.76;
-    if (score < draft.threshold) {
-      setToast("Sample score is below the threshold. No event created.");
-      return;
-    }
-    const sampleId = `sample-${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
-    const added = [
-        {
-          id: sampleId,
-          camera: selected,
-          title: `${draft.label === "person" ? "Person" : "Object"} in ${draft.name}`,
-          time: "10:12:36 AM",
-          score,
-          label: draft.label,
-          status: "pending",
-          mode: "sample",
-          rule: `${draft.label} observed in ${draft.name} for ${draft.dwell} seconds (simulated test)`,
-          note: "",
-        },
-      ];
-    if (!addObservations(added, false)) return;
-    setToast("Simulated rule event added to the review queue.");
   }
   async function importReceipt(e) {
     const file = e.target.files?.[0];
@@ -511,14 +391,14 @@ export function App() {
         </div>
         <div className="wordmark">Intelligent DVR</div>
         <span className="header-divider" />
-        <span className="pilot-label">{tab === "Recognition" ? "Recording recognition" : tab === "Facility" ? "Guided facility builder" : "Review prototype"}</span>
+        <span className="pilot-label">{tab === "Recognition" ? "Recording recognition" : tab === "Facility" ? "Guided facility builder" : "Local camera workspace"}</span>
         <button className="workspace-select" onClick={() => setTab("Settings")}>
-          {tab === "Recognition" ? "Local recording review" : "Demo workspace"}
+          {tab === "Recognition" ? "Local recording review" : "Local workspace"}
           <CaretDown size={14} />
         </button>
         <div className="header-right">
           <span className="header-date">
-            {tab === "Recognition" ? <>Offline <span>· human review</span></> : <>Oct 24, 2026 <span>· sample</span></>}
+            {tab === "Recognition" ? <>Offline <span>· human review</span></> : <>Local <span>· human reviewed</span></>}
           </span>
           <button
             className="icon-button"
@@ -574,24 +454,7 @@ export function App() {
         {tab === "Facility" && <Suspense fallback={<div className="content-page"><h1>Opening facility builder…</h1></div>}><FacilityBuilder /></Suspense>}
         {tab === "System" && <Suspense fallback={<div className="content-page"><h1>Opening machine setup…</h1></div>}><SystemSetup setup={resources}
           onApply={setup => setResourceState({ setup, error: "" })} storageError={resourceState.error} download={download} /></Suspense>}
-        {tab === "Monitor" && (
-          <>
-            <div className="monitor-layout">
-              <section className={`camera-wall wall-${resources.browser.visibleTiles}`} aria-label="Sample camera wall">
-                {visibleCameraSlots(slots, selected, resources.browser.visibleTiles).map((id) => (
-                  <CameraTile
-                    key={id}
-                    camera={cameras.find((c) => c.id === id)}
-                    selected={id === selected}
-                    select={setSelected}
-                    expand={(c) => setModal({ type: "camera", camera: c })}
-                    rule={rules.find((r) => r.camera === id)}
-                    pageHidden={pageHidden}
-                    pauseHidden={resources.browser.pauseHidden}
-                    overlayScale={resources.browser.overlayScale}
-                  />
-                ))}
-              </section>
+        {tab === "Monitor" && <LiveMonitor visibleTiles={resources.browser.visibleTiles} onCount={setLiveCount} pageHidden={pageHidden} queue={
               <aside className="review-queue">
                 <div className="queue-heading">
                   <h2>
@@ -621,8 +484,8 @@ export function App() {
                   {!pending.length && (
                     <div className="empty-state">
                       <Check size={32} />
-                      <h3>You’re all caught up</h3>
-                      <p>No observations awaiting review.</p>
+                      <h3>No observations yet</h3>
+                      <p>Analyze a recording in Recognition to produce observations for review.</p>
                       <button
                         className="button"
                         onClick={() => setTab("Events")}
@@ -641,40 +504,7 @@ export function App() {
                   </p>
                 </div>
               </aside>
-            </div>
-            <section className="sources">
-              <div className="source-heading">
-                <h2>
-                  Camera sources <span>5</span>
-                </h2>
-                <span>Simulated scenes</span>
-              </div>
-              <div className="source-strip">
-                {cameras.map((c) => (
-                  <button
-                    className={`source ${selected === c.id ? "active" : ""}`}
-                    key={c.id}
-                    onClick={() => selectCamera(c.id)}
-                    aria-label={`Select ${c.name}`}
-                    aria-pressed={selected === c.id}
-                  >
-                    <div className="source-image">
-                      <img src={c.image} alt="" />
-                      <span className="sample-badge">SAMPLE</span>
-                    </div>
-                    <span className="source-title">
-                      <Camera size={14} />
-                      <span>
-                        Cam {c.id}
-                        <small>{c.name}</small>
-                      </span>
-                    </span>
-                  </button>
-                ))}
-              </div>
-            </section>
-          </>
-        )}
+        } />}
         {tab === "Events" && (
           <section className="content-page">
             <div className="page-heading">
@@ -771,7 +601,7 @@ export function App() {
                 <p className="eyebrow">EXPLICIT RULES · HUMAN REVIEW</p>
                 <h1>Define what needs attention</h1>
                 <p>
-                  Draw a zone, then choose what should enter the review queue.
+                  Saved rule plans are retained here. They are not attached to connected feeds; live analysis is not running.
                 </p>
               </div>
               <select
@@ -781,7 +611,7 @@ export function App() {
               >
                 {cameras.map((c) => (
                   <option value={c.id} key={c.id}>
-                    Cam {c.id} · {c.name}
+                    Plan {c.id} · {c.name}
                   </option>
                 ))}
               </select>
@@ -789,20 +619,17 @@ export function App() {
             <div className="zone-layout">
               <div>
                 <div className="zone-editor">
-                  <img
-                    src={cameras.find((c) => c.id === selected).image}
-                    alt="Synthetic scene for configuring a review zone"
-                  />
+                  <div className="zone-planning-grid" />
                   <Overlay
                     rule={draft}
                     edit
                     onRect={(rect) => setDraft((r) => ({ ...r, rect }))}
                   />
-                  <span className="sample-badge">SAMPLE · DRAG TO DRAW</span>
+                  <span className="sample-badge">RULE PLAN · NO CAMERA IMAGE</span>
                 </div>
                 <p className="hint">
                   <Info size={16} />
-                  Drag across the scene, or use the keyboard controls below.
+                  Define normalized coordinates on this planning grid, or use the keyboard controls below.
                 </p>
                 <div className="geometry-fields">
                   {["Left", "Top", "Width", "Height"].map((label, i) => (
@@ -899,10 +726,6 @@ export function App() {
                   Save review rule
                   <Check />
                 </button>
-                <button className="button" type="button" onClick={tryRule}>
-                  <Play />
-                  Try simulated event
-                </button>
                 <button
                   className="text-button"
                   type="button"
@@ -924,27 +747,24 @@ export function App() {
           <section className="content-page settings">
             <div className="page-heading">
               <div>
-                <p className="eyebrow">PILOT WORKSPACE</p>
-                <h1>Make the boundaries clear.</h1>
+                <p className="eyebrow">LOCAL WORKSPACE</p>
+                <h1>Connections and local evidence</h1>
                 <p>
-                  A working review interface. Camera and model qualification
-                  come next.
+                  Connect your cameras explicitly and analyze recordings on this computer.
                 </p>
               </div>
-              <span className="mode-tag">Demo workspace</span>
+              <span className="mode-tag">Local operation</span>
             </div>
             <div className="settings-grid">
               <section>
                 <Camera size={28} />
-                <h2>Camera connections</h2>
+                <h2>Camera connections</h2><button className="button" onClick={() => setTab("Monitor")}>Open camera connections</button>
                 <p>
-                  No cameras are connected. These five scenes and detections are
-                  generated samples. RTSP / ONVIF compatibility has not been
-                  tested.
+                  Connect built-in or USB webcams and configured local DVR RTSP channels from Monitor. No camera starts automatically. ONVIF discovery is not included.
                 </p>
                 <div className="setting-row">
                   <span>Connected cameras</span>
-                  <strong>0 connected</strong>
+                  <strong>{liveCount} receiving</strong>
                 </div>
                 <div className="setting-row">
                   <span>Detection model</span>
@@ -959,9 +779,7 @@ export function App() {
                 <UploadSimple size={28} />
                 <h2>Bring your own evidence</h2>
                 <p>
-                  Preview a local video in this browser. This does not run AI or
-                  upload footage. Import observations from the included offline
-                  edge tool separately.
+                  Preview a local video, or open Recognition to launch bounded local analysis with your configured model and rules. Video stays on this computer.
                 </p>
                 <button
                   className="button"
@@ -983,15 +801,14 @@ export function App() {
                 <h2>Your data stays in your control</h2>
                 <p>
                   Rules and review decisions are saved in this browser. Video
-                  previews remain in memory. No cloud inference, remote camera
-                  access, or automatic enforcement is running.
+                  previews remain in memory. No cloud inference or automatic enforcement is running. Camera previews stop when you leave Monitor or hide the page.
                 </p>
                 <button
                   className="text-button"
                   onClick={() => setModal({ type: "reset" })}
                 >
                   <ArrowCounterClockwise />
-                  Reset sample workspace
+                  Remove pending legacy samples
                 </button>
               </section>
               <section>
@@ -1023,17 +840,9 @@ export function App() {
       </main>
       <footer className="footer">
         <Info size={21} />
-        <strong>No cameras connected</strong>
+        <strong>{liveCount ? `${liveCount} receiving` : 'No camera preview active'}</strong>
         <span className="footer-divider" />
-        <span>
-          {tab === "Recognition" ? "Local model results need human review. No live recognition is running." : events.some((e) => e.mode === "offline-model") ? (
-            "Camera previews are simulated. Imported observations need source review."
-          ) : (
-            <>
-              All camera views and detections are <b>sample / simulated.</b>
-            </>
-          )}
-        </span>
+        <span>Camera previews do not record or run AI. Analyze recordings in Recognition.</span>
         <span className="footer-end">Edge-first. Human-reviewed.</span>
       </footer>
       <input
@@ -1064,45 +873,15 @@ export function App() {
           </button>
         </div>
       )}
-      {modal?.type === "camera" && (
-        <Modal title={modal.camera.name} wide close={() => setModal(null)}>
-          <CameraTile
-            camera={modal.camera}
-            large
-            rule={rules.find((r) => r.camera === modal.camera.id)}
-            pageHidden={pageHidden}
-            pauseHidden={resources.browser.pauseHidden}
-            overlayScale={resources.browser.overlayScale}
-          />
-          <p className="hint">
-            Simulated playback animates a timeline over a generated still. No
-            camera or video stream is connected.
-          </p>
-        </Modal>
-      )}
       {modal?.type === "review" && (
         <Modal title="Review observation" wide close={() => setModal(null)}>
           <div className="review-dialog-layout">
             <div>
-              {cameraOf(modal.event) ? (
-                <>
-                  <img
-                    className="review-evidence"
-                    src={cameraOf(modal.event).image}
-                    alt="Generated sample evidence scene"
-                  />
-                  <span className="mode-tag">SIMULATED EVIDENCE</span>
-                </>
-              ) : (
-                <div className="missing-evidence">
-                  <Camera size={44} />
-                  <h3>Original footage stays local</h3>
-                  <p>
-                    Open the source recording at {modal.event.time} to verify
-                    this observation. The receipt contains metadata only.
-                  </p>
-                </div>
-              )}
+              <div className="missing-evidence">
+                <Camera size={44} />
+                <h3>{modal.event.mode === 'sample' ? 'Legacy sample observation' : 'Original footage stays local'}</h3>
+                <p>{modal.event.mode === 'sample' ? 'This retained sample has no real camera evidence. Your previous decision and notes are preserved.' : `Open the source recording at ${modal.event.time} in Recognition to verify this observation.`}</p>
+              </div>
               <p className="hint">
                 {modal.event.time} ·{" "}
                 {cameraOf(modal.event)?.name || modal.event.cameraName}
@@ -1194,17 +973,14 @@ export function App() {
           close={() => setModal(null)}
         >
           <p>
-            This pilot demonstrates a five-camera review workflow with synthetic
-            scenes and sample events.
+            Connect a webcam or a configured local DVR channel in Monitor. The wall starts empty and shows only frames received from your selected sources.
           </p>
           <p>
             “Out of place” means an explicitly configured object, zone, and
             duration rule. It is not a judgment about a person’s intent.
           </p>
           <p>
-            Sample playback uses a generated still and simulated timeline. Real
-            video can be previewed locally. Actual model detections require the
-            separate edge tool and your qualified model.
+            Recognition can analyze a selected local recording with a configured model and rules. Live camera previews do not record, run AI or track people.
           </p>
           <div className="notice">
             <WarningCircle size={21} />
@@ -1235,28 +1011,25 @@ export function App() {
         </Modal>
       )}
       {modal?.type === "reset" && (
-        <Modal title="Reset the sample workspace?" close={() => setModal(null)}>
+        <Modal title="Remove pending legacy samples?" close={() => setModal(null)}>
           <p>
-            This resets pending sample events and sample rules. Imported observations,
-            reviewed samples, and review notes are kept. Your video files are unaffected.
+            This removes unreviewed legacy sample events. Imported observations, reviewed samples, saved rules and review notes are kept. No new sample events will be created.
           </p>
           <button
             className="button amber"
             onClick={() => {
               try {
-                const reset = resetSamples(eventsRef.current);
+                const reset = eventsRef.current.filter(e => e.mode !== 'sample' || e.status !== 'pending');
                 eventsRef.current = reset;
                 setEvents(reset);
               } catch (err) { setToast(err.message); return; }
-              setRules(initialRules);
               setModal(null);
               setTab("Monitor");
               setSelected(1);
-              setSlots([1, 2, 3, 4]);
-              setToast("Sample workspace restored.");
+              setToast("Pending legacy samples removed.");
             }}
           >
-            Reset workspace
+            Remove pending samples
             <ArrowCounterClockwise />
           </button>
           <button className="button" onClick={() => setModal(null)}>

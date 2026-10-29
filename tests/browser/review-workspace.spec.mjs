@@ -1,7 +1,9 @@
 import { test, expect } from '@playwright/test';
+import { initialEvents } from '../../src/data.mjs';
 import { recognitionFixture } from '../fixtures/recognition.mjs';
 const upload = value => ({name:'review.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(value))});
 const nav = (page, name) => page.getByRole('navigation', {name:'Main navigation'}).getByRole('button', {name:new RegExp(`^${name}`)});
+test.beforeEach(async ({page}) => { await page.addInitScript(events => { if (!localStorage.getItem('dvr.events.v1')) localStorage.setItem('dvr.events.v1', JSON.stringify(events)); }, initialEvents); });
 const stored = page => page.evaluate(() => JSON.parse(localStorage.getItem('dvr.events.v1')));
 
 test('maximum recognition run has an explicit clear, export, undo and successful handoff path', async ({page}) => {
@@ -30,9 +32,10 @@ test('maximum recognition run has an explicit clear, export, undo and successful
   await expect(page).toHaveURL(/#events$/);
   await expect(page.getByLabel('Review queue summary')).toContainText('1000 / 1,000');
   expect((await stored(page)).length).toBe(1000);
-  // At capacity, a sample test must not remove the oldest real review.
-  await nav(page,'Zones').click();
-  await page.getByRole('button',{name:'Try simulated event'}).click();
+  // A second distinct import must still refuse overflow without discarding reviews.
+  const extra = recognitionFixture().receipt;
+  extra.events[0].id = 'extra-at-capacity';
+  await page.getByLabel('Import receipt or review export').setInputFiles(upload(extra));
   await expect(page.locator('.toast')).toContainText('exceed 1,000');
   expect((await stored(page)).length).toBe(1000);
 });
@@ -100,12 +103,12 @@ test('narrow-screen queue controls, source filters and empty states remain usabl
 
 test('Back to the root URL restores Monitor and Forward restores Events', async ({page}) => {
   await page.goto('/');
-  await expect(page.getByLabel('Sample camera wall')).toBeVisible();
+  await expect(page.getByLabel('Camera wall')).toBeVisible();
   await nav(page,'Events').click();
   await expect(page).toHaveURL(/#events$/);
   await page.goBack();
   await expect(page).not.toHaveURL(/#/);
-  await expect(page.getByLabel('Sample camera wall')).toBeVisible();
+  await expect(page.getByLabel('Camera wall')).toBeVisible();
   await expect(nav(page,'Monitor')).toHaveAttribute('aria-current','page');
   await page.goForward();
   await expect(page.getByRole('heading',{name:'Event history'})).toBeVisible();

@@ -24,6 +24,8 @@ jobs:
       - run: npm run build
       - name: Local service with real synthetic CPU inference and browser recovery
         run: npx playwright test --config=playwright.analysis.config.mjs
+      - name: Webcam and synthetic RTSP end-to-end feed checks
+        run: npx playwright test --config=playwright.feeds.config.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -31,4 +33,5 @@ jobs:
           path: |
             qa-local/facility-browser-results.json
             qa-local/analysis-browser-results.json
+            qa-local/feeds-browser-results.json
             test-results/

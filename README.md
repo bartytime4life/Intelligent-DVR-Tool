@@ -8,22 +8,22 @@ A local camera-analysis foundation and visual review prototype from BARTA AI Sol
 
 [Visual tour](docs/visual-tour.md) · [Start here](docs/getting-started.md) · [Product status](docs/product-status.md) · [Wiki](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki) · [Test evidence](docs/verification/README.md)
 
-![Actual camera-wall interface, with generated sample scenes and a human review queue. No cameras are connected.](docs/media/cover.webp)
-
 </div>
 
-> **Working prototype.** The interface below is real; its camera scenes, overlays and playback are simulated. Recording analysis is a separate offline CLI. Live camera operation, representative detection accuracy and the required **100-camera capacity remain unqualified**.
+**Local previews and recording review.** Monitor starts empty and can explicitly
+connect a browser webcam or a configured local DVR RTSP channel. Camera previews
+do not record or run AI. Recognition can analyze a selected local recording with
+progress, cancellation and source-matched results.
 
-## Watch the workspace unfold
+[Connect a webcam or DVR](docs/local-camera-feeds.md) · [Analyze a recording](docs/local-analysis-service.md)
 
-![Animated walkthrough of the actual monitor, observation review, saved sample decision, zone editor and fictional 3D facility. These captured interface states are not live footage or measured detections.](docs/media/workspace-tour.gif)
+Physical-device compatibility, independently measured recognition quality,
+tracking and **100-camera capacity remain unqualified**. Earlier generated-camera
+screenshots in the [historical tour](docs/visual-tour.md) document previous versions.
 
-*Five actual browser views, edited into a looping walkthrough. [Still-image tour](docs/visual-tour.md#still-image-tour) · [Capture provenance](docs/media/README.md).*
-
-| Observe | Make a decision | Plan the facility |
+| Monitor | Review | Plan |
 | --- | --- | --- |
-| Four-view wall, five selectable sample scenes, overlay controls and expanded views | Review observations, add notes, confirm or dismiss, search history and export decisions | Editable buildings, floors, rooms, labels, camera placement and estimated coverage |
-| [Explore the wall](docs/visual-tour.md#1-observe-the-scene) | [Follow a review](docs/visual-tour.md#2-review-the-evidence) | [Build a plan](docs/facility-builder.md) |
+| Explicit webcam / local RTSP previews, status, errors and disconnect | Source-matched recording results, human decisions, notes, export and Undo | Editable buildings, rooms and camera plans with estimated coverage |
 
 ## Put the space in motion
 

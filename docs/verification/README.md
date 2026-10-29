@@ -1,5 +1,9 @@
 # Verification index
 
+[Local feed integration, October 29](local-feeds-2026-10-29/README.md): webcam and
+RTSP preview lifecycle; synthetic transport tests, not physical-device acceptance.
+
+
 The [October 29 recording recognition check](recognition-2026-10-29/README.md)
 adds analyzer-to-browser review contracts and two actual bounded CPU recording
 runs. Recognition quality, live operation and 100-camera acceptance remain open.

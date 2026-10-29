@@ -1,5 +1,11 @@
 # Your first five minutes
 
+Current Monitor setup: [connect a webcam or local DVR](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/local-camera-feeds.md).
+It starts empty; generated scenes and default sample events from earlier
+walkthroughs are no longer shown. [Recognition](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/local-analysis-service.md) can
+run local recording jobs directly. Earlier screenshots below are historical.
+
+
 [Home](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Home) · [Visual tour](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-tour) · [Architecture](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Architecture-and-data)
 
 For OS-specific launchers and machine sizing, use [Linux setup](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Linux-setup), [Windows setup](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Windows-setup) and the [hardware guide](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Hardware-guide). **System** in the main navigation opens the machine planner and resource-policy controls.

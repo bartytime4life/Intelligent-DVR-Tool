@@ -75,3 +75,14 @@ is performed by System or the supplied launchers.
 ## Local recording job service
 
 The optional `edge.local_service` binds only to `127.0.0.1`, checks exact Host and browser origin, and requires a per-service token for jobs and artifacts. It accepts opaque catalog selections, never uploaded footage or client paths/commands. One isolated CPU worker invokes the existing analyzer with bounded local snapshots, time, memory, threads and frame/output limits. It is single-user software for owner-approved recordings and hash-pinned models, not a hostile-model sandbox. See [the full boundary and shutdown/recovery behavior](docs/local-analysis-service.md).
+
+## Local camera preview boundary
+
+The optional RTSP bridge uses owner-configured private IPv4 sources, a pinned TCP
+relay that rejects redirects, same-origin/Host/token checks, bounded subprocesses
+and expiring preview leases. Credentials travel only through worker stdin; camera
+frames remain local. Webcam permission is requested only on explicit connection,
+and tracks stop on disconnect/hidden page/navigation. See
+[the complete connection and trust limits](docs/local-camera-feeds.md).
+Native decoder code is not a complete malicious-device sandbox. No cloud relay,
+automatic network scan, ONVIF discovery, live inference or recording is enabled.
