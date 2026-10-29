@@ -148,6 +148,14 @@ This is a separate application component, not an analyzer flag or camera service
 See the [supervision contract](../docs/performance-100-cameras.md#optional-linux-process-supervision)
 and [owner-PC recovery record](../docs/verification/recovery-2026-10-28/README.md).
 
+An explicit Linux `OutcomeJournal` can commit dispatch/outcome metadata on a
+private local disk before IPC/delivery. Reopening fails unresolved dispatches
+and retains unacknowledged terminal records; consumers acknowledge/prune
+explicitly. Parent-death cleanup kills the owned worker child. See the
+[journal contract and limits](../docs/performance-100-cameras.md#optional-local-outcome-journal)
+and [parent-crash qualification](../docs/verification/journal-2026-10-28/README.md).
+This does not persist pending samples, recording continuity or per-camera rules.
+
 Rule JSON is an array of named rules; browser rule exports have a separate
 schema and are intentionally not silently accepted by this CLI. Map a browser
 zone's normalized `rect` into an edge rule with an actual model label, and review

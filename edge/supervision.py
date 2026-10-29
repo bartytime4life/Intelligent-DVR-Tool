@@ -19,6 +19,7 @@ import time
 
 from .scheduler import CameraScheduler, Sample, finite, integer
 from .workers import Outcome
+from .journal import OutcomeJournal, JournalError
 
 PROTOCOL = 1
 META_LIMIT = 2048
@@ -34,6 +35,7 @@ class ProcessFailure(RuntimeError):
 class ProcessOutcome(Outcome):
     generation: int
     processor: int | None
+    journal_id: int | None = None
 
 
 def _json(value):
@@ -144,6 +146,25 @@ def _child_main(connection, factory, count, generation, request_limit, result_li
         connection.close()
 
 
+def _owned_child(parent_pid, target, *args):
+    """Arm Linux parent-death SIGKILL before constructing trusted native state.
+
+    prctl applies to this process's actual parent. Recheck after arming to cover
+    parent death during spawn/bootstrap; a changed parent must never run work.
+    """
+    import ctypes
+    import signal
+    libc = ctypes.CDLL(None, use_errno=True)
+    prctl = libc.prctl
+    prctl.argtypes = [ctypes.c_int, ctypes.c_ulong, ctypes.c_ulong, ctypes.c_ulong, ctypes.c_ulong]
+    prctl.restype = ctypes.c_int
+    if prctl(1, signal.SIGKILL, 0, 0, 0) != 0:  # PR_SET_PDEATHSIG from linux/prctl.h
+        raise OSError(ctypes.get_errno(), 'Cannot arm owned-worker parent-death cleanup')
+    if os.getppid() != parent_pid:
+        os._exit(72)
+    target(*args)
+
+
 class ProcessWorkers:
     """Linux-only opt-in process boundary, polled by one controlling thread.
 
@@ -162,7 +183,7 @@ class ProcessWorkers:
     and remains visible. This is not a host memory quota or an OS-level watchdog.
     """
     def __init__(self, scheduler, factory, *, startup_timeout=30., task_timeout=5.,
-                 max_restarts=0, restart_delay=.25, max_result_bytes=1024**2):
+                 max_restarts=0, restart_delay=.25, max_result_bytes=1024**2, journal=None):
         if sys.platform != 'linux':
             raise ValueError('ProcessWorkers is currently qualified and enabled only on Linux')
         if (not isinstance(scheduler, CameraScheduler) or not 1 <= scheduler.workers <= 4
@@ -179,6 +200,11 @@ class ProcessWorkers:
                 raise ValueError('Factory configuration exceeds 64 KiB')
         except Exception as exc:
             raise ValueError('Factory must be a small spawn-serializable trusted application object') from exc
+        if journal is not None:
+            if not isinstance(journal, OutcomeJournal):
+                raise ValueError('Use an explicit owner-local OutcomeJournal')
+            journal.attach(scheduler.workers, max_result_bytes)
+        self.journal, self._journal_error, self._journal_blocked = journal, None, False
         self.scheduler, self.factory = scheduler, factory
         self.startup_timeout, self.task_timeout = startup_timeout, task_timeout
         self.max_restarts, self.restart_delay = max_restarts, restart_delay
@@ -209,8 +235,8 @@ class ProcessWorkers:
         parent, child = self._context.Pipe(duplex=True)
         self._connection = parent
         os.set_blocking(parent.fileno(), False)
-        self._process = self._context.Process(target=_child_main,
-            args=(child, self.factory, self.scheduler.workers, self._generation,
+        self._process = self._context.Process(target=_owned_child,
+            args=(os.getpid(), _child_main, child, self.factory, self.scheduler.workers, self._generation,
                   self.scheduler.max_sample_bytes+META_LIMIT+4, self.max_result_bytes), daemon=True)
         try:
             self._process.start()
@@ -250,17 +276,30 @@ class ProcessWorkers:
             self._process = None
         return reaped
 
+    def _terminal(self, work, result, error, processor):
+        receipt_id = None
+        if self.journal is not None and self._journal_error is None:
+            receipt_id = self.journal.finish(work.token, result=result,
+                error=getattr(error, 'code', 'processor-error') if error is not None else None, processor=processor)
+        self.scheduler.complete(work.token, success=error is None)
+        if error is None:
+            self._completed += 1
+        else:
+            self._failed += 1
+        self._outcomes.append(ProcessOutcome(work, result, error, self._generation, processor, receipt_id))
+
     def _fault(self, code, message=''):
         self._process_failures += 1
         self._event('failure', code=code)
         for work in self._inflight.values():
-            self.scheduler.complete(work.token, success=False)
-            self._failed += 1
-            self._outcomes.append(ProcessOutcome(work, None,
-                ProcessFailure(code, self._generation, message), self._generation, None))
+            try:
+                self._terminal(work, None, ProcessFailure(code, self._generation, message), None)
+            except JournalError as exc:
+                self._journal_error = str(exc)
+                self._terminal(work, None, ProcessFailure('journal-error', self._generation), None)
         self._inflight.clear()
         reaped = self._retire()
-        if not self._closing and reaped and self._restarts < self.max_restarts:
+        if not self._closing and self._journal_error is None and reaped and self._restarts < self.max_restarts:
             self._restarts += 1
             self._restart_at = time.monotonic()+self.restart_delay
             self._state = 'backoff'
@@ -304,11 +343,8 @@ class ProcessWorkers:
                 elif not value['ok']:
                     self._fault(str(value.get('code', 'processor-error'))[:80], str(value.get('message', ''))[:200])
                 else:
+                    self._terminal(work, value.get('value'), None, processor)
                     self._inflight.pop(token)
-                    self.scheduler.complete(token)
-                    self._completed += 1
-                    self._outcomes.append(ProcessOutcome(work, value.get('value'), None,
-                                                         self._generation, processor))
             else:
                 raise ValueError('Unexpected result state')
         except (ValueError, TypeError, KeyError, RecursionError, UnicodeError) as exc:
@@ -366,6 +402,18 @@ class ProcessWorkers:
         self._read()
 
     def step(self):
+        try:
+            return self._step()
+        except JournalError as exc:
+            # Never continue executing after a failed/uncertain durable commit.
+            # Existing rows remain available for restart recovery/inspection.
+            self._journal_error = str(exc)
+            self._fault('journal-error')
+            outcomes = tuple(self._outcomes)
+            self._outcomes.clear()
+            return outcomes
+
+    def _step(self):
         if self._state == 'closed':
             raise ValueError('Process workers are closed')
         if self._state == 'backoff' and not self._closing and time.monotonic() >= self._restart_at:
@@ -378,8 +426,13 @@ class ProcessWorkers:
         elif self._state == 'running' and any(now-w.dispatched_at > self.task_timeout for w in self._inflight.values()):
             self._fault('task-timeout')
         if self._state == 'running' and not self._closing:
-            for work in self.scheduler.dispatch():
-                self._inflight[work.token] = work
+            free = self.scheduler.workers-len(self._inflight)
+            self._journal_blocked = self.journal is not None and not self.journal.can_reserve(free)
+            works = () if self._journal_blocked else self.scheduler.dispatch()
+            self._inflight.update((w.token, w) for w in works)
+            if self.journal is not None:
+                self.journal.reserve(works, self._generation)
+            for work in works:
                 request = self._request({'kind': 'work', 'token': work.token,
                     'camera': work.sample.camera, 'sequence': work.sample.sequence,
                     'captured_at': work.sample.captured_at}, work.sample.payload)
@@ -393,6 +446,8 @@ class ProcessWorkers:
         return {'state': self._state, 'generation': self._generation, 'restarts': self._restarts,
                 'active': len(self._inflight), 'completed': self._completed, 'failed': self._failed,
                 'process_failures': self._process_failures,
+                'journal_run_id': self.journal.run_id if self.journal is not None else None,
+                'journal_blocked': self._journal_blocked, 'journal_error': self._journal_error,
                 'pid': self._process.pid if self._process is not None else None,
                 'child_alive': self._process.is_alive() if self._process is not None and self._process.pid else False,
                 'unsent_bytes': sum(len(view) for view in self._outgoing),
