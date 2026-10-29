@@ -17,13 +17,14 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def main():
+    sys.stdout.reconfigure(errors='backslashreplace')
     calls = []
     class Provider(BaseHTTPRequestHandler):
         def log_message(self, *_):
             pass
         def do_GET(self):
             calls.append(self.path.split('?')[0])
-            body = b'{"features":[]}'
+            body = b'{"type":"FeatureCollection","features":[]}'
             self.send_response(200)
             self.send_header('Content-Type','application/json')
             self.send_header('Content-Length',str(len(body)))
@@ -79,7 +80,7 @@ def main():
                     raise RuntimeError('Source preview startup timed out')
                 time.sleep(.2)
             status, body = request('/geo/search?q=Example&limit=5&lang=en')
-            if status != 200 or json.loads(body) != {'features':[]}:
+            if status != 200 or json.loads(body) != {'type':'FeatureCollection','features':[]}:
                 raise RuntimeError('Local Photon route failed: '+str(status))
             query = subprocess.check_output(['node','--input-type=module','-e',
                 "import {osmQuery,searchBounds} from './src/facility-starter.mjs'; process.stdout.write(osmQuery(searchBounds([-98,38.5],0,0,250,250)))"],
