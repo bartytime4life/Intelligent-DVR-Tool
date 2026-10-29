@@ -8,7 +8,7 @@ Reference target: **Ubuntu 24.04 LTS x86-64**, Node.js **22**, Python **3.12**, 
 
 1. Verify CPU cooling, motherboard firmware/RAM QVL, disk/HBA/backplane compatibility, PCIe lane allocation and UPS behavior. Start with the [hardware candidates and arithmetic](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Hardware-guide), not a claimed camera count.
 2. Install the OS to its own SSD. Have the storage operator provision the selected recording array/filesystem and mount it at a deliberate stable path. Keep recordings and model files outside the repository. The launcher never partitions, formats or mounts disks.
-3. Install Node.js 22 from the [official Node distribution](https://nodejs.org/en/download) and Git/Python 3.12 with venv support through the OS's supported package tooling. Check `node --version` and `python3.12 --version`. The launcher validates these major/minor versions.
+3. Install Python 3.12 with venv support through supported OS tooling. A source checkout additionally needs Node.js 22 from the [official distribution](https://nodejs.org/en/download) and Git; the prebuilt kit does not. The installer checks interpreter versions.
 4. Use an unprivileged account. Review encryption, recoverable backup keys, permissions and restore procedures for the data store. Do not expose the development preview directly to the internet.
 
 ## Install and run for PC testing

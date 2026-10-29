@@ -79,7 +79,7 @@ The [verification index](docs/verification/README.md) separates the latest audit
 then open **Recognition** to match the original recording by SHA-256, inspect
 sampled person/object boxes and scene counts, and send rule observations to Events.
 [Run the complete pilot](docs/recording-recognition.md). This is offline analysis;
-the Monitor's generated scenes and live-camera qualification boundaries remain.
+physical-device compatibility and independent recognition-quality qualification remain open.
 
 ```mermaid
 flowchart TD
@@ -127,7 +127,7 @@ python3 scripts/check-docs.py
 
 Install `edge/requirements-test.txt` in an isolated Python environment to enable synthetic native-inference integration tests. Without them, those cases are explicitly skipped. Restricted runners can use the [single-process Node commands](docs/verification/2026-10-27/README.md#reproduce).
 
-This repository does **not** currently assign a software license. No open-source licensing grant is implied by public availability. [Third-party notices](docs/third-party-notices.md) cover separately licensed components and model sources; [SECURITY.md](SECURITY.md) describes the prototype boundary. Camera imagery is generated sample artwork, not a record of a real workplace.
+This repository does **not** currently assign a software license. No open-source licensing grant is implied by public availability. [Third-party notices](docs/third-party-notices.md) cover separately licensed components and model sources; [SECURITY.md](SECURITY.md) describes the prototype boundary. Historical documentation imagery is generated sample artwork; the current Monitor starts empty and uses explicitly connected sources.
 
 ### Local recording analysis
 

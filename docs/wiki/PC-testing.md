@@ -110,6 +110,16 @@ ONVIF discovery, vendor cloud accounts, RTSPS, public addresses, hostnames, IPv6
 and RTSP/UDP are not supported by this bridge. See the
 [camera guide](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/local-camera-feeds.md).
 
+## Optional local map services
+
+The prebuilt camera kit supports the local facility planner and its existing
+explicit public-provider/offline-file choices. Operator-hosted Local Photon and
+Local Overpass routes require a **source checkout with Node.js 22**. The existing
+DVR_GEO_LOCAL=1 launcher opt-in selects that source Vite preview; --facility /
+-Facility can select it explicitly. For the camera/analysis kit, clear that
+environment flag. The Python camera service does not proxy map-provider routes.
+See [native local map delivery](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/facility-local-delivery.md).
+
 ## Optional recording recognition
 
 Previews do **not** record or run live AI. Recognition analyzes a deliberately

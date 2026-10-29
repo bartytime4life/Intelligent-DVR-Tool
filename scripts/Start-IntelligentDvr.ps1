@@ -5,6 +5,7 @@ param(
     [switch]$Check,
     [switch]$Analysis,
     [switch]$Feeds,
+    [switch]$Facility,
     [switch]$NoBrowser,
     [string]$FeedsConfig = '',
     [string]$Recordings = '',
@@ -26,6 +27,7 @@ try {
     if ($Check) { $TaskArgs += '--check' }
     if ($Analysis) { $TaskArgs += '--analysis' }
     if ($Feeds) { $TaskArgs += '--feeds' }
+    if ($Facility) { $TaskArgs += '--facility' }
     if ($NoBrowser) { $TaskArgs += '--no-browser' }
     if ($FeedsConfig) { $TaskArgs += @('--feeds-config', $FeedsConfig) }
     if ($Recordings) { $TaskArgs += @('--recordings', $Recordings) }

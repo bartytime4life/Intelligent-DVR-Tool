@@ -59,6 +59,8 @@ jobs:
           name: synthetic-durable-profiling
           path: '${{ runner.temp }}/durable-profiling/*.json'
           retention-days: 14
+      - name: Actual source launcher local geo delivery
+        run: python scripts/smoke-source-facility.py
       - run: python scripts/check-docs.py
       - run: python scripts/build-wiki.py --check
       - name: Linux launcher syntax

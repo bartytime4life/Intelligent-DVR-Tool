@@ -120,6 +120,27 @@ class PcSetupTest(unittest.TestCase):
             with self.assertRaises(pc.SetupError): pc.install(self.root)
         self.assertEqual((self.root/'local-feeds.json').read_bytes(), b'owner settings')
 
+    def test_local_geo_legacy_opt_in_selects_source_preview(self):
+        with patch.dict(os.environ, {'DVR_GEO_LOCAL':'1'}, clear=True), patch.object(pc, 'host_check'), \
+                patch.object(pc, 'facility_command', return_value=['npm','run','preview']) as selected, \
+                patch('subprocess.call', return_value=0) as launched:
+            self.assertEqual(pc.main(['--no-browser','--port','4175']), 0)
+            selected.assert_called_once_with(4175, False)
+            launched.assert_called_once()
+            self.assertEqual(pc.main(['--feeds']), 1)
+            self.assertEqual(launched.call_count, 1)
+
+    def test_facility_preview_uses_bounded_loopback_and_refuses_prebuilt_kit(self):
+        self.kit()
+        with self.assertRaises(pc.SetupError): pc.facility_command(4173, root=self.root)
+        self.write('node_modules/vite/bin/vite.js')
+        with patch.object(pc, 'verify_kit', return_value='source checkout'), \
+                patch('shutil.which', side_effect=lambda name: '/tools/' + name), \
+                patch.object(pc, 'command', return_value='22'):
+            args = pc.facility_command(4175, False, self.root)
+            self.assertEqual(args[-5:], ['--host','127.0.0.1','--port','4175','--strictPort'])
+            self.assertNotIn('--open', args)
+
     def test_subprocess_failure_and_timeout_are_actionable(self):
         for failure in (OSError('private path'), subprocess.TimeoutExpired('private command', 1)):
             with patch('subprocess.run', side_effect=failure), self.assertRaisesRegex(pc.SetupError, '^Retry setup$'):

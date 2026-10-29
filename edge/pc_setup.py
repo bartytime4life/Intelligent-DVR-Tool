@@ -187,7 +187,20 @@ def built_interface(root=ROOT):
     return 'present'
 
 
-def check(port=4173, feeds_config=None, recordings=None, config=None, *, root=ROOT, bind=True):
+def facility_command(port, open_browser=True, root=ROOT):
+    if verify_kit(root) != 'source checkout':
+        raise SetupError('Local geo delivery needs a source checkout with Node.js 22. For camera-kit testing, clear DVR_GEO_LOCAL and omit --facility.')
+    built_interface(root)
+    node, npm = shutil.which('node'), shutil.which('npm.cmd' if sys.platform == 'win32' else 'npm')
+    if not node or not npm or not (root / 'node_modules/vite/bin/vite.js').is_file():
+        raise SetupError('Install the source checkout first; local geo preview needs Node.js 22 and npm dependencies.')
+    major = command([node, '-p', 'process.versions.node.split(".")[0]'], 'Cannot run Node.js.', root=root, capture=True)
+    if major.strip() != '22':
+        raise SetupError('Use Node.js 22 for the source facility preview.')
+    return [npm, 'run', 'preview', '--', '--host', '127.0.0.1', '--port', str(port), '--strictPort'] + (['--open'] if open_browser else [])
+
+
+def check(port=4173, feeds_config=None, recordings=None, config=None, *, root=ROOT, bind=True, facility=False):
     host_check()
     checks = []
     def record(name, operation):
@@ -197,6 +210,11 @@ def check(port=4173, feeds_config=None, recordings=None, config=None, *, root=RO
             checks.append({'check': name, 'status': 'fail'})
     record('kit_integrity', lambda: verify_kit(root))
     record('built_interface', lambda: built_interface(root))
+    if facility:
+        def facility_ready():
+            facility_command(port, False, root)
+            return 'source Vite route available; provider endpoints not contacted'
+        record('facility_preview', facility_ready)
     def runtime():
         python = validate_environment(root)
         result = command([python, '-m', 'edge.pc_setup', '--native-probe'],
@@ -246,6 +264,7 @@ def check(port=4173, feeds_config=None, recordings=None, config=None, *, root=RO
 
 
 REMEDIES = {
+    'facility_preview': 'Use a source checkout with Node.js 22 for local map services; clear DVR_GEO_LOCAL for the PC camera kit.',
     'kit_integrity': 'Extract a complete unmodified kit, or rebuild from a trusted source checkout.',
     'built_interface': 'Run the installer or extract a complete kit.',
     'native_runtime': 'Rerun the installer. If it persists, use a fresh folder and check Python 3.12/pip output.',
@@ -264,6 +283,7 @@ def main(argv=None):
     modes.add_argument('--native-probe', action='store_true', help=argparse.SUPPRESS)
     parser.add_argument('--feeds', action='store_true', help='Compatibility alias; the local feed service is the default')
     parser.add_argument('--analysis', action='store_true')
+    parser.add_argument('--facility', action='store_true', help='Source-only Vite preview, preserving opt-in local geo delivery')
     parser.add_argument('--feeds-config', type=Path, default=Path(os.environ.get('DVR_FEEDS_CONFIG') or ROOT / 'local-feeds.json'))
     parser.add_argument('--recordings', type=Path, default=os.environ.get('DVR_RECORDINGS') or None)
     parser.add_argument('--config', type=Path, default=os.environ.get('DVR_ANALYSIS_CONFIG') or None)
@@ -285,8 +305,12 @@ def main(argv=None):
         if args.install:
             install()
             return 0
+        facility = args.facility or os.environ.get('DVR_GEO_LOCAL') == '1'
+        if facility and (args.analysis or args.feeds or args.recordings or args.config or
+                         args.feeds_config.absolute() != (ROOT / 'local-feeds.json').absolute()):
+            raise SetupError('Local geo preview and the camera/analysis service use separate launch modes. Clear DVR_GEO_LOCAL for camera/analysis testing.')
         if args.check:
-            result = check(args.port, args.feeds_config, args.recordings, args.config)
+            result = check(args.port, args.feeds_config, args.recordings, args.config, facility=facility)
             for item in result['checks']:
                 print(f"{item['status'].upper()}: {item['check']}")
                 if item['status'] == 'fail':
@@ -299,6 +323,10 @@ def main(argv=None):
                     json.dump(result, file, indent=2)
                     file.write('\n')
             return 0 if result['ready'] else 1
+        if facility:
+            preview = facility_command(args.port, not args.no_browser)
+            print('Source facility preview: local geo follows DVR_GEO_LOCAL. Camera and analysis service APIs are separate.', flush=True)
+            return subprocess.call(preview, cwd=ROOT)
         verify_kit()
         built_interface()
         python = validate_environment()
