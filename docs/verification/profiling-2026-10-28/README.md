@@ -96,6 +96,13 @@ encoding/transport is excluded from child timing to avoid recursion. Profiles
 have a separate 64 KiB limit; original result-byte limits remain. Profiling adds
 work/traffic: compare throughput with it OFF and collect attribution separately.
 
+The Linux CI job repeats the acknowledgment and synthetic process comparisons in
+A/B/B/A order against the pinned PR #20 commit, plus profiled journal/no-journal
+controls. It validates settings, source hashes, statement bounds, resource bounds,
+delivery and opportunity accounting, and retains the ten JSON receipts in the
+synthetic-durable-profiling artifact for 14 days. These hosted-runner measurements
+are storage/IPC diagnostics, not owner-hardware or native capacity evidence.
+
 ## Reproduce and owner gate
 
 Scripts never open recordings, models, cameras, production journals or a network.
