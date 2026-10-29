@@ -324,7 +324,10 @@ class Jobs:
 class LocalServer(HTTPServer):
     # Sequential requests bound concurrent file transfers and memory. Analysis is
     # the one background worker; each connection has a short read/write timeout.
-    allow_reuse_address = False
+    # Linux TIME_WAIT sockets must not prevent a normal stop/restart. An active
+    # listener still owns its exact loopback address. Windows reuse has different
+    # semantics and remains disabled.
+    allow_reuse_address = sys.platform == 'linux'
     def __init__(self, port, jobs, static_root, feeds=None):
         self.jobs, self.static_root, self.feeds = jobs, Path(static_root).resolve(), feeds
         self.token = jobs.token if jobs else secrets.token_urlsafe(32)

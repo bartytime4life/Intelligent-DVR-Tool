@@ -155,6 +155,30 @@ class PcSetupTest(unittest.TestCase):
         with self.assertRaises(FileExistsError): builder.build(self.root/'first.zip', 'b'*40, self.root)
 
     @unittest.skipUnless(os.getenv('DVR_TEST_SOCKETS') == '1', 'Requires local socket permission')
+    def test_service_restart_after_http_and_active_port_exclusion(self):
+        import http.client
+        import threading
+        from edge.local_service import LocalServer
+        server = LocalServer(0, None, self.root)
+        port = server.server_port
+        thread = threading.Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+        try:
+            with self.assertRaises(OSError): LocalServer(port, None, self.root)
+            conn = http.client.HTTPConnection('127.0.0.1', port, timeout=3)
+            try:
+                conn.request('GET', '/api/feeds/session')
+                response = conn.getresponse()
+                self.assertEqual(response.status, 503)
+                response.read()
+            finally:
+                conn.close()
+        finally:
+            server.shutdown(); server.server_close(); thread.join()
+        with LocalServer(port, None, self.root):
+            pass
+
+    @unittest.skipUnless(os.getenv('DVR_TEST_SOCKETS') == '1', 'Requires local socket permission')
     def test_occupied_port_fails_then_recovers(self):
         self.kit()
         pc.create_settings(self.root)

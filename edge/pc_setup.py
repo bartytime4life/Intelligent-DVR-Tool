@@ -233,8 +233,11 @@ def check(port=4173, feeds_config=None, recordings=None, config=None, *, root=RO
     if bind:
         def loopback():
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+                if sys.platform == 'linux':
+                    sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
                 sock.bind(('127.0.0.1', port))
-            return 'available at check time; no server started'
+                sock.listen(1)
+            return 'loopback port available at check time; no requests served'
         record('loopback_port', loopback)
     return {'schema': 'intelligent-dvr.pc-readiness.v1',
             'ready': not any(c['status'] == 'fail' for c in checks),
