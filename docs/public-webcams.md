@@ -68,7 +68,8 @@ MJPEG transport backpressure can add latency; this is a preview, not synchronize
 real-time monitoring.
 
 The existing 15-second browser lease and 15-minute session bound apply. Disconnect,
-hidden pages and leaving Monitor stop previews. Failures remove old images and
+hidden pages and leaving Monitor stop previews. Stopping public-only previews
+does not create a local-webcam source or request webcam permission. Failures remove old images and
 require explicit reconnect. Snapshot staleness uses the configured refresh
 interval plus a 12-second retrieval allowance. The displayed age is **time since
 retrieval**, not proof of provider capture time: a cached/frozen provider image

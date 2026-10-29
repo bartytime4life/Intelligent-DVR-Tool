@@ -175,6 +175,44 @@ class PcSetupTest(unittest.TestCase):
             self.assertFalse(any('private' in name or name.endswith('/local-feeds.json') for name in names))
         with self.assertRaises(FileExistsError): builder.build(self.root/'first.zip', 'b'*40, self.root)
 
+    def test_extracted_kit_validates_pinned_model_without_source_checkout(self):
+        source = Path(__file__).resolve().parents[1]
+        for name in builder.FIXED:
+            self.write(name, (source / name).read_bytes())
+        for name in ('edge/__init__.py', 'edge/model_profiles.py', 'edge/labels/coco80.json'):
+            self.write(name, (source / name).read_bytes())
+        for name in ('dist/client/index.html', 'dist/client/assets/app.js', 'docs/pc-testing.md'):
+            self.write(name)
+        builder.build(self.root/'pinned.zip', 'c'*40, self.root)
+        with zipfile.ZipFile(self.root/'pinned.zip') as archive:
+            archive.extractall(self.root/'extracted')
+        extracted = self.root/'extracted/Intelligent-DVR-PC'
+        candidate = 'edge/candidates/opencv-zoo-yolox-s-2022nov.json'
+        self.assertTrue((extracted/candidate).is_file(), 'Pinned runtime metadata must be packaged')
+        self.assertEqual((extracted/candidate).read_bytes(), (source/candidate).read_bytes())
+        manifest = json.loads((extracted/'pc-kit.json').read_text())
+        self.assertEqual(manifest['files'][candidate], pc.digest(extracted/candidate))
+        self.assertFalse(manifest['weights_included'])
+        # A fresh isolated interpreter cannot borrow missing assets from this checkout.
+        code = '''import json, sys
+from pathlib import Path
+sys.path.insert(0, sys.argv[1])
+from edge.model_profiles import ASSETS, YOLOX_PROFILE, validate_binding
+assert ASSETS == Path(sys.argv[1]) / 'edge'
+labels = json.loads((ASSETS / 'labels/coco80.json').read_text())
+candidate = json.loads((ASSETS / 'candidates' / (YOLOX_PROFILE + '.json')).read_text())
+validate_binding(YOLOX_PROFILE, candidate['model_sha256'], labels)
+for digest, names in [('0' * 64, labels), (candidate['model_sha256'], list(reversed(labels)))]:
+    try:
+        validate_binding(YOLOX_PROFILE, digest, names)
+    except ValueError:
+        continue
+    raise AssertionError('Pinned binding was weakened')
+'''
+        result = subprocess.run([sys.executable, '-I', '-c', code, str(extracted)],
+                                cwd=extracted, capture_output=True, text=True, timeout=10)
+        self.assertEqual(result.returncode, 0, result.stderr)
+
     @unittest.skipUnless(os.getenv('DVR_TEST_SOCKETS') == '1', 'Requires local socket permission')
     def test_service_restart_after_http_and_active_port_exclusion(self):
         import http.client

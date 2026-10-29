@@ -5,6 +5,18 @@ function stream() {
   const track=new EventTarget();track.readyState='live';track.stop=()=>{track.readyState='ended';};
   return {track,getTracks:()=>[track],getVideoTracks:()=>[track]};
 }
+test('stopping an unused webcam keeps the source absent after network-only previews',async()=>{
+  const states=[];let requests=0;
+  const controller=webcamController({getUserMedia:async()=>{requests++;return stream();}},s=>states.push(s));
+  controller.stop();
+  controller.stop('Preview stopped while the page was hidden. Connect again when ready.');
+  assert.equal(requests,0);
+  assert.deepEqual(states.at(-1),{state:'disconnected',message:'No webcam connected'});
+  await controller.connect();controller.stop();
+  assert.equal(states.at(-1).message,'Disconnected');
+  controller.stop('No webcam connected');controller.stop();
+  assert.deepEqual(states.at(-1),{state:'disconnected',message:'No webcam connected'});
+});
 test('webcam is explicit, video-only, bounded and releases tracks on disconnect',async()=>{
   const states=[], value=stream();let options;
   const controller=webcamController({getUserMedia:async(o)=>{options=o;return value;}},s=>states.push(s));
