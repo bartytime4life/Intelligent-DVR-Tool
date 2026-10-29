@@ -64,6 +64,6 @@ test('custom AOI filters the enclosing rectangle while retaining whole intersect
   const way=(id,r)=>({type:'way',id,tags:{building:'yes'},geometry:geo(r)});
   const result=parseOsmBuildings({elements:[way(1,box(60,60,10,10)),way(2,box(-50,-50,10,10)),way(3,box(-10,-10,30,30))]},origin,selection.bounds,undefined,ring);
   assert.deepEqual(result.buildings.map(b=>b.id),['osm-way-2','osm-way-3']);assert.equal(result.buildings[1].crossing,true);
-  for(const text of ['0,0\n600,0\n0,600','0,0\n1,0\n0,1','0,0\nfoo,20','0,0\n100,100\n0,100\n100,0'])assert.throws(()=>polygonAreaSelection(origin,parseAreaVertices(text)));
+  for(const text of ['0,0\n600,0\n0,600','0,0\n1,0\n0,1','0,0\nfoo,20','0,0\n100,100\n0,100\n100,0','0,\n100,0\n0,100',',0\n100,0\n0,100'])assert.throws(()=>polygonAreaSelection(origin,parseAreaVertices(text)));
   assert.match(osmQuery(selection.bounds),/building:part/);
 });

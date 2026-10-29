@@ -68,7 +68,7 @@ export function polygonAreaSelection(origin, ring) {
 }
 export function parseAreaVertices(text) {
   if (typeof text !== 'string' || text.length > 5000) throw Error('Area vertex text is too large.');
-  const points=text.trim().split(/\n/).map(line=>line.trim().split(/[,\s]+/).map(Number));
+  const points=text.trim().split(/\n/).map(line=>line.trim().split(/[,\s]+/).map(v=>v===''?NaN:Number(v)));
   if(points.some(p=>p.length!==2 || !p.every(Number.isFinite))) throw Error('Enter one east,north pair in meters per line.');
   if(points.length && (points[0][0]!==points.at(-1)[0] || points[0][1]!==points.at(-1)[1])) points.push([...points[0]]);
   return points;

@@ -293,37 +293,37 @@ TAP version 13
 # Subtest: v2 preserves holes/base/part and upgrades ordinary v1 without allowing a geometry downgrade
 ok 1 - v2 preserves holes/base/part and upgrades ordinary v1 without allowing a geometry downgrade
   ---
-  duration_ms: 1.694219
+  duration_ms: 1.608998
   ...
 # Subtest: invalid courtyard topology, including enclosing a hole with a room, is rejected atomically
 ok 2 - invalid courtyard topology, including enclosing a hole with a room, is rejected atomically
   ---
-  duration_ms: 0.959319
+  duration_ms: 1.042936
   ...
 # Subtest: courtyard translations/resizes keep all rings aligned and room edits remain validated
 ok 3 - courtyard translations/resizes keep all rings aligned and room edits remain validated
   ---
-  duration_ms: 0.151565
+  duration_ms: 0.155702
   ...
 # Subtest: coverage uses inner walls and permits rays below raised bases
 ok 4 - coverage uses inner walls and permits rays below raised bases
   ---
-  duration_ms: 0.568196
+  duration_ms: 0.256822
   ...
 # Subtest: complete courtyard relations assemble split inner rings and retain source/export
 ok 5 - complete courtyard relations assemble split inner rings and retain source/export
   ---
-  duration_ms: 1.088051
+  duration_ms: 0.896381
   ...
 # Subtest: independent parts preserve raised bases; conflicting envelopes/parts are excluded together
 ok 6 - independent parts preserve raised bases; conflicting envelopes/parts are excluded together
   ---
-  duration_ms: 0.518703
+  duration_ms: 0.472917
   ...
 # Subtest: custom AOI filters the enclosing rectangle while retaining whole intersecting shells
 ok 7 - custom AOI filters the enclosing rectangle while retaining whole intersecting shells
   ---
-  duration_ms: 0.648887
+  duration_ms: 0.624361
   ...
 1..7
 # tests 7
@@ -333,7 +333,7 @@ ok 7 - custom AOI filters the enclosing rectangle while retaining whole intersec
 # cancelled 0
 # skipped 0
 # todo 0
-# duration_ms 10.152776
+# duration_ms 9.542619
 
 FILE: tests/facility-delivery.test.mjs
 TAP version 13
