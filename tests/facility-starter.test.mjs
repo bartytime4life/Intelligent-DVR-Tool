@@ -70,8 +70,9 @@ test('raised and uncertain bases are not flattened into ground-level shells', ()
     way(13,{building:'yes','building:min_level':'1'}),
     way(14,{building:'yes',min_height:'0 m'}),
   ]},origin,bounds);
-  assert.deepEqual(result.buildings.map(b=>b.id),['osm-way-14']);
-  assert.equal(result.skipped,3);
+  assert.deepEqual(result.buildings.map(b=>b.id),['osm-way-11','osm-way-13','osm-way-14']);
+  assert.equal(result.skipped,1);
+  assert.equal(result.buildings[0].base,0.5);assert.equal(result.buildings[1].base,3);
 });
 test("network adapter caps response bytes and reports service failure", async () => {
   let request;

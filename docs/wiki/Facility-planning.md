@@ -1,5 +1,12 @@
 # Guided facility builder
 
+October 28 follow-up: [current workflow/geometry](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Facility-setup-reliability)
+adds map pin/custom AOI selection, v2 courtyards/bases and independent parts.
+The earlier v1 limitations and evidence below describe the original increment;
+overlapping parts, live/installed services, field accuracy and novice acceptance
+remain open. [Local delivery](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/facility-local-delivery.md) · [Study kit](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/facility-novice-study.md).
+
+
 [Visual tour](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-tour) · [Getting started](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Getting-started) · [Verification index](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Evidence-and-validation)
 
 ![Actual fictional sample facility in the 3D planner. Coverage is estimated.](https://raw.githubusercontent.com/bartytime4life/Intelligent-DVR-Tool/main/docs/media/facility.webp)

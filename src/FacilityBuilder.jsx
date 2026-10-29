@@ -1,3 +1,4 @@
+import { buildingArea, transformBuilding } from "./facility.mjs";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   MapPin,
@@ -71,6 +72,7 @@ nsaved sample", error: "" };
 ot be read. The sample is open; export it or make a deliberate edit to replace saved data." };
     }
   }
+  const [pickedOrigin,setPickedOrigin]=useState(null), [drawnArea,setDrawnArea]=useState(null);
   const [pasteOpen, setPasteOpen] = useState(false);
   const [mapDrafts, setMapDrafts] = useState([]), [searchArea, setSearchArea] = useState(null);
   const [replaceDrafts, setReplaceDrafts] = useState(false);
@@ -159,6 +161,8 @@ ot be read. The sample is open; export it or make a deliberate edit to replace s
     setError("");
   }
   function onDraw(kind, ring) {
+    if(kind==='search-area') {setDrawnArea(ring.map(p=>p.map(round)));return;}
+
     if (kind === "route") {
       commit({ ...plan, route: ring }, "Route saved");
       return;
@@ -202,12 +206,12 @@ ot be read. The sample is open; export it or make a deliberate edit to replace s
     if (commit({ ...plan, [keyOf[kind]]: [...plan[keyOf[kind]], item] }, kind === "camera" ? "Camera placed \u2014 adjust its\
  view" : "Label placed")) select(item.id, kind);
   }
-  latest.current = { onDraw, onPlace: place, onSelect: select, onToolDone: () => {
+  latest.current = { onPin: p=>setPickedOrigin(p), onDraw, onPlace: place, onSelect: select, onToolDone: () => {
     setTool("select");
   }, onReady: () => setReady(true), onError: setMapError };
   useEffect(() => {
     try {
-      api.current = createFacilityMap(mapEl.current, Object.fromEntries(["onDraw", "onPlace", "onSelect", "onToolDone", "\
+      api.current = createFacilityMap(mapEl.current, Object.fromEntries(["onPin", "onDraw", "onPlace", "onSelect", "onToolDone", "\
 onReady", "onError"].map((k) => [k, (...args) => latest.current[k](...args)])), plan);
     } catch (e) {
       setMapError("3D graphics are unavailable here. You can still edit numeric properties and export the plan. " + e.message);
@@ -286,7 +290,7 @@ onReady", "onError"].map((k) => [k, (...args) => latest.current[k](...args)])), 
       return;
     }
     setTool(kind);
-    if (["building", "room", "route"].includes(kind)) setView("2d");
+    if (["building", "room", "route", "search-area", "site-pin"].includes(kind)) setView("2d");
     api.current?.setTool(kind);
   }
   function saveSelected(e) {
@@ -336,14 +340,13 @@ onReady", "onError"].map((k) => [k, (...args) => latest.current[k](...args)])), 
   function translateBuilding(axis, value) {
     if (!draft || value === "") return;
     const p = centroid(draft.footprint), i = axis === "x" ? 0 : 1;
-    setDraft({ ...draft, footprint: draft.footprint.map((q) => q.map((n, j) => round(n + (j === i ? value - p[i] : 0)))) });
+    setDraft(transformBuilding(draft,q=>q.map((n,j)=>round(n+(j===i?value-p[i]:0)))));
   }
   function resizeBuilding(axis, value) {
     if (!draft || !Number.isFinite(value) || value < 1) return;
     const i = axis === "x" ? 0 : 1, p = centroid(draft.footprint), span = Math.max(...draft.footprint.map((p2) => p2[i])) -
     Math.min(...draft.footprint.map((p2) => p2[i]));
-    setDraft({ ...draft, footprint: draft.footprint.map((q) => q.map((n, j) => j === i ? round(p[i] + (n - p[i]) * value /
-    span) : n)) });
+    setDraft(transformBuilding(draft,q=>q.map((n,j)=>j===i?round(p[i]+(n-p[i])*value/span):n)));
   }
   async function importFile(e) {
     const f = e.target.files[0];
@@ -359,7 +362,7 @@ onReady", "onError"].map((k) => [k, (...args) => latest.current[k](...args)])), 
   }
   const cameras = plan.cameras.filter((c) => (c.name + " " + c.id).toLowerCase().includes(search.toLowerCase()));
   useEffect(() => setPage((p) => Math.min(p, Math.max(0, Math.ceil(cameras.length / 6) - 1))), [cameras.length]);
-  const toolText = { building: "Click each corner, then click the first corner to finish.", room: "Trace a room inside t\
+  const toolText = { "site-pin":"Click the map to suggest a site location, then review and Save site.", "search-area":"Click the area corners, then its first corner to finish. Review or edit the vertices before loading.", building: "Click each corner, then click the first corner to finish.", room: "Trace a room inside t\
 he selected building. Click its first corner to finish.", route: "Click route points. Double-click the last point to fin\
 ish.", camera: "Click the map to place a camera. Adjust its height and view next.", label: "Click the map to position a \
 label." };
@@ -418,7 +421,7 @@ street map \xB7 OpenStreetMap" : "Local grid \xB7 20 m spacing \xB7 no external 
   }}>{plan.buildings.map((b2) => <option value={b2.id} key={b2.id}>{b2.name}</option>)}</select><select aria-label="Active floor" value={floor} onChange={(e) => {
     setFloor(+e.target.value);
     setView("floors");
-  }}>{Array.from({ length: b?.floors || 1 }, (_, i) => <option key={i} value={i}>{i === 0 ? "Ground floor" : "Level " + (i +
+  }}>{Array.from({ length: b?.floors || 1 }, (_, i) => <option key={i} value={i}>{i === 0 ? b?.base ? `Lowest modeled floor (${b.base} m)` : "Ground floor" : "Level " + (i +
   1)}</option>)}</select></div>}
       <div className="facility-map-legend"><span><i className="coverage-key" />Estimated visibility</span><span><i className="route-key" />Rehearsal route</span><span>Only the selected camera’s 3D volume is shown.</span></div>
       {step === 5 && <div className="facility-rehearsal"><div className="facility-rehearsal-top"><button aria-label={playing ?
@@ -442,8 +445,8 @@ pect its modeled view.", "Draw a route and review proposed camera transitions."]
     setStreets(e.target.checked);
     api.current?.setBasemap(e.target.checked);
   }} />Online street map<small>Sends the visible map area to OpenStreetMap. No offline tile download.</small></label>}
-      {step === 0 && <SiteForm plan={plan} commit={commit} center={() => api.current?.center()} />} 
-      {step === 0 && <OpenMapStarter plan={plan} commit={commit} onPreview={(buildings,replace) => {setMapDrafts(buildings);setReplaceDrafts(!!replace);}} onArea={setSearchArea} disabled={dirty} />}
+      {step === 0 && <SiteForm pickedOrigin={pickedOrigin} onPin={()=>startTool("site-pin")} ready={ready} plan={plan} commit={commit} center={() => api.current?.center()} />}
+      {step === 0 && <OpenMapStarter drawnArea={drawnArea} onDrawArea={()=>startTool("search-area")} onCancelArea={()=>{api.current?.setTool("select");setTool("select");}} ready={ready} plan={plan} commit={commit} onPreview={(buildings,replace) => {setMapDrafts(buildings);setReplaceDrafts(!!replace);}} onArea={setSearchArea} disabled={dirty} />}
       {step === 0 && <><div className="facility-section-note"><MapPin /><p>This map starts with a fictional layout and no external map services. Coordinates anchor your plan; they do not verify a real building.</p></div><button className="facility-secondary" onClick={() => {
     commit(blankFacility(), "New plan \u2014 Undo is available");
     setSelected({ kind: "camera", id: "" });
@@ -461,8 +464,10 @@ pect its modeled view.", "Draw a route and review proposed camera transitions."]
         }}/>
         <ConstructionGuide />
         {selected.kind === "building" && draft?.id === selected.id && <form onSubmit={saveSelected}>
-          <MeasurementSummary ring={draft.footprint}/>
+          <MeasurementSummary ring={draft.footprint} holes={draft.holes}/>
           {draft.source&&<p className="facility-caption">OpenStreetMap source {draft.source.id}. Original height basis: {draft.source.heightBasis}; original floors: {draft.source.floorsBasis}. Source updated: {draft.source.updated}. Edits below are user supplied and do not update the source map.</p>}
+          <p className="facility-caption">{draft.holes?.length || 0} courtyards. {draft.part ? 'Independent building part.' : ''} Roof height is above ground.</p>
+          <Field label="Building base" suffix="m" value={draft.base || 0} min={0} max={149} onChange={v=>change('base',v)} />
           <Field label="Building name" type="text" value={draft.name} onChange={(v) => change("name", v)} />
           <div className="facility-field-pair"><Field label="Building height" suffix="m" value={draft.height} min={1} max={150} onChange={(v) => change(
     "height",
@@ -484,14 +489,14 @@ pect its modeled view.", "Draw a route and review proposed camera transitions."]
     v
   )} /><Field label="North-south span" suffix="m" value={round(Math.max(...draft.footprint.map((p) => p[1])) - Math.min(...draft.
   footprint.map((p) => p[1])))} min={1} max={1e3} onChange={(v) => resizeBuilding("y", v)} /></div>
-          <p className="facility-caption">Footprint area: {Math.round(polygonArea(draft.footprint))} m². Existing rooms must remain inside the footprint.</p><button className="facility-primary" type="submit">Save building<Check /></button>
+          <p className="facility-caption">Footprint area: {Math.round(buildingArea(draft))} m². Courtyards stay open when moving or resizing. Rooms must stay within solid floor space.</p><button className="facility-primary" type="submit">Save building<Check /></button>
         </form>}
       </>}
       {step === 2 && <><div className="facility-action-row"><button className="facility-primary" disabled={!ready || !b} onClick={() => startTool(
     "room"
   )}><Polygon />Draw room</button><button className="facility-secondary" disabled={!ready} onClick={() => startTool(
     "label"
-  )}><Plus />Place label</button></div><p className="facility-caption">Choose a building and floor on the map. Floors divide building height evenly. Labels can name doors, corridors and outdoor areas.</p><div className="facility-item-list compact">{plan.
+  )}><Plus />Place label</button></div><p className="facility-caption">Choose a building and floor on the map. Modeled floors divide the occupied height above the building base evenly. Labels can name doors, corridors and outdoor areas.</p><div className="facility-item-list compact">{plan.
   rooms.filter((r) => r.buildingId === b?.id && r.level === floor).map((r) => <button key={r.id} className={selected.id ===
   r.id ? "selected" : ""} onClick={() => select(r.id, "room")}><Stack /><span>{r.name}</span></button>)}{plan.labels.map(
     (l) => <button key={l.id} className={selected.id === l.id ? "selected" : ""} onClick={() => select(l.id, "label")}><MapPin /><span>{l.
@@ -519,7 +524,7 @@ pect its modeled view.", "Draw a route and review proposed camera transitions."]
   cameras.map((c) => <option key={c.id} value={c.id}>{c.id} · {c.name}</option>)}</select></label>
         {selected.kind === "camera" && draft?.id === selected.id ? <form className="facility-camera-form" onSubmit={saveSelected}>
           <Field label="Camera name" type="text" value={draft.name} onChange={(v) => change("name", v)} />
-          
+
           <Field label="Mount elevation above ground" suffix="m" value={draft.z} min={0.5} max={150} onChange={(v) => change(
     "z",
     v
@@ -590,11 +595,16 @@ Kept as separate tracks."} This does not verify identity.</p>}</div>) : <p class
   }} />}</><input ref={input} hidden type="file" accept=".json,application/json" aria-label="Import facility plan" onChange={importFile} />
   </section>;
 }
-function SiteForm({ plan, commit, center }) {
+function SiteForm({ plan, commit, center, pickedOrigin, onPin, ready }) {
   const [name, setName] = useState(plan.name), [lng, setLng] = useState(plan.origin[0]), [lat, setLat] = useState(plan.origin[1]);
   const [locating, setLocating] = useState(false), [locationNote, setLocationNote] = useState("");
   const locationRequest = useRef(0);
   useEffect(() => () => { locationRequest.current++; }, []);
+  useEffect(()=>{
+    if(!pickedOrigin)return;
+    locationRequest.current++;setLocating(false);setLng(+pickedOrigin[0].toFixed(7));setLat(+pickedOrigin[1].toFixed(7));
+    setLocationNote('Map pin suggestion. Review coordinates, then Save site.');
+  },[pickedOrigin]);
   function locate() {
     if (locating) return;
     if (!window.isSecureContext || !navigator.geolocation) {
@@ -628,7 +638,7 @@ function SiteForm({ plan, commit, center }) {
     setLng(plan.origin[0]);
     setLat(plan.origin[1]);
   }, [plan]);
-  return <><AddressSearch onChoose={p=>{locationRequest.current++;setLocating(false);setLng(+p.origin[0].toFixed(7));setLat(+p.origin[1].toFixed(7));setLocationNote('Suggested: '+p.label+'. Review before saving. Existing plan positions remain unchanged until Save site.');}} /><form onSubmit={(e) => {
+  return <><button type="button" className="facility-secondary" disabled={!ready} onClick={onPin}>Pick site on map</button><AddressSearch onChoose={p=>{locationRequest.current++;setLocating(false);setLng(+p.origin[0].toFixed(7));setLat(+p.origin[1].toFixed(7));setLocationNote('Suggested: '+p.label+'. Review before saving. Existing plan positions remain unchanged until Save site.');}} /><form onSubmit={(e) => {
     e.preventDefault();
     if (commit({ ...plan, name, origin: [lng, lat] }, "Site origin saved — choose an area and review building outlines below")) center();
   }}><button type="button" className="facility-secondary" disabled={locating} onClick={locate}>{locating ? "Finding location…" : "Use my location"}</button>

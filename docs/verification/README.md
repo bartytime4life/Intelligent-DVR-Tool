@@ -1,5 +1,10 @@
 # Verification index
 
+[October 28 facility follow-up](facility-2026-10-28/README.md): polygon selection,
+v2 courtyard/base geometry, bounded local delivery and novice-study preparation.
+Local checks and unresolved field/human acceptance are recorded separately.
+
+
 Reviewed October 28, 2026. [Product status](../product-status.md) · [Home](../../README.md)
 
 ## Latest audited application baseline

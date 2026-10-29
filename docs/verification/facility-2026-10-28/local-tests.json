@@ -1,0 +1,73 @@
+{
+  "suite": "facility-follow-up",
+  "upstream_tree": "50349bc758dedb6363c728e4893bedcedafc3808",
+  "platform": "local Linux restricted shell",
+  "passed": 66,
+  "failed": 0,
+  "skipped": 1,
+  "files": [
+    {
+      "file": "domain",
+      "passed": 6,
+      "failed": 0,
+      "skipped": 0,
+      "exit": 0
+    },
+    {
+      "file": "facility",
+      "passed": 13,
+      "failed": 0,
+      "skipped": 0,
+      "exit": 0
+    },
+    {
+      "file": "facility-starter",
+      "passed": 8,
+      "failed": 0,
+      "skipped": 0,
+      "exit": 0
+    },
+    {
+      "file": "resources",
+      "passed": 10,
+      "failed": 0,
+      "skipped": 0,
+      "exit": 0
+    },
+    {
+      "file": "facility-services",
+      "passed": 9,
+      "failed": 0,
+      "skipped": 0,
+      "exit": 0
+    },
+    {
+      "file": "facility-geometry",
+      "passed": 7,
+      "failed": 0,
+      "skipped": 0,
+      "exit": 0
+    },
+    {
+      "file": "facility-delivery",
+      "passed": 5,
+      "failed": 0,
+      "skipped": 1,
+      "exit": 0
+    },
+    {
+      "file": "facility-study",
+      "passed": 4,
+      "failed": 0,
+      "skipped": 0,
+      "exit": 0
+    },
+    {
+      "file": "sites-worker",
+      "passed": 4,
+      "failed": 0,
+      "skipped": 0,
+      "exit": 0
+    }
+  ]
+}

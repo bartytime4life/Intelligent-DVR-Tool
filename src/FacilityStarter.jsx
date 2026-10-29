@@ -1,14 +1,15 @@
+import { polygonArea } from "./facility.mjs";
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { SHAPES, OSM_SERVERS, shapeFootprint, dimensions, searchBounds, parseOsmBuildings, fetchOsmBuildings, draftFacility, clearFootprintCache } from "./facility-starter.mjs";
+import { SHAPES, OSM_SERVERS, shapeFootprint, dimensions, searchBounds, parseOsmBuildings, fetchOsmBuildings, draftFacility, clearFootprintCache, polygonAreaSelection, parseAreaVertices } from "./facility-starter.mjs";
 import { FOOTPRINT_SERVICES } from "./facility-services.mjs";
 function Numeric({ label, value, onChange, min, max, step = "any" }) {
   return <label className="facility-field"><span>{label}</span><input type="number" aria-label={label} required value={value} min={min} max={max} step={step} onChange={(e) => onChange(
   e.target.value === "" ? "" : Number(e.target.value))} /></label>;
 }
-function MeasurementSummary({ ring }) {
-  const m = dimensions(ring), v = (n) => n.toFixed(1);
+function MeasurementSummary({ ring, holes = [] }) {
+  const m = dimensions(ring); m.area -= holes.reduce((sum,h)=>sum+polygonArea(h),0); const v = (n) => n.toFixed(1);
   return <p className="facility-caption">Approx. enclosing dimensions {v(m.length)} × {v(m.width)} m ({v(m.length / 0.3048)} × {v(
-  m.width / 0.3048)} ft). Footprint {v(m.area)} m² / {v(m.area / 0.09290304)} ft². Perimeter {v(m.perimeter)} m. Dimensions follow the footprint’s orientation; verify on site.</p>;
+  m.width / 0.3048)} ft). Footprint {v(m.area)} m² / {v(m.area / 0.09290304)} ft². Exterior perimeter {v(m.perimeter)} m. Dimensions follow the footprint’s orientation; verify on site.</p>;
 }
 function ShapeBuilder({ add, disabled }) {
   const [open, setOpen] = useState(false);
@@ -55,31 +56,35 @@ function ConstructionGuide() {
     <p className="facility-caption"><a href="https://codes.iccsafe.org/s/IBC2024P1/chapter-12-interior-environment/IBC2024P1-Ch12-Sec1208.2" target="_blank" rel="noreferrer">IBC reference</a> · <a href="https://www.access-board.gov/ada/guides/chapter-4-accessible-routes/" target="_blank" rel="noreferrer">ADA routes</a> · <a href="https://www.access-board.gov/ada/guides/chapter-4-entrances-doors-and-gates/" target="_blank" rel="noreferrer">ADA doors</a> · <a href="https://steelconstruction.info/topics/cost-of-structural-steelwork/cost-planning-industrial-buildings" target="_blank" rel="noreferrer">SCI examples</a></p>
   </details>;
 }
-function OpenMapStarter({ plan, commit, onPreview, onArea, disabled }) {
+function OpenMapStarter({ plan, commit, onPreview, onArea, disabled, drawnArea, onDrawArea, onCancelArea, ready }) {
   const [open, setOpen] = useState(false), [east, setEast] = useState(0), [north, setNorth] = useState(0), [width, setWidth] = useState(
   250), [depth, setDepth] = useState(250), [result, setResult] = useState(null), [checked, setChecked] = useState([]), [
   busy, setBusy] = useState(false), [message, setMessage] = useState(""), [mode, setMode] = useState("append"), [paste, setPaste] = useState(
   "");
+  const [areaMode,setAreaMode]=useState('rectangle'),[vertices,setVertices]=useState('-125,-125\n125,-125\n125,125\n-125,125');
+  useEffect(()=>{if(drawnArea){setAreaMode('polygon');setVertices(drawnArea.slice(0,-1).map(p=>p.join(',')).join('\n'));}},[drawnArea]);
   const controller = useRef(), generation = useRef(0), lastQuery = useRef(0), callbacks = useRef();
   callbacks.current = { onPreview, onArea };
   const [endpoint,setEndpoint] = useState(OSM_SERVERS[0]);
   const fileGeneration = useRef(0);
-  const bounds = useMemo(() => {
+  const selection = useMemo(() => {
     try {
-      return searchBounds(plan.origin, east, north, width, depth);
+      return areaMode==='polygon' ? polygonAreaSelection(plan.origin,parseAreaVertices(vertices)) : {bounds:searchBounds(plan.origin,east,north,width,depth),ring:null};
     } catch {
       return null;
     }
-  }, [plan.origin, east, north, width, depth]);
+  }, [plan.origin, east, north, width, depth, areaMode, vertices]);
+  const bounds=selection?.bounds || null;
   const priorOrigin = useRef(plan.origin.join(","));
   useEffect(()=>{const next=plan.origin.join(",");if(next!==priorOrigin.current){priorOrigin.current=next;setOpen(true);}},[plan.origin]);
   const chosen = useMemo(() => result?.buildings.filter((b) => checked.includes(b.id)) || [], [result, checked]);
   useEffect(() => {
     callbacks.current.onPreview(open ? chosen : [], mode === 'new');
   }, [chosen, open, mode]);
+  useEffect(()=>{if(!open)onCancelArea();},[open]);
   useEffect(() => {
-    callbacks.current.onArea(open ? bounds : null);
-  }, [bounds, open]);
+    callbacks.current.onArea(open ? selection : null);
+  }, [selection, open]);
   useEffect(() => {
     generation.current++;
     fileGeneration.current++;
@@ -88,7 +93,7 @@ function OpenMapStarter({ plan, commit, onPreview, onArea, disabled }) {
     setResult(null);
     setChecked([]);
     setMessage("");
-  }, [plan, east, north, width, depth, endpoint, open]);
+  }, [plan, east, north, width, depth, endpoint, open, areaMode, vertices]);
   useEffect(() => () => {
     generation.current++;
     fileGeneration.current++;
@@ -97,10 +102,10 @@ function OpenMapStarter({ plan, commit, onPreview, onArea, disabled }) {
     callbacks.current.onArea(null);
   }, []);
   function accept(data) {
-    const next = parseOsmBuildings(data, plan.origin, bounds);
+    const next = parseOsmBuildings(data, plan.origin, bounds, new Date().toISOString(), selection?.ring);
     const existing = new Set(plan.buildings.map((b) => b.id));
     const existingWays = new Set(plan.buildings.filter(b=>b.source?.id.startsWith('way/')).map(b=>b.source.id));
-    next.buildings = next.buildings.filter((b) => !existing.has(b.id) && !existingWays.has(b.source.id));
+    next.buildings = next.buildings.filter((b) => mode === 'new' || (!existing.has(b.id) && !existingWays.has(b.source.id)));
     setResult(next);
     setChecked(next.buildings.map((b) => b.id));
     setMessage(next.buildings.length ? `${next.buildings.length} draft shells. Review before adding. ${next.skipped} uns\
@@ -149,8 +154,11 @@ ry a smaller nearby area or draw a shape.`);
     <ol className="facility-starter-progress" aria-label="Building draft steps"><li>1. Save location</li><li>2. Confirm area</li><li>3. Review outlines</li><li>4. Apply selected</li></ol>
     <p className="facility-caption">First save your address, GPS suggestion or coordinates above. This area is relative to the saved origin: {plan.
   origin[1]}, {plan.origin[0]}. Adjust its dimensions and offsets to select the area outlined on the map.</p>
-    <div className="facility-field-pair"><Numeric label="Search width (m)" value={width} onChange={setWidth} min={20} max={500} /><Numeric label="Search depth (m)" value={depth} onChange={setDepth} min={20} max={500} /></div>
-    <div className="facility-field-pair"><Numeric label="Search east (m)" value={east} onChange={setEast} min={-1700} max={1700} /><Numeric label="Search north (m)" value={north} onChange={setNorth} min={-1700} max={1700} /></div>
+    <label className="facility-field"><span>Area shape</span><select aria-label="Area shape" value={areaMode} onChange={e=>{onCancelArea();setAreaMode(e.target.value);}}><option value="rectangle">Rectangle</option><option value="polygon">Custom polygon</option></select></label>
+    <button className="facility-secondary" disabled={!ready || disabled} onClick={()=>{setOpen(true);onDrawArea();}}>Draw search area</button>
+    {areaMode==='polygon' && <label className="facility-field"><span>Area vertices (east,north meters; one per line)</span><textarea aria-label="Area vertices" rows={6} maxLength={5000} value={vertices} onChange={e=>setVertices(e.target.value)}/><small>Edit, add or remove corners here with the keyboard. The closing point is added automatically. Whole intersecting buildings are retained.</small></label>}
+    {areaMode==='rectangle' && <><div className="facility-field-pair"><Numeric label="Search width (m)" value={width} onChange={setWidth} min={20} max={500} /><Numeric label="Search depth (m)" value={depth} onChange={setDepth} min={20} max={500} /></div>
+    <div className="facility-field-pair"><Numeric label="Search east (m)" value={east} onChange={setEast} min={-1700} max={1700} /><Numeric label="Search north (m)" value={north} onChange={setNorth} min={-1700} max={1700} /></div></>}
     <label className="facility-field"><span>Building source</span><select aria-label="Building source" value={endpoint} onChange={e=>setEndpoint(e.target.value)}>{FOOTPRINT_SERVICES.map(s=><option key={s.url} value={s.url}>{s.label}</option>)}</select></label>
     <p className="facility-caption">Load sends only this area's coordinates to {endpoint.startsWith('/') ? `this site’s ${endpoint} service (operator must configure it)` : new URL(endpoint).hostname}. It does not send cameras, rooms or recordings. Public service availability varies; import an extract if unavailable. Requests are limited to 500 × 500 m, 300 features and 2 MB. No subscription or API key.</p>
     <p className="facility-caption"><a href={endpoint.includes("overpass-api.de") ? "https://dev.overpass-api.de/overpass-doc/en/preface/commons.html" : "https://overpass.private.coffee/"} target="_blank" rel="noreferrer">Map service terms and privacy</a> · Used for draft planning only. Verify all geometry before operational use.</p>
@@ -162,12 +170,12 @@ ry a smaller nearby area or draw a shape.`);
     setBusy(false);
     setMessage("Request cancelled.");
   }}>Cancel map request</button>}
-    {!bounds && <p className="facility-caption" role="alert">Use a 20–500 m area within 1,800 m of the saved origin.</p>}
+    {!bounds && <p className="facility-caption" role="alert">Use a simple closed area with bounds 20–500 m per side within 1,800 m of the saved origin; at most 50 corners. Courtyard or crossing outlines must be valid.</p>}
     <p role="status" className="facility-caption">{message}</p>
     {result && <><details><summary>Why some features were skipped</summary><ul className="facility-caption">{Object.entries(result.reasons).map(([reason,count])=><li key={reason}>{count}: {reason}</li>)}</ul></details><div className="facility-import-list">{result.buildings.map((b) => <label className="facility-draft-choice" key={b.
   id}><input type="checkbox" aria-label={`Include ${b.name}`} checked={checked.includes(b.id)} onChange={(e) => setChecked((ids) => e.target.checked ? [...ids,
-  b.id] : ids.filter((id) => id !== b.id))} /><span><strong>{b.name}</strong><MeasurementSummary ring={b.footprint} /><small>Height: {b.
-  height} m — {b.source.heightBasis}. Floors: {b.floors} — {b.source.floorsBasis}. {b.crossing ? "Crosses area bound\
+  b.id] : ids.filter((id) => id !== b.id))} /><span><strong>{b.name}</strong><MeasurementSummary ring={b.footprint} holes={b.holes} /><small>Height: {b.
+  height} m above ground; base {b.base || 0} m; {b.holes?.length || 0} courtyards. {b.part ? "Independent part. " : ""} — {b.source.heightBasis}. Floors: {b.floors} — {b.source.floorsBasis}. {b.crossing ? "Crosses area bound\
 ary; the whole footprint will be kept." : ""} Source: {b.source.id}. Updated: {b.source.updated}. Imported: {b.source.retrieved}.</small></span></label>)}</div>
       <label className="facility-field"><span>Apply drafts</span><select aria-label="Apply building drafts" value={mode} onChange={(e) => setMode(
   e.target.value)}><option value="append">Add to existing plan</option><option value="new">Replace with a clean site</option></select></label>
@@ -193,7 +201,7 @@ dings added \u2014 Undo available")) {
   e.target.value)} /><button className="facility-secondary" disabled={!bounds || busy || disabled} onClick={() => {
     reviewText(paste);
   }}>Review extract</button></details>
-    <p className="facility-caption">Complete outer-only relations can be assembled or split into separate shells. Courtyards, building parts, nested/overlapping rings and invalid outlines are skipped rather than filled. Heights/floors may be placeholders. No interiors are inferred.</p>
+    <p className="facility-caption">Complete outer-only relations can be assembled or split into separate shells. Courtyards remain open and raised bases are retained. Independent, non-overlapping building parts are supported. Overlapping parts/envelopes and invalid or nested rings are excluded with reasons. Heights/floors may be placeholders. No interiors are inferred.</p>
     <button type="button" className="facility-link" onClick={()=>{clearFootprintCache();setMessage("Session footprint cache cleared.");}}>Clear session map cache</button>
     <p className="facility-caption">© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap contributors · ODbL</a>. Source and license are retained in plan exports. Review ODbL obligations before distributing a derived database.</p>
   </details>;
