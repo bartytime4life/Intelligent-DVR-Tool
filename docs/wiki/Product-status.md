@@ -7,6 +7,10 @@ checks do not establish compatibility with a particular physical PC or camera.
 The current Monitor starts empty and supports explicit browser webcam and bounded
 local RTSP previews. Generated camera images/default events are removed. See
 [connections, limits and device qualification](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/local-camera-feeds.md).
+Owner-approved direct HTTPS JPEG/MJPEG public webcams now use the same bounded
+preview lifecycle, with attribution, retrieval age and snapshot labels. See the
+[public-webcam boundary](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/public-webcams.md). External-provider availability and
+capture freshness remain unqualified; no public source is enabled by default.
 
 Local recording analysis now has a bounded same-origin CPU job service and
 Recognition controls for explicit selection, progress, cancellation and automatic

@@ -8,7 +8,7 @@ import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
 FIXED = (
-    'edge/requirements-qualification.txt', 'edge/local-feeds.example.json',
+    'edge/requirements-qualification.txt', 'edge/local-feeds.example.json', 'edge/public-webcams.example.json',
     'edge/local-analysis.example.json', 'edge/rules.example.json',
     'scripts/run-linux.sh', 'scripts/Start-IntelligentDvr.ps1',
     'Install-Windows.cmd', 'Check-Windows.cmd', 'Start-Windows.cmd',
