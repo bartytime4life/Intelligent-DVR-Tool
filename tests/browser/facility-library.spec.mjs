@@ -1,6 +1,7 @@
 import {test,expect} from '@playwright/test';
 import {readFile} from 'node:fs/promises';
-import {exampleFacility,createFloorPath} from '../../src/facility.mjs';
+import {blankFacility,exampleFacility,createFloorPath} from '../../src/facility.mjs';
+import {createLibrary,addFacility} from '../../src/facility-library.mjs';
 import {createFacilityZone} from '../../src/facility-zones.mjs';
 import {savedFacilities,savedPlan,openExample} from './facility-test-helpers.mjs';
 
