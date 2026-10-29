@@ -140,6 +140,14 @@ integration component, not a new analyzer flag, GPU default or camera service.
 Its ownership, outcome/failure handling, native-call limits and measured replay
 scope are in the [worker guide](../docs/performance-100-cameras.md#bounded-local-execution-adapter).
 
+For explicitly supervised Linux integration, `edge.supervision.ProcessWorkers`
+constructs independent processors in one owned spawned child and adds polled
+startup/task deadlines, bounded result IPC and an explicit restart budget
+(default zero). It reports terminal sample failures instead of retrying them.
+This is a separate application component, not an analyzer flag or camera service.
+See the [supervision contract](../docs/performance-100-cameras.md#optional-linux-process-supervision)
+and [owner-PC recovery record](../docs/verification/recovery-2026-10-28/README.md).
+
 Rule JSON is an array of named rules; browser rule exports have a separate
 schema and are intentionally not silently accepted by this CLI. Map a browser
 zone's normalized `rect` into an edge rule with an actual model label, and review

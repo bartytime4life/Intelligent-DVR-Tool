@@ -66,6 +66,13 @@ For `edge.analyze`, omitted `--threads` / `--max-frames` take policy values. Exp
 
 ## OS hard limits and future work
 
-Use the Linux/Windows guides for the distinction between cgroup/systemd properties and Windows Job Object limits. No OS containment, filesystem quota, GPU-power setting, retention-deletion service or priority tuner is controlled by the browser. A future admitted local supervisor needs authenticated narrow APIs, supported OS enforcement, per-process health and failure receipts before such controls can be presented as live.
+The optional [Linux process adapter](performance-100-cameras.md#optional-linux-process-supervision)
+is constructed explicitly by local application code. A policy-created scheduler
+does not start it or choose its factory, deadlines or restart budget. The adapter
+requires 1–4 scheduler slots and rejects larger counts; it does not silently
+clamp an exported plan. Its polled deadlines, bounded IPC and owned-child
+termination are distinct from the browser's planning fields and OS quotas.
+
+Use the Linux/Windows guides for the distinction between cgroup/systemd properties and Windows Job Object limits. No OS containment, filesystem quota, GPU-power setting, retention-deletion service or priority tuner is controlled by the browser. An admitted host-control service still needs authenticated narrow APIs, supported OS enforcement, per-process health and durable failure receipts before such controls can be presented as live.
 
 The 100-camera requirement remains a workload qualification target. Valid policy imports, successful calculations and green unit tests do not establish sustained camera throughput or recognition quality.

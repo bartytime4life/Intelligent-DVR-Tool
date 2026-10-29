@@ -10,11 +10,12 @@ from workload values still requiring pilot decisions.
 
 Current state: a single-recording analyzer with an explicit optional CUDA backend,
 hash-bound YOLOX profile, evaluation harness, reusable sample scheduler, bounded
-local execution adapter and synthetic load model. The
+thread execution, optional Linux process supervision and a synthetic load model. The
 [CUDA record](verification/cuda-2026-10-28/README.md) and
 [worker record](verification/workers-2026-10-28/README.md) retain measured scope.
-Live ingest, a recording service, distributed/supervised workers and 100-camera
-hardware acceptance remain open.
+The [recovery record](verification/recovery-2026-10-28/README.md) covers the optional
+process boundary. Live ingest, a recording service, distributed workers and
+100-camera hardware acceptance remain open.
 
 ## Separate the workloads
 
@@ -58,8 +59,8 @@ float32 model tensors. Decoders, preprocessing, workers, results and copies
 outside the scheduler need separate memory budgets. A retained-payload limit is
 not a process-memory ceiling or native-code sandbox.
 
-Expiry is checked at dispatch. Hung in-flight workers have no hard timeout or
-cancellation here; future process supervision is a separate requirement. The
+Expiry is checked at dispatch. The scheduler itself cannot terminate a hung
+native call; optional process supervision below supplies a polled fault boundary. The
 scheduler is deliberately not wired into the recording analyzer: dropped or
 skipped samples can change dwell behavior and detection quality, so that
 integration needs its own ordered, per-camera trace and gap/reset tests.
@@ -87,12 +88,87 @@ processors and must consume all outcomes, including those returned by `close()`.
 The context manager closes workers but does not return remaining outcomes;
 call `close()` explicitly when those results are needed.
 
-Thread execution cannot kill a hung native GPU call. Supervised process
-deadlines/restarts, result-size budgets, durable outcomes, per-camera rules and
-live recording remain separate work. The adapter does not change analyzer CLI
+Thread execution cannot kill a hung native GPU call. The optional process
+adapter below adds deadlines/restarts and encoded result-size limits. Durable
+outcomes, per-camera rules and live recording remain separate work. Neither adapter changes analyzer CLI
 defaults or the browser's planning controls. Four sessions are an explicit
 tested candidate on one PC, not a new universal/default worker count. See the
 [dated comparison and limits](verification/workers-2026-10-28/README.md).
+
+## Optional Linux process supervision
+
+`edge.supervision.ProcessWorkers(scheduler, factory, ...)` starts one owned
+**spawned** child containing 1–4 independent processors. It requires a matching
+scheduler with no in-flight work. It is enabled only on Linux; it neither changes
+`LocalWorkers` nor selects a new analyzer/browser default. The parent must not
+dispatch/complete this scheduler elsewhere. Producer threads may submit normally.
+
+The trusted, importable `factory(slot, generation)` constructs each processor
+inside the child. Factories are small application objects, never receipt/browser
+input. Only the factory uses Python's trusted spawn serialization. Samples and
+results use a versioned, length-bounded bytes/JSON protocol over an anonymous
+local pipe, with no listening network service. Processor results must be finite
+JSON; the caller sets `max_result_bytes` (512 bytes–4 MiB; default 1 MiB).
+The factory configuration cap is 64 KiB. Callbacks may expose JSON `runtime`
+metadata and an optional `close()` method.
+
+One controlling thread calls `step()` frequently. Returned `ProcessOutcome`
+records preserve `work`, `result` and `error`, and add an authoritative
+`generation` and successful `processor` slot. Snapshot metadata binds each
+generation/slot to the supplied processor's startup metadata. The parent rejects
+unknown/duplicate tokens, wrong generations, invalid framing and late results.
+The scheduler's sequence, fair routing, retained-payload budget and one in-flight
+sample per camera remain in force. IPC adds bounded copies beyond that budget;
+native models, decoder caches, parsed results and caller-held outcomes need
+separate memory accounting.
+
+`startup_timeout` (default 30 seconds) covers initialization/proof;
+`task_timeout` (default 5 seconds) covers dispatch, transport, execution and
+collection. Deadlines are enforced **when the caller polls**, not by an OS-level
+watchdog. A busy or blocked parent must not present this as a hard real-time
+deadline. A failed generation is terminated/reaped before replacement. Every
+unacknowledged in-flight token receives an explicit `ProcessFailure`, even if
+the child computed a result that the parent had not received. Accepted results
+are retained. Failed samples are never retried; newer pending samples remain
+eligible under age/byte checks. Rule/dwell state after a failed or skipped sample
+requires separate caller integration.
+
+`max_restarts` is **0 by default** (range 0–3 for the entire adapter lifetime).
+An explicitly chosen budget permits replacement generations after
+`restart_delay` (default 0.25 seconds). Startup failures consume the same budget;
+successful work does not reset it. An exhausted budget or unreaped child stops
+dispatch. Snapshot events expose generation, PID, failure reason, ready/reap
+times and current state. These are local diagnostics, not durable receipts.
+Parent-side admission/allocation errors remain ordinary caller exceptions;
+parent-process death and orphan cleanup need separate service supervision.
+
+```mermaid
+flowchart TD
+  A["Spawn and initialize"] --> B["Validate ready metadata"]
+  B --> C["Dispatch bounded samples"]
+  A -->|startup failure| D["Fail unacknowledged work"]
+  C -->|exit, error or polled deadline| D
+  D --> E["Terminate and reap owned child"]
+  E -->|reaped and restart budget remains| F["Backoff, new generation"]
+  F --> A
+  E -->|unreaped or budget exhausted| G["Stop dispatch; expose failure"]
+```
+
+`close(timeout=1)` stops new dispatch and restarts, drains for the selected
+0–30-second interval, then accounts for remaining work as shutdown failures and
+terminates its child. Termination uses bounded waits and escalates to kill;
+an unreaped OS task remains visible and blocks restart. OS scheduling or an
+uninterruptible kernel task can exceed requested waits. Consume every outcome
+returned by `step()` and explicit `close()`; context-manager exit cleans up but
+cannot deliver its returned outcomes to the caller.
+
+Processors must perform local, side-effect-free computation. This component is
+fault isolation, not a permission or memory sandbox. It does not install a
+network filter, enforce host RAM/VRAM quotas, authenticate APIs, persist results,
+connect cameras or record video. The qualification runner separately denied
+IPv4/IPv6 for the parent and descendants. Full methods, actual fault injection,
+recovery measurements and limits are in the
+[dated recovery record](verification/recovery-2026-10-28/README.md).
 
 ## Reproduce the load model
 
@@ -156,9 +232,9 @@ No finding here establishes that one particular workstation can satisfy them.
    order, source/license records and decoder semantics. Require CPU/accelerated
    box/score/geometry parity and labeled-scene quality before adoption. No new
    backend, quantization or model substitution is silently enabled.
-4. **Integrate bounded workers.** Add supervised worker processes, bounded input
-   and result queues, fair routing, cancellation/restart, freshness deadlines,
-   per-camera rule state and deterministic receipts. Requalify dwell/max-gap
+4. **Integrate bounded workers.** Extend the optional Linux process component
+   into an admitted pipeline with durable results, per-camera rule state,
+   freshness/recovery policy and deterministic receipts. Requalify dwell/max-gap
    behavior under explicit frame loss. Keep recording separate from sample drops.
 5. **Add a governed local ingest/recording service.** Use explicit source
    admission and private credential handling, per-source reconnect/backoff and
