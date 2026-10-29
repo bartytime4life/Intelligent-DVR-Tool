@@ -40,7 +40,7 @@ export default function LocalAnalysis({ onResult, onBusy }) {
     try { setJob(await request('/jobs', { method: 'POST', body: { recording, model, rules } })); }
     catch (err) {
       // A lost response is ambiguous: reconnect to the retained job before retrying.
-      setConnected(false); setError(`${err.message} Reconnect to check whether the job started.`);
+      setConnected(false); setMessage(''); setError(`${err.message} Reconnect to check whether the job started.`);
     } finally { setWorking(false); }
   }
   async function cancel() {
@@ -49,6 +49,11 @@ export default function LocalAnalysis({ onResult, onBusy }) {
     catch (err) { setConnected(false); setError(`${err.message} Cancellation is unconfirmed. Reconnect to check the job.`); }
     finally { setWorking(false); }
   }
+  useEffect(() => {
+    if (job?.state === 'failed') setMessage('Analysis stopped. Review the error, then explicitly start another recording.');
+    else if (job?.state === 'cancelled') setMessage('Analysis cancelled. Your current review is preserved.');
+    else if (activeJob(job)) setMessage('Processing on this computer. Your current review remains available below.');
+  }, [job?.state]);
   useEffect(() => {
     if (!connected || !activeJob(job)) return;
     let disposed = false;

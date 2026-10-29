@@ -22,6 +22,8 @@ test('real local HTTP job invokes CPU analyzer and automatically opens verified 
   await expect(page.locator('.recognition-boxes rect')).toHaveCount(1);
   await expect(page.locator('.recognition-facts')).toContainText('6 sampled frames');
   await expect(page.locator('.recognition-facts')).toContainText('CPU analysis');
+  await expect.poll(() => page.locator('video').evaluate(el => el.readyState)).toBe(4);
+  await page.evaluate(() => window.scrollTo(0,0));
   await page.screenshot({path:'test-results/local-analysis-desktop.png',fullPage:true});
   await page.reload();
   await page.getByRole('button',{name:'Connect local analysis'}).click();
@@ -79,6 +81,7 @@ test('progress, cancellation, disconnected recovery and narrow controls stay usa
   await expect(page.locator('.local-analysis-job')).toContainText('Analysis cancelled');
   await expect(page.getByRole('button',{name:'Analyze recording',exact:true})).toBeEnabled();
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBe(true);
+  await page.evaluate(() => window.scrollTo(0,0));
   await page.screenshot({path:'test-results/local-analysis-mobile.png',fullPage:true});
 });
 
@@ -86,6 +89,7 @@ test('process failure returns controls for an explicit retry', async ({page}) =>
   await controlled(page,{fail:true}); await connect(page); await select(page);
   await page.getByRole('button',{name:'Analyze recording',exact:true}).click();
   await expect(page.locator('.local-analysis-job')).toContainText('Check the model and retry');
+  await expect(page.locator('.local-analysis-message')).toContainText('Analysis stopped');
   await expect(page.getByRole('button',{name:'Analyze recording',exact:true})).toBeEnabled();
   await expect(page.locator('.recognition-boxes')).toHaveCount(0);
 });

@@ -99,6 +99,21 @@ class ServiceTest(unittest.TestCase):
         self.assertTrue(process.killed)
         self.assertEqual(list(Path(service.directory.name).iterdir()), [])
         self.assertEqual(service.cancel(first['id'])['state'], 'cancelled')
+    def test_cancellation_reaps_an_actual_child_process(self):
+        children = []
+        def spawn(*args, **kwargs):
+            child = subprocess.Popen([sys.executable, '-c', 'import time; time.sleep(60)'],
+                                     stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            children.append(child)
+            return child
+        service = self.service(process_factory=spawn)
+        job = self.start(service)
+        deadline = time.monotonic() + 3
+        while not children and time.monotonic() < deadline: time.sleep(.01)
+        self.assertTrue(children)
+        service.cancel(job['id'])
+        self.assertEqual(self.finish(service)['state'], 'cancelled')
+        self.assertIsNotNone(children[0].poll())
     def test_deadline_kills_hung_process(self):
         process = FakeProcess()
         service = self.service(wall_seconds=.1, process_factory=lambda *a, **k: process)

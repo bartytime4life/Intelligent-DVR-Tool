@@ -284,6 +284,8 @@ class Jobs:
                                 elapsed_seconds=round(time.monotonic() - began, 1))
 
     def _progress(self, directory, began):
+        with self.lock:
+            self.job['elapsed_seconds'] = round(time.monotonic() - began, 1)
         try:
             value = read_json(directory / 'progress.json', 2048)
             if value.get('phase') not in ('validating', 'analyzing', 'verifying', 'completed'):
