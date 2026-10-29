@@ -27,6 +27,7 @@ def check():
             ROOT / 'docs/verification/recovery-2026-10-28/README.md',
             ROOT / 'docs/verification/journal-2026-10-28/README.md',
             ROOT / 'docs/verification/batching-2026-10-28/README.md',
+            ROOT / 'docs/verification/profiling-2026-10-28/README.md',
             ROOT / 'docs/performance-100-cameras.md',
             ROOT / 'edge/README.md', ROOT / 'docs/third-party-notices.md',
             ROOT / 'docs/offline-qualification.md',

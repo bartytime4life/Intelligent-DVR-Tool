@@ -1,0 +1,54 @@
+{
+  "schema": "intelligent-dvr.profiling-observed-summary.v1",
+  "baseline_commit": "50349bc758dedb6363c728e4893bedcedafc3808",
+  "evidence_status": "Earlier local iteration summaries observed before connection loss; raw receipts inaccessible; not final-head qualification.",
+  "native_cuda_measured": false,
+  "native_cpu_measured": false,
+  "physical_camera_capacity": "unqualified",
+  "environment": {
+    "python": "3.14.4",
+    "sqlite": "3.46.1",
+    "filesystem": "tmpfs"
+  },
+  "local_tests": {
+    "discovered": 139,
+    "passed": 131,
+    "failed": 0,
+    "skipped": 8,
+    "added": 14
+  },
+  "ack_summary_us": [
+    {
+      "batch": 1,
+      "baseline": 10.319,
+      "candidate": 9.673
+    },
+    {
+      "batch": 4,
+      "baseline": 22.041,
+      "candidate": 17.057
+    },
+    {
+      "batch": 64,
+      "baseline": 171.411,
+      "candidate": 66.294
+    },
+    {
+      "batch": 1000,
+      "baseline": 2656.383,
+      "candidate": 1113.409
+    }
+  ],
+  "synthetic_summary": {
+    "completed_cases": 6,
+    "seconds_per_case": 5,
+    "offered_per_case": 1000,
+    "completed_per_case": 1000,
+    "replacements_per_case": 0,
+    "pending_per_case": 0,
+    "throughput_advantage_established": false
+  },
+  "recordings_transmitted": false,
+  "cameras_activated": false,
+  "host_configuration_changed": false
+}
