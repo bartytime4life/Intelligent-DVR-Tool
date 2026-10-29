@@ -6,7 +6,7 @@ import ShapeDimensions from './ShapeDimensions.jsx';
 import LineDimensions from './LineDimensions.jsx';
 import './floor-geometry.css';
 
-export default function FloorGeometry({plan,building,floor,selected,draft,onDraft,onSelect,commit,onDraw,disabled=false,ready,units='metric'}) {
+export default function FloorGeometry({plan,building,floor,selected,draft,onDraft,onSelect,commit,onDraw,disabled=false,ready,units='metric',onPendingChange}) {
   const [error,setError]=useState('');
   if(!building)return null;
   const openings=(plan.openings || []).filter(o=>o.buildingId===building.id && o.level===floor);
@@ -43,7 +43,7 @@ export default function FloorGeometry({plan,building,floor,selected,draft,onDraf
     {!!ceilingOpenings(plan,building.id,floor).length && <p className="facility-caption">Dashed boundaries show ceiling openings from the level above.</p>}
     {item && <form onSubmit={save}>
       <label className="facility-field"><span>{selected.kind==='opening'?'Opening name':'Pathway name'}</span><input aria-label={selected.kind==='opening'?'Opening name':'Pathway name'} required maxLength={100} value={item.name} onChange={e=>onDraft({...item,name:e.target.value})}/></label>
-      {selected.kind==='opening'?<ShapeDimensions shape={item} onChange={onDraft} units={units}/>:<LineDimensions points={item.points} onChange={points=>onDraft({...item,points})} units={units}/>}
+      {selected.kind==='opening'?<ShapeDimensions shape={item} onChange={onDraft} units={units}/>:<LineDimensions onDirtyChange={onPendingChange} points={item.points} onChange={points=>onDraft({...item,points})} units={units}/>}
       <button className="facility-primary" disabled={locked} type="submit">Save {selected.kind==='opening'?'opening':'pathway'}<Check/></button>
       <button className="facility-delete" disabled={disabled} type="button" onClick={remove}><Trash/>{selected.kind==='opening'?'Close opening with solid floor':'Remove pathway'}<small>Undo available</small></button>
     </form>}

@@ -27,10 +27,7 @@ import "./facility.css";
 import {
   STEPS,
   LIMITS,
-  exampleFacility,
-  blankFacility,
   validateFacility,
-  parseFacility,
   uid,
   centroid,
   rehearse,
@@ -55,33 +52,20 @@ import FacilityZones from './FacilityZones.jsx';
 import { createFacilityZone } from './facility-zones.mjs';
 import FacilityCameraPreview from './FacilityCameraPreview.jsx';
 const MeasurementUnits = React.createContext("metric");
-const STORAGE = "dvr.facility.v1";
+import FacilityLibrary,{downloadFacilityData} from './FacilityLibrary.jsx';
+import {facilityFilename} from './facility-library.mjs';
+import {FacilityEmptyState} from './FacilitySwitcher.jsx';
 const keyOf = { building: "buildings", camera: "cameras", room: "rooms", label: "labels", zone: "zones", opening: "openings", stair: "stairs", path: "paths" };
 const round = (n) => Math.round(n * 100) / 100;
-function download(data) {
-  const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: "application/json" }));
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "dvr-facility.json";
-  a.click();
-  setTimeout(() => URL.revokeObjectURL(url), 1e3);
-}
+function download(data){downloadFacilityData(data,facilityFilename(data));}
 function Field({ name, label, value, onChange, min, max, step = "any", type = "number", suffix }) {
   const units=useContext(MeasurementUnits), length=suffix==='m',factor=length?unitFactor(units):1;
   return <label className="facility-field"><span>{label}{suffix && <small>{length?unitLabel(units):suffix}</small>}</span><input name={name} aria-label={label} type={type} value={(length?displayLength(value,units):value) ?? ''} required min={min===undefined?undefined:min/factor} max={max===undefined?undefined:max/factor} step={type === 'number' ? step : undefined} maxLength={type === 'text' ? 100 : undefined} onChange={e=>onChange(type === 'number' ? e.target.value === '' ? '' : Number(e.target.value)*factor : e.target.value)}/></label>;
 }
-function FacilityBuilder({onPreviewCount}) {
-  const initial = useRef();
-  if (!initial.current) {
-    try {
-      const raw = localStorage.getItem(STORAGE);
-      initial.current = { plan: raw ? parseFacility(raw) : exampleFacility(), status: raw ? "Saved in this browser" : "U\
-nsaved sample", error: "" };
-    } catch {
-      initial.current = { plan: exampleFacility(), status: "Saved data needs review", error: "The saved facility could n\
-ot be read. The sample is open; export it or make a deliberate edit to replace saved data." };
-    }
-  }
+function FacilityBuilder(props){return <FacilityLibrary>{libraryProps=><FacilityEditor key={libraryProps.facilityId} {...props} {...libraryProps}/>}</FacilityLibrary>;}
+function FacilityEditor({onPreviewCount,initialPlan,facilityControls,onPersist,onDraftChange,onImportFacilities,onOpenImport}) {
+  const initial=useRef({plan:initialPlan,status:'Ready to edit',error:''});
+  const [siteDirty,setSiteDirty]=useState(false),[shapePending,setShapePending]=useState(false),[linePending,setLinePending]=useState(false);
   const [zoneDirty, setZoneDirty] = useState(false), [stairDirty,setStairDirty]=useState(false);
   const [measurements, setMeasurements] = useState(true), [units, setUnits] = useState(()=>{try{return localStorage.getItem("dvr.facility.units")==="imperial"?"imperial":"metric";}catch{return "metric";}}), [mapBearing, setMapBearing] = useState(-27);
   const [pickedOrigin,setPickedOrigin]=useState(null), [drawnArea,setDrawnArea]=useState(null);
@@ -90,10 +74,10 @@ ot be read. The sample is open; export it or make a deliberate edit to replace s
   const [replaceDrafts, setReplaceDrafts] = useState(false);
   const [draftPreviewError, setDraftPreviewError] = useState('');
   const [plan, setPlan] = useState(initial.current.plan), [step, setStep] = useState(0), [selected, setSelected] = useState(
-    { kind: "camera", id: "C-07" }
+    { kind: "camera", id: "" }
   ), [draft, setDraft] = useState(null), [view, setView] = useState("3d"), [floor, setFloor] = useState(
     0
-  ), [floorBuilding, setFloorBuilding] = useState("b2"), [tool, setTool] = useState("select"), [error, setError] = useState(
+  ), [floorBuilding, setFloorBuilding] = useState(initialPlan.buildings[0]?.id || ""), [tool, setTool] = useState("select"), [error, setError] = useState(
     initial.current.error
   ), [status, setStatus] = useState(initial.current.status), [ready, setReady] = useState(false), [
     mapError,
@@ -108,7 +92,10 @@ ot be read. The sample is open; export it or make a deliberate edit to replace s
   const mapEl = useRef(), api = useRef(), input = useRef(), latest = useRef();
   const selectedItem = plan[keyOf[selected.kind]]?.find((x) => x.id === selected.id);
   const propertyDirty = !['zone','stair'].includes(selected.kind) && !!(draft && selectedItem && draft.id === selectedItem.id && JSON.stringify(draft) !== JSON.stringify(selectedItem));
-  const dirty = propertyDirty || zoneDirty || stairDirty;
+  const dirty = propertyDirty || zoneDirty || stairDirty || siteDirty;
+  const editingDirty=dirty || shapePending || linePending;
+  const navigationDirty=editingDirty || mapDrafts.length>0 || tool!=='select';
+  useEffect(()=>{onDraftChange(navigationDirty);return()=>onDraftChange(false);},[navigationDirty,onDraftChange]);
   useEffect(() => setDraft(selectedItem ? structuredClone(selectedItem) : null), [selectedItem]);
   useEffect(()=>{if(selectedItem && ['opening','path','stair'].includes(selected.kind)){setFloorBuilding(selectedItem.buildingId);setFloor(selectedItem.level ?? selectedItem.fromLevel);setView('floors');}},[selected.kind,selected.id,selectedItem?.id]);
   const b = plan.buildings.find((x) => x.id === floorBuilding) || plan.buildings[0];
@@ -151,17 +138,11 @@ ot be read. The sample is open; export it or make a deliberate edit to replace s
   function commit(next, message) {
     try {
       const clean = validateFacility(next);
+      const result=onPersist(clean);
       setHistory((h) => [...h.slice(-19), plan]);
       setPlan(clean);
       setError("");
-      try {
-        localStorage.setItem(STORAGE, JSON.stringify(clean));
-        setStatus(message || "Saved in this browser");
-      } catch {
-        setStatus("Not saved \u2014 export a copy");
-        setError("Browser storage is unavailable or full. Your current edits are in memory; export a copy before closing\
-.");
-      }
+      setStatus(result.saved ? (message || 'Saved in this browser') : 'Changes applied in memory — export a backup');
       return true;
     } catch (e) {
       setError(e.message);
@@ -169,7 +150,7 @@ ot be read. The sample is open; export it or make a deliberate edit to replace s
     }
   }
   function select(id, kind) {
-    if (dirty) {
+    if (editingDirty) {
       setError("Save or discard your preview before selecting another item.");
       return false;
     }
@@ -197,7 +178,7 @@ ot be read. The sample is open; export it or make a deliberate edit to replace s
   function onDraw(kind, ring) {
     if(kind==='search-area') {setDrawnArea(ring.map(p=>p.map(round)));return;}
 
-    if (dirty) { setError("Save or discard your preview before drawing."); return; }
+    if (editingDirty) { setError("Save or discard your preview before drawing."); return; }
     if (kind === 'opening' || kind === 'floor-path') {
       if(!b) {setError('Choose a building and floor first.');return;}
       try {
@@ -235,7 +216,7 @@ ot be read. The sample is open; export it or make a deliberate edit to replace s
     }
   }
   function place(kind, p) {
-    if (dirty) {
+    if (editingDirty) {
       setError("Save or discard your preview before adding another item.");
       return;
     }
@@ -314,7 +295,7 @@ ot be read. The sample is open; export it or make a deliberate edit to replace s
     return () => document.removeEventListener("keydown", stop);
   }, []);
   function go(n) {
-    if (dirty) {
+    if (editingDirty) {
       setError("Save or discard your preview before changing steps.");
       return;
     }
@@ -336,7 +317,7 @@ ot be read. The sample is open; export it or make a deliberate edit to replace s
     if (n === 6) { setView("2d"); setSelected({kind:'zone',id:plan.zones?.[0]?.id || ''}); }
   }
   function startTool(kind) {
-    if (dirty && !["aim-camera", "move-camera"].includes(kind)) {
+    if (editingDirty && !["aim-camera", "move-camera"].includes(kind)) {
       setError("Save or discard your preview before drawing.");
       return;
     }
@@ -380,21 +361,18 @@ ot be read. The sample is open; export it or make a deliberate edit to replace s
     }
   }
   function undo() {
-    if (dirty) {setError("Save or discard your preview before undoing.");return;}
+    if (editingDirty) {setError("Save or discard your preview before undoing.");return;}
     const prev = history.at(-1);
     if (!prev) return;
+    let result;try{result=onPersist(prev);}catch(e){setError(e.message);return;}
     setPlan(prev);
     setHistory((h) => h.slice(0, -1));
     setError("");
-    try {
-      localStorage.setItem(STORAGE, JSON.stringify(prev));
-      setStatus("Previous edit restored");
-    } catch {
-      setError("Restored in memory. Export a copy; browser storage is unavailable.");
-    }
+    setStatus(result.saved?'Previous edit restored':'Restored in memory — export a backup');
   }
+
   function addRectangle() {
-    if (dirty) {
+    if (editingDirty) {
       setError("Save or discard your preview before adding a building.");
       return;
     }
@@ -412,9 +390,8 @@ ot be read. The sample is open; export it or make a deliberate edit to replace s
     e.target.value = "";
     if (!f) return;
     try {
-      if (f.size > LIMITS.bytes) throw Error("Facility files must be smaller than 2 MB.");
-      commit(parseFacility(await f.text()), "Imported and saved in this browser");
-      setSelected({ kind: "camera", id: "" });
+      if (f.size > 4_000_000) throw Error("Facility backups must be smaller than 4 MB.");
+      onImportFacilities(await f.text());
     } catch (x) {
       setError(x.message);
     }
@@ -428,7 +405,7 @@ label." };
   const change = (key, value) => setDraft((d) => ({ ...d, [key]: value }));
   const note = <p className="facility-estimate"><WarningCircle size={17} /><span>Estimated ground visibility · verify on site. Opaque walls only; excludes floor slabs, openings, furniture and lens effects.</span></p>;
   return <MeasurementUnits.Provider value={units}><section className="facility-workspace" aria-label="Guided facility builder">
-    <aside className="facility-guide">
+    <aside className="facility-guide">{facilityControls}
       <p className="eyebrow">FACILITY WORKSPACE</p><h1>Design your coverage</h1><p className="facility-intro">Measure the space. Build each level.<br />Place, aim and review your cameras.</p>
       <ol className="facility-steps">{STEPS.map(([title, desc], i) => <li key={title}><button aria-current={step === i ?
   "step" : void 0} onClick={() => go(i)}><span className="facility-step-number">{i + 1}</span><span><strong>{title}</strong><small>{desc}</small></span></button></li>)}</ol>
@@ -451,11 +428,12 @@ label." };
   1) * 6 >= cameras.length} onClick={() => setPage((p) => p + 1)}><CaretRight /></button></div>}
         </>}
       </div>
-      <div className="facility-file-actions"><button disabled={dirty} onClick={() => download(plan)}><DownloadSimple />Export plan</button><button disabled={dirty} onClick={() => input.
-  current.click()}><UploadSimple />Import plan</button><button disabled={dirty} onClick={() => setPasteOpen(true)}><UploadSimple />Paste JSON</button><button onClick={undo} disabled={!history.length || dirty}><ArrowCounterClockwise />Undo edit</button></div>
+      <div className="facility-file-actions"><button disabled={navigationDirty} onClick={() => download(plan)}><DownloadSimple />Export plan</button><button disabled={navigationDirty} onClick={() => input.
+  current.click()}><UploadSimple />Import plan</button><button disabled={navigationDirty} onClick={() => setPasteOpen(true)}><UploadSimple />Paste JSON</button><button onClick={undo} disabled={!history.length || navigationDirty}><ArrowCounterClockwise />Undo edit</button></div>
       <p className="facility-save-state" role="status">{status}</p>
     </aside>
     <div className="facility-stage">
+      {!plan.buildings.length && !plan.cameras.length && !plan.labels.length && !plan.zones?.length && !plan.route.length && tool==='select' && step===0 && <FacilityEmptyState disabled={navigationDirty} onDraw={()=>{go(1);if(ready)startTool('building');}} onImport={onOpenImport} onLocate={()=>{go(0);input.current?.closest('section')?.querySelector('[aria-label="Facility name"]')?.focus();}}/>}
       <div className="facility-map" ref={mapEl} aria-label="Facility map. Use arrow keys to pan; use numeric fields to place items without drawing." />
       <div className="facility-view-controls" aria-label="Map view">{[["2d", "2D"], ["3d", "3D"], ["floors", "Floors"]].
   map(([id, title]) => <button key={id} aria-pressed={view === id} onClick={() => setView(id)}>{title}</button>)}<button className="facility-fit" title="Center facility" aria-label="Center facility" onClick={() => api.
@@ -477,12 +455,12 @@ street map \xB7 OpenStreetMap" : `Local grid · ${formatDistance(20,units)} spac
   }}>Cancel</button></div>}
       {(step === 2 || view === "floors") && <div className="facility-floor-picker"><Stack size={18} /><select aria-label="Building for floor editing" value={b?.
   id || ""} onChange={(e) => {
-    if(dirty) {setError("Save or discard your preview before changing floors.");return;}
+    if(editingDirty) {setError("Save or discard your preview before changing floors.");return;}
     setFloorBuilding(e.target.value);
     setFloor(0);
     select(e.target.value, "building");
   }}>{plan.buildings.map((b2) => <option value={b2.id} key={b2.id}>{b2.name}</option>)}</select><select aria-label="Active floor" value={floor} onChange={(e) => {
-    if(dirty) {setError("Save or discard your preview before changing floors.");return;}
+    if(editingDirty) {setError("Save or discard your preview before changing floors.");return;}
     setFloor(+e.target.value);
     setView("floors");
   }}>{Array.from({ length: b?.floors || 1 }, (_, i) => <option key={i} value={i}>{i === 0 ? b?.base ? `Lowest modeled floor (${formatDistance(b.base,units)})` : "Ground floor" : "Level " + (i +
@@ -509,21 +487,15 @@ pect its modeled view.", "Draw a route and review proposed camera transitions.",
     setStreets(e.target.checked);
     api.current?.setBasemap(e.target.checked);
   }} />Online street map<small>Sends the visible map area to OpenStreetMap. No offline tile download.</small></label>}
-      {step === 0 && <SiteForm pickedOrigin={pickedOrigin} onPin={()=>startTool("site-pin")} ready={ready} plan={plan} commit={commit} center={() => api.current?.center()} />}
+      {step === 0 && <SiteForm onDirtyChange={setSiteDirty} pickedOrigin={pickedOrigin} onPin={()=>startTool("site-pin")} ready={ready} plan={plan} commit={commit} center={() => api.current?.center()} />}
       {step === 0 && <OpenMapStarter drawnArea={drawnArea} onDrawArea={()=>startTool("search-area")} onCancelArea={()=>{api.current?.setTool("select");setTool("select");}} ready={ready} plan={plan} commit={commit} onPreview={(buildings,replace) => {setMapDrafts(buildings);setReplaceDrafts(!!replace);}} onArea={setSearchArea} disabled={dirty} />}
-      {step === 0 && <><div className="facility-section-note"><MapPin /><p>This map starts with a fictional layout and no external map services. Coordinates anchor your plan; they do not verify a real building.</p></div><button className="facility-secondary" onClick={() => {
-    commit(blankFacility(), "New plan \u2014 Undo is available");
-    setSelected({ kind: "camera", id: "" });
-  }}>Start an empty plan</button><button className="facility-link" onClick={() => {
-    commit(exampleFacility(), "Sample restored \u2014 Undo is available");
-    select("C-07", "camera");
-  }}>Restore sample facility</button></>}
+      {step === 0 && <div className="facility-section-note"><MapPin/><p>Start with an empty local grid. Set a site location or draw your first building. Saved facilities stay separate; imported files and examples open as new facilities.</p></div>}
       {step === 1 && <><div className="facility-action-row"><button className="facility-primary" disabled={!ready} onClick={() => startTool(
     "building"
   )}><Polygon />Draw building</button><button className="facility-secondary" onClick={addRectangle}><Plus />Add rectangle</button></div>
-        <ShapeBuilder units={units} onUnits={setUnits} disabled={dirty} add={item => {
+        <ShapeBuilder onDirtyChange={setShapePending} units={units} onUnits={setUnits} disabled={dirty} add={item => {
           const building = {...item,id:uid('b')};
-          if(commit({...plan,buildings:[...plan.buildings,building]},'Building shape added')) {select(building.id,'building');return true;}
+          if(commit({...plan,buildings:[...plan.buildings,building]},'Building shape added')) {setSelected({id:building.id,kind:'building'});setFloorBuilding(building.id);setFloor(0);return true;}
           return false;
         }}/>
         <ConstructionGuide />
@@ -615,13 +587,13 @@ nabled", e.target.checked)} />Include in coverage estimates</label>
         </form> : <p className="facility-caption">Select a camera in the inventory, or place the first camera.</p>}
         {step === 3 && <p className="hint">Use the source preview to compare your camera placement. View guides are estimates; centering moves the map, not a physical camera.</p>}
       </>}
-      {step === 2 && <><FloorGeometry plan={plan} building={b} floor={floor} selected={selected} draft={draft} onDraft={setDraft} onSelect={select} commit={commit} onDraw={startTool} disabled={dirty} ready={ready} units={units}/><FacilityStairs plan={plan} building={b} floor={floor} selectedId={selected.kind==='stair'?selected.id:''} onSelect={id=>select(id,'stair')} commit={commit} disabled={propertyDirty || zoneDirty} units={units} onDirtyChange={setStairDirty}/></>}
+      {step === 2 && <><FloorGeometry onPendingChange={setLinePending} plan={plan} building={b} floor={floor} selected={selected} draft={draft} onDraft={setDraft} onSelect={select} commit={commit} onDraw={startTool} disabled={dirty} ready={ready} units={units}/><FacilityStairs plan={plan} building={b} floor={floor} selectedId={selected.kind==='stair'?selected.id:''} onSelect={id=>select(id,'stair')} commit={commit} disabled={propertyDirty || zoneDirty} units={units} onDirtyChange={setStairDirty}/></>}
       {step === 5 && <><div className="facility-action-row"><button className="facility-primary" disabled={!ready} onClick={() => startTool(
     "route"
   )}><Path />Draw route</button><button className="facility-secondary" disabled={plan.route.length < 2} onClick={() => {
     setSeconds(0);
     setPlaying(true);
-  }}><Play />Run rehearsal</button></div><p className="facility-caption">Follow the route in the map and scrub the timeline. Coverage changes produce proposals for review; no identity matching is running.</p>{plan.route.length>1 && <><LineDimensions points={plan.route} onChange={route=>commit({...plan,route},'Route dimensions saved — Undo available')} units={units}/><p className="facility-caption">Route dimension edits save immediately. Undo restores the previous geometry.</p></>}<h3 className="facility-subheading">Proposed transitions</h3>{proposals.
+  }}><Play />Run rehearsal</button></div><p className="facility-caption">Follow the route in the map and scrub the timeline. Coverage changes produce proposals for review; no identity matching is running.</p>{plan.route.length>1 && <><LineDimensions onDirtyChange={setLinePending} points={plan.route} onChange={route=>commit({...plan,route},'Route dimensions saved — Undo available')} units={units}/><p className="facility-caption">Route dimension edits save immediately. Undo restores the previous geometry.</p></>}<h3 className="facility-subheading">Proposed transitions</h3>{proposals.
   length ? proposals.map((p) => <div className="facility-proposal" key={p.key}><strong>{p.from}<CaretRight />{p.to}</strong><small>At {p.
   seconds.toFixed(1)} s · simulated, unverified</small><div><button aria-pressed={decisions[p.key] === "link"} onClick={() => setDecisions(
     (d) => ({ ...d, [p.key]: "link" })
@@ -642,20 +614,15 @@ Kept as separate tracks."} This does not verify identity.</p>}</div>) : <p class
   )}>Continue<CaretRight /></button> : <button disabled={dirty} className="facility-primary" onClick={() => download(
     plan
   )}>Export plan<DownloadSimple /></button>}</div></div>
-    </aside><>{pasteOpen && <PlanPasteDialog close={() => setPasteOpen(false)} onImport={(text) => {
-    const next = parseFacility(text);
-    if (commit(next, "Imported and saved in this browser")) {
-      setSelected({ kind: "camera", id: "" });
-      return true;
-    }
-    return false;
-  }} />}</><input ref={input} hidden type="file" accept=".json,application/json" aria-label="Import facility plan" onChange={importFile} />
+    </aside><>{pasteOpen && <PlanPasteDialog close={() => setPasteOpen(false)} onImport={text=>onImportFacilities(text)} />}</><input ref={input} hidden type="file" accept=".json,application/json" aria-label="Import facility plan" onChange={importFile} />
   </section></MeasurementUnits.Provider>;
 }
-function SiteForm({ plan, commit, center, pickedOrigin, onPin, ready }) {
+function SiteForm({ plan, commit, center, pickedOrigin, onPin, ready, onDirtyChange }) {
   const [name, setName] = useState(plan.name), [lng, setLng] = useState(plan.origin[0]), [lat, setLat] = useState(plan.origin[1]);
   const [locating, setLocating] = useState(false), [locationNote, setLocationNote] = useState("");
   const locationRequest = useRef(0);
+  const changed=name!==plan.name || lng!==plan.origin[0] || lat!==plan.origin[1];
+  useEffect(()=>{onDirtyChange(changed);return()=>onDirtyChange(false);},[changed,onDirtyChange]);
   useEffect(() => () => { locationRequest.current++; }, []);
   useEffect(()=>{
     if(!pickedOrigin)return;
@@ -702,7 +669,7 @@ function SiteForm({ plan, commit, center, pickedOrigin, onPin, ready }) {
   {locating && <button type="button" className="facility-secondary" onClick={() => { locationRequest.current++; setLocating(false); setLocationNote("Location suggestion cancelled. Enter site coordinates below."); }}>Cancel location</button>}
   <p className="facility-caption">Uses your browser’s location service once, only when requested. Review the suggestion before Save site. This does not find building outlines.</p>
   {locationNote && <p className="facility-caption" role="status">{locationNote}</p>}
-  <Field label="Facility name" type="text" value={name} onChange={setName} /><Field label="Longitude" value={lng} min={-180} max={180} onChange={setLng} /><Field label="Latitude" value={lat} min={-80} max={80} onChange={setLat} /><p className="facility-caption">Building and camera positions are meters east and north of this origin. Changing the origin moves the whole plan geographically. This is a local planning coordinate system, not a surveyed model.</p><button className="facility-primary" type="submit" disabled={locating}>Save site<Check /></button></form></>;
+  <Field label="Facility name" type="text" value={name} onChange={setName} /><Field label="Longitude" value={lng} min={-180} max={180} onChange={setLng} /><Field label="Latitude" value={lat} min={-80} max={80} onChange={setLat} /><p className="facility-caption">Building and camera positions are meters east and north of this origin. Changing the origin moves the whole plan geographically. This is a local planning coordinate system, not a surveyed model.</p><button className="facility-primary" type="submit" disabled={locating}>Save site<Check /></button>{changed && <button type="button" className="facility-secondary" onClick={()=>{setName(plan.name);setLng(plan.origin[0]);setLat(plan.origin[1]);setLocationNote('');}}>Discard site edits</button>}</form></>;
 }
 function PlanPasteDialog({ close, onImport }) {
   const ref = useRef();
@@ -715,7 +682,7 @@ function PlanPasteDialog({ close, onImport }) {
   }, []);
   return <dialog aria-labelledby="facility-import-title" className="modal facility-paste-modal" ref={ref} onCancel={close} onClick={(e) => {
     if (e.target === e.currentTarget) close();
-  }}><div className="modal-heading"><h2 id="facility-import-title">Import facility JSON</h2><button className="icon-button" onClick={close} aria-label="Close JSON import"><X /></button></div><p>Paste an exported facility plan. Only validated geometry and labels are retained. Maximum 2 MB. Import replaces this plan; Undo remains available.</p><form onSubmit={(e) => {
+  }}><div className="modal-heading"><h2 id="facility-import-title">Import facility JSON</h2><button className="icon-button" onClick={close} aria-label="Close JSON import"><X /></button></div><p>Paste an exported facility plan. Only validated geometry and labels are retained. Maximum 4 MB for a facility collection, 2 MB per facility. Import adds separate facilities and keeps existing work.</p><form onSubmit={(e) => {
     e.preventDefault();
     try {
       if (onImport(text)) close();
@@ -723,7 +690,7 @@ function PlanPasteDialog({ close, onImport }) {
       setError(e2.message);
     }
   }}><label className="facility-field"><span>Facility plan JSON</span><textarea autoFocus aria-label="Facility plan JSON" value={text} onChange={(e) => setText(
-  e.target.value)} maxLength={2e6} required rows={9} spellCheck={false} /></label>{error && <p className="error" role="alert">{error}</p>}<div className="facility-paste-actions"><button className="facility-secondary" type="button" onClick={close}>Cancel</button><button className="facility-primary" type="submit">Import pasted plan<UploadSimple /></button></div></form></dialog>;
+  e.target.value)} maxLength={4e6} required rows={9} spellCheck={false} /></label>{error && <p className="error" role="alert">{error}</p>}<div className="facility-paste-actions"><button className="facility-secondary" type="button" onClick={close}>Cancel</button><button className="facility-primary" type="submit">Import pasted plan<UploadSimple /></button></div></form></dialog>;
 }
 export {
   FacilityBuilder

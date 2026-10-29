@@ -1,12 +1,13 @@
 import {test,expect} from '@playwright/test';
+import {savedPlan as saved, openExample} from './facility-test-helpers.mjs';
 import {toLngLat} from '../../src/facility.mjs';
 const origin=[-98,38.5],box=(x,y,w,h)=>[[x,y],[x+w,y],[x+w,y+h],[x,y+h],[x,y]];
 const member=(ring,role,ref)=>({type:'way',role,ref,geometry:ring.map(p=>{const [lon,lat]=toLngLat(p,origin);return {lon,lat};})});
 const extract={elements:[{type:'relation',id:900,tags:{type:'multipolygon',building:'yes',name:'Courtyard test',height:'12',min_height:'2','building:levels':'3'},members:[member(box(-30,-30,60,60),'outer',1),member(box(-10,-10,20,20),'inner',2)]}]};
-const saved=page=>page.evaluate(()=>JSON.parse(localStorage.getItem('dvr.facility.v1')));
 async function setup(page){
   await page.route('**/*',route=>new URL(route.request().url()).hostname==='127.0.0.1'?route.continue():route.abort());
   await page.goto('/#facility');await expect(page.getByRole('heading',{name:'Locate your facility'})).toBeVisible();
+  await openExample(page);
 }
 async function review(page,data){await page.getByText('Draft buildings from OpenStreetMap',{exact:true}).click();await page.getByText('Open an offline OSM file or paste JSON',{exact:true}).click();await page.getByLabel('OSM extract JSON',{exact:true}).fill(JSON.stringify(data));await page.getByRole('button',{name:'Review extract',exact:true}).click();}
 

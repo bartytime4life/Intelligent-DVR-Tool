@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import {savedPlan as saved, openExample} from './facility-test-helpers.mjs';
 import { readFileSync } from 'node:fs';
 const fixture = name => JSON.parse(readFileSync(new URL('../fixtures/facility/'+name+'.json',import.meta.url)));
 const exterior=fixture('eppan-exteriors'), courtyard=fixture('eppan-courtyard');
@@ -15,9 +16,9 @@ async function setup(page,{address=photon,footprints=exterior}={}) {
   });
   await page.goto('/#facility');
   await expect(page.getByRole('heading',{name:'Locate your facility'})).toBeVisible();
+  await openExample(page);
   return requests;
 }
-const saved=page=>page.evaluate(()=>JSON.parse(localStorage.getItem('dvr.facility.v1')));
 async function saveOrigin(page){await page.getByLabel('Longitude',{exact:true}).fill('11.2574936');await page.getByLabel('Latitude',{exact:true}).fill('46.45528628');await page.getByRole('button',{name:'Save site',exact:true}).click();}
 async function pasteExtract(page,data){
   await page.getByText('Open an offline OSM file or paste JSON',{exact:true}).click();
@@ -26,7 +27,7 @@ async function pasteExtract(page,data){
 }
 
 test('submitted address search is keyboard accessible and does not send text while typing',async({page})=>{
-  const requests=await setup(page);
+  const requests=await setup(page),before=await saved(page);
   await page.getByText('Find an address or place',{exact:true}).click();
   await page.getByLabel('Address or place name',{exact:true}).fill('Recorded exterior example');
   expect(requests).toHaveLength(0);
@@ -37,7 +38,7 @@ test('submitted address search is keyboard accessible and does not send text whi
   await expect(page.locator('[role="status"][tabindex="-1"]')).toBeFocused();
   await suggestion.press('Enter');
   await expect(page.getByLabel('Longitude',{exact:true})).toHaveValue('11.2574936');
-  expect(await saved(page)).toBeNull(); // Suggestion alone never commits.
+  expect(await saved(page)).toEqual(before); // Suggestion alone never changes a saved facility.
   await page.getByRole('button',{name:'Save site',exact:true}).click();
   await expect(page.getByLabel('Search width (m)',{exact:true})).toBeVisible();
   expect((await saved(page)).cameras).toHaveLength(5);

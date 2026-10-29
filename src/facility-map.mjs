@@ -341,7 +341,7 @@ e-stroke-width": 2 } });
       grid.push(feat("LineString", [toLngLat([-300, n], o), toLngLat([300, n], o)]));
     }
     map.getSource("grid").setData(fc(grid));
-    map.getSource("site").setData(fc([polygon([[-125, -110], [130, -110], [130, 108], [-125, 108], [-125, -110]], o)]));
+    map.getSource("site").setData(fc([]));
     const inspectedBuilding = structureBuilding(plan, selected, mode, displayOptions);
     const floorPresentation = floorRenderPlan(inspectedBuilding,floor,mode,FLOOR_DRAW_TOOLS.includes(tool));
     const floorDrawing = floorPresentation.flattened;

@@ -1,12 +1,13 @@
 import {test, expect} from '@playwright/test';
+import {savedPlan as saved, openExample} from './facility-test-helpers.mjs';
 
 async function openFacility(page) {
   await page.route('**/*', route => new URL(route.request().url()).hostname === '127.0.0.1' ? route.continue() : route.abort());
   await page.goto('/#facility');
   await expect(page.getByRole('heading',{name:'Locate your facility'})).toBeVisible();
+  await openExample(page);
   await page.getByRole('button',{name:'Save site',exact:true}).click();
 }
-const saved = page => page.evaluate(() => JSON.parse(localStorage.getItem('dvr.facility.v1')));
 
 test('dimensions follow selected polygon, switch units, and hide without altering geometry',async({page})=>{
   await openFacility(page);
