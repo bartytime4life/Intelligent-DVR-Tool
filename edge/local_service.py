@@ -1,4 +1,4 @@
-"""Explicit loopback app and recording job service. No uploads or camera ingest."""
+"""Explicit loopback app and recording job service. No uploads; explicit LAN camera previews are optional."""
 import argparse
 import hashlib
 import hmac
@@ -23,6 +23,7 @@ from urllib.parse import urlsplit, unquote
 from .evaluation import local_file, read_json, relative_file
 from .model_profiles import validate_binding
 from .rules import Rule, RuleEngine
+from .local_feeds import Feeds, FeedError, load_sources
 
 ROOT = Path(__file__).resolve().parents[1]
 VIDEO_BYTES = MODEL_BYTES = 512 * 1024**2
@@ -324,8 +325,9 @@ class LocalServer(HTTPServer):
     # Sequential requests bound concurrent file transfers and memory. Analysis is
     # the one background worker; each connection has a short read/write timeout.
     allow_reuse_address = False
-    def __init__(self, port, jobs, static_root):
-        self.jobs, self.static_root = jobs, Path(static_root).resolve()
+    def __init__(self, port, jobs, static_root, feeds=None):
+        self.jobs, self.static_root, self.feeds = jobs, Path(static_root).resolve(), feeds
+        self.token = jobs.token if jobs else secrets.token_urlsafe(32)
         super().__init__(('127.0.0.1', port), Handler)
         self.origin = f'http://127.0.0.1:{self.server_port}'
 
@@ -345,7 +347,7 @@ class Handler(BaseHTTPRequestHandler):
             raise JobError('HOST', 'Use the exact local application address.', 403)
         if self.headers.get('Origin') not in (None, self.server.origin) or self.headers.get('Sec-Fetch-Site') not in (None, 'same-origin', 'none'):
             raise JobError('ORIGIN', 'Open the application directly on this computer.', 403)
-        if api and not hmac.compare_digest(self.headers.get('X-DVR-Token', ''), self.server.jobs.token):
+        if api and not hmac.compare_digest(self.headers.get('X-DVR-Token', ''), self.server.token):
             raise JobError('SESSION', 'Reconnect to the local service and retry.', 403)
 
     def _headers(self, status, mime, size):
@@ -370,9 +372,15 @@ class Handler(BaseHTTPRequestHandler):
 
     def _dispatch(self):
         path = urlsplit(self.path).path
-        api = path.startswith('/api/analysis/')
-        self._guard(api and path != '/api/analysis/session')
-        jobs = self.server.jobs
+        api = path.startswith('/api/')
+        self._guard(api and path not in ('/api/analysis/session', '/api/feeds/session'))
+        jobs, feeds = self.server.jobs, self.server.feeds
+        if path.startswith('/api/analysis/') and jobs is None:
+            raise JobError('ANALYSIS_DISABLED', 'Recording analysis is not configured. Restart the local app with a recordings folder and model/rule configuration.', 503)
+        if path.startswith('/api/feeds/') and feeds is None:
+            raise JobError('FEEDS_DISABLED', 'DVR feeds are not configured. Start the local app with --feeds-config and a local source list.', 503)
+        if self.command == 'GET' and path == '/api/feeds/session':
+            return self._json({'token': self.server.token, **feeds.available()})
         if self.command == 'GET' and path == '/api/analysis/session':
             return self._json({'token': jobs.token, **jobs.available()})
         if self.command == 'POST':
@@ -388,12 +396,24 @@ class Handler(BaseHTTPRequestHandler):
                 body = json.loads(self.rfile.read(length))
             except (ValueError, UnicodeError):
                 raise JobError('BODY', 'Invalid JSON request.') from None
+            if path == '/api/feeds/connect':
+                return self._json(feeds.connect(body), 202)
+            match = re.fullmatch('/api/feeds/([a-f0-9]{32})/disconnect', path)
+            if match:
+                return self._json(feeds.disconnect(match[1]))
             if path == '/api/analysis/jobs':
                 return self._json(jobs.start(body), 202)
             match = re.fullmatch('/api/analysis/jobs/([a-f0-9]{32})/cancel', path)
             if match:
                 return self._json(jobs.cancel(match[1]))
         if self.command == 'GET':
+            match = re.fullmatch('/api/feeds/([a-f0-9]{32})(/frame)?', path)
+            if match:
+                if match[2]:
+                    data = feeds.frame(match[1])
+                    self._headers(200, 'image/jpeg', len(data))
+                    return self.wfile.write(data)
+                return self._json(feeds.status(match[1]))
             match = re.fullmatch('/api/analysis/jobs/([a-f0-9]{32})(/(result|source))?', path)
             if match:
                 if match[3]:
@@ -414,7 +434,7 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         try:
             self._dispatch()
-        except JobError as exc:
+        except (JobError, FeedError) as exc:
             self._json({'error': {'code': exc.code, 'message': str(exc)}}, exc.status)
         except (BrokenPipeError, ConnectionResetError, TimeoutError):
             pass
@@ -426,19 +446,27 @@ class Handler(BaseHTTPRequestHandler):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--recordings', type=Path, required=True, help='Explicit local folder; direct recordings only')
-    parser.add_argument('--config', type=Path, required=True, help='Local model/rule allowlist; see edge/local-analysis.example.json')
+    parser.add_argument('--recordings', type=Path, help='Explicit local folder; direct recordings only')
+    parser.add_argument('--config', type=Path, help='Local model/rule allowlist; see edge/local-analysis.example.json')
+    parser.add_argument('--feeds-config', type=Path, help='Trusted LAN RTSP channels; see edge/local-feeds.example.json')
     parser.add_argument('--port', type=int, default=4173)
     args = parser.parse_args(argv)
+    if bool(args.recordings) != bool(args.config):
+        parser.error('Use --recordings and --config together')
+    if not args.config and not args.feeds_config:
+        parser.error('Configure recording analysis, DVR feeds, or both')
     if not 1024 <= args.port <= 65535:
         parser.error('port must be 1024–65535')
     if not (ROOT / 'dist/client/index.html').is_file():
         parser.error('Build the local app first with npm run build')
-    jobs = None
+    jobs = feeds = None
     try:
-        jobs = Jobs(args.recordings, load_catalog(args.config.absolute()))
-        with LocalServer(args.port, jobs, ROOT / 'dist/client') as server:
-            print(f'Local Recognition: {server.origin}/#recognition — explicit jobs only; Ctrl+C stops.', flush=True)
+        if args.config:
+            jobs = Jobs(args.recordings, load_catalog(args.config.absolute()))
+        if args.feeds_config:
+            feeds = Feeds(load_sources(args.feeds_config.absolute()))
+        with LocalServer(args.port, jobs, ROOT / 'dist/client', feeds) as server:
+            print(f'Local Intelligent DVR: {server.origin}/ — explicit connections and jobs only; Ctrl+C stops.', flush=True)
             server.serve_forever()
     except KeyboardInterrupt:
         pass
@@ -447,6 +475,8 @@ def main(argv=None):
     finally:
         if jobs:
             jobs.close()
+        if feeds:
+            feeds.close()
 
 
 if __name__ == '__main__':

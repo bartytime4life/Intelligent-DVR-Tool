@@ -558,7 +558,7 @@ pect its modeled view.", "Draw a route and review proposed camera transitions."]
 nabled", e.target.checked)} />Include in coverage estimates</label>
           {note}<button className="facility-primary" type="submit">Save camera<Check /></button>
         </form> : <p className="facility-caption">Select a camera in the inventory, or place the first camera.</p>}
-        {step === 3 && <figure className="facility-reference"><img src="/assets/loading-dock.webp" alt="Generated loading dock scene for placement reference only" /><figcaption>Generated placement reference · not this camera’s footage</figcaption></figure>}
+        {step === 3 && <p className="hint">Camera placement is a plan. Connect actual camera previews in Monitor; planned coverage is not calibrated to a feed.</p>}
       </>}
       {step === 5 && <><div className="facility-action-row"><button className="facility-primary" disabled={!ready} onClick={() => startTool(
     "route"

@@ -15,3 +15,6 @@ qualification-preflight*.json
 
 # Transient documentation capture inputs
 /docs/media/captures/
+
+# Local DVR endpoints and credentials (never commit these)
+local-feeds*.json

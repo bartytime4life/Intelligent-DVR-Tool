@@ -1,5 +1,9 @@
 # Verification index
 
+[Local feed integration, October 29](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/local-feeds-2026-10-29/README.md): webcam and
+RTSP preview lifecycle; synthetic transport tests, not physical-device acceptance.
+
+
 The [October 29 recording recognition check](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/recognition-2026-10-29/README.md)
 adds analyzer-to-browser review contracts and two actual bounded CPU recording
 runs. Recognition quality, live operation and 100-camera acceptance remain open.

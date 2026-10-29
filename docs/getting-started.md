@@ -1,5 +1,11 @@
 # Your first five minutes
 
+Current Monitor setup: [connect a webcam or local DVR](local-camera-feeds.md).
+It starts empty; generated scenes and default sample events from earlier
+walkthroughs are no longer shown. [Recognition](local-analysis-service.md) can
+run local recording jobs directly. Earlier screenshots below are historical.
+
+
 [Home](../README.md) · [Visual tour](visual-tour.md) · [Architecture](architecture.md)
 
 For OS-specific launchers and machine sizing, use [Linux setup](setup-linux.md), [Windows setup](setup-windows.md) and the [hardware guide](hardware-guide.md). **System** in the main navigation opens the machine planner and resource-policy controls.
