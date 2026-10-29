@@ -421,7 +421,7 @@ street map \xB7 OpenStreetMap" : "Local grid \xB7 20 m spacing \xB7 no external 
   }}>{plan.buildings.map((b2) => <option value={b2.id} key={b2.id}>{b2.name}</option>)}</select><select aria-label="Active floor" value={floor} onChange={(e) => {
     setFloor(+e.target.value);
     setView("floors");
-  }}>{Array.from({ length: b?.floors || 1 }, (_, i) => <option key={i} value={i}>{i === 0 ? "Ground floor" : "Level " + (i +
+  }}>{Array.from({ length: b?.floors || 1 }, (_, i) => <option key={i} value={i}>{i === 0 ? b?.base ? `Lowest modeled floor (${b.base} m)` : "Ground floor" : "Level " + (i +
   1)}</option>)}</select></div>}
       <div className="facility-map-legend"><span><i className="coverage-key" />Estimated visibility</span><span><i className="route-key" />Rehearsal route</span><span>Only the selected camera’s 3D volume is shown.</span></div>
       {step === 5 && <div className="facility-rehearsal"><div className="facility-rehearsal-top"><button aria-label={playing ?
@@ -496,7 +496,7 @@ pect its modeled view.", "Draw a route and review proposed camera transitions."]
     "room"
   )}><Polygon />Draw room</button><button className="facility-secondary" disabled={!ready} onClick={() => startTool(
     "label"
-  )}><Plus />Place label</button></div><p className="facility-caption">Choose a building and floor on the map. Floors divide building height evenly. Labels can name doors, corridors and outdoor areas.</p><div className="facility-item-list compact">{plan.
+  )}><Plus />Place label</button></div><p className="facility-caption">Choose a building and floor on the map. Modeled floors divide the occupied height above the building base evenly. Labels can name doors, corridors and outdoor areas.</p><div className="facility-item-list compact">{plan.
   rooms.filter((r) => r.buildingId === b?.id && r.level === floor).map((r) => <button key={r.id} className={selected.id ===
   r.id ? "selected" : ""} onClick={() => select(r.id, "room")}><Stack /><span>{r.name}</span></button>)}{plan.labels.map(
     (l) => <button key={l.id} className={selected.id === l.id ? "selected" : ""} onClick={() => select(l.id, "label")}><MapPin /><span>{l.

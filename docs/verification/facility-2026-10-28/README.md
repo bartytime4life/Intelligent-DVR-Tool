@@ -52,3 +52,17 @@ Schema v2 deliberately prevents older software from silently dropping geometry.
 Ordinary v1 input upgrades without altering shapes. Export before reverting to
 older code. No service installation, camera activation, model/inference change,
 merge, deployment or native Wiki publication is part of this increment.
+
+## Follow-through
+
+Candidate `51e9145b707e8e7b12ece47ee9306af5dc46fdcf` passed
+[Linux/Windows run 40814586136](https://github.com/bartytime4life/Intelligent-DVR-Tool/actions/runs/40814586136)
+and [all 10 Chromium scenarios](https://github.com/bartytime4life/Intelligent-DVR-Tool/actions/runs/40814586134).
+Linux/Windows each passed 63 frontend cases including actual loopback HTTP and
+four packaging cases. The unchanged Python suite passed 125 on Linux and 91 with
+34 Linux-only skips on Windows. These counts do not count skips as passes.
+Final presentation changes label raised floors by their base, call the measured
+perimeter exterior-only, and omit fictional rooftop decorations from imported
+OSM/courtyard shells. Final source hashes include these changes; exact-head CI
+links are recorded on PR #21. None of these runs tested real GPS, installed regional
+services, live public retrieval, field accuracy or novice users.

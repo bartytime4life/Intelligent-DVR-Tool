@@ -9,7 +9,7 @@ function Numeric({ label, value, onChange, min, max, step = "any" }) {
 function MeasurementSummary({ ring, holes = [] }) {
   const m = dimensions(ring); m.area -= holes.reduce((sum,h)=>sum+polygonArea(h),0); const v = (n) => n.toFixed(1);
   return <p className="facility-caption">Approx. enclosing dimensions {v(m.length)} × {v(m.width)} m ({v(m.length / 0.3048)} × {v(
-  m.width / 0.3048)} ft). Footprint {v(m.area)} m² / {v(m.area / 0.09290304)} ft². Perimeter {v(m.perimeter)} m. Dimensions follow the footprint’s orientation; verify on site.</p>;
+  m.width / 0.3048)} ft). Footprint {v(m.area)} m² / {v(m.area / 0.09290304)} ft². Exterior perimeter {v(m.perimeter)} m. Dimensions follow the footprint’s orientation; verify on site.</p>;
 }
 function ShapeBuilder({ add, disabled }) {
   const [open, setOpen] = useState(false);

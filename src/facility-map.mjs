@@ -67,7 +67,7 @@ class CameraVolumes {
         this.group.add(new THREE.Line(lines, new THREE.LineBasicMaterial({ color: 6155245, transparent: true, opacity: 0.8 })));
       }
     }
-    if (view === "3d") for (const b of plan.buildings) {
+    if (view === "3d") for (const b of plan.buildings.filter(b=>!b.source && !b.holes?.length)) {
       const [x, y] = centroid(b.footprint);
       const geo = new THREE.BoxGeometry(5, 3, 1.1);
       const mat = new THREE.MeshBasicMaterial({ color: 6320515 });
