@@ -6,25 +6,26 @@
 
 ```mermaid
 flowchart TD
-  subgraph Browser["Browser prototype"]
-    A["Generated scenes + simulated observations"] --> B["Monitor / Events / Zones"]
-    B --> C["Browser-local decisions and rules"]
-    D["Facility metadata"] --> E["MapLibre + Three.js planner"]
-    E --> F["Local plan + explicit JSON export"]
-  end
-  subgraph Offline["Explicit local analysis"]
-    G["Approved recording + selected ONNX model"] --> H["OpenCV analyzer + rules"]
-    H --> I["Review receipt + optional frame trace"]
-    I --> J["Evaluation + independent annotations / reviews"]
-  end
-  I -->|"explicit receipt import"| B
-  K["Optional OSM data / tiles"] -->|"user-initiated request or extract import"| E
+  A["Explicit webcam permission"] --> B["Monitor video preview"]
+  C["Configured LAN RTSP channel"] --> D["Pinned relay + bounded CPU decoder"]
+  D --> B
+  E["Selected local recording + model/rules"] --> F["Bounded analysis job"]
+  F --> G["Existing analyzer + verified review bundle"]
+  G --> H["Recognition + human review"]
 ```
 
-This diagram describes the original manual paths. The [local job service](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/local-analysis-service.md) additionally connects Recognition selections to an isolated CPU invocation of the same analyzer and opens its verified-source bundle automatically. The reusable scheduler and synthetic load model are separate preparation components; they are **not wired into the analyzer or a live ingest service**. The browser does not perform neural-network inference.
+Webcam video remains in the browser. DVR previews use the optional same-computer
+service and stop on disconnect, page exit, lease expiry or a processing limit.
+The [feed bridge](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/local-camera-feeds.md) does not connect to the analyzer or record
+video. The [local job service](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/local-analysis-service.md) separately connects
+Recognition selections to the existing analyzer and opens source-matched results.
+The scheduler/load model remains a separate preparation component; no live
+inference, tracking or 100-camera capacity is implied. Facility plans are metadata,
+not calibrated camera feeds. The browser performs no neural-network inference.
 
 | Component | Source | Role |
 | --- | --- | --- |
+| Camera previews | `src/LiveMonitor.jsx`, `edge/local_feeds.py`, `edge/feed_worker.py` | Explicit browser webcam and configured LAN RTSP preview, bounded lifecycle, no recording or inference |
 | Workspace | `src/App.jsx`, `src/data.mjs` | Review, rules, local video preview, explicit receipt import |
 | Recording recognition | `src/RecognitionReview.jsx`, `src/recognition.mjs` | Explicit review bundle, original-file hash matching, paused sampled detections/counts and Event handoff; connects to the optional same-origin local job API |
 | Facility model | `src/facility.mjs` | Bounded plan validation, local-meter projection, estimated visibility and rehearsal |

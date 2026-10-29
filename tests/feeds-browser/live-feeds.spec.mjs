@@ -1,5 +1,18 @@
 import {test, expect} from '@playwright/test';
 const nav=(page,name)=>page.getByRole('navigation',{name:'Main navigation'}).getByRole('button',{name:new RegExp(`^${name}`)});
+test.beforeEach(async({page})=>{
+  await page.addInitScript(()=>{
+    window.mediaDiagnostics=[];
+    const media=navigator.mediaDevices, original=media?.getUserMedia;
+    if(original)media.getUserMedia=async function(options){
+      try{const result=await original.call(media,options);window.mediaDiagnostics.push({ok:true,tracks:result.getVideoTracks().map(t=>({state:t.readyState,muted:t.muted}))});return result;}
+      catch(error){window.mediaDiagnostics.push({name:error.name,message:error.message});throw error;}
+    };
+  });
+});
+test.afterEach(async({page},info)=>{
+  if(info.status!==info.expectedStatus)await info.attach('synthetic-webcam-diagnostics',{body:JSON.stringify(await page.evaluate(()=>window.mediaDiagnostics)),contentType:'application/json'});
+});
 async function dvr(page,source='video') {
   await page.getByRole('button',{name:'Set up local DVR'}).click();
   await page.getByRole('button',{name:'Load configured DVR sources'}).click();
@@ -57,9 +70,9 @@ test('invalid DVR channel errors, cancellation and retry recover without old fra
   await page.goto('/');await dvr(page,'missing');
   await expect(page.getByRole('heading',{name:'Connection needs attention'})).toBeVisible({timeout:15000});
   await expect(page.getByText('No usable RTSP stream.',{exact:false})).toBeVisible();
-  await page.getByRole('button',{name:'Remove',exact:true}).click();
   await page.getByRole('button',{name:'Set up local DVR'}).click();
   await page.getByLabel('DVR channel',{exact:true}).selectOption('stall');await page.getByRole('button',{name:'Connect DVR channel',exact:true}).click();
+  await expect(page.locator('.live-tile')).toHaveCount(1); // Terminal error was replaced.
   await page.getByRole('button',{name:'Cancel',exact:true}).click();await expect(page.locator('.live-tile')).toHaveCount(0);
   await page.getByRole('button',{name:'Set up local DVR'}).click();await page.getByLabel('DVR channel',{exact:true}).selectOption('video');await page.getByRole('button',{name:'Connect DVR channel',exact:true}).click();
   await expect(page.getByAltText('Synthetic RTSP video current preview frame')).toBeVisible({timeout:15000});
@@ -71,4 +84,14 @@ test('mobile camera setup and monitor remain usable without horizontal scrolling
   await expect(page.getByRole('heading',{name:'Connect a camera source'})).toBeVisible();
   expect(await page.evaluate(()=>document.documentElement.scrollWidth <= innerWidth+1)).toBe(true);
   await page.screenshot({path:'test-results/real-monitor-mobile-setup.png',fullPage:true});
+});
+
+test('hiding the page releases webcam tracks and does not reconnect automatically',async({page})=>{
+  await page.goto('/');await page.getByRole('button',{name:'Connect source',exact:true}).first().click();
+  await page.getByRole('button',{name:'Connect webcam',exact:true}).click();await page.getByRole('button',{name:'View camera wall'}).click();
+  await page.evaluate(()=>{window.testTrack=document.querySelector('video').srcObject.getVideoTracks()[0];Object.defineProperty(document,'hidden',{configurable:true,value:true});document.dispatchEvent(new Event('visibilitychange'));});
+  await expect.poll(()=>page.evaluate(()=>window.testTrack.readyState)).toBe('ended');
+  await page.evaluate(()=>{Object.defineProperty(document,'hidden',{configurable:true,value:false});document.dispatchEvent(new Event('visibilitychange'));});
+  await expect(page.getByLabel('Webcam video')).toHaveCount(0);
+  await expect(page.getByText('Preview stopped while the page was hidden.',{exact:false})).toBeVisible();
 });

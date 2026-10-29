@@ -3,6 +3,9 @@ export function stopStream(stream) { stream?.getTracks().forEach(track => track.
 export function webcamError(error) {
   return ({NotAllowedError:'Camera access was denied. Allow camera access for this app in your browser, then connect again.',
     NotFoundError:'No webcam was found. Attach a USB camera or enable a built-in camera, then refresh devices.',
+    AbortError:'Camera startup was interrupted. Check the device and try connecting again.',
+    InvalidStateError:'This page is no longer active. Return to Monitor and connect again.',
+    TypeError:'The browser rejected the camera request. Check browser camera support and retry.',
     NotReadableError:'The camera could not start. Close other apps using it, check its connection, and retry.',
     OverconstrainedError:'This camera is no longer available. Refresh devices and select another camera.',
     SecurityError:'Camera access is disabled. Open this app on HTTPS or localhost and check browser permissions.'})[error?.name] ||
