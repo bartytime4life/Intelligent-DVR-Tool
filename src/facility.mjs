@@ -1,13 +1,17 @@
-const SCHEMA = "intelligent-dvr.facility.v2";
+import {validateStair, stairFootprint} from './facility-stairs.mjs';
+import {FACILITY_CLASSES, ZONE_TYPES, validateImageRegion} from './facility-zones.mjs';
+const SCHEMA = "intelligent-dvr.facility.v3";
+const PREVIOUS_SCHEMA = "intelligent-dvr.facility.v2";
 const LEGACY_SCHEMA = "intelligent-dvr.facility.v1";
-const LIMITS = { buildings: 100, cameras: 500, rooms: 500, labels: 1e3, route: 200, bytes: 2e6 };
+const LIMITS = { buildings: 100, cameras: 500, rooms: 500, zones: 500, openings: 500, stairs: 100, paths: 100, labels: 1e3, route: 200, bytes: 2e6 };
 const STEPS = [
   ["Locate site", "Set the site and map origin"],
   ["Buildings", "Draw footprints and set heights"],
   ["Floors & labels", "Name the spaces that matter"],
   ["Cameras", "Place and aim each camera"],
   ["Coverage", "Inspect visibility and blind spots"],
-  ["Handoffs", "Rehearse a route between cameras"]
+  ["Handoffs", "Rehearse a route between cameras"],
+  ["Zones & objects", "Define restricted areas and object rules"]
 ];
 const box = (x, y, w, h) => [[x, y], [x + w, y], [x + w, y + h], [x, y + h], [x, y]];
 function exampleFacility() {
@@ -35,11 +39,15 @@ function exampleFacility() {
       { id: "r2", name: "Hall A", buildingId: "b2", level: 0, footprint: box(-61, -72, 22, 8), wallHeight: 2.8 }
     ],
     labels: [{ id: "l1", name: "Loading yard", x: 22, y: -25, z: 0 }, { id: "l2", name: "Main gate", x: -20, y: -92, z: 0 }],
+    zones: [],
+    openings: [],
+    stairs: [],
+    paths: [],
     route: [[-90, -88], [-55, -88], [-12, -55], [25, -30], [57, -15], [107, -14]]
   };
 }
 function blankFacility() {
-  return { schema: SCHEMA, name: "My facility", origin: [-98, 38.5], buildings: [], cameras: [], rooms: [], labels: [], route: [] };
+  return { schema: SCHEMA, name: "My facility", origin: [-98, 38.5], buildings: [], cameras: [], rooms: [], labels: [], zones: [], openings: [], stairs: [], paths: [], route: [] };
 }
 function uid(prefix) {
   return prefix + "-" + crypto.randomUUID().slice(0, 8);
@@ -101,24 +109,41 @@ function transformBuilding(b, transform) {
   return {...b,footprint:b.footprint.map(transform),...(b.holes ? {holes:b.holes.map(h=>h.map(transform))} : {})};
 }
 function validateFacility(d) {
-  if (!d || ![SCHEMA, LEGACY_SCHEMA].includes(d.schema) || !nameOK(d.name) || !Array.isArray(d.origin) || d.origin.length !== 2 || !finite(d.origin[0],
-  -180, 180) || !finite(d.origin[1], -80, 80)) throw Error("Use a facility v1 or v2 file with a valid name and map origin (lat\
+  if (!d || ![SCHEMA, PREVIOUS_SCHEMA, LEGACY_SCHEMA].includes(d.schema) || !nameOK(d.name) || !Array.isArray(d.origin) || d.origin.length !== 2 || !finite(d.origin[0],
+  -180, 180) || !finite(d.origin[1], -80, 80)) throw Error("Use a facility v1, v2 or v3 file with a valid name and map origin (lat\
 itude \u221280 to 80).");
   for (const k of ["buildings", "cameras", "rooms", "labels", "route"]) if (!Array.isArray(d[k]) || d[k].length > LIMITS[k])
    throw Error("Too many or invalid " + k + ".");
+  const zones = d.zones === undefined ? [] : d.zones;
+  if (!Array.isArray(zones) || zones.length > LIMITS.zones) throw Error('Use up to 500 valid zones.');
+  if (d.schema === LEGACY_SCHEMA && zones.length) throw Error('Zones require facility v2 or newer.');
+  const openings = d.openings === undefined ? [] : d.openings;
+  const stairs = d.stairs === undefined ? [] : d.stairs;
+  if (!Array.isArray(openings) || openings.length > LIMITS.openings) throw Error('Use up to 500 valid floor openings.');
+  if (!Array.isArray(stairs) || stairs.length > LIMITS.stairs) throw Error('Use up to 100 valid stairs.');
+  const paths = d.paths === undefined ? [] : d.paths;
+  if (!Array.isArray(paths) || paths.length > LIMITS.paths) throw Error('Use up to 100 valid floor paths.');
+  if (d.schema !== SCHEMA && (openings.length || stairs.length || paths.length)) throw Error('Floor openings, stairs and paths require facility v3; older formats cannot preserve them.');
   const ids = /* @__PURE__ */ new Set();
-  for (const o of [...d.buildings, ...d.cameras, ...d.rooms, ...d.labels]) {
-    if (!idOK(o.id) || ids.has(o.id) || !nameOK(o.name)) throw Error("Every item needs a unique ID and a name of 1\u2013100 c\
+  for (const o of [...d.buildings, ...d.cameras, ...d.rooms, ...d.labels, ...zones, ...openings, ...stairs, ...paths]) {
+    if (!o || !idOK(o.id) || ids.has(o.id) || !nameOK(o.name)) throw Error("Every item needs a unique ID and a name of 1\u2013100 c\
 haracters.");
     ids.add(o.id);
   }
   for (const b of d.buildings) if (!validPolygon(b.footprint) || !finite(b.height, 1, 150) || !Number.isInteger(b.floors) ||
   !finite(b.floors, 1, 40)) throw Error("Buildings need a simple closed footprint, height 1\u2013150 m, and 1\u201340 floors.");
   for (const b of d.buildings) {
+    if (b.openFloors !== undefined) {
+      if (d.schema !== SCHEMA) throw Error('Open floors require facility v3; older formats cannot preserve them.');
+      if (!Array.isArray(b.openFloors) || b.openFloors.length > b.floors ||
+          b.openFloors.some(level=>!Number.isInteger(level) || level < 0 || level >= b.floors) ||
+          new Set(b.openFloors).size !== b.openFloors.length)
+        throw Error('Open floors must list unique existing level numbers.');
+    }
     if (!validHoles(b.footprint,b.holes) || (b.base !== undefined && !finite(b.base,0,b.height-0.1)) ||
         (b.part !== undefined && typeof b.part !== 'boolean')) throw Error('Invalid courtyard, building base or part geometry.');
     if (d.schema === LEGACY_SCHEMA && (b.holes !== undefined || b.base !== undefined || b.part !== undefined))
-      throw Error('Courtyards, bases and parts require facility v2; do not label advanced geometry as v1.');
+      throw Error('Courtyards, bases and parts require facility v2 or newer; do not label advanced geometry as v1.');
   }
   for(let i=0;i<d.buildings.length;i++) for(let j=i+1;j<d.buildings.length;j++) {
     const a=d.buildings[i],b=d.buildings[j];
@@ -138,6 +163,48 @@ haracters.");
     r.wallHeight, 0.2, 10) || !polygonContains(b.footprint, r.footprint) || (b.holes || []).some(h=>ringsOverlap(h,r.footprint))) throw Error("Rooms must fit inside their build\
 ing and reference an existing floor.");
   }
+  const openingGroups = new Map();
+  for (const opening of openings) {
+    const b = d.buildings.find(b => b.id === opening.buildingId);
+    if (!b || !Number.isInteger(opening.level) || opening.level < 0 || opening.level >= b.floors || !validPolygon(opening.footprint))
+      throw Error('Floor openings need a valid building, floor and simple closed footprint.');
+    const key = `${b.id}:${opening.level}`;
+    const group = openingGroups.get(key) || {building:b,holes:[...(b.holes || [])]};
+    group.holes.push(opening.footprint); openingGroups.set(key,group);
+  }
+  for (const {building,holes} of openingGroups.values()) if (!validHoles(building.footprint,holes))
+    throw Error('Floor openings must be strictly inside solid building space, without touching other openings, courtyards or outer walls. Use at most 20 combined holes per floor.');
+  const cleanStairs = stairs.map(stair => {
+    const b = d.buildings.find(b => b.id === stair.buildingId), clean = validateStair(stair,b);
+    const footprint = stairFootprint(clean,b);
+    if (!footprint.every(pointOK) || !polygonContains(b.footprint,footprint) || (b.holes || []).some(h=>ringsOverlap(h,footprint)))
+      throw Error('Stair flights and landings must fit inside solid building space, outside courtyards.');
+    return clean;
+  });
+  for (const path of paths) {
+    const b = d.buildings.find(b => b.id === path.buildingId);
+    if (!b || !Number.isInteger(path.level) || path.level < 0 || path.level >= b.floors ||
+        !Array.isArray(path.points) || path.points.length < 2 || path.points.length > 200 || !path.points.every(pointOK) ||
+        path.points.slice(1).some((p,i)=>eq(p,path.points[i])) || !polygonContains(b.footprint,path.points))
+      throw Error('Floor paths need an existing level and 2–200 distinct consecutive points inside the building.');
+    if ((b.openFloors || []).includes(path.level)) throw Error('Floor paths need a solid floor; this entire level is open.');
+    const holes = [...(b.holes || []),...openings.filter(o=>o.buildingId===b.id && o.level===path.level).map(o=>o.footprint)];
+    if (holes.some(hole=>ringsIntersect(path.points,hole) || path.points.some(p=>pointInPolygon(p,hole))))
+      throw Error('Floor paths cannot cross or touch a courtyard or floor opening on that level.');
+  }
+  for (const z of zones) {
+    if (!ZONE_TYPES.includes(z.type) || !validPolygon(z.footprint) || typeof z.enabled !== 'boolean' ||
+        !finite(z.dwellSeconds, 0, 3600) || !Array.isArray(z.expectedClasses) || z.expectedClasses.length > FACILITY_CLASSES.length ||
+        z.expectedClasses.some(c => !FACILITY_CLASSES.includes(c)) || new Set(z.expectedClasses).size !== z.expectedClasses.length)
+      throw Error('Zones need a simple footprint, a supported type, expected model classes and dwell 0–3600 seconds.');
+    if (z.buildingId !== undefined || z.level !== undefined) {
+      const b = d.buildings.find(b => b.id === z.buildingId);
+      if (!b || !Number.isInteger(z.level) || z.level < 0 || z.level >= b.floors ||
+          !polygonContains(b.footprint, z.footprint) || (b.holes || []).some(h => ringsOverlap(h,z.footprint)))
+        throw Error('Indoor zones must fit inside their building and reference an existing floor.');
+    }
+    if (z.imageRegion !== undefined) validateImageRegion(z.imageRegion,d.cameras);
+  }
   for (const l of d.labels) if (!pointOK([l.x, l.y]) || !finite(l.z, 0, 150)) throw Error("Labels need valid positions.");
   if (!d.route.every(pointOK)) throw Error("Route points must be within 2 km of the origin.");
   return {
@@ -145,13 +212,20 @@ ing and reference an existing floor.");
     name: d.name,
     origin: [...d.origin],
     buildings: d.buildings.map((b) => ({ id: b.id, name: b.name, footprint: b.footprint.map((p) => [...p]), height: b.height,
-    floors: b.floors, ...(b.holes ? {holes:b.holes.map(h=>h.map(p=>[...p]))} : {}),
+    floors: b.floors, ...(b.openFloors !== undefined ? {openFloors:[...b.openFloors].sort((a,b)=>a-b)} : {}), ...(b.holes ? {holes:b.holes.map(h=>h.map(p=>[...p]))} : {}),
     ...(b.base !== undefined ? {base:b.base} : {}), ...(b.part !== undefined ? {part:b.part} : {}), ...(b.source ? { source: Object.fromEntries(['provider','id','license','retrieved','updated','heightBasis','floorsBasis'].map(k=>[k,b.source[k]])) } : {}) })),
     cameras: d.cameras.map((c) => Object.fromEntries(["id", "name", "x", "y", "z", "bearing", "tilt", "hfov", "vfov", "r\
 ange", "enabled"].map((k) => [k, c[k]]))),
     rooms: d.rooms.map((r) => ({ id: r.id, name: r.name, buildingId: r.buildingId, level: r.level, footprint: r.footprint.
     map((p) => [...p]), wallHeight: r.wallHeight })),
     labels: d.labels.map((l) => ({ id: l.id, name: l.name, x: l.x, y: l.y, z: l.z })),
+    openings: openings.map(o => ({id:o.id,name:o.name,buildingId:o.buildingId,level:o.level,footprint:o.footprint.map(p=>[...p])})),
+    stairs: cleanStairs,
+    paths: paths.map(p=>({id:p.id,name:p.name,buildingId:p.buildingId,level:p.level,points:p.points.map(q=>[...q])})),
+    zones: zones.map(z => ({id:z.id,name:z.name,type:z.type,footprint:z.footprint.map(p=>[...p]),
+      enabled:z.enabled,expectedClasses:[...z.expectedClasses],dwellSeconds:z.dwellSeconds,
+      ...(z.buildingId !== undefined ? {buildingId:z.buildingId,level:z.level} : {}),
+      ...(z.imageRegion !== undefined ? {imageRegion:validateImageRegion(z.imageRegion,d.cameras)} : {})})),
     route: d.route.map((p) => [...p])
   };
 }
@@ -294,3 +368,57 @@ export {
   validateFacility,
   wallObstacles
 };
+
+// Add one top level without moving the existing equal-height floor elevations.
+export function addBuildingLevel(plan, buildingId) {
+  const clean = validateFacility(plan), building = clean.buildings.find(b => b.id === buildingId);
+  if (!building) throw Error('Choose a building first.');
+  if (building.floors >= 40) throw Error('A building can have at most 40 levels.');
+  const base = building.base || 0, levelHeight = (building.height - base) / building.floors;
+  const height = base + levelHeight * (building.floors + 1);
+  if (height > 150) throw Error('Adding a level would exceed the 150 m height limit.');
+  return validateFacility({...clean,buildings:clean.buildings.map(b => b.id === buildingId ? {...b,floors:b.floors+1,height} : b)});
+}
+
+export function copyRoomsToNextLevel(plan, buildingId, level) {
+  let next = validateFacility(plan);
+  const building = next.buildings.find(b => b.id === buildingId);
+  if (!building || !Number.isInteger(level) || level < 0 || level >= building.floors) throw Error('Choose an existing floor to copy.');
+  const rooms = next.rooms.filter(r => r.buildingId === buildingId && r.level === level);
+  if (!rooms.length) throw Error('Draw at least one room on this floor before copying.');
+  if (next.rooms.length + rooms.length > LIMITS.rooms) throw Error('Copying would exceed the 500-room limit.');
+  if (next.rooms.some(r => r.buildingId === buildingId && r.level === level+1)) throw Error('The next level already has rooms. Choose an empty level to avoid overlapping layouts.');
+  if (level + 1 === building.floors) next = addBuildingLevel(next, buildingId);
+  return validateFacility({...next, rooms:[...next.rooms,...rooms.map(r => ({...r,id:uid('r'),level:level+1,footprint:r.footprint.map(p=>[...p])}))]});
+}
+
+// Floor n is the ceiling above floor n−1. Courtyards cut every slab; openings cut one slab only.
+export function floorSlabRings(plan, buildingId, level) {
+  const b = plan.buildings.find(b => b.id === buildingId);
+  if (!b || !Number.isInteger(level) || level < 0 || level >= b.floors) throw Error('Choose an existing building floor.');
+  if ((b.openFloors || []).includes(level)) return [];
+  return [b.footprint,...(b.holes || []),...(plan.openings || []).filter(o=>o.buildingId===buildingId && o.level===level).map(o=>o.footprint)].map(ring=>ring.map(p=>[...p]));
+}
+
+export function ceilingOpenings(plan, buildingId, level) {
+  const b = plan.buildings.find(b => b.id === buildingId);
+  if (!b || !Number.isInteger(level) || level < 0 || level >= b.floors) throw Error('Choose an existing building floor.');
+  if ((b.openFloors || []).includes(level+1)) return [{id:`entire-floor-${buildingId}-${level+1}`,name:'Entire ceiling open',buildingId,level:level+1,footprint:b.footprint.map(p=>[...p]),entireFloor:true}];
+  return (plan.openings || []).filter(o=>o.buildingId===buildingId && o.level===level+1).map(o=>({...o,footprint:o.footprint.map(p=>[...p])}));
+}
+
+export function createFloorOpening(plan, buildingId, level, footprint, name='Floor opening') {
+  const base=validateFacility(plan);
+  if (!Array.isArray(footprint) || !footprint.every(pointOK)) throw Error('Use valid local-meter opening vertices.');
+  const opening={id:uid('opening'),name,buildingId,level,footprint:footprint.map(p=>[...p])};
+  const next=validateFacility({...base,openings:[...base.openings,opening]});
+  return next.openings.find(o=>o.id===opening.id);
+}
+
+export function createFloorPath(plan, buildingId, level, points, name='Floor pathway') {
+  const base=validateFacility(plan);
+  if (!Array.isArray(points) || !points.every(pointOK)) throw Error('Use valid local-meter pathway points.');
+  const path={id:uid('path'),name,buildingId,level,points:points.map(p=>[...p])};
+  const next=validateFacility({...base,paths:[...base.paths,path]});
+  return next.paths.find(p=>p.id===path.id);
+}

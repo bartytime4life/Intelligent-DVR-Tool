@@ -75,6 +75,23 @@ prebuilt PC test kit with source identity. Install/check must not activate camer
 or inference. Preserve local credentials/settings on reinstall; keep physical-PC
 and device acceptance separate from clean CI installation and synthetic checks.
 
+Owner facility-workspace decision (2026-10-29): show local-plan polygon/courtyard
+and route measurements directly on the map with metric/imperial display, preserve
+floor elevations when adding levels, and make room copying undoable. Provide
+explicit camera preview with planned FOV guides, click-to-aim/move, centering,
+compass and map reset. Color-code restricted and unexpected-class zones; map
+geometry and manually configured camera image regions are separate. Exported
+recording rules are class-presence candidates for human review, not calibrated
+visibility, learned anomaly detection, object identity or continuous live AI.
+
+Owner floor-model follow-up (2026-10-29): support editable polygon and line
+dimensions with a persistent meters/feet choice for entry and display. Model
+per-level openings and fully open floors so the ceiling beneath uses the same
+void. Keep walk paths on solid floor. Add editable straight-stair reservations
+from modeled floor rise with sourced 2024 IBC general guidance and visible
+departures; do not claim local code compliance, measured headroom or surveying
+accuracy. Keep stair landings explicit and floor cutouts independently editable.
+
 Owner public-webcam request (2026-10-29): support intentionally published internet
 webcams safely, using explicit operator-approved HTTPS sources, attribution,
 network and media bounds, and clear snapshot versus motion labels. Keep local

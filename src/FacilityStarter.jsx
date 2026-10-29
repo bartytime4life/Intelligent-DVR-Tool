@@ -1,3 +1,4 @@
+import {formatDistance,formatArea} from './facility-measurements.mjs';
 import { polygonArea } from "./facility.mjs";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { SHAPES, OSM_SERVERS, shapeFootprint, dimensions, searchBounds, parseOsmBuildings, fetchOsmBuildings, draftFacility, clearFootprintCache, polygonAreaSelection, parseAreaVertices } from "./facility-starter.mjs";
@@ -6,16 +7,17 @@ function Numeric({ label, value, onChange, min, max, step = "any" }) {
   return <label className="facility-field"><span>{label}</span><input type="number" aria-label={label} required value={value} min={min} max={max} step={step} onChange={(e) => onChange(
   e.target.value === "" ? "" : Number(e.target.value))} /></label>;
 }
-function MeasurementSummary({ ring, holes = [] }) {
-  const m = dimensions(ring); m.area -= holes.reduce((sum,h)=>sum+polygonArea(h),0); const v = (n) => n.toFixed(1);
-  return <p className="facility-caption">Approx. enclosing dimensions {v(m.length)} × {v(m.width)} m ({v(m.length / 0.3048)} × {v(
-  m.width / 0.3048)} ft). Footprint {v(m.area)} m² / {v(m.area / 0.09290304)} ft². Exterior perimeter {v(m.perimeter)} m. Dimensions follow the footprint’s orientation; verify on site.</p>;
+function MeasurementSummary({ring,holes=[],units='metric'}) {
+  const m=dimensions(ring);m.area-=holes.reduce((sum,h)=>sum+polygonArea(h),0);
+  return <p className="facility-caption">Approx. enclosing dimensions {formatDistance(m.length,units)} × {formatDistance(m.width,units)}. Footprint {formatArea(m.area,units)}. Exterior perimeter {formatDistance(m.perimeter,units)}. Dimensions follow the footprint’s orientation; verify on site.</p>;
 }
-function ShapeBuilder({ add, disabled }) {
+function ShapeBuilder({ add, disabled, units, onUnits }) {
   const [open, setOpen] = useState(false);
-  const [shape, setShape] = useState("Rectangle"), [unit, setUnit] = useState("m"), [w, setW] = useState(32), [d, setD] = useState(
+  const [shape, setShape] = useState("Rectangle"), [localUnit, setLocalUnit] = useState("m"), [w, setW] = useState(32), [d, setD] = useState(
   40), [wing, setWing] = useState(8), [angle, setAngle] = useState(0), [x, setX] = useState(0), [y, setY] = useState(0),
   [height, setHeight] = useState(8), [floors, setFloors] = useState(1), [note, setNote] = useState("");
+  const unit=units ? (units==='imperial'?'ft':'m') : localUnit;
+  const setUnit=v=>onUnits?onUnits(v==='ft'?'imperial':'metric'):setLocalUnit(v);
   const factor = unit === "ft" ? 0.3048 : 1;
   let ring, error;
   try {
@@ -43,7 +45,7 @@ function ShapeBuilder({ add, disabled }) {
   -1800, 1800)}</div>
     <Numeric label="Shape rotation (degrees)" value={angle} onChange={setAngle} min={-360} max={360} />
     <div className="facility-field-pair">{distance("Shape height", height, setHeight, 1, 150)}<Numeric label="Shape floors" value={floors} onChange={setFloors} min={1} max={40} step="1" /></div>
-    {ring ? <MeasurementSummary ring={ring} /> : <p role="alert" className="facility-caption">{error}</p>}
+    {ring ? <MeasurementSummary ring={ring} units={units || (unit==='ft'?'imperial':'metric')}/> : <p role="alert" className="facility-caption">{error}</p>}
     <button className="facility-primary" disabled={disabled || !ring}>Add selected shape</button>
     <p role="status" className="facility-caption">{note}</p>
     <p className="facility-caption">Starting example: 32 m span × five 8 m bays; 8 m height is editable. Shapes do not infer an existing structure. Round uses 32 segments. U wings have an open recess, not a closed courtyard.</p>

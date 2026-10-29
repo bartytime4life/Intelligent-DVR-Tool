@@ -1,0 +1,25 @@
+.facility-map-label.facility-opening-label {
+  color: #ffd1fa;
+  border-color: #c47cbd;
+  background: #38233ce8;
+}
+.facility-map-label.facility-stair-label {
+  color: #d7f4ff;
+  border-color: #72a5bd;
+  background: #173542ed;
+}
+.facility-map-label.facility-floor-path-label {
+  color: #fff0bc;
+  border-color: #b49b4a;
+  background: #353021ed;
+}
+.facility-map-label.facility-measurement-summary {
+  max-width: min(320px, 65vw);
+  white-space: normal;
+  text-align: center;
+  line-height: 1.35;
+}
+.facility-map-label.facility-route-dimension {
+  color: #fff0bc;
+  border-color: #927b3d;
+}
