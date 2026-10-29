@@ -129,6 +129,10 @@ Install `edge/requirements-test.txt` in an isolated Python environment to enable
 
 This repository does **not** currently assign a software license. No open-source licensing grant is implied by public availability. [Third-party notices](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/third-party-notices.md) cover separately licensed components and model sources; [SECURITY.md](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/SECURITY.md) describes the prototype boundary. Camera imagery is generated sample artwork, not a record of a real workplace.
 
+### Local recording analysis
+
+Use the [local analysis application](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/local-analysis-service.md) to choose an approved recording, model and rules, start a bounded CPU job, follow progress, cancel and open source-matched results in Recognition. Inference and footage remain on the local computer; analysis starts only on request. This does not qualify live-camera operation, tracking, recognition accuracy or 100-camera capacity.
+
 ---
 
 [Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/README.md) · Documentation refresh: October 28, 2026.

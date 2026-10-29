@@ -1,5 +1,11 @@
 # Product status and evidence
 
+Local recording analysis now has a bounded same-origin CPU job service and
+Recognition controls for explicit selection, progress, cancellation and automatic
+source matching. See [setup, resource limits and recovery](local-analysis-service.md).
+This is a recording workflow; live cameras, tracking, representative accuracy and
+100-camera acceptance remain separate gates.
+
 Updated October 28, 2026. Audited application baseline:
 [`82c862c68735720b8840461fc624e8dbe148a53a`](https://github.com/bartytime4life/Intelligent-DVR-Tool/commit/82c862c68735720b8840461fc624e8dbe148a53a)
 (the merged PR #11 revision). Later native-runtime and optional-CUDA work has

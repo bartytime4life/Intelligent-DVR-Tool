@@ -1,0 +1,19 @@
+{
+  "models": [
+    {
+      "id": "yolox-s",
+      "name": "OpenCV Zoo YOLOX-S (CPU)",
+      "path": "models/yolox-s.onnx",
+      "labels": "labels/coco80.json",
+      "profile": "opencv-zoo-yolox-s-2022nov",
+      "sha256": "c5c2d13e59ae883e6af3b45daea64af4833a4951c92d116ec270d9ddbe998063"
+    }
+  ],
+  "rules": [
+    {
+      "id": "presence",
+      "name": "Example presence rules \u2014 review zones first",
+      "path": "rules.example.json"
+    }
+  ]
+}
