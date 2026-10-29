@@ -10,7 +10,7 @@ from workload values still requiring pilot decisions.
 
 Current state: a single-recording analyzer with an explicit optional CUDA backend,
 hash-bound YOLOX profile, evaluation harness, reusable sample scheduler, bounded
-thread execution, optional Linux process supervision and a synthetic load model. The
+thread execution, optional Linux process supervision/local outcome journal and a synthetic load model. The
 [CUDA record](verification/cuda-2026-10-28/README.md) and
 [worker record](verification/workers-2026-10-28/README.md) retain measured scope.
 The [recovery record](verification/recovery-2026-10-28/README.md) covers the optional
@@ -89,8 +89,9 @@ The context manager closes workers but does not return remaining outcomes;
 call `close()` explicitly when those results are needed.
 
 Thread execution cannot kill a hung native GPU call. The optional process
-adapter below adds deadlines/restarts and encoded result-size limits. Durable
-outcomes, per-camera rules and live recording remain separate work. Neither adapter changes analyzer CLI
+adapter below adds deadlines/restarts and encoded result-size limits. Its optional
+journal persists dispatched outcomes. Per-camera rules and live recording remain
+separate work. Neither adapter changes analyzer CLI
 defaults or the browser's planning controls. Four sessions are an explicit
 tested candidate on one PC, not a new universal/default worker count. See the
 [dated comparison and limits](verification/workers-2026-10-28/README.md).
@@ -114,7 +115,7 @@ metadata and an optional `close()` method.
 
 One controlling thread calls `step()` frequently. Returned `ProcessOutcome`
 records preserve `work`, `result` and `error`, and add an authoritative
-`generation` and successful `processor` slot. Snapshot metadata binds each
+`generation`, successful `processor` slot and optional committed `journal_id`. Snapshot metadata binds each
 generation/slot to the supplied processor's startup metadata. The parent rejects
 unknown/duplicate tokens, wrong generations, invalid framing and late results.
 The scheduler's sequence, fair routing, retained-payload budget and one in-flight
@@ -138,9 +139,17 @@ An explicitly chosen budget permits replacement generations after
 `restart_delay` (default 0.25 seconds). Startup failures consume the same budget;
 successful work does not reset it. An exhausted budget or unreaped child stops
 dispatch. Snapshot events expose generation, PID, failure reason, ready/reap
-times and current state. These are local diagnostics, not durable receipts.
-Parent-side admission/allocation errors remain ordinary caller exceptions;
-parent-process death and orphan cleanup need separate service supervision.
+times and current state. These diagnostics remain in memory; the optional journal
+below persists sample records, not the full lifecycle event log. Parent-side
+admission/allocation errors remain ordinary caller exceptions.
+
+Each spawned child arms Linux parent-death `SIGKILL` before constructing its
+processors, then rechecks the parent PID to cover death during spawn/bootstrap.
+A failed arm aborts child startup. This applies to the owned child and its threads;
+trusted factories must not fork descendants or change this signal setting. Linux
+tracks the creating parent thread: create/control workers from a long-lived thread.
+This does not restart a dead parent, retain pending samples or promise immediate
+cleanup of a task stuck in the kernel. Service supervision remains separate work.
 
 ```mermaid
 flowchart TD
@@ -164,11 +173,89 @@ cannot deliver its returned outcomes to the caller.
 
 Processors must perform local, side-effect-free computation. This component is
 fault isolation, not a permission or memory sandbox. It does not install a
-network filter, enforce host RAM/VRAM quotas, authenticate APIs, persist results,
-connect cameras or record video. The qualification runner separately denied
+network filter, enforce host RAM/VRAM quotas, authenticate APIs, connect cameras
+or record video. Results remain in memory unless the explicit journal below is used. The qualification runner separately denied
 IPv4/IPv6 for the parent and descendants. Full methods, actual fault injection,
 recovery measurements and limits are in the
 [dated recovery record](verification/recovery-2026-10-28/README.md).
+
+## Optional local outcome journal
+
+`edge.journal.OutcomeJournal` is a Linux-only SQLite outbox on an explicit private
+**local-disk** directory. Pass it to `ProcessWorkers(..., journal=journal)`; it is
+off by default. Each open journal owns a fresh UUID run and an exclusive file
+lock. One controlling thread and one worker adapter may use that open run.
+The lock file stays in place; do not delete it while an owner may be running.
+
+The directory must have owner-only permissions (new directories use 0700), and
+files must be owner-owned private regular files. Symlink final paths and shared
+files are rejected. SQLite uses WAL and `synchronous=FULL`; failed queries/commits
+stop worker dispatch/restart, terminate owned computation and expose
+`journal_error`. Memory-only failure outcomes have no `journal_id`. Preserve the
+directory for recovery/inspection after a storage error. Process-exit tests are
+not power-loss, failing-disk, network-filesystem or backup qualification.
+
+| Boundary | Durable behavior |
+| --- | --- |
+| Before sending a dispatch batch | Commit camera/sequence, run-scoped token, generation, monotonic sample/dispatch times, payload size and SHA-256. Frame bytes are absent. |
+| Before returning an outcome | Commit its terminal result or failure code and processor slot. A returned `journal_id` identifies the committed row in this database. |
+| Reopen after interrupted ownership | Keep committed terminal outcomes; convert every unresolved dispatch to `failed / parent-interrupted`, without claiming whether computation occurred. Never retry it. |
+| Read with `pending(limit=100)` | Return terminal unacknowledged records in stable ID order, at most 1,000 per call. Reading never acknowledges. |
+| Explicit `acknowledge(ids)` | Persist acknowledgment of specified terminal rows. Repeating an acknowledgment before pruning is harmless. |
+| Explicit `prune()` | Remove only acknowledged terminal rows. Unread results and in-flight reservations are retained. IDs are not reused. |
+
+Delivery is **at least once**. A consumer can crash after acting on a read and
+before acknowledgment; the same IDs will be offered again. Use persisted
+`(run_id, token)` as an idempotency key in a durable consumer. Acknowledgment is
+not atomic with an external action or another database. This outbox does not
+supply exactly-once alerts or durable human-review/rule state.
+
+```python
+# Application-owned Linux integration, under if __name__ == '__main__':
+# scheduler and trusted_factory are explicitly constructed by the application.
+from edge.journal import OutcomeJournal
+from edge.supervision import ProcessWorkers
+
+with OutcomeJournal('/private/local/dvr/outbox') as journal:
+    workers = ProcessWorkers(scheduler, trusted_factory, journal=journal)
+    try:
+        outcomes = workers.step()  # Call frequently while producers submit.
+        # Consume outcomes and/or journal.pending(). Acknowledge explicit IDs
+        # only after durable consumer handling; prune acknowledged rows explicitly.
+    finally:
+        remaining = workers.close()  # Consume these outcomes too.
+# Reopen the same directory to recover unread terminal records.
+```
+
+The example's parent directory must already exist; choose a private owner-local
+location outside Git. Reopening is explicit, not an automatic background service.
+Never acknowledge merely because a result was read. Terminal records contain
+finite JSON results, failure codes, wall-clock commit times and sample hashes/
+metadata. Results can contain sensitive object locations: keep the database, WAL,
+SHM and exports local and private. No frame payloads, source credentials or URLs
+are added by the journal itself. Trusted processors remain responsible for their
+result JSON. Monotonic times belong to the originating process/boot; they are
+not a cross-restart freshness clock. Wall time is diagnostic and can change.
+
+Bounds are explicit: 1–1,000,000 rows (default 100,000), 512 bytes–4 MiB per result
+(default 1 MiB), and a logical reservation budget (default 64 MiB, up to 4 GiB).
+Each dispatched row reserves the result bound plus 2 KiB metadata; terminal
+commit replaces that with actual encoded result bytes plus 2 KiB. The configured
+budget must cover every worker slot. Historical rows, including acknowledged
+rows, count until pruning. When free slots cannot be reserved, dispatch pauses
+and `journal_blocked` is visible. Pending samples still replace/expire under the
+scheduler's policy. Existing oversized history can be read/acknowledged/pruned
+without admitting new work. SQLite pages, indexes, WAL and native caches add
+overhead; these bounds are not a filesystem quota or retention policy.
+
+Only **dispatched** samples are journaled. Pending, replaced, stale or budget-
+dropped samples exist only in scheduler counters and may disappear with the
+parent. Source restart position, recording continuity, lifecycle diagnostics,
+per-camera rules and dwell state are not recovered. Processor/model configuration
+and startup proofs are not stored by this outbox; retain a separate run-bound
+manifest before interpreting results. See the
+[owner-PC journal and parent-crash record](verification/journal-2026-10-28/README.md)
+for source bindings, forced-exit checks and measured replay cost.
 
 ## Reproduce the load model
 
