@@ -12,13 +12,13 @@ dist/client/assets/maplibre-gl-worker-PcuQ6pji.js    508.52 kB
 dist/client/assets/SystemSetup-B3PUJx65.css            5.45 kB │ gzip:   1.43 kB
 dist/client/assets/index-Dz3bSPSF.css                 20.88 kB │ gzip:   5.26 kB
 dist/client/assets/FacilityBuilder-BNd6o0cq.css      102.95 kB │ gzip:  14.89 kB
-dist/client/assets/SystemSetup-Bv_qpYcQ.js            31.38 kB │ gzip:   9.07 kB
-dist/client/assets/index-BV24GZhf.js                 306.67 kB │ gzip:  91.89 kB
-dist/client/assets/FacilityBuilder-DIKR3rRu.js     1,811.14 kB │ gzip: 482.02 kB
+dist/client/assets/SystemSetup-Cz5btMoq.js            31.38 kB │ gzip:   9.07 kB
+dist/client/assets/index-CrExd6LA.js                 306.67 kB │ gzip:  91.89 kB
+dist/client/assets/FacilityBuilder-Joe2KNKn.js     1,811.49 kB │ gzip: 482.14 kB
 
 (!) Some chunks are larger than 500 kB after minification. Consider:
 - Using dynamic import() to code-split the application
 - Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
 - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
-✓ built in 3.68s
+✓ built in 4.44s
 Prepared Sites build: dist/server/index.js and dist/.openai/hosting.json

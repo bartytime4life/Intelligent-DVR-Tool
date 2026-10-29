@@ -3,32 +3,32 @@ TAP version 13
 # Subtest: zone geometry cannot extend beyond image
 ok 1 - zone geometry cannot extend beyond image
   ---
-  duration_ms: 0.396855
+  duration_ms: 0.423394
   ...
 # Subtest: review records decision without contaminating another event
 ok 2 - review records decision without contaminating another event
   ---
-  duration_ms: 0.391414
+  duration_ms: 0.43152
   ...
 # Subtest: offline receipts remain separate from simulated camera evidence
 ok 3 - offline receipts remain separate from simulated camera evidence
   ---
-  duration_ms: 0.189986
+  duration_ms: 0.208531
   ...
 # Subtest: invalid receipts and duplicate ids are rejected
 ok 4 - invalid receipts and duplicate ids are rejected
   ---
-  duration_ms: 0.531838
+  duration_ms: 0.679524
   ...
 # Subtest: receipt provenance rejects malformed metadata rather than rendering objects
 ok 5 - receipt provenance rejects malformed metadata rather than rendering objects
   ---
-  duration_ms: 0.097072
+  duration_ms: 0.119354
   ...
 # Subtest: corrupt browser snapshots recover to the initial workspace
 ok 6 - corrupt browser snapshots recover to the initial workspace
   ---
-  duration_ms: 0.265828
+  duration_ms: 0.370976
   ...
 1..6
 # tests 6
@@ -38,74 +38,74 @@ ok 6 - corrupt browser snapshots recover to the initial workspace
 # cancelled 0
 # skipped 0
 # todo 0
-# duration_ms 6.136203
+# duration_ms 7.076334
 
 FILE: tests/facility.test.mjs
 TAP version 13
 # Subtest: sample and empty facility round trip through the bounded public contract
 ok 1 - sample and empty facility round trip through the bounded public contract
   ---
-  duration_ms: 2.060266
+  duration_ms: 2.248438
   ...
 # Subtest: coordinate projection preserves local-meter geometry at Kansas latitude
 ok 2 - coordinate projection preserves local-meter geometry at Kansas latitude
   ---
-  duration_ms: 0.133831
+  duration_ms: 0.253325
   ...
 # Subtest: polygons reject self crossings, degenerate areas and unclosed rings
 ok 3 - polygons reject self crossings, degenerate areas and unclosed rings
   ---
-  duration_ms: 0.06932
+  duration_ms: 0.071123
   ...
 # Subtest: ground plane coverage respects direction, near limit, far limit and enabled state
 ok 4 - ground plane coverage respects direction, near limit, far limit and enabled state
   ---
-  duration_ms: 0.156013
+  duration_ms: 0.160561
   ...
 # Subtest: opaque walls block lines of sight while a low obstacle can be seen over
 ok 5 - opaque walls block lines of sight while a low obstacle can be seen over
   ---
-  duration_ms: 0.26149
+  duration_ms: 0.253927
   ...
 # Subtest: narrow downward views cannot claim ground coverage before their near distance
 ok 6 - narrow downward views cannot claim ground coverage before their near distance
   ---
-  duration_ms: 0.062607
+  duration_ms: 0.06432
   ...
 # Subtest: route interpolation follows distance, including repeated points
 ok 7 - route interpolation follows distance, including repeated points
   ---
-  duration_ms: 0.179928
+  duration_ms: 0.118682
   ...
 # Subtest: rehearsal returns explicit gaps instead of inferred observations
 ok 8 - rehearsal returns explicit gaps instead of inferred observations
   ---
-  duration_ms: 0.61829
+  duration_ms: 0.691307
   ...
 # Subtest: bad imports reject non-finite values, duplicates, invalid room floor and oversize JSON
 ok 9 - bad imports reject non-finite values, duplicates, invalid room floor and oversize JSON
   ---
-  duration_ms: 1.415897
+  duration_ms: 1.515954
   ...
 # Subtest: import only retains declared geometry and text fields, never media URLs or HTML properties
 ok 10 - import only retains declared geometry and text fields, never media URLs or HTML properties
   ---
-  duration_ms: 0.305523
+  duration_ms: 0.291798
   ...
 # Subtest: 100-camera metadata inventory remains valid without making a video throughput claim
 ok 11 - 100-camera metadata inventory remains valid without making a video throughput claim
   ---
-  duration_ms: 0.764424
+  duration_ms: 0.813205
   ...
 # Subtest: room must stay within its building footprint and building deletion cannot leave orphan rooms
 ok 12 - room must stay within its building footprint and building deletion cannot leave orphan rooms
   ---
-  duration_ms: 0.157195
+  duration_ms: 0.183564
   ...
 # Subtest: rooms cannot bridge outside a concave building even when every vertex is inside
 ok 13 - rooms cannot bridge outside a concave building even when every vertex is inside
   ---
-  duration_ms: 0.132459
+  duration_ms: 0.1336
   ...
 1..13
 # tests 13
@@ -115,49 +115,49 @@ ok 13 - rooms cannot bridge outside a concave building even when every vertex is
 # cancelled 0
 # skipped 0
 # todo 0
-# duration_ms 11.132607
+# duration_ms 12.281338
 
 FILE: tests/facility-starter.test.mjs
 TAP version 13
 # Subtest: all common footprints remain simple and dimensioned after rotation
 ok 1 - all common footprints remain simple and dimensioned after rotation
   ---
-  duration_ms: 3.766176
+  duration_ms: 4.065827
   ...
 # Subtest: bounded search does not accept blank, oversized or invalid coordinates
 ok 2 - bounded search does not accept blank, oversized or invalid coordinates
   ---
-  duration_ms: 0.164308
+  duration_ms: 0.169378
   ...
 # Subtest: height tags honor meter and foot units without guessing unparseable heights
 ok 3 - height tags honor meter and foot units without guessing unparseable heights
   ---
-  duration_ms: 0.183454
+  duration_ms: 0.19697
   ...
 # Subtest: OSM shells preserve provenance and distinguish tags from placeholder dimensions
 ok 4 - OSM shells preserve provenance and distinguish tags from placeholder dimensions
   ---
-  duration_ms: 0.961965
+  duration_ms: 1.040652
   ...
 # Subtest: relations never become solid courtyards, and invalid/duplicate/outside features are bounded
 ok 5 - relations never become solid courtyards, and invalid/duplicate/outside features are bounded
   ---
-  duration_ms: 0.788008
+  duration_ms: 0.884108
   ...
 # Subtest: raised and uncertain bases are not flattened into ground-level shells
 ok 6 - raised and uncertain bases are not flattened into ground-level shells
   ---
-  duration_ms: 0.260559
+  duration_ms: 0.481243
   ...
 # Subtest: network adapter caps response bytes and reports service failure
 ok 7 - network adapter caps response bytes and reports service failure
   ---
-  duration_ms: 10.244411
+  duration_ms: 11.490264
   ...
 # Subtest: replacement previews accept 98 drafts without retaining the old 3 buildings or cameras
 ok 8 - replacement previews accept 98 drafts without retaining the old 3 buildings or cameras
   ---
-  duration_ms: 1.614079
+  duration_ms: 1.937064
   ...
 1..8
 # tests 8
@@ -167,59 +167,59 @@ ok 8 - replacement previews accept 98 drafts without retaining the old 3 buildin
 # cancelled 0
 # skipped 0
 # todo 0
-# duration_ms 22.500085
+# duration_ms 25.301192
 
 FILE: tests/resources.test.mjs
 TAP version 13
 # Subtest: 100 × 4 Mbit × 30 days distinguishes raw, redundancy, overhead and reserve
 ok 1 - 100 × 4 Mbit × 30 days distinguishes raw, redundancy, overhead and reserve
   ---
-  duration_ms: 1.155568
+  duration_ms: 1.281925
   ...
 # Subtest: doubling bitrate halves retention; six 24TB dual-parity drives are inadequate for this full workload
 ok 2 - doubling bitrate halves retention; six 24TB dual-parity drives are inadequate for this full workload
   ---
-  duration_ms: 0.212098
+  duration_ms: 0.232897
   ...
 # Subtest: mirror and unprotected capacity are explicit and invalid arrays cannot be saved
 ok 3 - mirror and unprotected capacity are explicit and invalid arrays cannot be saved
   ---
-  duration_ms: 0.31959
+  duration_ms: 0.317035
   ...
 # Subtest: memory, byte-budget, drive-workload and power warnings never become capacity passes
 ok 4 - memory, byte-budget, drive-workload and power warnings never become capacity passes
   ---
-  duration_ms: 0.114375
+  duration_ms: 0.108524
   ...
 # Subtest: VRAM contexts include batch tensors and exceed the allowance without pretending to run GPU inference
 ok 5 - VRAM contexts include batch tensors and exceed the allowance without pretending to run GPU inference
   ---
-  duration_ms: 0.207119
+  duration_ms: 0.209083
   ...
 # Subtest: invalid imported values, prototype fields and unbounded JSON are rejected
 ok 6 - invalid imported values, prototype fields and unbounded JSON are rejected
   ---
-  duration_ms: 0.942298
+  duration_ms: 1.055731
   ...
 # Subtest: exported application policy matches the shared Python contract fixture
 ok 7 - exported application policy matches the shared Python contract fixture
   ---
-  duration_ms: 0.264096
+  duration_ms: 0.701285
   ...
 # Subtest: wall budget always preserves selected sources with at most the applied count
 ok 8 - wall budget always preserves selected sources with at most the applied count
   ---
-  duration_ms: 0.065914
+  duration_ms: 0.070833
   ...
 # Subtest: background sample playback respects the applied pause setting
 ok 9 - background sample playback respects the applied pause setting
   ---
-  duration_ms: 0.131697
+  duration_ms: 0.134021
   ...
 # Subtest: host import retains bounded numerical observations and drops private or unknown fields
 ok 10 - host import retains bounded numerical observations and drops private or unknown fields
   ---
-  duration_ms: 0.328296
+  duration_ms: 0.397826
   ...
 1..10
 # tests 10
@@ -229,54 +229,54 @@ ok 10 - host import retains bounded numerical observations and drops private or 
 # cancelled 0
 # skipped 0
 # todo 0
-# duration_ms 8.495579
+# duration_ms 9.347646
 
 FILE: tests/facility-services.test.mjs
 TAP version 13
 # Subtest: address search validates queries, bounds, and remote labels as text
 ok 1 - address search validates queries, bounds, and remote labels as text
   ---
-  duration_ms: 0.718869
+  duration_ms: 0.983265
   ...
 # Subtest: submitted address requests omit credentials, cache only in memory, and rate-limit
 ok 2 - submitted address requests omit credentials, cache only in memory, and rate-limit
   ---
-  duration_ms: 8.775385
+  duration_ms: 11.504501
   ...
 # Subtest: concurrent and aborted searches cannot be cached as successes
 ok 3 - concurrent and aborted searches cannot be cached as successes
   ---
-  duration_ms: 0.471164
+  duration_ms: 0.638728
   ...
 # Subtest: bounded readers reject oversized, empty, malformed and rate-limited bodies
 ok 4 - bounded readers reject oversized, empty, malformed and rate-limited bodies
   ---
-  duration_ms: 0.739828
+  duration_ms: 1.18358
   ...
 # Subtest: complete relation outers stitch reversed segments and preserve source on export
 ok 5 - complete relation outers stitch reversed segments and preserve source on export
   ---
-  duration_ms: 1.163363
+  duration_ms: 1.235207
   ...
 # Subtest: disjoint outers split; invalid holes/nesting are excluded and independent parts retain their role
 ok 6 - disjoint outers split; invalid holes/nesting are excluded and independent parts retain their role
   ---
-  duration_ms: 1.096628
+  duration_ms: 1.405727
   ...
 # Subtest: recorded licensed exterior extracts import; the real courtyard stays excluded
 ok 7 - recorded licensed exterior extracts import; the real courtyard stays excluded
   ---
-  duration_ms: 1.328212
+  duration_ms: 2.302309
   ...
 # Subtest: pinned extract bytes match the source manifest
 ok 8 - pinned extract bytes match the source manifest
   ---
-  duration_ms: 0.366438
+  duration_ms: 0.518583
   ...
 # Subtest: retraced edges and nonconsecutive duplicate vertices cannot invent a simple shell
 ok 9 - retraced edges and nonconsecutive duplicate vertices cannot invent a simple shell
   ---
-  duration_ms: 0.168906
+  duration_ms: 0.193473
   ...
 1..9
 # tests 9
@@ -286,44 +286,44 @@ ok 9 - retraced edges and nonconsecutive duplicate vertices cannot invent a simp
 # cancelled 0
 # skipped 0
 # todo 0
-# duration_ms 19.540712
+# duration_ms 25.749283
 
 FILE: tests/facility-geometry.test.mjs
 TAP version 13
 # Subtest: v2 preserves holes/base/part and upgrades ordinary v1 without allowing a geometry downgrade
 ok 1 - v2 preserves holes/base/part and upgrades ordinary v1 without allowing a geometry downgrade
   ---
-  duration_ms: 1.543385
+  duration_ms: 1.694219
   ...
 # Subtest: invalid courtyard topology, including enclosing a hole with a room, is rejected atomically
 ok 2 - invalid courtyard topology, including enclosing a hole with a room, is rejected atomically
   ---
-  duration_ms: 1.036886
+  duration_ms: 0.959319
   ...
 # Subtest: courtyard translations/resizes keep all rings aligned and room edits remain validated
 ok 3 - courtyard translations/resizes keep all rings aligned and room edits remain validated
   ---
-  duration_ms: 0.155322
+  duration_ms: 0.151565
   ...
 # Subtest: coverage uses inner walls and permits rays below raised bases
 ok 4 - coverage uses inner walls and permits rays below raised bases
   ---
-  duration_ms: 0.269376
+  duration_ms: 0.568196
   ...
 # Subtest: complete courtyard relations assemble split inner rings and retain source/export
 ok 5 - complete courtyard relations assemble split inner rings and retain source/export
   ---
-  duration_ms: 0.865214
+  duration_ms: 1.088051
   ...
 # Subtest: independent parts preserve raised bases; conflicting envelopes/parts are excluded together
 ok 6 - independent parts preserve raised bases; conflicting envelopes/parts are excluded together
   ---
-  duration_ms: 0.391034
+  duration_ms: 0.518703
   ...
 # Subtest: custom AOI filters the enclosing rectangle while retaining whole intersecting shells
 ok 7 - custom AOI filters the enclosing rectangle while retaining whole intersecting shells
   ---
-  duration_ms: 0.623009
+  duration_ms: 0.648887
   ...
 1..7
 # tests 7
@@ -333,39 +333,39 @@ ok 7 - custom AOI filters the enclosing rectangle while retaining whole intersec
 # cancelled 0
 # skipped 0
 # todo 0
-# duration_ms 8.888286
+# duration_ms 10.152776
 
 FILE: tests/facility-delivery.test.mjs
 TAP version 13
 # Subtest: disabled delivery and unknown routes cannot make upstream requests
 ok 1 - disabled delivery and unknown routes cannot make upstream requests
   ---
-  duration_ms: 0.66633
+  duration_ms: 0.784141
   ...
 # Subtest: only fixed loopback services receive minimized input; cookies/auth/URLs are never forwarded
 ok 2 - only fixed loopback services receive minimized input; cookies/auth/URLs are never forwarded
   ---
-  duration_ms: 2.240714
+  duration_ms: 2.500491
   ...
 # Subtest: cross-origin, rebinding, method and arbitrary-query attempts never call upstream
 ok 3 - cross-origin, rebinding, method and arbitrary-query attempts never call upstream
   ---
-  duration_ms: 1.82804
+  duration_ms: 2.173196
   ...
 # Subtest: bounded canonical Overpass queries work; invalid, partial and oversized responses fail closed
 ok 4 - bounded canonical Overpass queries work; invalid, partial and oversized responses fail closed
   ---
-  duration_ms: 3.880671
+  duration_ms: 3.84352
   ...
 # Subtest: rate limits and active request bounds are enforced across clients without automatic retries
 ok 5 - rate limits and active request bounds are enforced across clients without automatic retries
   ---
-  duration_ms: 0.807124
+  duration_ms: 0.668093
   ...
 # Subtest: real HTTP loopback middleware round trip (opt-in on CI)
 ok 6 - real HTTP loopback middleware round trip (opt-in on CI) # SKIP
   ---
-  duration_ms: 0.06936
+  duration_ms: 0.050915
   ...
 1..6
 # tests 6
@@ -375,29 +375,29 @@ ok 6 - real HTTP loopback middleware round trip (opt-in on CI) # SKIP
 # cancelled 0
 # skipped 1
 # todo 0
-# duration_ms 13.066795
+# duration_ms 14.284115
 
 FILE: tests/facility-study.test.mjs
 TAP version 13
 # Subtest: an empty study and unavailable imagery flow cannot become measured acceptance
 ok 1 - an empty study and unavailable imagery flow cannot become measured acceptance
   ---
-  duration_ms: 0.42104
+  duration_ms: 0.517611
   ...
 # Subtest: five to eight distinct novices are required and sessions cannot be duplicated or fabricated for unavailable flows
 ok 2 - five to eight distinct novices are required and sessions cannot be duplicated or fabricated for unavailable flows
   ---
-  duration_ms: 0.292078
+  duration_ms: 0.357331
   ...
 # Subtest: failed and aided attempts stay in denominators and timing; height identification is required
 ok 3 - failed and aided attempts stay in denominators and timing; height identification is required
   ---
-  duration_ms: 0.669596
+  duration_ms: 0.721323
   ...
 # Subtest: unavailable third flow keeps comparison open and incomplete cohorts cannot be compared
 ok 4 - unavailable third flow keeps comparison open and incomplete cohorts cannot be compared
   ---
-  duration_ms: 0.126197
+  duration_ms: 0.13906
   ...
 1..4
 # tests 4
@@ -407,29 +407,29 @@ ok 4 - unavailable third flow keeps comparison open and incomplete cohorts canno
 # cancelled 0
 # skipped 0
 # todo 0
-# duration_ms 4.74934
+# duration_ms 6.371022
 
 FILE: tests/sites-worker.test.mjs
 TAP version 13
 # Subtest: serves existing static assets without a fallback
 ok 1 - serves existing static assets without a fallback
   ---
-  duration_ms: 9.219397
+  duration_ms: 10.242023
   ...
 # Subtest: falls back to index.html for an unknown app route
 ok 2 - falls back to index.html for an unknown app route
   ---
-  duration_ms: 1.023942
+  duration_ms: 0.891552
   ...
 # Subtest: does not turn missing API or write requests into the app shell
 ok 3 - does not turn missing API or write requests into the app shell
   ---
-  duration_ms: 0.297278
+  duration_ms: 0.323687
   ...
 # Subtest: emits the files required by Sites packaging
 ok 4 - emits the files required by Sites packaging
   ---
-  duration_ms: 1.834832
+  duration_ms: 2.1695
   ...
 1..4
 # tests 4
@@ -439,4 +439,4 @@ ok 4 - emits the files required by Sites packaging
 # cancelled 0
 # skipped 0
 # todo 0
-# duration_ms 14.3373
+# duration_ms 15.999313

@@ -56,6 +56,7 @@ test('independent parts preserve raised bases; conflicting envelopes/parts are e
   const accepted=parse([part]).buildings[0];assert.equal(accepted.part,true);assert.equal(accepted.base,4);assert.equal(accepted.floors,3);
   const overlap=parse([way(1,box(-30,-30,60,60),{building:'yes'}),part]);
   assert.equal(overlap.buildings.length,0);assert.equal(overlap.reasons['overlapping part or envelope requires decomposition'],2);
+  assert.throws(()=>validateFacility({...blankFacility(),buildings:[{id:'b1',name:'Envelope',footprint:box(-30,-30,60,60),height:12,floors:3},accepted]}),/decomposition/);
   const invalid={...part,tags:{...part.tags,min_height:'12'}};assert.equal(parse([invalid]).buildings.length,0);
 });
 test('custom AOI filters the enclosing rectangle while retaining whole intersecting shells',()=>{

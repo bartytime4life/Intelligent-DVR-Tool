@@ -120,6 +120,11 @@ haracters.");
     if (d.schema === LEGACY_SCHEMA && (b.holes !== undefined || b.base !== undefined || b.part !== undefined))
       throw Error('Courtyards, bases and parts require facility v2; do not label advanced geometry as v1.');
   }
+  for(let i=0;i<d.buildings.length;i++) for(let j=i+1;j<d.buildings.length;j++) {
+    const a=d.buildings[i],b=d.buildings[j];
+    if((a.part || b.part) && Math.max(a.base || 0,b.base || 0)<Math.min(a.height,b.height) && ringsOverlap(a.footprint,b.footprint))
+      throw Error('Overlapping part/envelope volumes require a reviewed decomposition.');
+  }
   for (const b of d.buildings) if (b.source !== undefined && (!b.source || b.source.provider !== 'OpenStreetMap' ||
     !/^(way|relation)\/[1-9]\d{0,15}$/.test(b.source.id) || b.source.license !== 'ODbL-1.0' ||
     !['retrieved','updated','heightBasis','floorsBasis'].every(k => typeof b.source[k] === 'string' && b.source[k].length <= 80)))

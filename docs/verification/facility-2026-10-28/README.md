@@ -15,9 +15,14 @@ The skipped case is actual listening-socket delivery; the shell denies loopback
 
 [Production build](build.log) passed, retaining the Sites layout. The existing
 large facility bundle still triggers Vite's chunk-size warning. Browser runtime
-performance is not qualified by this build. The source adds four Chromium
+performance is not qualified by this build. The [source hashes](source-hashes.json) bind the final local implementation and tests.
+The source adds four Chromium
 regressions to the existing six: v2 apply/edit/Undo, numeric polygon invalidation,
-pointer AOI/pin suggestions and missing-WebGL recovery. Local preview start was
+pointer AOI/pin suggestions and missing-WebGL recovery. On initial candidate `84c74116526d56b70cc121b0bd78f011025c90f9`,
+[Chromium run 40814353292](https://github.com/bartytime4life/Intelligent-DVR-Tool/actions/runs/40814353292)
+passed all 10 scenarios. Subsequent changes add a cross-import overlapping-part
+validation guard and hide inactive rectangle fields in polygon mode; their exact-head
+CI links are recorded on PR #21. Local preview start was
 attempted at `127.0.0.1:4182` and failed with EPERM; browser acceptance needs CI.
 The native middleware has five mocked protocol tests; CI enables its sixth test,
 a real HTTP round trip against temporary synthetic provider servers, on Linux and
