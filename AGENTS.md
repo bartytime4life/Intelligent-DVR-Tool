@@ -74,3 +74,9 @@ install path, pinned isolated CPU dependencies, an honest readiness check, and a
 prebuilt PC test kit with source identity. Install/check must not activate cameras
 or inference. Preserve local credentials/settings on reinstall; keep physical-PC
 and device acceptance separate from clean CI installation and synthetic checks.
+
+Owner public-webcam request (2026-10-29): support intentionally published internet
+webcams safely, using explicit operator-approved HTTPS sources, attribution,
+network and media bounds, and clear snapshot versus motion labels. Keep local
+camera footage and inference local. Public visibility is not reuse permission;
+do not discover exposed private cameras or bypass provider access controls.

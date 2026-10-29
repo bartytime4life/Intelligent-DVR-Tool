@@ -107,3 +107,11 @@ qualification. No camera footage is uploaded for testing.
 Primary API references: [browser media permission and secure contexts](https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia),
 [OpenCV video capture timeout properties](https://docs.opencv.org/4.x/d4/d15/group__videoio__flags__base.html),
 [FFmpeg RTSP handling](https://github.com/FFmpeg/FFmpeg/blob/master/libavformat/rtsp.c).
+# Public internet webcams
+
+The local service also supports owner-approved direct HTTPS JPEG/MJPEG webcams.
+Use **Monitor → Public webcams** and the [public-webcam setup and safety guide](public-webcams.md).
+Public sources share the four-preview cap and expiring leases. They disclose the
+operator's public IP/request to their provider; local recordings and DVR footage
+are not uploaded. No provider is enabled by default.
+

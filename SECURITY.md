@@ -86,3 +86,15 @@ and tracks stop on disconnect/hidden page/navigation. See
 [the complete connection and trust limits](docs/local-camera-feeds.md).
 Native decoder code is not a complete malicious-device sandbox. No cloud relay,
 automatic network scan, ONVIF discovery, live inference or recording is enabled.
+
+## Public webcam previews
+
+The explicit public-webcam adapter accepts only owner-configured HTTPS JPEG/MJPEG
+sources selected by opaque ID. All DNS answers must be public; the connection
+pins one validated IPv4 while retaining TLS hostname verification. No redirects,
+credentials, cookies, environment HTTP proxies, HTML players or dynamic browser
+URLs are accepted. Public previews share bounded workers and leases. Image byte,
+pixel and native decoder limits apply before frames are exposed. See
+[public source permission, external disclosure and exact limits](docs/public-webcams.md).
+Provider capture time, freshness and media safety are not authenticated. The
+owner must approve provider terms; an open endpoint alone grants no reuse rights.

@@ -1,4 +1,4 @@
-"""Explicit, short-lived previews of owner-configured LAN RTSP sources."""
+"""Explicit, short-lived previews of owner-configured LAN and public webcam sources."""
 import importlib.util
 import ipaddress
 import json
@@ -13,6 +13,7 @@ import threading
 import time
 
 from .evaluation import read_json
+from .public_feed import KINDS, public_source
 
 ROOT = Path(__file__).resolve().parents[1]
 LIMITS = {'active_feeds': 4, 'lease_seconds': 15, 'session_seconds': 900,
@@ -35,12 +36,17 @@ def load_sources(config):
         raise ValueError('Configure up to 100 sources in a sources array')
     sources = {}
     for item in data['sources']:
-        if not isinstance(item, dict) or set(item) - {'id', 'name', 'host', 'port', 'path', 'username', 'password'}:
+        if not isinstance(item, dict):
             raise ValueError('Unsupported source fields')
         if not re.fullmatch(r'[a-z0-9-]{1,40}', item.get('id', '')) or item['id'] in sources:
             raise ValueError('Use unique source IDs')
         if not isinstance(item.get('name'), str) or not 1 <= len(item['name']) <= 80 or any(ord(c) < 32 for c in item['name']):
             raise ValueError('Use source names of 1–80 printable characters')
+        if item.get('kind') in KINDS:
+            sources[item['id']] = public_source(item)
+            continue
+        if set(item) - {'id', 'name', 'host', 'port', 'path', 'username', 'password'}:
+            raise ValueError('Unsupported source fields')
         try:
             host = ipaddress.IPv4Address(item.get('host', ''))
         except ipaddress.AddressValueError:
@@ -71,12 +77,16 @@ class Feeds:
         self.thread.start()
 
     def available(self):
-        return {'sources': [{'id': s['id'], 'name': s['name'], 'kind': 'rtsp'} for s in self.sources.values()],
+        return {'sources': [self._source_info(s) for s in self.sources.values()],
                 'limits': LIMITS, 'ready': sys.platform in ('linux', 'win32') and importlib.util.find_spec('cv2') is not None}
+
+    @staticmethod
+    def _source_info(source):
+        return {k: source[k] for k in ('id', 'name', 'kind', 'provider', 'provider_url', 'refresh_seconds') if k in source} | {'kind': source.get('kind', 'rtsp')}
 
     def connect(self, body):
         if not isinstance(body, dict) or set(body) != {'source'} or not isinstance(body['source'], str) or body['source'] not in self.sources:
-            raise FeedError('SOURCE', 'Select a source from this computer’s configured DVR channels.')
+            raise FeedError('SOURCE', 'Select a source from this computer’s approved source list.')
         with self.lock:
             if self.closed.is_set():
                 raise FeedError('STOPPED', 'The local service is stopping.', 503)
@@ -84,7 +94,7 @@ class Feeds:
             if any(s['source'] == body['source'] for s in self.sessions.values() if s['state'] in ('connecting', 'live')):
                 raise FeedError('IN_USE', 'This channel already has a preview. Disconnect it or wait for its preview lease to expire.', 409)
             if sum(s['state'] in ('connecting', 'live') for s in self.sessions.values()) >= LIMITS['active_feeds']:
-                raise FeedError('CAPACITY', 'Four DVR previews are already open. Disconnect one first.', 409)
+                raise FeedError('CAPACITY', 'Four network previews are already open. Disconnect one first.', 409)
             # Keep only a bounded number of short-lived terminal receipts.
             for key in list(self.sessions):
                 if self.sessions[key]['state'] not in ('connecting', 'live'):
@@ -93,6 +103,7 @@ class Feeds:
             source = self.sources[body['source']]
             identifier = secrets.token_hex(16)
             session = {'id': identifier, 'source': source['id'], 'name': source['name'], 'state': 'connecting',
+                       **{k: v for k, v in self._source_info(source).items() if k not in ('id', 'name')},
                        'error': None, 'began': self.clock(), 'touched': self.clock(), 'frame_at': None,
                        'directory': directory, 'process': None, 'stamp': None}
             self.sessions[identifier] = session
@@ -108,7 +119,7 @@ class Feeds:
 
     def _public(self, s):
         age = None if s['frame_at'] is None else round(max(0, self.clock() - s['frame_at']), 1)
-        return {k: s[k] for k in ('id', 'source', 'name', 'state', 'error')} | {'frame_age_seconds': age, 'limits': LIMITS}
+        return {k: s[k] for k in ('id', 'source', 'name', 'state', 'error', 'kind', 'provider', 'provider_url', 'refresh_seconds') if k in s} | {'frame_age_seconds': age, 'limits': LIMITS}
 
     def _find(self, identifier):
         if identifier not in self.sessions:
@@ -174,11 +185,11 @@ class Feeds:
             elif now - s['began'] > LIMITS['session_seconds']:
                 error = ('SESSION_LIMIT', 'The 15-minute preview ended. Explicitly connect again to continue.')
             elif s['process'] is None or s['process'].poll() is not None:
-                error = ('CONNECTION_FAILED', 'No usable RTSP stream. Check DVR power, LAN access, RTSP port, channel path and credentials; use a substream up to 1080p. Redirects are refused.')
+                error = ('CONNECTION_FAILED', 'Public webcam unavailable. Check provider availability, permission, direct JPEG/MJPEG path, public IPv4 DNS and valid HTTPS certificate. Redirects, login pages and oversized images are refused. Reconnect explicitly.' if s.get('kind') in KINDS else 'No usable RTSP stream. Check DVR power, LAN access, RTSP port, channel path and credentials; use a substream up to 1080p. Redirects are refused.')
             elif s['frame_at'] is None and now - s['began'] > LIMITS['open_seconds']:
-                error = ('OPEN_TIMEOUT', 'DVR did not provide a frame in 12 seconds. Check its RTSP settings, credentials and network, then retry.')
-            elif s['frame_at'] is not None and now - s['frame_at'] > LIMITS['stale_seconds']:
-                error = ('STALE', 'Frames stopped arriving. Check the DVR connection and reconnect.')
+                error = ('OPEN_TIMEOUT', 'Source did not provide an image in 12 seconds. Check the source settings and network, then retry.')
+            elif s['frame_at'] is not None and now - s['frame_at'] > (s.get('refresh_seconds', 0) + LIMITS['open_seconds'] if s.get('kind') == 'public-jpeg' else LIMITS['stale_seconds']):
+                error = ('STALE', 'Images stopped arriving. Check the source and reconnect. The previous image has been removed.')
             if error:
                 self._stop(s, 'failed', *error)
 

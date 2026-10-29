@@ -144,9 +144,14 @@ def main(directory):
     analysis_worker.MEMORY_BYTES = LIMITS['memory_bytes']
     handle = analysis_worker.constrain()
     os.environ.update(OMP_NUM_THREADS='1', OPENBLAS_NUM_THREADS='1', MKL_NUM_THREADS='1',
+        OPENCV_IO_MAX_IMAGE_PIXELS=str(LIMITS['input_pixels']), OPENCV_IO_MAX_IMAGE_WIDTH='4096', OPENCV_IO_MAX_IMAGE_HEIGHT='4096',
         OPENCV_VIDEOIO_PRIORITY_LIST='FFMPEG',
         OPENCV_FFMPEG_CAPTURE_OPTIONS='rtsp_transport;tcp|protocol_whitelist;rtsp,tcp|allowed_media_types;video')
-    data = json.loads(sys.stdin.buffer.read(4096))
+    data = json.loads(sys.stdin.buffer.read(8192))
+    if data.get('kind') in ('public-jpeg', 'public-mjpeg'):
+        from .public_feed import capture_public
+        capture_public(data, Path(directory))
+        return handle
     relay = PinnedRelay(data['host'], data['port'])
     credentials = ''
     if data.get('username') or data.get('password'):

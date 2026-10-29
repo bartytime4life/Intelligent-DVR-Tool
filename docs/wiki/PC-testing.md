@@ -120,6 +120,16 @@ DVR_GEO_LOCAL=1 launcher opt-in selects that source Vite preview; --facility /
 environment flag. The Python camera service does not proxy map-provider routes.
 See [native local map delivery](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/facility-local-delivery.md).
 
+## Optional public internet webcams
+
+The kit includes `edge/public-webcams.example.json` as a disabled configuration
+shape. Merge only provider-permitted direct HTTPS JPEG/MJPEG sources into your
+local source list, retain attribution and restart. Monitor → Public webcams
+loads the approved list without contacting providers; Connect makes the external
+request. See the [public-webcam guide](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/public-webcams.md).
+Snapshots show retrieval age, not verified capture time. Local footage is not
+uploaded. Public providers, logins, HTML players and HLS formats are not bundled.
+
 ## Optional recording recognition
 
 Previews do **not** record or run live AI. Recognition analyzes a deliberately

@@ -1,0 +1,15 @@
+{
+  "sources": [
+    {
+      "id": "public-garden",
+      "name": "Replace with the permitted webcam name",
+      "kind": "public-jpeg",
+      "host": "replace-with-provider.invalid",
+      "path": "/replace-with-documented-image.jpg",
+      "provider": "Replace with provider attribution",
+      "provider_url": "https://replace-with-provider.invalid/webcams/",
+      "permission": "public-viewing",
+      "refresh_seconds": 60
+    }
+  ]
+}
