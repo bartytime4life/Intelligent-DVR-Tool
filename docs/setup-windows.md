@@ -8,7 +8,7 @@ Reference target: **Windows 11 Pro x86-64**, Node.js **22**, Python **3.12**, Po
 
 1. Choose the same storage/CPU/RAM/GPU budget used for Linux, then validate **Windows drivers and recovery tools** for the exact board, HBA/RAID controller and backplane.
 2. Install Windows on a separate SSD. Have the storage operator provision and verify the chosen recording volume, with an explicit drive letter/mount path. A validated RAID6 controller plus NTFS is one candidate. Do not assume Linux RAIDZ2 or server-only Storage Spaces features are available as an equivalent Windows 11 client configuration.
-3. Install Node.js 22 from [Node's official distribution](https://nodejs.org/en/download), Python 3.12 from [Python's official Windows downloads](https://www.python.org/downloads/windows/), and Git. Check `node --version`, then `py -3.12 --version` or the selected `python --version`.
+3. Install 64-bit Python 3.12 from [Python's official Windows downloads](https://www.python.org/downloads/windows/). A source checkout additionally needs Node.js 22 and Git; the prebuilt kit does not. Check `py -3.12 --version` or the selected `python --version`.
 4. Use an ordinary account and a trusted project checkout. Review OS update/reboot, sleep, BitLocker/recovery-key, UPS and backup policy with the owner. No supplied script changes execution policy, disables security software, changes power plans or installs a background service.
 
 ## Install and start for PC testing

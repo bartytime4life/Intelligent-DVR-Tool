@@ -1,6 +1,7 @@
 # Native local map-service delivery
 
-This is an opt-in loopback route for the existing Linux/Windows Vite launchers.
+This is an opt-in loopback route for a **source checkout** using the Linux/Windows
+launchers and Node.js 22. It uses the existing bounded Vite middleware.
 It installs no service, downloads no map database and never enables cameras.
 Prepare regional Photon and Overpass services separately from their upstream
 [Photon](https://github.com/komoot/photon) and
@@ -18,10 +19,19 @@ Before running the existing launcher, set these operator environment variables:
 
 Linux example: `DVR_GEO_LOCAL=1 bash scripts/run-linux.sh`. PowerShell example:
 `$env:DVR_GEO_LOCAL='1'`, then `./scripts/Start-IntelligentDvr.ps1`. These are explicit
-operator actions; the browser never changes them. Set them in the same process
+operator actions; the browser never changes them. DVR_GEO_LOCAL=1 automatically
+selects the source facility preview. Explicit --facility / -Facility also selects
+that preview; the geo routes still require the environment opt-in. Set them in the same process
 that builds/serves the app. The default browser paths are `/geo/search` and
 `/geo/overpass`. A build-time custom `VITE_FACILITY_LOCAL_PREFIX` needs the matching
 operator route; this native middleware currently handles `/geo` only.
+
+The prebuilt PC camera kit does not bundle Node/Vite or these provider routes.
+Its default Python service supports local cameras and recording analysis. For
+local map-service delivery, install a source checkout and use the mode above.
+For camera/analysis service testing, clear DVR_GEO_LOCAL; combining that flag with
+camera/analysis options is rejected with an actionable message. A hosted Site also
+has no access to these loopback services.
 
 Select **Local Photon service** or **Local Overpass service** in the app and
 submit a request. Native preview listens on loopback. Middleware additionally
