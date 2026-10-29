@@ -17,7 +17,7 @@ test('recognition keeps evidence separate, rejects wrong files, and sends observ
   await expect(page.getByText('No detections meet this display threshold.',{exact:false})).toBeVisible();
   await page.getByRole('button',{name:'Send 1 observations to Events'}).click();
   await page.getByRole('button',{name:'Events',exact:false}).first().click();
-  await expect(page.getByText('test-recording').first()).toBeVisible();
+  await expect(page.locator('.event-table-row').filter({hasText:'test-recording'})).toBeVisible();
   const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('dvr.events.v1')));
   expect(stored.find(e => e.id === 'import-fixture-observation')).toMatchObject({mode:'offline-model',camera:null});
 });
