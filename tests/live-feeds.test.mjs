@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {webcamController, webcamError, feedRequest, localFeedOrigin} from '../src/live-feeds.mjs';
+import {webcamController, webcamError, feedRequest, localFeedOrigin, visibleFeedTiles} from '../src/live-feeds.mjs';
 function stream() {
   const track=new EventTarget();track.readyState='live';track.stop=()=>{track.readyState='ended';};
   return {track,getTracks:()=>[track],getVideoTracks:()=>[track]};
@@ -47,4 +47,15 @@ test('local bridge requires exact loopback origin and authenticates mutations',a
 test('webcam failures never echo native error details',()=>{
   assert.doesNotMatch(webcamError({message:'private device id'}),/private device id/);
   assert.match(webcamError({name:'NotFoundError'}),/Attach a USB/);
+  assert.match(webcamError({name:'NotSupportedError'}),/browser build does not support webcam/);
+});
+
+test('one, two and four visible feed limits always include the selected source',()=>{
+  const tiles = ['a','b','c','d'].map(id=>({id}));
+  for (const limit of [1,2,4]) {
+    const visible=visibleFeedTiles(tiles,'d',limit);
+    assert.equal(visible.length,limit);assert.ok(visible.some(t=>t.id==='d'));
+  }
+  assert.deepEqual(visibleFeedTiles([],'absent',2),[]);
+  assert.deepEqual(visibleFeedTiles(tiles,'absent',2),tiles.slice(0,2));
 });

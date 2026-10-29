@@ -76,7 +76,12 @@ class PinnedRelay:
             def requests():
                 try:
                     while True:
-                        block = downstream.recv(64 * 1024)
+                        try:
+                            block = downstream.recv(64 * 1024)
+                        except socket.timeout:
+                            # RTSP/RTCP keepalives can be much less frequent than
+                            # media. Only upstream/media inactivity is stale.
+                            continue
                         if not block:
                             break
                         upstream.sendall(block)

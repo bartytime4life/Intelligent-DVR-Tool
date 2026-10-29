@@ -1,0 +1,18 @@
+{
+  "source_commit": "14f5eb381f15c6aa6034c466056b7e4390c12e07",
+  "base_pr": 28,
+  "cross_platform_run": 40908666650,
+  "browser_run": 40908666828,
+  "linux": {"job_id": 123570313775, "node_passed": 101, "python_passed": 171, "python_skipped": 0},
+  "windows": {"job_id": 123570313954, "node_passed": 101, "python_passed": 126, "python_skipped": 45},
+  "browser": {"job_id": 123570315489, "existing_passed": 19, "analysis_passed": 5, "feeds_passed": 7, "failed": 0, "skipped": 0, "generated_webcam": true, "generated_rtsp": true},
+  "browser_artifact": {"id": 12912263720, "sha256": "daf234af41fcf2d432d62891e0b525ef578424befc0c7cf8fa2a999cae836b21"},
+  "physical_camera_compatibility": "unqualified",
+  "recognition_accuracy": "unmeasured",
+  "live_inference": "not implemented",
+  "recording": "not implemented by preview",
+  "person_tracking": "not implemented",
+  "concurrent_camera_capacity_100": "unqualified",
+  "hosted_site": "source-sync DNS failure; unchanged",
+  "persistent_local_server": "blocked by selected executor socket policy"
+}

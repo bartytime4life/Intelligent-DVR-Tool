@@ -1,6 +1,6 @@
 import React, {useEffect, useRef, useState} from 'react';
 import {Camera, Plus, Plug, PlugsConnected, X, ArrowClockwise, WarningCircle} from '@phosphor-icons/react';
-import {feedRequest, localFeedOrigin, webcamController} from './live-feeds.mjs';
+import {feedRequest, localFeedOrigin, webcamController, visibleFeedTiles} from './live-feeds.mjs';
 import './live-feeds.css';
 
 const guide = 'https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/local-camera-feeds.md';
@@ -111,6 +111,14 @@ export default function LiveMonitor({queue, visibleTiles=4, onCount, pageHidden}
       if (ticket !== generation.current || !alive.current) {
         await feedRequest(`/${state.id}/disconnect`, {token:sessionToken, body:{}, signal:AbortSignal.timeout(4000)}); return;
       }
+      // A new explicit connection replaces terminal previews, never active ones.
+      for (const [id, previous] of sessions.current) {
+        if (!['connecting','live'].includes(previous.state)) {
+          previous.abort?.abort(); if (previous.image) URL.revokeObjectURL(previous.image);
+          sessions.current.delete(id);
+        }
+      }
+      if (!webcamActive) controller.current.stop('No webcam connected');
       sessions.current.set(state.id, {...state, token:sessionToken, image:''}); sync(); setSelected(state.id); setSetup('');
     } catch (err) { if (ticket === generation.current && alive.current) setError(`${err.name === 'TimeoutError' ? 'The service did not respond.' : err.message} If a connection started, its lease expires within 15 seconds.`); }
     finally { if (ticket === generation.current && alive.current) { setWorking(false); busy.current = false; } }
@@ -125,8 +133,7 @@ export default function LiveMonitor({queue, visibleTiles=4, onCount, pageHidden}
     ...(webcam.state !== 'disconnected' || webcam.message !== 'No webcam connected' ? [{id:'webcam', name:'This computer’s webcam', state:webcam.state, message:webcam.message}] : []),
     ...feeds,
   ];
-  const displayed = visibleTiles === 1 ? tiles.filter(t => t.id === selected).slice(0,1) : tiles.slice(0,4);
-  if (visibleTiles === 1 && !displayed.length && tiles.length) displayed.push(tiles[0]);
+  const displayed = visibleFeedTiles(tiles, selected, visibleTiles);
   const blanks = Math.max(0, Math.min(4, visibleTiles) - displayed.length);
   return <div className="live-monitor">
     <div className="live-heading"><div><p className="eyebrow">YOUR CAMERAS · LOCAL PREVIEW</p><h1>Monitor <span>{live} receiving</span></h1></div>
@@ -166,7 +173,7 @@ export default function LiveMonitor({queue, visibleTiles=4, onCount, pageHidden}
       <div className="modal-heading"><div><p className="eyebrow">EXPLICIT CONNECTION · LOCAL VIDEO</p><h2>Connect a camera source</h2></div><button className="icon-button" aria-label="Close connection setup" onClick={closeSetup}><X/></button></div>
       <div className="feed-kind"><button className={`button ${setup === 'webcam' ? 'active' : ''}`} onClick={() => {setError('');setSetup('webcam');}}><Camera/>This computer’s webcam</button><button className={`button ${setup === 'dvr' ? 'active' : ''}`} onClick={() => {setError('');setSetup('dvr');}}><Plug/>Local DVR / IP camera</button></div>
       {setup === 'webcam' ? <div className="feed-setup-body"><h3>Use a built-in or USB webcam</h3><p>Your browser will ask for camera permission. Video stays in this browser. The microphone stays off.</p>
-        <label>Webcam<select value={device} onChange={e => setDevice(e.target.value)} disabled={webcamActive}><option value="">Browser default camera</option>{devices.filter(d=>d.deviceId).map((d,i)=><option key={d.deviceId} value={d.deviceId}>{d.label || `Camera ${i+1}`}</option>)}</select></label>
+        <label>Webcam<select aria-label="Webcam" value={device} onChange={e => setDevice(e.target.value)} disabled={webcamActive}><option value="">Browser default camera</option>{devices.filter(d=>d.deviceId).map((d,i)=><option key={d.deviceId} value={d.deviceId}>{d.label || `Camera ${i+1}`}</option>)}</select></label>
         <button className="text-button" onClick={refreshDevices}><ArrowClockwise/>Refresh devices</button>
         <p className={webcam.state === 'failed' ? 'feed-error' : 'hint'} role="status">{webcam.message}</p>
         <div className="review-actions"><button className="button amber" disabled={webcamActive || active >= 4} onClick={async () => {setSelected('webcam');await controller.current.connect(device);}}>Connect webcam</button>
@@ -175,7 +182,7 @@ export default function LiveMonitor({queue, visibleTiles=4, onCount, pageHidden}
       </div> : <div className="feed-setup-body"><h3>Choose an RTSP channel on your LAN</h3><p>The local app bridges a configured DVR channel into this browser. Each channel has its own RTSP path. It connects only when you press Connect DVR channel.</p>
         {!local && <p className="feed-error">DVR access needs the local app at http://127.0.0.1. This hosted page cannot reach your DVR through the local service.</p>}
         <button className="button" disabled={!local || working} onClick={refreshDvr}><ArrowClockwise/>{catalog ? 'Refresh DVR sources' : 'Load configured DVR sources'}</button>
-        {catalog && <><label>DVR channel<select value={source} onChange={e=>setSource(e.target.value)} disabled={working}><option value="">Choose a channel…</option>{catalog.sources.map(s=><option key={s.id} value={s.id}>{s.name}</option>)}</select></label>
+        {catalog && <><label>DVR channel<select aria-label="DVR channel" value={source} onChange={e=>setSource(e.target.value)} disabled={working}><option value="">Choose a channel…</option>{catalog.sources.map(s=><option key={s.id} value={s.id}>{s.name}</option>)}</select></label>
           {!catalog.sources.length && <p>No DVR channels configured. Add the channel’s private IPv4 address, RTSP port, path and credentials to the local source file, then restart the local app.</p>}
           {!catalog.ready && <p className="feed-error">OpenCV is unavailable. Install the local edge requirements on Linux or Windows and restart the app.</p>}
           <button className="button amber" disabled={!source || working || !catalog.ready || active >= 4} onClick={connectDvr}><PlugsConnected/>{working ? 'Connecting…' : 'Connect DVR channel'}</button></>}
