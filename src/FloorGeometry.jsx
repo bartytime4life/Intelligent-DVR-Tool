@@ -6,9 +6,11 @@ import ShapeDimensions from './ShapeDimensions.jsx';
 import LineDimensions from './LineDimensions.jsx';
 import './floor-geometry.css';
 
-export default function FloorGeometry({plan,building,floor,selected,draft,onDraft,onSelect,commit,onDraw,disabled=false,ready,units='metric',pending=false,onPendingChange}) {
+export default function FloorGeometry({plan,building,floor:requestedFloor,selected,draft,onDraft,onSelect,commit,onDraw,disabled=false,ready,units='metric',pending=false,onPendingChange}) {
   const [error,setError]=useState('');
   if(!building)return null;
+  // Undo can remove the selected top level before the parent's floor effect runs.
+  const floor=Math.max(0,Math.min(building.floors-1,Number.isInteger(requestedFloor)?requestedFloor:0));
   const openings=(plan.openings || []).filter(o=>o.buildingId===building.id && o.level===floor);
   const paths=(plan.paths || []).filter(o=>o.buildingId===building.id && o.level===floor);
   const open=(building.openFloors || []).includes(floor);
