@@ -1,0 +1,2436 @@
+{
+  "schema": "intelligent-dvr.durable-overload-qualification.v1",
+  "owner_date": "2026-10-28",
+  "candidate_base_commit": "29b20d78726b0e811fa97fe62577e92ce6a82fab",
+  "scope": "Owner-local synthetic disk/IPC diagnostics; no native inference or camera-capacity claim",
+  "source_sha256": {
+    "edge/journal.py": "70f7a3419d05d76380ea32ad5de20ee440bc17256e25baf0f2289a86e46a495a",
+    "edge/supervision.py": "03f334d5fa072e5f3ad02bd90536fd2c00fc97ebfaa54ca1ef1c10b64b80a9cf",
+    "edge/scheduler.py": "8639b46d3ba2e1a14efaa7ff647f412e6be437685ec7be5717a00983835b9019",
+    "edge/inference.py": "7e95beb9e25dd67ac5d8d977ec6c466874371d12d112119a85a619124687b2f1",
+    "edge/profiling.py": "f7c0a3e4b831d7f996840aec51a73e3fe68e06627cdce854716c576068f80f91",
+    "scripts/profile-durable.py": "6f6ce5c9f9e8a83330c288562d6508b178cbfcd78037594f111b6ef486b08e72",
+    "scripts/summarize-durable-probes.py": "49599773a563334e7343f046a3a705fd5b69ff3b5e91e7e5c383175b5150be49",
+    "tests/test_checkpoint_policy.py": "a01fa9be734641b9b1eb6e1bcbfbdd0b9cc99702bb9ee3aa059666151d046059",
+    "tests/test_profile_durable_cli.py": "5db5f4e18107837c1efcf8b45a919dbbb77a3cab75c5ad9e027fa0bc9562f402",
+    "docs/verification/durable-overload-2026-10-28/run-experiment.py": "73f0f9a1dba93ceab3406981f46283729547fab3ee21f0a9d22427761d4f98f7",
+    "docs/verification/durable-overload-2026-10-28/legacy-roundtrip.py": "27ccd1bec6c8f1f4b2ded3f7915dbe61c0b77db2b5459cb88015be9ae59bdf7b",
+    "docs/verification/durable-overload-2026-10-28/check-cuda.py": "5af2870bac1cf8db142b0c646ada1a65f9da09bcc5994b217b49d82876ff5c74"
+  },
+  "native_cuda": {
+    "scope": "Synthetic startup admission only; not recording or capacity evidence",
+    "model_sha256": "c5c2d13e59ae883e6af3b45daea64af4833a4951c92d116ec270d9ddbe998063",
+    "onnxruntime": "1.31.1",
+    "requested_backend": "onnxruntime-cuda",
+    "available_providers": [
+      "TensorrtExecutionProvider",
+      "CUDAExecutionProvider",
+      "CPUExecutionProvider"
+    ],
+    "fallback_policy_requested": "disabled",
+    "cpu_fallback_used": false,
+    "recording_frames_processed": 0,
+    "visible_gpu_device_nodes": 0,
+    "source_sha256": {
+      "journal.py": "70f7a3419d05d76380ea32ad5de20ee440bc17256e25baf0f2289a86e46a495a",
+      "supervision.py": "03f334d5fa072e5f3ad02bd90536fd2c00fc97ebfaa54ca1ef1c10b64b80a9cf",
+      "scheduler.py": "8639b46d3ba2e1a14efaa7ff647f412e6be437685ec7be5717a00983835b9019",
+      "inference.py": "7e95beb9e25dd67ac5d8d977ec6c466874371d12d112119a85a619124687b2f1"
+    },
+    "status": "blocked",
+    "error_type": "RuntimeError",
+    "cuda_failure_code": 100,
+    "reason": "No CUDA-capable device detected"
+  },
+  "network_guard": {
+    "passed": true,
+    "checks": [
+      {
+        "family": 2,
+        "denied": true,
+        "errno": 1
+      },
+      {
+        "family": 10,
+        "denied": true,
+        "errno": 1
+      }
+    ]
+  },
+  "legacy_roundtrip": {
+    "passed": true,
+    "schema_version": 1,
+    "unique_ids": 3,
+    "interrupted": 1,
+    "legacy_wal_pages": 64,
+    "candidate_wal_pages": 512,
+    "read_repeat_stable": true,
+    "explicit_acks_survived_reopen": true,
+    "explicitly_pruned": 3
+  },
+  "tests": {
+    "cpu_environment": {
+      "discovered": 142,
+      "passed": 142,
+      "failed": 0,
+      "skipped": 0
+    },
+    "gpu_package_environment": {
+      "discovered": 142,
+      "passed": 142,
+      "failed": 0,
+      "skipped": 0
+    }
+  },
+  "initial_diagnostic": {
+    "plan": {
+      "scope": "Synthetic storage/IPC only; no native inference or capacity claim",
+      "baseline_commit": "50349bc758dedb6363c728e4893bedcedafc3808",
+      "candidate_commit": "29b20d78726b0e811fa97fe62577e92ce6a82fab",
+      "settings": {
+        "cameras": 100,
+        "workers": 4,
+        "seconds": 8,
+        "offer_hz": 20,
+        "payload_bytes": 388800,
+        "ack_seconds": 0.025,
+        "max_payload_bytes": 67108864,
+        "max_rows": 1000
+      },
+      "harness_sha256": "639867218a2e33ffd6c3020c1e78fc356d7a792e275b9a26c1dccd2894b56ba1",
+      "runner_sha256": "819916ca8c1fa97f36c259ab4d8c1b351218fe14e2912fe03bd70a15859fc41b",
+      "guard_sha256": "f13ebd3434a9eeb157263908eeeb892dbe48e3573f4049ab2eb716f3ed995d84",
+      "baseline_source_sha256": {
+        "journal.py": "b20ad60e4bfc80e62f9912cdba7ad0a8279e2b887ce5341ceb5084e40c3ed6aa",
+        "supervision.py": "c7dbd9c8694a986f324792abe901b6ef1d27dd5698233d6f7275308bb0cc854d",
+        "scheduler.py": "915cd9757a14d54abb5e1bc249ccd91d7ce37d6713786c31025307e87f661eb1",
+        "inference.py": "8393956c8c994da89f074b9fb9a49071d1ebe0868f26d13892c9a8159c305f8b"
+      },
+      "candidate_source_sha256": {
+        "journal.py": "35a166844761af46b82843cb1025e460b8ff4d4756f20b35ee97fb16c5520017",
+        "supervision.py": "03f334d5fa072e5f3ad02bd90536fd2c00fc97ebfaa54ca1ef1c10b64b80a9cf",
+        "scheduler.py": "8639b46d3ba2e1a14efaa7ff647f412e6be437685ec7be5717a00983835b9019",
+        "inference.py": "7e95beb9e25dd67ac5d8d977ec6c466874371d12d112119a85a619124687b2f1"
+      },
+      "order": [
+        "A1",
+        "B1",
+        "B2",
+        "A2",
+        "D1",
+        "R1",
+        "R2",
+        "D2",
+        "control"
+      ],
+      "filesystems": {
+        "disk": "ext2/ext3",
+        "ram": "tmpfs"
+      }
+    },
+    "reports": [
+      {
+        "case": "A1",
+        "settings": {
+          "cameras": 100,
+          "workers": 4,
+          "seconds": 8.0,
+          "payload_bytes": 388800,
+          "offer_hz": 20.0,
+          "journal": true,
+          "ack_seconds": 0.025,
+          "profiling": false
+        },
+        "python": "3.12.3",
+        "sqlite": "3.46.1",
+        "source_sha256": {
+          "journal.py": "b20ad60e4bfc80e62f9912cdba7ad0a8279e2b887ce5341ceb5084e40c3ed6aa",
+          "supervision.py": "c7dbd9c8694a986f324792abe901b6ef1d27dd5698233d6f7275308bb0cc854d",
+          "scheduler.py": "915cd9757a14d54abb5e1bc249ccd91d7ce37d6713786c31025307e87f661eb1",
+          "inference.py": "8393956c8c994da89f074b9fb9a49071d1ebe0868f26d13892c9a8159c305f8b"
+        },
+        "offered": 16000,
+        "completed_in_window": 4174,
+        "failed_in_window": 0,
+        "successful_drain": 2,
+        "failed_drain": 0,
+        "samples_per_second": 521.75,
+        "replacements": 11749,
+        "stale": 0,
+        "budget_dropped": 0,
+        "pending": 75,
+        "inflight": 0,
+        "peak_payload_bytes": 40435200,
+        "peak_entries": 509,
+        "unique_delivery_ids": 4176,
+        "accounting_balanced": true
+      },
+      {
+        "case": "B1",
+        "settings": {
+          "cameras": 100,
+          "workers": 4,
+          "seconds": 8.0,
+          "payload_bytes": 388800,
+          "offer_hz": 20.0,
+          "journal": true,
+          "ack_seconds": 0.025,
+          "profiling": false
+        },
+        "python": "3.12.3",
+        "sqlite": "3.46.1",
+        "source_sha256": {
+          "journal.py": "35a166844761af46b82843cb1025e460b8ff4d4756f20b35ee97fb16c5520017",
+          "supervision.py": "03f334d5fa072e5f3ad02bd90536fd2c00fc97ebfaa54ca1ef1c10b64b80a9cf",
+          "scheduler.py": "8639b46d3ba2e1a14efaa7ff647f412e6be437685ec7be5717a00983835b9019",
+          "inference.py": "7e95beb9e25dd67ac5d8d977ec6c466874371d12d112119a85a619124687b2f1"
+        },
+        "offered": 16000,
+        "completed_in_window": 4190,
+        "failed_in_window": 0,
+        "successful_drain": 4,
+        "failed_drain": 0,
+        "samples_per_second": 523.75,
+        "replacements": 11734,
+        "stale": 0,
+        "budget_dropped": 0,
+        "pending": 72,
+        "inflight": 0,
+        "peak_payload_bytes": 40435200,
+        "peak_entries": 514,
+        "unique_delivery_ids": 4194,
+        "accounting_balanced": true
+      },
+      {
+        "case": "B2",
+        "settings": {
+          "cameras": 100,
+          "workers": 4,
+          "seconds": 8.0,
+          "payload_bytes": 388800,
+          "offer_hz": 20.0,
+          "journal": true,
+          "ack_seconds": 0.025,
+          "profiling": false
+        },
+        "python": "3.12.3",
+        "sqlite": "3.46.1",
+        "source_sha256": {
+          "journal.py": "35a166844761af46b82843cb1025e460b8ff4d4756f20b35ee97fb16c5520017",
+          "supervision.py": "03f334d5fa072e5f3ad02bd90536fd2c00fc97ebfaa54ca1ef1c10b64b80a9cf",
+          "scheduler.py": "8639b46d3ba2e1a14efaa7ff647f412e6be437685ec7be5717a00983835b9019",
+          "inference.py": "7e95beb9e25dd67ac5d8d977ec6c466874371d12d112119a85a619124687b2f1"
+        },
+        "offered": 16000,
+        "completed_in_window": 4264,
+        "failed_in_window": 0,
+        "successful_drain": 5,
+        "failed_drain": 0,
+        "samples_per_second": 533.0,
+        "replacements": 11658,
+        "stale": 0,
+        "budget_dropped": 0,
+        "pending": 73,
+        "inflight": 0,
+        "peak_payload_bytes": 40435200,
+        "peak_entries": 513,
+        "unique_delivery_ids": 4269,
+        "accounting_balanced": true
+      },
+      {
+        "case": "A2",
+        "settings": {
+          "cameras": 100,
+          "workers": 4,
+          "seconds": 8.0,
+          "payload_bytes": 388800,
+          "offer_hz": 20.0,
+          "journal": true,
+          "ack_seconds": 0.025,
+          "profiling": false
+        },
+        "python": "3.12.3",
+        "sqlite": "3.46.1",
+        "source_sha256": {
+          "journal.py": "b20ad60e4bfc80e62f9912cdba7ad0a8279e2b887ce5341ceb5084e40c3ed6aa",
+          "supervision.py": "c7dbd9c8694a986f324792abe901b6ef1d27dd5698233d6f7275308bb0cc854d",
+          "scheduler.py": "915cd9757a14d54abb5e1bc249ccd91d7ce37d6713786c31025307e87f661eb1",
+          "inference.py": "8393956c8c994da89f074b9fb9a49071d1ebe0868f26d13892c9a8159c305f8b"
+        },
+        "offered": 16000,
+        "completed_in_window": 4044,
+        "failed_in_window": 0,
+        "successful_drain": 4,
+        "failed_drain": 0,
+        "samples_per_second": 505.5,
+        "replacements": 11876,
+        "stale": 0,
+        "budget_dropped": 0,
+        "pending": 76,
+        "inflight": 0,
+        "peak_payload_bytes": 40435200,
+        "peak_entries": 513,
+        "unique_delivery_ids": 4048,
+        "accounting_balanced": true
+      },
+      {
+        "case": "D1",
+        "settings": {
+          "cameras": 100,
+          "workers": 4,
+          "seconds": 8.0,
+          "payload_bytes": 388800,
+          "offer_hz": 20.0,
+          "journal": true,
+          "ack_seconds": 0.025,
+          "profiling": true
+        },
+        "python": "3.12.3",
+        "sqlite": "3.46.1",
+        "source_sha256": {
+          "journal.py": "35a166844761af46b82843cb1025e460b8ff4d4756f20b35ee97fb16c5520017",
+          "supervision.py": "03f334d5fa072e5f3ad02bd90536fd2c00fc97ebfaa54ca1ef1c10b64b80a9cf",
+          "scheduler.py": "8639b46d3ba2e1a14efaa7ff647f412e6be437685ec7be5717a00983835b9019",
+          "inference.py": "7e95beb9e25dd67ac5d8d977ec6c466874371d12d112119a85a619124687b2f1"
+        },
+        "offered": 16000,
+        "completed_in_window": 4008,
+        "failed_in_window": 0,
+        "successful_drain": 3,
+        "failed_drain": 0,
+        "samples_per_second": 501.0,
+        "replacements": 11917,
+        "stale": 0,
+        "budget_dropped": 0,
+        "pending": 72,
+        "inflight": 0,
+        "peak_payload_bytes": 40435200,
+        "peak_entries": 513,
+        "unique_delivery_ids": 4011,
+        "accounting_balanced": true,
+        "parent_timings_count_total_max": {
+          "journal.sqlite.query": [4124,49422105,96671],
+          "journal.sqlite.execute": [5523,66550069,336239],
+          "journal.sqlite.commit": [5523,5144971098,6007010],
+          "scheduler.snapshot": [2,35867,21640],
+          "parent.ipc.read": [17341,33937742,19447],
+          "parent.delivery": [2318,2039183,23875],
+          "parent.step": [2318,6320132920,11680005],
+          "parent.deserialize": [4075,45458773,262590],
+          "scheduler.dispatch": [2277,10285742,62978],
+          "journal.reserve": [2277,2837599840,6093271],
+          "scheduler.submit": [16000,22120231,45865],
+          "journal.hash": [4011,604788348,1454669],
+          "journal.serialize": [12033,57080351,159508],
+          "parent.serialize": [4012,159002306,265406],
+          "parent.ipc.write": [11375,145001220,472784],
+          "journal.pending": [288,18646413,137657],
+          "journal.snapshot": [290,6998471,61956],
+          "journal.finish": [2960,2899114633,6074285],
+          "scheduler.complete": [4011,10726487,14057],
+          "journal.ack": [287,273977396,3672495],
+          "journal.prune": [7,22205111,4492619]
+        }
+      },
+      {
+        "case": "R1",
+        "settings": {
+          "cameras": 100,
+          "workers": 4,
+          "seconds": 8.0,
+          "payload_bytes": 388800,
+          "offer_hz": 20.0,
+          "journal": true,
+          "ack_seconds": 0.025,
+          "profiling": true
+        },
+        "python": "3.12.3",
+        "sqlite": "3.46.1",
+        "source_sha256": {
+          "journal.py": "35a166844761af46b82843cb1025e460b8ff4d4756f20b35ee97fb16c5520017",
+          "supervision.py": "03f334d5fa072e5f3ad02bd90536fd2c00fc97ebfaa54ca1ef1c10b64b80a9cf",
+          "scheduler.py": "8639b46d3ba2e1a14efaa7ff647f412e6be437685ec7be5717a00983835b9019",
+          "inference.py": "7e95beb9e25dd67ac5d8d977ec6c466874371d12d112119a85a619124687b2f1"
+        },
+        "offered": 16000,
+        "completed_in_window": 11602,
+        "failed_in_window": 0,
+        "successful_drain": 4,
+        "failed_drain": 0,
+        "samples_per_second": 1450.25,
+        "replacements": 4366,
+        "stale": 0,
+        "budget_dropped": 0,
+        "pending": 28,
+        "inflight": 0,
+        "peak_payload_bytes": 40435200,
+        "peak_entries": 539,
+        "unique_delivery_ids": 11606,
+        "accounting_balanced": true,
+        "parent_timings_count_total_max": {
+          "journal.sqlite.query": [11873,72198911,176990],
+          "journal.sqlite.execute": [18104,116193100,283741],
+          "journal.sqlite.commit": [18104,121853659,164608],
+          "scheduler.snapshot": [2,30437,16421],
+          "parent.ipc.read": [52481,69166919,39564],
+          "parent.delivery": [7244,4309331,3446],
+          "parent.step": [7244,3799007815,1868623],
+          "parent.deserialize": [11789,90369180,159789],
+          "scheduler.dispatch": [7207,22210553,28995],
+          "journal.reserve": [7207,1884082146,928987],
+          "scheduler.submit": [16000,18682690,53110],
+          "journal.hash": [11606,1671788318,492431],
+          "journal.serialize": [34818,111832287,43601],
+          "parent.serialize": [11607,556950219,311583],
+          "parent.ipc.write": [32842,310733434,389808],
+          "journal.pending": [311,36097304,263633],
+          "journal.snapshot": [313,5736166,58249],
+          "journal.finish": [10602,413387978,307696],
+          "scheduler.complete": [11606,18736276,19477],
+          "journal.ack": [310,22104095,190967],
+          "journal.prune": [22,9926230,529320]
+        }
+      },
+      {
+        "case": "R2",
+        "settings": {
+          "cameras": 100,
+          "workers": 4,
+          "seconds": 8.0,
+          "payload_bytes": 388800,
+          "offer_hz": 20.0,
+          "journal": true,
+          "ack_seconds": 0.025,
+          "profiling": true
+        },
+        "python": "3.12.3",
+        "sqlite": "3.46.1",
+        "source_sha256": {
+          "journal.py": "35a166844761af46b82843cb1025e460b8ff4d4756f20b35ee97fb16c5520017",
+          "supervision.py": "03f334d5fa072e5f3ad02bd90536fd2c00fc97ebfaa54ca1ef1c10b64b80a9cf",
+          "scheduler.py": "8639b46d3ba2e1a14efaa7ff647f412e6be437685ec7be5717a00983835b9019",
+          "inference.py": "7e95beb9e25dd67ac5d8d977ec6c466874371d12d112119a85a619124687b2f1"
+        },
+        "offered": 16000,
+        "completed_in_window": 11654,
+        "failed_in_window": 0,
+        "successful_drain": 5,
+        "failed_drain": 0,
+        "samples_per_second": 1456.75,
+        "replacements": 4325,
+        "stale": 0,
+        "budget_dropped": 0,
+        "pending": 16,
+        "inflight": 0,
+        "peak_payload_bytes": 40435200,
+        "peak_entries": 540,
+        "unique_delivery_ids": 11659,
+        "accounting_balanced": true,
+        "parent_timings_count_total_max": {
+          "journal.sqlite.query": [12085,72687402,112811],
+          "journal.sqlite.execute": [18230,118525656,412441],
+          "journal.sqlite.commit": [18230,124103270,220562],
+          "scheduler.snapshot": [2,21651,11762],
+          "parent.ipc.read": [52203,69880619,30196],
+          "parent.delivery": [7147,4281796,6041],
+          "parent.step": [7147,3850334835,2712521],
+          "parent.deserialize": [11843,93032147,299711],
+          "scheduler.dispatch": [7111,22494922,25457],
+          "journal.reserve": [7111,1901275266,889894],
+          "scheduler.submit": [16000,19041174,13766],
+          "journal.hash": [11659,1686053291,349834],
+          "journal.serialize": [34977,112413247,38322],
+          "parent.serialize": [11660,566702681,315340],
+          "parent.ipc.write": [31704,316450708,1945337],
+          "journal.pending": [311,37283211,351988],
+          "journal.snapshot": [313,5964898,39644],
+          "journal.finish": [10814,419839762,193201],
+          "scheduler.complete": [11659,18956098,10008],
+          "journal.ack": [310,23056630,226423],
+          "journal.prune": [22,10267397,717301]
+        }
+      },
+      {
+        "case": "D2",
+        "settings": {
+          "cameras": 100,
+          "workers": 4,
+          "seconds": 8.0,
+          "payload_bytes": 388800,
+          "offer_hz": 20.0,
+          "journal": true,
+          "ack_seconds": 0.025,
+          "profiling": true
+        },
+        "python": "3.12.3",
+        "sqlite": "3.46.1",
+        "source_sha256": {
+          "journal.py": "35a166844761af46b82843cb1025e460b8ff4d4756f20b35ee97fb16c5520017",
+          "supervision.py": "03f334d5fa072e5f3ad02bd90536fd2c00fc97ebfaa54ca1ef1c10b64b80a9cf",
+          "scheduler.py": "8639b46d3ba2e1a14efaa7ff647f412e6be437685ec7be5717a00983835b9019",
+          "inference.py": "7e95beb9e25dd67ac5d8d977ec6c466874371d12d112119a85a619124687b2f1"
+        },
+        "offered": 16000,
+        "completed_in_window": 4085,
+        "failed_in_window": 0,
+        "successful_drain": 4,
+        "failed_drain": 0,
+        "samples_per_second": 510.625,
+        "replacements": 11838,
+        "stale": 0,
+        "budget_dropped": 0,
+        "pending": 73,
+        "inflight": 0,
+        "peak_payload_bytes": 40435200,
+        "peak_entries": 511,
+        "unique_delivery_ids": 4089,
+        "accounting_balanced": true,
+        "parent_timings_count_total_max": {
+          "journal.sqlite.query": [4071,42403118,92854],
+          "journal.sqlite.execute": [5471,58776487,323846],
+          "journal.sqlite.commit": [5471,5123809522,9356092],
+          "scheduler.snapshot": [2,35927,26109],
+          "parent.ipc.read": [17491,31318465,25077],
+          "parent.delivery": [2315,1816284,5320],
+          "parent.step": [2315,6305841872,19014089],
+          "parent.deserialize": [4154,41295429,168215],
+          "scheduler.dispatch": [2276,9233716,57036],
+          "journal.reserve": [2276,2822636302,9691369],
+          "scheduler.submit": [16000,21183517,17001],
+          "journal.hash": [4089,632544783,364551],
+          "journal.serialize": [12267,52010987,42620],
+          "parent.serialize": [4090,224863542,1781841],
+          "parent.ipc.write": [11189,121658692,241060],
+          "journal.pending": [287,16446704,110466],
+          "journal.snapshot": [289,6275757,74098],
+          "journal.finish": [2906,2863804979,8915018],
+          "scheduler.complete": [4089,9224850,8797],
+          "journal.ack": [286,299371799,9354740],
+          "journal.prune": [8,25448902,5448626]
+        }
+      },
+      {
+        "case": "control",
+        "settings": {
+          "cameras": 100,
+          "workers": 4,
+          "seconds": 8.0,
+          "payload_bytes": 388800,
+          "offer_hz": 20.0,
+          "journal": false,
+          "ack_seconds": 0.025,
+          "profiling": true
+        },
+        "python": "3.12.3",
+        "sqlite": "3.46.1",
+        "source_sha256": {
+          "journal.py": "35a166844761af46b82843cb1025e460b8ff4d4756f20b35ee97fb16c5520017",
+          "supervision.py": "03f334d5fa072e5f3ad02bd90536fd2c00fc97ebfaa54ca1ef1c10b64b80a9cf",
+          "scheduler.py": "8639b46d3ba2e1a14efaa7ff647f412e6be437685ec7be5717a00983835b9019",
+          "inference.py": "7e95beb9e25dd67ac5d8d977ec6c466874371d12d112119a85a619124687b2f1"
+        },
+        "offered": 16000,
+        "completed_in_window": 13897,
+        "failed_in_window": 0,
+        "successful_drain": 4,
+        "failed_drain": 0,
+        "samples_per_second": 1737.125,
+        "replacements": 2091,
+        "stale": 0,
+        "budget_dropped": 0,
+        "pending": 8,
+        "inflight": 0,
+        "peak_payload_bytes": 40435200,
+        "peak_entries": 0,
+        "unique_delivery_ids": 0,
+        "accounting_balanced": true,
+        "parent_timings_count_total_max": {
+          "scheduler.snapshot": [2,27771,18254],
+          "parent.ipc.read": [72797,87570829,63649],
+          "parent.delivery": [11158,6095268,6762],
+          "parent.step": [11158,1677595413,782753],
+          "parent.deserialize": [14120,158901174,196147],
+          "scheduler.dispatch": [11120,29490566,66744],
+          "scheduler.submit": [16000,19580825,15259],
+          "parent.serialize": [13902,574269134,224449],
+          "parent.ipc.write": [45701,382144257,487101],
+          "scheduler.complete": [13901,21055463,24796]
+        }
+      }
+    ]
+  },
+  "exploratory_checkpoint_trial": [
+    {
+      "case": "A1",
+      "settings": {
+        "cameras": 100,
+        "workers": 4,
+        "seconds": 8.0,
+        "payload_bytes": 388800,
+        "offer_hz": 20.0,
+        "journal": true,
+        "ack_seconds": 0.025,
+        "profiling": false
+      },
+      "python": "3.12.3",
+      "sqlite": "3.46.1",
+      "source_sha256": {
+        "journal.py": "35a166844761af46b82843cb1025e460b8ff4d4756f20b35ee97fb16c5520017",
+        "supervision.py": "03f334d5fa072e5f3ad02bd90536fd2c00fc97ebfaa54ca1ef1c10b64b80a9cf",
+        "scheduler.py": "8639b46d3ba2e1a14efaa7ff647f412e6be437685ec7be5717a00983835b9019",
+        "inference.py": "7e95beb9e25dd67ac5d8d977ec6c466874371d12d112119a85a619124687b2f1"
+      },
+      "offered": 16000,
+      "completed_in_window": 4128,
+      "failed_in_window": 0,
+      "successful_drain": 4,
+      "failed_drain": 0,
+      "samples_per_second": 516.0,
+      "replacements": 11796,
+      "stale": 0,
+      "budget_dropped": 0,
+      "pending": 72,
+      "inflight": 0,
+      "peak_payload_bytes": 40435200,
+      "peak_entries": 511,
+      "journal_policy": {
+        "journal_mode": "wal",
+        "synchronous": 2,
+        "wal_autocheckpoint": 64,
+        "page_size": 4096
+      },
+      "sampled_peak_wal_bytes": 609792,
+      "unique_delivery_ids": 4132,
+      "accounting_balanced": true
+    },
+    {
+      "case": "B1",
+      "settings": {
+        "cameras": 100,
+        "workers": 4,
+        "seconds": 8.0,
+        "payload_bytes": 388800,
+        "offer_hz": 20.0,
+        "journal": true,
+        "ack_seconds": 0.025,
+        "profiling": false
+      },
+      "python": "3.12.3",
+      "sqlite": "3.46.1",
+      "source_sha256": {
+        "journal.py": "5084e69a282c17af29030e0cda50f7e8affb007324eb1a2a322dad7e4a8f5090",
+        "supervision.py": "03f334d5fa072e5f3ad02bd90536fd2c00fc97ebfaa54ca1ef1c10b64b80a9cf",
+        "scheduler.py": "8639b46d3ba2e1a14efaa7ff647f412e6be437685ec7be5717a00983835b9019",
+        "inference.py": "7e95beb9e25dd67ac5d8d977ec6c466874371d12d112119a85a619124687b2f1"
+      },
+      "offered": 16000,
+      "completed_in_window": 4378,
+      "failed_in_window": 0,
+      "successful_drain": 5,
+      "failed_drain": 0,
+      "samples_per_second": 547.25,
+      "replacements": 11547,
+      "stale": 0,
+      "budget_dropped": 0,
+      "pending": 70,
+      "inflight": 0,
+      "peak_payload_bytes": 40435200,
+      "peak_entries": 513,
+      "journal_policy": {
+        "journal_mode": "wal",
+        "synchronous": 2,
+        "wal_autocheckpoint": 512,
+        "page_size": 4096
+      },
+      "sampled_peak_wal_bytes": 2146552,
+      "unique_delivery_ids": 4383,
+      "accounting_balanced": true
+    },
+    {
+      "case": "B2",
+      "settings": {
+        "cameras": 100,
+        "workers": 4,
+        "seconds": 8.0,
+        "payload_bytes": 388800,
+        "offer_hz": 20.0,
+        "journal": true,
+        "ack_seconds": 0.025,
+        "profiling": false
+      },
+      "python": "3.12.3",
+      "sqlite": "3.46.1",
+      "source_sha256": {
+        "journal.py": "5084e69a282c17af29030e0cda50f7e8affb007324eb1a2a322dad7e4a8f5090",
+        "supervision.py": "03f334d5fa072e5f3ad02bd90536fd2c00fc97ebfaa54ca1ef1c10b64b80a9cf",
+        "scheduler.py": "8639b46d3ba2e1a14efaa7ff647f412e6be437685ec7be5717a00983835b9019",
+        "inference.py": "7e95beb9e25dd67ac5d8d977ec6c466874371d12d112119a85a619124687b2f1"
+      },
+      "offered": 16000,
+      "completed_in_window": 4395,
+      "failed_in_window": 0,
+      "successful_drain": 4,
+      "failed_drain": 0,
+      "samples_per_second": 549.375,
+      "replacements": 11530,
+      "stale": 0,
+      "budget_dropped": 0,
+      "pending": 71,
+      "inflight": 0,
+      "peak_payload_bytes": 40435200,
+      "peak_entries": 510,
+      "journal_policy": {
+        "journal_mode": "wal",
+        "synchronous": 2,
+        "wal_autocheckpoint": 512,
+        "page_size": 4096
+      },
+      "sampled_peak_wal_bytes": 2348432,
+      "unique_delivery_ids": 4399,
+      "accounting_balanced": true
+    },
+    {
+      "case": "A2",
+      "settings": {
+        "cameras": 100,
+        "workers": 4,
+        "seconds": 8.0,
+        "payload_bytes": 388800,
+        "offer_hz": 20.0,
+        "journal": true,
+        "ack_seconds": 0.025,
+        "profiling": false
+      },
+      "python": "3.12.3",
+      "sqlite": "3.46.1",
+      "source_sha256": {
+        "journal.py": "35a166844761af46b82843cb1025e460b8ff4d4756f20b35ee97fb16c5520017",
+        "supervision.py": "03f334d5fa072e5f3ad02bd90536fd2c00fc97ebfaa54ca1ef1c10b64b80a9cf",
+        "scheduler.py": "8639b46d3ba2e1a14efaa7ff647f412e6be437685ec7be5717a00983835b9019",
+        "inference.py": "7e95beb9e25dd67ac5d8d977ec6c466874371d12d112119a85a619124687b2f1"
+      },
+      "offered": 16000,
+      "completed_in_window": 4189,
+      "failed_in_window": 0,
+      "successful_drain": 4,
+      "failed_drain": 0,
+      "samples_per_second": 523.625,
+      "replacements": 11735,
+      "stale": 0,
+      "budget_dropped": 0,
+      "pending": 72,
+      "inflight": 0,
+      "peak_payload_bytes": 40435200,
+      "peak_entries": 513,
+      "journal_policy": {
+        "journal_mode": "wal",
+        "synchronous": 2,
+        "wal_autocheckpoint": 64,
+        "page_size": 4096
+      },
+      "sampled_peak_wal_bytes": 597432,
+      "unique_delivery_ids": 4193,
+      "accounting_balanced": true
+    },
+    {
+      "case": "profile64",
+      "settings": {
+        "cameras": 100,
+        "workers": 4,
+        "seconds": 8.0,
+        "payload_bytes": 388800,
+        "offer_hz": 20.0,
+        "journal": true,
+        "ack_seconds": 0.025,
+        "profiling": true
+      },
+      "python": "3.12.3",
+      "sqlite": "3.46.1",
+      "source_sha256": {
+        "journal.py": "35a166844761af46b82843cb1025e460b8ff4d4756f20b35ee97fb16c5520017",
+        "supervision.py": "03f334d5fa072e5f3ad02bd90536fd2c00fc97ebfaa54ca1ef1c10b64b80a9cf",
+        "scheduler.py": "8639b46d3ba2e1a14efaa7ff647f412e6be437685ec7be5717a00983835b9019",
+        "inference.py": "7e95beb9e25dd67ac5d8d977ec6c466874371d12d112119a85a619124687b2f1"
+      },
+      "offered": 16000,
+      "completed_in_window": 4094,
+      "failed_in_window": 0,
+      "successful_drain": 5,
+      "failed_drain": 0,
+      "samples_per_second": 511.75,
+      "replacements": 11831,
+      "stale": 0,
+      "budget_dropped": 0,
+      "pending": 70,
+      "inflight": 0,
+      "peak_payload_bytes": 40435200,
+      "peak_entries": 513,
+      "journal_policy": {
+        "journal_mode": "wal",
+        "synchronous": 2,
+        "wal_autocheckpoint": 64,
+        "page_size": 4096
+      },
+      "sampled_peak_wal_bytes": 626272,
+      "unique_delivery_ids": 4099,
+      "accounting_balanced": true,
+      "parent_timings_count_total_max": {
+        "journal.sqlite.query": [4044,44944327,100318],
+        "journal.sqlite.execute": [5475,62048371,410678],
+        "journal.sqlite.commit": [5475,5099597084,5673547],
+        "scheduler.snapshot": [2,42059,22833],
+        "parent.ipc.read": [17625,32298253,51556],
+        "parent.delivery": [2343,1879821,10039],
+        "parent.step": [2343,6304948821,10835918],
+        "parent.deserialize": [4165,43126588,125846],
+        "scheduler.dispatch": [2304,9555767,23253],
+        "journal.reserve": [2304,2899765900,5879422],
+        "scheduler.submit": [16000,20850015,28203],
+        "journal.hash": [4099,609767823,293148],
+        "journal.serialize": [12297,53579848,24656],
+        "parent.serialize": [4100,224687443,221053],
+        "parent.ipc.write": [11254,125874176,209051],
+        "journal.pending": [287,17026926,128330],
+        "journal.snapshot": [289,6292645,43201],
+        "journal.finish": [2882,2772390066,5311991],
+        "scheduler.complete": [4099,9297019,15970],
+        "journal.ack": [286,274746444,3611208],
+        "journal.prune": [8,26082702,6066011]
+      }
+    },
+    {
+      "case": "profile512",
+      "settings": {
+        "cameras": 100,
+        "workers": 4,
+        "seconds": 8.0,
+        "payload_bytes": 388800,
+        "offer_hz": 20.0,
+        "journal": true,
+        "ack_seconds": 0.025,
+        "profiling": true
+      },
+      "python": "3.12.3",
+      "sqlite": "3.46.1",
+      "source_sha256": {
+        "journal.py": "5084e69a282c17af29030e0cda50f7e8affb007324eb1a2a322dad7e4a8f5090",
+        "supervision.py": "03f334d5fa072e5f3ad02bd90536fd2c00fc97ebfaa54ca1ef1c10b64b80a9cf",
+        "scheduler.py": "8639b46d3ba2e1a14efaa7ff647f412e6be437685ec7be5717a00983835b9019",
+        "inference.py": "7e95beb9e25dd67ac5d8d977ec6c466874371d12d112119a85a619124687b2f1"
+      },
+      "offered": 16000,
+      "completed_in_window": 4415,
+      "failed_in_window": 0,
+      "successful_drain": 2,
+      "failed_drain": 0,
+      "samples_per_second": 551.875,
+      "replacements": 11512,
+      "stale": 0,
+      "budget_dropped": 0,
+      "pending": 71,
+      "inflight": 0,
+      "peak_payload_bytes": 40435200,
+      "peak_entries": 516,
+      "journal_policy": {
+        "journal_mode": "wal",
+        "synchronous": 2,
+        "wal_autocheckpoint": 512,
+        "page_size": 4096
+      },
+      "sampled_peak_wal_bytes": 2138312,
+      "unique_delivery_ids": 4417,
+      "accounting_balanced": true,
+      "parent_timings_count_total_max": {
+        "journal.sqlite.query": [4299,48124929,79168],
+        "journal.sqlite.execute": [5895,66280943,408965],
+        "journal.sqlite.commit": [5895,4868173947,5383154],
+        "scheduler.snapshot": [2,36288,20248],
+        "parent.ipc.read": [18987,34873635,22072],
+        "parent.delivery": [2521,2029000,6873],
+        "parent.step": [2521,6223095977,8737331],
+        "parent.deserialize": [4488,46442954,144320],
+        "scheduler.dispatch": [2484,10545581,21530],
+        "journal.reserve": [2484,2812379404,5604298],
+        "scheduler.submit": [16000,21236029,26309],
+        "journal.hash": [4417,649472613,362097],
+        "journal.serialize": [13251,57710407,35867],
+        "parent.serialize": [4418,241983818,246030],
+        "parent.ipc.write": [12180,141687270,348533],
+        "journal.pending": [291,19374871,123231],
+        "journal.snapshot": [293,6369809,59882],
+        "journal.finish": [3122,2721264484,5461320],
+        "scheduler.complete": [4417,10255341,11332],
+        "journal.ack": [290,257926824,4819519],
+        "journal.prune": [8,10831742,1667180]
+      }
+    }
+  ],
+  "confirmation": {
+    "plan": {
+      "scope": "Synthetic storage/IPC only; no native inference or capacity claim",
+      "baseline_commit": "29b20d78726b0e811fa97fe62577e92ce6a82fab",
+      "candidate_base_commit": "29b20d78726b0e811fa97fe62577e92ce6a82fab",
+      "acceptance": {
+        "minimum_median_gain": 0.03,
+        "maximum_sampled_wal_bytes": 4194304,
+        "full_sync": 2,
+        "mode": "wal",
+        "balanced_opportunities": true
+      },
+      "settings": {
+        "cameras": 100,
+        "workers": 4,
+        "seconds": 8,
+        "offer_hz": 20,
+        "payload_bytes": 388800,
+        "ack_seconds": 0.025,
+        "max_payload_bytes": 67108864,
+        "max_rows": 1000
+      },
+      "harness_sha256": "6f6ce5c9f9e8a83330c288562d6508b178cbfcd78037594f111b6ef486b08e72",
+      "runner_sha256": "73f0f9a1dba93ceab3406981f46283729547fab3ee21f0a9d22427761d4f98f7",
+      "guard_sha256": "f13ebd3434a9eeb157263908eeeb892dbe48e3573f4049ab2eb716f3ed995d84",
+      "baseline_source_sha256": {
+        "journal.py": "35a166844761af46b82843cb1025e460b8ff4d4756f20b35ee97fb16c5520017",
+        "supervision.py": "03f334d5fa072e5f3ad02bd90536fd2c00fc97ebfaa54ca1ef1c10b64b80a9cf",
+        "scheduler.py": "8639b46d3ba2e1a14efaa7ff647f412e6be437685ec7be5717a00983835b9019",
+        "inference.py": "7e95beb9e25dd67ac5d8d977ec6c466874371d12d112119a85a619124687b2f1"
+      },
+      "candidate_source_sha256": {
+        "journal.py": "70f7a3419d05d76380ea32ad5de20ee440bc17256e25baf0f2289a86e46a495a",
+        "supervision.py": "03f334d5fa072e5f3ad02bd90536fd2c00fc97ebfaa54ca1ef1c10b64b80a9cf",
+        "scheduler.py": "8639b46d3ba2e1a14efaa7ff647f412e6be437685ec7be5717a00983835b9019",
+        "inference.py": "7e95beb9e25dd67ac5d8d977ec6c466874371d12d112119a85a619124687b2f1"
+      },
+      "order": [
+        "A1",
+        "B1",
+        "B2",
+        "A2",
+        "D1",
+        "R1",
+        "R2",
+        "D2",
+        "control"
+      ],
+      "filesystems": {
+        "disk": "ext2/ext3",
+        "ram": "tmpfs"
+      }
+    },
+    "reports": [
+      {
+        "schema": "intelligent-dvr.synthetic-durable-profile.v1",
+        "scope": "Synthetic storage/IPC only; no media, inference or capacity claim",
+        "python": "3.12.3",
+        "sqlite": "3.46.1",
+        "source_sha256": {
+          "journal.py": "35a166844761af46b82843cb1025e460b8ff4d4756f20b35ee97fb16c5520017",
+          "supervision.py": "03f334d5fa072e5f3ad02bd90536fd2c00fc97ebfaa54ca1ef1c10b64b80a9cf",
+          "scheduler.py": "8639b46d3ba2e1a14efaa7ff647f412e6be437685ec7be5717a00983835b9019",
+          "inference.py": "7e95beb9e25dd67ac5d8d977ec6c466874371d12d112119a85a619124687b2f1"
+        },
+        "settings": {
+          "cameras": 100,
+          "workers": 4,
+          "seconds": 8.0,
+          "payload_bytes": 388800,
+          "offer_hz": 20.0,
+          "journal": true,
+          "ack_seconds": 0.025,
+          "profiling": false
+        },
+        "offered": 16000,
+        "completed_in_window": 4186,
+        "failed_in_window": 0,
+        "successful_drain": 5,
+        "failed_drain": 0,
+        "window_seconds": 8.0,
+        "samples_per_second": 523.25,
+        "replacements": 11735,
+        "stale": 0,
+        "budget_dropped": 0,
+        "pending": 74,
+        "inflight": 0,
+        "peak_payload_bytes": 40435200,
+        "peak_entries": 514,
+        "journal_policy": {
+          "journal_mode": "wal",
+          "synchronous": 2,
+          "wal_autocheckpoint": 64,
+          "page_size": 4096
+        },
+        "sampled_peak_wal_bytes": 605672,
+        "unique_delivery_ids": 4191,
+        "accounting_balanced": true,
+        "workers": {
+          "state": "closed",
+          "generation": 1,
+          "restarts": 0,
+          "active": 0,
+          "completed": 4191,
+          "failed": 0,
+          "process_failures": 0,
+          "journal_blocked": false,
+          "journal_error": null,
+          "received_uncommitted": 0,
+          "child_alive": false,
+          "unsent_bytes": 0,
+          "received_buffer_bytes": 0
+        },
+        "journal": {
+          "entries": 146,
+          "reserved_bytes": 312732,
+          "max_entries": 1000,
+          "max_bytes": 67108864,
+          "recovered_interrupted": 0,
+          "unacknowledged": 0,
+          "states": {
+            "succeeded": 146
+          },
+          "terminal_commits": 2998,
+          "terminal_rows": 4191,
+          "largest_terminal_batch": 3
+        },
+        "profile": null,
+        "case": "A1"
+      },
+      {
+        "schema": "intelligent-dvr.synthetic-durable-profile.v1",
+        "scope": "Synthetic storage/IPC only; no media, inference or capacity claim",
+        "python": "3.12.3",
+        "sqlite": "3.46.1",
+        "source_sha256": {
+          "journal.py": "70f7a3419d05d76380ea32ad5de20ee440bc17256e25baf0f2289a86e46a495a",
+          "supervision.py": "03f334d5fa072e5f3ad02bd90536fd2c00fc97ebfaa54ca1ef1c10b64b80a9cf",
+          "scheduler.py": "8639b46d3ba2e1a14efaa7ff647f412e6be437685ec7be5717a00983835b9019",
+          "inference.py": "7e95beb9e25dd67ac5d8d977ec6c466874371d12d112119a85a619124687b2f1"
+        },
+        "settings": {
+          "cameras": 100,
+          "workers": 4,
+          "seconds": 8.0,
+          "payload_bytes": 388800,
+          "offer_hz": 20.0,
+          "journal": true,
+          "ack_seconds": 0.025,
+          "profiling": false
+        },
+        "offered": 16000,
+        "completed_in_window": 4497,
+        "failed_in_window": 0,
+        "successful_drain": 5,
+        "failed_drain": 0,
+        "window_seconds": 8.0,
+        "samples_per_second": 562.125,
+        "replacements": 11428,
+        "stale": 0,
+        "budget_dropped": 0,
+        "pending": 70,
+        "inflight": 0,
+        "peak_payload_bytes": 40435200,
+        "peak_entries": 516,
+        "journal_policy": {
+          "journal_mode": "wal",
+          "synchronous": 2,
+          "wal_autocheckpoint": 512,
+          "page_size": 4096
+        },
+        "sampled_peak_wal_bytes": 2138312,
+        "unique_delivery_ids": 4502,
+        "accounting_balanced": true,
+        "workers": {
+          "state": "closed",
+          "generation": 1,
+          "restarts": 0,
+          "active": 0,
+          "completed": 4502,
+          "failed": 0,
+          "process_failures": 0,
+          "journal_blocked": false,
+          "journal_error": null,
+          "received_uncommitted": 0,
+          "child_alive": false,
+          "unsent_bytes": 0,
+          "received_buffer_bytes": 0
+        },
+        "journal": {
+          "entries": 442,
+          "reserved_bytes": 946764,
+          "max_entries": 1000,
+          "max_bytes": 67108864,
+          "recovered_interrupted": 0,
+          "unacknowledged": 0,
+          "states": {
+            "succeeded": 442
+          },
+          "terminal_commits": 3181,
+          "terminal_rows": 4502,
+          "largest_terminal_batch": 2
+        },
+        "profile": null,
+        "case": "B1"
+      },
+      {
+        "schema": "intelligent-dvr.synthetic-durable-profile.v1",
+        "scope": "Synthetic storage/IPC only; no media, inference or capacity claim",
+        "python": "3.12.3",
+        "sqlite": "3.46.1",
+        "source_sha256": {
+          "journal.py": "70f7a3419d05d76380ea32ad5de20ee440bc17256e25baf0f2289a86e46a495a",
+          "supervision.py": "03f334d5fa072e5f3ad02bd90536fd2c00fc97ebfaa54ca1ef1c10b64b80a9cf",
+          "scheduler.py": "8639b46d3ba2e1a14efaa7ff647f412e6be437685ec7be5717a00983835b9019",
+          "inference.py": "7e95beb9e25dd67ac5d8d977ec6c466874371d12d112119a85a619124687b2f1"
+        },
+        "settings": {
+          "cameras": 100,
+          "workers": 4,
+          "seconds": 8.0,
+          "payload_bytes": 388800,
+          "offer_hz": 20.0,
+          "journal": true,
+          "ack_seconds": 0.025,
+          "profiling": false
+        },
+        "offered": 16000,
+        "completed_in_window": 4460,
+        "failed_in_window": 0,
+        "successful_drain": 5,
+        "failed_drain": 0,
+        "window_seconds": 8.0,
+        "samples_per_second": 557.5,
+        "replacements": 11465,
+        "stale": 0,
+        "budget_dropped": 0,
+        "pending": 70,
+        "inflight": 0,
+        "peak_payload_bytes": 40435200,
+        "peak_entries": 515,
+        "journal_policy": {
+          "journal_mode": "wal",
+          "synchronous": 2,
+          "wal_autocheckpoint": 512,
+          "page_size": 4096
+        },
+        "sampled_peak_wal_bytes": 2261912,
+        "unique_delivery_ids": 4465,
+        "accounting_balanced": true,
+        "workers": {
+          "state": "closed",
+          "generation": 1,
+          "restarts": 0,
+          "active": 0,
+          "completed": 4465,
+          "failed": 0,
+          "process_failures": 0,
+          "journal_blocked": false,
+          "journal_error": null,
+          "received_uncommitted": 0,
+          "child_alive": false,
+          "unsent_bytes": 0,
+          "received_buffer_bytes": 0
+        },
+        "journal": {
+          "entries": 406,
+          "reserved_bytes": 869652,
+          "max_entries": 1000,
+          "max_bytes": 67108864,
+          "recovered_interrupted": 0,
+          "unacknowledged": 0,
+          "states": {
+            "succeeded": 406
+          },
+          "terminal_commits": 3149,
+          "terminal_rows": 4465,
+          "largest_terminal_batch": 2
+        },
+        "profile": null,
+        "case": "B2"
+      },
+      {
+        "schema": "intelligent-dvr.synthetic-durable-profile.v1",
+        "scope": "Synthetic storage/IPC only; no media, inference or capacity claim",
+        "python": "3.12.3",
+        "sqlite": "3.46.1",
+        "source_sha256": {
+          "journal.py": "35a166844761af46b82843cb1025e460b8ff4d4756f20b35ee97fb16c5520017",
+          "supervision.py": "03f334d5fa072e5f3ad02bd90536fd2c00fc97ebfaa54ca1ef1c10b64b80a9cf",
+          "scheduler.py": "8639b46d3ba2e1a14efaa7ff647f412e6be437685ec7be5717a00983835b9019",
+          "inference.py": "7e95beb9e25dd67ac5d8d977ec6c466874371d12d112119a85a619124687b2f1"
+        },
+        "settings": {
+          "cameras": 100,
+          "workers": 4,
+          "seconds": 8.0,
+          "payload_bytes": 388800,
+          "offer_hz": 20.0,
+          "journal": true,
+          "ack_seconds": 0.025,
+          "profiling": false
+        },
+        "offered": 16000,
+        "completed_in_window": 4170,
+        "failed_in_window": 0,
+        "successful_drain": 5,
+        "failed_drain": 0,
+        "window_seconds": 8.0,
+        "samples_per_second": 521.25,
+        "replacements": 11751,
+        "stale": 0,
+        "budget_dropped": 0,
+        "pending": 74,
+        "inflight": 0,
+        "peak_payload_bytes": 40435200,
+        "peak_entries": 516,
+        "journal_policy": {
+          "journal_mode": "wal",
+          "synchronous": 2,
+          "wal_autocheckpoint": 64,
+          "page_size": 4096
+        },
+        "sampled_peak_wal_bytes": 601552,
+        "unique_delivery_ids": 4175,
+        "accounting_balanced": true,
+        "workers": {
+          "state": "closed",
+          "generation": 1,
+          "restarts": 0,
+          "active": 0,
+          "completed": 4175,
+          "failed": 0,
+          "process_failures": 0,
+          "journal_blocked": false,
+          "journal_error": null,
+          "received_uncommitted": 0,
+          "child_alive": false,
+          "unsent_bytes": 0,
+          "received_buffer_bytes": 0
+        },
+        "journal": {
+          "entries": 127,
+          "reserved_bytes": 272034,
+          "max_entries": 1000,
+          "max_bytes": 67108864,
+          "recovered_interrupted": 0,
+          "unacknowledged": 0,
+          "states": {
+            "succeeded": 127
+          },
+          "terminal_commits": 2944,
+          "terminal_rows": 4175,
+          "largest_terminal_batch": 3
+        },
+        "profile": null,
+        "case": "A2"
+      },
+      {
+        "schema": "intelligent-dvr.synthetic-durable-profile.v1",
+        "scope": "Synthetic storage/IPC only; no media, inference or capacity claim",
+        "python": "3.12.3",
+        "sqlite": "3.46.1",
+        "source_sha256": {
+          "journal.py": "70f7a3419d05d76380ea32ad5de20ee440bc17256e25baf0f2289a86e46a495a",
+          "supervision.py": "03f334d5fa072e5f3ad02bd90536fd2c00fc97ebfaa54ca1ef1c10b64b80a9cf",
+          "scheduler.py": "8639b46d3ba2e1a14efaa7ff647f412e6be437685ec7be5717a00983835b9019",
+          "inference.py": "7e95beb9e25dd67ac5d8d977ec6c466874371d12d112119a85a619124687b2f1"
+        },
+        "settings": {
+          "cameras": 100,
+          "workers": 4,
+          "seconds": 8.0,
+          "payload_bytes": 388800,
+          "offer_hz": 20.0,
+          "journal": true,
+          "ack_seconds": 0.025,
+          "profiling": true
+        },
+        "offered": 16000,
+        "completed_in_window": 4435,
+        "failed_in_window": 0,
+        "successful_drain": 4,
+        "failed_drain": 0,
+        "window_seconds": 8.0,
+        "samples_per_second": 554.375,
+        "replacements": 11490,
+        "stale": 0,
+        "budget_dropped": 0,
+        "pending": 71,
+        "inflight": 0,
+        "peak_payload_bytes": 40435200,
+        "peak_entries": 510,
+        "journal_policy": {
+          "journal_mode": "wal",
+          "synchronous": 2,
+          "wal_autocheckpoint": 512,
+          "page_size": 4096
+        },
+        "sampled_peak_wal_bytes": 2356672,
+        "unique_delivery_ids": 4439,
+        "accounting_balanced": true,
+        "workers": {
+          "state": "closed",
+          "generation": 1,
+          "restarts": 0,
+          "active": 0,
+          "completed": 4439,
+          "failed": 0,
+          "process_failures": 0,
+          "journal_blocked": false,
+          "journal_error": null,
+          "received_uncommitted": 0,
+          "child_alive": false,
+          "unsent_bytes": 0,
+          "received_buffer_bytes": 0
+        },
+        "journal": {
+          "entries": 415,
+          "reserved_bytes": 888930,
+          "max_entries": 1000,
+          "max_bytes": 67108864,
+          "recovered_interrupted": 0,
+          "unacknowledged": 0,
+          "states": {
+            "succeeded": 415
+          },
+          "terminal_commits": 3255,
+          "terminal_rows": 4439,
+          "largest_terminal_batch": 2
+        },
+        "profile": {
+          "enabled": true,
+          "parent": {
+            "journal.sqlite.query": [
+              4424,
+              45453428,
+              97843,
+              [0,0,0,0,0,0,0,0,0,0,0,22,257,1494,2198,422,29,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ],
+            "journal.sqlite.execute": [
+              6030,
+              63159469,
+              320420,
+              [0,0,0,0,0,0,0,0,0,0,0,0,97,2512,2650,735,26,2,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ],
+            "journal.sqlite.commit": [
+              6030,
+              5004187306,
+              5535010,
+              [0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,4320,1601,105,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ],
+            "scheduler.snapshot": [
+              2,
+              37540,
+              18986,
+              [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ],
+            "parent.ipc.read": [
+              19039,
+              33986362,
+              18966,
+              [0,0,0,0,0,0,0,0,0,1,2896,11152,4407,565,16,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ],
+            "parent.delivery": [
+              2523,
+              2011860,
+              3566,
+              [0,0,0,0,0,0,0,0,2,56,2175,278,12,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ],
+            "parent.step": [
+              2523,
+              6212881570,
+              8526379,
+              [0,0,0,0,0,0,0,0,0,0,0,0,0,18,6,9,5,3,0,0,10,785,1609,76,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ],
+            "parent.deserialize": [
+              4510,
+              45613395,
+              167273,
+              [0,0,0,0,0,0,0,0,0,0,0,0,68,2087,2180,103,2,68,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ],
+            "scheduler.dispatch": [
+              2486,
+              9812147,
+              10700,
+              [0,0,0,0,0,0,0,0,0,0,0,16,1560,891,19,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ],
+            "journal.reserve": [
+              2486,
+              2825302231,
+              5277859,
+              [0,0,0,0,0,0,0,0,0,2,5,1,0,0,0,0,0,0,0,0,1603,806,67,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ],
+            "scheduler.submit": [
+              16000,
+              20913137,
+              14758,
+              [0,0,0,0,0,0,0,0,0,0,4585,10319,912,169,15,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ],
+            "journal.hash": [
+              4439,
+              672986056,
+              369552,
+              [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4404,35,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ],
+            "journal.serialize": [
+              13317,
+              55847995,
+              31690,
+              [0,0,0,0,0,0,0,0,0,0,0,966,7074,4580,675,22,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ],
+            "parent.serialize": [
+              4440,
+              140879170,
+              177543,
+              [0,0,0,0,0,0,0,0,0,0,0,0,0,1,1427,1455,1128,422,7,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ],
+            "parent.ipc.write": [
+              12035,
+              132041935,
+              388868,
+              [0,0,0,0,0,0,0,0,0,0,828,2504,449,270,5732,2128,119,3,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ],
+            "journal.pending": [
+              289,
+              17685576,
+              139140,
+              [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,200,82,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ],
+            "journal.snapshot": [
+              291,
+              6249473,
+              51326,
+              [0,0,0,0,0,0,0,0,0,0,0,0,0,0,53,225,13,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ],
+            "journal.finish": [
+              3255,
+              2842593902,
+              5603669,
+              [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2350,848,56,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ],
+            "scheduler.complete": [
+              4439,
+              10134122,
+              13756,
+              [0,0,0,0,0,0,0,0,0,0,185,1757,2306,186,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ],
+            "journal.ack": [
+              288,
+              266160807,
+              2886493,
+              [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,200,77,11,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ],
+            "journal.prune": [
+              8,
+              18270990,
+              4726137,
+              [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,1,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ]
+          },
+          "children": {
+            "1": {
+              "child.wait": [
+                6073,
+                2603498169,
+                1087596,
+                [0,0,0,0,0,0,0,0,0,0,459,1458,609,133,136,144,92,127,141,284,921,1569,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+              ],
+              "child.ipc.read": [
+                8880,
+                5183601022,
+                7870352,
+                [0,0,0,0,0,0,0,0,0,0,100,2055,1490,513,156,474,514,163,23,65,521,2349,428,29,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+              ],
+              "child.deserialize": [
+                4440,
+                21358708,
+                47128,
+                [0,0,0,0,0,0,0,0,0,0,0,0,2735,878,786,39,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+              ],
+              "child.queue": [
+                4439,
+                100557843,
+                473056,
+                [0,0,0,0,0,0,0,0,0,0,0,0,0,88,1266,2573,487,20,3,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+              ],
+              "child.processor": [
+                4439,
+                766926278,
+                615933,
+                [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3931,507,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+              ],
+              "child.serialize": [
+                4439,
+                19784448,
+                71864,
+                [0,0,0,0,0,0,0,0,0,0,0,271,2571,1104,466,24,2,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+              ],
+              "child.ipc.write": [
+                4439,
+                37801359,
+                1053902,
+                [0,0,0,0,0,0,0,0,0,8,695,443,1074,207,1302,668,38,1,1,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+              ]
+            }
+          },
+          "child_final": {
+            "1": true
+          }
+        },
+        "case": "D1"
+      },
+      {
+        "schema": "intelligent-dvr.synthetic-durable-profile.v1",
+        "scope": "Synthetic storage/IPC only; no media, inference or capacity claim",
+        "python": "3.12.3",
+        "sqlite": "3.46.1",
+        "source_sha256": {
+          "journal.py": "70f7a3419d05d76380ea32ad5de20ee440bc17256e25baf0f2289a86e46a495a",
+          "supervision.py": "03f334d5fa072e5f3ad02bd90536fd2c00fc97ebfaa54ca1ef1c10b64b80a9cf",
+          "scheduler.py": "8639b46d3ba2e1a14efaa7ff647f412e6be437685ec7be5717a00983835b9019",
+          "inference.py": "7e95beb9e25dd67ac5d8d977ec6c466874371d12d112119a85a619124687b2f1"
+        },
+        "settings": {
+          "cameras": 100,
+          "workers": 4,
+          "seconds": 8.0,
+          "payload_bytes": 388800,
+          "offer_hz": 20.0,
+          "journal": true,
+          "ack_seconds": 0.025,
+          "profiling": true
+        },
+        "offered": 16000,
+        "completed_in_window": 11711,
+        "failed_in_window": 0,
+        "successful_drain": 5,
+        "failed_drain": 0,
+        "window_seconds": 8.0,
+        "samples_per_second": 1463.875,
+        "replacements": 4259,
+        "stale": 0,
+        "budget_dropped": 0,
+        "pending": 25,
+        "inflight": 0,
+        "peak_payload_bytes": 40435200,
+        "peak_entries": 538,
+        "journal_policy": {
+          "journal_mode": "wal",
+          "synchronous": 2,
+          "wal_autocheckpoint": 512,
+          "page_size": 4096
+        },
+        "sampled_peak_wal_bytes": 2373152,
+        "unique_delivery_ids": 11716,
+        "accounting_balanced": true,
+        "workers": {
+          "state": "closed",
+          "generation": 1,
+          "restarts": 0,
+          "active": 0,
+          "completed": 11716,
+          "failed": 0,
+          "process_failures": 0,
+          "journal_blocked": false,
+          "journal_error": null,
+          "received_uncommitted": 0,
+          "child_alive": false,
+          "unsent_bytes": 0,
+          "received_buffer_bytes": 0
+        },
+        "journal": {
+          "entries": 280,
+          "reserved_bytes": 599760,
+          "max_entries": 1000,
+          "max_bytes": 67108864,
+          "recovered_interrupted": 0,
+          "unacknowledged": 0,
+          "states": {
+            "succeeded": 280
+          },
+          "terminal_commits": 11034,
+          "terminal_rows": 11716,
+          "largest_terminal_batch": 4
+        },
+        "profile": {
+          "enabled": true,
+          "parent": {
+            "journal.sqlite.query": [
+              12305,
+              78774564,
+              108493,
+              [0,0,0,0,0,0,0,0,0,0,0,45,2003,7899,2069,237,47,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ],
+            "journal.sqlite.execute": [
+              18209,
+              127359702,
+              505766,
+              [0,0,0,0,0,0,0,0,0,0,0,0,4636,10602,2209,615,121,4,11,11,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ],
+            "journal.sqlite.commit": [
+              18209,
+              135708395,
+              177533,
+              [0,0,0,0,0,0,0,0,0,0,0,1,504,12464,4962,86,134,52,6,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ],
+            "scheduler.snapshot": [
+              2,
+              33493,
+              23544,
+              [0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ],
+            "parent.ipc.read": [
+              51415,
+              72064355,
+              111249,
+              [0,0,0,0,0,0,0,0,0,6,11303,36421,3209,441,32,2,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ],
+            "parent.delivery": [
+              6921,
+              4324854,
+              5391,
+              [0,0,0,0,0,0,0,0,4,602,6220,85,8,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ],
+            "parent.step": [
+              6921,
+              3956893476,
+              1695383,
+              [0,0,0,0,0,0,0,0,0,0,0,0,0,24,5,6,17,25,19,2166,4610,49,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ],
+            "parent.deserialize": [
+              11901,
+              98313909,
+              177873,
+              [0,0,0,0,0,0,0,0,0,0,0,0,121,9692,1794,105,5,181,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ],
+            "scheduler.dispatch": [
+              6885,
+              23224430,
+              14688,
+              [0,0,0,0,0,0,0,0,0,0,1,75,5787,990,32,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ],
+            "journal.reserve": [
+              6885,
+              1932893750,
+              870740,
+              [0,0,0,0,0,0,0,0,0,28,13,2,0,0,0,0,0,0,2193,4616,33,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ],
+            "scheduler.submit": [
+              16000,
+              19349095,
+              19467,
+              [0,0,0,0,0,0,0,0,0,0,5885,9539,433,134,8,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ],
+            "journal.hash": [
+              11716,
+              1709443200,
+              307996,
+              [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,11675,41,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ],
+            "journal.serialize": [
+              35148,
+              118901588,
+              35606,
+              [0,0,0,0,0,0,0,0,0,0,0,848,29027,4663,578,29,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ],
+            "parent.serialize": [
+              11717,
+              586389193,
+              870138,
+              [0,0,0,0,0,0,0,0,0,0,0,0,0,0,1446,334,8273,1633,30,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ],
+            "parent.ipc.write": [
+              31407,
+              312796249,
+              341840,
+              [0,0,0,0,0,0,0,0,0,0,5004,3523,1256,994,17074,3377,170,3,2,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ],
+            "journal.pending": [
+              311,
+              38835357,
+              320881,
+              [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,204,104,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ],
+            "journal.snapshot": [
+              313,
+              5863993,
+              53280,
+              [0,0,0,0,0,0,0,0,0,0,0,0,0,0,104,203,6,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ],
+            "journal.finish": [
+              11034,
+              455539456,
+              246371,
+              [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2608,7763,621,42,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ],
+            "scheduler.complete": [
+              11716,
+              20442928,
+              12073,
+              [0,0,0,0,0,0,0,0,0,0,136,9888,1614,75,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ],
+            "journal.ack": [
+              310,
+              23441791,
+              207248,
+              [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,58,240,12,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ],
+            "journal.prune": [
+              22,
+              9595452,
+              785611,
+              [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,21,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ]
+          },
+          "children": {
+            "1": {
+              "child.wait": [
+                11975,
+                2564055519,
+                1064753,
+                [0,0,0,0,0,0,0,0,0,0,754,4538,839,126,123,116,9,19,603,3977,623,248,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+              ],
+              "child.ipc.read": [
+                23434,
+                4933143571,
+                1848300,
+                [0,0,0,0,0,0,0,0,0,0,32,6869,3335,756,450,1774,1364,732,1369,171,6538,44,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+              ],
+              "child.deserialize": [
+                11717,
+                44209922,
+                34925,
+                [0,0,0,0,0,0,0,0,0,0,0,0,9156,1608,920,32,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+              ],
+              "child.queue": [
+                11716,
+                240344412,
+                1466405,
+                [0,0,0,0,0,0,0,0,0,0,0,0,0,34,4484,6376,793,24,2,1,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+              ],
+              "child.processor": [
+                11716,
+                1852309313,
+                752509,
+                [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,11013,702,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+              ],
+              "child.serialize": [
+                11716,
+                40859589,
+                23895,
+                [0,0,0,0,0,0,0,0,0,0,0,186,9229,1861,410,30,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+              ],
+              "child.ipc.write": [
+                11716,
+                95857312,
+                606876,
+                [0,0,0,0,0,0,0,0,0,2,270,2110,2883,575,4563,1271,40,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+              ]
+            }
+          },
+          "child_final": {
+            "1": true
+          }
+        },
+        "case": "R1"
+      },
+      {
+        "schema": "intelligent-dvr.synthetic-durable-profile.v1",
+        "scope": "Synthetic storage/IPC only; no media, inference or capacity claim",
+        "python": "3.12.3",
+        "sqlite": "3.46.1",
+        "source_sha256": {
+          "journal.py": "70f7a3419d05d76380ea32ad5de20ee440bc17256e25baf0f2289a86e46a495a",
+          "supervision.py": "03f334d5fa072e5f3ad02bd90536fd2c00fc97ebfaa54ca1ef1c10b64b80a9cf",
+          "scheduler.py": "8639b46d3ba2e1a14efaa7ff647f412e6be437685ec7be5717a00983835b9019",
+          "inference.py": "7e95beb9e25dd67ac5d8d977ec6c466874371d12d112119a85a619124687b2f1"
+        },
+        "settings": {
+          "cameras": 100,
+          "workers": 4,
+          "seconds": 8.0,
+          "payload_bytes": 388800,
+          "offer_hz": 20.0,
+          "journal": true,
+          "ack_seconds": 0.025,
+          "profiling": true
+        },
+        "offered": 16000,
+        "completed_in_window": 11914,
+        "failed_in_window": 0,
+        "successful_drain": 3,
+        "failed_drain": 0,
+        "window_seconds": 8.0,
+        "samples_per_second": 1489.25,
+        "replacements": 4057,
+        "stale": 0,
+        "budget_dropped": 0,
+        "pending": 26,
+        "inflight": 0,
+        "peak_payload_bytes": 40046400,
+        "peak_entries": 538,
+        "journal_policy": {
+          "journal_mode": "wal",
+          "synchronous": 2,
+          "wal_autocheckpoint": 512,
+          "page_size": 4096
+        },
+        "sampled_peak_wal_bytes": 2476152,
+        "unique_delivery_ids": 11917,
+        "accounting_balanced": true,
+        "workers": {
+          "state": "closed",
+          "generation": 1,
+          "restarts": 0,
+          "active": 0,
+          "completed": 11917,
+          "failed": 0,
+          "process_failures": 0,
+          "journal_blocked": false,
+          "journal_error": null,
+          "received_uncommitted": 0,
+          "child_alive": false,
+          "unsent_bytes": 0,
+          "received_buffer_bytes": 0
+        },
+        "journal": {
+          "entries": 41,
+          "reserved_bytes": 87822,
+          "max_entries": 1000,
+          "max_bytes": 67108864,
+          "recovered_interrupted": 0,
+          "unacknowledged": 0,
+          "states": {
+            "succeeded": 41
+          },
+          "terminal_commits": 11434,
+          "terminal_rows": 11917,
+          "largest_terminal_batch": 3
+        },
+        "profile": {
+          "enabled": true,
+          "parent": {
+            "journal.sqlite.query": [
+              12708,
+              76662969,
+              92513,
+              [0,0,0,0,0,0,0,0,0,0,0,58,2737,8042,1598,225,42,6,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ],
+            "journal.sqlite.execute": [
+              18487,
+              125821801,
+              421649,
+              [0,0,0,0,0,0,0,0,0,0,0,0,5209,10591,2027,491,141,5,11,12,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ],
+            "journal.sqlite.commit": [
+              18487,
+              137945571,
+              187000,
+              [0,0,0,0,0,0,0,0,0,0,0,1,340,12994,4880,74,144,48,6,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ],
+            "scheduler.snapshot": [
+              2,
+              34445,
+              24416,
+              [0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ],
+            "parent.ipc.read": [
+              51245,
+              70568585,
+              61074,
+              [0,0,0,0,0,0,0,0,0,6,11056,37108,2708,350,15,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ],
+            "parent.delivery": [
+              6777,
+              4210352,
+              13194,
+              [0,0,0,0,0,0,0,0,2,556,6161,50,6,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ],
+            "parent.step": [
+              6777,
+              4041453136,
+              3025403,
+              [0,0,0,0,0,0,0,0,0,0,0,0,0,21,9,5,4,19,5,1643,5054,16,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ],
+            "parent.deserialize": [
+              12105,
+              98311475,
+              155501,
+              [0,0,0,0,0,0,0,0,0,0,0,0,76,10225,1549,66,2,184,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ],
+            "scheduler.dispatch": [
+              6740,
+              22731130,
+              56997,
+              [0,0,0,0,0,0,0,0,0,0,0,64,5774,881,20,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ],
+            "journal.reserve": [
+              6740,
+              1971124992,
+              2402287,
+              [0,0,0,0,0,0,0,0,0,15,5,1,0,0,0,0,0,0,1674,5025,19,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ],
+            "scheduler.submit": [
+              16000,
+              18876411,
+              9738,
+              [0,0,0,0,0,0,0,0,0,0,6560,9023,286,127,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ],
+            "journal.hash": [
+              11917,
+              1751263262,
+              2138342,
+              [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,11893,23,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ],
+            "journal.serialize": [
+              35751,
+              119578920,
+              63489,
+              [0,0,0,0,0,0,0,0,0,0,0,769,29884,4644,436,14,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ],
+            "parent.serialize": [
+              11918,
+              614378125,
+              209462,
+              [0,0,0,0,0,0,0,0,0,0,0,0,0,1,1029,215,9058,1597,18,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ],
+            "parent.ipc.write": [
+              31012,
+              322204947,
+              378639,
+              [0,0,0,0,0,0,0,0,0,0,4172,4133,1744,1003,15406,4270,268,6,9,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ],
+            "journal.pending": [
+              311,
+              39303534,
+              251851,
+              [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,207,102,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ],
+            "journal.snapshot": [
+              313,
+              5842688,
+              39153,
+              [0,0,0,0,0,0,0,0,0,0,0,0,0,0,112,195,6,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ],
+            "journal.finish": [
+              11434,
+              459782955,
+              290033,
+              [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2734,8160,517,21,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ],
+            "scheduler.complete": [
+              11917,
+              20101649,
+              10149,
+              [0,0,0,0,0,0,0,0,0,0,121,10352,1404,38,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ],
+            "journal.ack": [
+              310,
+              24254629,
+              183583,
+              [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,41,259,10,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ],
+            "journal.prune": [
+              23,
+              10005921,
+              618458,
+              [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,22,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ]
+          },
+          "children": {
+            "1": {
+              "child.wait": [
+                12105,
+                2658203083,
+                1060135,
+                [0,0,0,0,0,0,0,0,0,0,888,4699,571,103,139,73,18,13,415,4306,698,182,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+              ],
+              "child.ipc.read": [
+                23836,
+                4857896931,
+                1796112,
+                [0,0,0,0,0,0,0,0,0,0,13,7635,2848,592,567,1752,1721,926,1090,194,6450,48,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+              ],
+              "child.deserialize": [
+                11918,
+                40942583,
+                88064,
+                [0,0,0,0,0,0,0,0,0,0,0,0,10123,1073,702,18,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+              ],
+              "child.queue": [
+                11917,
+                227289788,
+                1278814,
+                [0,0,0,0,0,0,0,0,0,0,0,0,0,40,5520,5827,514,11,3,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+              ],
+              "child.processor": [
+                11917,
+                1864553287,
+                440645,
+                [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,11403,514,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+              ],
+              "child.serialize": [
+                11917,
+                38045737,
+                23394,
+                [0,0,0,0,0,0,0,0,0,0,0,189,10136,1306,272,14,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+              ],
+              "child.ipc.write": [
+                11917,
+                94499146,
+                376946,
+                [0,0,0,0,0,0,0,0,0,8,215,2028,3044,658,4766,1177,19,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+              ]
+            }
+          },
+          "child_final": {
+            "1": true
+          }
+        },
+        "case": "R2"
+      },
+      {
+        "schema": "intelligent-dvr.synthetic-durable-profile.v1",
+        "scope": "Synthetic storage/IPC only; no media, inference or capacity claim",
+        "python": "3.12.3",
+        "sqlite": "3.46.1",
+        "source_sha256": {
+          "journal.py": "70f7a3419d05d76380ea32ad5de20ee440bc17256e25baf0f2289a86e46a495a",
+          "supervision.py": "03f334d5fa072e5f3ad02bd90536fd2c00fc97ebfaa54ca1ef1c10b64b80a9cf",
+          "scheduler.py": "8639b46d3ba2e1a14efaa7ff647f412e6be437685ec7be5717a00983835b9019",
+          "inference.py": "7e95beb9e25dd67ac5d8d977ec6c466874371d12d112119a85a619124687b2f1"
+        },
+        "settings": {
+          "cameras": 100,
+          "workers": 4,
+          "seconds": 8.0,
+          "payload_bytes": 388800,
+          "offer_hz": 20.0,
+          "journal": true,
+          "ack_seconds": 0.025,
+          "profiling": true
+        },
+        "offered": 16000,
+        "completed_in_window": 4404,
+        "failed_in_window": 0,
+        "successful_drain": 4,
+        "failed_drain": 0,
+        "window_seconds": 8.0,
+        "samples_per_second": 550.5,
+        "replacements": 11520,
+        "stale": 0,
+        "budget_dropped": 0,
+        "pending": 72,
+        "inflight": 0,
+        "peak_payload_bytes": 40435200,
+        "peak_entries": 511,
+        "journal_policy": {
+          "journal_mode": "wal",
+          "synchronous": 2,
+          "wal_autocheckpoint": 512,
+          "page_size": 4096
+        },
+        "sampled_peak_wal_bytes": 2414352,
+        "unique_delivery_ids": 4408,
+        "accounting_balanced": true,
+        "workers": {
+          "state": "closed",
+          "generation": 1,
+          "restarts": 0,
+          "active": 0,
+          "completed": 4408,
+          "failed": 0,
+          "process_failures": 0,
+          "journal_blocked": false,
+          "journal_error": null,
+          "received_uncommitted": 0,
+          "child_alive": false,
+          "unsent_bytes": 0,
+          "received_buffer_bytes": 0
+        },
+        "journal": {
+          "entries": 386,
+          "reserved_bytes": 826812,
+          "max_entries": 1000,
+          "max_bytes": 67108864,
+          "recovered_interrupted": 0,
+          "unacknowledged": 0,
+          "states": {
+            "succeeded": 386
+          },
+          "terminal_commits": 3095,
+          "terminal_rows": 4408,
+          "largest_terminal_batch": 3
+        },
+        "profile": {
+          "enabled": true,
+          "parent": {
+            "journal.sqlite.query": [
+              4264,
+              46126702,
+              98895,
+              [0,0,0,0,0,0,0,0,0,0,0,7,276,1310,2138,501,28,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ],
+            "journal.sqlite.execute": [
+              5859,
+              64494539,
+              431518,
+              [0,0,0,0,0,0,0,0,0,0,0,0,76,2146,2825,767,35,2,5,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ],
+            "journal.sqlite.commit": [
+              5859,
+              4868719784,
+              5784137,
+              [0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,4167,1605,81,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ],
+            "scheduler.snapshot": [
+              2,
+              40665,
+              21710,
+              [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ],
+            "parent.ipc.read": [
+              18939,
+              34402902,
+              33012,
+              [0,0,0,0,0,0,0,0,0,3,3133,10530,4658,578,34,2,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ],
+            "parent.delivery": [
+              2514,
+              2031668,
+              21690,
+              [0,0,0,0,0,0,0,0,14,42,2160,293,4,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ],
+            "parent.step": [
+              2514,
+              6235399000,
+              11077845,
+              [0,0,0,0,0,0,0,0,0,0,0,0,0,31,2,1,5,6,0,0,17,759,1630,59,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ],
+            "parent.deserialize": [
+              4478,
+              45570271,
+              163687,
+              [0,0,0,0,0,0,0,0,0,0,0,0,52,2046,2197,110,4,67,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ],
+            "scheduler.dispatch": [
+              2477,
+              10251662,
+              19646,
+              [0,0,0,0,0,0,0,0,0,0,0,13,1355,1075,33,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ],
+            "journal.reserve": [
+              2477,
+              2837979918,
+              5953003,
+              [0,0,0,0,0,0,0,0,0,5,4,1,0,0,0,0,0,0,0,0,1537,850,78,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ],
+            "scheduler.submit": [
+              16000,
+              21136225,
+              19026,
+              [0,0,0,0,0,0,0,0,0,0,4121,10948,751,162,15,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ],
+            "journal.hash": [
+              4408,
+              678866460,
+              487452,
+              [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4365,43,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ],
+            "journal.serialize": [
+              13224,
+              56683344,
+              32211,
+              [0,0,0,0,0,0,0,0,0,0,0,1049,6640,4798,704,33,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ],
+            "parent.serialize": [
+              4409,
+              238319759,
+              186339,
+              [0,0,0,0,0,0,0,0,0,0,0,0,0,1,358,561,2119,1351,19,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ],
+            "parent.ipc.write": [
+              12448,
+              135503864,
+              240119,
+              [0,0,0,0,0,0,0,0,0,0,848,2481,873,416,5395,2280,145,5,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ],
+            "journal.pending": [
+              289,
+              17602347,
+              125885,
+              [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,6,191,92,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ],
+            "journal.snapshot": [
+              291,
+              6247414,
+              55163,
+              [0,0,0,0,0,0,0,0,0,0,0,0,0,0,50,223,18,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ],
+            "journal.finish": [
+              3095,
+              2722387067,
+              5507138,
+              [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2219,823,50,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ],
+            "scheduler.complete": [
+              4408,
+              9923387,
+              10390,
+              [0,0,0,0,0,0,0,0,0,0,148,1894,2164,200,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ],
+            "journal.ack": [
+              288,
+              252209134,
+              2739197,
+              [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,212,72,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ],
+            "journal.prune": [
+              8,
+              13430330,
+              4279450,
+              [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,6,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ]
+          },
+          "children": {
+            "1": {
+              "child.wait": [
+                6099,
+                2552359955,
+                1082416,
+                [0,0,0,0,0,0,0,0,0,0,500,1307,701,155,141,145,112,167,206,183,836,1646,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+              ],
+              "child.ipc.read": [
+                8818,
+                5214567377,
+                7989094,
+                [0,0,0,0,0,0,0,0,0,0,83,1971,1533,533,125,446,456,231,42,84,530,2323,431,30,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+              ],
+              "child.deserialize": [
+                4409,
+                22471080,
+                39384,
+                [0,0,0,0,0,0,0,0,0,0,0,0,2507,1116,706,79,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+              ],
+              "child.queue": [
+                4408,
+                106742623,
+                189144,
+                [0,0,0,0,0,0,0,0,0,0,0,0,0,77,930,2710,669,21,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+              ],
+              "child.processor": [
+                4408,
+                820516936,
+                475009,
+                [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3621,787,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+              ],
+              "child.serialize": [
+                4408,
+                20817114,
+                59321,
+                [0,0,0,0,0,0,0,0,0,0,0,171,2474,1231,478,52,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+              ],
+              "child.ipc.write": [
+                4408,
+                38138684,
+                100859,
+                [0,0,0,0,0,0,0,0,0,7,727,535,1044,199,1010,832,52,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+              ]
+            }
+          },
+          "child_final": {
+            "1": true
+          }
+        },
+        "case": "D2"
+      },
+      {
+        "schema": "intelligent-dvr.synthetic-durable-profile.v1",
+        "scope": "Synthetic storage/IPC only; no media, inference or capacity claim",
+        "python": "3.12.3",
+        "sqlite": "3.46.1",
+        "source_sha256": {
+          "journal.py": "70f7a3419d05d76380ea32ad5de20ee440bc17256e25baf0f2289a86e46a495a",
+          "supervision.py": "03f334d5fa072e5f3ad02bd90536fd2c00fc97ebfaa54ca1ef1c10b64b80a9cf",
+          "scheduler.py": "8639b46d3ba2e1a14efaa7ff647f412e6be437685ec7be5717a00983835b9019",
+          "inference.py": "7e95beb9e25dd67ac5d8d977ec6c466874371d12d112119a85a619124687b2f1"
+        },
+        "settings": {
+          "cameras": 100,
+          "workers": 4,
+          "seconds": 8.0,
+          "payload_bytes": 388800,
+          "offer_hz": 20.0,
+          "journal": false,
+          "ack_seconds": 0.025,
+          "profiling": true
+        },
+        "offered": 16000,
+        "completed_in_window": 14493,
+        "failed_in_window": 0,
+        "successful_drain": 3,
+        "failed_drain": 0,
+        "window_seconds": 8.0,
+        "samples_per_second": 1811.625,
+        "replacements": 1490,
+        "stale": 0,
+        "budget_dropped": 0,
+        "pending": 14,
+        "inflight": 0,
+        "peak_payload_bytes": 40435200,
+        "peak_entries": 0,
+        "journal_policy": null,
+        "sampled_peak_wal_bytes": 0,
+        "unique_delivery_ids": 0,
+        "accounting_balanced": true,
+        "workers": {
+          "state": "closed",
+          "generation": 1,
+          "restarts": 0,
+          "active": 0,
+          "completed": 14496,
+          "failed": 0,
+          "process_failures": 0,
+          "journal_blocked": false,
+          "journal_error": null,
+          "received_uncommitted": 0,
+          "child_alive": false,
+          "unsent_bytes": 0,
+          "received_buffer_bytes": 0
+        },
+        "journal": null,
+        "profile": {
+          "enabled": true,
+          "parent": {
+            "scheduler.snapshot": [
+              2,
+              30426,
+              20538,
+              [0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ],
+            "parent.ipc.read": [
+              73283,
+              87995813,
+              106299,
+              [0,0,0,0,0,0,0,0,0,4,33734,36202,2639,674,25,3,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ],
+            "parent.delivery": [
+              10978,
+              6052555,
+              4829,
+              [0,0,0,0,0,0,0,0,1,5665,5118,181,11,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ],
+            "parent.step": [
+              10978,
+              1778725442,
+              1087445,
+              [0,0,0,0,0,0,0,0,0,0,0,0,0,24,7,5,715,3874,5251,1082,19,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ],
+            "parent.deserialize": [
+              14724,
+              165167730,
+              145973,
+              [0,0,0,0,0,0,0,0,0,0,0,0,0,3310,10107,1042,37,226,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ],
+            "scheduler.dispatch": [
+              10939,
+              30657357,
+              32190,
+              [0,0,0,0,0,0,0,0,0,0,11,2511,7427,957,31,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ],
+            "scheduler.submit": [
+              16000,
+              19171551,
+              14267,
+              [0,0,0,0,0,0,0,0,0,0,5774,9757,299,164,6,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ],
+            "parent.serialize": [
+              14497,
+              647622613,
+              515495,
+              [0,0,0,0,0,0,0,0,0,0,0,0,0,1,3824,992,7486,2159,34,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ],
+            "parent.ipc.write": [
+              44087,
+              385547105,
+              584665,
+              [0,0,0,0,0,0,0,0,0,0,8891,6399,2532,1764,19409,4845,216,14,7,9,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ],
+            "scheduler.complete": [
+              14496,
+              21785129,
+              32621,
+              [0,0,0,0,0,0,0,0,0,0,772,12368,1293,56,4,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            ]
+          },
+          "children": {
+            "1": {
+              "child.wait": [
+                14506,
+                1333107118,
+                1059543,
+                [0,0,0,0,0,0,0,0,0,0,810,6587,1134,243,269,296,745,2498,549,16,1350,9,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+              ],
+              "child.ipc.read": [
+                28994,
+                6081440252,
+                1689151,
+                [0,0,0,0,0,0,0,0,0,0,447,8209,4242,738,529,1706,1871,1477,182,892,8695,6,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+              ],
+              "child.deserialize": [
+                14497,
+                51748332,
+                103343,
+                [0,0,0,0,0,0,0,0,0,0,0,2,12029,1380,1036,43,5,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+              ],
+              "child.queue": [
+                14496,
+                274132628,
+                395090,
+                [0,0,0,0,0,0,0,0,0,0,0,0,0,691,6515,6527,735,20,7,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+              ],
+              "child.processor": [
+                14496,
+                2223561879,
+                362859,
+                [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,14148,348,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+              ],
+              "child.serialize": [
+                14496,
+                47432015,
+                174036,
+                [0,0,0,0,0,0,0,0,0,0,0,1839,10462,1743,416,34,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+              ],
+              "child.ipc.write": [
+                14496,
+                110217097,
+                189495,
+                [0,0,0,0,0,0,0,0,0,7,703,2863,3307,590,5524,1476,22,1,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+              ]
+            }
+          },
+          "child_final": {
+            "1": true
+          }
+        },
+        "case": "control"
+      }
+    ],
+    "observed_median_gain": 0.07192436572522731,
+    "candidate_accepted": true
+  },
+  "boundaries": {
+    "recordings_transmitted": false,
+    "live_cameras_activated": false,
+    "host_configuration_changed": false,
+    "runtime_packages_changed": false,
+    "model_thresholds_changed": false,
+    "private_frozen_recordings_processed": false
+  },
+  "qualification": {
+    "native_cuda_replay_gain": "unqualified",
+    "physical_100_cameras": "unqualified",
+    "full_resolution_production": "unqualified",
+    "24_hour_operation": "unqualified",
+    "power_loss": "unqualified"
+  }
+}

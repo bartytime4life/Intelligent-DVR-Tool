@@ -197,6 +197,14 @@ stop worker dispatch/restart, terminate owned computation and expose
 directory for recovery/inspection after a storage error. Process-exit tests are
 not power-loss, failing-disk, network-filesystem or backup qualification.
 
+Automatic checkpointing uses 512 pages while FULL commit synchronization stays
+enabled. The [disk-backed overload record](verification/durable-overload-2026-10-28/README.md)
+measured a 7.19% median improvement over the prior 64-page cadence in a matched
+synthetic disk/IPC experiment. Sampled WAL storage increased; the threshold is
+not a file quota. This does not establish a native CUDA replay or physical-camera
+capacity gain. The qualification CLI accepts bounded `--offer-hz` stress settings
+and records actual SQLite policy and sampled WAL bytes; its default cadence stays 2.
+
 | Boundary | Durable behavior |
 | --- | --- |
 | Before sending a dispatch batch | Commit camera/sequence, run-scoped token, generation, monotonic sample/dispatch times, payload size and SHA-256. Frame bytes are absent. |

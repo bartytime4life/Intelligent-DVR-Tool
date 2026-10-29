@@ -41,10 +41,12 @@ def run(args):
     payload = b's'*args.payload_bytes
     seen, delivered = set(), set()
     counts = dict(completed_in_window=0, failed_in_window=0, successful_drain=0, failed_drain=0)
-    offered = peak_entries = 0
+    offered = peak_entries = peak_wal_bytes = 0
     with tempfile.TemporaryDirectory(dir=args.output.parent, prefix='durable-probe-') as directory:
         journal = None if args.no_journal else OutcomeJournal(Path(directory)/'journal',
             max_entries=1000, max_bytes=64*1024**2, **options)
+        policy = None if journal is None else {name:journal._db.execute('PRAGMA '+name).fetchone()[0]
+            for name in ('journal_mode','synchronous','wal_autocheckpoint','page_size')}
         pool = None
         try:
             pool = ProcessWorkers(scheduler, SyntheticFactory(), journal=journal,
@@ -66,7 +68,7 @@ def run(args):
                     counts[key] += 1
 
             def consume():
-                nonlocal peak_entries
+                nonlocal peak_entries, peak_wal_bytes
                 if journal is None:
                     return
                 ids = [row['id'] for row in journal.pending(1000)]
@@ -77,6 +79,8 @@ def run(args):
                     journal.acknowledge(ids)
                 count = journal.snapshot()['entries']
                 peak_entries = max(peak_entries, count)
+                wal = Path(directory)/'journal/outcomes.sqlite3-wal'
+                peak_wal_bytes = max(peak_wal_bytes, wal.stat().st_size if wal.exists() else 0)
                 if count >= 500:
                     journal.prune()
 
@@ -90,7 +94,7 @@ def run(args):
                         scheduler.submit(Sample(camera, sequence, time.monotonic(), payload))
                         offered += 1
                     sequence += 1
-                    next_offer = started+sequence*.5
+                    next_offer = started+sequence/args.offer_hz
                 rows = pool.step()
                 collect(rows, drain=time.monotonic() >= end)
                 if time.monotonic() >= next_ack:
@@ -117,13 +121,14 @@ def run(args):
                 source_sha256={n: hashlib.sha256((args.source_root/'edge'/n).read_bytes()).hexdigest()
                     for n in ('journal.py','supervision.py','scheduler.py','inference.py')},
                 settings=dict(cameras=100, workers=4, seconds=args.seconds,
-                    payload_bytes=args.payload_bytes, offer_hz=2, journal=journal is not None,
+                    payload_bytes=args.payload_bytes, offer_hz=args.offer_hz, journal=journal is not None,
                     ack_seconds=args.ack_seconds, profiling=args.profile),
                 offered=offered, **counts, window_seconds=args.seconds,
                 samples_per_second=counts['completed_in_window']/args.seconds,
                 replacements=totals['replaced'], stale=totals['stale'], budget_dropped=totals['budget_dropped'],
                 pending=snap['pending'], inflight=snap['inflight'],
                 peak_payload_bytes=snap['peak_buffered_payload_bytes'], peak_entries=peak_entries,
+                journal_policy=policy, sampled_peak_wal_bytes=peak_wal_bytes,
                 unique_delivery_ids=len(delivered), accounting_balanced=True,
                 workers=pool.snapshot(), journal=journal.snapshot() if journal is not None else None,
                 profile=pool.profile_snapshot() if profile is not None else None)
@@ -139,13 +144,16 @@ def main():
     parser.add_argument('--source-root', type=Path, default=Path(__file__).resolve().parents[1])
     parser.add_argument('--seconds', type=float, default=10)
     parser.add_argument('--payload-bytes', type=int, default=4096)
+    parser.add_argument('--offer-hz', type=float, default=2,
+        help='Synthetic offers per virtual source per second, 0.5–20; not a production camera setting')
     parser.add_argument('--ack-seconds', type=float, default=.025)
     parser.add_argument('--profile', action='store_true')
     parser.add_argument('--no-journal', action='store_true')
     parser.add_argument('--output', type=Path, required=True)
     args = parser.parse_args()
-    if not 1 <= args.seconds <= 120 or not 1 <= args.payload_bytes <= 2*1024**2 or not 0 <= args.ack_seconds <= 1:
-        parser.error('Use 1–120 seconds, 1–2097152 payload bytes and 0–1 acknowledgment seconds')
+    if (not 1 <= args.seconds <= 120 or not 1 <= args.payload_bytes <= 2*1024**2 or
+            not 0 <= args.ack_seconds <= 1 or not .5 <= args.offer_hz <= 20):
+        parser.error('Use 1–120 seconds, 1–2097152 payload bytes, 0–1 acknowledgment seconds and --offer-hz 0.5–20')
     fd = os.open(args.output, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
     with os.fdopen(fd, 'w') as stream:
         json.dump(run(args), stream, indent=2)
