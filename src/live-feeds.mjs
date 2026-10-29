@@ -15,12 +15,16 @@ export function webcamError(error) {
 }
 // A permission prompt may resolve after cancellation. Late streams must be stopped.
 export function webcamController(media, onChange) {
-  let generation = 0, stream = null;
-  const stop = (message = 'Disconnected') => { generation++; stopStream(stream); stream = null; onChange({state:'disconnected', message}); };
+  let generation = 0, stream = null, attempted = false;
+  const stop = (message = 'Disconnected') => {
+    generation++; stopStream(stream); stream = null;
+    if (message === 'No webcam connected') attempted = false;
+    onChange({state:'disconnected', message:attempted ? message : 'No webcam connected'});
+  };
   return {
     stop,
     async connect(deviceId = '') {
-      stop(); const ticket = generation;
+      attempted = true; stop(); const ticket = generation;
       onChange({state:'connecting', message:'Allow camera access in your browser. You can cancel while permission is pending.'});
       try {
         if (!media?.getUserMedia) throw {name:'SecurityError'};

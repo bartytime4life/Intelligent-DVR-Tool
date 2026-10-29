@@ -39,6 +39,7 @@ test('public webcam is explicit, attributed, source-filtered and labelled as a p
   await page.screenshot({path:'test-results/public-webcam-synthetic-snapshot.png',fullPage:true});
   await page.getByRole('button',{name:'Disconnect all',exact:true}).click();
   await expect(page.locator('.camera-wall img')).toHaveCount(0);
+  await expect(page.locator('.live-tile')).toHaveCount(0);
   expect(calls.some(c=>c.path.endsWith('/disconnect'))).toBe(true);
 });
 
@@ -69,6 +70,7 @@ test('public connection setup fits a phone and hidden previews stop without reco
   await page.evaluate(()=>{Object.defineProperty(document,'hidden',{configurable:true,value:true});document.dispatchEvent(new Event('visibilitychange'));});
   await expect(page.locator('.camera-wall img')).toHaveCount(0);
   await expect.poll(()=>calls.filter(c=>c.path.endsWith('/disconnect')).length).toBe(1);
+  await expect(page.locator('.live-tile')).toHaveCount(0);
   await page.evaluate(()=>{Object.defineProperty(document,'hidden',{configurable:true,value:false});document.dispatchEvent(new Event('visibilitychange'));});
   expect(calls.filter(c=>c.path.endsWith('/connect'))).toHaveLength(1);
 });

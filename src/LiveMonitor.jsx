@@ -155,7 +155,7 @@ export default function LiveMonitor({queue, visibleTiles=4, onCount, pageHidden}
             {t.id === 'webcam' && webcam.stream && <video ref={video} autoPlay muted playsInline aria-label="Webcam video" />}
             {t.id !== 'webcam' && t.image && <img src={t.image} alt={`${t.name} current preview frame`} onError={() => {const s=sessions.current.get(t.id); if(s){s.state='failed';s.error={message:'The browser could not display this frame. Disconnect and retry.'};URL.revokeObjectURL(s.image);s.image='';sync();}}} />}
             {((t.id === 'webcam' && t.state !== 'live') || (t.id !== 'webcam' && !t.image)) && <div className="feed-placeholder"><Camera size={34}/><h3>{t.state === 'connecting' ? 'Connecting…' : t.state === 'failed' ? 'Connection needs attention' : 'Preview stopped'}</h3>
-              <p>{t.message || t.error?.message || 'Waiting for the first frame from your DVR…'}</p></div>}
+              <p>{t.message || t.error?.message || 'Waiting for the first image from this source…'}</p></div>}
             <div className="live-tile-heading"><strong>{t.name}</strong><span className={`feed-status ${t.state}`}>{t.state === 'live' ? 'Receiving' : t.state}</span></div>
           </div>
           {t.kind?.startsWith('public-') && <div className="public-source-credit"><a href={t.provider_url} target="_blank" rel="noreferrer noopener">{t.provider} ↗</a><span>{t.kind === 'public-jpeg' ? `Snapshot · refresh ${t.refresh_seconds}s` : 'Public MJPEG · preview ≤ 4 fps'}{t.frame_age_seconds != null ? ` · retrieved ${Math.floor(t.frame_age_seconds)}s ago` : ''}</span><small>Provider capture time and freshness unverified</small></div>}
