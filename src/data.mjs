@@ -146,6 +146,7 @@ export function restoreSnapshot(key, value, fallback) {
       )
         return fallback;
     } else {
+      if (new Set(value.map(e => e?.id)).size !== value.length) return fallback;
       if (
         value.some(
           (e) =>
@@ -153,6 +154,9 @@ export function restoreSnapshot(key, value, fallback) {
             !["id", "title", "label", "time", "rule", "note"].every(
               (k) => typeof e[k] === "string",
             ) ||
+            !e.id || e.id.length > 128 || e.title.length > 300 ||
+            e.label.length > 80 || e.time.length > 100 || e.rule.length > 200 || e.note.length > 2000 ||
+            (e.mode === "sample" && !cameras.some(c => c.id === e.camera)) ||
             !Number.isFinite(e.score) ||
             e.score < 0 ||
             e.score > 1 ||
@@ -168,6 +172,7 @@ export function restoreSnapshot(key, value, fallback) {
             (!e.provenance ||
               !["partial", "completed"].includes(e.provenance.state) ||
               typeof e.cameraName !== "string" ||
+              e.cameraName.length > 80 || e.camera !== null ||
               !["source_sha256", "model_sha256"].every(
                 (k) =>
                   typeof e.provenance[k] === "string" &&

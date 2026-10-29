@@ -1550,3 +1550,15 @@ textarea::placeholder {
 .camera-wall.wall-1 { grid-template-columns: 1fr; grid-template-rows: 1fr; }
 .camera-wall.wall-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: 1fr; }
 @media(max-width:700px) { .camera-wall.wall-2 { grid-template-columns:1fr; } }
+/* Retained workspaces stay mounted without exposing hidden controls. */
+[hidden] { display: none !important; }
+.review-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.review-summary { display: flex; flex-wrap: wrap; gap: 12px 24px; padding: 16px 0; margin-bottom: 16px; border-block: 1px solid #304450; color: #aabac5; font-size: 13px; }
+.review-summary strong { color: #7ee0cc; }
+.review-recovery, .workspace-storage-warning { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; padding: 16px; background: #1a3038; border: 1px solid #3a6867; border-radius: 8px; margin-bottom: 18px; line-height: 1.6; }
+.review-recovery > span, .workspace-storage-warning > div { flex: 1; min-width: 180px; }
+.workspace-storage-warning { margin: 18px; background: #35291f; border-color: #866348; color: #ffdab4; }
+.workspace-storage-warning p { margin: 4px 0; font-size: 13px; }
+.event-filters { flex-wrap: wrap; }
+.review-actions .button:disabled { opacity: .45; cursor: not-allowed; }
+

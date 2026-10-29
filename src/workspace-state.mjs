@@ -1,0 +1,41 @@
+import { initialEvents, restoreSnapshot } from './data.mjs';
+import { mergeRecognitionEvents } from './recognition.mjs';
+
+export const WORKSPACES = ['Monitor', 'Recognition', 'Facility', 'Events', 'Zones', 'System', 'Settings'];
+export function workspaceFromHash(hash) {
+  return WORKSPACES.find(name => `#${name.toLowerCase()}` === hash) || null;
+}
+
+export function readWorkspace(storage, key, fallback) {
+  try {
+    const raw = storage.getItem(key);
+    if (raw === null) return { value: fallback, error: '' };
+    const value = restoreSnapshot(key, JSON.parse(raw), null);
+    if (!value) throw Error('Invalid saved data');
+    return { value, error: '' };
+  } catch {
+    return { value: fallback, error: 'Saved data could not be loaded. Defaults are shown; the original saved entry has not been replaced.' };
+  }
+}
+
+export function writeWorkspace(storage, key, value) {
+  try { storage.setItem(key, JSON.stringify(value)); return ''; }
+  catch { return 'Changes are only in memory. Browser storage is unavailable or full. Export before closing this page.'; }
+}
+
+export function reviewExport(events) {
+  return { schema: 'intelligent-dvr.review-export.v1', exportedAt: new Date().toISOString(), events };
+}
+
+export function parseReviewExport(value) {
+  if (value?.schema !== 'intelligent-dvr.review-export.v1' || !restoreSnapshot('dvr.events.v1', value.events, null)) {
+    throw Error('Choose a valid review export with up to 1,000 events.');
+  }
+  return value.events;
+}
+
+export function resetSamples(events) {
+  // Reset only pending samples. Keep all imported observations and human decisions.
+  const retained = events.filter(e => e.mode !== 'sample' || e.status !== 'pending');
+  return mergeRecognitionEvents(retained, initialEvents);
+}
