@@ -50,7 +50,7 @@ test('complete relation outers stitch reversed segments and preserve source on e
   const plan=validateFacility({...blankFacility(),buildings:result.buildings});assert.equal(plan.buildings[0].source.id,'relation/100');
   assert.equal(plan.buildings[0].footprint.length,5);
 });
-test('disjoint outers split; holes, parts, nested or incomplete topology never become shells',()=>{
+test('disjoint outers split; invalid holes/nesting are excluded and independent parts retain their role',()=>{
   const r=ring(),disjoint=ring(60);
   const result=parseOsmBuildings({elements:[relation([member(r),member(disjoint,2)])]},origin,bounds);
   assert.deepEqual(result.buildings.map(b=>b.id),['osm-relation-100-1','osm-relation-100-2']);
@@ -58,7 +58,7 @@ test('disjoint outers split; holes, parts, nested or incomplete topology never b
     assert.equal(parseOsmBuildings({elements:[relation(members)]},origin,bounds).buildings.length,0);
   }
   const parts=relation([member(r)]);parts.tags['building:part']='yes';
-  assert.equal(parseOsmBuildings({elements:[parts]},origin,bounds).buildings.length,0);
+  assert.equal(parseOsmBuildings({elements:[parts]},origin,bounds).buildings[0].part,true);
 });
 test('recorded licensed exterior extracts import; the real courtyard stays excluded',()=>{
   const ex=JSON.parse(readFileSync(new URL('./fixtures/facility/eppan-exteriors.json',import.meta.url)));

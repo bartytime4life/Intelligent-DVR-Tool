@@ -1,5 +1,10 @@
 # Verification index
 
+[October 28 facility follow-up](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/facility-2026-10-28/README.md): polygon selection,
+v2 courtyard/base geometry, bounded local delivery and novice-study preparation.
+Local checks and unresolved field/human acceptance are recorded separately.
+
+
 Reviewed October 28, 2026. [Product status](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Product-status) · [Home](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Home)
 
 ## Latest audited application baseline

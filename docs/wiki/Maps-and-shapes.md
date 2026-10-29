@@ -1,5 +1,12 @@
 # Open-map starter layouts and measurements
 
+October 28 follow-up: [current workflow/geometry](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Facility-setup-reliability)
+adds map pin/custom AOI selection, v2 courtyards/bases and independent parts.
+The earlier v1 limitations and evidence below describe the original increment;
+overlapping parts, live/installed services, field accuracy and novice acceptance
+remain open. [Local delivery](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/facility-local-delivery.md) · [Study kit](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/facility-novice-study.md).
+
+
 Implemented 2026-10-27 in the existing MapLibre/Three.js editor. No subscription,
 API key, recording upload or live person tracking is required.
 

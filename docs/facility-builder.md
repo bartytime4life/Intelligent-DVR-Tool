@@ -1,5 +1,12 @@
 # Guided facility builder
 
+October 28 follow-up: [current workflow/geometry](facility-setup-reliability.md)
+adds map pin/custom AOI selection, v2 courtyards/bases and independent parts.
+The earlier v1 limitations and evidence below describe the original increment;
+overlapping parts, live/installed services, field accuracy and novice acceptance
+remain open. [Local delivery](facility-local-delivery.md) · [Study kit](facility-novice-study.md).
+
+
 [Visual tour](visual-tour.md) · [Getting started](getting-started.md) · [Verification index](verification/README.md)
 
 ![Actual fictional sample facility in the 3D planner. Coverage is estimated.](media/facility.webp)

@@ -1,4 +1,5 @@
-const SCHEMA = "intelligent-dvr.facility.v1";
+const SCHEMA = "intelligent-dvr.facility.v2";
+const LEGACY_SCHEMA = "intelligent-dvr.facility.v1";
 const LIMITS = { buildings: 100, cameras: 500, rooms: 500, labels: 1e3, route: 200, bytes: 2e6 };
 const STEPS = [
   ["Locate site", "Set the site and map origin"],
@@ -74,9 +75,34 @@ function validPolygon(p) {
   }
   return true;
 }
+// Boundary-inclusive intersection: touching courtyard walls is invalid topology.
+function ringsIntersect(a, b) {
+  return a.slice(1).some((p,i) => b.slice(1).some((q,j) => {
+    if (segmentIntersection(a[i],p,b[j],q) !== null) return true;
+    const on = (v,x,y) => Math.abs((v[0]-x[0])*(y[1]-x[1])-(v[1]-x[1])*(y[0]-x[0])) < 1e-7 &&
+      v[0]>=Math.min(x[0],y[0])-1e-7 && v[0]<=Math.max(x[0],y[0])+1e-7 && v[1]>=Math.min(x[1],y[1])-1e-7 && v[1]<=Math.max(x[1],y[1])+1e-7;
+    return on(a[i],b[j],q) || on(p,b[j],q) || on(b[j],a[i],p) || on(q,a[i],p);
+  }));
+}
+function ringsOverlap(a,b) {
+  return ringsIntersect(a,b) || pointInPolygon(a[0],b) || pointInPolygon(b[0],a);
+}
+function validHoles(outer, holes = []) {
+  return Array.isArray(holes) && holes.length <= 20 && holes.reduce((n,h)=>n+(Array.isArray(h)?h.length:10000),outer.length)<=1000 && holes.every((h,i) => validPolygon(h) &&
+    polygonContains(outer,h) && !ringsIntersect(outer,h) && !holes.slice(0,i).some(other => ringsOverlap(h,other))) &&
+    polygonArea(outer)-holes.reduce((sum,h)=>sum+polygonArea(h),0) >= 1;
+}
+function buildingArea(b) { return polygonArea(b.footprint)-(b.holes || []).reduce((sum,h)=>sum+polygonArea(h),0); }
+function buildingRings(b) { return [b.footprint, ...(b.holes || [])]; }
+function buildingFeature(b, origin, properties = {}) {
+  return {type:'Feature',geometry:{type:'Polygon',coordinates:buildingRings(b).map(r=>r.map(p=>toLngLat(p,origin)))},properties};
+}
+function transformBuilding(b, transform) {
+  return {...b,footprint:b.footprint.map(transform),...(b.holes ? {holes:b.holes.map(h=>h.map(transform))} : {})};
+}
 function validateFacility(d) {
-  if (!d || d.schema !== SCHEMA || !nameOK(d.name) || !Array.isArray(d.origin) || d.origin.length !== 2 || !finite(d.origin[0],
-  -180, 180) || !finite(d.origin[1], -80, 80)) throw Error("Use a facility v1 file with a valid name and map origin (lat\
+  if (!d || ![SCHEMA, LEGACY_SCHEMA].includes(d.schema) || !nameOK(d.name) || !Array.isArray(d.origin) || d.origin.length !== 2 || !finite(d.origin[0],
+  -180, 180) || !finite(d.origin[1], -80, 80)) throw Error("Use a facility v1 or v2 file with a valid name and map origin (lat\
 itude \u221280 to 80).");
   for (const k of ["buildings", "cameras", "rooms", "labels", "route"]) if (!Array.isArray(d[k]) || d[k].length > LIMITS[k])
    throw Error("Too many or invalid " + k + ".");
@@ -88,6 +114,17 @@ haracters.");
   }
   for (const b of d.buildings) if (!validPolygon(b.footprint) || !finite(b.height, 1, 150) || !Number.isInteger(b.floors) ||
   !finite(b.floors, 1, 40)) throw Error("Buildings need a simple closed footprint, height 1\u2013150 m, and 1\u201340 floors.");
+  for (const b of d.buildings) {
+    if (!validHoles(b.footprint,b.holes) || (b.base !== undefined && !finite(b.base,0,b.height-0.1)) ||
+        (b.part !== undefined && typeof b.part !== 'boolean')) throw Error('Invalid courtyard, building base or part geometry.');
+    if (d.schema === LEGACY_SCHEMA && (b.holes !== undefined || b.base !== undefined || b.part !== undefined))
+      throw Error('Courtyards, bases and parts require facility v2; do not label advanced geometry as v1.');
+  }
+  for(let i=0;i<d.buildings.length;i++) for(let j=i+1;j<d.buildings.length;j++) {
+    const a=d.buildings[i],b=d.buildings[j];
+    if((a.part || b.part) && Math.max(a.base || 0,b.base || 0)<Math.min(a.height,b.height) && ringsOverlap(a.footprint,b.footprint))
+      throw Error('Overlapping part/envelope volumes require a reviewed decomposition.');
+  }
   for (const b of d.buildings) if (b.source !== undefined && (!b.source || b.source.provider !== 'OpenStreetMap' ||
     !/^(way|relation)\/[1-9]\d{0,15}$/.test(b.source.id) || b.source.license !== 'ODbL-1.0' ||
     !['retrieved','updated','heightBasis','floorsBasis'].every(k => typeof b.source[k] === 'string' && b.source[k].length <= 80)))
@@ -98,7 +135,7 @@ haracters.");
   for (const r of d.rooms) {
     const b = d.buildings.find((b2) => b2.id === r.buildingId);
     if (!b || !validPolygon(r.footprint) || !Number.isInteger(r.level) || r.level < 0 || r.level >= b.floors || !finite(
-    r.wallHeight, 0.2, 10) || !polygonContains(b.footprint, r.footprint)) throw Error("Rooms must fit inside their build\
+    r.wallHeight, 0.2, 10) || !polygonContains(b.footprint, r.footprint) || (b.holes || []).some(h=>ringsOverlap(h,r.footprint))) throw Error("Rooms must fit inside their build\
 ing and reference an existing floor.");
   }
   for (const l of d.labels) if (!pointOK([l.x, l.y]) || !finite(l.z, 0, 150)) throw Error("Labels need valid positions.");
@@ -108,7 +145,8 @@ ing and reference an existing floor.");
     name: d.name,
     origin: [...d.origin],
     buildings: d.buildings.map((b) => ({ id: b.id, name: b.name, footprint: b.footprint.map((p) => [...p]), height: b.height,
-    floors: b.floors, ...(b.source ? { source: Object.fromEntries(['provider','id','license','retrieved','updated','heightBasis','floorsBasis'].map(k=>[k,b.source[k]])) } : {}) })),
+    floors: b.floors, ...(b.holes ? {holes:b.holes.map(h=>h.map(p=>[...p]))} : {}),
+    ...(b.base !== undefined ? {base:b.base} : {}), ...(b.part !== undefined ? {part:b.part} : {}), ...(b.source ? { source: Object.fromEntries(['provider','id','license','retrieved','updated','heightBasis','floorsBasis'].map(k=>[k,b.source[k]])) } : {}) })),
     cameras: d.cameras.map((c) => Object.fromEntries(["id", "name", "x", "y", "z", "bearing", "tilt", "hfov", "vfov", "r\
 ange", "enabled"].map((k) => [k, c[k]]))),
     rooms: d.rooms.map((r) => ({ id: r.id, name: r.name, buildingId: r.buildingId, level: r.level, footprint: r.footprint.
@@ -162,9 +200,9 @@ function centroid(p) {
 }
 const rad = (a) => a * Math.PI / 180;
 function wallObstacles(plan) {
-  return [...plan.buildings.map((b) => ({ polygon: b.footprint, base: 0, top: b.height })), ...plan.rooms.map((r) => {
+  return [...plan.buildings.flatMap((b) => buildingRings(b).map(polygon=>({polygon, base: b.base || 0, top: b.height}))), ...plan.rooms.map((r) => {
     const b = plan.buildings.find((b2) => b2.id === r.buildingId);
-    const base = r.level * b.height / b.floors;
+    const base = (b.base || 0) + r.level * (b.height - (b.base || 0)) / b.floors;
     return { polygon: r.footprint, base, top: base + r.wallHeight };
   })];
 }
@@ -225,6 +263,13 @@ function rehearse(plan, samples = 61) {
   });
 }
 export {
+  buildingArea,
+  buildingRings,
+  buildingFeature,
+  transformBuilding,
+  validHoles,
+  ringsIntersect,
+  ringsOverlap,
   LIMITS,
   SCHEMA,
   STEPS,

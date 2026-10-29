@@ -33,6 +33,15 @@ The fresh 100-source simulation offers 2,000 synthetic samples over ten virtual 
 
 Both retain `concurrent_camera_capacity: unqualified`. Serving every source eventually does not satisfy an analysis cadence. [Raw reports and commands](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/2026-10-27/README.md#100-source-load-model).
 
+## Facility acceptance follow-up — October 28, 2026
+
+Map pin/custom polygon AOI, v2 courtyards/raised bases, independent non-overlapping
+parts and native fixed-loopback delivery are implemented in the
+[facility follow-up](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Facility-setup-reliability). Overlapping-part decomposition,
+installed services/live retrieval, field/device accuracy and the original three-flow
+novice comparison remain open. The [study kit](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/facility-novice-study.md) records
+imagery assistance as unavailable rather than replacing it with another flow.
+
 ---
 
 [Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/roadmap.md) · Documentation refresh: October 28, 2026.

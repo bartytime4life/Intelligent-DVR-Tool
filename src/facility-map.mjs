@@ -3,7 +3,7 @@ import workerUrl from "maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url";
 import * as THREE from "three";
 import { TerraDraw, TerraDrawPolygonMode, TerraDrawLineStringMode } from "./vendor/terra-draw.mjs";
 import { TerraDrawMapLibreGLAdapter } from "./vendor/terra-maplibre.mjs";
-import { centroid, toLngLat, fromLngLat, coverageFan, wallObstacles } from "./facility.mjs";
+import { centroid, toLngLat, fromLngLat, coverageFan, wallObstacles, buildingFeature } from "./facility.mjs";
 setWorkerUrl(workerUrl);
 const fc = (features) => ({ type: "FeatureCollection", features });
 const feat = (type, coordinates, properties = {}) => ({ type: "Feature", geometry: { type, coordinates }, properties });
@@ -67,7 +67,7 @@ class CameraVolumes {
         this.group.add(new THREE.Line(lines, new THREE.LineBasicMaterial({ color: 6155245, transparent: true, opacity: 0.8 })));
       }
     }
-    if (view === "3d") for (const b of plan.buildings) {
+    if (view === "3d") for (const b of plan.buildings.filter(b=>!b.source && !b.holes?.length)) {
       const [x, y] = centroid(b.footprint);
       const geo = new THREE.BoxGeometry(5, 3, 1.1);
       const mat = new THREE.MeshBasicMaterial({ color: 6320515 });
@@ -140,7 +140,7 @@ ne-dasharray": [3, 4] } });
       ["get", "selected"],
       "#648894",
       "#405661"
-    ], "fill-extrusion-height": ["get", "top"], "fill-extrusion-base": 0, "fill-extrusion-opacity": 0.96, "fill-extrusio\
+    ], "fill-extrusion-height": ["get", "top"], "fill-extrusion-base": ["get", "base"], "fill-extrusion-opacity": 0.96, "fill-extrusio\
 n-vertical-gradient": true } });
     map.addLayer({ id: "building-edge", type: "line", source: "buildings", paint: {
       "line-color": "#72bec7",
@@ -192,6 +192,9 @@ e-stroke-width": 2 } });
   });
   map.on("click", (e) => {
     if (!ready || suppressSelection) return;
+    if (tool === 'site-pin') {
+      callbacks.onPin([e.lngLat.lng,e.lngLat.lat]); tool='select';callbacks.onToolDone();map.getCanvas().style.cursor='';return;
+    }
     if (tool === "camera" || tool === "label") {
       callbacks.onPlace(tool, fromLngLat([e.lngLat.lng, e.lngLat.lat], current.origin));
       tool = "select";
@@ -222,11 +225,10 @@ oom" : "building");
     }
     map.getSource("grid").setData(fc(grid));
     map.getSource("site").setData(fc([polygon([[-125, -110], [130, -110], [130, 108], [-125, 108], [-125, -110]], o)]));
-    map.getSource("buildings").setData(fc(plan.buildings.map((b) => polygon(b.footprint, o, { id: b.id, selected: b.id ===
-    selected, top: mode === "2d" ? 0 : mode === "floors" ? Math.min(b.floors - 1, floor) * b.height / b.floors + 0.15 : b.
-    height }))));
+    map.getSource("buildings").setData(fc(plan.buildings.map(b=>buildingFeature(b,o,{id:b.id,selected:b.id===selected,
+      base:mode==='2d'?0:(b.base || 0), top:mode==='2d'?0:mode==='floors'?(b.base || 0)+Math.min(b.floors-1,floor)*(b.height-(b.base || 0))/b.floors+0.15:b.height}))));
     map.getSource("rooms").setData(fc(mode === "floors" ? plan.rooms.filter((r) => r.level === floor).map((r) => {
-      const b = plan.buildings.find((b2) => b2.id === r.buildingId), base = r.level * b.height / b.floors;
+      const b = plan.buildings.find((b2) => b2.id === r.buildingId), base = (b.base || 0) + r.level * (b.height-(b.base || 0)) / b.floors;
       return polygon(r.footprint, o, { id: r.id, base, top: base + r.wallHeight });
     }) : []));
     const obstacles = wallObstacles(plan);
@@ -293,18 +295,19 @@ oom" : "building");
   }
   return {
     update,
-    setArea(bounds) {
+    setArea(area) {
+      const bounds=area?.bounds || area;
       if(!ready)return;
       const ring = bounds ? [[bounds[1],bounds[0]],[bounds[3],bounds[0]],[bounds[3],bounds[2]],[bounds[1],bounds[2]],[bounds[1],bounds[0]]] : null;
-      map.getSource('search-area').setData(fc(ring?[feat('Polygon',[ring])]:[]));
+      map.getSource('search-area').setData(fc(area?.ring ? [polygon(area.ring,current.origin)] : ring?[feat('Polygon',[ring])]:[]));
     },
     setTool(next) {
       if (!ready) return;
       tool = next;
       draw.clear();
-      draw.setMode(["building", "room"].includes(next) ? "polygon" : next === "route" ? "linestring" : "static");
+      draw.setMode(["building", "room", "search-area"].includes(next) ? "polygon" : next === "route" ? "linestring" : "static");
       map.getCanvas().style.cursor = next === "select" ? "" : "crosshair";
-      if (["building", "room", "route"].includes(next)) map.easeTo({ pitch: 0, duration: 250 });
+      if (["building", "room", "route", "search-area", "site-pin"].includes(next)) map.easeTo({ pitch: 0, duration: 250 });
     },
     center: fitPlan,
     setBasemap(enabled) {
