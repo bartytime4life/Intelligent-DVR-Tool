@@ -15,6 +15,7 @@ import time
 import uuid
 
 from .scheduler import integer
+from .profiling import measure, profiled, validate_profile
 
 
 class JournalError(RuntimeError):
@@ -35,7 +36,8 @@ class OutcomeJournal:
     Pending samples, frame bytes, rule state and consumer side effects are absent.
     """
     def __init__(self, directory, *, max_entries=100000, max_bytes=64*1024**2,
-                 max_result_bytes=1024**2):
+                 max_result_bytes=1024**2, profile=None):
+        self._profile = validate_profile(profile)
         if sys.platform != 'linux':
             raise ValueError('OutcomeJournal currently requires Linux and a private local directory')
         if (not integer(max_entries, 1, 1000000) or not integer(max_result_bytes, 512, 4*1024**2)
@@ -109,6 +111,7 @@ class OutcomeJournal:
         if not valid or info.st_uid != os.getuid() or info.st_mode & 0o077:
             raise JournalError('Journal paths must be private, owner-owned and not symlinks')
 
+    @profiled('journal.sqlite.query')
     def _query(self, sql, params=()):
         if self._closed:
             raise JournalError('Journal is closed')
@@ -117,12 +120,29 @@ class OutcomeJournal:
         except sqlite3.Error as exc:
             raise JournalError('Journal query failed') from exc
 
+    @profiled('journal.serialize')
+    def _encode(self, value):
+        return _json(value)
+
+    @profiled('journal.hash')
+    def _payload_hash(self, payload):
+        return hashlib.sha256(payload).hexdigest()
+
     def _write(self, sql, rows):
         if self._closed:
             raise JournalError('Journal is closed')
         try:
+            if self._profile is None:
+                with self._db:
+                    self._db.executemany(sql, rows)
+                return
             with self._db:
-                self._db.executemany(sql, rows)
+                with measure(self._profile, 'journal.sqlite.execute'):
+                    self._db.executemany(sql, rows)
+                # The connection context still rolls back on any failure.
+                if self._db.in_transaction:
+                    with measure(self._profile, 'journal.sqlite.commit'):
+                        self._db.commit()
         except sqlite3.Error as exc:
             raise JournalError('Journal commit failed; stop dispatch and preserve the directory') from exc
 
@@ -133,7 +153,7 @@ class OutcomeJournal:
             body = json.loads(raw)
             body.update(status='failed', result=None, processor=None,
                         error='parent-interrupted', finished_ns=time.time_ns())
-            updates.append((_json(body), 2048, receipt_id))
+            updates.append((self._encode(body), 2048, receipt_id))
         self._write("UPDATE entries SET body=?,charge=?,status='failed' WHERE id=?", updates)
         return len(updates)
 
@@ -152,6 +172,7 @@ class OutcomeJournal:
         return (self._count+count <= self.max_entries and
                 self._bytes+count*(self.max_result_bytes+2048) <= self.max_bytes)
 
+    @profiled('journal.reserve')
     def reserve(self, works, generation):
         """Commit the entire dispatch batch before any member may enter IPC."""
         works = tuple(works)
@@ -165,9 +186,9 @@ class OutcomeJournal:
             body = dict(run_id=self.run_id, token=work.token, camera=sample.camera,
                         sequence=sample.sequence, generation=generation,
                         captured_at=sample.captured_at, dispatched_at=work.dispatched_at,
-                        payload_bytes=len(sample.payload), payload_sha256=hashlib.sha256(sample.payload).hexdigest(),
+                        payload_bytes=len(sample.payload), payload_sha256=self._payload_hash(sample.payload),
                         status='dispatched', reserved_ns=time.time_ns())
-            rows.append((self.run_id, work.token, self.max_result_bytes+2048, _json(body)))
+            rows.append((self.run_id, work.token, self.max_result_bytes+2048, self._encode(body)))
         self._write("INSERT INTO entries(run,token,charge,body,status) VALUES(?,?,?,?,'dispatched')", rows)
         self._count += len(rows)
         self._bytes += len(rows)*(self.max_result_bytes+2048)
@@ -175,6 +196,7 @@ class OutcomeJournal:
     def finish(self, token, *, result, error, processor):
         return self.finish_many([dict(token=token, result=result, error=error, processor=processor)])[0]
 
+    @profiled('journal.finish')
     def finish_many(self, completions):
         """Atomically commit 1–4 terminal rows; return IDs in input order.
 
@@ -198,7 +220,7 @@ class OutcomeJournal:
         for item in completions:
             receipt_id, _, raw, previous_charge = existing[item['token']]
             try:
-                encoded = _json(item['result'])
+                encoded = self._encode(item['result'])
             except (TypeError, ValueError, RecursionError) as exc:
                 raise JournalError('Result must be finite JSON') from exc
             size = len(encoded.encode())
@@ -209,7 +231,7 @@ class OutcomeJournal:
                         error=None if item['error'] is None else str(item['error'])[:80],
                         processor=item['processor'], finished_ns=time.time_ns())
             charge = size+2048
-            updates.append((body['status'], _json(body), charge, receipt_id))
+            updates.append((body['status'], self._encode(body), charge, receipt_id))
             ids.append(receipt_id)
             delta += charge-previous_charge
         self._write('UPDATE entries SET status=?,body=?,charge=? WHERE id=?', updates)
@@ -219,6 +241,7 @@ class OutcomeJournal:
         self._largest_terminal_batch = max(self._largest_terminal_batch, len(ids))
         return tuple(ids)
 
+    @profiled('journal.pending')
     def pending(self, limit=100):
         """Read terminal unacknowledged rows in stable ID order; never acknowledges."""
         if not integer(limit, 1, 1000):
@@ -226,17 +249,40 @@ class OutcomeJournal:
         return [dict(json.loads(body), id=receipt_id) for receipt_id, body in self._query(
             "SELECT id,body FROM entries WHERE status!='dispatched' AND acked=0 ORDER BY id LIMIT ?", (limit,))]
 
+    @profiled('journal.ack')
     def acknowledge(self, receipt_ids):
         ids = tuple(receipt_ids)
         if not 1 <= len(ids) <= 1000 or any(not integer(i, 1, 2**63-1) for i in ids):
             raise ValueError('Acknowledge 1–1000 explicit positive journal IDs')
         # Validate the whole batch before modifying it; repeated acknowledgments are harmless.
-        for i in ids:
-            rows = self._query('SELECT status FROM entries WHERE id=?', (i,))
-            if not rows or rows[0][0] == 'dispatched':
-                raise JournalError('Cannot acknowledge missing or nonterminal work')
-        self._write('UPDATE entries SET acked=1 WHERE id=?', [(i,) for i in ids])
+        ids = tuple(dict.fromkeys(ids))
+        # Retain cheap prepared single-ID queries for natural small groups.
+        # Validate EVERY chunk before the ONE atomic write.
+        if len(ids) <= 4:
+            for receipt_id in ids:
+                rows = self._query('SELECT status FROM entries WHERE id=?', (receipt_id,))
+                if not rows or rows[0][0] == 'dispatched':
+                    raise JournalError('Cannot acknowledge missing or nonterminal work')
+        else:
+            for offset in range(0, len(ids), 250):
+                chunk = ids[offset:offset+250]
+                placeholders = ','.join('?' for _ in chunk)
+                count = self._query("SELECT COUNT(*) FROM entries WHERE status!='dispatched' AND id IN ("+
+                                    placeholders+')', chunk)[0][0]
+                if count != len(chunk):
+                    raise JournalError('Cannot acknowledge missing or nonterminal work')
+        if len(ids) <= 4:
+            self._write('UPDATE entries SET acked=1 WHERE id=?', [(i,) for i in ids])
+        else:
+            width = min(250, len(ids))
+            chunks = [ids[offset:offset+width] for offset in range(0, len(ids), width)]
+            # Padding repeats a validated identity in the final IN set. One
+            # statement shape, <=250 parameters, one transaction for all chunks.
+            rows = [chunk+(chunk[-1],)*(width-len(chunk)) for chunk in chunks]
+            self._write('UPDATE entries SET acked=1 WHERE id IN ('+
+                        ','.join('?' for _ in range(width))+')', rows)
 
+    @profiled('journal.prune')
     def prune(self):
         """Explicitly remove acknowledged terminal rows; never erase unread outcomes."""
         count, size = self._query('SELECT COUNT(*),COALESCE(SUM(charge),0) FROM entries WHERE acked=1')[0]
@@ -245,6 +291,7 @@ class OutcomeJournal:
         self._bytes -= size
         return count
 
+    @profiled('journal.snapshot')
     def snapshot(self):
         counts = dict(self._query('SELECT status,COUNT(*) FROM entries GROUP BY status'))
         unread = self._query("SELECT COUNT(*) FROM entries WHERE status!='dispatched' AND acked=0")[0][0]

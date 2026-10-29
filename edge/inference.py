@@ -8,6 +8,7 @@ from pathlib import Path
 import tempfile
 
 from .model_profiles import YOLOX_PROFILE
+from .profiling import profiled
 
 BACKENDS = ('opencv-cpu', 'onnxruntime-cuda')
 ORT_VERSION = '1.31.1'
@@ -25,6 +26,7 @@ class OpenCVCpu:
         self.runtime = {'backend': 'OpenCV CPU', 'backend_id': 'opencv-cpu',
                         'threads': threads, 'fallback': 'none'}
 
+    @profiled('native.cpu.run')
     def forward(self, blob):
         self.net.setInput(blob)
         return self.net.forward()
@@ -94,6 +96,7 @@ class OnnxRuntimeCuda:
                     'profile_sha256': hashlib.sha256(raw).hexdigest()}}
             cleanup.pop_all()
 
+    @profiled('native.cuda.run')
     def forward(self, blob):
         return self.session.run([self.output_name], {self.input_name: blob})[0]
 

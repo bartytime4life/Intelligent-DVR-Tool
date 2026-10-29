@@ -20,6 +20,8 @@ import time
 from .scheduler import CameraScheduler, Sample, finite, integer
 from .workers import Outcome
 from .journal import OutcomeJournal, JournalError
+from .profiling import (BoundedProfile, WIRE_LIMIT, activate, measure, profiled,
+                        validate_profile)
 
 PROTOCOL = 1
 META_LIMIT = 2048
@@ -56,23 +58,44 @@ def _read_exact(fd, count):
     return bytes(data)
 
 
-def _send(fd, value, limit):
-    body = _json(value)
+def _send(fd, value, limit, profile=None):
+    if profile is None:
+        body = _json(value)
+    else:
+        with measure(profile, 'child.serialize'):
+            body = _json(value)
     if len(body) > limit:
         raise ValueError('result-too-large')
     view = memoryview(_frame(body))
     while view:
-        count = os.write(fd, view)
+        if profile is None:
+            count = os.write(fd, view)
+        else:
+            with measure(profile, 'child.ipc.write'):
+                count = os.write(fd, view)
         if not count:
             raise EOFError('Local processor pipe closed')
         view = view[count:]
 
 
-def _child_main(connection, factory, count, generation, request_limit, result_limit):
+def _run_processor(processor, sample, profile, queued_ns):
+    profile.record('child.queue', time.perf_counter_ns()-queued_ns)
+    with activate(profile), measure(profile, 'child.processor'):
+        return processor(sample)
+
+
+def _child_main(connection, factory, count, generation, request_limit, result_limit, profiling=False):
     """One owned process, independent processors, at most one call per slot."""
     fd = connection.fileno()
     processors, active, executor = [], {}, None
     envelope = {'v': PROTOCOL, 'generation': generation}
+    profile = BoundedProfile() if profiling else None
+    responses = 0
+
+    def report(final=False):
+        if profile is not None:
+            _send(fd, {**envelope, 'kind': 'profile', 'timings': profile.snapshot(), 'final': final}, WIRE_LIMIT)
+
     try:
         for slot in range(count):
             processor = factory(slot, generation)
@@ -91,27 +114,36 @@ def _child_main(connection, factory, count, generation, request_limit, result_li
                 try:
                     result = future.result()
                     _send(fd, {**envelope, 'kind': 'result', 'token': token, 'processor': slot,
-                               'ok': True, 'value': result}, result_limit)
+                               'ok': True, 'value': result}, result_limit, profile)
                 except Exception as exc:
                     code = 'result-too-large' if str(exc) == 'result-too-large' else 'processor-error'
                     _send(fd, {**envelope, 'kind': 'result', 'token': token, 'processor': slot,
-                               'ok': False, 'code': code, 'message': str(exc)[:200]}, result_limit)
-            if not select.select([fd], [], [], .001)[0]:
+                               'ok': False, 'code': code, 'message': str(exc)[:200]}, result_limit, profile)
+                responses += 1
+                if responses % 64 == 0:
+                    report()
+            with measure(profile, 'child.wait'):
+                readable = select.select([fd], [], [], .001)[0]
+            if not readable:
                 continue
-            size = struct.unpack('!I', _read_exact(fd, 4))[0]
+            with measure(profile, 'child.ipc.read'):
+                size = struct.unpack('!I', _read_exact(fd, 4))[0]
             if not 4 <= size <= request_limit:
                 raise ValueError('Invalid request size')
-            body = _read_exact(fd, size)
+            with measure(profile, 'child.ipc.read'):
+                body = _read_exact(fd, size)
             meta_size = struct.unpack('!I', body[:4])[0]
             if not 1 <= meta_size <= META_LIMIT or meta_size > len(body)-4:
                 raise ValueError('Invalid request metadata')
-            meta = json.loads(body[4:4+meta_size])
+            with measure(profile, 'child.deserialize'):
+                meta = json.loads(body[4:4+meta_size])
             if (type(meta.get('generation')) is not int or meta['generation'] != generation
                     or type(meta.get('v')) is not int or meta['v'] != PROTOCOL):
                 raise ValueError('Invalid request generation')
             if meta.get('kind') == 'stop':
                 if active:
                     raise ValueError('Stop request while processors are busy')
+                report(final=True)
                 break
             token = meta.get('token')
             if (meta.get('kind') != 'work' or type(token) is not int or token <= last_token
@@ -123,7 +155,11 @@ def _child_main(connection, factory, count, generation, request_limit, result_li
             last_token = token
             slot = next(i for i in range(count) if i not in active)
             sample = Sample(meta['camera'], meta['sequence'], meta['captured_at'], payload)
-            active[slot] = token, executor.submit(processors[slot], sample)
+            if profile is None:
+                active[slot] = token, executor.submit(processors[slot], sample)
+            else:
+                active[slot] = token, executor.submit(_run_processor, processors[slot], sample,
+                                                      profile, time.perf_counter_ns())
     except (EOFError, BrokenPipeError):
         pass
     except Exception as exc:
@@ -183,7 +219,11 @@ class ProcessWorkers:
     and remains visible. This is not a host memory quota or an OS-level watchdog.
     """
     def __init__(self, scheduler, factory, *, startup_timeout=30., task_timeout=5.,
-                 max_restarts=0, restart_delay=.25, max_result_bytes=1024**2, journal=None):
+                 max_restarts=0, restart_delay=.25, max_result_bytes=1024**2, journal=None,
+                 profile=None):
+        self._profile = validate_profile(profile)
+        self._child_profiles = {}
+        self._profile_final = {}
         if sys.platform != 'linux':
             raise ValueError('ProcessWorkers is currently qualified and enabled only on Linux')
         if (not isinstance(scheduler, CameraScheduler) or not 1 <= scheduler.workers <= 4
@@ -223,6 +263,7 @@ class ProcessWorkers:
         self._events.append({'kind': kind, 'generation': self._generation,
                              'at': time.monotonic(), **details})
 
+    @profiled('parent.serialize')
     def _request(self, meta, payload=b''):
         data = _json({'v': PROTOCOL, 'generation': self._generation, **meta})
         if len(data) > META_LIMIT:
@@ -236,9 +277,11 @@ class ProcessWorkers:
         parent, child = self._context.Pipe(duplex=True)
         self._connection = parent
         os.set_blocking(parent.fileno(), False)
-        self._process = self._context.Process(target=_owned_child,
-            args=(os.getpid(), _child_main, child, self.factory, self.scheduler.workers, self._generation,
-                  self.scheduler.max_sample_bytes+META_LIMIT+4, self.max_result_bytes), daemon=True)
+        args = (os.getpid(), _child_main, child, self.factory, self.scheduler.workers, self._generation,
+                self.scheduler.max_sample_bytes+META_LIMIT+4, self.max_result_bytes)
+        if self._profile is not None:
+            args += (True,)
+        self._process = self._context.Process(target=_owned_child, args=args, daemon=True)
         try:
             self._process.start()
             self._event('spawn', pid=self._process.pid)
@@ -256,6 +299,11 @@ class ProcessWorkers:
                 except OSError:
                     pass
                 process.join(.1)
+                if self._profile is not None:
+                    self._read(eof_ok=True)
+                    if self._process is not process:
+                        # A malformed final message may have retired this handle.
+                        return self._process is None
             if process.is_alive():
                 process.terminate()
                 process.join(.3)
@@ -328,6 +376,7 @@ class ProcessWorkers:
         if not reaped:
             self._event('unreaped')
 
+    @profiled('parent.deserialize')
     def _message(self, body):
         try:
             def invalid_constant(value):
@@ -338,7 +387,15 @@ class ProcessWorkers:
                     or value['generation'] != self._generation):
                 raise ValueError('Invalid protocol generation')
             kind = value.get('kind')
-            if kind == 'fatal':
+            if kind == 'profile' and self._profile is not None:
+                if len(body) > WIRE_LIMIT or type(value.get('final')) is not bool:
+                    raise ValueError('Invalid final profile flag or size')
+                self._child_profiles[self._generation] = copy.deepcopy(
+                    BoundedProfile.validate(value.get('timings')))
+                self._profile_final[self._generation] = value['final']
+            elif len(body) > self.max_result_bytes:
+                raise ValueError('Result exceeds its independent byte bound')
+            elif kind == 'fatal':
                 self._fault('worker-error', str(value.get('message', ''))[:200])
             elif kind == 'ready' and self._state == 'starting':
                 if time.monotonic()-self._started > self.startup_timeout:
@@ -373,14 +430,15 @@ class ProcessWorkers:
         except (ValueError, TypeError, KeyError, RecursionError, UnicodeError) as exc:
             self._fault('protocol-error', str(exc)[:200])
 
-    def _read(self):
+    def _read(self, eof_ok=False):
         budget = 2*1024**2
         while self._connection is not None and budget > 0:
             if len(self._incoming) < 4:
                 needed = 4-len(self._incoming)
             else:
                 length = struct.unpack('!I', self._incoming[:4])[0]
-                if not 1 <= length <= self.max_result_bytes:
+                limit = max(WIRE_LIMIT, self.max_result_bytes) if self._profile is not None else self.max_result_bytes
+                if not 1 <= length <= limit:
                     self._fault('result-size-limit')
                     return
                 needed = 4+length-len(self._incoming)
@@ -390,13 +448,19 @@ class ProcessWorkers:
                     self._message(body)
                     continue
             try:
-                data = os.read(self._connection.fileno(), min(65536, needed, budget))
+                if self._profile is None:
+                    data = os.read(self._connection.fileno(), min(65536, needed, budget))
+                else:
+                    with measure(self._profile, 'parent.ipc.read'):
+                        data = os.read(self._connection.fileno(), min(65536, needed, budget))
             except BlockingIOError:
                 return
             except OSError as exc:
                 self._fault('pipe-error', str(exc)[:200])
                 return
             if not data:
+                if eof_ok:
+                    return
                 self._fault('worker-exit')
                 return
             self._incoming.extend(data)
@@ -408,7 +472,11 @@ class ProcessWorkers:
         while self._connection is not None and self._outgoing and budget > 0:
             view = self._outgoing[0]
             try:
-                count = os.write(self._connection.fileno(), view[:budget])
+                if self._profile is None:
+                    count = os.write(self._connection.fileno(), view[:budget])
+                else:
+                    with measure(self._profile, 'parent.ipc.write'):
+                        count = os.write(self._connection.fileno(), view[:budget])
             except BlockingIOError:
                 break
             except OSError as exc:
@@ -425,6 +493,13 @@ class ProcessWorkers:
         self._read()
         self._flush_staged()
 
+    @profiled('parent.delivery')
+    def _take_outcomes(self):
+        outcomes = tuple(self._outcomes)
+        self._outcomes.clear()
+        return outcomes
+
+    @profiled('parent.step')
     def step(self):
         try:
             return self._step()
@@ -433,9 +508,7 @@ class ProcessWorkers:
             # Existing rows remain available for restart recovery/inspection.
             self._journal_error = str(exc)
             self._fault('journal-error')
-            outcomes = tuple(self._outcomes)
-            self._outcomes.clear()
-            return outcomes
+            return self._take_outcomes()
 
     def _step(self):
         if self._state == 'closed':
@@ -462,9 +535,18 @@ class ProcessWorkers:
                     'captured_at': work.sample.captured_at}, work.sample.payload)
                 self._outgoing.append(memoryview(request))
             self._io()
-        outcomes = tuple(self._outcomes)
-        self._outcomes.clear()
-        return outcomes
+        return self._take_outcomes()
+
+    def profile_snapshot(self):
+        """Inclusive aggregates; child counters are cumulative per generation.
+        
+        A missing child_final marker means an unreported forced-exit tail, not
+        zero cost. Final=True proves receipt of the graceful summary only.
+        """
+        return {'enabled': self._profile is not None,
+                'parent': self._profile.snapshot() if self._profile is not None else {},
+                'children': copy.deepcopy(self._child_profiles),
+                'child_final': dict(self._profile_final)}
 
     def snapshot(self):
         return {'state': self._state, 'generation': self._generation, 'restarts': self._restarts,

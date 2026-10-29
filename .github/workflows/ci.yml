@@ -25,6 +25,11 @@ jobs:
           python-version: "3.12"
       - run: python -m pip install -r edge/requirements-qualification.txt
       - run: python -m unittest discover -s tests -p 'test_*.py'
+      - name: Synthetic durable profiling smoke
+        if: runner.os == 'Linux'
+        run: |
+          python scripts/profile-durable.py --seconds 2 --payload-bytes 388800 --profile --output "$RUNNER_TEMP/dvr-profile.json"
+          python scripts/benchmark-ack.py --label candidate-ci --output "$RUNNER_TEMP/dvr-ack.json"
       - run: python scripts/check-docs.py
       - run: python scripts/build-wiki.py --check
       - name: Linux launcher prerequisites

@@ -4,6 +4,7 @@ from dataclasses import dataclass
 import math
 from threading import Lock
 import time
+from .profiling import profiled, validate_profile
 
 MINIMUM_CAMERA_TARGET = 100
 
@@ -41,7 +42,8 @@ class CameraScheduler:
     omit now so the monotonic clock is read inside the lock, avoiding races.
     """
     def __init__(self, cameras, workers=8, max_sample_bytes=640*640*3,
-                 max_buffer_bytes=128*1024**2, max_age_seconds=2):
+                 max_buffer_bytes=128*1024**2, max_age_seconds=2, *, profile=None):
+        self._profile = validate_profile(profile)
         cameras = tuple(cameras)
         if (not 1 <= len(cameras) <= 10000 or len(set(cameras)) != len(cameras)
                 or any(not isinstance(c, str) or not 1 <= len(c.strip()) <= 80 for c in cameras)):
@@ -77,6 +79,7 @@ class CameraScheduler:
         self._now = now
         return now
 
+    @profiled('scheduler.submit')
     def submit(self, sample, now=None):
         with self._lock:
             now = self._clock(now)
@@ -111,6 +114,7 @@ class CameraScheduler:
             self._peak_pending = max(self._peak_pending, len(self._pending))
             return 'replaced' if old else 'accepted'
 
+    @profiled('scheduler.dispatch')
     def dispatch(self, now=None):
         with self._lock:
             now = self._clock(now)
@@ -131,6 +135,7 @@ class CameraScheduler:
             self._peak_inflight = max(self._peak_inflight, len(self._inflight))
             return result
 
+    @profiled('scheduler.complete')
     def complete(self, token, now=None, success=True):
         with self._lock:
             self._clock(now)
@@ -144,6 +149,7 @@ class CameraScheduler:
             if camera in self._pending:
                 self._ready.append(camera)
 
+    @profiled('scheduler.snapshot')
     def snapshot(self):
         with self._lock:
             return {'admitted_cameras': len(self._stats), 'workers': self.workers,
