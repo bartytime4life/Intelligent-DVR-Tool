@@ -168,7 +168,7 @@ function FacilityEditor({onPreviewCount,initialPlan,facilityControls,onPersist,o
     api.current?.centerSelection(id);
   }
   function selectOnMap(id,kind) {
-    if (kind === 'zone') {if(!dirty){setStep(6);selectZone(id);}else setError('Save or discard your preview before selecting another item.');return;}
+    if (kind === 'zone') {if(!editingDirty){setStep(6);selectZone(id);}else setError('Save or discard your preview before selecting another item.');return;}
     if(!select(id,kind)) return;
     if(kind==='building') setStep(1);
     if(kind==='camera') setStep(3);
@@ -441,7 +441,7 @@ label." };
       <div className="facility-map-tools">
         <button className="facility-compass" aria-label="Point map north" title="Point map north" onClick={() => api.current?.north()}><span style={{transform:`rotate(${-mapBearing}deg)`}}>↑</span><b>N</b><small>{Math.round((mapBearing+360)%360)}°</small></button>
         <label><input type="checkbox" checked={measurements} onChange={e=>setMeasurements(e.target.checked)}/>Dimensions</label>
-        <select aria-label="Measurement units" value={units} onChange={e=>setUnits(e.target.value)}><option value="metric">Meters · m / m²</option><option value="imperial">Feet · ft / ft²</option></select>
+        <select aria-label="Measurement units" disabled={linePending} value={units} onChange={e=>setUnits(e.target.value)}><option value="metric">Meters · m / m²</option><option value="imperial">Feet · ft / ft²</option></select>
       </div>
       <div className="facility-map-context"><span className="facility-local-dot" />{plan.name}<small>{streets ? "Online \
 street map \xB7 OpenStreetMap" : `Local grid · ${formatDistance(20,units)} spacing · no external tiles`}</small></div>
@@ -479,7 +479,7 @@ street map \xB7 OpenStreetMap" : `Local grid · ${formatDistance(20,units)} spac
     <aside className="facility-properties">
       <header><p className="eyebrow">STEP {step + 1} OF {STEPS.length}</p><h2>{["Locate your facility", "Shape a building", "Define f\
 loors & labels", "Aim this camera", "Check estimated coverage", "Test camera handoffs", "Zones & object rules"][step]}</h2><p>{["Set a geographi\
-c origin; the sample layout uses local meters.", "Trace a footprint or choose a common shape, then set its dimensions.", "Add \
+c origin for your facility; dimensions use the local map grid.", "Trace a footprint or choose a common shape, then set its dimensions.", "Add \
 rooms, stairs, openings and pathways on each level.", "Adjust the camera\u2019s position and viewing volume.", "Select a camera to ins\
 pect its modeled view.", "Draw a route and review proposed camera transitions.", "Mark restricted areas and define expected objects for review."][step]}</p></header>
       <div className="facility-property-body">
@@ -515,7 +515,7 @@ pect its modeled view.", "Draw a route and review proposed camera transitions.",
           <p className="facility-caption">Footprint area: {formatArea(buildingArea(draft),units)}. Courtyards stay open when moving or resizing. Rooms must stay within solid floor space.</p><button className="facility-primary" type="submit">Save building<Check /></button>
         </form>}
       </>}
-      {step === 2 && <><FacilityLevels units={units} plan={plan} building={b} floor={floor} onFloor={level=>{setFloor(level);setView('floors');}} commit={commit} disabled={dirty} onSelect={select}/><div className="facility-action-row"><button className="facility-primary" disabled={!ready || !b} onClick={() => startTool(
+      {step === 2 && <><FacilityLevels units={units} plan={plan} building={b} floor={floor} onFloor={level=>{setFloor(level);setView('floors');}} commit={commit} disabled={editingDirty} onSelect={select}/><div className="facility-action-row"><button className="facility-primary" disabled={!ready || !b} onClick={() => startTool(
     "room"
   )}><Polygon />Draw room</button><button className="facility-secondary" disabled={!ready} onClick={() => startTool(
     "label"
@@ -587,7 +587,7 @@ nabled", e.target.checked)} />Include in coverage estimates</label>
         </form> : <p className="facility-caption">Select a camera in the inventory, or place the first camera.</p>}
         {step === 3 && <p className="hint">Use the source preview to compare your camera placement. View guides are estimates; centering moves the map, not a physical camera.</p>}
       </>}
-      {step === 2 && <><FloorGeometry onPendingChange={setLinePending} plan={plan} building={b} floor={floor} selected={selected} draft={draft} onDraft={setDraft} onSelect={select} commit={commit} onDraw={startTool} disabled={dirty} ready={ready} units={units}/><FacilityStairs plan={plan} building={b} floor={floor} selectedId={selected.kind==='stair'?selected.id:''} onSelect={id=>select(id,'stair')} commit={commit} disabled={propertyDirty || zoneDirty} units={units} onDirtyChange={setStairDirty}/></>}
+      {step === 2 && <><FloorGeometry pending={linePending} onPendingChange={setLinePending} plan={plan} building={b} floor={floor} selected={selected} draft={draft} onDraft={setDraft} onSelect={select} commit={commit} onDraw={startTool} disabled={dirty} ready={ready} units={units}/><FacilityStairs plan={plan} building={b} floor={floor} selectedId={selected.kind==='stair'?selected.id:''} onSelect={id=>select(id,'stair')} commit={commit} disabled={propertyDirty || zoneDirty || linePending} units={units} onDirtyChange={setStairDirty}/></>}
       {step === 5 && <><div className="facility-action-row"><button className="facility-primary" disabled={!ready} onClick={() => startTool(
     "route"
   )}><Path />Draw route</button><button className="facility-secondary" disabled={plan.route.length < 2} onClick={() => {

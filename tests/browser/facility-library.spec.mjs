@@ -1,6 +1,7 @@
 import {test,expect} from '@playwright/test';
 import {readFile} from 'node:fs/promises';
-import {exampleFacility} from '../../src/facility.mjs';
+import {exampleFacility,createFloorPath} from '../../src/facility.mjs';
+import {createFacilityZone} from '../../src/facility-zones.mjs';
 import {savedFacilities,savedPlan,openExample} from './facility-test-helpers.mjs';
 
 const collectionKey='dvr.facilities.v1',legacyKey='dvr.facility.v1';
@@ -214,6 +215,73 @@ test('unapplied line measurements protect navigation while Apply and Discard rem
   await expect(page.getByLabel('Saved facility',{exact:true})).toBeEnabled();
   const [a,b]=(await savedPlan(page)).route;
   expect(Math.hypot(b[0]-a[0],b[1]-a[1])).toBeCloseTo(50,6);
+});
+
+test('pending floor-path measurements protect levels, units and surfaces until Apply and Save',async({page})=>{
+  const plan=exampleFacility();
+  plan.paths=[createFloorPath(plan,'b2',1,[[-75,-60],[-65,-60]],'Fixture corridor')];
+  await page.addInitScript(({key,plan})=>localStorage.setItem(key,JSON.stringify(plan)),{key:legacyKey,plan});
+  await openBlank(page);
+  await page.getByRole('button',{name:/^3 Floors & labels/}).click();
+  await page.getByLabel('Building for floor editing',{exact:true}).selectOption('b2');
+  await page.getByLabel('Active floor',{exact:true}).selectOption('1');
+  await page.getByRole('button',{name:/^Fixture corridor/}).click();
+  const before=await savedPlan(page),levels=page.getByRole('region',{name:'Building levels',exact:true});
+  await page.getByLabel('Segment length',{exact:true}).fill('15');
+  await expect(page.getByLabel('Saved facility',{exact:true})).toBeDisabled();
+  await expect(page.getByLabel('Measurement units',{exact:true})).toBeDisabled();
+  await expect(levels.getByRole('button',{name:/^Level 3/})).toBeDisabled();
+  await expect(page.getByRole('button',{name:'Add top level',exact:true})).toBeDisabled();
+  await expect(page.getByRole('checkbox',{name:'Solid floor at this level',exact:true})).toBeDisabled();
+  await expect(page.getByRole('button',{name:'Save pathway',exact:true})).toBeDisabled();
+  await expect(page.getByRole('button',{name:/^Remove pathway/})).toBeDisabled();
+  await expect(page.getByRole('button',{name:'Apply segment length',exact:true})).toBeEnabled();
+  await expect(page.getByRole('button',{name:'Discard line edits',exact:true})).toBeEnabled();
+  await page.getByLabel('Active floor',{exact:true}).selectOption('2');
+  await expect(page.getByLabel('Active floor',{exact:true})).toHaveValue('1');
+  await expect(page.getByLabel('Segment length',{exact:true})).toHaveValue('15');
+  expect(await savedPlan(page)).toEqual(before);
+  await page.getByRole('button',{name:'Apply segment length',exact:true}).click();
+  await expect(page.getByRole('button',{name:'Save pathway',exact:true})).toBeEnabled();
+  await expect(page.getByLabel('Measurement units',{exact:true})).toBeEnabled();
+  await expect(page.getByLabel('Saved facility',{exact:true})).toBeDisabled();
+  expect(await savedPlan(page)).toEqual(before);
+  await page.getByRole('button',{name:'Save pathway',exact:true}).click();
+  await expect(page.getByLabel('Saved facility',{exact:true})).toBeEnabled();
+  await expect(levels.getByRole('button',{name:/^Level 3/})).toBeEnabled();
+  await expect(page.getByRole('checkbox',{name:'Solid floor at this level',exact:true})).toBeEnabled();
+  const [a,b]=(await savedPlan(page)).paths[0].points;
+  expect(Math.hypot(b[0]-a[0],b[1]-a[1])).toBeCloseTo(15,6);
+});
+
+test('selecting a zone on the map preserves a pending shape draft',async({page})=>{
+  const plan=exampleFacility();
+  plan.zones=[createFacilityZone([[-135,-15],[-105,-15],[-105,15],[-135,15],[-135,-15]],{name:'Navigation zone'})];
+  await page.addInitScript(({key,plan})=>localStorage.setItem(key,JSON.stringify(plan)),{key:legacyKey,plan});
+  await openBlank(page);
+  await expect(page.getByRole('checkbox',{name:/^Online street map/})).toBeEnabled();
+  await page.getByRole('button',{name:'2D',exact:true}).click();
+  const clickZone=async()=>{
+    // View changes and centering animate for up to 400 ms.
+    await page.waitForTimeout(450);
+    const marker=page.locator('.facility-zone-label').filter({hasText:'Navigation zone'});
+    await expect(marker).toBeVisible();
+    // Zone labels sit over their polygon centroid. Click the rendered map there.
+    const bounds=await marker.boundingBox();
+    await page.mouse.click(bounds.x+bounds.width/2,bounds.y+bounds.height/2);
+  };
+  await clickZone();
+  await expect(page.getByRole('heading',{name:'Zones & object rules',exact:true})).toBeVisible();
+  await page.getByRole('button',{name:/^2 Buildings/}).click();
+  await page.getByText('Common building shapes',{exact:true}).click();
+  await page.getByLabel('Shape width (m)',{exact:true}).fill('50');
+  await expect(page.getByLabel('Saved facility',{exact:true})).toBeDisabled();
+  const before=await savedPlan(page);
+  await clickZone();
+  await expect(page.getByText('Save or discard your preview before selecting another item.',{exact:true})).toBeVisible();
+  await expect(page.getByRole('heading',{name:'Shape a building',exact:true})).toBeVisible();
+  await expect(page.getByLabel('Shape width (m)',{exact:true})).toHaveValue('50');
+  expect(await savedPlan(page)).toEqual(before);
 });
 
 test('example layouts are opt-in and keep the existing blank facility',async({page},info)=>{
