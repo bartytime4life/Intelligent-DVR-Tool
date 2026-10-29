@@ -21,16 +21,17 @@ flowchart TD
   K["Optional OSM data / tiles"] -->|"user-initiated request or extract import"| E
 ```
 
-This diagram describes implemented paths. The reusable scheduler and synthetic load model are separate preparation components; they are **not wired into the analyzer or a live ingest service**. The browser does not perform neural-network inference.
+This diagram describes the original manual paths. The [local job service](local-analysis-service.md) additionally connects Recognition selections to an isolated CPU invocation of the same analyzer and opens its verified-source bundle automatically. The reusable scheduler and synthetic load model are separate preparation components; they are **not wired into the analyzer or a live ingest service**. The browser does not perform neural-network inference.
 
 | Component | Source | Role |
 | --- | --- | --- |
 | Workspace | `src/App.jsx`, `src/data.mjs` | Review, rules, local video preview, explicit receipt import |
-| Recording recognition | `src/RecognitionReview.jsx`, `src/recognition.mjs` | Explicit review bundle, original-file hash matching, paused sampled detections/counts and Event handoff; no inference/network API |
+| Recording recognition | `src/RecognitionReview.jsx`, `src/recognition.mjs` | Explicit review bundle, original-file hash matching, paused sampled detections/counts and Event handoff; connects to the optional same-origin local job API |
 | Facility model | `src/facility.mjs` | Bounded plan validation, local-meter projection, estimated visibility and rehearsal |
 | Facility renderer | `src/FacilityBuilder.jsx`, `src/facility-map.mjs` | Guided controls, MapLibre and selected-camera Three.js volume |
 | Map starter | `src/FacilityStarter.jsx`, `src/facility-starter.mjs` | Common shapes, dimensions, reviewed simple ways/supported outer-only relations and source records |
 | Place search and services | `src/AddressSearch.jsx`, `src/facility-services.mjs` | Explicit submitted search, selectable public/local services and bounded responses |
+| Local recording jobs | `edge/local_service.py`, `edge/analysis_worker.py`, `src/LocalAnalysis.jsx` | Loopback selection catalog, one isolated CPU job, bounds, progress/cancel and source-matched result opening |
 | Analyzer | `edge/analyze.py`, `edge/model_profiles.py`, `edge/rules.py` | Explicit recording analysis and profile-bound decoding |
 | Evaluation | `edge/evaluation.py`, `edge/evaluate.py` | Annotation matching, review coverage and timing summaries |
 | Scaling preparation | `edge/scheduler.py`, `edge/capacity.py` | Fair bounded sample admission and virtual-time load simulation |
@@ -42,6 +43,7 @@ This diagram describes implemented paths. The reusable scheduler and synthetic l
 | Use sample workspace | Browser memory/localStorage | Generated artwork is not real evidence |
 | Preview a local video | Local browser object URL | Preview is not analysis; no upload is implemented |
 | Open recognition results + matching recording | Transient browser memory and local object URL | SHA-256 match before attachment; metadata and video never uploaded; selected observations can be explicitly imported into localStorage |
+| Start local analysis job | One explicit local folder, private temporary input snapshots and same-computer HTTP result transfer | Token/Host/origin checks; no uploads or cloud inference; temporary state is not a durable recording or review database |
 | Run analyzer | Explicit local output files | No camera capture or model download |
 | Import receipt/plan | Browser memory/localStorage after validation | Bounds and declared fields are checked |
 | Export reviews/rules/plan | Explicit browser download | User-controlled file copies |

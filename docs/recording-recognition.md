@@ -7,7 +7,7 @@ workflow below remains available for existing receipt users.
 
 [Home](../README.md) · [Analyzer](../edge/README.md) · [Deployment path](roadmap.md#recognition-deployment-path--october-29-2026)
 
-The next deployment milestone is a complete **one-recording recognition and human
+The implemented local milestone is a bounded **one-recording recognition and human
 review workflow**. The analyzer runs the selected local model; the Recognition
 workspace displays its actual sampled detections against the matching recording.
 The Monitor workspace still contains generated samples.
@@ -42,8 +42,8 @@ filenames for each run:
 ```
 
 The optional CUDA backend remains an explicit selection in its separately
-qualified environment, with no automatic fallback. Browser selection does not
-choose or execute the backend. A trace can still be requested independently with
+qualified environment, with no automatic fallback. The local application job
+service uses CPU; its model/rule selectors do not select a CUDA backend. A trace can still be requested independently with
 `--trace-output`; review output contains its own trace without needing that flag.
 
 ## Review what the detector observed
@@ -63,10 +63,12 @@ choose or execute the backend. A trace can still be requested independently with
    would exceed 1,000 events is refused instead of silently dropping records.
 
 The video and loaded review bundle stay transient in the browser. Navigating
-away from Recognition releases them; reselect both files to continue. Imported
-event decisions use existing localStorage and need explicit export for a backup.
-No footage upload, camera connection, server execution API or background service
-is introduced. Existing optional fonts/maps retain their documented destinations.
+between workspaces retains them and pauses hidden playback; page reload/close
+releases the browser session. Reconnecting to a running local service can reopen
+its retained result. Imported event decisions use existing localStorage and need
+explicit export for a backup. The optional local job API requires explicit start;
+there is no footage upload, camera connection or installed background service.
+Existing optional fonts/maps retain their documented destinations.
 
 ## Contract and bounds
 

@@ -7,13 +7,15 @@ network scanning, automatic containment, background capture or cloud inference.
 Do not commit private recordings, receipts, model weights, API keys or camera
 credentials. Local input files and models should be trusted and processed in a
 resource-limited environment; native media/model decoders are an attack surface.
-The first adapter is bounded by frame/event/image counts, not a hard inference
-deadline or sandbox. Never expose it as an unauthenticated upload service.
+The direct CLI adapter is bounded by frame/event/image counts, not a hard
+inference deadline or sandbox. The optional local job service adds worker memory
+and wall-time bounds as described below. Never expose it as an unauthenticated upload service.
 
 The browser imports bounded JSON metadata (1 MB, 1,000 events) and renders it as
 React text. There is no HTML injection or URL-based media fetch from a receipt.
-Source imagery for imported observations is intentionally unavailable. Imports
-are unverified, unsigned records and require original-footage/hash checks.
+Receipt-only imports do not borrow sample imagery. Recognition can attach the
+exact recording after a source-hash match. Imports remain unsigned records;
+file correspondence does not authenticate detections or measure their accuracy.
 
 Browser-saved review decisions are editable, not an authoritative audit trail.
 Future operational use requires authentication, authorization, encrypted
