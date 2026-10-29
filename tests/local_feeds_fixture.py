@@ -49,7 +49,7 @@ class SyntheticRtsp(socketserver.ThreadingTCPServer):
 
 class RtspHandler(socketserver.StreamRequestHandler):
     def handle(self):
-        self.request.settimeout(10);self.lock=threading.Lock();self.done=threading.Event()
+        self.request.settimeout(30);self.lock=threading.Lock();self.done=threading.Event()
         sender=None
         try:
             while True:

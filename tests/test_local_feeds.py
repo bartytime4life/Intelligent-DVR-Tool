@@ -172,6 +172,12 @@ class NativeFeedTest(unittest.TestCase):
                 if state['state']!='connecting':break
                 time.sleep(.1)
             self.assertEqual(state['state'],'live',state)
+            # An active stream survives >8 seconds with no decoder requests.
+            # Keeping the browser lease alive must not hide media-worker exits.
+            sustained=time.monotonic()+10
+            while time.monotonic()<sustained:
+                self.assertEqual(feeds.status(identifier)['state'],'live')
+                time.sleep(.2)
             self.assertEqual(request('/api/feeds/'+identifier+'/frame')[0],403)
             status,frame=request('/api/feeds/'+identifier+'/frame',**headers);self.assertEqual(status,200)
             import cv2,numpy as np

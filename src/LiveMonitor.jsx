@@ -1,6 +1,6 @@
 import React, {useEffect, useRef, useState} from 'react';
 import {Camera, Plus, Plug, PlugsConnected, X, ArrowClockwise, WarningCircle} from '@phosphor-icons/react';
-import {feedRequest, localFeedOrigin, webcamController} from './live-feeds.mjs';
+import {feedRequest, localFeedOrigin, webcamController, visibleFeedTiles} from './live-feeds.mjs';
 import './live-feeds.css';
 
 const guide = 'https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/local-camera-feeds.md';
@@ -133,8 +133,7 @@ export default function LiveMonitor({queue, visibleTiles=4, onCount, pageHidden}
     ...(webcam.state !== 'disconnected' || webcam.message !== 'No webcam connected' ? [{id:'webcam', name:'This computer’s webcam', state:webcam.state, message:webcam.message}] : []),
     ...feeds,
   ];
-  const displayed = visibleTiles === 1 ? tiles.filter(t => t.id === selected).slice(0,1) : tiles.slice(0,4);
-  if (visibleTiles === 1 && !displayed.length && tiles.length) displayed.push(tiles[0]);
+  const displayed = visibleFeedTiles(tiles, selected, visibleTiles);
   const blanks = Math.max(0, Math.min(4, visibleTiles) - displayed.length);
   return <div className="live-monitor">
     <div className="live-heading"><div><p className="eyebrow">YOUR CAMERAS · LOCAL PREVIEW</p><h1>Monitor <span>{live} receiving</span></h1></div>
