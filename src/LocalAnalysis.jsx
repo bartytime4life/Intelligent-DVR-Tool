@@ -100,6 +100,7 @@ export default function LocalAnalysis({ onResult, onBusy }) {
       {catalog.rules.find(r => r.id === rules)?.summary.map((line, i) => <p className="local-analysis-rule" key={i}>{line}</p>)}
       {!compatible && <p className="recognition-error">Choose rules whose labels are available in this model.</p>}
       <p className="local-analysis-limits">Up to 6,000 decoded frames · sample every 5 frames · 5-minute limit · 2 CPU threads. Reaching the frame cap produces a clearly marked partial result.</p>
+      <p className="local-analysis-limits">{catalog.retention === 'private-local-last-job' ? 'The last analysis job and its verified recording snapshot stay on this computer across service restarts. Starting a new job replaces them.' : 'Results stay available until the service stops or a new job starts.'}</p>
       <div className="local-analysis-actions">
         <button className="button amber" disabled={busy || !connected || !catalog.ready || !recording || !compatible} onClick={start}>Analyze recording</button>
         {activeJob(job) && <button className="button" disabled={working || !connected} onClick={cancel}>Cancel analysis</button>}
@@ -108,6 +109,7 @@ export default function LocalAnalysis({ onResult, onBusy }) {
     </>}
     {job && <div className="local-analysis-job" aria-live="polite">
       <strong>{job.recording}</strong><span>{job.phase} · {job.elapsed_seconds}s</span>
+      {job.recovered && <p>Recovered from local storage after a service restart. No analysis was rerun.</p>}
       <p>{job.frames_analyzed} sampled frames · {job.frames_read} decoded / {job.max_frames} frame cap</p>
       {activeJob(job) && <progress aria-label="Analysis frame budget" value={job.frames_read} max={job.max_frames} />}
       {job.error && <p className={job.state === 'failed' ? 'recognition-error' : ''}>{job.error.message}</p>}

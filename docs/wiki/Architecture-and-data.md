@@ -44,7 +44,7 @@ not calibrated camera feeds. The browser performs no neural-network inference.
 | Use sample workspace | Browser memory/localStorage | Generated artwork is not real evidence |
 | Preview a local video | Local browser object URL | Preview is not analysis; no upload is implemented |
 | Open recognition results + matching recording | Transient browser memory and local object URL | SHA-256 match before attachment; metadata and video never uploaded; selected observations can be explicitly imported into localStorage |
-| Start local analysis job | One explicit local folder, private temporary input snapshots and same-computer HTTP result transfer | Token/Host/origin checks; no uploads or cloud inference; temporary state is not a durable recording or review database |
+| Start local analysis job | One explicit local folder, frozen input snapshots and same-computer HTTP result transfer; optional Linux private last-job recovery | Token/Host/origin checks; no uploads or cloud inference; [restart storage](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/local-analysis-service.md#optional-linux-restart-recovery) is not continuous recording or a durable human-review database |
 | Run analyzer | Explicit local output files | No camera capture or model download |
 | Import receipt/plan | Browser memory/localStorage after validation | Bounds and declared fields are checked |
 | Export reviews/rules/plan | Explicit browser download | User-controlled file copies |

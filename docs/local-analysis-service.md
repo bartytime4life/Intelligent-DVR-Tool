@@ -71,7 +71,7 @@ encoded bytes must never inherit another recording's boxes.
 | CPU | Two OpenCV/native worker threads requested; 6,000 decoded frames; sample every five; 4 GiB Linux virtual-address or Windows process-commit limit; Linux CPU-time/file-size caps |
 | Results | Existing 1,000-observation, 100,000-detection, 32 MiB review contract; browser validates full contract before attaching exact source |
 | HTTP | 2 KiB JSON request; no raw footage upload; one request at a time with five-second socket timeout; output sent in fixed-size chunks |
-| Retention | One private temporary recording/result snapshot until the next explicit job or graceful shutdown; model/config snapshots removed after processing |
+| Retention | Default: one private temporary recording/result snapshot until the next explicit job or graceful shutdown. Opt-in Linux storage retains the last job across service restarts; model/config snapshots are removed after processing |
 
 The retained result can be reopened with **Open results again**. Reloading the
 browser and reconnecting recovers the service's current job/result without
@@ -82,13 +82,64 @@ available for another explicit attempt. A previous loaded review is retained if
 a new job fails validation. A frame-budget stop is marked **PARTIAL**, not complete
 coverage of the recording. A time-limit stop produces no review result.
 
-Stopping the service cancels its active job and deletes its temporary inputs.
+In the default temporary mode, stopping the service cancels its active job and deletes its temporary inputs.
 A service restart does not resume or replay a job. Abrupt host/process termination
 can leave an `intelligent-dvr-job-*` private directory in the OS temporary folder;
-there is no persistent journal or cross-restart recovery in this first service.
+without `--state-dir`, no persistent journal or cross-restart recovery is used.
 Delete such a directory only after confirming its service/worker has stopped.
 Original recordings are never altered. This is a single-user local application,
 not a multi-user or remotely exposed server or a sandbox for hostile models.
+
+### Optional Linux restart recovery
+
+Add `--state-dir /absolute/path/to/private-analysis-state` to the direct
+`python -m edge.local_service` command above. The parent folder must already
+exist. Use a dedicated empty folder on local storage; a new folder is created
+with mode 0700. Existing folders/files must belong to the current OS user and
+must not be symlinks or shared with another service. Do not place originals or
+other data inside this store. The existing shell/PowerShell launchers do not
+forward this option; use the direct command for this opt-in path.
+
+The store retains **one last job**, not a recording library or review database.
+A completed job keeps its frozen recording (up to 512 MiB), review bundle (up
+to 32 MiB) and bounded metadata. A new explicit job replaces that job and its
+snapshot. During analysis a temporary model copy adds up to 512 MiB plus small
+configuration files. This is an application size bound, not a disk quota or
+free-space reservation. No model, source or metadata is uploaded.
+
+After restart, Connect local analysis recovers the job with a fresh API token.
+Completed files are checked by SHA-256 and the existing source-binding contract
+before serving; the browser still validates the full review contract and exact
+recording fingerprint. Original files may have changed or disappeared; the
+retained frozen bytes remain the result's source. No inference is rerun or
+automatically resumed. Graceful shutdown cancels an active job; an abrupt service
+exit becomes SERVICE_INTERRUPTED on restart, with no partial success exposed.
+The Linux analysis worker arms the existing parent-death SIGKILL mechanism before
+native work and verifies the expected parent, preventing an orphan from continuing
+analysis after its service dies.
+
+An exclusive file lock refuses a competing service owner. A successful completed
+state is published only after syncing the two retained files and atomically
+replacing metadata. Write/rename/sync failures stop new dispatch and do not open
+a live result. A commit whose final sync failed can remain uncertain: restart
+revalidates whatever complete state reached disk instead of inventing success
+or failure. These checks establish tested process-restart behavior, **not
+power-loss durability**, authentication of editable local records, or hostile-OS
+isolation. Checksums cannot prevent an OS owner from coherently editing files.
+
+Corrupt metadata, unknown files, missing committed metadata with retained files,
+wrong source bindings, unsafe paths or changed completed files refuse startup
+and preserve the affected files for inspection. An interrupted running record
+retains its explicit failure status and discards its incomplete working copies.
+Stop all service instances before repairing or moving a store aside. Omit
+`--state-dir` to return to temporary mode; preserve/export needed reviews and
+the private store first. Windows persistent-storage permission/locking semantics
+are not qualified by this implementation; Windows retains the default temporary
+workflow and explicitly rejects this opt-in option.
+
+Human review decisions remain in browser storage and exports; this store does
+not persist those decisions, capture live cameras, record continuous footage,
+qualify recognition accuracy, or establish 100-camera operation.
 
 CPU is the service's default and available fallback path; CUDA remains an explicit
 separate CLI backend with its existing no-silent-fallback policy. This service does
