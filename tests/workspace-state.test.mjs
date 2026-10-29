@@ -69,3 +69,17 @@ test('every workspace has a bookmark while skip links remain local anchors', () 
   assert.equal(workspaceFromHash('#workspace'), null);
   assert.equal(workspaceFromHash('#untrusted'), null);
 });
+
+test('restored or undone human reviews replace matching pending entries only', () => {
+  for (const pending of [initialEvents, imported()]) {
+    const restored = reviewEvent(pending, pending[0].id, 'confirmed', 'Exported decision');
+    const merged = mergeRecognitionEvents(pending, parseReviewExport(reviewExport(restored)));
+    assert.deepEqual(merged[0], restored[0]);
+    const later = reviewEvent(pending, pending[0].id, 'dismissed', 'Newer decision');
+    assert.deepEqual(mergeRecognitionEvents(later, restored)[0], later[0]);
+  }
+});
+test('root history entry restores Monitor while the skip link leaves the workspace alone', () => {
+  assert.equal(workspaceFromHash(''), 'Monitor');
+  assert.equal(workspaceFromHash('#workspace'), null);
+});

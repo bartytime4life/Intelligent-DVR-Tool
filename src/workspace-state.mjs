@@ -3,6 +3,7 @@ import { mergeRecognitionEvents } from './recognition.mjs';
 
 export const WORKSPACES = ['Monitor', 'Recognition', 'Facility', 'Events', 'Zones', 'System', 'Settings'];
 export function workspaceFromHash(hash) {
+  if (hash === '') return 'Monitor';
   return WORKSPACES.find(name => `#${name.toLowerCase()}` === hash) || null;
 }
 

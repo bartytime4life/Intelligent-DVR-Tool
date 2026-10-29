@@ -53,3 +53,13 @@ analyzer's thresholds. This proves worker/contract integration, not a true-negat
 or recognition-accuracy result. No clips, weights or detailed bundles were sent
 to GitHub. The API/browser tests above remain separate from these socket-free
 trained-model executions. No performance or target-camera capacity is inferred.
+
+## PR #25 reconciliation
+
+The merged PR's automated review identified two remaining P2 defects. This
+follow-up restores backed-up human decisions over matching pending entries while
+preserving current human decisions, evidence-conflict checks and queue limits.
+It also treats an empty hash as Monitor during Back/Forward navigation, while
+preserving the skip-link anchor. Domain tests cover model and starter-sample
+restoration; browser tests restore a reviewed backup after reimporting its raw
+receipt and navigate Back to the initially unfragmented URL.

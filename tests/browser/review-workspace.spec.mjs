@@ -52,6 +52,9 @@ test('receipt import preserves review decisions and review exports restore an em
   await page.getByRole('button',{name:'Clear queue now'}).click();
   await page.reload();
   await expect(page.getByRole('heading',{name:'Your review queue is empty'})).toBeVisible();
+  // Restore after the receipt has re-created a matching pending entry.
+  await page.getByLabel('Import receipt or review export').setInputFiles(upload(receipt));
+  expect((await stored(page)).find(e=>e.id===reviewed.id).status).toBe('pending');
   await page.getByLabel('Import receipt or review export').setInputFiles(upload(backup));
   expect((await stored(page)).find(e=>e.id===reviewed.id)).toEqual(reviewed);
 });
@@ -93,4 +96,17 @@ test('narrow-screen queue controls, source filters and empty states remain usabl
   await expect(page.locator('.event-table-row')).toHaveCount(2);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth+1)).toBe(true);
   await page.screenshot({path:'test-results/review-workspace-mobile.png',fullPage:true});
+});
+
+test('Back to the root URL restores Monitor and Forward restores Events', async ({page}) => {
+  await page.goto('/');
+  await expect(page.getByLabel('Sample camera wall')).toBeVisible();
+  await nav(page,'Events').click();
+  await expect(page).toHaveURL(/#events$/);
+  await page.goBack();
+  await expect(page).not.toHaveURL(/#/);
+  await expect(page.getByLabel('Sample camera wall')).toBeVisible();
+  await expect(nav(page,'Monitor')).toHaveAttribute('aria-current','page');
+  await page.goForward();
+  await expect(page.getByRole('heading',{name:'Event history'})).toBeVisible();
 });
