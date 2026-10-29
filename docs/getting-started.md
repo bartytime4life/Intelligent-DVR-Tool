@@ -44,6 +44,11 @@ Facility import validates before replacement, and Undo can restore the previous 
 
 ## Try a local video or offline receipt
 
+For actual sampled detections on matching footage, use the new **Recognition**
+workspace and [recording recognition pilot](recording-recognition.md). The analyzer
+creates a review bundle; the browser verifies your original file before overlaying
+boxes. This is separate from the sample Monitor and simple video preview below.
+
 Settings can preview an explicitly selected local video without uploading it. Preview does not analyze the video. To analyze an approved recording, use the separate [edge CLI](../edge/README.md), a deliberately obtained compatible model and verified labels, then explicitly import its review receipt.
 
 An evaluation report is **not** a review receipt. `intelligent-dvr.evaluation.v1` belongs to the evaluation path; the browser imports `intelligent-dvr.receipt.v1`. Imported observations do not acquire generated sample imagery.

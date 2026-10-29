@@ -1,0 +1,46 @@
+.recognition-page { max-width: 1500px; margin: 0 auto; }
+.recognition-intro { max-width: 800px; color: #b4c1cb; line-height: 1.6; }
+.recognition-page h1 { margin: 10px 0 14px; }
+.recognition-page p + p { margin-top: 12px; }
+.recognition-status { margin: 14px 0; }
+.recognition-caption { margin: 12px 0; font-size: 12px; }
+.recognition-observations > p { margin: 12px 0 18px; }
+.recognition-loaders { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 22px; }
+.recognition-loaders label { position: relative; overflow: hidden; cursor: pointer; }
+.recognition-loaders input { position: absolute; inset: 0; width: 100%; opacity: 0; cursor: pointer; }
+.recognition-loaders label:focus-within { outline: 2px solid #58dccd; outline-offset: 3px; }
+.recognition-loaders .disabled { opacity: .45; }
+.recognition-status, .recognition-caption { color: #aabac5; line-height: 1.5; }
+.recognition-error { color: #ffba91 !important; }
+.recognition-empty, .recognition-scene, .recognition-observations { border: 1px solid #304450; border-radius: 10px; padding: 24px; background: #15212b; }
+.recognition-empty { max-width: 850px; margin-top: 30px; line-height: 1.7; }
+.recognition-empty code { overflow-wrap: anywhere; }
+.recognition-facts { display: flex; gap: 12px 28px; flex-wrap: wrap; padding: 18px 0; font-size: 13px; color: #b8c8d3; }
+.recognition-layout { display: grid; grid-template-columns: minmax(0, 2.5fr) minmax(240px, 1fr); gap: 20px; align-items: start; }
+.recognition-stage { position: relative; background: #070d12; display: flex; align-items: center; justify-content: center; border: 1px solid #314956; border-radius: 8px; overflow: hidden; }
+.recognition-stage video { width: 100%; height: 100%; display: block; object-fit: contain; }
+.recognition-stage > p { padding: 24px; text-align: center; color: #9baebb; }
+.recognition-boxes { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.recognition-boxes rect { fill: #36d9c40d; stroke: #56eedb; stroke-width: 2; vector-effect: non-scaling-stroke; }
+.recognition-box-labels { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.recognition-box-labels span { position: absolute; background: #073a37e8; color: #a4fff1; font-size: 11px; padding: 3px 5px; border-radius: 2px; max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.recognition-timeline { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+.recognition-timeline label { flex: 1; min-width: 140px; font-size: 12px; color: #aabac5; }
+.recognition-timeline input, .recognition-threshold input { display: block; width: 100%; margin-top: 12px; accent-color: #55d8ca; }
+.recognition-scene h2 { margin: 12px 0 20px; }
+.recognition-scene p, .recognition-observations p, .recognition-provenance p { font-size: 13px; line-height: 1.6; color: #aabac5; }
+.recognition-threshold { display: block; font-size: 13px; }
+.recognition-counts { padding: 0; list-style: none; }
+.recognition-counts li, .recognition-detections > div { display: flex; justify-content: space-between; gap: 15px; padding: 9px 0; border-bottom: 1px solid #2b3e49; }
+.recognition-counts strong { color: #5ae7d2; }
+.recognition-detections { max-height: 210px; overflow: auto; font-size: 12px; }
+.recognition-observations { margin-top: 24px; }
+.recognition-observations h2 small { color: #5ae7d2; margin-left: 6px; }
+.recognition-event-list { max-height: 320px; overflow: auto; margin-top: 18px; }
+.recognition-event { width: 100%; display: flex; text-align: left; justify-content: space-between; gap: 20px; padding: 14px 8px; background: transparent; color: #d3dee5; border: 0; border-bottom: 1px solid #304450; cursor: pointer; line-height: 1.5; }
+.recognition-event:hover { background: #213741; }
+.recognition-event span:last-child { color: #74d8cb; font-size: 12px; flex-shrink: 0; }
+.recognition-provenance { margin-top: 24px; }
+.recognition-provenance code { overflow-wrap: anywhere; }
+@media(max-width: 1050px) { .recognition-layout { grid-template-columns: minmax(0, 1fr); } }
+@media(max-width: 600px) { .recognition-event { display: block; } .recognition-event span { display: block; } .recognition-loaders { flex-direction: column; } .recognition-timeline .button { font-size: 12px; padding: 9px; } }

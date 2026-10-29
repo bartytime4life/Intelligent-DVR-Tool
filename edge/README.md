@@ -25,6 +25,13 @@ executes a detector. `edge.analyze` still processes one local recording per run.
 
 ## Run
 
+For source-matched visual review, add `--review-output receipts/review.json`.
+Open this metadata bundle in the browser's **Recognition** workspace, then select
+the original recording. See the [recording recognition pilot](../docs/recording-recognition.md).
+All output paths must be new and distinct. Review mode uses the trace bounds,
+retains per-frame dimensions, and rechecks source/model/labels/rules hashes before
+writing. Receipt-only callers retain their existing output contract.
+
 Python 3.11+ is recommended. From the repository root:
 
 ```bash

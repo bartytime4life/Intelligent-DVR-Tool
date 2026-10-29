@@ -39,3 +39,10 @@ Vite geo middleware is opt-in fixed-loopback delivery, not installed services or
 Sites delivery. The original novice comparison includes unavailable imagery
 assistance; the study kit must not substitute a different third flow or invent
 participants. Overlapping parts and field/live/device acceptance remain open.
+
+Owner deployment priority (2026-10-29): advance toward real functional deployment
+of AI-assisted scene, person and object recognition. Prioritize a source-matched
+recording-to-human-review workflow, representative quality evaluation, explicit
+single-source ingest/recording, then staged 1/5/25/50/100-camera acceptance. Scene
+inventories are sampled class counts, not learned behavior or identity claims.
+Preserve existing local unpublished work while implementing against current main.

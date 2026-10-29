@@ -75,6 +75,12 @@ The [verification index](docs/verification/README.md) separates the latest audit
 
 ## From a recording to evidence
 
+**New: recording recognition review.** Add `--review-output` to the local analyzer,
+then open **Recognition** to match the original recording by SHA-256, inspect
+sampled person/object boxes and scene counts, and send rule observations to Events.
+[Run the complete pilot](docs/recording-recognition.md). This is offline analysis;
+the Monitor's generated scenes and live-camera qualification boundaries remain.
+
 ```mermaid
 flowchart TD
   A["Explicitly selected local recording"] --> B["Offline analyzer + selected ONNX profile"]

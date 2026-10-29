@@ -42,7 +42,8 @@ class InferenceTest(unittest.TestCase):
             command=[sys.executable,'-m','edge.analyze','--video',str(root/'sample.avi'),
                      '--model',str(root/'fixture.onnx'),'--labels',str(root/'labels.json'),
                      '--rules',str(root/'rules.json'),'--output',str(root/'receipt.json'),'--stride','5',
-                     '--trace-output',str(root/'trace.json')]
+                     '--trace-output',str(root/'trace.json'),
+                     '--review-output',str(root/'review.json')]
             subprocess.run(command,check=True,capture_output=True,text=True)
             receipt=json.loads((root/'receipt.json').read_text())
             self.assertEqual(receipt['state'],'completed')
@@ -56,6 +57,11 @@ class InferenceTest(unittest.TestCase):
             self.assertEqual(receipt['runtime']['fallback'],'none')
             from edge.evaluation import evaluate, digest, MANIFEST_SCHEMA
             trace=json.loads((root/'trace.json').read_text())
+            review=json.loads((root/'review.json').read_text())
+            self.assertEqual(review['schema'],'intelligent-dvr.recognition-review.v1')
+            self.assertEqual(review['receipt'],receipt)
+            self.assertEqual(review['trace'],trace)
+            self.assertEqual((trace['frames'][0]['width'],trace['frames'][0]['height']),(320,240))
             self.assertEqual([f['frame_index'] for f in trace['frames']],[0,5,10,15,20,25])
             self.assertEqual(trace['events'],receipt['events'])
             self.assertEqual(trace['runtime']['threads'],1)
@@ -88,7 +94,7 @@ class InferenceTest(unittest.TestCase):
             self.assertNotEqual(subprocess.run(changed,capture_output=True).returncode,0)
             self.assertFalse((root/'other-receipt.json').exists())
             # Receipt-only callers retain the existing schema and review events.
-            legacy=command[:-2]
+            legacy=command[:-4]
             legacy[legacy.index('--output')+1]=str(root/'receipt-only.json')
             subprocess.run(legacy,check=True,capture_output=True)
             receipt_only=json.loads((root/'receipt-only.json').read_text())
@@ -101,6 +107,7 @@ class InferenceTest(unittest.TestCase):
             bounded=command.copy()
             bounded[bounded.index('--output')+1]=str(root/'bounded.json')
             bounded[bounded.index('--trace-output')+1]=str(root/'bounded-trace.json')
+            bounded[bounded.index('--review-output')+1]=str(root/'bounded-review.json')
             bounded += ['--resource-policy',str(root/'policy.json')]
             subprocess.run(bounded,check=True,capture_output=True)
             limited=json.loads((root/'bounded.json').read_text())
@@ -108,10 +115,49 @@ class InferenceTest(unittest.TestCase):
             self.assertEqual(limited['frames_analyzed'],2)
             self.assertEqual(limited['resource_policy']['opencv_threads'],1)
             self.assertEqual(limited['resource_policy']['max_frames'],10)
+            self.assertEqual(json.loads((root/'bounded-review.json').read_text())['receipt']['state'],'partial')
             self.assertEqual(len(limited['resource_policy']['sha256']),64)
             failed=subprocess.run(bounded+['--threads','2'],capture_output=True)
             self.assertNotEqual(failed.returncode,0)
             self.assertIn(b'exceed',failed.stderr)
+            # Review-only output still collects detections without a separate trace file.
+            review_only=legacy.copy()
+            review_only[review_only.index('--output')+1]=str(root/'review-only-receipt.json')
+            review_only += ['--review-output',str(root/'review-only.json')]
+            subprocess.run(review_only,check=True,capture_output=True)
+            self.assertEqual(len(json.loads((root/'review-only.json').read_text())['trace']['frames']),6)
+            # A review collision fails before creating the otherwise-new receipt.
+            review_only[review_only.index('--output')+1]=str(root/'collision-receipt.json')
+            self.assertNotEqual(subprocess.run(review_only,capture_output=True).returncode,0)
+            self.assertFalse((root/'collision-receipt.json').exists())
+            # Changed source/configuration invalidates the new review run before publication.
+            from unittest.mock import patch
+            from edge import analyze
+            create_backend=analyze.create_backend
+            original_rules=(root/'rules.json').read_text()
+            def changing_backend(*args, **kwargs):
+                backend=create_backend(*args, **kwargs)
+                close=backend.close
+                def changed_close():
+                    close()
+                    (root/'rules.json').write_text(original_rules+' ')
+                backend.close=changed_close
+                return backend
+            mutated=legacy[3:]
+            mutated[mutated.index('--output')+1]=str(root/'changed-receipt.json')
+            mutated += ['--review-output',str(root/'changed-review.json')]
+            try:
+                with patch.object(analyze,'create_backend',changing_backend):
+                    with self.assertRaisesRegex(ValueError,'input changed'):
+                        analyze.main(mutated)
+                self.assertFalse((root/'changed-receipt.json').exists())
+                self.assertFalse((root/'changed-review.json').exists())
+            finally:
+                (root/'rules.json').write_text(original_rules)
+            # All destinations must be distinct, including the optional review file.
+            review_only[review_only.index('--review-output')+1]=str(root/'collision-receipt.json')
+            self.assertNotEqual(subprocess.run(review_only,capture_output=True).returncode,0)
+            self.assertFalse((root/'collision-receipt.json').exists())
 
     def test_decoder_rejects_unsupported_shape_and_maps_letterbox(self):
         import cv2
