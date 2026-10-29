@@ -11,24 +11,32 @@ Reference target: **Ubuntu 24.04 LTS x86-64**, Node.js **22**, Python **3.12**, 
 3. Install Node.js 22 from the [official Node distribution](https://nodejs.org/en/download) and Git/Python 3.12 with venv support through the OS's supported package tooling. Check `node --version` and `python3.12 --version`. The launcher validates these major/minor versions.
 4. Use an unprivileged account. Review encryption, recoverable backup keys, permissions and restore procedures for the data store. Do not expose the development preview directly to the internet.
 
-## Install and run the local prototype
+## Install and run for PC testing
 
-From the repository root:
+Use the [PC test kit and first-device checklist](pc-testing.md) for the simplest
+installation. The prebuilt kit needs Python 3.12; Node/Git are only needed when
+building a source checkout.
 
-```bash
-bash scripts/run-linux.sh --check
+From the extracted kit or repository root:
+
+~~~bash
 bash scripts/run-linux.sh --install
-```
-
-`--check` only checks Node/Python prerequisites. `--install` deliberately runs `npm ci`, creates `.venv` if absent, installs `edge/requirements-test.txt`, builds the current app and starts a **loopback-only production preview** on port 4173. Dependency installation needs network access. It does not download detector weights, connect cameras, enable monitoring, install a system service or modify host limits.
-
-On later runs:
-
-```bash
+bash scripts/run-linux.sh --check
 bash scripts/run-linux.sh
-```
+~~~
 
-Open the address printed by Vite, select **System**, choose Linux, review the workload/storage/CPU/RAM/GPU/power plan and apply browser limits. `/#system` opens that workspace directly. Stop the foreground preview with Ctrl+C. A different port can be selected with `DVR_PORT=4175`; `DVR_PYTHON` can identify a Python 3.12 executable. An existing `.venv` is retained, not silently rebuilt.
+Install uses the exact pins in edge/requirements-qualification.txt inside .venv,
+creates an empty local-feeds.json only if absent, and exits without starting a
+server. In a source checkout it first runs npm ci and builds the UI. The Check
+step validates files, native video support, temporary storage, config and port
+availability. Start runs the actual local camera service at
+http://127.0.0.1:4173 and opens the browser; cameras remain disconnected.
+
+Stop with Ctrl+C. DVR_PORT=4175 selects another port; DVR_PYTHON selects a
+Python 3.12 executable. An incompatible environment is refused, not replaced.
+Keep the origin/port stable for saved browser reviews. Add --no-browser to avoid
+opening a browser. Reinstall after source updates to rebuild the interface.
+DVR and optional recording-analysis settings are documented in the PC guide.
 
 ## Compare with the host
 

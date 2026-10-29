@@ -79,4 +79,4 @@ The 100-camera requirement remains a workload qualification target. Valid policy
 
 ---
 
-[Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/resource-controls.md) · Documentation refresh: October 28, 2026.
+[Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/resource-controls.md) · Documentation refresh: October 29, 2026.

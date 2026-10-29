@@ -91,4 +91,4 @@ The text above summarizes only the relevant specifications; final part selection
 
 ---
 
-[Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/hardware-guide.md) · Documentation refresh: October 28, 2026.
+[Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/hardware-guide.md) · Documentation refresh: October 29, 2026.

@@ -1,8 +1,9 @@
 # Explore Intelligent DVR
 
+Start with [PC installation and live-device testing](pc-testing.md).
+
 [Repository home](../README.md) · [Wiki](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki)
 
-![Actual prototype camera wall with generated scenes.](media/monitor.webp)
 
 | Journey | Guides |
 | --- | --- |

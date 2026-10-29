@@ -105,4 +105,4 @@ See [facility setup reliability](https://github.com/bartytime4life/Intelligent-D
 
 ---
 
-[Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/map-measurements-and-shapes.md) · Documentation refresh: October 28, 2026.
+[Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/map-measurements-and-shapes.md) · Documentation refresh: October 29, 2026.

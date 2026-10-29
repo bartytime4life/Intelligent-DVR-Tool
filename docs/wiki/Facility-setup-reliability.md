@@ -130,4 +130,4 @@ Earlier timings above remain attributed to their original run.
 
 ---
 
-[Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/facility-setup-reliability.md) · Documentation refresh: October 28, 2026.
+[Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/facility-setup-reliability.md) · Documentation refresh: October 29, 2026.

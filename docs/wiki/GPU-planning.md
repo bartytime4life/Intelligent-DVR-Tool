@@ -87,4 +87,4 @@ No GPU purchase, accelerated backend or 100-camera operating claim is made by th
 
 ---
 
-[Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/gpu-planning.md) · Documentation refresh: October 28, 2026.
+[Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/gpu-planning.md) · Documentation refresh: October 29, 2026.

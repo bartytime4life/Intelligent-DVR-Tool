@@ -66,4 +66,4 @@ imagery assistance as unavailable rather than replacing it with another flow.
 
 ---
 
-[Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/roadmap.md) · Documentation refresh: October 28, 2026.
+[Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/roadmap.md) · Documentation refresh: October 29, 2026.

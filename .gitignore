@@ -18,3 +18,8 @@ qualification-preflight*.json
 
 # Local DVR endpoints and credentials (never commit these)
 local-feeds*.json
+
+# PC test packages and private readiness output
+kit/
+evidence/
+readiness-*.json

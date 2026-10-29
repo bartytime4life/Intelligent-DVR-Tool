@@ -1,3 +1,4 @@
 # Hash-bound source/fixtures and generated documentation must have identical bytes
 # on Linux and Windows. Git's binary detection preserves media and model assets.
 * text=auto eol=lf
+*.cmd text eol=crlf

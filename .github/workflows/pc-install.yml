@@ -1,0 +1,71 @@
+name: PC install kit
+on: [push, pull_request, workflow_dispatch]
+permissions:
+  contents: read
+jobs:
+  package:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: npm ci
+      - run: npm run build
+      - run: python scripts/build-pc-kit.py --output kit/Intelligent-DVR-PC.zip --revision "$(git rev-parse HEAD)"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pc-kit-candidate
+          path: kit/*
+          retention-days: 1
+  install:
+    needs: package
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Installer contracts
+        run: python -m unittest discover -s tests -p test_pc_setup.py
+        env:
+          DVR_TEST_SOCKETS: '1'
+      - uses: actions/download-artifact@v4
+        with:
+          name: pc-kit-candidate
+          path: kit
+      - name: Clean extracted kit install, repeat install, doctor and real HTTP launch
+        run: python scripts/smoke-pc-install.py --archive kit/Intelligent-DVR-PC.zip --evidence evidence
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pc-install-evidence-${{ runner.os }}
+          path: evidence/
+          retention-days: 90
+  tested-kit:
+    needs: install
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: pc-kit-candidate
+          path: kit
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pc-test-kit
+          path: kit/*
+          retention-days: 90

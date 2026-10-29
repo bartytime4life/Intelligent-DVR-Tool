@@ -74,4 +74,4 @@ The offline analyzer, annotation evaluator and synthetic capacity model run sepa
 
 ---
 
-[Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/visual-tour.md) · Documentation refresh: October 28, 2026.
+[Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/visual-tour.md) · Documentation refresh: October 29, 2026.
