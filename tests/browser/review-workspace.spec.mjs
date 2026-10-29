@@ -60,13 +60,13 @@ test('recognition session survives workspace changes and browser Back/Forward', 
   await page.goto('/#recognition');
   await page.getByLabel('Open recognition results').setInputFiles(upload(recognitionFixture()));
   await page.getByRole('button',{name:'Next sample'}).click();
-  await page.getByLabel('Display score threshold').fill('0.75');
+  await page.getByLabel('Display score threshold').press('End');
   await nav(page,'Events').click();
   await expect(page.getByRole('heading',{name:'Event history'})).toBeVisible();
   await expect(page.getByLabel('Analyzed sample')).not.toBeVisible();
   await page.goBack();
   await expect(page.getByLabel('Analyzed sample')).toHaveValue('1');
-  await expect(page.getByLabel('Display score threshold')).toHaveValue('0.75');
+  await expect(page.getByLabel('Display score threshold')).toHaveValue('1');
   await page.goForward();
   await expect(page.getByRole('heading',{name:'Event history'})).toBeVisible();
   await nav(page,'Recognition').click();
