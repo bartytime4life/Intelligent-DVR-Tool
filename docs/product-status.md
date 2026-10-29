@@ -14,6 +14,9 @@ representative field/event accuracy, cross-platform GPU deployment and actual
 100-camera capacity remain unqualified. The optional CUDA route has bounded
 owner-PC execution evidence in its dated record.
 
+The [facility follow-up](verification/facility-2026-10-28/README.md) records the
+newer source/check scope separately from the historical baseline counts below.
+
 ## Capability register
 
 | Capability | Implemented baseline and source | Evidence and next gate |
@@ -21,13 +24,13 @@ owner-PC execution evidence in its dated record.
 | Monitor/review | Wall, queue, notes, history, zones and exports; [workspace source](../src/App.jsx) | Five generated scenes and playback are fixtures. No connected cameras. [Visual tour](visual-tour.md). |
 | Local video and receipts | Explicit video preview and receipt import; [offline CLI](../edge/README.md) | Preview does not analyze. Imported events do not borrow sample images. |
 | Facility planning | Buildings/floors/rooms/labels, cameras, seven shapes, coverage estimates, route rehearsal, export and Undo; [guide](facility-builder.md) | Coverage is approximate geometry; handoffs are simulated. Survey/optical qualification remains open. |
-| Find and draft a site | Submitted Photon search, GPS/numeric origin, rectangular area, selectable services, offline JSON file/paste; [service source](../src/facility-services.mjs) | [Six Chromium scenarios](verification/facility-2026-10-27/README.md) use recorded geometry/mocked services. External availability, real GPS and novice completion remain unqualified. |
-| OSM geometry | Complete simple ways and supported complete outer-only relations; [adapter](../src/facility-starter.mjs) | Review and provenance survive apply/export. Holes/parts, raised bases and invalid/incomplete geometry are excluded. [Limits](facility-setup-reliability.md). |
+| Find and draft a site | Submitted Photon search, GPS/numeric origin, map-pin suggestion, rectangular/custom polygon area, selectable services, offline JSON file/paste; [service source](../src/facility-services.mjs) | [Six Chromium scenarios](verification/facility-2026-10-27/README.md) use recorded geometry/mocked services. External availability, real GPS and novice completion remain unqualified. |
+| OSM geometry | Facility v2, complete simple ways and supported outer/inner relations, raised bases and independent parts; [adapter](../src/facility-starter.mjs) | Review and provenance survive apply/export. Courtyards/bases survive edits, rendering and coverage. Overlapping parts/envelopes and invalid/incomplete geometry remain excluded. [Limits](facility-setup-reliability.md). |
 | System controls | Planning arithmetic, applied browser limits, setup/policy exports and host-snapshot import; [control contract](resource-controls.md) | Browser controls and analyzer thread/frame caps have explicit scopes. RAM/VRAM/power/storage estimates are not OS quotas or activated hardware. |
 | Offline detection | One local recording per run, default OpenCV CPU and explicit pinned YOLOX-S CUDA option, bounded rule receipts/traces with backend metadata; [analyzer](../edge/analyze.py) | [CUDA qualification](verification/cuda-2026-10-28/README.md) covers the owner PC and bounded inputs. Field/event accuracy, sustained capacity and other GPU/OS combinations remain unqualified. No detector weights are bundled. |
 | Evaluation | Annotation matching, precision/recall, timing distributions and reviewed false alerts; [guide](offline-evaluation.md) | Synthetic fixtures verify calculation/evidence plumbing. Approved representative labels and held-out quality measurement remain required. |
 | Scale preparation | Bounded fair scheduler, explicit 1–4 thread processors, optional Linux process supervision/local outcome journal and virtual-time 100/125-source tests; [guide](performance-100-cameras.md) | [Thread trials](verification/workers-2026-10-28/README.md), [process recovery](verification/recovery-2026-10-28/README.md) and [parent-crash journal](verification/journal-2026-10-28/README.md) use bounded offline inputs. The [batching record](verification/batching-2026-10-28/README.md) separates atomic commits/index changes from consumer acknowledgment timing. Durable dispatched outcomes are optional; no distributed service, live ingest, rule-state or recording integration; physical/sustained 100-camera operation remains unqualified. |
-| Linux/Windows delivery | Launch helpers, build and cross-platform CI; [verification](verification/README.md) | Full installation, intended hardware and deployed-version acceptance remain separate. |
+| Linux/Windows delivery | Launch helpers, build and cross-platform CI; [verification](verification/README.md) | Opt-in fixed-loopback geo middleware is implemented for native dev/preview; actual service installation, intended hardware and deployed-version acceptance remain separate. |
 
 ## Read the status labels
 
@@ -59,7 +62,7 @@ capacity; their tests belong to their own revision, not the baseline counts abov
 The [owner-PC continuation](verification/host-2026-10-28/README.md) now records local AI execution, isolated GPU output agreement, short public-feed loads and fixed person-image metrics with source hashes and sanitized receipts. The local adapter/UI changes and private GPU harness are not included in this published implementation baseline. Production integration, representative video/event accuracy, sustained recording and 100-camera acceptance remain unqualified.
 
 [Issue #6](https://github.com/bartytime4life/Intelligent-DVR-Tool/issues/6) retains
-polygon AOI/complex geometry, production/local-service delivery, real-site checks
+overlapping-part decomposition, installed/live-service delivery, real-site checks
 and the novice study. The proposed 80% unaided completion and median under three
 minutes with 5–8 novices have not been measured.
 

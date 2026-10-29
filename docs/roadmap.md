@@ -32,3 +32,12 @@ No finish dates or hardware guarantees are implied. Use [pilot scope](pilot-scop
 The fresh 100-source simulation offers 2,000 synthetic samples over ten virtual seconds. With eight assumed 650 ms workers it completes 144, replaces 1,780 and expires 76. With assumed 10 ms service it completes all 2,000. These are modeled outcomes, not measurements of either model or hardware.
 
 Both retain `concurrent_camera_capacity: unqualified`. Serving every source eventually does not satisfy an analysis cadence. [Raw reports and commands](verification/2026-10-27/README.md#100-source-load-model).
+
+## Facility acceptance follow-up — October 28, 2026
+
+Map pin/custom polygon AOI, v2 courtyards/raised bases, independent non-overlapping
+parts and native fixed-loopback delivery are implemented in the
+[facility follow-up](facility-setup-reliability.md). Overlapping-part decomposition,
+installed services/live retrieval, field/device accuracy and the original three-flow
+novice comparison remain open. The [study kit](facility-novice-study.md) records
+imagery assistance as unavailable rather than replacing it with another flow.

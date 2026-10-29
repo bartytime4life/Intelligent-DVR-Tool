@@ -1,4 +1,4 @@
-import { fromLngLat, toLngLat, validPolygon, polygonArea, validateFacility, pointInPolygon, segmentIntersection } from "./facility.mjs";
+import { fromLngLat, toLngLat, validPolygon, polygonArea, validateFacility, pointInPolygon, segmentIntersection, validHoles, ringsOverlap, ringsIntersect } from "./facility.mjs";
 
 export function draftFacility(plan, buildings, replace = false) {
   const base = replace ? {...plan,buildings:[],cameras:[],rooms:[],labels:[],route:[]} : plan;
@@ -59,13 +59,27 @@ function searchBounds(origin, east, north, width, depth) {
   if (sw[0] < -180 || ne[0] > 180) throw Error("Areas crossing the date line are not supported.");
   return [sw[1], sw[0], ne[1], ne[0]];
 }
+export function polygonAreaSelection(origin, ring) {
+  if (!validPolygon(ring) || ring.length > 51) throw Error('Use a simple closed area with 3–50 corners and at least 1 m².');
+  const xs=ring.map(p=>p[0]), ys=ring.map(p=>p[1]);
+  const west=Math.min(...xs),east=Math.max(...xs),south=Math.min(...ys),north=Math.max(...ys);
+  if (east-west<20 || north-south<20) throw Error('Area bounds must be at least 20 m per side.');
+  return {ring:ring.map(p=>[...p]),bounds:searchBounds(origin,(west+east)/2,(south+north)/2,east-west,north-south)};
+}
+export function parseAreaVertices(text) {
+  if (typeof text !== 'string' || text.length > 5000) throw Error('Area vertex text is too large.');
+  const points=text.trim().split(/\n/).map(line=>line.trim().split(/[,\s]+/).map(Number));
+  if(points.some(p=>p.length!==2 || !p.every(Number.isFinite))) throw Error('Enter one east,north pair in meters per line.');
+  if(points.length && (points[0][0]!==points.at(-1)[0] || points[0][1]!==points.at(-1)[1])) points.push([...points[0]]);
+  return points;
+}
 function osmQuery(bounds) {
   if (!Array.isArray(bounds) || bounds.length !== 4 || !bounds.every(Number.isFinite) || bounds[0] >= bounds[2] || bounds[1] >= bounds[3] || Math.abs(bounds[0])>80 || Math.abs(bounds[2])>80 || Math.abs(bounds[1])>180 || Math.abs(bounds[3])>180 || (bounds[2]-bounds[0])*111320 > 501 || (bounds[3]-bounds[1])*111320*Math.cos((bounds[0]+bounds[2])/2*Math.PI/180)>502) throw Error("Invalid or oversized area.");
   const box = bounds.join(",");
   return `[out:json][timeout:20][maxsize:16777216];
 way["building"]["building"!="no"](${box})->.footprints;
-(.footprints;relation["building"]["building"!="no"](${box});
-relation(bw.footprints)["type"="multipolygon"];);
+(way["building:part"]["building:part"!="no"](${box});.footprints;relation["building"]["building"!="no"](${box});
+relation["building:part"]["building:part"!="no"](${box});relation(bw.footprints)["type"="multipolygon"];);
 out meta geom 301;`;
 }
 function osmHeight(raw, minimum = 1) {
@@ -76,11 +90,11 @@ function osmHeight(raw, minimum = 1) {
   if (f) n = +f[1] * 0.3048 + +(f[2] || 0) * 0.0254;
   return Number.isFinite(n) && n >= minimum && n <= 150 ? n : null;
 }
-// Assemble only fully known outer rings. Inner/unknown roles exclude the whole relation.
-function relationRings(e) {
+// Assemble fully known rings of one role; never bridge a missing segment.
+function relationRings(e, role) {
   if (e.tags?.type !== 'multipolygon' || !Array.isArray(e.members) || !e.members.length || e.members.length > 200 ||
-      e.members.some(m => m.type !== 'way' || m.role !== 'outer' || !Array.isArray(m.geometry) || m.geometry.length < 2 || m.geometry.length > 201)) return null;
-  const chains = e.members.map(m => m.geometry.map(p => [p?.lon, p?.lat]));
+      e.members.some(m => m.type !== 'way' || !['outer','inner'].includes(m.role) || !Array.isArray(m.geometry) || m.geometry.length < 2 || m.geometry.length > 201)) return null;
+  const chains = e.members.filter(m=>m.role===role).map(m => m.geometry.map(p => [p?.lon, p?.lat]));
   if (chains.flat().some(p => !p.every(Number.isFinite))) return null;
   const eq = (a,b) => a[0] === b[0] && a[1] === b[1];
   const rings = [];
@@ -97,13 +111,12 @@ function relationRings(e) {
   }
   return rings;
 }
-function overlapping(a,b) {
-  return a.some(p=>pointInPolygon(p,b)) || b.some(p=>pointInPolygon(p,a)) || a.slice(1).some((p,i)=>b.slice(1).some((q,j)=>segmentIntersection(a[i],p,b[j],q)!==null));
-}
-function parseOsmBuildings(data, origin, bounds, now = new Date().toISOString()) {
+function parseOsmBuildings(data, origin, bounds, now = new Date().toISOString(), areaRing = null) {
   // Validate area/origin before any projection or expensive geometry work.
   searchBounds(origin,0,0,20,20);
   if (!Array.isArray(bounds) || bounds.length!==4 || !bounds.every(Number.isFinite)) throw Error('Invalid area.');
+  osmQuery(bounds);
+  if (areaRing) polygonAreaSelection(origin,areaRing);
   if (!data || !Array.isArray(data.elements) || data.elements.length > 300 || data.remark) throw Error('Incomplete or oversized response. Reduce the area and try again.');
   const buildings = [], seen = new Set(), blocked = new Set(), reasons = {};
   const skip = reason => { reasons[reason] = (reasons[reason] || 0) + 1; };
@@ -113,25 +126,50 @@ function parseOsmBuildings(data, origin, bounds, now = new Date().toISOString())
     if (e.type === 'way' && blocked.has(e.id)) { skip('relation member (handled with parent)'); continue; }
     if (!Number.isSafeInteger(e.id) || e.id <= 0 || seen.has(e.type+'/'+e.id)) continue;
     seen.add(e.type+'/'+e.id);
-    if (!e.tags?.building || e.tags.building === 'no') { if(e.type==='relation')skip('unlabelled relation; members excluded'); continue; }
-    if (e.tags['building:part'] || (e.tags.min_height !== undefined && osmHeight(e.tags.min_height,0) !== 0) ||
-        (e.tags['building:min_level'] !== undefined && e.tags['building:min_level'] !== '0')) { skip('part or raised/uncertain base'); continue; }
-    const rings = e.type === 'relation' ? relationRings(e) : Array.isArray(e.geometry) ? [e.geometry.map(p=>[p?.lon,p?.lat])] : null;
-    if (!rings) { skip('courtyard, incomplete or unsupported relation'); continue; }
-    const local = rings.map(geo => geo.map(p=>p.every(Number.isFinite) ? fromLngLat(p,origin).map(v=>+v.toFixed(3)) : [NaN,NaN]));
-    if (rings.some(geo=>geo.length>201 || geo.some(p=>!p.every(Number.isFinite) || Math.abs(p[0])>180 || Math.abs(p[1])>80)) ||
-        local.some(r=>!validPolygon(r)) || local.some((r,i)=>local.slice(i+1).some(other=>overlapping(r,other)))) { skip('invalid, overlapping or nested outline'); continue; }
+    if ((!e.tags?.building || e.tags.building === 'no') && (!e.tags?.['building:part'] || e.tags['building:part'] === 'no')) { if(e.type==='relation')skip('unlabelled relation; members excluded'); continue; }
+    const part=!!e.tags['building:part'] && e.tags['building:part']!=='no';
+    const explicitBase=e.tags.min_height !== undefined ? osmHeight(e.tags.min_height,0) : null;
+    const minLevel=e.tags['building:min_level'];
+    if ((e.tags.min_height !== undefined && explicitBase === null) ||
+        (minLevel !== undefined && !/^(0|[1-9]\d*)$/.test(minLevel))) {skip('uncertain raised base');continue;}
+    const base=explicitBase ?? (minLevel !== undefined ? +minLevel*3 : 0);
+    const rings = e.type === 'relation' ? relationRings(e,'outer') : Array.isArray(e.geometry) ? [e.geometry.map(p=>[p?.lon,p?.lat])] : null;
+    const inners = e.type === 'relation' ? relationRings(e,'inner') : [];
+    if (!rings?.length || !inners) { skip('incomplete or unsupported relation'); continue; }
+    const all=[...rings,...inners];
+    if(all.some(geo=>geo.length>201 || geo.some(p=>!p.every(Number.isFinite) || Math.abs(p[0])>180 || Math.abs(p[1])>80))) {skip('invalid coordinates');continue;}
+    const project=geo=>geo.map(p=>fromLngLat(p,origin).map(v=>+v.toFixed(3)));
+    const local=rings.map(project), holes=inners.map(project), assigned=local.map(()=>[]);
+    let valid=local.every(validPolygon) && !local.some((r,i)=>local.slice(i+1).some(other=>ringsOverlap(r,other)));
+    for(const h of holes) {
+      const owners=local.map((r,i)=>({r,i})).filter(({r})=>pointInPolygon(h[0],r));
+      if(owners.length!==1) {valid=false;break;}
+      assigned[owners[0].i].push(h);
+    }
+    if(!valid || local.some((r,i)=>!validHoles(r,assigned[i]))) {skip('invalid, touching, overlapping or nested rings');continue;}
     const taggedFloors = /^[1-9]\d*$/.test(e.tags['building:levels'] || '') ? +e.tags['building:levels'] : null;
     const floorsKnown = taggedFloors && taggedFloors <= 40;
-    const floors = floorsKnown ? taggedFloors : 1, h = osmHeight(e.tags.height), height = h ?? (floorsKnown ? floors*3 : 6);
+    if(floorsKnown && minLevel !== undefined && +minLevel>=taggedFloors) {skip('minimum level is at or above floor count');continue;}
+    const floors = floorsKnown ? taggedFloors-(minLevel ? +minLevel : 0) : 1, h = osmHeight(e.tags.height), height = h ?? (base + (floorsKnown ? floors*3 : 6));
+    if(base<0 || base>=height-0.1 || height>150) {skip('base is at or above roof');continue;}
     rings.forEach((geo,i) => {
       if (Math.max(...geo.map(p=>p[0]))<bounds[1] || Math.min(...geo.map(p=>p[0]))>bounds[3] || Math.max(...geo.map(p=>p[1]))<bounds[0] || Math.min(...geo.map(p=>p[1]))>bounds[2]) { skip('outside selected area'); return; }
-      buildings.push({id: `osm-${e.type}-${e.id}${rings.length>1 ? '-'+(i+1) : ''}`, name: String(e.tags.name || `Mapped building ${e.id}`).slice(0,90)+(rings.length>1 ? ` (${i+1})` : ''), footprint:local[i], height, floors,
-        source:{provider:'OpenStreetMap',id:`${e.type}/${e.id}`,license:'ODbL-1.0',retrieved:now,updated:typeof e.timestamp==='string'?e.timestamp.slice(0,40):'unknown',heightBasis:h?'tagged':floorsKnown?'levels × 3 m estimate':'6 m placeholder',floorsBasis:floorsKnown?'tagged':'1 floor placeholder'},
-        crossing:geo.some(([lon,lat])=>lat<bounds[0] || lon<bounds[1] || lat>bounds[2] || lon>bounds[3])});
+      if(areaRing && !ringsOverlap(local[i],areaRing)) {skip('outside selected polygon');return;}
+      if(areaRing && assigned[i].some(h=>!ringsIntersect(h,areaRing) && areaRing.every(p=>pointInPolygon(p,h)))) {skip('selected area is inside courtyard');return;}
+      buildings.push({holes:assigned[i],base,part,id: `osm-${e.type}-${e.id}${rings.length>1 ? '-'+(i+1) : ''}`, name: String(e.tags.name || `Mapped building ${e.id}`).slice(0,90)+(rings.length>1 ? ` (${i+1})` : ''), footprint:local[i], height, floors,
+        source:{provider:'OpenStreetMap',id:`${e.type}/${e.id}`,license:'ODbL-1.0',retrieved:now,updated:typeof e.timestamp==='string'?e.timestamp.slice(0,40):'unknown',heightBasis:(h?'tagged':floorsKnown?'levels × 3 m estimate':'6 m above base placeholder')+(explicitBase===null && minLevel && +minLevel ? '; base min_level × 3 m estimate' : ''),floorsBasis:floorsKnown?(minLevel && +minLevel ? 'tagged levels minus min_level' : 'tagged'):'1 floor placeholder'},
+        crossing:areaRing ? local[i].some(p=>!pointInPolygon(p,areaRing)) : geo.some(([lon,lat])=>lat<bounds[0] || lon<bounds[1] || lat>bounds[2] || lon>bounds[3])});
     });
   }
-  return {buildings,skipped:Object.values(reasons).reduce((a,b)=>a+b,0),reasons};
+  // An overlapping envelope/part is not a qualified decomposition. Exclude both,
+  // rather than render the envelope as a solid block or silently invent a union.
+  const conflicts=new Set();
+  for(let i=0;i<buildings.length;i++) for(let j=i+1;j<buildings.length;j++) {
+    const a=buildings[i],b=buildings[j];
+    if((a.part || b.part) && Math.max(a.base,b.base)<Math.min(a.height,b.height) && ringsOverlap(a.footprint,b.footprint)) {conflicts.add(a.id);conflicts.add(b.id);}
+  }
+  const supported=buildings.filter(b=>{if(conflicts.has(b.id)){skip('overlapping part or envelope requires decomposition');return false;}return true;});
+  return {buildings:supported,skipped:Object.values(reasons).reduce((a,b)=>a+b,0),reasons};
 }
 const footprintCache = new Map();
 export function clearFootprintCache() { footprintCache.clear(); }

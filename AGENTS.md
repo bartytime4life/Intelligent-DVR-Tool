@@ -31,3 +31,11 @@ outer-only OSM relations; holes/parts, live-provider/site qualification and novi
 acceptance remain open. Reconcile separately reported local AI work with source
 and receipts before presenting it as shipped. Retain synthetic/estimated and
 100-camera qualification boundaries in documentation updates.
+
+Facility acceptance follow-up (2026-10-28): facility v2 adds holes/base/independent
+part fields; accept ordinary v1 input but never downgrade v2 geometry silently.
+See docs/facility-setup-reliability.md and its dated qualification record. Native
+Vite geo middleware is opt-in fixed-loopback delivery, not installed services or
+Sites delivery. The original novice comparison includes unavailable imagery
+assistance; the study kit must not substitute a different third flow or invent
+participants. Overlapping parts and field/live/device acceptance remain open.

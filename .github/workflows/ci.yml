@@ -18,7 +18,10 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
-      - run: npm test
+      - name: Frontend and actual loopback geo delivery
+        run: npm test
+        env:
+          DVR_TEST_SOCKETS: "1"
       - run: npm run test:sites
       - uses: actions/setup-python@v5
         with:
