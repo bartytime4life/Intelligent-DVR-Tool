@@ -16,6 +16,10 @@ editor. Direct entry is `/#facility`. The existing camera wall and event review
 remain available. This is an editable planning prototype, not a calibrated digital
 twin or an operational multi-camera tracking service.
 
+Fresh installs start with a blank facility. Use **New facility** to keep separate
+named sites, or explicitly open an example under **Backup & examples**. Existing
+saves reopen the last active site. See [saved facilities and backups](saved-facilities.md).
+
 ## Workflow
 
 1. Set the facility name and geographic origin. Coordinates are longitude then
@@ -44,8 +48,11 @@ twin or an operational multi-camera tracking service.
 Drawing uses clicks and polygon closure (line routes finish by double-click).
 Escape cancels. Building and camera placement have numeric alternatives. Rooms
 currently require pointer drawing; keyboard room drawing is an accessibility gap.
-Undo restores the previous 20 committed edits. Import from a file or the Paste JSON dialog validates before replacing
-the current plan; replacement can be undone. Export is a plain JSON metadata file.
+Undo restores the previous 20 committed edits in the current editor session.
+Facility file imports and the Paste JSON dialog validate the entire input, then
+add separate facilities without replacing saved sites. Export plan saves named
+JSON metadata; Export all facilities backs up the collection. Switching facilities
+clears the local Undo history and requires pending edits to be applied or discarded.
 
 ## Visibility model and evidence limits
 
@@ -69,8 +76,9 @@ per-camera tracklets, qualified association models, uncertainty and source revie
 
 ## Local data and maps
 
-Plans persist in `localStorage` under `dvr.facility.v1`. A storage failure is visible
-and leaves the current plan in memory so it can be exported. These records are
+Named plans persist in `localStorage` under `dvr.facilities.v1`. Existing
+`dvr.facility.v1` data migrates once and remains untouched for recovery. A storage
+failure is visible and leaves the collection in memory so it can be exported. These records are
 editable local state, not an authoritative audit trail. They have no multi-user
 authentication, encrypted-at-rest database, server retention or signed provenance.
 Do not put camera credentials or recordings in a facility JSON file.

@@ -97,3 +97,10 @@ webcams safely, using explicit operator-approved HTTPS sources, attribution,
 network and media bounds, and clear snapshot versus motion labels. Keep local
 camera footage and inference local. Public visibility is not reuse permission;
 do not discover exposed private cameras or bypass provider access controls.
+
+Owner facility-library decision (2026-10-29): fresh installs must start with a
+blank facility, without sample buildings, cameras, routes or fictitious site
+boundaries. Support separate named facilities, browser saves, portable named
+JSON files and collection backups. Preserve legacy single-facility data during
+migration, add imported/example plans as new facilities, and prevent pending
+edits or storage failures from silently overwriting saved work.

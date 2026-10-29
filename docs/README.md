@@ -9,7 +9,7 @@ Start with [PC installation and live-device testing](pc-testing.md).
 | --- | --- |
 | See it | [Visual tour](visual-tour.md), [animation provenance and stills](media/README.md) |
 | Set up a machine | [Hardware / disks / RAM / CPU / PSU](hardware-guide.md), [GPUs](gpu-planning.md), [Linux](setup-linux.md), [Windows](setup-windows.md), [resource controls](resource-controls.md) |
-| Try it | [Getting started](getting-started.md), [facility builder](facility-builder.md), [maps and shapes](map-measurements-and-shapes.md), [address search and offline recovery](facility-setup-reliability.md) |
+| Try it | [Getting started](getting-started.md), [facility builder](facility-builder.md), [saved facilities and backups](saved-facilities.md), [maps and shapes](map-measurements-and-shapes.md), [address search and offline recovery](facility-setup-reliability.md) |
 | Understand it | [Product status](product-status.md), [architecture and data](architecture.md), [pilot scope](pilot-scope.md), [security boundary](../SECURITY.md) |
 | Measure it | [Owner-PC GPU/load/person report](verification/host-2026-10-28/README.md), [Verification index](verification/README.md), [local evidence and qualification checklist](offline-qualification.md), [offline evaluation](offline-evaluation.md), [historical model qualification](model-qualification-20261026.md) |
 | Extend it | [Roadmap](roadmap.md), [100-camera preparation](performance-100-cameras.md), [map-setup research](easy-facility-setup.md) |

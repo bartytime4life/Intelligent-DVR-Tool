@@ -341,7 +341,7 @@ e-stroke-width": 2 } });
       grid.push(feat("LineString", [toLngLat([-300, n], o), toLngLat([300, n], o)]));
     }
     map.getSource("grid").setData(fc(grid));
-    map.getSource("site").setData(fc([polygon([[-125, -110], [130, -110], [130, 108], [-125, 108], [-125, -110]], o)]));
+    map.getSource("site").setData(fc([]));
     const inspectedBuilding = structureBuilding(plan, selected, mode, displayOptions);
     const floorPresentation = floorRenderPlan(inspectedBuilding,floor,mode,FLOOR_DRAW_TOOLS.includes(tool));
     const floorDrawing = floorPresentation.flattened;
@@ -409,7 +409,7 @@ e-stroke-width": 2 } });
     }) : [], ...activeZones.map(zone => {const [x,y] = centroid(zone.footprint); return {id:zone.id,name: `${zone.enabled === false ? "Disabled · " : ""}${zone.type === "object_watch" ? "Object watch" : "Restricted"} · ${zone.name}`, x, y, zone: true};}), ...activeOpenings.map(opening => {const [x,y] = centroid(opening.footprint); return {id:opening.id,name: `Floor ${opening.level + 1} opening · ${opening.name}`, x, y, opening: true};}), ...activeStairs.map(stair => ({id:stair.id,name: `↑ ${stair.name} · L${stair.fromLevel + 1}–L${stair.toLevel + 1}`,x:stair.x,y:stair.y,stair:true})), ...activePaths.map(path => ({id:path.id,name:`Path · ${path.name}`,x:path.points[0][0],y:path.points[0][1],path:true}))].sort((a,b)=>Number(b.id===selected)-Number(a.id===selected)).slice(0, 80);
     if (inspectedBuilding && mode === "floors" && (inspectedBuilding.openFloors || []).includes(floor)) {
       const [x,y] = centroid(inspectedBuilding.footprint);
-      labels.unshift({name:`Level ${floor + 1} · open floor · no slab`,x,y,opening:true});
+      labels.unshift({name:`Level ${floor + 1} · open floor · no slab`,x,y,opening:true,activeFloor:true});
       labels.length = Math.min(labels.length,80);
     }
     for (const l of labels) {
@@ -417,8 +417,8 @@ e-stroke-width": 2 } });
       el.className = "facility-map-label" + (l.zone ? " facility-zone-label" : l.opening ? " facility-opening-label" : l.stair ? " facility-stair-label" : l.path ? " facility-floor-path-label" : "");
       el.textContent = l.name;
       const isSelected = l.id === selected;
-      trackLabel(el,isSelected ? 1 : 4);
-      markers.push(new Marker({ element: el, anchor: isSelected ? "bottom" : "center", offset:isSelected ? [0,-18] : [0,0] }).setLngLat(toLngLat([l.x, l.y], o)).addTo(map));
+      trackLabel(el,l.activeFloor ? 0 : isSelected ? 1 : 4,!!l.activeFloor);
+      markers.push(new Marker({ element: el, anchor: l.activeFloor || isSelected ? "bottom" : "center", offset:l.activeFloor ? [0,-42] : isSelected ? [0,-18] : [0,0] }).setLngLat(toLngLat([l.x, l.y], o)).addTo(map));
     }
     const cam = plan.cameras.find((c) => c.id === selected);
     if (cam) {

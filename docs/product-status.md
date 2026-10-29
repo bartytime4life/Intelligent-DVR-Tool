@@ -35,6 +35,10 @@ owner-PC execution evidence in its dated record.
 The [facility follow-up](verification/facility-2026-10-28/README.md) records the
 newer source/check scope separately from the historical baseline counts below.
 
+The facility workspace starts blank on new installs and supports independent named
+facilities, browser saves and portable JSON backups. Examples are opt-in; legacy
+saves migrate without deleting the original. See [saved facilities](saved-facilities.md).
+
 ## Capability register
 
 | Capability | Implemented baseline and source | Evidence and next gate |

@@ -1,12 +1,13 @@
 import {test, expect} from '@playwright/test';
+import {savedPlan as saved, openExample} from './facility-test-helpers.mjs';
 
 async function openFacility(page) {
   await page.route('**/*', route => new URL(route.request().url()).hostname === '127.0.0.1' ? route.continue() : route.abort());
   await page.goto('/#facility');
   await expect(page.getByRole('heading',{name:'Locate your facility'})).toBeVisible();
+  await openExample(page);
   await page.getByRole('button',{name:'Save site',exact:true}).click();
 }
-const saved = page => page.evaluate(() => JSON.parse(localStorage.getItem('dvr.facility.v1')));
 
 test('dimensions follow selected polygon, switch units, and hide without altering geometry',async({page})=>{
   await openFacility(page);
@@ -24,6 +25,7 @@ test('dimensions follow selected polygon, switch units, and hide without alterin
 });
 
 test('copy rooms upstairs, add a level, and undo preserve lower floor elevations',async({page})=>{
+  const errors=[];page.on('pageerror',error=>errors.push(error.message));
   await openFacility(page);
   await page.getByRole('button',{name:/^3 Floors & labels/}).click();
   await page.getByLabel('Building for floor editing',{exact:true}).selectOption('b2');
@@ -39,8 +41,11 @@ test('copy rooms upstairs, add a level, and undo preserve lower floor elevations
   expect(edited.height/edited.floors).toBeCloseTo(office.height/office.floors);
   await expect(page.getByLabel('Active floor',{exact:true})).toHaveValue('3');
   await page.getByRole('button',{name:'Undo edit',exact:true}).click();
+  await expect(page.getByLabel('Active floor',{exact:true})).toHaveValue('2');
+  expect(errors).toEqual([]);
   await page.getByRole('button',{name:'Undo edit',exact:true}).click();
   expect(await saved(page)).toEqual(before);
+  expect(errors).toEqual([]);
 });
 
 test('camera edits retain unsaved changes across center and aim tools',async({page})=>{
