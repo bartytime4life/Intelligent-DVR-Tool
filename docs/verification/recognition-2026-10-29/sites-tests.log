@@ -1,0 +1,30 @@
+TAP version 13
+# Subtest: serves existing static assets without a fallback
+ok 1 - serves existing static assets without a fallback
+  ---
+  duration_ms: 9.140579
+  ...
+# Subtest: falls back to index.html for an unknown app route
+ok 2 - falls back to index.html for an unknown app route
+  ---
+  duration_ms: 0.67713
+  ...
+# Subtest: does not turn missing API or write requests into the app shell
+ok 3 - does not turn missing API or write requests into the app shell
+  ---
+  duration_ms: 0.257713
+  ...
+# Subtest: emits the files required by Sites packaging
+ok 4 - emits the files required by Sites packaging
+  ---
+  duration_ms: 1.310848
+  ...
+1..4
+# tests 4
+# suites 0
+# pass 4
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 19.0659

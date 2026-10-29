@@ -1,0 +1,365 @@
+TAP version 13
+# Subtest: zone geometry cannot extend beyond image
+ok 1 - zone geometry cannot extend beyond image
+  ---
+  duration_ms: 0.666751
+  ...
+# Subtest: review records decision without contaminating another event
+ok 2 - review records decision without contaminating another event
+  ---
+  duration_ms: 0.384421
+  ...
+# Subtest: offline receipts remain separate from simulated camera evidence
+ok 3 - offline receipts remain separate from simulated camera evidence
+  ---
+  duration_ms: 0.210004
+  ...
+# Subtest: invalid receipts and duplicate ids are rejected
+ok 4 - invalid receipts and duplicate ids are rejected
+  ---
+  duration_ms: 0.105037
+  ...
+# Subtest: receipt provenance rejects malformed metadata rather than rendering objects
+ok 5 - receipt provenance rejects malformed metadata rather than rendering objects
+  ---
+  duration_ms: 0.075832
+  ...
+# Subtest: corrupt browser snapshots recover to the initial workspace
+ok 6 - corrupt browser snapshots recover to the initial workspace
+  ---
+  duration_ms: 0.274164
+  ...
+# Subtest: disabled delivery and unknown routes cannot make upstream requests
+ok 7 - disabled delivery and unknown routes cannot make upstream requests
+  ---
+  duration_ms: 0.40003
+  ...
+# Subtest: only fixed loopback services receive minimized input; cookies/auth/URLs are never forwarded
+ok 8 - only fixed loopback services receive minimized input; cookies/auth/URLs are never forwarded
+  ---
+  duration_ms: 2.204364
+  ...
+# Subtest: cross-origin, rebinding, method and arbitrary-query attempts never call upstream
+ok 9 - cross-origin, rebinding, method and arbitrary-query attempts never call upstream
+  ---
+  duration_ms: 1.455339
+  ...
+# Subtest: bounded canonical Overpass queries work; invalid, partial and oversized responses fail closed
+ok 10 - bounded canonical Overpass queries work; invalid, partial and oversized responses fail closed
+  ---
+  duration_ms: 3.934367
+  ...
+# Subtest: rate limits and active request bounds are enforced across clients without automatic retries
+ok 11 - rate limits and active request bounds are enforced across clients without automatic retries
+  ---
+  duration_ms: 0.446828
+  ...
+# Subtest: real HTTP loopback middleware round trip (opt-in on CI)
+ok 12 - real HTTP loopback middleware round trip (opt-in on CI) # SKIP
+  ---
+  duration_ms: 0.026109
+  ...
+# Subtest: v2 preserves holes/base/part and upgrades ordinary v1 without allowing a geometry downgrade
+ok 13 - v2 preserves holes/base/part and upgrades ordinary v1 without allowing a geometry downgrade
+  ---
+  duration_ms: 0.916339
+  ...
+# Subtest: invalid courtyard topology, including enclosing a hole with a room, is rejected atomically
+ok 14 - invalid courtyard topology, including enclosing a hole with a room, is rejected atomically
+  ---
+  duration_ms: 0.583323
+  ...
+# Subtest: courtyard translations/resizes keep all rings aligned and room edits remain validated
+ok 15 - courtyard translations/resizes keep all rings aligned and room edits remain validated
+  ---
+  duration_ms: 0.094467
+  ...
+# Subtest: coverage uses inner walls and permits rays below raised bases
+ok 16 - coverage uses inner walls and permits rays below raised bases
+  ---
+  duration_ms: 0.24533
+  ...
+# Subtest: complete courtyard relations assemble split inner rings and retain source/export
+ok 17 - complete courtyard relations assemble split inner rings and retain source/export
+  ---
+  duration_ms: 0.820258
+  ...
+# Subtest: independent parts preserve raised bases; conflicting envelopes/parts are excluded together
+ok 18 - independent parts preserve raised bases; conflicting envelopes/parts are excluded together
+  ---
+  duration_ms: 0.454442
+  ...
+# Subtest: custom AOI filters the enclosing rectangle while retaining whole intersecting shells
+ok 19 - custom AOI filters the enclosing rectangle while retaining whole intersecting shells
+  ---
+  duration_ms: 0.397466
+  ...
+# Subtest: address search validates queries, bounds, and remote labels as text
+ok 20 - address search validates queries, bounds, and remote labels as text
+  ---
+  duration_ms: 0.253535
+  ...
+# Subtest: submitted address requests omit credentials, cache only in memory, and rate-limit
+ok 21 - submitted address requests omit credentials, cache only in memory, and rate-limit
+  ---
+  duration_ms: 0.797987
+  ...
+# Subtest: concurrent and aborted searches cannot be cached as successes
+ok 22 - concurrent and aborted searches cannot be cached as successes
+  ---
+  duration_ms: 0.300092
+  ...
+# Subtest: bounded readers reject oversized, empty, malformed and rate-limited bodies
+ok 23 - bounded readers reject oversized, empty, malformed and rate-limited bodies
+  ---
+  duration_ms: 0.559679
+  ...
+# Subtest: complete relation outers stitch reversed segments and preserve source on export
+ok 24 - complete relation outers stitch reversed segments and preserve source on export
+  ---
+  duration_ms: 0.374272
+  ...
+# Subtest: disjoint outers split; invalid holes/nesting are excluded and independent parts retain their role
+ok 25 - disjoint outers split; invalid holes/nesting are excluded and independent parts retain their role
+  ---
+  duration_ms: 0.37345
+  ...
+# Subtest: recorded licensed exterior extracts import; the real courtyard stays excluded
+ok 26 - recorded licensed exterior extracts import; the real courtyard stays excluded
+  ---
+  duration_ms: 1.241448
+  ...
+# Subtest: pinned extract bytes match the source manifest
+ok 27 - pinned extract bytes match the source manifest
+  ---
+  duration_ms: 0.904486
+  ...
+# Subtest: retraced edges and nonconsecutive duplicate vertices cannot invent a simple shell
+ok 28 - retraced edges and nonconsecutive duplicate vertices cannot invent a simple shell
+  ---
+  duration_ms: 0.102853
+  ...
+# Subtest: all common footprints remain simple and dimensioned after rotation
+ok 29 - all common footprints remain simple and dimensioned after rotation
+  ---
+  duration_ms: 2.300163
+  ...
+# Subtest: bounded search does not accept blank, oversized or invalid coordinates
+ok 30 - bounded search does not accept blank, oversized or invalid coordinates
+  ---
+  duration_ms: 0.107652
+  ...
+# Subtest: height tags honor meter and foot units without guessing unparseable heights
+ok 31 - height tags honor meter and foot units without guessing unparseable heights
+  ---
+  duration_ms: 0.049022
+  ...
+# Subtest: OSM shells preserve provenance and distinguish tags from placeholder dimensions
+ok 32 - OSM shells preserve provenance and distinguish tags from placeholder dimensions
+  ---
+  duration_ms: 0.334517
+  ...
+# Subtest: relations never become solid courtyards, and invalid/duplicate/outside features are bounded
+ok 33 - relations never become solid courtyards, and invalid/duplicate/outside features are bounded
+  ---
+  duration_ms: 0.235542
+  ...
+# Subtest: raised and uncertain bases are not flattened into ground-level shells
+ok 34 - raised and uncertain bases are not flattened into ground-level shells
+  ---
+  duration_ms: 0.145913
+  ...
+# Subtest: network adapter caps response bytes and reports service failure
+ok 35 - network adapter caps response bytes and reports service failure
+  ---
+  duration_ms: 1.488211
+  ...
+# Subtest: replacement previews accept 98 drafts without retaining the old 3 buildings or cameras
+ok 36 - replacement previews accept 98 drafts without retaining the old 3 buildings or cameras
+  ---
+  duration_ms: 1.491687
+  ...
+# Subtest: an empty study and unavailable imagery flow cannot become measured acceptance
+ok 37 - an empty study and unavailable imagery flow cannot become measured acceptance
+  ---
+  duration_ms: 0.189615
+  ...
+# Subtest: five to eight distinct novices are required and sessions cannot be duplicated or fabricated for unavailable flows
+ok 38 - five to eight distinct novices are required and sessions cannot be duplicated or fabricated for unavailable flows
+  ---
+  duration_ms: 0.242635
+  ...
+# Subtest: failed and aided attempts stay in denominators and timing; height identification is required
+ok 39 - failed and aided attempts stay in denominators and timing; height identification is required
+  ---
+  duration_ms: 0.183965
+  ...
+# Subtest: unavailable third flow keeps comparison open and incomplete cohorts cannot be compared
+ok 40 - unavailable third flow keeps comparison open and incomplete cohorts cannot be compared
+  ---
+  duration_ms: 0.102903
+  ...
+# Subtest: sample and empty facility round trip through the bounded public contract
+ok 41 - sample and empty facility round trip through the bounded public contract
+  ---
+  duration_ms: 0.275256
+  ...
+# Subtest: coordinate projection preserves local-meter geometry at Kansas latitude
+ok 42 - coordinate projection preserves local-meter geometry at Kansas latitude
+  ---
+  duration_ms: 0.043842
+  ...
+# Subtest: polygons reject self crossings, degenerate areas and unclosed rings
+ok 43 - polygons reject self crossings, degenerate areas and unclosed rings
+  ---
+  duration_ms: 0.310783
+  ...
+# Subtest: ground plane coverage respects direction, near limit, far limit and enabled state
+ok 44 - ground plane coverage respects direction, near limit, far limit and enabled state
+  ---
+  duration_ms: 0.113263
+  ...
+# Subtest: opaque walls block lines of sight while a low obstacle can be seen over
+ok 45 - opaque walls block lines of sight while a low obstacle can be seen over
+  ---
+  duration_ms: 0.160491
+  ...
+# Subtest: narrow downward views cannot claim ground coverage before their near distance
+ok 46 - narrow downward views cannot claim ground coverage before their near distance
+  ---
+  duration_ms: 0.04266
+  ...
+# Subtest: route interpolation follows distance, including repeated points
+ok 47 - route interpolation follows distance, including repeated points
+  ---
+  duration_ms: 0.131557
+  ...
+# Subtest: rehearsal returns explicit gaps instead of inferred observations
+ok 48 - rehearsal returns explicit gaps instead of inferred observations
+  ---
+  duration_ms: 0.221586
+  ...
+# Subtest: bad imports reject non-finite values, duplicates, invalid room floor and oversize JSON
+ok 49 - bad imports reject non-finite values, duplicates, invalid room floor and oversize JSON
+  ---
+  duration_ms: 0.731131
+  ...
+# Subtest: import only retains declared geometry and text fields, never media URLs or HTML properties
+ok 50 - import only retains declared geometry and text fields, never media URLs or HTML properties
+  ---
+  duration_ms: 0.104797
+  ...
+# Subtest: 100-camera metadata inventory remains valid without making a video throughput claim
+ok 51 - 100-camera metadata inventory remains valid without making a video throughput claim
+  ---
+  duration_ms: 0.441178
+  ...
+# Subtest: room must stay within its building footprint and building deletion cannot leave orphan rooms
+ok 52 - room must stay within its building footprint and building deletion cannot leave orphan rooms
+  ---
+  duration_ms: 0.12246
+  ...
+# Subtest: rooms cannot bridge outside a concave building even when every vertex is inside
+ok 53 - rooms cannot bridge outside a concave building even when every vertex is inside
+  ---
+  duration_ms: 0.06924
+  ...
+# Subtest: recognition review retains real class names, provenance and event-frame association
+ok 54 - recognition review retains real class names, provenance and event-frame association
+  ---
+  duration_ms: 3.945929
+  ...
+# Subtest: mixed-source/model/settings/observation bundles fail closed
+ok 55 - mixed-source/model/settings/observation bundles fail closed
+  ---
+  duration_ms: 0.422592
+  ...
+# Subtest: invalid geometry, timestamps, lengths and labels are rejected
+ok 56 - invalid geometry, timestamps, lengths and labels are rejected
+  ---
+  duration_ms: 0.483136
+  ...
+# Subtest: partial coverage is preserved and display filtering never changes rule observations
+ok 57 - partial coverage is preserved and display filtering never changes rule observations
+  ---
+  duration_ms: 0.084399
+  ...
+# Subtest: overlays require matched source and the paused, correctly sized sampled frame
+ok 58 - overlays require matched source and the paused, correctly sized sampled frame
+  ---
+  duration_ms: 0.084188
+  ...
+# Subtest: hash match admits exact local bytes and rejects changed/oversized/empty recordings
+ok 59 - hash match admits exact local bytes and rejects changed/oversized/empty recordings
+  ---
+  duration_ms: 5.638552
+  ...
+# Subtest: untrusted class text stays data and prototype-like labels can be counted
+ok 60 - untrusted class text stays data and prototype-like labels can be counted
+  ---
+  duration_ms: 0.097122
+  ...
+# Subtest: repeat import keeps decisions, and queue overflow does not silently discard records
+ok 61 - repeat import keeps decisions, and queue overflow does not silently discard records
+  ---
+  duration_ms: 0.273753
+  ...
+# Subtest: 100 × 4 Mbit × 30 days distinguishes raw, redundancy, overhead and reserve
+ok 62 - 100 × 4 Mbit × 30 days distinguishes raw, redundancy, overhead and reserve
+  ---
+  duration_ms: 0.4
+  ...
+# Subtest: doubling bitrate halves retention; six 24TB dual-parity drives are inadequate for this full workload
+ok 63 - doubling bitrate halves retention; six 24TB dual-parity drives are inadequate for this full workload
+  ---
+  duration_ms: 0.145653
+  ...
+# Subtest: mirror and unprotected capacity are explicit and invalid arrays cannot be saved
+ok 64 - mirror and unprotected capacity are explicit and invalid arrays cannot be saved
+  ---
+  duration_ms: 0.118743
+  ...
+# Subtest: memory, byte-budget, drive-workload and power warnings never become capacity passes
+ok 65 - memory, byte-budget, drive-workload and power warnings never become capacity passes
+  ---
+  duration_ms: 0.068519
+  ...
+# Subtest: VRAM contexts include batch tensors and exceed the allowance without pretending to run GPU inference
+ok 66 - VRAM contexts include batch tensors and exceed the allowance without pretending to run GPU inference
+  ---
+  duration_ms: 0.152435
+  ...
+# Subtest: invalid imported values, prototype fields and unbounded JSON are rejected
+ok 67 - invalid imported values, prototype fields and unbounded JSON are rejected
+  ---
+  duration_ms: 0.26638
+  ...
+# Subtest: exported application policy matches the shared Python contract fixture
+ok 68 - exported application policy matches the shared Python contract fixture
+  ---
+  duration_ms: 0.183725
+  ...
+# Subtest: wall budget always preserves selected sources with at most the applied count
+ok 69 - wall budget always preserves selected sources with at most the applied count
+  ---
+  duration_ms: 0.038302
+  ...
+# Subtest: background sample playback respects the applied pause setting
+ok 70 - background sample playback respects the applied pause setting
+  ---
+  duration_ms: 0.021901
+  ...
+# Subtest: host import retains bounded numerical observations and drops private or unknown fields
+ok 71 - host import retains bounded numerical observations and drops private or unknown fields
+  ---
+  duration_ms: 0.169869
+  ...
+1..71
+# tests 71
+# suites 0
+# pass 70
+# fail 0
+# cancelled 0
+# skipped 1
+# todo 0
+# duration_ms 67.684603

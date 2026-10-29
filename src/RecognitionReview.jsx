@@ -1,0 +1,121 @@
+import React, { useEffect, useRef, useState } from 'react';
+import { parseRecognition, frameSummary, canShowBoxes, matchRecording, MAX_REVIEW_BYTES } from './recognition.mjs';
+import './recognition.css';
+
+export default function RecognitionReview({ onImport }) {
+  const [run, setRun] = useState(null), [index, setIndex] = useState(0);
+  const [source, setSource] = useState(null), [media, setMedia] = useState({});
+  const [threshold, setThreshold] = useState(0.5), [status, setStatus] = useState(''), [error, setError] = useState('');
+  const video = useRef(), generation = useRef(0), sourceGeneration = useRef(0);
+  useEffect(() => () => { generation.current++; sourceGeneration.current++; }, []);
+  useEffect(() => () => { if (source) URL.revokeObjectURL(source.url); }, [source]);
+  const frame = run?.trace.frames[index];
+  const summary = frame ? frameSummary(frame, threshold) : null;
+  const displayed = summary?.detections.slice(0, 200) || [];
+  const boxesVisible = frame && canShowBoxes(frame, run.receipt.fps_metadata, { ...media, matched: Boolean(source) });
+
+  async function loadRun(event) {
+    const file = event.target.files?.[0]; event.target.value = '';
+    if (!file) return;
+    const ticket = ++generation.current; sourceGeneration.current++;
+    setRun(null); setSource(null); setMedia({}); setError(''); setStatus('Reading recognition results…');
+    try {
+      if (file.size > MAX_REVIEW_BYTES) throw Error('Recognition results exceed 32 MiB. Split the recording before analysis.');
+      const parsed = parseRecognition(JSON.parse(await file.text()));
+      if (ticket !== generation.current) return;
+      setRun(parsed); setIndex(0); setStatus('Results loaded. Choose the original recording to verify and view the detections.');
+    } catch (err) { if (ticket === generation.current) { setError(err.message); setStatus(''); } }
+  }
+  async function loadVideo(event) {
+    const file = event.target.files?.[0]; event.target.value = '';
+    if (!file || !run) return;
+    const ticket = generation.current, sourceTicket = ++sourceGeneration.current;
+    setSource(null); setMedia({}); setError(''); setStatus('Verifying recording fingerprint…');
+    try {
+      await matchRecording(file, run.receipt.source_sha256);
+      if (ticket !== generation.current || sourceTicket !== sourceGeneration.current) return;
+      setSource({ url: URL.createObjectURL(file), name: file.name });
+      setStatus('Recording fingerprint matched. Review sampled frames and observations below.');
+    } catch (err) {
+      if (ticket === generation.current && sourceTicket === sourceGeneration.current) { setError(err.message); setStatus(''); }
+    }
+  }
+  function readMedia() {
+    const el = video.current;
+    if (el) setMedia({ ready: el.readyState >= 2, paused: el.paused, seeking: el.seeking, seconds: el.currentTime, width: el.videoWidth, height: el.videoHeight });
+  }
+  function seek(i) {
+    setIndex(i); setMedia({});
+    const el = video.current;
+    if (el) { el.pause(); el.currentTime = run.trace.frames[i].seconds; readMedia(); }
+  }
+  return <section className="content-page recognition-page" aria-label="Recording recognition review">
+    <p className="eyebrow">LOCAL RECORDING · MODEL OBSERVATIONS</p>
+    <h1>Recognition</h1>
+    <p className="recognition-intro">See detected people and objects on the recording they came from. Inspect each sampled scene, then send observations for human review.</p>
+    <div className="recognition-loaders">
+      <label className="button">1. Open recognition results<input type="file" accept=".json,application/json" onChange={loadRun} aria-label="Open recognition results" /></label>
+      <label className={`button ${!run ? 'disabled' : ''}`}>2. Match original recording<input type="file" accept="video/*,.avi,.mkv" disabled={!run} onChange={loadVideo} aria-label="Match original recording" /></label>
+    </div>
+    <p className="recognition-status" role="status">{status || 'Video stays on this computer. This page reads files you choose and does not run inference.'}</p>
+    {error && <p className="recognition-error" role="alert">{error}</p>}
+    {!run && <div className="recognition-empty">
+      <h2>Start with one approved recording</h2>
+      <p>Run the local analyzer with your selected model and rules, adding <code>--review-output receipts/review.json</code>. Open that file here, then choose the original recording.</p>
+      <p>The result file contains sampled detections and rule observations. It contains no video. See the repository’s recording recognition guide for the complete command.</p>
+    </div>}
+    {run && <>
+      <div className="recognition-facts">
+        <span><strong>{run.receipt.camera}</strong> · {run.receipt.runtime?.backend_id === 'onnxruntime-cuda' ? 'CUDA analysis' : run.receipt.runtime?.backend_id === 'opencv-cpu' ? 'CPU analysis' : 'Backend unspecified'}</span>
+        <span>{run.trace.frames.length.toLocaleString()} sampled frames · every {run.receipt.stride} source frames</span>
+        <span className={run.receipt.state === 'partial' ? 'recognition-error' : ''}>{run.receipt.state === 'partial' ? 'PARTIAL — analysis limit reached' : 'Analyzer finished — source integrity unverified'}</span>
+      </div>
+      <div className="recognition-layout">
+        <div>
+          <div className="recognition-stage" style={{ aspectRatio: `${frame.width}/${frame.height}` }}>
+            {source ? <>
+              <video key={source.url} ref={video} src={source.url} controls preload="metadata" playsInline
+                onLoadedMetadata={() => seek(index)} onLoadedData={readMedia} onSeeked={readMedia} onSeeking={readMedia}
+                onTimeUpdate={readMedia} onPlay={readMedia} onPause={readMedia} onEnded={readMedia}
+                onError={() => { setMedia({}); setError('The browser cannot play this recording. Use a browser-compatible source and analyze it again; converted files have a different fingerprint.'); }} />
+              {boxesVisible && <svg viewBox="0 0 1000 1000" preserveAspectRatio="none" className="recognition-boxes" aria-label="Detections on verified sampled frame">
+                {displayed.map((d, i) => <rect key={i} x={d.box[0]*1000} y={d.box[1]*1000} width={d.box[2]*1000} height={d.box[3]*1000}><title>{d.label} · score {d.score.toFixed(2)}</title></rect>)}
+              </svg>}
+              {boxesVisible && <div className="recognition-box-labels" aria-hidden="true">{displayed.map((d, i) => <span key={i} style={{left:`${d.box[0]*100}%`, top:`${d.box[1]*100}%`}}>{d.label} {d.score.toFixed(2)}</span>)}</div>}
+            </> : <p>Match the original recording to view this scene.</p>}
+          </div>
+          <p className="recognition-caption">{source ? boxesVisible ? 'Boxes correspond to this paused, sampled frame.' : 'Boxes hidden. Select a sample to pause on its analyzed frame.' : 'No recording attached. Results alone are unverified metadata.'}</p>
+          <div className="recognition-timeline">
+            <button className="button" disabled={index === 0} onClick={() => seek(index-1)}>Previous sample</button>
+            <label>Sample {index+1} of {run.trace.frames.length}<input aria-label="Analyzed sample" type="range" min="0" max={run.trace.frames.length-1} value={index} onChange={e => seek(Number(e.target.value))} /></label>
+            <button className="button" disabled={index === run.trace.frames.length-1} onClick={() => seek(index+1)}>Next sample</button>
+          </div>
+        </div>
+        <aside className="recognition-scene">
+          <p className="eyebrow">SAMPLED SCENE · +{frame.seconds.toFixed(3)}s</p>
+          <h2>People & objects</h2>
+          <label className="recognition-threshold">Display score ≥ {threshold.toFixed(2)}<input type="range" aria-label="Display score threshold" min="0.1" max="1" step="0.05" value={threshold} onChange={e => setThreshold(Number(e.target.value))} /></label>
+          <p>This filter changes the display only. Recorded rules and observations stay unchanged.</p>
+          {summary.counts.length ? <ul className="recognition-counts">{summary.counts.map(([label, n]) => <li key={label}><span>{label}</span><strong>{n}</strong></li>)}</ul> : <p>No detections meet this display threshold. This does not establish an empty scene.</p>}
+          <p>Counts apply to this frame. They are not unique people, identities or tracked objects.</p>
+          {summary.detections.length > 200 && <p>Showing the first 200 boxes and scores. Counts include all {summary.detections.length} detections above the display threshold.</p>}
+          <div className="recognition-detections">{displayed.map((d, i) => <div key={i}><span>{d.label}</span><span>score {d.score.toFixed(2)}</span></div>)}</div>
+        </aside>
+      </div>
+      <div className="recognition-observations">
+        <h2>Rule observations <small>{run.events.length}</small></h2>
+        <p>Presence and dwell follow the configured zones and class labels. They do not establish intent, an anomaly or continuity of the same person.</p>
+        {run.events.length > 0 ? <>
+          <button className="button amber" onClick={() => onImport(run.events)}>Send {run.events.length} observations to Events</button>
+          <div className="recognition-event-list">{run.receipt.events.map((e, i) => <button key={e.id} className="recognition-event" onClick={() => seek(run.eventFrames[i])}><span>+{e.seconds.toFixed(2)}s · {e.rule}</span><span>score {e.score.toFixed(2)} · View frame</span></button>)}</div>
+        </> : <p>No configured rules emitted an observation in the analyzed portion. Inspect detections and rule settings before drawing conclusions.</p>}
+      </div>
+      <details className="recognition-provenance"><summary>Provenance and limits</summary>
+        <p>Source SHA-256: <code>{run.receipt.source_sha256}</code></p>
+        <p>Model SHA-256: <code>{run.receipt.model_sha256}</code></p>
+        <p>Profile: {run.receipt.inference_profile}. Timing assumes constant frame rate ({run.receipt.fps_metadata.toFixed(3)} FPS).</p>
+        <p>A matching recording fingerprint proves file correspondence, not authenticity or recognition accuracy. These results are unsigned. No live camera, identity tracking, learned scene interpretation or 100-camera acceptance is established.</p>
+      </details>
+    </>}
+  </section>;
+}

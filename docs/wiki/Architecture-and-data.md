@@ -26,6 +26,7 @@ This diagram describes implemented paths. The reusable scheduler and synthetic l
 | Component | Source | Role |
 | --- | --- | --- |
 | Workspace | `src/App.jsx`, `src/data.mjs` | Review, rules, local video preview, explicit receipt import |
+| Recording recognition | `src/RecognitionReview.jsx`, `src/recognition.mjs` | Explicit review bundle, original-file hash matching, paused sampled detections/counts and Event handoff; no inference/network API |
 | Facility model | `src/facility.mjs` | Bounded plan validation, local-meter projection, estimated visibility and rehearsal |
 | Facility renderer | `src/FacilityBuilder.jsx`, `src/facility-map.mjs` | Guided controls, MapLibre and selected-camera Three.js volume |
 | Map starter | `src/FacilityStarter.jsx`, `src/facility-starter.mjs` | Common shapes, dimensions, reviewed simple ways/supported outer-only relations and source records |
@@ -40,6 +41,7 @@ This diagram describes implemented paths. The reusable scheduler and synthetic l
 | --- | --- | --- |
 | Use sample workspace | Browser memory/localStorage | Generated artwork is not real evidence |
 | Preview a local video | Local browser object URL | Preview is not analysis; no upload is implemented |
+| Open recognition results + matching recording | Transient browser memory and local object URL | SHA-256 match before attachment; metadata and video never uploaded; selected observations can be explicitly imported into localStorage |
 | Run analyzer | Explicit local output files | No camera capture or model download |
 | Import receipt/plan | Browser memory/localStorage after validation | Bounds and declared fields are checked |
 | Export reviews/rules/plan | Explicit browser download | User-controlled file copies |

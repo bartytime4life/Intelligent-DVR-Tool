@@ -80,6 +80,8 @@ def main(argv=None):
     parser.add_argument('--output',type=Path,required=True,help='New receipt path (will not overwrite)')
     parser.add_argument('--trace-output',type=Path,
                         help='Optional new frame-level evaluation trace; metadata only')
+    parser.add_argument('--review-output',type=Path,
+                        help='Optional new recognition review bundle; metadata only, open in Recognition')
     parser.add_argument('--threads',type=int,help='OpenCV CPU threads, 1–8; default 1 or policy cap')
     parser.add_argument('--resource-policy',type=Path,help='Explicit local resource policy exported from System')
     parser.add_argument('--camera',default='offline-camera')
@@ -106,13 +108,15 @@ def main(argv=None):
             local_file(path)
         except ValueError as error:
             parser.error(str(error))
-    outputs = [args.output] + ([args.trace_output] if args.trace_output is not None else [])
+    outputs = [p for p in (args.output, args.trace_output, args.review_output) if p is not None]
     if len({p.resolve() for p in outputs}) != len(outputs):
-        parser.error('Receipt and trace require distinct output paths')
+        parser.error('Receipt, trace and review require distinct output paths')
     if any(p.exists() or p.is_symlink() for p in outputs):
         parser.error('Output must be a new file')
-    if args.trace_output is not None and math.ceil(args.max_frames/args.stride) > MAX_FRAMES:
+    retain_frames = args.trace_output is not None or args.review_output is not None
+    if retain_frames and math.ceil(args.max_frames/args.stride) > MAX_FRAMES:
         parser.error('Trace mode permits up to 10,000 sampled frames; reduce max-frames or increase stride')
+    input_hashes = {p: digest(p) for p in (args.video, args.model, args.labels, args.rules)} if args.review_output else {}
     labels=json.loads(args.labels.read_text())
     model_hash=digest(args.model)
     try:
@@ -168,11 +172,12 @@ def main(argv=None):
             elapsed=(time.perf_counter()-began)*1000
             latencies.append(elapsed)
             processed+=1;events.extend(engine.update(index/fps,detections))
-            if args.trace_output is not None:
+            if retain_frames:
                 detection_count += len(detections)
                 if detection_count > MAX_DETECTIONS:
                     raise ValueError('Evaluation trace exceeds 100,000 detections; split the recording')
                 trace_frames.append({'frame_index':index,'seconds':index/fps,
+                                     'width':int(frame.shape[1]),'height':int(frame.shape[0]),
                                      'detections':detections,'inference_decode_ms':elapsed})
             if len(events) >= 1000:
                 events=events[:1000];partial=True;break
@@ -183,6 +188,8 @@ def main(argv=None):
         backend.close()
     if not processed:
         raise ValueError('No frames were decoded; no receipt was written')
+    if input_hashes and any(digest(p) != expected for p, expected in input_hashes.items()):
+        raise ValueError('An input changed during analysis; no review result was written')
     ordered=sorted(latencies)
     receipt={'schema':'intelligent-dvr.receipt.v1','mode':'offline-model',
              'state':'partial' if partial else 'completed','events':events,
@@ -201,7 +208,7 @@ def main(argv=None):
         receipt['resource_policy'] = {'sha256': policy_hash, 'opencv_threads': args.threads,
                                       'max_frames': args.max_frames,
                                       'scope': 'Analyzer thread and decoded-frame limits only; no OS/GPU quota or worker pool.'}
-    if args.trace_output is not None:
+    if retain_frames:
         from .model_profiles import ASSETS
         trace = {'schema':TRACE_SCHEMA,'origin':'offline-analyzer','state':receipt['state'],
                  'source_sha256':source_hash,'model_sha256':model_hash,
@@ -214,7 +221,18 @@ def main(argv=None):
                  'timing_scope':receipt['timing']['scope'],'human_review_required':True}
         if policy_hash is not None:
             trace['runtime']['resource_policy_sha256'] = policy_hash
-        documents.append((args.trace_output, trace))
+        if args.trace_output is not None:
+            documents.append((args.trace_output, trace))
+        if args.review_output is not None:
+            documents.append((args.review_output, {
+                'schema':'intelligent-dvr.recognition-review.v1',
+                'receipt':receipt, 'trace':trace,
+                'limitations':[
+                    'Detected classes and rule-based presence only; no identity or learned scene understanding.',
+                    'Counts are per sampled frame, not unique people or objects.',
+                    'Metadata is unsigned; source hash matching does not authenticate detections.',
+                ],
+            }))
     # Reserve every destination exclusively before writing either document.
     # On a write failure, remove only files created by this invocation.
     created=[]
@@ -227,8 +245,8 @@ def main(argv=None):
             for stream,document in streams:
                 json.dump(document,stream,indent=2,allow_nan=False)
                 stream.write('\n')
-                if document.get('schema') == TRACE_SCHEMA and stream.tell() > 32*1024**2:
-                    raise ValueError('Evaluation trace exceeds the 32 MiB JSON bound; split the recording')
+                if document.get('schema') in (TRACE_SCHEMA, 'intelligent-dvr.recognition-review.v1') and stream.tell() > 32*1024**2:
+                    raise ValueError('Trace/review exceeds the 32 MiB JSON bound; split the recording')
     except BaseException:
         for path in created:
             path.unlink()

@@ -1,0 +1,12 @@
+{
+  "edge/analyze.py": "b9aff1d3d8376c762eca7cb17e7f019294be87b7a9cb87a02a8b8d668b76d27b",
+  "src/recognition.mjs": "8a6cbe45a69f2ee7c0f5bd9f23c635f2aaccbdfc25f79a00d4fbacb5f1d1b92a",
+  "src/RecognitionReview.jsx": "243c1ac3e4583b0615ded1cd521c0899084566763d382aa2a979aa96aa4834b7",
+  "src/recognition.css": "145dff41c636efcee8fe3394b2bcec1ae52e7d2e9a8df589c3012827e6a84af7",
+  "src/App.jsx": "c57ca26479a49288cc22baecf899f3d55fb5f0cecb1a1c4502636d4a43d0b1d1",
+  "tests/recognition.test.mjs": "0b124ab8ce93ff54697b2c8b6e21821d5dbd08f8f36cc37fda4aa386c92d50f8",
+  "tests/test_inference.py": "df6813a63c40f445c6ea7043ab3f6595ddfb37ea8a2adc59ed5379d4f666448a",
+  "tests/browser/recognition.spec.mjs": "bbdca536404ae1db8445b355b4465bde8a1aa3860f7f3d67b7be94b008a1ae46",
+  "tests/fixtures/recognition.mjs": "c91f198fc856ba03a24d5ca45af83ee5abe8d9d19e6bbc0bfa980a9e1aa19618",
+  "package.json": "4fe089fef9f75b1f9e0dfb08cb481dce1770d79ab2eb5556816affc526d4e4aa"
+}

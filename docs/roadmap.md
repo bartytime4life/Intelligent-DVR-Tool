@@ -27,7 +27,29 @@ The [facility reliability guide](facility-setup-reliability.md) records the impl
 
 No finish dates or hardware guarantees are implied. Use [pilot scope](pilot-scope.md) for decisions and the [performance guide](performance-100-cameras.md) for budgets.
 
-## Read the load model correctly
+## Recognition deployment path — October 29, 2026
+
+The owner prioritized real deployment of AI-assisted scene, person and object
+recognition. The immediate milestone is the [recording recognition pilot](recording-recognition.md):
+actual model output, original-source matching, sampled boxes/counts and human
+review in one workflow. The optional CUDA, worker supervision and outcome journal
+already have implementations and dated checks; those components are not yet a
+complete ingest/recording product.
+
+| Order | Deliverable | Acceptance before advancing |
+| --- | --- | --- |
+| 1 · Recording pilot | Implemented analyzer-to-Recognition handoff; metadata stays separate from footage | Exact-source match, actual person/object model execution, rejection/partial-state/browser checks and operator walkthrough |
+| 2 · Detection quality | Independently labeled, approved day/night/occlusion clips; held-out evaluation and scene-specific rules | Agreed per-class recall/precision and reviewed false alerts; record misses, not just visible successes |
+| 3 · One live source | Explicitly configured local ingest, recording, reconnect, retention and stop controls; connect inference/review | Continuous recording and visible gap/stale/drop accounting under disconnect, restart and disk pressure |
+| 4 · Person/object tracking | Short-lived within-camera track IDs and entry/exit/dwell evaluation | Labeled continuity/ID-switch metrics; no implied real-world identity; separate cross-camera evidence |
+| 5 · Staged deployment | 1 → 5 → 25 → 50 → 100 simultaneous sources | Accepted source resolution/codec/FPS/cadence, quality, latency, retention, sustained soak and recovery at each stage |
+
+Scene inventories and rule observations come first. Learned scene/behavior
+models require separate model/license selection and labeled acceptance. Host
+GPU visibility must be verified before CUDA measurements; synthetic storage
+improvements do not substitute for native inference or camera acceptance.
+
+## Read the historical load model correctly
 
 The fresh 100-source simulation offers 2,000 synthetic samples over ten virtual seconds. With eight assumed 650 ms workers it completes 144, replaces 1,780 and expires 76. With assumed 10 ms service it completes all 2,000. These are modeled outcomes, not measurements of either model or hardware.
 

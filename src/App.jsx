@@ -1,6 +1,8 @@
 import React, { lazy, Suspense, useEffect, useRef, useState } from "react";
 const FacilityBuilder = lazy(() => import("./FacilityBuilder.jsx").then(m => ({default:m.FacilityBuilder})));
 const SystemSetup = lazy(() => import("./SystemSetup.jsx"));
+const RecognitionReview = lazy(() => import("./RecognitionReview.jsx"));
+import { mergeRecognitionEvents } from './recognition.mjs';
 import { DEFAULT_SETUP, parseSetup, sampleShouldRun, visibleCameraSlots } from "./resources.mjs";
 import {
   Monitor,
@@ -315,7 +317,7 @@ function EventRow({ event, review, zone }) {
   );
 }
 export function App() {
-  const [tab, setTab] = useState(window.location.hash === "#facility" ? "Facility" : window.location.hash === "#system" ? "System" : "Monitor"),
+  const [tab, setTab] = useState(window.location.hash === "#recognition" ? "Recognition" : window.location.hash === "#facility" ? "Facility" : window.location.hash === "#system" ? "System" : "Monitor"),
     [selected, setSelected] = useState(1),
     [slots, setSlots] = useState([1, 2, 3, 4]),
     [events, setEvents] = useStored("dvr.events.v1", initialEvents),
@@ -486,14 +488,14 @@ export function App() {
         </div>
         <div className="wordmark">Intelligent DVR</div>
         <span className="header-divider" />
-        <span className="pilot-label">{tab === "Facility" ? "Guided facility builder" : "Review prototype"}</span>
+        <span className="pilot-label">{tab === "Recognition" ? "Recording recognition" : tab === "Facility" ? "Guided facility builder" : "Review prototype"}</span>
         <button className="workspace-select" onClick={() => setTab("Settings")}>
-          Demo workspace
+          {tab === "Recognition" ? "Local recording review" : "Demo workspace"}
           <CaretDown size={14} />
         </button>
         <div className="header-right">
           <span className="header-date">
-            Oct 24, 2026 <span>· sample</span>
+            {tab === "Recognition" ? <>Offline <span>· human review</span></> : <>Oct 24, 2026 <span>· sample</span></>}
           </span>
           <button
             className="icon-button"
@@ -507,6 +509,7 @@ export function App() {
       <nav className="sidebar" aria-label="Main navigation">
         {[
           [Monitor, "Monitor"],
+          [Eye, "Recognition"],
           [Buildings, "Facility"],
           [ListBullets, "Events"],
           [Selection, "Zones"],
@@ -535,6 +538,12 @@ export function App() {
         </button>
       </nav>
       <main id="workspace" className={`workspace tab-${tab.toLowerCase()}`}>
+        {tab === "Recognition" && <Suspense fallback={<div className="content-page"><h1>Opening recognition review…</h1></div>}><RecognitionReview onImport={added => {
+          try {
+            setEvents(mergeRecognitionEvents(events, added));
+            setToast(`Imported ${added.length} model observations. Review them in Events; footage stays local.`);
+          } catch (err) { setToast(err.message); }
+        }} /></Suspense>}
         {tab === "Facility" && <Suspense fallback={<div className="content-page"><h1>Opening facility builder…</h1></div>}><FacilityBuilder /></Suspense>}
         {tab === "System" && <Suspense fallback={<div className="content-page"><h1>Opening machine setup…</h1></div>}><SystemSetup setup={resources}
           onApply={setup => setResourceState({ setup, error: "" })} storageError={resourceState.error} download={download} /></Suspense>}
@@ -997,7 +1006,7 @@ export function App() {
         <strong>No cameras connected</strong>
         <span className="footer-divider" />
         <span>
-          {events.some((e) => e.mode === "offline-model") ? (
+          {tab === "Recognition" ? "Local model results need human review. No live recognition is running." : events.some((e) => e.mode === "offline-model") ? (
             "Camera previews are simulated. Imported observations need source review."
           ) : (
             <>

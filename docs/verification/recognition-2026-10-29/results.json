@@ -1,0 +1,72 @@
+{
+  "schema": "intelligent-dvr.recognition-check.v1",
+  "upstream_base": "d0ff007472a2f3c03f4dcaf4044fc260c0dbc270",
+  "scope": "Two bounded existing local recordings, explicit CPU inference; no live cameras, no footage transmission, no ground-truth quality measurement. IPv4/IPv6 sockets denied by existing local guard.",
+  "cases": [
+    {
+      "case": "person",
+      "state": "partial",
+      "review_sha256": "c7e36aaae03f9f577256d40a91986e230b4a27d91159c0ffef40dc42278c245c",
+      "source_sha256": "9661a6f5602df23be9f013d3a1e3f8e03e7267e4f89a889cafc91f54e0994039",
+      "model_sha256": "c5c2d13e59ae883e6af3b45daea64af4833a4951c92d116ec270d9ddbe998063",
+      "labels_sha256": "76ce1473f01bd271bab54429737358a97160629cf970c5ec8384c2777dd0bae9",
+      "rules_sha256": "a1b96444daab97cb72739638e199507375c2c60dcf75ee4ee4601178b5f0638f",
+      "frames_read": 250,
+      "frames_analyzed": 50,
+      "events": 2,
+      "stride": 5,
+      "fps_metadata": 30.0,
+      "runtime": {
+        "python": "3.12.3",
+        "opencv": "4.13.0",
+        "numpy": "2.5.4",
+        "machine": "x86_64",
+        "backend": "OpenCV CPU",
+        "backend_id": "opencv-cpu",
+        "threads": 4,
+        "fallback": "none"
+      },
+      "timing": {
+        "scope": "local inference and postprocessing only; not end-to-end camera latency",
+        "p50_ms": 104.66616248595528,
+        "p95_ms": 122.56147299194708
+      },
+      "detection_instances_across_frames_score_at_least_0_5": {
+        "person": 36
+      }
+    },
+    {
+      "case": "vehicle",
+      "state": "partial",
+      "review_sha256": "f8af93f702bacb5410ea5519408d35b7ae0a124815322c45bea43da4d0718ddb",
+      "source_sha256": "7d51815f61ee9e0dd349171d02d9d08c74d9d166a2be58eab65895b1617ad6eb",
+      "model_sha256": "c5c2d13e59ae883e6af3b45daea64af4833a4951c92d116ec270d9ddbe998063",
+      "labels_sha256": "76ce1473f01bd271bab54429737358a97160629cf970c5ec8384c2777dd0bae9",
+      "rules_sha256": "a1b96444daab97cb72739638e199507375c2c60dcf75ee4ee4601178b5f0638f",
+      "frames_read": 250,
+      "frames_analyzed": 50,
+      "events": 1,
+      "stride": 5,
+      "fps_metadata": 30.0,
+      "runtime": {
+        "python": "3.12.3",
+        "opencv": "4.13.0",
+        "numpy": "2.5.4",
+        "machine": "x86_64",
+        "backend": "OpenCV CPU",
+        "backend_id": "opencv-cpu",
+        "threads": 4,
+        "fallback": "none"
+      },
+      "timing": {
+        "scope": "local inference and postprocessing only; not end-to-end camera latency",
+        "p50_ms": 102.81424652202986,
+        "p95_ms": 121.00300804013386
+      },
+      "detection_instances_across_frames_score_at_least_0_5": {
+        "car": 200,
+        "truck": 99
+      }
+    }
+  ]
+}

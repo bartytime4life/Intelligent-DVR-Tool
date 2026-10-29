@@ -1,5 +1,9 @@
 # Verification index
 
+The [October 29 recording recognition check](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/recognition-2026-10-29/README.md)
+adds analyzer-to-browser review contracts and two actual bounded CPU recording
+runs. Recognition quality, live operation and 100-camera acceptance remain open.
+
 [October 28 facility follow-up](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/facility-2026-10-28/README.md): polygon selection,
 v2 courtyard/base geometry, bounded local delivery and novice-study preparation.
 Local checks and unresolved field/human acceptance are recorded separately.
