@@ -103,6 +103,22 @@ test('named save files and collection backups import as additional facilities wi
   for(const original of savedBackup.facilities)expect(library.facilities.find(f=>f.id===original.id).plan).toEqual(original.plan);
 });
 
+test('a full 30-facility backup restores on a fresh install without a spare starter record',async({page})=>{
+  let backup=createLibrary({...blankFacility(),name:'Campus 1'});
+  for(let i=2;i<=30;i++)backup=addFacility(backup,{...blankFacility(),name:`Campus ${i}`});
+  await openBlank(page);
+  await expect.poll(async()=> (await savedFacilities(page))?.revision).toBe(1);
+  await page.getByLabel('Import facility library',{exact:true}).setInputFiles({name:'all-facilities.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(backup))});
+  await expect.poll(async()=> (await savedFacilities(page))?.facilities.length).toBe(30);
+  await expect(page.getByLabel('Facility name',{exact:true})).toHaveValue('Campus 30');
+  const restored=await savedFacilities(page);
+  expect(restored.facilities.map(f=>f.plan)).toEqual(backup.facilities.map(f=>f.plan));
+  expect(restored.facilities.every(f=>!backup.facilities.some(original=>original.id===f.id))).toBe(true);
+  await page.reload();
+  await expect(page.getByLabel('Facility name',{exact:true})).toHaveValue('Campus 30');
+  expect((await savedFacilities(page)).facilities).toHaveLength(30);
+});
+
 test('an existing saved plan migrates once and the original legacy save stays intact',async({page})=>{
   const legacy=exampleFacility();legacy.name='Existing facility';const raw=JSON.stringify(legacy);
   await page.addInitScript(({key,raw})=>{if(localStorage.getItem(key)===null)localStorage.setItem(key,raw);},{key:legacyKey,raw});

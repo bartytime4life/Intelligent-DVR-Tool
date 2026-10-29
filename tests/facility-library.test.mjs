@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {blankFacility, exampleFacility} from '../src/facility.mjs';
-import {LIBRARY_KEY, LEGACY_KEY, LIBRARY_SCHEMA, MAX_LIBRARY_BYTES, MAX_FACILITY_BYTES, createLibrary, validateLibrary, loadLibrary, persistLibrary, addFacility, replaceActive, selectFacility, duplicateActive, facilityFilename, parseFacilityFile} from '../src/facility-library.mjs';
+import {LIBRARY_KEY, LEGACY_KEY, LIBRARY_SCHEMA, MAX_LIBRARY_BYTES, MAX_FACILITY_BYTES, createLibrary, validateLibrary, loadLibrary, persistLibrary, addFacility, replaceActive, selectFacility, duplicateActive, importFacilities, facilityFilename, parseFacilityFile} from '../src/facility-library.mjs';
 
 function memoryStorage(entries = {}) {
   const values = new Map(Object.entries(entries));
@@ -120,6 +120,38 @@ test('imported collection records get fresh IDs when added and cannot replace a 
   let next=current;for(const plan of parseFacilityFile(backup))next=addFacility(next,plan);
   assert.equal(next.facilities.length,2);assert.equal(next.facilities[0].id,originalId);assert.notEqual(next.facilities[1].id,originalId);
   assert.deepEqual(next.facilities[0].plan,next.facilities[1].plan);assert.equal(current.facilities.length,1);
+});
+
+test('a complete 30-facility backup fits a fresh install by replacing only its automatic starter',()=>{
+  let source=createLibrary({...blankFacility(),name:'Site 1'});
+  for(let i=2;i<=30;i++)source=addFacility(source,{...blankFacility(),name:`Site ${i}`});
+  const plans=parseFacilityFile(JSON.stringify(source)),sourceIds=new Set(source.facilities.map(item=>item.id));
+  for(const revision of [0,1]) {
+    const starter={...createLibrary(),revision},before=structuredClone(starter);
+    const restored=importFacilities(starter,plans);
+    assert.equal(restored.facilities.length,30);assert.equal(restored.revision,revision);
+    assert.deepEqual(restored.facilities.map(item=>item.plan),source.facilities.map(item=>item.plan));
+    assert.ok(restored.facilities.every(item=>!sourceIds.has(item.id) && item.id!==starter.activeId));
+    assert.equal(restored.activeId,restored.facilities.at(-1).id);assert.deepEqual(starter,before);
+    assert.equal(validateLibrary(JSON.parse(JSON.stringify(restored))).facilities.length,30);
+  }
+});
+
+test('imports preserve authored or previously edited blank facilities and remain all-or-nothing',()=>{
+  const plans=Array.from({length:30},(_,i)=>({...blankFacility(),name:`Imported ${i+1}`}));
+  const authored=[createLibrary({...blankFacility(),name:'Saved empty site'}),
+    createLibrary({...blankFacility(),origin:[0,0]}),
+    {...createLibrary(),revision:2},createLibrary(exampleFacility()),addFacility(createLibrary())];
+  for(const library of authored) {
+    const before=structuredClone(library);
+    assert.throws(()=>importFacilities(library,plans),/30 facilities/);
+    assert.deepEqual(library,before);
+  }
+  const starter=createLibrary(),normal=importFacilities(starter,plans.slice(0,2));
+  assert.equal(normal.facilities.length,3);assert.equal(normal.facilities[0].id,starter.activeId);
+  const invalid=[...plans];invalid[29]={...blankFacility(),origin:[NaN,0]};
+  const before=structuredClone(starter);assert.throws(()=>importFacilities(starter,invalid));assert.deepEqual(starter,before);
+  for(const incoming of [[],null,[...plans,blankFacility()]])assert.throws(()=>importFacilities(starter,incoming),/1 and 30/);
 });
 
 test('download filenames contain no path, control, device-name or Unicode surprises',()=>{

@@ -1,7 +1,7 @@
 import React,{useEffect,useRef,useState} from 'react';
 import {blankFacility,exampleFacility} from './facility.mjs';
 import FacilitySwitcher from './FacilitySwitcher.jsx';
-import {LIBRARY_KEY,loadLibrary,persistLibrary,addFacility,replaceActive,selectFacility,duplicateActive,parseFacilityFile} from './facility-library.mjs';
+import {LIBRARY_KEY,loadLibrary,persistLibrary,addFacility,replaceActive,selectFacility,duplicateActive,parseFacilityFile,importFacilities} from './facility-library.mjs';
 
 export function downloadFacilityData(data,filename) {
   const contents=typeof data==='string'?data:JSON.stringify(data);
@@ -33,8 +33,7 @@ export default function FacilityLibrary({children}) {
   function mutate(fn){if(dirtyRef.current){setError('Save or discard your preview before changing facilities.');return false;}try{save(fn(libraryRef.current));return true;}catch(e){setError(e.message);return false;}}
   function importText(text){
     if(dirtyRef.current)throw Error('Save or discard your preview before importing facilities.');
-    const plans=parseFacilityFile(text);let next=libraryRef.current;
-    for(const plan of plans)next=addFacility(next,plan);
+    const next=importFacilities(libraryRef.current,parseFacilityFile(text));
     save(next);return true;
   }
   async function importFile(e){const file=e.target.files[0];e.target.value='';if(!file)return;try{if(file.size>4_000_000)throw Error('Facility backups must be smaller than 4 MB.');importText(await file.text());}catch(e){setError(e.message);}}

@@ -149,6 +149,25 @@ export function duplicateActive(library) {
   return addFacility(clean, {...current.plan,name});
 }
 
+// Build the entire import before saving. Only the untouched automatic starter
+// can yield its slot when a complete 30-facility backup needs every slot.
+export function importFacilities(library, plans) {
+  const clean = validateLibrary(library);
+  if (!Array.isArray(plans) || !plans.length || plans.length > MAX_FACILITIES)
+    throw Error('Import between 1 and 30 valid facilities.');
+  const imported = plans.map(cleanPlan);
+  const untouchedStarter = clean.facilities.length === 1 && clean.revision <= 1 &&
+    JSON.stringify(clean.facilities[0].plan) === JSON.stringify(cleanPlan(blankFacility()));
+  const needsStarterSlot = clean.facilities.length + imported.length > MAX_FACILITIES;
+  let next = clean, remaining = imported;
+  if (needsStarterSlot && untouchedStarter) {
+    next = {...createLibrary(imported[0]), revision:clean.revision};
+    remaining = imported.slice(1);
+  }
+  for (const plan of remaining) next = addFacility(next, plan);
+  return next;
+}
+
 export function facilityFilename(plan) {
   const name = typeof plan?.name === 'string' ? plan.name : 'facility';
   const safe = name.normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLowerCase()
