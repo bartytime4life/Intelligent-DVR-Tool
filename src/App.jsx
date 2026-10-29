@@ -451,7 +451,7 @@ export function App() {
         {recognitionOpened && <div hidden={tab !== "Recognition"}><Suspense fallback={<div className="content-page"><h1>Opening recognition review…</h1></div>}>
           <RecognitionReview active={tab === "Recognition" && !pageHidden} onImport={addObservations} />
         </Suspense></div>}
-        {tab === "Facility" && <Suspense fallback={<div className="content-page"><h1>Opening facility builder…</h1></div>}><FacilityBuilder /></Suspense>}
+        {tab === "Facility" && <Suspense fallback={<div className="content-page"><h1>Opening facility builder…</h1></div>}><FacilityBuilder onPreviewCount={setLiveCount} /></Suspense>}
         {tab === "System" && <Suspense fallback={<div className="content-page"><h1>Opening machine setup…</h1></div>}><SystemSetup setup={resources}
           onApply={setup => setResourceState({ setup, error: "" })} storageError={resourceState.error} download={download} /></Suspense>}
         {tab === "Monitor" && <LiveMonitor visibleTiles={resources.browser.visibleTiles} onCount={setLiveCount} pageHidden={pageHidden} queue={

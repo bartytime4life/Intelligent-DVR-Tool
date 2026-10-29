@@ -1,7 +1,7 @@
 import { fromLngLat, toLngLat, validPolygon, polygonArea, validateFacility, pointInPolygon, segmentIntersection, validHoles, ringsOverlap, ringsIntersect } from "./facility.mjs";
 
 export function draftFacility(plan, buildings, replace = false) {
-  const base = replace ? {...plan,buildings:[],cameras:[],rooms:[],labels:[],route:[]} : plan;
+  const base = replace ? {...plan,buildings:[],cameras:[],rooms:[],labels:[],route:[],zones:[],openings:[],stairs:[],paths:[]} : plan;
   return validateFacility({...base,buildings:[...base.buildings,...buildings]});
 }
 const SHAPES = ["Rectangle", "L wing", "T wing", "U wing", "Cross", "Octagon", "Round"];

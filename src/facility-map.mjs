@@ -3,12 +3,39 @@ import workerUrl from "maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url";
 import * as THREE from "three";
 import { TerraDraw, TerraDrawPolygonMode, TerraDrawLineStringMode } from "./vendor/terra-draw.mjs";
 import { TerraDrawMapLibreGLAdapter } from "./vendor/terra-maplibre.mjs";
-import { centroid, toLngLat, fromLngLat, coverageFan, wallObstacles, buildingFeature } from "./facility.mjs";
+import { centroid, toLngLat, fromLngLat, coverageFan, wallObstacles, buildingFeature, floorSlabRings, ceilingOpenings } from "./facility.mjs";
+import { stairDimensions, stairFootprint, stairTreadPolygons } from "./facility-stairs.mjs";
+import { measurementLabels, lineRibbonSegments, floorRenderPlan, floorElevation, visibleLabelIndices } from "./facility-measurements.mjs";
+import "./facility-map-geometry.css";
 setWorkerUrl(workerUrl);
 const fc = (features) => ({ type: "FeatureCollection", features });
 const feat = (type, coordinates, properties = {}) => ({ type: "Feature", geometry: { type, coordinates }, properties });
 const polygon = (ring, origin, props) => feat("Polygon", [ring.map((p) => toLngLat(p, origin))], props);
 const empty = () => fc([]);
+const FLOOR_DRAW_TOOLS = ["room", "opening", "floor-path"];
+const OVERHEAD_TOOLS = ["building", "room", "zone", "opening", "route", "floor-path", "search-area", "site-pin", "camera", "aim-camera", "move-camera"];
+const viewPitch = (view, tool) => view === "2d" || OVERHEAD_TOOLS.includes(tool) ? 0 : 52;
+function structureBuilding(plan, selected, view, options) {
+  if (view === "2d") return undefined;
+  const owner = [...plan.rooms, ...(plan.openings || []), ...(plan.stairs || []), ...(plan.paths || [])].find(item => item.id === selected);
+  const id = view === "floors" ? options.floorBuildingId : plan.buildings.some(b => b.id === selected) ? selected : owner?.buildingId;
+  return plan.buildings.find(building => building.id === id);
+}
+function floorSlabFeature(plan, building, level, origin, selected, flattened = false) {
+  const elevation = floorElevation(building, level, flattened);
+  const rings = floorSlabRings(plan, building.id, level);
+  if (!rings.length) return null;
+  return feat("Polygon", rings.map(ring => ring.map(point => toLngLat(point, origin))), {
+    id: building.id, selected: building.id === selected, level,
+    base: Math.max(0, elevation - .12), top: elevation + .02,
+  });
+}
+function visibleStairs(plan, selected, view, floor, options) {
+  const building = structureBuilding(plan, selected, view, options);
+  if (!building) return [];
+  return (plan.stairs || []).filter(stair => stair.buildingId === building.id &&
+    (view === "3d" || (view === "floors" && (stair.fromLevel === floor || stair.toLevel === floor))));
+}
 function disposeGroup(group) {
   for (const child of [...group.children]) {
     group.remove(child);
@@ -33,7 +60,7 @@ class CameraVolumes {
     this.renderer = new THREE.WebGLRenderer({ canvas: map.getCanvas(), context: gl, antialias: true });
     this.renderer.autoClear = false;
   }
-  update(plan, selected, view, floor) {
+  update(plan, selected, view, floor, options = {}) {
     disposeGroup(this.group);
     this.origin = MercatorCoordinate.fromLngLat(plan.origin, 0);
     const unit = this.origin.meterInMercatorCoordinateUnits();
@@ -67,7 +94,35 @@ class CameraVolumes {
         this.group.add(new THREE.Line(lines, new THREE.LineBasicMaterial({ color: 6155245, transparent: true, opacity: 0.8 })));
       }
     }
-    if (view === "3d") for (const b of plan.buildings.filter(b=>!b.source && !b.holes?.length)) {
+    // A floor n slab is also the ceiling above floor n-1. Its opening is
+    // drawn once at that elevation; it never cuts the entire building envelope.
+    const floorBuilding = structureBuilding(plan, selected, view, options);
+    if (floorBuilding) {
+      const base = floorBuilding.base || 0, rise = (floorBuilding.height - base) / floorBuilding.floors;
+      const flattened = options.floorDrawing;
+      const levels = flattened ? [floor] : view === "floors" ? [floor, Math.min(floor + 1, floorBuilding.floors)] : Array.from({length: floorBuilding.floors + 1}, (_,level) => level);
+      for (const level of levels.filter(level => !(floorBuilding.openFloors || []).includes(level))) for (const ring of [floorBuilding.footprint, ...(floorBuilding.holes || [])]) {
+        const geometry = new THREE.BufferGeometry().setFromPoints(ring.map(([x,y]) => new THREE.Vector3(x,y,floorElevation(floorBuilding,level,flattened) + .035)));
+        this.group.add(new THREE.Line(geometry, new THREE.LineBasicMaterial({color: level === floor ? 0x70e3d2 : 0x8ba1b8, transparent: true, opacity: .7, depthTest: true})));
+      }
+      const openings = (plan.openings || []).filter(opening => opening.buildingId === floorBuilding.id && !(floorBuilding.openFloors || []).includes(opening.level) && (view === "3d" || opening.level === floor));
+      const ceilings = view === "floors" && !flattened ? ceilingOpenings(plan, floorBuilding.id, floor) : [];
+      for (const opening of [...openings, ...ceilings]) {
+        const geometry = new THREE.BufferGeometry().setFromPoints(opening.footprint.map(([x,y]) => new THREE.Vector3(x,y,floorElevation(floorBuilding,opening.level,flattened) + .045)));
+        const material = new THREE.LineDashedMaterial({color: 0xef94ee, transparent: true, opacity: opening.level === floor || view === "3d" ? 1 : .6, dashSize: .65, gapSize: .4, depthTest: true});
+        const line = new THREE.Line(geometry, material); line.computeLineDistances(); this.group.add(line);
+      }
+    }
+    for (const stair of options.floorDrawing ? [] : visibleStairs(plan, selected, view, floor, options).sort((a,b)=>Number(b.id===selected)-Number(a.id===selected)).slice(0,24)) {
+      const building = plan.buildings.find(b => b.id === stair.buildingId);
+      const metrics = stairDimensions(stair,building), angle = stair.bearing * Math.PI / 180;
+      const along = [Math.sin(angle),Math.cos(angle)], across = [Math.cos(angle),-Math.sin(angle)];
+      const tip = metrics.length * .38, wing = Math.min(.7,stair.width * .35);
+      const point = (d,w,z) => new THREE.Vector3(stair.x+along[0]*d+across[0]*w,stair.y+along[1]*d+across[1]*w,z);
+      const geometry = new THREE.BufferGeometry().setFromPoints([point(-tip,0,metrics.base+.12),point(tip,0,metrics.top+.12),point(tip-wing,wing,metrics.top+.12),point(tip,0,metrics.top+.12),point(tip-wing,-wing,metrics.top+.12)]);
+      this.group.add(new THREE.Line(geometry,new THREE.LineBasicMaterial({color:0xd7f4ff,transparent:true,opacity:.9})));
+    }
+    if (view === "3d") for (const b of plan.buildings.filter(b=>!b.source && !b.holes?.length && b.id !== floorBuilding?.id)) {
       const [x, y] = centroid(b.footprint);
       const geo = new THREE.BoxGeometry(5, 3, 1.1);
       const mat = new THREE.MeshBasicMaterial({ color: 6320515 });
@@ -95,7 +150,7 @@ function createFacilityMap(container, callbacks, initialPlan) {
     center: initialPlan.origin,
     zoom: 18.3,
     pitch: 52,
-    bearing: -27,
+    bearing: 0,
     attributionControl: false,
     renderWorldCopies: false,
     maxPitch: 65,
@@ -108,15 +163,34 @@ function createFacilityMap(container, callbacks, initialPlan) {
   map.addControl(attribution, "bottom-right");
   const osmCredit = '© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap contributors</a> · ODbL';
   map.addControl(new NavigationControl({ visualizePitch: true }), "bottom-right");
-  map.addControl(new ScaleControl({ unit: "metric" }), "bottom-left");
+  const scaleControl = new ScaleControl({ unit: "metric" });
+  map.addControl(scaleControl, "bottom-left");
   const volumes = new CameraVolumes();
   let draw, ready = false, suppressSelection = false, current = initialPlan, selected = "C-07", view = "3d", floor = 0, tool = "\
 select", markers = [];
+  let displayOptions = {measurements: true, units: "metric", floorBuildingId: null};
+  let labelRecords = [], labelFrame = null;
+  function declutterLabels() {
+    labelFrame = null;
+    const visible = visibleLabelIndices(labelRecords.map(record => ({priority:record.priority,keep:record.keep,rect:record.element.getBoundingClientRect()})));
+    labelRecords.forEach((record,index) => {
+      record.element.style.visibility = visible.has(index) ? "visible" : "hidden";
+      record.element.setAttribute("aria-hidden", visible.has(index) ? "false" : "true");
+    });
+  }
+  function scheduleLabels() { if (labelFrame === null) labelFrame = requestAnimationFrame(declutterLabels); }
+  function trackLabel(element, priority, keep = false) {
+    element.style.visibility = "hidden";
+    labelRecords.push({element,priority,keep});
+  }
+  map.on("move", scheduleLabels);
+  map.on("resize", scheduleLabels);
+  map.on("rotate", () => callbacks.onBearing?.((map.getBearing() + 360) % 360));
   map.on("error", (e) => callbacks.onError(e.error?.message || "Map rendering error."));
   map.on("webglcontextlost", () => callbacks.onError("3D graphics were interrupted. Save or export the plan, then reload\
  to recover."));
   map.on("load", () => {
-    const sources = ["grid", "site", "buildings", "rooms", "coverage", "cameras", "route", "track", "search-area"];
+    const sources = ["grid", "site", "buildings", "rooms", "coverage", "cameras", "route", "track", "search-area", "zones", "camera-heading", "floor-slabs", "ghost-envelope", "openings", "stairs", "stair-steps", "stair-heading", "floor-paths"];
     for (const id of sources) map.addSource(id, { type: "geojson", data: empty() });
     map.addLayer({ id: "grid", type: "line", source: "grid", paint: { "line-color": "#36505c", "line-opacity": 0.26, "li\
 ne-width": 0.6 } });
@@ -142,6 +216,12 @@ ne-dasharray": [3, 4] } });
       "#405661"
     ], "fill-extrusion-height": ["get", "top"], "fill-extrusion-base": ["get", "base"], "fill-extrusion-opacity": 0.96, "fill-extrusio\
 n-vertical-gradient": true } });
+    map.addLayer({id: "ghost-envelope", type: "fill-extrusion", source: "ghost-envelope", paint: {
+      "fill-extrusion-color": "#78929e", "fill-extrusion-height": ["get", "top"], "fill-extrusion-base": ["get", "base"], "fill-extrusion-opacity": .12,
+    }});
+    map.addLayer({id: "floor-slabs", type: "fill-extrusion", source: "floor-slabs", paint: {
+      "fill-extrusion-color": ["case", ["get", "active"], "#608a94", "#334f5e"], "fill-extrusion-height": ["get", "top"], "fill-extrusion-base": ["get", "base"], "fill-extrusion-opacity": .97,
+    }});
     map.addLayer({ id: "building-edge", type: "line", source: "buildings", paint: {
       "line-color": "#72bec7",
       "line-width": 1.3,
@@ -149,6 +229,29 @@ n-vertical-gradient": true } });
     } });
     map.addLayer({ id: "rooms", type: "fill-extrusion", source: "rooms", paint: { "fill-extrusion-color": "#6b9397", "fi\
 ll-extrusion-base": ["get", "base"], "fill-extrusion-height": ["get", "top"], "fill-extrusion-opacity": 0.55 } });
+    map.addLayer({id: "stairs", type: "fill", source: "stairs", paint: {"fill-color": "#80c9ee", "fill-opacity": .09}});
+    map.addLayer({id: "stair-steps", type: "fill-extrusion", source: "stair-steps", paint: {
+      "fill-extrusion-color": ["case", ["get", "selected"], "#9addfb", "#6597b2"], "fill-extrusion-base": ["get", "base"], "fill-extrusion-height": ["get", "top"], "fill-extrusion-opacity": .95,
+    }});
+    map.addLayer({id: "stair-edge", type: "line", source: "stairs", paint: {"line-color": "#9addfb", "line-width": 1.5}});
+    map.addLayer({id: "stair-heading", type: "line", source: "stair-heading", paint: {"line-color": "#d7f4ff", "line-width": 2}});
+    // A very faint hit surface preserves map selection inside the actual slab hole.
+    map.addLayer({id: "openings", type: "fill-extrusion", source: "openings", paint: {
+      "fill-extrusion-color": "#ef94ee", "fill-extrusion-base": ["get", "base"], "fill-extrusion-height": ["get", "top"], "fill-extrusion-opacity": .065,
+    }});
+    map.addLayer({id: "floor-paths", type: "fill-extrusion", source: "floor-paths", paint: {
+      "fill-extrusion-color": ["case", ["get", "selected"], "#fff2a8", "#f1cc64"], "fill-extrusion-base": ["get", "base"], "fill-extrusion-height": ["get", "top"], "fill-extrusion-opacity": .95,
+    }});
+    map.addLayer({id: "zones", type: "fill-extrusion", source: "zones", paint: {
+      "fill-extrusion-color": ["case", ["!", ["get", "enabled"]], "#81919e", ["==", ["get", "type"], "object_watch"], "#f3b65d", "#f27782"],
+      "fill-extrusion-base": ["get", "base"], "fill-extrusion-height": ["get", "top"],
+      "fill-extrusion-opacity": .3,
+    }});
+    map.addLayer({id: "zone-edge", type: "line", source: "zones", filter: ["==", ["get", "base"], 0], paint: {
+      "line-color": ["case", ["!", ["get", "enabled"]], "#81919e", ["==", ["get", "type"], "object_watch"], "#f3b65d", "#f27782"],
+      "line-width": ["case", ["get", "selected"], 3, 1.5], "line-dasharray": [3, 2],
+    }});
+    map.addLayer({id: "camera-heading", type: "line", source: "camera-heading", paint: {"line-color": "#9bfff0", "line-width": 2, "line-dasharray": [2,2]}});
     map.addLayer(volumes);
     map.addLayer({ id: "route", type: "line", source: "route", paint: { "line-color": "#ffc15a", "line-width": 3, "line-\
 dasharray": [2, 2] } });
@@ -173,20 +276,23 @@ e-stroke-width": 2 } });
       suppressSelection = true;
       queueMicrotask(() => {
         const f = draw.getSnapshotFeature(id);
-        if (!f) return;
+        if (!f) { suppressSelection = false; return; }
         const geometry = f.geometry.type === "Polygon" ? f.geometry.coordinates[0] : f.geometry.coordinates;
         callbacks.onDraw(tool, geometry.map((p) => fromLngLat(p, current.origin)));
         draw.clear();
         draw.setMode("static");
         tool = "select";
         callbacks.onToolDone();
+        update(current, selected, view, floor, displayOptions);
+        map.getCanvas().style.cursor = "";
         requestAnimationFrame(() => {
           suppressSelection = false;
         });
       });
     });
     ready = true;
-    update(current, selected, view, floor);
+    update(current, selected, view, floor, displayOptions);
+    callbacks.onBearing?.((map.getBearing() + 360) % 360);
     fitPlan(false);
     callbacks.onReady();
   });
@@ -194,6 +300,14 @@ e-stroke-width": 2 } });
     if (!ready || suppressSelection) return;
     if (tool === 'site-pin') {
       callbacks.onPin([e.lngLat.lng,e.lngLat.lat]); tool='select';callbacks.onToolDone();map.getCanvas().style.cursor='';return;
+    }
+    if (tool === "aim-camera" || tool === "move-camera") {
+      const point = fromLngLat([e.lngLat.lng, e.lngLat.lat], current.origin);
+      if (tool === "aim-camera") callbacks.onAim?.(point); else callbacks.onMoveCamera?.(point);
+      tool = "select";
+      callbacks.onToolDone();
+      map.getCanvas().style.cursor = "";
+      return;
     }
     if (tool === "camera" || tool === "label") {
       callbacks.onPlace(tool, fromLngLat([e.lngLat.lng, e.lngLat.lat], current.origin));
@@ -203,20 +317,23 @@ e-stroke-width": 2 } });
       return;
     }
     if (tool !== "select") return;
-    const hit = map.queryRenderedFeatures(e.point, { layers: ["cameras", "buildings", "rooms"] })[0];
-    if (hit) callbacks.onSelect(hit.properties.id, hit.layer.id === "cameras" ? "camera" : hit.layer.id === "rooms" ? "r\
-oom" : "building");
+    const hit = map.queryRenderedFeatures(e.point, { layers: ["cameras", "zones", "openings", "stairs", "stair-steps", "floor-paths", "floor-slabs", "ghost-envelope", "buildings", "rooms"] })[0];
+    if (hit) callbacks.onSelect(hit.properties.id, hit.layer.id === "cameras" ? "camera" : hit.layer.id === "zones" ? "zone" : hit.layer.id === "openings" ? "opening" : hit.layer.id === "floor-paths" ? "path" : ["stairs", "stair-steps"].includes(hit.layer.id) ? "stair" : hit.layer.id === "rooms" ? "room" : "building");
   });
-  function update(plan, selection, mode, level) {
+  function update(plan, selection, mode, level, options = {}) {
+    displayOptions = {...displayOptions, ...options};
     const originChanged = current.origin[0] !== plan.origin[0] || current.origin[1] !== plan.origin[1];
     current = plan;
     selected = selection;
-    floor = level;
+    const levelBuilding = plan.buildings.find(building => building.id === displayOptions.floorBuildingId);
+    floor = Number.isInteger(level) ? Math.max(0, Math.min(level, levelBuilding ? levelBuilding.floors - 1 : 39)) : 0;
+    const modeChanged = view !== mode;
+    view = mode;
     if (!ready) return;
+    scaleControl.setUnit(displayOptions.units === "imperial" ? "imperial" : "metric");
     if (originChanged) map.jumpTo({ center: plan.origin });
-    if (view !== mode) {
-      view = mode;
-      map.easeTo({ pitch: mode === "2d" ? 0 : 52, duration: 350 });
+    if (modeChanged) {
+      map.easeTo({ pitch: viewPitch(mode, tool), duration: 350 });
     }
     const o = plan.origin, grid = [];
     for (let n = -300; n <= 300; n += 20) {
@@ -225,12 +342,50 @@ oom" : "building");
     }
     map.getSource("grid").setData(fc(grid));
     map.getSource("site").setData(fc([polygon([[-125, -110], [130, -110], [130, 108], [-125, 108], [-125, -110]], o)]));
-    map.getSource("buildings").setData(fc(plan.buildings.map(b=>buildingFeature(b,o,{id:b.id,selected:b.id===selected,
-      base:mode==='2d'?0:(b.base || 0), top:mode==='2d'?0:mode==='floors'?(b.base || 0)+Math.min(b.floors-1,floor)*(b.height-(b.base || 0))/b.floors+0.15:b.height}))));
-    map.getSource("rooms").setData(fc(mode === "floors" ? plan.rooms.filter((r) => r.level === floor).map((r) => {
-      const b = plan.buildings.find((b2) => b2.id === r.buildingId), base = (b.base || 0) + r.level * (b.height-(b.base || 0)) / b.floors;
-      return polygon(r.footprint, o, { id: r.id, base, top: base + r.wallHeight });
+    const inspectedBuilding = structureBuilding(plan, selected, mode, displayOptions);
+    const floorPresentation = floorRenderPlan(inspectedBuilding,floor,mode,FLOOR_DRAW_TOOLS.includes(tool));
+    const floorDrawing = floorPresentation.flattened;
+    const normalBuildings = plan.buildings.filter(building => building.id !== inspectedBuilding?.id);
+    map.getSource("buildings").setData(fc(normalBuildings.map(b => buildingFeature(b,o,{id:b.id,selected:b.id===selected,
+      base:mode==='2d'?0:(b.base || 0), top:mode==='2d'?0:b.height}))));
+    map.getSource("ghost-envelope").setData(fc(inspectedBuilding && !floorDrawing ? [buildingFeature(inspectedBuilding,o,{id: inspectedBuilding.id,base:inspectedBuilding.base || 0,top:inspectedBuilding.height})] : []));
+    const slabLevels = floorPresentation.slabLevels;
+    map.getSource("floor-slabs").setData(fc(slabLevels.map(level => {
+      const feature = floorSlabFeature(plan,inspectedBuilding,level,o,selected,floorDrawing);
+      if (feature) feature.properties.active = level === floor; return feature;
+    }).filter(Boolean)));
+    const activeOpenings = (plan.openings || []).filter(opening => opening.buildingId === inspectedBuilding?.id && !(inspectedBuilding.openFloors || []).includes(opening.level) && (mode === "3d" || opening.level === floor));
+    map.getSource("openings").setData(fc(activeOpenings.map(opening => {
+      const base = floorElevation(inspectedBuilding,opening.level,floorDrawing);
+      return polygon(opening.footprint,o,{id:opening.id,base:base + .025,top:base + .03});
+    })));
+    const activeStairs = visibleStairs(plan, selected, mode, floor, displayOptions);
+    map.getSource("stairs").setData(fc(activeStairs.map(stair => polygon(stairFootprint(stair,inspectedBuilding),o,{id:stair.id}))));
+    const detailedStairs = [...activeStairs].sort((a,b)=>Number(b.id===selected)-Number(a.id===selected)).slice(0,24);
+    map.getSource("stair-steps").setData(fc(detailedStairs.flatMap(stair => stairTreadPolygons(stair,inspectedBuilding).map(tread => polygon(tread.footprint,o,{id:stair.id,selected:stair.id===selected,base:floorDrawing ? 0 : tread.base,top:floorDrawing ? .04 : tread.top})))));
+    map.getSource("stair-heading").setData(fc((floorDrawing ? activeStairs : []).map(stair => {
+      const metrics = stairDimensions(stair,inspectedBuilding), angle=stair.bearing*Math.PI/180;
+      const along=[Math.sin(angle),Math.cos(angle)], across=[Math.cos(angle),-Math.sin(angle)];
+      const point=(d,w=0)=>[stair.x+along[0]*d+across[0]*w,stair.y+along[1]*d+across[1]*w];
+      const tip=metrics.length*.38, wing=Math.min(.7,stair.width*.35);
+      return feat("LineString",[point(-tip),point(tip),point(tip-wing,wing),point(tip),point(tip-wing,-wing)].map(p=>toLngLat(p,o)));
+    })));
+    const activePaths = (plan.paths || []).filter(path => path.buildingId === inspectedBuilding?.id && (mode === "3d" || path.level === floor));
+    map.getSource("floor-paths").setData(fc(activePaths.flatMap(path => {
+      const base = floorElevation(inspectedBuilding,path.level,floorDrawing) + .045;
+      return lineRibbonSegments(path.points).map(ring => polygon(ring,o,{id:path.id,selected:path.id===selected,base,top:base+.025}));
+    })));
+    const activeRooms = plan.rooms.filter(r => r.level === floor && (!displayOptions.floorBuildingId || r.buildingId === displayOptions.floorBuildingId));
+    map.getSource("rooms").setData(fc(mode === "floors" ? activeRooms.flatMap((r) => {
+      const b = plan.buildings.find((b2) => b2.id === r.buildingId), base = floorElevation(b,r.level,floorDrawing);
+      return lineRibbonSegments(r.footprint,.14).map(ring => polygon(ring, o, { id: r.id, base, top: base + (floorDrawing ? .05 : r.wallHeight) }));
     }) : []));
+    const activeZones = (plan.zones || []).filter(zone => !zone.buildingId || (mode === "floors" && zone.buildingId === displayOptions.floorBuildingId && zone.level === floor));
+    map.getSource("zones").setData(fc(activeZones.map(zone => {
+      const building = plan.buildings.find(b => b.id === zone.buildingId);
+      const base = building ? floorElevation(building,zone.level,floorDrawing) : 0;
+      return polygon(zone.footprint, o, {id: zone.id, type: zone.type, enabled: zone.enabled !== false, selected: zone.id === selected, base, top: base + .2});
+    })));
     const obstacles = wallObstacles(plan);
     const visible = plan.cameras.filter((c) => c.id === selected).concat(plan.cameras.filter((c) => c.id !== selected).slice(
       0,
@@ -244,28 +399,47 @@ oom" : "building");
     []));
     for (const m of markers) m.remove();
     markers = [];
+    labelRecords = [];
     const labels = [...plan.buildings.map((b) => {
       const [x, y] = centroid(b.footprint);
-      return { name: b.name, x, y };
-    }), ...plan.labels, ...mode === "floors" ? plan.rooms.filter((r) => r.level === floor).map((r) => {
+      return { id:b.id, name: b.name, x, y };
+    }), ...plan.labels, ...mode === "floors" ? activeRooms.map((r) => {
       const [x, y] = centroid(r.footprint);
-      return { name: r.name, x, y };
-    }) : []].slice(0, 80);
+      return { id:r.id, name: r.name, x, y };
+    }) : [], ...activeZones.map(zone => {const [x,y] = centroid(zone.footprint); return {id:zone.id,name: `${zone.enabled === false ? "Disabled · " : ""}${zone.type === "object_watch" ? "Object watch" : "Restricted"} · ${zone.name}`, x, y, zone: true};}), ...activeOpenings.map(opening => {const [x,y] = centroid(opening.footprint); return {id:opening.id,name: `Floor ${opening.level + 1} opening · ${opening.name}`, x, y, opening: true};}), ...activeStairs.map(stair => ({id:stair.id,name: `↑ ${stair.name} · L${stair.fromLevel + 1}–L${stair.toLevel + 1}`,x:stair.x,y:stair.y,stair:true})), ...activePaths.map(path => ({id:path.id,name:`Path · ${path.name}`,x:path.points[0][0],y:path.points[0][1],path:true}))].sort((a,b)=>Number(b.id===selected)-Number(a.id===selected)).slice(0, 80);
+    if (inspectedBuilding && mode === "floors" && (inspectedBuilding.openFloors || []).includes(floor)) {
+      const [x,y] = centroid(inspectedBuilding.footprint);
+      labels.unshift({name:`Level ${floor + 1} · open floor · no slab`,x,y,opening:true});
+      labels.length = Math.min(labels.length,80);
+    }
     for (const l of labels) {
       const el = document.createElement("span");
-      el.className = "facility-map-label";
+      el.className = "facility-map-label" + (l.zone ? " facility-zone-label" : l.opening ? " facility-opening-label" : l.stair ? " facility-stair-label" : l.path ? " facility-floor-path-label" : "");
       el.textContent = l.name;
-      markers.push(new Marker({ element: el, anchor: "center" }).setLngLat(toLngLat([l.x, l.y], o)).addTo(map));
+      const isSelected = l.id === selected;
+      trackLabel(el,isSelected ? 1 : 4);
+      markers.push(new Marker({ element: el, anchor: isSelected ? "bottom" : "center", offset:isSelected ? [0,-18] : [0,0] }).setLngLat(toLngLat([l.x, l.y], o)).addTo(map));
     }
     const cam = plan.cameras.find((c) => c.id === selected);
     if (cam) {
       const el = document.createElement("span");
       el.className = "facility-map-label selected-camera-label";
       el.textContent = cam.id + " \xB7 " + cam.name;
+      trackLabel(el,1);
       markers.push(new Marker({ element: el, anchor: "top", offset: [0, 14] }).setLngLat(toLngLat([cam.x, cam.y], o)).
       addTo(map));
     }
-    volumes.update(plan, selected, mode, floor);
+    map.getSource("camera-heading").setData(fc(cam ? [feat("LineString", [toLngLat([cam.x,cam.y],o), toLngLat([cam.x + Math.sin(cam.bearing*Math.PI/180) * Math.min(cam.range,12),cam.y + Math.cos(cam.bearing*Math.PI/180) * Math.min(cam.range,12)],o)])] : []));
+    if (displayOptions.measurements) for (const label of measurementLabels(plan, selected, {...displayOptions, floor, view: mode})) {
+      const el = document.createElement("span");
+      el.className = `facility-map-label facility-dimension-label${label.summary ? " facility-measurement-summary" : ""}${label.route ? " facility-route-dimension" : ""}`;
+      el.textContent = label.text;
+      el.title = "Plan dimensions · verify on site";
+      trackLabel(el,label.primary ? 0 : label.summary ? 2 : 3,!!label.primary);
+      markers.push(new Marker({element: el, anchor: "center", offset: label.summary ? [0, 24] : [0,-9]}).setLngLat(toLngLat(label.point,o)).addTo(map));
+    }
+    scheduleLabels();
+    volumes.update(plan, selected, mode, floor, {...displayOptions,floorDrawing});
     const nextHasOsm = plan.buildings.some(b=>b.source?.provider==='OpenStreetMap');
     if(nextHasOsm!==hasOsm) {
       map.removeControl(attribution);
@@ -277,9 +451,9 @@ oom" : "building");
   function fitPlan(animate = true) {
     if (!ready) return;
     const points = [...current.buildings.flatMap((b) => b.footprint), ...current.cameras.map((c) => [c.x, c.y]), ...current.
-    labels.map((l) => [l.x, l.y])];
+    labels.map((l) => [l.x, l.y]), ...(current.zones || []).flatMap(zone => zone.footprint), ...current.route];
     if (!points.length) {
-      map.easeTo({ center: current.origin, zoom: 17.4, pitch: view === "2d" ? 0 : 52, duration: 300 });
+      map.easeTo({ center: current.origin, zoom: 17.4, bearing: 0, pitch: viewPitch(view, tool), duration: animate ? 300 : 0 });
       return;
     }
     const min = [Math.min(...points.map((p) => p[0])) - 12, Math.min(...points.map((p) => p[1])) - 12], max = [Math.max(
@@ -288,8 +462,8 @@ oom" : "building");
     map.fitBounds([toLngLat(min, current.origin), toLngLat(max, current.origin)], {
       padding: 28,
       maxZoom: 19.4,
-      bearing: -27,
-      pitch: view === "2d" ? 0 : 52,
+      bearing: 0,
+      pitch: viewPitch(view, tool),
       duration: animate ? 400 : 0
     });
   }
@@ -305,11 +479,28 @@ oom" : "building");
       if (!ready) return;
       tool = next;
       draw.clear();
-      draw.setMode(["building", "room", "search-area"].includes(next) ? "polygon" : next === "route" ? "linestring" : "static");
+      draw.setMode(["building", "room", "zone", "opening", "search-area"].includes(next) ? "polygon" : ["route", "floor-path"].includes(next) ? "linestring" : "static");
       map.getCanvas().style.cursor = next === "select" ? "" : "crosshair";
-      if (["building", "room", "route", "search-area", "site-pin"].includes(next)) map.easeTo({ pitch: 0, duration: 250 });
+      update(current,selected,view,floor,displayOptions);
+      if (OVERHEAD_TOOLS.includes(next)) map.easeTo({ pitch: 0, duration: 250 });
     },
     center: fitPlan,
+    reset() { fitPlan(); },
+    north() { if (ready) map.easeTo({bearing: 0, duration: 300}); },
+    centerCamera(id = selected) {
+      const camera = current.cameras.find(c => c.id === id);
+      if (ready && camera) map.easeTo({center: toLngLat([camera.x,camera.y],current.origin), zoom: Math.max(map.getZoom(),19), duration: 350});
+    },
+    centerSelection(id = selected) {
+      const pointItem = [...current.cameras,...current.labels,...(current.stairs || [])].find(item => item.id === id);
+      const shape = [...current.buildings,...current.rooms,...(current.zones || []),...(current.openings || []),...(current.paths || []).map(path => ({...path,footprint:path.points}))].find(item => item.id === id);
+      if (!ready) return;
+      if (pointItem) map.easeTo({center: toLngLat([pointItem.x,pointItem.y],current.origin), duration: 350});
+      else if (shape) {
+        const points = shape.footprint;
+        map.fitBounds([toLngLat([Math.min(...points.map(p=>p[0]))-5,Math.min(...points.map(p=>p[1]))-5],current.origin),toLngLat([Math.max(...points.map(p=>p[0]))+5,Math.max(...points.map(p=>p[1]))+5],current.origin)],{padding: 60,maxZoom:21,duration:350});
+      }
+    },
     setBasemap(enabled) {
       if (!ready) return;
       if (enabled && !map.getSource("street-tiles")) {
@@ -332,6 +523,8 @@ aster-saturation": -1, "raster-brightness-max": 0.55 } }, "grid");
       if (ready) map.getSource("track").setData(fc(point ? [feat("Point", toLngLat(point, current.origin))] : []));
     },
     destroy() {
+      if (labelFrame !== null) cancelAnimationFrame(labelFrame);
+      labelRecords = [];
       for (const m of markers) m.remove();
       draw?.stop();
       map.remove();

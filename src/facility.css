@@ -1227,3 +1227,32 @@
 .facility-place-results small {display:block;margin-top:5px;color:#a4c5d0;}
 .facility-starter-progress {padding-left:20px;font-size:12px;line-height:1.8;color:#a4c5d0;}
 .facility-starter input:focus-visible,.facility-starter button:focus-visible,.facility-starter select:focus-visible,.facility-starter summary:focus-visible {outline:2px solid #35e0e3;outline-offset:3px;}
+
+/* Facility editing controls remain local, readable and directly on the map. */
+.facility-map-tools {position:absolute;left:18px;top:104px;z-index:2;display:flex;gap:8px;align-items:center;flex-wrap:wrap;max-width:calc(100% - 36px);font-size:11px;}
+.facility-map-tools label,.facility-map-tools select,.facility-compass {background:#102b39ed;border:1px solid #3a5968;border-radius:7px;color:#d8e9f0;min-height:38px;}
+.facility-map-tools label {display:flex;align-items:center;gap:7px;padding:8px 11px;}
+.facility-map-tools input {accent-color:#35e0e3;width:15px;height:15px;}
+.facility-map-tools select {padding:7px;max-width:160px;}
+.facility-compass {display:flex;align-items:center;gap:7px;padding:5px 10px;}
+.facility-compass span {display:inline-block;color:#4ce4e5;font-size:24px;line-height:1;}
+.facility-compass b {font-size:12px;}.facility-compass small {font-size:10px;color:#a8c5d4;min-width:28px;}
+.facility-dimension-label {background:#071923ed!important;color:#e4f8fb!important;border:1px solid #5b8896;border-radius:4px;padding:3px 6px!important;font-size:10px!important;font-variant-numeric:tabular-nums;box-shadow:0 1px 5px #0008;pointer-events:none;}
+.facility-measurement-summary {color:#94f2e8!important;background:#0b2734ed!important;border:1px solid #3c7b7a;padding:5px 8px!important;white-space:pre-line!important;text-align:center;}
+.facility-map-legend .restricted-key {background:#f17384;}
+.facility-camera-actions {display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:12px 0;}
+.facility-camera-actions button:first-child {grid-column:1/-1;}
+.facility-view-controls {flex-wrap:wrap;max-width:calc(100% - 36px);}
+.facility-view-controls button {min-height:36px;}
+.facility-floor-picker {top:155px!important;bottom:auto;max-width:calc(100% - 36px);flex-wrap:wrap;}
+.facility-floor-picker select {min-width:0;max-width:100%;}
+.facility-draw-hint {top:205px!important;}
+.facility-draft-banner {top:156px;}
+.facility-map-legend {flex-wrap:wrap;max-width:calc(100% - 90px);}
+.facility-workspace button:focus-visible,.facility-workspace input:focus-visible,.facility-workspace select:focus-visible,.facility-workspace summary:focus-visible {outline:2px solid #63e3e2;outline-offset:3px;}
+.facility-steps {gap:3px;margin-bottom:18px;}
+.facility-steps button {min-height:55px;}
+.facility-steps button[aria-current="step"] {background:linear-gradient(90deg,#173c46,transparent);border-radius:8px;}
+@media(min-width:1650px) {.facility-workspace {grid-template-columns:260px minmax(300px,1fr) 390px;}}
+@media(max-width:900px) {.facility-steps {grid-template-columns:repeat(7,minmax(0,1fr));}.facility-map-tools {top:110px;left:12px;}.facility-floor-picker {top:159px!important;}}
+@media(max-width:620px) {.facility-steps {display:flex;flex-direction:row;overflow-x:auto;gap:4px;}.facility-steps li {flex:0 0 76px;}.facility-file-actions {gap:10px;flex-wrap:wrap;}.facility-map-tools {font-size:10px;gap:5px;top:110px;}.facility-map-tools label {padding:6px;}.facility-map-context {max-width:calc(100% - 24px);}.facility-map-legend {font-size:9px;}.facility-stage {min-height:480px;height:480px;}}

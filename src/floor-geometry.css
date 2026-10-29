@@ -1,0 +1,6 @@
+.facility-floor-geometry,.facility-shape-dimensions{border-top:1px solid var(--border,#263a43);margin-top:18px;padding-top:16px;min-width:0}
+.facility-floor-geometry h3,.facility-shape-dimensions h3{font-size:14px;margin:0 0 12px}
+.facility-floor-geometry>.facility-secondary{margin:8px 0;white-space:normal}
+.facility-floor-geometry .facility-checkbox{font-weight:600}
+.facility-floor-geometry .facility-item-list{margin:12px 0}
+.facility-shape-dimensions details{margin:10px 0}

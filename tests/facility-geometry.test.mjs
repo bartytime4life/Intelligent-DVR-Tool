@@ -10,9 +10,10 @@ const courtyard={type:'relation',id:100,tags:{type:'multipolygon',building:'yes'
 const parse=elements=>parseOsmBuildings({elements},origin,bounds,'2026-10-28T00:00:00Z');
 const shell={id:'b',name:'Courtyard',footprint:box(-30,-30,60,60),holes:[box(-10,-10,20,20)],height:12,base:2,floors:3};
 
-test('v2 preserves holes/base/part and upgrades ordinary v1 without allowing a geometry downgrade',()=>{
+test('v3 exports preserve v2 geometry and upgrade earlier plans without allowing geometry downgrades',()=>{
   const plan={...blankFacility(),buildings:[{...shell,part:true}]};
   assert.deepEqual(parseFacility(JSON.stringify(plan)),plan);
+  assert.deepEqual(validateFacility({...plan,schema:'intelligent-dvr.facility.v2'}),plan);
   assert.equal(validateFacility({...blankFacility(),schema:'intelligent-dvr.facility.v1'}).schema,SCHEMA);
   assert.throws(()=>validateFacility({...plan,schema:'intelligent-dvr.facility.v1'}),/require facility v2/);
   assert.equal(buildingArea(shell),3200);
