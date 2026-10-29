@@ -1,0 +1,1361 @@
+{
+  "schema": "intelligent-dvr.process-recovery-qualification.v1",
+  "base_commit": "1528fd9651a59b40804a7fe39f8a657a23707bce",
+  "cpu_default_unchanged": true,
+  "linux_process_optional": true,
+  "environments_modified": false,
+  "live_camera_activated": false,
+  "recordings_kept_local": true,
+  "new_video_files": 0,
+  "capacity_100_qualified": false,
+  "checks": {
+    "cpu_environment": {
+      "passed": 104,
+      "skipped": 0
+    },
+    "gpu_environment": {
+      "passed": 104,
+      "skipped": 0
+    }
+  },
+  "native_parity": {
+    "frames": 100,
+    "passed": true,
+    "minimum_iou": 0.9999956908415983,
+    "maximum_score_delta": 3.6441184114721636e-06,
+    "criteria": {
+      "minimum_iou": 0.99,
+      "maximum_score_delta": 0.001,
+      "matching_counts_and_labels": true
+    },
+    "source_bindings": [
+      {
+        "name": "vehicle",
+        "trace_sha256": "49e6408354d3adb34f9341b4354bfe5a91f1c5fdfff4e52498fa7732f969b6d3"
+      },
+      {
+        "name": "person",
+        "trace_sha256": "1d390d3ebd0d37f71e9a370d816aa52c5d3dcb260d318e27084e50f7a53f7fe4"
+      }
+    ],
+    "workers": {
+      "state": "closed",
+      "generation": 1,
+      "restarts": 0,
+      "active": 0,
+      "completed": 100,
+      "failed": 0,
+      "process_failures": 0,
+      "child_alive": false,
+      "unsent_bytes": 0,
+      "received_buffer_bytes": 0,
+      "metadata": [
+        {
+          "generation": 1,
+          "processors": [
+            {
+              "backend": "ONNX Runtime CUDA",
+              "backend_id": "onnxruntime-cuda",
+              "onnxruntime": "1.31.1",
+              "threads": 4,
+              "fallback": "disabled",
+              "precision": "FP32, TF32 disabled",
+              "provider_options": {
+                "device_id": 0,
+                "use_tf32": 0,
+                "gpu_mem_limit": 1073741824,
+                "arena_extend_strategy": "kSameAsRequested",
+                "cudnn_conv_algo_search": "HEURISTIC",
+                "cudnn_conv_use_max_workspace": "0"
+              },
+              "startup_execution": {
+                "scope": "One synthetic zero-input startup probe, not per-frame profiling or capacity qualification.",
+                "warmup_runs_excluded": 1,
+                "node_execution_counts": {
+                  "CUDAExecutionProvider": 203
+                },
+                "profile_sha256": "b18a87902ae51bd6fcd2ad0959d5b3030051cdd9da4fea4d31419be176fdf5f7"
+              }
+            },
+            {
+              "backend": "ONNX Runtime CUDA",
+              "backend_id": "onnxruntime-cuda",
+              "onnxruntime": "1.31.1",
+              "threads": 4,
+              "fallback": "disabled",
+              "precision": "FP32, TF32 disabled",
+              "provider_options": {
+                "device_id": 0,
+                "use_tf32": 0,
+                "gpu_mem_limit": 1073741824,
+                "arena_extend_strategy": "kSameAsRequested",
+                "cudnn_conv_algo_search": "HEURISTIC",
+                "cudnn_conv_use_max_workspace": "0"
+              },
+              "startup_execution": {
+                "scope": "One synthetic zero-input startup probe, not per-frame profiling or capacity qualification.",
+                "warmup_runs_excluded": 1,
+                "node_execution_counts": {
+                  "CUDAExecutionProvider": 203
+                },
+                "profile_sha256": "ae0e6a4a0de4489faa50d5d5f92e3ef2c26f456edb1a2b4e04f02145ce5b3d13"
+              }
+            },
+            {
+              "backend": "ONNX Runtime CUDA",
+              "backend_id": "onnxruntime-cuda",
+              "onnxruntime": "1.31.1",
+              "threads": 4,
+              "fallback": "disabled",
+              "precision": "FP32, TF32 disabled",
+              "provider_options": {
+                "device_id": 0,
+                "use_tf32": 0,
+                "gpu_mem_limit": 1073741824,
+                "arena_extend_strategy": "kSameAsRequested",
+                "cudnn_conv_algo_search": "HEURISTIC",
+                "cudnn_conv_use_max_workspace": "0"
+              },
+              "startup_execution": {
+                "scope": "One synthetic zero-input startup probe, not per-frame profiling or capacity qualification.",
+                "warmup_runs_excluded": 1,
+                "node_execution_counts": {
+                  "CUDAExecutionProvider": 203
+                },
+                "profile_sha256": "3356aa77d391f1ad9f5df6f0605e365145322fd6e499cc796ce4d704d2882302"
+              }
+            },
+            {
+              "backend": "ONNX Runtime CUDA",
+              "backend_id": "onnxruntime-cuda",
+              "onnxruntime": "1.31.1",
+              "threads": 4,
+              "fallback": "disabled",
+              "precision": "FP32, TF32 disabled",
+              "provider_options": {
+                "device_id": 0,
+                "use_tf32": 0,
+                "gpu_mem_limit": 1073741824,
+                "arena_extend_strategy": "kSameAsRequested",
+                "cudnn_conv_algo_search": "HEURISTIC",
+                "cudnn_conv_use_max_workspace": "0"
+              },
+              "startup_execution": {
+                "scope": "One synthetic zero-input startup probe, not per-frame profiling or capacity qualification.",
+                "warmup_runs_excluded": 1,
+                "node_execution_counts": {
+                  "CUDAExecutionProvider": 203
+                },
+                "profile_sha256": "42e0c6f30602f88b0f5e7048c5a40195486bdbb1130dde94107b03f93fae0b7a"
+              }
+            }
+          ]
+        }
+      ],
+      "events": [
+        {
+          "kind": "spawn",
+          "generation": 1,
+          "seconds_since_initial_spawn": 0.0
+        },
+        {
+          "kind": "ready",
+          "generation": 1,
+          "seconds_since_initial_spawn": 0.9029236090136692
+        },
+        {
+          "kind": "reaped",
+          "generation": 1,
+          "exit": 0,
+          "seconds_since_initial_spawn": 2.2256907080300152
+        }
+      ],
+      "all_owned_children_reaped": true,
+      "reaped_before_replacement": true
+    }
+  },
+  "replay": [
+    {
+      "cameras": 100,
+      "workers": 4,
+      "mode": "none",
+      "physical_recordings": 30,
+      "seconds": 30.000956825970206,
+      "offered": 5688,
+      "completed": 5625,
+      "results_per_second": 187.49402002841262,
+      "drained_after_stop": 4,
+      "replaced": 0,
+      "stale": 0,
+      "budget_dropped": 0,
+      "failed": 0,
+      "pending": 59,
+      "inflight": 0,
+      "active_decoders": 100,
+      "decoded_frames": 46608,
+      "errors": [],
+      "source_errors": [],
+      "sample_p50_ms": 18.342586001381278,
+      "sample_p95_ms": 25.42364300461486,
+      "completion_age_p95_ms": 427.05628578551114,
+      "min_available_bytes": 5204881408,
+      "max_combined_rss_bytes": 2039549952,
+      "terminal_outcomes_unique_and_ordered": true,
+      "name": "baseline-final",
+      "process": {
+        "state": "closed",
+        "generation": 1,
+        "restarts": 0,
+        "active": 0,
+        "completed": 5629,
+        "failed": 0,
+        "process_failures": 0,
+        "child_alive": false,
+        "unsent_bytes": 0,
+        "received_buffer_bytes": 0,
+        "metadata": [
+          {
+            "generation": 1,
+            "processors": [
+              {
+                "backend": "ONNX Runtime CUDA",
+                "backend_id": "onnxruntime-cuda",
+                "onnxruntime": "1.31.1",
+                "threads": 4,
+                "fallback": "disabled",
+                "precision": "FP32, TF32 disabled",
+                "provider_options": {
+                  "device_id": 0,
+                  "use_tf32": 0,
+                  "gpu_mem_limit": 1073741824,
+                  "arena_extend_strategy": "kSameAsRequested",
+                  "cudnn_conv_algo_search": "HEURISTIC",
+                  "cudnn_conv_use_max_workspace": "0"
+                },
+                "startup_execution": {
+                  "scope": "One synthetic zero-input startup probe, not per-frame profiling or capacity qualification.",
+                  "warmup_runs_excluded": 1,
+                  "node_execution_counts": {
+                    "CUDAExecutionProvider": 203
+                  },
+                  "profile_sha256": "49ea6060ca8a795fc266fbebdbed93dbe7bcd664f28d496beed76f2d4771da11"
+                }
+              },
+              {
+                "backend": "ONNX Runtime CUDA",
+                "backend_id": "onnxruntime-cuda",
+                "onnxruntime": "1.31.1",
+                "threads": 4,
+                "fallback": "disabled",
+                "precision": "FP32, TF32 disabled",
+                "provider_options": {
+                  "device_id": 0,
+                  "use_tf32": 0,
+                  "gpu_mem_limit": 1073741824,
+                  "arena_extend_strategy": "kSameAsRequested",
+                  "cudnn_conv_algo_search": "HEURISTIC",
+                  "cudnn_conv_use_max_workspace": "0"
+                },
+                "startup_execution": {
+                  "scope": "One synthetic zero-input startup probe, not per-frame profiling or capacity qualification.",
+                  "warmup_runs_excluded": 1,
+                  "node_execution_counts": {
+                    "CUDAExecutionProvider": 203
+                  },
+                  "profile_sha256": "3a43ccf0cad69bbe88036099ae854e668104034e5f4b5df64b9539f3600b73d7"
+                }
+              },
+              {
+                "backend": "ONNX Runtime CUDA",
+                "backend_id": "onnxruntime-cuda",
+                "onnxruntime": "1.31.1",
+                "threads": 4,
+                "fallback": "disabled",
+                "precision": "FP32, TF32 disabled",
+                "provider_options": {
+                  "device_id": 0,
+                  "use_tf32": 0,
+                  "gpu_mem_limit": 1073741824,
+                  "arena_extend_strategy": "kSameAsRequested",
+                  "cudnn_conv_algo_search": "HEURISTIC",
+                  "cudnn_conv_use_max_workspace": "0"
+                },
+                "startup_execution": {
+                  "scope": "One synthetic zero-input startup probe, not per-frame profiling or capacity qualification.",
+                  "warmup_runs_excluded": 1,
+                  "node_execution_counts": {
+                    "CUDAExecutionProvider": 203
+                  },
+                  "profile_sha256": "6b5166ac0f954e95a73d160f60f290195ca08befd9b610f148f7466e50f678ee"
+                }
+              },
+              {
+                "backend": "ONNX Runtime CUDA",
+                "backend_id": "onnxruntime-cuda",
+                "onnxruntime": "1.31.1",
+                "threads": 4,
+                "fallback": "disabled",
+                "precision": "FP32, TF32 disabled",
+                "provider_options": {
+                  "device_id": 0,
+                  "use_tf32": 0,
+                  "gpu_mem_limit": 1073741824,
+                  "arena_extend_strategy": "kSameAsRequested",
+                  "cudnn_conv_algo_search": "HEURISTIC",
+                  "cudnn_conv_use_max_workspace": "0"
+                },
+                "startup_execution": {
+                  "scope": "One synthetic zero-input startup probe, not per-frame profiling or capacity qualification.",
+                  "warmup_runs_excluded": 1,
+                  "node_execution_counts": {
+                    "CUDAExecutionProvider": 203
+                  },
+                  "profile_sha256": "220c117cf5407225f2a0ddd04269e2569e395ae3ad8ad8c460e27ca7c3e1c6ea"
+                }
+              }
+            ]
+          }
+        ],
+        "events": [
+          {
+            "kind": "spawn",
+            "generation": 1,
+            "seconds_since_initial_spawn": 0.0
+          },
+          {
+            "kind": "ready",
+            "generation": 1,
+            "seconds_since_initial_spawn": 0.6963682359782979
+          },
+          {
+            "kind": "reaped",
+            "generation": 1,
+            "exit": 0,
+            "seconds_since_initial_spawn": 30.950608567974996
+          }
+        ],
+        "all_owned_children_reaped": true,
+        "reaped_before_replacement": true
+      },
+      "recoveries": [],
+      "decoder_progress_during_observed_nonrunning_groups": [],
+      "failure_codes": {},
+      "per_camera_completed_including_drain_min": 54,
+      "per_camera_completed_including_drain_max": 58,
+      "gpu": {
+        "scope": "Whole device, includes display and other host work; five-second sampled queries.",
+        "query_samples": 6,
+        "fields": {
+          "memory_used_mib": {
+            "valid_samples": 6,
+            "minimum": 6482.0,
+            "maximum": 8123.0
+          },
+          "utilization_percent": {
+            "valid_samples": 6,
+            "minimum": 7.0,
+            "maximum": 92.0
+          },
+          "temperature_c": {
+            "valid_samples": 6,
+            "minimum": 35.0,
+            "maximum": 53.0
+          },
+          "power_draw_w": {
+            "valid_samples": 6,
+            "minimum": 53.27,
+            "maximum": 278.16
+          }
+        }
+      },
+      "retained_private_hashes": {
+        "summary": "e982af2d5243db3a0fe3d43f04b653e3b3db6e4f8ad83c9064d8703a290ddcd1",
+        "trace": "6e760e4feff8ae6bdbf71191d34db2f80a3bff2f34c3aeb43a0185696a72141f",
+        "drained": "783c82c879f33a471e0b8e828e16410d6d7fbea4826ba923b389a7f4022d7509",
+        "failures": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+        "resources": "110009a2b9b7ecf0333d0e4dbbdac3990a82e3cc97a950a522365f3bbea90525",
+        "gpu": "c632db5581dcb3596c1a9f2a99409078abfbb56a7b30bd1ae93894e9918d1fc4",
+        "inputs": "4f49ae063eebf7ebecdec64f7e695d9e9370b353a2d31ac1e344ded40d932906"
+      }
+    },
+    {
+      "cameras": 100,
+      "workers": 4,
+      "mode": "combined",
+      "physical_recordings": 30,
+      "seconds": 120.003542535007,
+      "offered": 22513,
+      "completed": 21985,
+      "results_per_second": 183.20292497687404,
+      "drained_after_stop": 4,
+      "replaced": 479,
+      "stale": 0,
+      "budget_dropped": 0,
+      "failed": 8,
+      "pending": 37,
+      "inflight": 0,
+      "active_decoders": 100,
+      "decoded_frames": 186353,
+      "errors": [],
+      "source_errors": [],
+      "sample_p50_ms": 18.057940993458033,
+      "sample_p95_ms": 25.392872979864478,
+      "completion_age_p95_ms": 404.6209719963372,
+      "min_available_bytes": 5276053504,
+      "max_combined_rss_bytes": 2141986816,
+      "terminal_outcomes_unique_and_ordered": true,
+      "name": "recovery-120s-final",
+      "process": {
+        "state": "closed",
+        "generation": 3,
+        "restarts": 2,
+        "active": 0,
+        "completed": 21989,
+        "failed": 8,
+        "process_failures": 2,
+        "child_alive": false,
+        "unsent_bytes": 0,
+        "received_buffer_bytes": 0,
+        "metadata": [
+          {
+            "generation": 1,
+            "processors": [
+              {
+                "backend": "ONNX Runtime CUDA",
+                "backend_id": "onnxruntime-cuda",
+                "onnxruntime": "1.31.1",
+                "threads": 4,
+                "fallback": "disabled",
+                "precision": "FP32, TF32 disabled",
+                "provider_options": {
+                  "device_id": 0,
+                  "use_tf32": 0,
+                  "gpu_mem_limit": 1073741824,
+                  "arena_extend_strategy": "kSameAsRequested",
+                  "cudnn_conv_algo_search": "HEURISTIC",
+                  "cudnn_conv_use_max_workspace": "0"
+                },
+                "startup_execution": {
+                  "scope": "One synthetic zero-input startup probe, not per-frame profiling or capacity qualification.",
+                  "warmup_runs_excluded": 1,
+                  "node_execution_counts": {
+                    "CUDAExecutionProvider": 203
+                  },
+                  "profile_sha256": "c0416fdd15a4f68d51e1ce64c1a9c4d1703bec42319d53494d36df222ade1af8"
+                }
+              },
+              {
+                "backend": "ONNX Runtime CUDA",
+                "backend_id": "onnxruntime-cuda",
+                "onnxruntime": "1.31.1",
+                "threads": 4,
+                "fallback": "disabled",
+                "precision": "FP32, TF32 disabled",
+                "provider_options": {
+                  "device_id": 0,
+                  "use_tf32": 0,
+                  "gpu_mem_limit": 1073741824,
+                  "arena_extend_strategy": "kSameAsRequested",
+                  "cudnn_conv_algo_search": "HEURISTIC",
+                  "cudnn_conv_use_max_workspace": "0"
+                },
+                "startup_execution": {
+                  "scope": "One synthetic zero-input startup probe, not per-frame profiling or capacity qualification.",
+                  "warmup_runs_excluded": 1,
+                  "node_execution_counts": {
+                    "CUDAExecutionProvider": 203
+                  },
+                  "profile_sha256": "618f094bb5b1e906f5d5650fb8e2eb5fa0d0880f990f86e24cc755e4857f5ed6"
+                }
+              },
+              {
+                "backend": "ONNX Runtime CUDA",
+                "backend_id": "onnxruntime-cuda",
+                "onnxruntime": "1.31.1",
+                "threads": 4,
+                "fallback": "disabled",
+                "precision": "FP32, TF32 disabled",
+                "provider_options": {
+                  "device_id": 0,
+                  "use_tf32": 0,
+                  "gpu_mem_limit": 1073741824,
+                  "arena_extend_strategy": "kSameAsRequested",
+                  "cudnn_conv_algo_search": "HEURISTIC",
+                  "cudnn_conv_use_max_workspace": "0"
+                },
+                "startup_execution": {
+                  "scope": "One synthetic zero-input startup probe, not per-frame profiling or capacity qualification.",
+                  "warmup_runs_excluded": 1,
+                  "node_execution_counts": {
+                    "CUDAExecutionProvider": 203
+                  },
+                  "profile_sha256": "b64eaa625b6d250d2eb0b3a5e817ed1dd87a940b466d57c716372878df0e9b78"
+                }
+              },
+              {
+                "backend": "ONNX Runtime CUDA",
+                "backend_id": "onnxruntime-cuda",
+                "onnxruntime": "1.31.1",
+                "threads": 4,
+                "fallback": "disabled",
+                "precision": "FP32, TF32 disabled",
+                "provider_options": {
+                  "device_id": 0,
+                  "use_tf32": 0,
+                  "gpu_mem_limit": 1073741824,
+                  "arena_extend_strategy": "kSameAsRequested",
+                  "cudnn_conv_algo_search": "HEURISTIC",
+                  "cudnn_conv_use_max_workspace": "0"
+                },
+                "startup_execution": {
+                  "scope": "One synthetic zero-input startup probe, not per-frame profiling or capacity qualification.",
+                  "warmup_runs_excluded": 1,
+                  "node_execution_counts": {
+                    "CUDAExecutionProvider": 203
+                  },
+                  "profile_sha256": "2355069ac35712b5f4834141c4c58929a4bca4b96af7114929c090febcb3ed04"
+                }
+              }
+            ]
+          },
+          {
+            "generation": 2,
+            "processors": [
+              {
+                "backend": "ONNX Runtime CUDA",
+                "backend_id": "onnxruntime-cuda",
+                "onnxruntime": "1.31.1",
+                "threads": 4,
+                "fallback": "disabled",
+                "precision": "FP32, TF32 disabled",
+                "provider_options": {
+                  "device_id": 0,
+                  "use_tf32": 0,
+                  "gpu_mem_limit": 1073741824,
+                  "arena_extend_strategy": "kSameAsRequested",
+                  "cudnn_conv_algo_search": "HEURISTIC",
+                  "cudnn_conv_use_max_workspace": "0"
+                },
+                "startup_execution": {
+                  "scope": "One synthetic zero-input startup probe, not per-frame profiling or capacity qualification.",
+                  "warmup_runs_excluded": 1,
+                  "node_execution_counts": {
+                    "CUDAExecutionProvider": 203
+                  },
+                  "profile_sha256": "bfa9cc340e3e3def6dc2bcaa41cdd244f896a683ef3260e5db6ad9130a2fd4f1"
+                }
+              },
+              {
+                "backend": "ONNX Runtime CUDA",
+                "backend_id": "onnxruntime-cuda",
+                "onnxruntime": "1.31.1",
+                "threads": 4,
+                "fallback": "disabled",
+                "precision": "FP32, TF32 disabled",
+                "provider_options": {
+                  "device_id": 0,
+                  "use_tf32": 0,
+                  "gpu_mem_limit": 1073741824,
+                  "arena_extend_strategy": "kSameAsRequested",
+                  "cudnn_conv_algo_search": "HEURISTIC",
+                  "cudnn_conv_use_max_workspace": "0"
+                },
+                "startup_execution": {
+                  "scope": "One synthetic zero-input startup probe, not per-frame profiling or capacity qualification.",
+                  "warmup_runs_excluded": 1,
+                  "node_execution_counts": {
+                    "CUDAExecutionProvider": 203
+                  },
+                  "profile_sha256": "d219508732666ad1bc389f91a85f7f560ae21b4dab69ddb6d991046f0799e8f5"
+                }
+              },
+              {
+                "backend": "ONNX Runtime CUDA",
+                "backend_id": "onnxruntime-cuda",
+                "onnxruntime": "1.31.1",
+                "threads": 4,
+                "fallback": "disabled",
+                "precision": "FP32, TF32 disabled",
+                "provider_options": {
+                  "device_id": 0,
+                  "use_tf32": 0,
+                  "gpu_mem_limit": 1073741824,
+                  "arena_extend_strategy": "kSameAsRequested",
+                  "cudnn_conv_algo_search": "HEURISTIC",
+                  "cudnn_conv_use_max_workspace": "0"
+                },
+                "startup_execution": {
+                  "scope": "One synthetic zero-input startup probe, not per-frame profiling or capacity qualification.",
+                  "warmup_runs_excluded": 1,
+                  "node_execution_counts": {
+                    "CUDAExecutionProvider": 203
+                  },
+                  "profile_sha256": "1347709509428217321febf6d6921385afeb31cb9efa20f09bf5d78257c4a8ec"
+                }
+              },
+              {
+                "backend": "ONNX Runtime CUDA",
+                "backend_id": "onnxruntime-cuda",
+                "onnxruntime": "1.31.1",
+                "threads": 4,
+                "fallback": "disabled",
+                "precision": "FP32, TF32 disabled",
+                "provider_options": {
+                  "device_id": 0,
+                  "use_tf32": 0,
+                  "gpu_mem_limit": 1073741824,
+                  "arena_extend_strategy": "kSameAsRequested",
+                  "cudnn_conv_algo_search": "HEURISTIC",
+                  "cudnn_conv_use_max_workspace": "0"
+                },
+                "startup_execution": {
+                  "scope": "One synthetic zero-input startup probe, not per-frame profiling or capacity qualification.",
+                  "warmup_runs_excluded": 1,
+                  "node_execution_counts": {
+                    "CUDAExecutionProvider": 203
+                  },
+                  "profile_sha256": "746f4114b18b31e872e7a6ec8d9f1dbe465f32af836a98d4561712d38e9e6960"
+                }
+              }
+            ]
+          },
+          {
+            "generation": 3,
+            "processors": [
+              {
+                "backend": "ONNX Runtime CUDA",
+                "backend_id": "onnxruntime-cuda",
+                "onnxruntime": "1.31.1",
+                "threads": 4,
+                "fallback": "disabled",
+                "precision": "FP32, TF32 disabled",
+                "provider_options": {
+                  "device_id": 0,
+                  "use_tf32": 0,
+                  "gpu_mem_limit": 1073741824,
+                  "arena_extend_strategy": "kSameAsRequested",
+                  "cudnn_conv_algo_search": "HEURISTIC",
+                  "cudnn_conv_use_max_workspace": "0"
+                },
+                "startup_execution": {
+                  "scope": "One synthetic zero-input startup probe, not per-frame profiling or capacity qualification.",
+                  "warmup_runs_excluded": 1,
+                  "node_execution_counts": {
+                    "CUDAExecutionProvider": 203
+                  },
+                  "profile_sha256": "8a2e616c0217aea237b8970c47bf6547a2d51b1a5709f4ca943e35169ba120a3"
+                }
+              },
+              {
+                "backend": "ONNX Runtime CUDA",
+                "backend_id": "onnxruntime-cuda",
+                "onnxruntime": "1.31.1",
+                "threads": 4,
+                "fallback": "disabled",
+                "precision": "FP32, TF32 disabled",
+                "provider_options": {
+                  "device_id": 0,
+                  "use_tf32": 0,
+                  "gpu_mem_limit": 1073741824,
+                  "arena_extend_strategy": "kSameAsRequested",
+                  "cudnn_conv_algo_search": "HEURISTIC",
+                  "cudnn_conv_use_max_workspace": "0"
+                },
+                "startup_execution": {
+                  "scope": "One synthetic zero-input startup probe, not per-frame profiling or capacity qualification.",
+                  "warmup_runs_excluded": 1,
+                  "node_execution_counts": {
+                    "CUDAExecutionProvider": 203
+                  },
+                  "profile_sha256": "fe1f6e88fa23d5e1642c82bf8e73db5e73d106bde97de26a1638c4a069ad193f"
+                }
+              },
+              {
+                "backend": "ONNX Runtime CUDA",
+                "backend_id": "onnxruntime-cuda",
+                "onnxruntime": "1.31.1",
+                "threads": 4,
+                "fallback": "disabled",
+                "precision": "FP32, TF32 disabled",
+                "provider_options": {
+                  "device_id": 0,
+                  "use_tf32": 0,
+                  "gpu_mem_limit": 1073741824,
+                  "arena_extend_strategy": "kSameAsRequested",
+                  "cudnn_conv_algo_search": "HEURISTIC",
+                  "cudnn_conv_use_max_workspace": "0"
+                },
+                "startup_execution": {
+                  "scope": "One synthetic zero-input startup probe, not per-frame profiling or capacity qualification.",
+                  "warmup_runs_excluded": 1,
+                  "node_execution_counts": {
+                    "CUDAExecutionProvider": 203
+                  },
+                  "profile_sha256": "d7dd691abd0b1201addf75156ed5796e7e5229ea702171bf44fa89956d641a38"
+                }
+              },
+              {
+                "backend": "ONNX Runtime CUDA",
+                "backend_id": "onnxruntime-cuda",
+                "onnxruntime": "1.31.1",
+                "threads": 4,
+                "fallback": "disabled",
+                "precision": "FP32, TF32 disabled",
+                "provider_options": {
+                  "device_id": 0,
+                  "use_tf32": 0,
+                  "gpu_mem_limit": 1073741824,
+                  "arena_extend_strategy": "kSameAsRequested",
+                  "cudnn_conv_algo_search": "HEURISTIC",
+                  "cudnn_conv_use_max_workspace": "0"
+                },
+                "startup_execution": {
+                  "scope": "One synthetic zero-input startup probe, not per-frame profiling or capacity qualification.",
+                  "warmup_runs_excluded": 1,
+                  "node_execution_counts": {
+                    "CUDAExecutionProvider": 203
+                  },
+                  "profile_sha256": "dbeb1361712f181427049aa37cad3ada628af763a35a69268ca91f4dc4768a4b"
+                }
+              }
+            ]
+          }
+        ],
+        "events": [
+          {
+            "kind": "spawn",
+            "generation": 1,
+            "seconds_since_initial_spawn": 0.0
+          },
+          {
+            "kind": "ready",
+            "generation": 1,
+            "seconds_since_initial_spawn": 0.7152458190103061
+          },
+          {
+            "kind": "failure",
+            "generation": 1,
+            "code": "task-timeout",
+            "seconds_since_initial_spawn": 13.659540246997494
+          },
+          {
+            "kind": "reaped",
+            "generation": 1,
+            "exit": -15,
+            "seconds_since_initial_spawn": 13.80842187901726
+          },
+          {
+            "kind": "spawn",
+            "generation": 2,
+            "seconds_since_initial_spawn": 14.059567835996859
+          },
+          {
+            "kind": "ready",
+            "generation": 2,
+            "seconds_since_initial_spawn": 14.766564020013902
+          },
+          {
+            "kind": "failure",
+            "generation": 2,
+            "code": "worker-exit",
+            "seconds_since_initial_spawn": 43.50780143699376
+          },
+          {
+            "kind": "reaped",
+            "generation": 2,
+            "exit": 86,
+            "seconds_since_initial_spawn": 43.56797485501738
+          },
+          {
+            "kind": "spawn",
+            "generation": 3,
+            "seconds_since_initial_spawn": 43.81913408602122
+          },
+          {
+            "kind": "ready",
+            "generation": 3,
+            "seconds_since_initial_spawn": 44.6304831749876
+          },
+          {
+            "kind": "reaped",
+            "generation": 3,
+            "exit": -15,
+            "seconds_since_initial_spawn": 121.02378372801468
+          }
+        ],
+        "all_owned_children_reaped": true,
+        "reaped_before_replacement": true
+      },
+      "recoveries": [
+        {
+          "fault": "software-stall",
+          "generation": 1,
+          "code": "task-timeout",
+          "detection_seconds": 1.9992623759899288,
+          "replacement_ready_after_detection_seconds": 1.107023773016408
+        },
+        {
+          "fault": "abrupt-exit",
+          "generation": 2,
+          "code": "worker-exit",
+          "detection_seconds": 0.06110015796730295,
+          "replacement_ready_after_detection_seconds": 1.1226817379938439
+        }
+      ],
+      "decoder_progress_during_observed_nonrunning_groups": [
+        {
+          "samples": 10,
+          "observed_seconds": 0.9032740240218118,
+          "decoded_frames_advanced": 1437
+        },
+        {
+          "samples": 11,
+          "observed_seconds": 1.0068343029706739,
+          "decoded_frames_advanced": 1580
+        }
+      ],
+      "failure_codes": {
+        "task-timeout": 4,
+        "worker-exit": 4
+      },
+      "per_camera_completed_including_drain_min": 209,
+      "per_camera_completed_including_drain_max": 226,
+      "gpu": {
+        "scope": "Whole device, includes display and other host work; five-second sampled queries.",
+        "query_samples": 24,
+        "fields": {
+          "memory_used_mib": {
+            "valid_samples": 24,
+            "minimum": 6493.0,
+            "maximum": 8123.0
+          },
+          "utilization_percent": {
+            "valid_samples": 24,
+            "minimum": 12.0,
+            "maximum": 97.0
+          },
+          "temperature_c": {
+            "valid_samples": 24,
+            "minimum": 40.0,
+            "maximum": 62.0
+          },
+          "power_draw_w": {
+            "valid_samples": 24,
+            "minimum": 54.89,
+            "maximum": 289.63
+          }
+        }
+      },
+      "retained_private_hashes": {
+        "summary": "7960df58d7bd104ba79bedcdeb8e919232900adbc4b5cd4bf3d3d0185f228c2f",
+        "trace": "1458a2cad5e8cc259eddf8eb3bbf9ab90da00b74d70f8bb49ba233e92e7f55b7",
+        "drained": "030c3724c20c1bdcbc2d5196fc0228bbfb597182fb0ae5f66370592a843a03e7",
+        "failures": "269463f57ac656d4a4b50f6f52dfcf68e0e102e88715dc53f896aa7cddc42235",
+        "resources": "4d692ba8dfd677d5e648c1f99793e5fafb0c7da21c13d24f6ae2bd7559e35015",
+        "gpu": "5b9b78e4d627feffa31071d19af8a482e0df7f19c21283f5c61d6727dc3adc25",
+        "inputs": "4f49ae063eebf7ebecdec64f7e695d9e9370b353a2d31ac1e344ded40d932906"
+      }
+    },
+    {
+      "cameras": 100,
+      "workers": 4,
+      "mode": "combined",
+      "physical_recordings": 30,
+      "seconds": 600.0004465510137,
+      "offered": 112398,
+      "completed": 110835,
+      "results_per_second": 184.72486251820897,
+      "drained_after_stop": 4,
+      "replaced": 1488,
+      "stale": 0,
+      "budget_dropped": 0,
+      "failed": 8,
+      "pending": 63,
+      "inflight": 0,
+      "active_decoders": 100,
+      "decoded_frames": 931449,
+      "errors": [],
+      "source_errors": [],
+      "sample_p50_ms": 18.372445018030703,
+      "sample_p95_ms": 26.448991033248603,
+      "completion_age_p95_ms": 412.0419211103581,
+      "min_available_bytes": 3500126208,
+      "max_combined_rss_bytes": 2471489536,
+      "terminal_outcomes_unique_and_ordered": true,
+      "name": "recovery-600s-final",
+      "process": {
+        "state": "closed",
+        "generation": 3,
+        "restarts": 2,
+        "active": 0,
+        "completed": 110839,
+        "failed": 8,
+        "process_failures": 2,
+        "child_alive": false,
+        "unsent_bytes": 0,
+        "received_buffer_bytes": 0,
+        "metadata": [
+          {
+            "generation": 1,
+            "processors": [
+              {
+                "backend": "ONNX Runtime CUDA",
+                "backend_id": "onnxruntime-cuda",
+                "onnxruntime": "1.31.1",
+                "threads": 4,
+                "fallback": "disabled",
+                "precision": "FP32, TF32 disabled",
+                "provider_options": {
+                  "device_id": 0,
+                  "use_tf32": 0,
+                  "gpu_mem_limit": 1073741824,
+                  "arena_extend_strategy": "kSameAsRequested",
+                  "cudnn_conv_algo_search": "HEURISTIC",
+                  "cudnn_conv_use_max_workspace": "0"
+                },
+                "startup_execution": {
+                  "scope": "One synthetic zero-input startup probe, not per-frame profiling or capacity qualification.",
+                  "warmup_runs_excluded": 1,
+                  "node_execution_counts": {
+                    "CUDAExecutionProvider": 203
+                  },
+                  "profile_sha256": "84f3f7fe3aa657adf6c28be89e94e80d0edb31a5e6afe886d7fae7bf926e37ff"
+                }
+              },
+              {
+                "backend": "ONNX Runtime CUDA",
+                "backend_id": "onnxruntime-cuda",
+                "onnxruntime": "1.31.1",
+                "threads": 4,
+                "fallback": "disabled",
+                "precision": "FP32, TF32 disabled",
+                "provider_options": {
+                  "device_id": 0,
+                  "use_tf32": 0,
+                  "gpu_mem_limit": 1073741824,
+                  "arena_extend_strategy": "kSameAsRequested",
+                  "cudnn_conv_algo_search": "HEURISTIC",
+                  "cudnn_conv_use_max_workspace": "0"
+                },
+                "startup_execution": {
+                  "scope": "One synthetic zero-input startup probe, not per-frame profiling or capacity qualification.",
+                  "warmup_runs_excluded": 1,
+                  "node_execution_counts": {
+                    "CUDAExecutionProvider": 203
+                  },
+                  "profile_sha256": "726fc2fb77718eeb14fc8dbe1ea7bca4ed718e29f0d2c9bb578fe7a225ec049b"
+                }
+              },
+              {
+                "backend": "ONNX Runtime CUDA",
+                "backend_id": "onnxruntime-cuda",
+                "onnxruntime": "1.31.1",
+                "threads": 4,
+                "fallback": "disabled",
+                "precision": "FP32, TF32 disabled",
+                "provider_options": {
+                  "device_id": 0,
+                  "use_tf32": 0,
+                  "gpu_mem_limit": 1073741824,
+                  "arena_extend_strategy": "kSameAsRequested",
+                  "cudnn_conv_algo_search": "HEURISTIC",
+                  "cudnn_conv_use_max_workspace": "0"
+                },
+                "startup_execution": {
+                  "scope": "One synthetic zero-input startup probe, not per-frame profiling or capacity qualification.",
+                  "warmup_runs_excluded": 1,
+                  "node_execution_counts": {
+                    "CUDAExecutionProvider": 203
+                  },
+                  "profile_sha256": "c7172f29314761917d9356b954c187cbd4fe91967586a88949f02f83d164ab1e"
+                }
+              },
+              {
+                "backend": "ONNX Runtime CUDA",
+                "backend_id": "onnxruntime-cuda",
+                "onnxruntime": "1.31.1",
+                "threads": 4,
+                "fallback": "disabled",
+                "precision": "FP32, TF32 disabled",
+                "provider_options": {
+                  "device_id": 0,
+                  "use_tf32": 0,
+                  "gpu_mem_limit": 1073741824,
+                  "arena_extend_strategy": "kSameAsRequested",
+                  "cudnn_conv_algo_search": "HEURISTIC",
+                  "cudnn_conv_use_max_workspace": "0"
+                },
+                "startup_execution": {
+                  "scope": "One synthetic zero-input startup probe, not per-frame profiling or capacity qualification.",
+                  "warmup_runs_excluded": 1,
+                  "node_execution_counts": {
+                    "CUDAExecutionProvider": 203
+                  },
+                  "profile_sha256": "2b08354329d9be487cf4d3281defc054e063bd655741f98fe257d70be7877a4d"
+                }
+              }
+            ]
+          },
+          {
+            "generation": 2,
+            "processors": [
+              {
+                "backend": "ONNX Runtime CUDA",
+                "backend_id": "onnxruntime-cuda",
+                "onnxruntime": "1.31.1",
+                "threads": 4,
+                "fallback": "disabled",
+                "precision": "FP32, TF32 disabled",
+                "provider_options": {
+                  "device_id": 0,
+                  "use_tf32": 0,
+                  "gpu_mem_limit": 1073741824,
+                  "arena_extend_strategy": "kSameAsRequested",
+                  "cudnn_conv_algo_search": "HEURISTIC",
+                  "cudnn_conv_use_max_workspace": "0"
+                },
+                "startup_execution": {
+                  "scope": "One synthetic zero-input startup probe, not per-frame profiling or capacity qualification.",
+                  "warmup_runs_excluded": 1,
+                  "node_execution_counts": {
+                    "CUDAExecutionProvider": 203
+                  },
+                  "profile_sha256": "f5a0afa1793b5aec588455d7dab9bf7a0ac9068f9109488d3bfe23f799342ee1"
+                }
+              },
+              {
+                "backend": "ONNX Runtime CUDA",
+                "backend_id": "onnxruntime-cuda",
+                "onnxruntime": "1.31.1",
+                "threads": 4,
+                "fallback": "disabled",
+                "precision": "FP32, TF32 disabled",
+                "provider_options": {
+                  "device_id": 0,
+                  "use_tf32": 0,
+                  "gpu_mem_limit": 1073741824,
+                  "arena_extend_strategy": "kSameAsRequested",
+                  "cudnn_conv_algo_search": "HEURISTIC",
+                  "cudnn_conv_use_max_workspace": "0"
+                },
+                "startup_execution": {
+                  "scope": "One synthetic zero-input startup probe, not per-frame profiling or capacity qualification.",
+                  "warmup_runs_excluded": 1,
+                  "node_execution_counts": {
+                    "CUDAExecutionProvider": 203
+                  },
+                  "profile_sha256": "84135455dc6bb357a4a7480bf450ae497745a12c4a78da9f5ee0799caacf0449"
+                }
+              },
+              {
+                "backend": "ONNX Runtime CUDA",
+                "backend_id": "onnxruntime-cuda",
+                "onnxruntime": "1.31.1",
+                "threads": 4,
+                "fallback": "disabled",
+                "precision": "FP32, TF32 disabled",
+                "provider_options": {
+                  "device_id": 0,
+                  "use_tf32": 0,
+                  "gpu_mem_limit": 1073741824,
+                  "arena_extend_strategy": "kSameAsRequested",
+                  "cudnn_conv_algo_search": "HEURISTIC",
+                  "cudnn_conv_use_max_workspace": "0"
+                },
+                "startup_execution": {
+                  "scope": "One synthetic zero-input startup probe, not per-frame profiling or capacity qualification.",
+                  "warmup_runs_excluded": 1,
+                  "node_execution_counts": {
+                    "CUDAExecutionProvider": 203
+                  },
+                  "profile_sha256": "2d71cbbdf44c484b47dfa0b4ffd528aba25c41b62fa2e1d10f083a92463dee7c"
+                }
+              },
+              {
+                "backend": "ONNX Runtime CUDA",
+                "backend_id": "onnxruntime-cuda",
+                "onnxruntime": "1.31.1",
+                "threads": 4,
+                "fallback": "disabled",
+                "precision": "FP32, TF32 disabled",
+                "provider_options": {
+                  "device_id": 0,
+                  "use_tf32": 0,
+                  "gpu_mem_limit": 1073741824,
+                  "arena_extend_strategy": "kSameAsRequested",
+                  "cudnn_conv_algo_search": "HEURISTIC",
+                  "cudnn_conv_use_max_workspace": "0"
+                },
+                "startup_execution": {
+                  "scope": "One synthetic zero-input startup probe, not per-frame profiling or capacity qualification.",
+                  "warmup_runs_excluded": 1,
+                  "node_execution_counts": {
+                    "CUDAExecutionProvider": 203
+                  },
+                  "profile_sha256": "62a93334b9da664ec15352920f960db467a2f9168dbe38289a050136b47b1b25"
+                }
+              }
+            ]
+          },
+          {
+            "generation": 3,
+            "processors": [
+              {
+                "backend": "ONNX Runtime CUDA",
+                "backend_id": "onnxruntime-cuda",
+                "onnxruntime": "1.31.1",
+                "threads": 4,
+                "fallback": "disabled",
+                "precision": "FP32, TF32 disabled",
+                "provider_options": {
+                  "device_id": 0,
+                  "use_tf32": 0,
+                  "gpu_mem_limit": 1073741824,
+                  "arena_extend_strategy": "kSameAsRequested",
+                  "cudnn_conv_algo_search": "HEURISTIC",
+                  "cudnn_conv_use_max_workspace": "0"
+                },
+                "startup_execution": {
+                  "scope": "One synthetic zero-input startup probe, not per-frame profiling or capacity qualification.",
+                  "warmup_runs_excluded": 1,
+                  "node_execution_counts": {
+                    "CUDAExecutionProvider": 203
+                  },
+                  "profile_sha256": "66fad37cc8a8504331f3a784a9165ca53eee88753b72f981b9649c4bbcf39d08"
+                }
+              },
+              {
+                "backend": "ONNX Runtime CUDA",
+                "backend_id": "onnxruntime-cuda",
+                "onnxruntime": "1.31.1",
+                "threads": 4,
+                "fallback": "disabled",
+                "precision": "FP32, TF32 disabled",
+                "provider_options": {
+                  "device_id": 0,
+                  "use_tf32": 0,
+                  "gpu_mem_limit": 1073741824,
+                  "arena_extend_strategy": "kSameAsRequested",
+                  "cudnn_conv_algo_search": "HEURISTIC",
+                  "cudnn_conv_use_max_workspace": "0"
+                },
+                "startup_execution": {
+                  "scope": "One synthetic zero-input startup probe, not per-frame profiling or capacity qualification.",
+                  "warmup_runs_excluded": 1,
+                  "node_execution_counts": {
+                    "CUDAExecutionProvider": 203
+                  },
+                  "profile_sha256": "120e1b20c9b56c48d82fdbed76f542941c701e773b2e424f96611988819cf57c"
+                }
+              },
+              {
+                "backend": "ONNX Runtime CUDA",
+                "backend_id": "onnxruntime-cuda",
+                "onnxruntime": "1.31.1",
+                "threads": 4,
+                "fallback": "disabled",
+                "precision": "FP32, TF32 disabled",
+                "provider_options": {
+                  "device_id": 0,
+                  "use_tf32": 0,
+                  "gpu_mem_limit": 1073741824,
+                  "arena_extend_strategy": "kSameAsRequested",
+                  "cudnn_conv_algo_search": "HEURISTIC",
+                  "cudnn_conv_use_max_workspace": "0"
+                },
+                "startup_execution": {
+                  "scope": "One synthetic zero-input startup probe, not per-frame profiling or capacity qualification.",
+                  "warmup_runs_excluded": 1,
+                  "node_execution_counts": {
+                    "CUDAExecutionProvider": 203
+                  },
+                  "profile_sha256": "a3b17b823ea27a7ca515c670425ffb72aae92792137a30d550f885ae8b00844d"
+                }
+              },
+              {
+                "backend": "ONNX Runtime CUDA",
+                "backend_id": "onnxruntime-cuda",
+                "onnxruntime": "1.31.1",
+                "threads": 4,
+                "fallback": "disabled",
+                "precision": "FP32, TF32 disabled",
+                "provider_options": {
+                  "device_id": 0,
+                  "use_tf32": 0,
+                  "gpu_mem_limit": 1073741824,
+                  "arena_extend_strategy": "kSameAsRequested",
+                  "cudnn_conv_algo_search": "HEURISTIC",
+                  "cudnn_conv_use_max_workspace": "0"
+                },
+                "startup_execution": {
+                  "scope": "One synthetic zero-input startup probe, not per-frame profiling or capacity qualification.",
+                  "warmup_runs_excluded": 1,
+                  "node_execution_counts": {
+                    "CUDAExecutionProvider": 203
+                  },
+                  "profile_sha256": "d4c19050f30ac3e8140531282b690ec63ef105aa224a80935ca75b1d5800670a"
+                }
+              }
+            ]
+          }
+        ],
+        "events": [
+          {
+            "kind": "spawn",
+            "generation": 1,
+            "seconds_since_initial_spawn": 0.0
+          },
+          {
+            "kind": "ready",
+            "generation": 1,
+            "seconds_since_initial_spawn": 0.7257860240060836
+          },
+          {
+            "kind": "failure",
+            "generation": 1,
+            "code": "task-timeout",
+            "seconds_since_initial_spawn": 13.75309382902924
+          },
+          {
+            "kind": "reaped",
+            "generation": 1,
+            "exit": -15,
+            "seconds_since_initial_spawn": 13.892299512051977
+          },
+          {
+            "kind": "spawn",
+            "generation": 2,
+            "seconds_since_initial_spawn": 14.143120524997357
+          },
+          {
+            "kind": "ready",
+            "generation": 2,
+            "seconds_since_initial_spawn": 14.916130472032819
+          },
+          {
+            "kind": "failure",
+            "generation": 2,
+            "code": "worker-exit",
+            "seconds_since_initial_spawn": 43.63007535901852
+          },
+          {
+            "kind": "reaped",
+            "generation": 2,
+            "exit": 86,
+            "seconds_since_initial_spawn": 43.71819094900275
+          },
+          {
+            "kind": "spawn",
+            "generation": 3,
+            "seconds_since_initial_spawn": 43.96910523803672
+          },
+          {
+            "kind": "ready",
+            "generation": 3,
+            "seconds_since_initial_spawn": 44.82920736505184
+          },
+          {
+            "kind": "reaped",
+            "generation": 3,
+            "exit": -15,
+            "seconds_since_initial_spawn": 601.0162756570498
+          }
+        ],
+        "all_owned_children_reaped": true,
+        "reaped_before_replacement": true
+      },
+      "recoveries": [
+        {
+          "fault": "software-stall",
+          "generation": 1,
+          "code": "task-timeout",
+          "detection_seconds": 1.9997536540031433,
+          "replacement_ready_after_detection_seconds": 1.1630366430035792
+        },
+        {
+          "fault": "abrupt-exit",
+          "generation": 2,
+          "code": "worker-exit",
+          "detection_seconds": 0.06700557598378509,
+          "replacement_ready_after_detection_seconds": 1.1991320060333237
+        }
+      ],
+      "decoder_progress_during_observed_nonrunning_groups": [
+        {
+          "samples": 11,
+          "observed_seconds": 1.002937341982033,
+          "decoded_frames_advanced": 1554
+        },
+        {
+          "samples": 12,
+          "observed_seconds": 1.1028449069708586,
+          "decoded_frames_advanced": 1672
+        }
+      ],
+      "failure_codes": {
+        "task-timeout": 4,
+        "worker-exit": 4
+      },
+      "per_camera_completed_including_drain_min": 1060,
+      "per_camera_completed_including_drain_max": 1135,
+      "gpu": {
+        "scope": "Whole device, includes display and other host work; five-second sampled queries.",
+        "query_samples": 120,
+        "fields": {
+          "memory_used_mib": {
+            "valid_samples": 120,
+            "minimum": 6492.0,
+            "maximum": 8126.0
+          },
+          "utilization_percent": {
+            "valid_samples": 120,
+            "minimum": 3.0,
+            "maximum": 99.0
+          },
+          "temperature_c": {
+            "valid_samples": 120,
+            "minimum": 46.0,
+            "maximum": 62.0
+          },
+          "power_draw_w": {
+            "valid_samples": 120,
+            "minimum": 56.34,
+            "maximum": 292.49
+          }
+        }
+      },
+      "retained_private_hashes": {
+        "summary": "495e74fe421e5f282260d8c83d49ff18d6afa31f19b66b1c83269c2b57bef6f9",
+        "trace": "b45a1acea1f5d3ee0a196984cd2b7df05fc43d633d48b331da1c1884528a7e6f",
+        "drained": "703a9b04396bb7cf97b96d8374e6d1da569e40dd3b7e8bf2b24d42a35730f853",
+        "failures": "ee0ef4586c064e3424a54178cfa5d2c9461884f426fd4b263b1afa7b10153e33",
+        "resources": "fe69e890fa9c771ac784f786274fd9203bf383d2e7c0af1cafe87da0e2c83522",
+        "gpu": "ac13bc84bb172238713701ed6e60bd169e5357ace64642424725e639bed17260",
+        "inputs": "4f49ae063eebf7ebecdec64f7e695d9e9370b353a2d31ac1e344ded40d932906"
+      }
+    }
+  ],
+  "prototype_diagnostic": {
+    "seconds": 30.000904924003407,
+    "offered": 5688,
+    "completed": 5142,
+    "results_per_second": 171.39483002347507,
+    "failed": 0,
+    "replaced": 465,
+    "pending": 77,
+    "drained_after_stop": 4,
+    "errors": [],
+    "source_errors": [],
+    "scope": "Prototype before generation/processor outcome binding; not final-head qualification.",
+    "raw_summary_sha256": "82e08a025f33820dc0b1a7ba4b626b446a8874baf2a442fee080a4a6d8e050a4",
+    "source_sha256": "73b68ba82c39a53cf31c507da7f8dfd9be38f7c23b73f37bb17df532ab8515ed",
+    "receipt_format": "Original valid JSON retained unchanged; no numeric normalization."
+  },
+  "notes": [
+    "Software stall/exit injection while CUDA sessions were live; not every hardware/driver fault.",
+    "100 virtual streams cycle 30 frozen public recordings; no new video or physical-camera qualification.",
+    "Polled deadlines include IPC/collection after dispatch; sampled child age excludes result transport.",
+    "Failure accounting is explicit; unreceived results can be failed even if computed, with no automatic sample retry.",
+    "A ten-minute bounded repeat is not 24-hour recording, field accuracy or sustained operating acceptance."
+  ]
+}

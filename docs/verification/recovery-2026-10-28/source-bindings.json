@@ -1,0 +1,91 @@
+{
+  "base_commit": "1528fd9651a59b40804a7fe39f8a657a23707bce",
+  "bindings": {
+    "implementation": [
+      {
+        "path": "edge/supervision.py",
+        "sha256": "40256306b9bf4a96cc4946c68ebbe59047ca91bbb465e30168b396e2799dc3d5"
+      },
+      {
+        "path": "tests/test_supervision.py",
+        "sha256": "c01c486c57ccf8529164e4504612ff011ecfaf169363eb88025c05c902e578ff"
+      },
+      {
+        "path": "edge/scheduler.py",
+        "sha256": "915cd9757a14d54abb5e1bc249ccd91d7ce37d6713786c31025307e87f661eb1"
+      },
+      {
+        "path": "edge/workers.py",
+        "sha256": "790392890fd13f4131c640b9ee0c263e40ba6661edbd55f06f3ff2660cca9f38"
+      },
+      {
+        "path": "edge/inference.py",
+        "sha256": "8393956c8c994da89f074b9fb9a49071d1ebe0868f26d13892c9a8159c305f8b"
+      },
+      {
+        "path": "edge/analyze.py",
+        "sha256": "f4efa1f5f412705cbc4dda7e9cb8b47e3c7f74804991b97c4c1ba38f6fa1df5f"
+      },
+      {
+        "path": "edge/requirements-gpu-qualification.txt",
+        "sha256": "a71dbb8ad7ec094fd9745194c06ba0fc2ebe190344c350e1945d5a3cf8baf30b"
+      }
+    ],
+    "private_harnesses": [
+      {
+        "path": "native_factory.py",
+        "sha256": "b4acebc582bd30b77360a441a0000eb5fd9a56353b4cc1077812cfaafa8e9c2e"
+      },
+      {
+        "path": "process_parity.py",
+        "sha256": "c5452c273344a1c859e734197a82ce99a4d99dc80fd39bccb458910d98c5e6b7"
+      },
+      {
+        "path": "recovery_replay.py",
+        "sha256": "020c07411f8bf2ae18eacb7866f837c1c35a6b75944bf29783b4702b3d0785ce"
+      },
+      {
+        "path": "run_qualification.py",
+        "sha256": "99747a22c139a33b9e0f86f9877e5390b2726522665d0009f0cb0f56726da2ea"
+      },
+      {
+        "path": "export_results.py",
+        "sha256": "1a82a106a2968173cd5ed2c08c6242d177cd1a6c0a3eeaeea02f0c3e0fc6f819"
+      },
+      {
+        "path": "supervision-initial-snapshot.py",
+        "sha256": "73b68ba82c39a53cf31c507da7f8dfd9be38f7c23b73f37bb17df532ab8515ed"
+      },
+      {
+        "path": "recovery-replay-initial-snapshot.py",
+        "sha256": "e26ffd5496198eab70d912ae42793b21357c10b992b4670851e72db822a3cef7"
+      }
+    ],
+    "private_logs": [
+      {
+        "path": "python-cpu-final.log",
+        "sha256": "dc576a707332289e61f79aa273a0708b207f7f0ae03ad0ccca39825b30291e60"
+      },
+      {
+        "path": "python-gpu-final.log",
+        "sha256": "ab0e3aa8f128b9fcfaa7b8270f3a7a69f22a2d5a8c7e0216eee7a8fbc230bfb8"
+      },
+      {
+        "path": "parity-final.log",
+        "sha256": "7f005dec50908612a2a4f3c19ec6d150b28e81e5f1b9b5e85749614e56963455"
+      },
+      {
+        "path": "baseline-final.log",
+        "sha256": "1775f4211451918d5b0ab6183043bf03b57425839a69a5a189c3c2d29ce53287"
+      },
+      {
+        "path": "faults-final.log",
+        "sha256": "3a1847f34c24efca48a88a70187415300cf91193fe18fe8f692c6efbf0727ed4"
+      },
+      {
+        "path": "soak-final.log",
+        "sha256": "69c0d11b041023d07ac6b62882d2e03da1d988ba3158cfc40c70a80bd509f4fb"
+      }
+    ]
+  }
+}

@@ -18,6 +18,7 @@ own CI checks; this index does not automatically certify future source or deploy
 
 | Record | Scope and results | Interpretation |
 | --- | --- | --- |
+| [Linux process recovery, October 28](recovery-2026-10-28/README.md) | Optional spawned-process deadlines/restarts, real fault tests and offline native qualification | Explicit failed-sample accounting; polled deadlines and bounded replay do not qualify physical cameras, durable recording or an OS sandbox |
 | [Bounded local workers, October 28](workers-2026-10-28/README.md) | Explicit 1–4 execution adapter, native parity and 100-stream replay | Offline experiments with repeated public recordings; capacity, hard native-call cancellation and live-service acceptance remain open |
 | [Optional CUDA analyzer, October 28](cuda-2026-10-28/README.md) | Explicit backend; 86 Python passes in each CPU/GPU environment, 100-frame analyzer parity, 120-second 30-feed run and 50/100-stream replay | CPU default preserved; replay queue replacements expose unmet cadence, not qualified 100-camera capacity |
 | [Owner-PC continuation, October 28](host-2026-10-28/README.md) | CPU/GPU parity, 5/10/25/30 public-feed experiments, 300-image person benchmark and rejected crop/confidence trials | Local experiment records; media remains private, unpublished source is not promoted, field/sustained/100-camera acceptance remains open |
