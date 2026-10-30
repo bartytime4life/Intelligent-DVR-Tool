@@ -15,7 +15,7 @@ import time
 
 from .evaluation import digest, read_json
 from .local_feeds import FeedError, ROOT
-from .result_store import REVIEW_BYTES
+from .result_store import REVIEW_BYTES, VIDEO_BYTES
 from .segment_worker import SEGMENT_BYTES, atomic_json
 
 DEFAULTS = {'segment_seconds': 10, 'max_segments': 20, 'max_storage_mib': 1024,
@@ -25,6 +25,8 @@ BOUNDS = {'segment_seconds': (5, 60), 'max_segments': (2, 100), 'max_storage_mib
 ENTRY_FILES = {'capture.webm', 'source.webm', 'complete.json', 'complete.tmp',
                'progress.json', 'progress.tmp', 'review.json', 'review.tmp'}
 STATES = {'recording', 'queued', 'analyzing', 'completed', 'failed', 'interrupted'}
+WORK_FILES = {'source.webm', 'model.onnx', 'labels.json', 'rules.json', 'args.json',
+              'receipt.json', 'review.json', 'progress.json', 'progress.tmp'}
 # Account for output + result, encoder buffering, and bounded metadata per row.
 RESERVATION = SEGMENT_BYTES + REVIEW_BYTES + 4 * 1024**2
 
@@ -86,13 +88,30 @@ class Store:
 
     def inspect(self):
         entries = list(itertools.islice(self.path.iterdir(), 105))
-        if len(entries) > 103:
+        if len(entries) > 104:
             raise ValueError('Recorder storage has too many entries')
         for path in entries:
             if path.name in ('state.json', 'state.tmp', 'owner.lock'):
                 safe(path)
                 if path.stat().st_size > 512 * 1024:
                     raise ValueError('Recorder metadata exceeds its bound')
+            elif path.name == 'work':
+                safe(path, True)
+                jobs = list(itertools.islice(path.iterdir(), 2))
+                if len(jobs) > 1: raise ValueError('Too many recorder analysis workers')
+                for job in jobs:
+                    safe(job, True)
+                    if not re.fullmatch('intelligent-dvr-job-[a-z0-9_]{8}', job.name):
+                        raise ValueError('Unexpected recorder working directory')
+                    files = list(itertools.islice(job.iterdir(), 10))
+                    if len(files) > len(WORK_FILES): raise ValueError('Unexpected analysis work files')
+                    for file in files:
+                        if file.name not in WORK_FILES: raise ValueError('Unexpected analysis work file')
+                        try:
+                            safe(file)
+                            limit = VIDEO_BYTES if file.name == 'model.onnx' else REVIEW_BYTES
+                            if file.stat().st_size > limit: raise ValueError('Oversized analysis work file')
+                        except FileNotFoundError: pass
             elif re.fullmatch('[a-f0-9]{32}', path.name):
                 safe(path, True)
                 files = list(itertools.islice(path.iterdir(), 10))
@@ -193,9 +212,11 @@ class Recorder:
         self.active = False; self.state = 'stopped'; self.error = None
         self.failed = False
         self.process = self.capture = self.analysis = None
+        self.analysis_budget = 0
         self.retry_at = 0; self.failures = 0; self.selection = None
         self.metrics = {}; self.last_finished = None
         self.store = Store(directory)
+        self.work = self.store.path / 'work'
         self.rows = self.store.data['rows']; self.counters = self.store.data['counters']
         try:
             self.recover()
@@ -206,6 +227,9 @@ class Recorder:
             self.thread.start()
 
     def recover(self):
+        # Native workers lose their parent pipe on service death. Their one
+        # bounded scratch directory is owned by this store, not an orphan in /tmp.
+        if self.work.exists(): shutil.rmtree(self.work)
         known = {row['id'] for row in self.rows}
         for directory in self.store.path.iterdir():
             if directory.is_dir() and directory.name not in known:
@@ -226,6 +250,7 @@ class Recorder:
                 except (OSError, ValueError, KeyError, TypeError):
                     row.update(state='failed', error='INTEGRITY_FAILED'); self.counters['dropped'] += 1
         self.store.save()  # No worker, network, deletion by age, or analysis starts here.
+        self.work.mkdir(mode=0o700)
 
     def _error(self, code):
         self.error = code
@@ -283,7 +308,7 @@ class Recorder:
         for row in list(self.rows):
             if id(row) in protected: continue
             expired = now - row['created_at'] >= self.config['retention_minutes'] * 60
-            full = room and (len(self.rows) >= self.config['max_segments'] or self.store.usage() + RESERVATION > self.config['max_storage_mib'] * 1024**2)
+            full = room and (len(self.rows) >= self.config['max_segments'] or self.store.usage() + RESERVATION + self.analysis_budget > self.config['max_storage_mib'] * 1024**2)
             if expired or full:
                 if row['state'] in ('queued', 'analyzing'): self.counters['dropped'] += 1
                 self.counters['expired'] += 1
@@ -293,7 +318,7 @@ class Recorder:
 
     def _space(self):
         return (self.disk_usage(self.store.path).free >= self.config['reserve_mib'] * 1024**2 + RESERVATION and
-                self.store.usage() + RESERVATION <= self.config['max_storage_mib'] * 1024**2 and
+                self.store.usage() + RESERVATION + self.analysis_budget <= self.config['max_storage_mib'] * 1024**2 and
                 len(self.rows) < self.config['max_segments'])
 
     def _launch(self):
@@ -380,7 +405,7 @@ class Recorder:
                 row.update(state='queued' if not self.active else 'failed', error='ANALYSIS_INTERRUPTED' if not self.active else 'ANALYSIS_FAILED')
                 if self.active: self.counters['dropped'] += 1
                 self._error(row['error'])
-            self.analysis = None; self.store.save()
+            self.analysis = None; self.analysis_budget = 0; self.store.save()
             self.jobs.discard_managed_result(self)
         if not self.active:
             self.jobs.release(self); self.state = 'stopped'; return
@@ -390,17 +415,16 @@ class Recorder:
                 directory = self.store.verify(row)
                 if self.store.usage() + REVIEW_BYTES > self.config['max_storage_mib'] * 1024**2:
                     self._error('ANALYSIS_STORAGE_PRESSURE'); return
-                # Existing Jobs snapshots source + model. Check its volume too;
-                # a full temp volume must not be hidden by recorder-volume space.
-                analysis_root = Path(__import__('tempfile').gettempdir())
                 model = self.jobs.catalog['models'][row['model']]
-                required = model['path'].stat().st_size + SEGMENT_BYTES + REVIEW_BYTES + self.config['reserve_mib'] * 1024**2
-                if self.disk_usage(analysis_root).free < required:
+                budget = model['path'].stat().st_size + SEGMENT_BYTES + REVIEW_BYTES
+                required = budget + RESERVATION
+                if (self.disk_usage(self.store.path).free < required + self.config['reserve_mib'] * 1024**2 or
+                    self.store.usage() + required > self.config['max_storage_mib'] * 1024**2):
                     self._error('ANALYSIS_STORAGE_PRESSURE'); return
                 row.update(state='analyzing'); self.store.save()
                 job = self.jobs.start({'recording': row['id'], 'model': row['model'], 'rules': row['rules']}, owner=self,
-                    source=directory / 'source.webm', expected_sha=row['sha256'], camera=row['source'])
-                row['job_id'] = job['id']; self.analysis = row; self.store.save()
+                    source=directory / 'source.webm', expected_sha=row['sha256'], camera=row['source'], scratch_parent=self.work)
+                row['job_id'] = job['id']; self.analysis = row; self.analysis_budget = budget; self.store.save()
                 return
             except Exception:
                 row.update(state='failed', error='ANALYSIS_START_FAILED'); self.counters['dropped'] += 1

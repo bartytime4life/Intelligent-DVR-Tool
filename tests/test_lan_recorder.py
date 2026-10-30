@@ -176,8 +176,8 @@ class RecorderTest(unittest.TestCase):
     def test_retention_and_queue_bounds_expose_drops(self):
         self.config.update(max_segments=2, retention_minutes=1)
         rec = self.make(); self.start(rec)
-        # Full analysis scratch volume lets capture queue grow without an analyzer.
-        rec.disk_usage = lambda p: SimpleNamespace(free=10 * 1024**3 if Path(p)==rec.store.path else 1)
+        # Enough headroom to capture, but not to snapshot model/source/results.
+        rec.disk_usage = lambda p: SimpleNamespace(free=(self.config['reserve_mib'] + 100) * 1024**2)
         self.complete(rec); self.complete(rec)
         self.assertLessEqual(len(rec.rows), 2)
         self.assertEqual(rec.counters['expired'], 1); self.assertEqual(rec.counters['dropped'], 1)
@@ -248,6 +248,28 @@ class RecorderTest(unittest.TestCase):
         self.assertEqual(recovered.rows[0]['state'], 'queued'); self.assertIsNone(self.jobs.job)
         self.start(recovered); self.finish_analysis(recovered)
         self.assertEqual(recovered.rows[0]['state'], 'completed')
+
+    def test_analysis_scratch_is_owned_bounded_and_cleaned_on_restart(self):
+        rec = self.make(); self.start(rec); self.complete(rec)
+        self.assertTrue(Path(self.jobs.directory.name).is_relative_to(rec.work))
+        self.finish_analysis(rec); self.assertEqual(list(rec.work.iterdir()), [])
+        rec._kill_capture(); scratch = rec.work / 'intelligent-dvr-job-abcdefgh'; scratch.mkdir(mode=0o700)
+        (scratch / 'model.onnx').write_bytes(b'interrupted model copy')
+        rec.store.close(); self.jobs.release(rec)
+        recovered = self.make(); self.assertEqual(list(recovered.work.iterdir()), [])
+        self.assertFalse(recovered.active)
+
+    def test_parent_pipe_closure_terminates_native_worker_lifetime_on_both_platforms(self):
+        child = subprocess.Popen([sys.executable, '-c',
+            "from edge.analysis_worker import watch_parent_pipe; import time; watch_parent_pipe(); print('ready', flush=True); time.sleep(60)"],
+            stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+        try:
+            self.assertEqual(child.stdout.readline(), b'ready\n')
+            child.stdin.close()
+            self.assertEqual(child.wait(timeout=5), 75)
+        finally:
+            if child.poll() is None: child.kill(); child.wait()
+            child.stdout.close()
 
     @unittest.skipUnless(sys.platform == 'linux', 'Existing manual last-job recovery is Linux-only')
     def test_managed_analysis_does_not_replace_manual_persistent_result(self):

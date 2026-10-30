@@ -197,7 +197,7 @@ class Jobs:
                 self.directory.cleanup(); self.directory = None
             self.job = None
 
-    def start(self, request, *, owner=None, source=None, expected_sha=None, camera='local-recording'):
+    def start(self, request, *, owner=None, source=None, expected_sha=None, camera='local-recording', scratch_parent=None):
         with self.lock:
             if self.owner is not owner:
                 raise JobError('BUSY', 'Stop the LAN recorder before starting a separate analysis.', 409)
@@ -231,7 +231,7 @@ class Jobs:
             else:
                 if self.directory:
                     self.directory.cleanup()
-                self.directory = tempfile.TemporaryDirectory(prefix='intelligent-dvr-job-')
+                self.directory = tempfile.TemporaryDirectory(prefix='intelligent-dvr-job-', dir=scratch_parent)
                 directory = Path(self.directory.name)
             self.cancel_event = threading.Event()
             self.job = job
@@ -312,8 +312,8 @@ class Jobs:
             (directory / 'args.json').write_text(json.dumps(args), encoding='utf-8')
             self._check(began)
             self.process = self.process_factory([sys.executable, '-m', 'edge.analysis_worker', str(directory)], cwd=ROOT,
-                                               stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
-                                               env={**os.environ, 'DVR_ANALYSIS_PARENT_PID': str(os.getpid())})
+                                               stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                                               env={**os.environ, 'DVR_ANALYSIS_PARENT_PID': str(os.getpid()), 'DVR_ANALYSIS_PARENT_PIPE': '1'})
             while self.process.poll() is None:
                 self._check(began)
                 self._progress(directory, began)
@@ -340,6 +340,8 @@ class Jobs:
             if self.process and self.process.poll() is None:
                 self.process.kill()
                 self.process.wait()
+            if self.process and getattr(self.process, 'stdin', None):
+                self.process.stdin.close()
             self.process = None
             with self.lock:
                 # Cancel wins a race with publication; no partial result is exposed.

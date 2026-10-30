@@ -3,9 +3,18 @@ import json
 import os
 from pathlib import Path
 import sys
+import threading
 import time
 
 MEMORY_BYTES = 4 * 1024**3
+
+
+def watch_parent_pipe():
+    """A private stdin pipe is an OS-released lifetime lease on both platforms."""
+    def watch():
+        os.read(sys.stdin.fileno(), 1)  # No buffered-reader lock during interpreter shutdown.
+        os._exit(75)
+    threading.Thread(target=watch, daemon=True).start()
 
 
 def constrain():
@@ -50,6 +59,8 @@ def constrain():
 
 def run(directory):
     directory = Path(directory)
+    if sys.platform == 'win32' and os.environ.get('DVR_ANALYSIS_PARENT_PIPE') == '1':
+        watch_parent_pipe()
     handle = constrain()
     os.environ.update(OMP_NUM_THREADS='2', OPENBLAS_NUM_THREADS='2', MKL_NUM_THREADS='2',
                       OPENCV_FFMPEG_CAPTURE_OPTIONS='protocol_whitelist;file',

@@ -81,9 +81,10 @@ vault or encrypt footage. Do not place it on a shared/public filesystem.
 Retention runs while the recorder is explicitly active. Stopped services preserve
 files; the next Start applies elapsed-age limits before processing queued work.
 Active capture/analysis entries are protected until their operation ends. The
-quota includes partial files and retained result JSON. Allocation estimates reserve
-space for a segment and its result before capture. The analysis working volume is
-checked separately for its source/model/result copies. Free-space checks cannot
+quota includes partial files, retained result JSON and the single analysis working
+directory. Conservative allocation estimates include source/model/result copies
+before analysis and another segment before capture. A service restart removes
+recognized interrupted working files before accepting a new session. Free-space checks cannot
 reserve space against other applications; external disk pressure can still cause
 an explicit failure. Native encoder buffering permits a small transient overshoot,
 especially on Windows, which has no per-process file-size quota. This is bounded
@@ -127,7 +128,8 @@ operational metadata, not an authenticated forensic audit log.
   require target-disk testing; checksums do not establish authenticity.
 - The capture worker reads credentials through a private pipe, with no URL in argv,
   browser state, artifacts or logs. Pipe closure terminates an orphan on Linux and
-  Windows. The reused relay pins the configured RFC1918 address/port and rejects
+  Windows. Windows analysis workers use the same parent pipe; Linux retains its
+  existing parent-death signal. The reused relay pins the configured RFC1918 address/port and rejects
   redirects. Management remains `127.0.0.1`, exact Host/origin guarded and token
   protected. RTSP itself has no TLS in this path; use the trusted camera LAN.
 

@@ -4,7 +4,6 @@ import json
 import os
 from pathlib import Path
 import sys
-import threading
 import time
 
 from .feed_worker import PinnedRelay, configure_capture, relay_url
@@ -122,7 +121,7 @@ def record(url, directory, seconds, *, capture_factory=None, clock=time.monotoni
         if not 16 <= temporary.stat().st_size <= SEGMENT_BYTES:
             raise ValueError('Segment size')
         validate_video(temporary, len(offsets), size)
-        with temporary.open('rb') as stream:
+        with temporary.open('r+b') as stream:
             os.fsync(stream.fileno())
             sha = hashlib.file_digest(stream, 'sha256').hexdigest()
         temporary.replace(directory / 'source.webm')
@@ -141,10 +140,8 @@ def main(directory, seconds):
     # Keep stdin open for the worker's entire lifetime. EOF kills an orphan on
     # both supported OSes, even while a native decoder is blocked.
     data = json.loads(sys.stdin.buffer.readline(8192))
-    def parent_lifetime():
-        sys.stdin.buffer.read(1)
-        os._exit(75)
-    threading.Thread(target=parent_lifetime, daemon=True).start()
+    from .analysis_worker import watch_parent_pipe
+    watch_parent_pipe()
     relay = PinnedRelay(data['host'], data['port'])
     try:
         record(relay_url(data, relay), Path(directory), int(seconds))
