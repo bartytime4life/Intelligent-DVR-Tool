@@ -37,6 +37,10 @@ Python 3.12 executable. An incompatible environment is refused, not replaced.
 Keep the origin/port stable for saved browser reviews. Add --no-browser to avoid
 opening a browser. Reinstall after source updates to rebuild the interface.
 DVR and optional recording-analysis settings are documented in the PC guide.
+For opt-in recovery of the last recording analysis, add **--state-dir** to Check
+and Start as shown in [Linux analysis recovery](pc-testing.md#optional-linux-analysis-recovery).
+Use **--temporary** to bypass saved state without deleting it. Neither mode
+automatically connects a camera or runs analysis.
 
 ## Compare with the host
 

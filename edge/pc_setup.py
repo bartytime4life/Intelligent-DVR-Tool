@@ -200,7 +200,22 @@ def facility_command(port, open_browser=True, root=ROOT):
     return [npm, 'run', 'preview', '--', '--host', '127.0.0.1', '--port', str(port), '--strictPort'] + (['--open'] if open_browser else [])
 
 
-def check(port=4173, feeds_config=None, recordings=None, config=None, *, root=ROOT, bind=True, facility=False):
+def persistence_check(directory):
+    """Reuse store validation/recovery without creating, pruning or rewriting state."""
+    from .result_store import ResultStore
+    store = ResultStore(directory, inspect_only=True)
+    try:
+        job = store.job
+        recovery = ('SERVICE_INTERRUPTED on start' if job and (job.get('error') or {}).get('code') == 'SERVICE_INTERRUPTED'
+                    else job['state'] if job else 'no retained job')
+        return {'mode': 'private-local-last-job', 'recovery': recovery,
+                'free_bytes': shutil.disk_usage(store.directory if store.directory.exists() else store.directory.parent).free,
+                'state_changed': False}
+    finally:
+        store.close()
+
+
+def check(port=4173, feeds_config=None, recordings=None, config=None, *, root=ROOT, bind=True, facility=False, state_dir=None):
     host_check()
     checks = []
     def record(name, operation):
@@ -248,6 +263,14 @@ def check(port=4173, feeds_config=None, recordings=None, config=None, *, root=RO
         record('analysis_config', analysis)
     else:
         checks.append({'check': 'analysis_config', 'status': 'not_configured'})
+    if state_dir is not None:
+        def persistence():
+            if not recordings or not config or facility:
+                raise ValueError('Persistence requires recording analysis')
+            return persistence_check(state_dir)
+        record('analysis_persistence', persistence)
+    else:
+        checks.append({'check': 'analysis_persistence', 'status': 'disabled'})
     if bind:
         def loopback():
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
@@ -271,6 +294,7 @@ REMEDIES = {
     'temporary_storage': 'Check free space and permissions on the operating system temporary directory.',
     'dvr_config': 'Check local-feeds.json against edge/local-feeds.example.json; an empty sources array is valid.',
     'analysis_config': 'Supply the recording folder and catalog together; verify local paths, model hash, labels and rules.',
+    'analysis_persistence': 'Use --state-dir with recording analysis on Linux. Use a dedicated owner-owned 0700 folder, no symlinks, with an existing writable parent. Stop any other store owner. Preserve suspect state for inspection; --temporary bypasses it without deleting it.',
     'loopback_port': 'Close the existing app or choose an unused --port / -Port. Keep the origin stable for saved reviews.',
 }
 
@@ -287,6 +311,9 @@ def main(argv=None):
     parser.add_argument('--feeds-config', type=Path, default=Path(os.environ.get('DVR_FEEDS_CONFIG') or ROOT / 'local-feeds.json'))
     parser.add_argument('--recordings', type=Path, default=os.environ.get('DVR_RECORDINGS') or None)
     parser.add_argument('--config', type=Path, default=os.environ.get('DVR_ANALYSIS_CONFIG') or None)
+    retention = parser.add_mutually_exclusive_group()
+    retention.add_argument('--state-dir', type=Path, help='Opt-in Linux last-analysis recovery in a dedicated private folder (or DVR_STATE_DIR)')
+    retention.add_argument('--temporary', action='store_true', help='Disable recovery for this launch, overriding DVR_STATE_DIR; preserves saved state')
     parser.add_argument('--port', type=int, default=os.environ.get('DVR_PORT') or 4173)
     parser.add_argument('--no-browser', action='store_true')
     parser.add_argument('--report', type=Path, help='New readiness report, without camera endpoints or credentials')
@@ -302,21 +329,31 @@ def main(argv=None):
             raise SetupError('Supply --recordings and --config together for recording analysis.')
         if args.report and not args.check:
             raise SetupError('--report is available with --check only.')
+        state_dir = None if args.temporary else args.state_dir or (Path(os.environ['DVR_STATE_DIR']) if os.environ.get('DVR_STATE_DIR') and not args.install else None)
+        if state_dir is not None:
+            if sys.platform != 'linux':
+                raise SetupError('Analysis recovery requires Linux. Use --temporary or clear DVR_STATE_DIR on Windows.')
+            if args.install or args.native_probe:
+                raise SetupError('Enable recovery with Start or Check, after installation. Install does not create or change retained state.')
+            if not args.recordings or not args.config:
+                raise SetupError('--state-dir / DVR_STATE_DIR requires --recordings and --config together.')
         if args.install:
             install()
             return 0
         facility = args.facility or os.environ.get('DVR_GEO_LOCAL') == '1'
-        if facility and (args.analysis or args.feeds or args.recordings or args.config or
+        if facility and (state_dir is not None or args.analysis or args.feeds or args.recordings or args.config or
                          args.feeds_config.absolute() != (ROOT / 'local-feeds.json').absolute()):
             raise SetupError('Local geo preview and the camera/analysis service use separate launch modes. Clear DVR_GEO_LOCAL for camera/analysis testing.')
         if args.check:
-            result = check(args.port, args.feeds_config, args.recordings, args.config, facility=facility)
+            result = check(args.port, args.feeds_config, args.recordings, args.config, facility=facility, state_dir=state_dir)
             for item in result['checks']:
                 print(f"{item['status'].upper()}: {item['check']}")
                 if item['status'] == 'fail':
                     print('  ' + REMEDIES[item['check']])
                 elif item['check'] == 'dvr_config':
                     print(f"  {item['detail']['configured_sources']} configured channels; none connected.")
+                elif item['check'] == 'analysis_persistence' and item['status'] == 'pass':
+                    print(f"  Recovery: {item['detail']['recovery']}; {item['detail']['free_bytes']} bytes free (not reserved). Saved state unchanged.")
             print('READY for explicit PC testing.' if result['ready'] else 'NOT READY. Correct failed checks and run Check again.')
             if args.report:
                 with args.report.open('x', encoding='utf-8') as file:
@@ -337,6 +374,15 @@ def main(argv=None):
             if not args.recordings or not args.config:
                 raise SetupError('Supply the recording folder and analysis catalog together.')
             service += ['--recordings', str(args.recordings), '--config', str(args.config)]
+        if state_dir is not None:
+            try:
+                persistence_check(state_dir)
+            except (OSError, ValueError, TypeError, KeyError):
+                raise SetupError(REMEDIES['analysis_persistence']) from None
+            service += ['--state-dir', str(state_dir)]
+            print('Linux analysis recovery enabled: one last job; no automatic analysis or resume.', flush=True)
+        else:
+            print('Analysis recovery disabled: temporary results. Existing saved state is untouched.', flush=True)
         if not args.no_browser:
             service.append('--open-browser')
         if sys.platform == 'linux':

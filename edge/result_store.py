@@ -79,27 +79,40 @@ class ResultStore:
     Caller holds its job lock. The file lock excludes other service processes.
     A committed completed record follows fsync of its two retained artifacts.
     Only a new explicit job replaces the last job; close preserves committed data.
+    inspect_only validates and predicts recovery without creating or changing files.
+    It holds an existing owner lock until close; startup must revalidate afterward.
     """
-    def __init__(self, directory):
+    def __init__(self, directory, *, inspect_only=False):
         if sys.platform != 'linux':
             raise ValueError('Persistent analysis results currently require Linux; omit --state-dir for temporary storage')
         self.directory = Path(directory).absolute()
+        self.fd = None
         if any(p.is_symlink() for p in (self.directory, *self.directory.parents)):
             raise ValueError('Result-store paths cannot contain symlinks')
-        self.directory.mkdir(mode=0o700, parents=False, exist_ok=True)
+        if inspect_only and not self.directory.exists():
+            if not self.directory.parent.is_dir() or not os.access(self.directory.parent, os.W_OK | os.X_OK):
+                raise ValueError('Result-store parent must exist and be writable')
+            self.job = self.job_directory = None
+            return
+        if not inspect_only:
+            self.directory.mkdir(mode=0o700, parents=False, exist_ok=True)
         private(self.directory, directory=True)
-        self.fd = None
+        if inspect_only and (self.directory.stat().st_mode & 0o700 != 0o700 or
+                             not os.access(self.directory, os.R_OK | os.W_OK | os.X_OK)):
+            raise ValueError('Result-store directory needs owner read, write and search permissions')
         try:
             self._check_contents()
             import fcntl
-            self.fd = os.open(self.directory/'owner.lock', os.O_CREAT | os.O_RDWR | os.O_NOFOLLOW, 0o600)
-            private(self.directory/'owner.lock')
-            try:
-                fcntl.flock(self.fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
-            except BlockingIOError as exc:
-                raise ValueError('Result store already has a live service owner') from exc
+            lock = self.directory/'owner.lock'
+            if not inspect_only or lock.exists():
+                self.fd = os.open(lock, (os.O_RDONLY if inspect_only else os.O_CREAT | os.O_RDWR) | os.O_NOFOLLOW, 0o600)
+                private(lock)
+                try:
+                    fcntl.flock(self.fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                except BlockingIOError as exc:
+                    raise ValueError('Result store already has a live service owner') from exc
             self._check_contents()
-            self.job, self.job_directory = self._recover()
+            self.job, self.job_directory = self._recover(inspect_only=inspect_only)
         except BaseException:
             self.close()
             raise
@@ -197,7 +210,7 @@ class ResultStore:
                 review['receipt'].get('state') not in ('completed', 'partial')):
             raise ValueError('Retained review is not bound to its recording')
 
-    def _recover(self):
+    def _recover(self, *, inspect_only=False):
         path = self.directory/'state.json'
         if not path.exists():
             if any(self.directory.glob('job-*')):
@@ -211,15 +224,18 @@ class ResultStore:
         if job['state'] == 'completed':
             private(directory, directory=True)
             self._verify(directory, record['artifacts'])
-            self._prune(keep=directory)
+            if not inspect_only:
+                self._prune(keep=directory)
         else:
             if record['artifacts'] is not None:
                 raise ValueError('Unexpected artifacts for an unsuccessful retained job')
             if job['state'] == 'running':
                 job.update(state='failed', phase='failed', result_state=None,
                            error={'code':'SERVICE_INTERRUPTED', 'message':'The service stopped during analysis. No result was recovered. Start another job explicitly.'})
-                self._save(job)
-            self._prune()
+                if not inspect_only:
+                    self._save(job)
+            if not inspect_only:
+                self._prune()
             directory = None
         return {**job, 'recovered':True}, directory
 

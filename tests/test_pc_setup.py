@@ -141,6 +141,70 @@ class PcSetupTest(unittest.TestCase):
             self.assertEqual(args[-5:], ['--host','127.0.0.1','--port','4175','--strictPort'])
             self.assertNotIn('--open', args)
 
+    def test_launcher_forwards_opt_in_and_port_without_starting_work(self):
+        feeds = self.write('feeds.json', b'{"sources":[]}')
+        state = self.root/'private state'
+        with patch.dict(os.environ, {}, clear=True), patch.object(pc, 'host_check'), \
+                patch.object(pc.sys, 'platform', 'linux'), patch.object(pc, 'verify_kit'), \
+                patch.object(pc, 'built_interface'), patch.object(pc, 'validate_environment', return_value=Path('/python')), \
+                patch.object(pc, 'persistence_check', return_value={}), \
+                patch('os.execv', side_effect=SystemExit(0)) as execute:
+            with self.assertRaises(SystemExit):
+                pc.main(['--analysis','--recordings',str(self.root),'--config',str(self.root/'catalog.json'),
+                         '--feeds-config',str(feeds),'--state-dir',str(state),'--port','4199','--no-browser'])
+        args = execute.call_args.args[1]
+        self.assertEqual(args[args.index('--state-dir')+1], str(state))
+        self.assertEqual(args[args.index('--port')+1], '4199')
+        self.assertNotIn('--open-browser', args)
+        self.assertFalse(state.exists())
+
+    def test_temporary_override_bypasses_state_without_deleting_it(self):
+        feeds = self.write('feeds.json', b'{"sources":[]}')
+        state = self.write('state/owner-data', b'keep')
+        with patch.dict(os.environ, {'DVR_STATE_DIR':str(state.parent)}, clear=True), patch.object(pc, 'host_check'), \
+                patch.object(pc.sys, 'platform', 'linux'), patch.object(pc, 'verify_kit'), \
+                patch.object(pc, 'built_interface'), patch.object(pc, 'validate_environment', return_value=Path('/python')), \
+                patch.object(pc, 'persistence_check', side_effect=AssertionError('Disabled store must not be opened')), \
+                patch('os.execv', side_effect=SystemExit(0)) as execute:
+            with self.assertRaises(SystemExit):
+                pc.main(['--temporary','--feeds-config',str(feeds),'--no-browser'])
+        self.assertNotIn('--state-dir', execute.call_args.args[1])
+        self.assertEqual(state.read_bytes(), b'keep')
+
+    def test_opt_in_requires_linux_analysis_and_service_mode(self):
+        with patch.dict(os.environ, {}, clear=True), patch.object(pc, 'host_check'), \
+                patch.object(pc.sys, 'platform', 'linux'), patch('os.execv') as execute:
+            for args in (['--state-dir',str(self.root/'state')],
+                         ['--install','--state-dir',str(self.root/'state')],
+                         ['--facility','--state-dir',str(self.root/'state'),'--recordings',str(self.root),'--config','catalog.json']):
+                self.assertEqual(pc.main(args), 1)
+            execute.assert_not_called()
+        with patch.dict(os.environ, {'DVR_STATE_DIR':str(self.root/'state')}, clear=True), \
+                patch.object(pc, 'host_check'), patch.object(pc.sys, 'platform', 'win32'), patch('subprocess.call') as execute:
+            self.assertEqual(pc.main([]), 1)
+            execute.assert_not_called()
+
+    def test_install_ignores_inherited_state_and_preserves_it(self):
+        state = self.write('state/owner-data', b'keep')
+        with patch.dict(os.environ, {'DVR_STATE_DIR':str(state.parent)}, clear=True), patch.object(pc, 'host_check'), \
+                patch.object(pc, 'install') as install, patch.object(pc, 'persistence_check') as inspect:
+            self.assertEqual(pc.main(['--install']), 0)
+            install.assert_called_once()
+            inspect.assert_not_called()
+        self.assertEqual(state.read_bytes(), b'keep')
+
+    @unittest.skipUnless(sys.platform == 'linux', 'Linux persistence permissions')
+    def test_readiness_checks_state_without_creating_it_or_disclosing_path(self):
+        self.kit(); pc.create_settings(self.root)
+        state = self.root/'private state'
+        with patch.object(pc, 'host_check'), patch.object(pc, 'validate_environment', return_value=sys.executable), \
+                patch.object(pc, 'command', return_value='{}'), patch('edge.local_service.load_catalog', return_value={'models':{},'rules':{}}):
+            report = pc.check(root=self.root, recordings=self.root, config=self.root/'catalog.json', state_dir=state, bind=False)
+        self.assertTrue(report['ready'])
+        self.assertFalse(state.exists())
+        self.assertNotIn(str(state), json.dumps(report))
+        self.assertEqual(next(c for c in report['checks'] if c['check']=='analysis_persistence')['detail']['recovery'], 'no retained job')
+
     def test_subprocess_failure_and_timeout_are_actionable(self):
         for failure in (OSError('private path'), subprocess.TimeoutExpired('private command', 1)):
             with patch('subprocess.run', side_effect=failure), self.assertRaisesRegex(pc.SetupError, '^Retry setup$'):

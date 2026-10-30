@@ -92,13 +92,19 @@ not a multi-user or remotely exposed server or a sandbox for hostile models.
 
 ### Optional Linux restart recovery
 
-Add `--state-dir /absolute/path/to/private-analysis-state` to the direct
-`python -m edge.local_service` command above. The parent folder must already
+Add `--state-dir /absolute/path/to/private-analysis-state` to the normal Linux
+`bash scripts/run-linux.sh --analysis` command above, or to the direct service
+command. The same option works with `--check`; see the
+[PC installation guide](pc-testing.md#optional-linux-analysis-recovery) for Check,
+Start and disabling recovery. The parent folder must already
 exist. Use a dedicated empty folder on local storage; a new folder is created
 with mode 0700. Existing folders/files must belong to the current OS user and
 must not be symlinks or shared with another service. Do not place originals or
-other data inside this store. The existing shell/PowerShell launchers do not
-forward this option; use the direct command for this opt-in path.
+other data inside this store. Existing directories need owner read/write/search
+permissions and no group/other permissions (0700). Check validates the same
+store schema, ownership, path, locking, hashes and source binding without creating
+a store, pruning files or changing an interrupted job's status. It reports free
+bytes without reserving space; service startup revalidates and acquires the lock.
 
 The store retains **one last job**, not a recording library or review database.
 A completed job keeps its frozen recording (up to 512 MiB), review bundle (up
@@ -132,7 +138,9 @@ wrong source bindings, unsafe paths or changed completed files refuse startup
 and preserve the affected files for inspection. An interrupted running record
 retains its explicit failure status and discards its incomplete working copies.
 Stop all service instances before repairing or moving a store aside. Omit
-`--state-dir` to return to temporary mode; preserve/export needed reviews and
+`--state-dir` (and clear `DVR_STATE_DIR`), or use the Linux launcher's `--temporary`
+override to return to temporary mode. Temporary operation does not open, delete
+or modify the saved store. Preserve/export needed reviews and
 the private store first. Windows persistent-storage permission/locking semantics
 are not qualified by this implementation; Windows retains the default temporary
 workflow and explicitly rejects this opt-in option.

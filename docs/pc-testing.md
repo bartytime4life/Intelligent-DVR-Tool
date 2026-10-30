@@ -167,6 +167,55 @@ identity tracking or live-camera analysis.
 
 ## Reports and recovery
 
+### Optional Linux analysis recovery
+
+After installing, use **--state-dir** with the same recording folder and analysis
+catalog used for Recognition. This is explicitly enabled each launch; no extra
+service command or storage setup is required. Choose a dedicated local folder
+outside the extracted app so a future kit can use it. Its parent must already
+exist, with write/search access. A missing final folder is created only by Start,
+owned by your OS account with mode 0700. Existing folders must already be 0700,
+owner-owned, without symlink components or unrelated files. The launcher never
+changes permissions/ownership or deletes questionable files to make them pass.
+
+~~~bash
+bash scripts/run-linux.sh --check --recordings /path/to/approved-recordings --config /path/to/catalog.json --state-dir "$HOME/DVR-analysis-state"
+bash scripts/run-linux.sh --analysis --recordings /path/to/approved-recordings --config /path/to/catalog.json --state-dir "$HOME/DVR-analysis-state"
+~~~
+
+Substitute your real absolute paths. Add **--port 4175** to both commands if
+needed; existing **DVR_PORT**, **DVR_RECORDINGS** and **DVR_ANALYSIS_CONFIG**
+settings still work. **DVR_STATE_DIR** is an optional environment equivalent;
+an explicit --state-dir takes precedence. Relative paths are relative to the
+app folder, so absolute paths are recommended for portable upgrades.
+
+Check reports **analysis_persistence**, recovery status and free bytes. It checks
+the existing store without creating or changing retained state, contacting a
+camera, or running the model. Stop another service using this store before
+checking it. A completed result is verified before availability; an interrupted
+job is reported as **SERVICE_INTERRUPTED on start**, then marked failed when
+Start opens the store. No analysis resumes automatically. Starting the app also
+does not connect a camera or start a new job.
+
+Only the last explicit analysis job is retained, including its frozen recording
+and review. A new explicit job replaces the previous one. Reserve room for up to
+512 MiB each for recording and model, 32 MiB for the review, plus temporary/update
+overhead. The free-space report is not a quota, reservation or power-loss guarantee.
+See [storage contracts](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/local-analysis-service.md#optional-linux-restart-recovery).
+
+To disable, omit --state-dir and clear DVR_STATE_DIR, or add **--temporary** to
+Start/Check to override that environment setting. Temporary operation leaves
+the saved store intact; use the same --state-dir again to recover it. Install
+ignores inherited DVR_STATE_DIR and preserves saved data. An explicit
+--install --state-dir is refused: enable it with Check/Start after installation.
+Export browser review decisions separately; they are not saved in this store.
+
+Windows retains temporary operation. Its installation and launch commands are
+unchanged; Linux recovery is refused if requested on Windows. Keep your store
+and browser exports before moving/upgrading/uninstalling an app.
+
+### Readiness reports
+
 Create a new report with Linux **--check --report readiness-001.json** or PowerShell
 **-Check -Report readiness-001.json**. Reports contain check statuses, runtime
 versions and source revision for a kit. They omit camera names, credentials,
