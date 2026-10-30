@@ -139,7 +139,8 @@ def capture(url, directory, *, seconds=900):
         cap.release()
 
 
-def main(directory):
+def configure_capture():
+    """Shared bounded native RTSP configuration for previews and segment capture."""
     from . import analysis_worker
     analysis_worker.MEMORY_BYTES = LIMITS['memory_bytes']
     handle = analysis_worker.constrain()
@@ -147,17 +148,26 @@ def main(directory):
         OPENCV_IO_MAX_IMAGE_PIXELS=str(LIMITS['input_pixels']), OPENCV_IO_MAX_IMAGE_WIDTH='4096', OPENCV_IO_MAX_IMAGE_HEIGHT='4096',
         OPENCV_VIDEOIO_PRIORITY_LIST='FFMPEG',
         OPENCV_FFMPEG_CAPTURE_OPTIONS='rtsp_transport;tcp|protocol_whitelist;rtsp,tcp|allowed_media_types;video')
+    return handle
+
+
+def relay_url(data, relay):
+    credentials = ''
+    if data.get('username') or data.get('password'):
+        credentials = quote(data.get('username', ''), safe='') + ':' + quote(data.get('password', ''), safe='') + '@'
+    return f'rtsp://{credentials}127.0.0.1:{relay.local_port}{data["path"]}'
+
+
+def main(directory):
+    handle = configure_capture()
     data = json.loads(sys.stdin.buffer.read(8192))
     if data.get('kind') in ('public-jpeg', 'public-mjpeg'):
         from .public_feed import capture_public
         capture_public(data, Path(directory))
         return handle
     relay = PinnedRelay(data['host'], data['port'])
-    credentials = ''
-    if data.get('username') or data.get('password'):
-        credentials = quote(data.get('username', ''), safe='') + ':' + quote(data.get('password', ''), safe='') + '@'
     try:
-        capture(f'rtsp://{credentials}127.0.0.1:{relay.local_port}{data["path"]}', Path(directory))
+        capture(relay_url(data, relay), Path(directory))
     finally:
         relay.close()
     return handle

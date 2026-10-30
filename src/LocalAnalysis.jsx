@@ -2,16 +2,16 @@ import React, { useEffect, useRef, useState } from 'react';
 import { activeJob, analysisRequest, localAnalysisOrigin, openJobResult, importRecording } from './local-analysis.mjs';
 import { downloadBlob } from './clip-capture.mjs';
 
-export default function LocalAnalysis({ onResult, onBusy, clip, onClip }) {
+export default function LocalAnalysis({ onResult, onBusy, clip, onClip, recorderBusy = false }) {
   const [catalog, setCatalog] = useState(null), [job, setJob] = useState(null);
   const [recording, setRecording] = useState(''), [model, setModel] = useState(''), [rules, setRules] = useState('');
   const [error, setError] = useState(''), [message, setMessage] = useState(''), [working, setWorking] = useState(false);
   const [connected, setConnected] = useState(false), [opening, setOpening] = useState(false);
   const token = useRef(''), version = useRef(0), opened = useRef(''), controller = useRef(null);
   const resultHandler = useRef(onResult); resultHandler.current = onResult;
-  const busy = Boolean(working || opening || activeJob(job));
+  const busy = Boolean(working || opening || activeJob(job) || recorderBusy);
   const local = localAnalysisOrigin(globalThis.location);
-  useEffect(() => { onBusy(busy); }, [busy, onBusy]);
+  useEffect(() => { onBusy(Boolean(working || opening || activeJob(job))); }, [working, opening, job, onBusy]);
   useEffect(() => () => { version.current++; controller.current?.abort(); }, []);
 
   async function request(path, options = {}) {

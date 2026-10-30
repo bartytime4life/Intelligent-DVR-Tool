@@ -2,8 +2,10 @@
 
 This workflow joins explicit browser-webcam capture, bounded local file import,
 the existing native CPU analyzer, source-matched inspection, human decisions and
-portable reporting. Network-camera recording, continuous live AI, identity
-tracking and sustained 100-camera operation remain separate work.
+portable reporting. The separate [one-camera LAN recorder](lan-recording.md) now
+feeds finalized RTSP segments into the same workflow with explicit Start/Stop and
+bounded retention. Gapless recording, identity tracking and sustained 100-camera
+operation remain separate work.
 
 ## Prepare once
 
@@ -75,7 +77,8 @@ trusted; this is not a hostile-OS boundary or a power-loss durability claim.
 
 Browser recording timers are not exact. Hiding/leaving Monitor or disconnecting
 requests capture stop. Runtime/codec failures discard the failed recording and
-show an error. Raw RTSP/public preview images are not recorded by this feature.
+show an error. Raw RTSP/public preview images are not recorded by this browser feature. The
+optional native LAN recorder uses a separately configured RTSP capture worker.
 
 Browser API references: [MediaRecorder](https://developer.mozilla.org/en-US/docs/Web/API/MediaRecorder),
 [final data and timeslice behavior](https://developer.mozilla.org/en-US/docs/Web/API/MediaRecorder/dataavailable_event).

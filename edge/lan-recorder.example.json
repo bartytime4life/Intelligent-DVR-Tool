@@ -1,0 +1,8 @@
+{
+  "source": "dvr-channel-1",
+  "segment_seconds": 10,
+  "max_segments": 20,
+  "max_storage_mib": 1024,
+  "retention_minutes": 60,
+  "reserve_mib": 512
+}

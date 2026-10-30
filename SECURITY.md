@@ -105,3 +105,14 @@ pixel and native decoder limits apply before frames are exposed. See
 [public source permission, external disclosure and exact limits](docs/public-webcams.md).
 Provider capture time, freshness and media safety are not authenticated. The
 owner must approve provider terms; an open endpoint alone grants no reuse rights.
+
+## Optional LAN recording
+
+The [one-camera recorder](docs/lan-recording.md) uses the existing private-IPv4
+RTSP allowlist and redirect-refusing relay. Only explicit Start activates capture
+and segment analysis. No internet/public source is eligible. Credentials stay in
+the local source configuration and private child pipe; management stays loopback
+with Host/origin/token checks. Recording recovery never starts capture. Retention
+can delete queued/completed evidence; export what must remain. Use account-private
+storage (0700 on Linux; restricted inherited ACLs on Windows). This is not an
+encrypted vault, forensic audit log, gapless DVR or power-loss durability claim.

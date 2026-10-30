@@ -2,6 +2,9 @@
 
 Start with [PC installation and live-device testing](pc-testing.md).
 
+[One-camera LAN recording](lan-recording.md) connects finalized RTSP segments to
+the existing local recognition and review workflow.
+
 [Repository home](../README.md) · [Wiki](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki)
 
 
@@ -16,3 +19,4 @@ Start with [PC installation and live-device testing](pc-testing.md).
 | Check terms | [Third-party notices](third-party-notices.md), [model license text](model-qualification/Apache-2.0-YOLOX.txt) |
 
 The current source and tested behavior take precedence over future-work research. For every capacity or quality number, check whether the evidence describes a browser fixture, synthetic arithmetic, a compatibility probe or an actual deployment measurement.
+

@@ -109,6 +109,8 @@ class Jobs:
         self.job = self.thread = self.process = self.directory = None
         self.choices = {}
         self.closed = False
+        self.owner = None
+        self.managed = False
         self.token = secrets.token_urlsafe(32)
         self.store = ResultStore(state_dir) if state_dir is not None else None
         self.store_failed = False
@@ -141,7 +143,8 @@ class Jobs:
                      for item in self.catalog['rules'].values()]
             return {'recordings': [{'id': key, 'name': p.name, 'bytes': sig[2]} for key, (p, sig) in choices.items()],
                     'models': models, 'rules': rules, 'limits': LIMITS,
-                    'backend': 'opencv-cpu', 'job': self.snapshot(),
+                    'backend': 'opencv-cpu', 'job': None if self.managed else self.snapshot(),
+                    'recorder_active': self.owner is not None,
                     'recording_import': {'enabled': self.allow_import, 'max_bytes': MAX_IMPORT_BYTES},
                     'retention': 'private-local-last-job' if self.store else 'temporary-until-service-exit',
                     'ready': all(importlib.util.find_spec(x) is not None for x in ('cv2', 'numpy'))}
@@ -150,7 +153,7 @@ class Jobs:
         with self.lock:
             if not self.allow_import:
                 raise JobError('IMPORT_DISABLED', 'Restart the local app with --allow-recording-import to save selected recordings here.', 403)
-            if self.closed or (self.job and self.job['state'] not in TERMINAL):
+            if self.closed or self.owner is not None or (self.job and self.job['state'] not in TERMINAL):
                 raise JobError('BUSY', 'Wait for the current analysis to finish before importing a recording.', 409)
             listed = self.available()['recordings']
             expected_name = 'import-' + expected_hash + IMPORT_MIMES.get(mime, '')
@@ -172,8 +175,32 @@ class Jobs:
                 raise JobError('JOB_GONE', 'This job is no longer retained. Reconnect and explicitly start another recording.', 404)
             return dict(self.job) if self.job else None
 
-    def start(self, request):
+    def claim(self, owner):
         with self.lock:
+            if self.closed or self.store_failed:
+                raise JobError('STOPPED', 'Analysis is unavailable. Check storage and restart the local service.', 503)
+            if self.owner is not None or (self.job and self.job['state'] not in TERMINAL):
+                raise JobError('BUSY', 'Wait for analysis or stop the LAN recorder first.', 409)
+            self.owner = owner
+
+    def release(self, owner):
+        with self.lock:
+            if self.owner is owner:
+                self.owner = None
+
+    def discard_managed_result(self, owner):
+        """Recorder has archived the pair (or recorded failure); remove its scratch copy."""
+        with self.lock:
+            if self.owner is not owner or not self.managed or (self.job and self.job['state'] not in TERMINAL):
+                return
+            if self.directory:
+                self.directory.cleanup(); self.directory = None
+            self.job = None
+
+    def start(self, request, *, owner=None, source=None, expected_sha=None, camera='local-recording', scratch_parent=None):
+        with self.lock:
+            if self.owner is not owner:
+                raise JobError('BUSY', 'Stop the LAN recorder before starting a separate analysis.', 409)
             if self.closed:
                 raise JobError('STOPPED', 'The local service is stopping.', 503)
             if self.store_failed:
@@ -183,7 +210,7 @@ class Jobs:
             if not isinstance(request, dict) or set(request) != {'recording', 'model', 'rules'} or any(not isinstance(v, str) for v in request.values()):
                 raise JobError('SELECTION', 'Choose a listed recording, model and rule set.')
             try:
-                source, sig = self.choices[request['recording']]
+                source, sig = (source, signature(source.stat())) if source is not None and owner is not None else self.choices[request['recording']]
                 model = self.catalog['models'][request['model']]
                 rules = self.catalog['rules'][request['rules']]
                 if not set(rules['classes']) <= set(model['classes']):
@@ -194,7 +221,7 @@ class Jobs:
                         'recording': source.name, 'model': model['name'], 'rules': rules['name'],
                         'frames_read': 0, 'frames_analyzed': 0, 'max_frames': LIMITS['max_frames'],
                         'elapsed_seconds': 0, 'error': None}
-            if self.store:
+            if self.store and owner is None:
                 try:
                     directory = self.store.begin(job)
                 except (OSError, ValueError):
@@ -204,11 +231,12 @@ class Jobs:
             else:
                 if self.directory:
                     self.directory.cleanup()
-                self.directory = tempfile.TemporaryDirectory(prefix='intelligent-dvr-job-')
+                self.directory = tempfile.TemporaryDirectory(prefix='intelligent-dvr-job-', dir=scratch_parent)
                 directory = Path(self.directory.name)
             self.cancel_event = threading.Event()
             self.job = job
-            self.thread = threading.Thread(target=self._run, args=(directory, source, sig, model, rules), daemon=True)
+            self.managed = owner is not None
+            self.thread = threading.Thread(target=self._run, args=(directory, source, sig, model, rules, expected_sha, camera), daemon=True)
             self.thread.start()
             return self.snapshot()
 
@@ -253,11 +281,13 @@ class Jobs:
                 raise JobError('INPUT_CHANGED', 'An input changed during preparation. Refresh and retry.')
         return digest.hexdigest()
 
-    def _run(self, directory, source, sig, model, rules):
+    def _run(self, directory, source, sig, model, rules, expected_sha=None, camera='local-recording'):
         began = time.monotonic()
         terminal, error, result_state = 'failed', None, None
         try:
             source_hash = self._copy(source, directory / ('source' + source.suffix.lower()), VIDEO_BYTES, began, sig)
+            if expected_sha is not None and source_hash != expected_sha:
+                raise JobError('SOURCE_CHANGED', 'The recorded segment fingerprint changed. No results were accepted.')
             video = directory / ('source' + source.suffix.lower())
             with video.open('rb') as stream:
                 if not video_header(stream.read(16)):
@@ -277,13 +307,13 @@ class Jobs:
                 raise ValueError('Incompatible rules')
             args = ['--video', str(video), '--model', str(directory / 'model.onnx'), '--labels', str(directory / 'labels.json'),
                     '--rules', str(directory / 'rules.json'), '--profile', model['profile'], '--backend', 'opencv-cpu',
-                    '--threads', '2', '--max-frames', '6000', '--stride', '5', '--camera', 'local-recording',
+                    '--threads', '2', '--max-frames', '6000', '--stride', '5', '--camera', camera,
                     '--output', str(directory / 'receipt.json'), '--review-output', str(directory / 'review.json')]
             (directory / 'args.json').write_text(json.dumps(args), encoding='utf-8')
             self._check(began)
             self.process = self.process_factory([sys.executable, '-m', 'edge.analysis_worker', str(directory)], cwd=ROOT,
-                                               stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
-                                               env={**os.environ, 'DVR_ANALYSIS_PARENT_PID': str(os.getpid())})
+                                               stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                                               env={**os.environ, 'DVR_ANALYSIS_PARENT_PID': str(os.getpid()), 'DVR_ANALYSIS_PARENT_PIPE': '1'})
             while self.process.poll() is None:
                 self._check(began)
                 self._progress(directory, began)
@@ -310,6 +340,8 @@ class Jobs:
             if self.process and self.process.poll() is None:
                 self.process.kill()
                 self.process.wait()
+            if self.process and getattr(self.process, 'stdin', None):
+                self.process.stdin.close()
             self.process = None
             with self.lock:
                 # Cancel wins a race with publication; no partial result is exposed.
@@ -324,7 +356,7 @@ class Jobs:
                     if terminal != 'completed':
                         for path in directory.iterdir():
                             path.unlink()
-                    if self.store:
+                    if self.store and not self.managed:
                         self.store.commit(finished, directory)
                 except (OSError, ValueError, KeyError, TypeError):
                     self.store_failed = bool(self.store)
@@ -354,7 +386,7 @@ class Jobs:
             job = self.snapshot(job_id)
             if job['state'] != 'completed':
                 raise JobError('NOT_READY', 'Results are available only after successful analysis.', 409)
-            directory = self.retained_directory if self.store else Path(self.directory.name)
+            directory = self.retained_directory if self.store and not self.managed else Path(self.directory.name)
             if kind == 'result':
                 return regular(directory / 'review.json', RESULT_BYTES), 'application/json'
             source = next(directory.glob('source.*'))
@@ -379,8 +411,9 @@ class LocalServer(HTTPServer):
     # listener still owns its exact loopback address. Windows reuse has different
     # semantics and remains disabled.
     allow_reuse_address = sys.platform == 'linux'
-    def __init__(self, port, jobs, static_root, feeds=None):
+    def __init__(self, port, jobs, static_root, feeds=None, recorder=None):
         self.jobs, self.static_root, self.feeds = jobs, Path(static_root).resolve(), feeds
+        self.recorder = recorder
         self.token = jobs.token if jobs else secrets.token_urlsafe(32)
         super().__init__(('127.0.0.1', port), Handler)
         self.origin = f'http://127.0.0.1:{self.server_port}'
@@ -429,6 +462,9 @@ class Handler(BaseHTTPRequestHandler):
         api = path.startswith('/api/')
         self._guard(api and path not in ('/api/analysis/session', '/api/feeds/session'))
         jobs, feeds = self.server.jobs, self.server.feeds
+        recorder = getattr(self.server, 'recorder', None)
+        if path.startswith('/api/recorder/') and recorder is None:
+            raise JobError('RECORDER_DISABLED', 'LAN recording is not configured. Enable it in the local launcher with a reviewed recorder configuration.', 503)
         if path.startswith('/api/analysis/') and jobs is None:
             raise JobError('ANALYSIS_DISABLED', 'Recording analysis is not configured. Restart the local app with a recordings folder and model/rule configuration.', 503)
         if path.startswith('/api/feeds/') and feeds is None:
@@ -465,10 +501,24 @@ class Handler(BaseHTTPRequestHandler):
                 return self._json(feeds.disconnect(match[1]))
             if path == '/api/analysis/jobs':
                 return self._json(jobs.start(body), 202)
+            if path == '/api/recorder/start':
+                return self._json(recorder.start(body), 202)
+            if path == '/api/recorder/stop':
+                if body != {}:
+                    raise JobError('BODY', 'Stop takes an empty object.')
+                return self._json(recorder.stop())
             match = re.fullmatch('/api/analysis/jobs/([a-f0-9]{32})/cancel', path)
             if match:
                 return self._json(jobs.cancel(match[1]))
         if self.command == 'GET':
+            if path == '/api/recorder/status':
+                return self._json(recorder.status())
+            match = re.fullmatch('/api/recorder/segments/([a-f0-9]{32})/(source|result|timing)', path)
+            if match:
+                # Pin retention through the transfer; another tick cannot unlink
+                # the source between verification and opening it on either OS.
+                with recorder.lock:
+                    return self._file(*recorder.artifact(match[1], match[2]))
             match = re.fullmatch('/api/feeds/([a-f0-9]{32})(/frame)?', path)
             if match:
                 if match[2]:
@@ -513,6 +563,7 @@ def main(argv=None):
     parser.add_argument('--state-dir', type=Path, help='Opt-in Linux private last-job storage; no automatic analysis or resume')
     parser.add_argument('--allow-recording-import', action='store_true', help='Allow explicit same-origin video imports up to 64 MiB; stored locally until manually moved or deleted')
     parser.add_argument('--feeds-config', type=Path, help='Trusted LAN RTSP channels; see edge/local-feeds.example.json')
+    parser.add_argument('--recorder-config', type=Path, help='Opt-in one-camera segment recorder; never starts automatically')
     parser.add_argument('--port', type=int, default=4173)
     parser.add_argument('--open-browser', action='store_true', help='Open the local app after binding; never connects cameras')
     args = parser.parse_args(argv)
@@ -522,19 +573,25 @@ def main(argv=None):
         parser.error('--state-dir requires recording analysis configuration')
     if args.allow_recording_import and not args.config:
         parser.error('--allow-recording-import requires recording analysis configuration')
+    if args.recorder_config and (not args.config or not args.feeds_config):
+        parser.error('--recorder-config requires recording analysis and feeds configuration')
     if not args.config and not args.feeds_config:
         parser.error('Configure recording analysis, DVR feeds, or both')
     if not 1024 <= args.port <= 65535:
         parser.error('port must be 1024–65535')
     if not (ROOT / 'dist/client/index.html').is_file():
         parser.error('Build the local app first with npm run build')
-    jobs = feeds = None
+    jobs = feeds = recorder = None
     try:
         if args.config:
             jobs = Jobs(args.recordings, load_catalog(args.config.absolute()), state_dir=args.state_dir, allow_import=args.allow_recording_import)
         if args.feeds_config:
             feeds = Feeds(load_sources(args.feeds_config.absolute()))
-        with LocalServer(args.port, jobs, ROOT / 'dist/client', feeds) as server:
+        if args.recorder_config:
+            from .lan_recorder import Recorder, validate_config
+            config = validate_config(args.recorder_config.absolute(), feeds.sources)
+            recorder = Recorder(config, feeds.sources, jobs, jobs.recordings / '.lan-recorder')
+        with LocalServer(args.port, jobs, ROOT / 'dist/client', feeds, recorder) as server:
             print(f'Local Intelligent DVR: {server.origin}/ — explicit connections and jobs only; Ctrl+C stops.', flush=True)
             if args.open_browser:
                 import webbrowser
@@ -550,6 +607,8 @@ def main(argv=None):
     except (OSError, ValueError, KeyError, TypeError) as exc:
         parser.error(str(exc))
     finally:
+        if recorder:
+            recorder.close()
         if jobs:
             jobs.close()
         if feeds:

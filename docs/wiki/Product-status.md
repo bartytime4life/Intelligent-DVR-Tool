@@ -1,6 +1,12 @@
 # Product status and evidence
 
-October 30 recording-workflow candidate: explicit browser-webcam clips, opt-in
+October 30 LAN-recorder follow-up: [one configured RTSP channel](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/lan-recording.md)
+now supports explicit sampled segment capture, bounded retention, reconnects,
+restart recovery and the existing local analysis/review path. It is a one-camera
+pilot with visible gaps/drops, not gapless recording or multi-camera qualification.
+See its [separate evidence](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/lan-recorder-2026-10-30/README.md).
+
+October 30 recording-workflow baseline: explicit browser-webcam clips, opt-in
 same-computer recording import, pinned local model preparation, and printable
 HTML/JSON/CSV reporting now join preview to human review. See the
 [workflow and storage limits](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/recording-workflow.md). Native local checks include

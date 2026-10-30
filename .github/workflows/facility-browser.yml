@@ -26,6 +26,8 @@ jobs:
         run: npx playwright test --config=playwright.analysis.config.mjs
       - name: Webcam and synthetic RTSP end-to-end feed checks
         run: npx playwright test --config=playwright.feeds.config.mjs
+      - name: One-camera recorder with controlled RTSP, CPU analysis and browser review
+        run: npx playwright test --config=playwright.recorder.config.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -34,4 +36,5 @@ jobs:
             qa-local/facility-browser-results.json
             qa-local/analysis-browser-results.json
             qa-local/feeds-browser-results.json
+            qa-local/recorder-browser-results.json
             test-results/
