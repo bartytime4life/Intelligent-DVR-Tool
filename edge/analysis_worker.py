@@ -11,9 +11,25 @@ MEMORY_BYTES = 4 * 1024**3
 
 def watch_parent_pipe():
     """A private stdin pipe is an OS-released lifetime lease on both platforms."""
-    def watch():
-        os.read(sys.stdin.fileno(), 1)  # No buffered-reader lock during interpreter shutdown.
-        os._exit(75)
+    if sys.platform == 'win32':
+        # Blocking CRT reads hold stdin's descriptor lock, which native video
+        # libraries also need. Inspect the anonymous pipe without consuming data.
+        import ctypes
+        import msvcrt
+        from ctypes import wintypes as w
+        handle = msvcrt.get_osfhandle(sys.stdin.fileno())
+        kernel = ctypes.WinDLL('kernel32', use_last_error=True)
+        kernel.PeekNamedPipe.argtypes = [w.HANDLE, ctypes.c_void_p, w.DWORD,
+                                        ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p]
+        kernel.PeekNamedPipe.restype = w.BOOL
+        def watch():
+            while kernel.PeekNamedPipe(handle, None, 0, None, None, None):
+                time.sleep(.25)
+            os._exit(75)
+    else:
+        def watch():
+            os.read(sys.stdin.fileno(), 1)  # No buffered-reader lock during interpreter shutdown.
+            os._exit(75)
     threading.Thread(target=watch, daemon=True).start()
 
 

@@ -7,7 +7,7 @@ not establish physical-camera compatibility or operational recognition quality.
 
 ## Local checks
 
-- 262 Python tests discovered: 256 passed, 6 socket-dependent tests skipped.
+- 264 Python tests discovered: 258 passed, 6 socket-dependent tests skipped.
 - Frontend suites run directly: 184 passed, 1 loopback test skipped. Direct runs
   avoid this environment's Node test-runner child output limitation.
 - Production build passed. Native VP8 encoding, whole-file decode verification,
@@ -57,7 +57,14 @@ another segment reservation.
 
 The first CI candidate also exposed Windows requiring a writable file handle for
 the segment flush and a blocking buffered stdin reader at worker shutdown. The
-flush now uses a writable handle and parent lifetime checks use an unbuffered OS
-pipe read. Interrupted analysis scratch is owned, counted and recovered by the
+flush now uses a writable handle. Parent lifetime checks use an unbuffered OS
+pipe read on Linux and non-consuming Windows pipe inspection: blocking Windows
+CRT reads also interfere with native video initialization and shutdown. Tests
+cover parent loss and ordinary worker exit. Interrupted analysis scratch is owned, counted and recovered by the
 recorder store, with a regression test. The webcam browser suite selects full
 Chromium, matching the existing feed suite, so its native fake camera is available.
+
+A later review identified that capture reservations could crowd out the larger
+analysis reservation. Queue admission now retains the selected source while
+reclaiming unprotected entries for the complete analysis budget. A 256 MiB quota
+regression proves that 160 MiB of retained footage cannot starve native analysis.

@@ -302,13 +302,13 @@ class Recorder:
             self.store.save()
             return self.status()
 
-    def _expire(self, room=False):
-        now = self.wall(); protected = {id(r) for r in (self.capture, self.analysis) if r is not None}
+    def _expire(self, room=False, reservation=RESERVATION, keep=None):
+        now = self.wall(); protected = {id(r) for r in (self.capture, self.analysis, keep) if r is not None}
         changed = False
         for row in list(self.rows):
             if id(row) in protected: continue
             expired = now - row['created_at'] >= self.config['retention_minutes'] * 60
-            full = room and (len(self.rows) >= self.config['max_segments'] or self.store.usage() + RESERVATION + self.analysis_budget > self.config['max_storage_mib'] * 1024**2)
+            full = room and (len(self.rows) >= self.config['max_segments'] or self.store.usage() + reservation + self.analysis_budget > self.config['max_storage_mib'] * 1024**2)
             if expired or full:
                 if row['state'] in ('queued', 'analyzing'): self.counters['dropped'] += 1
                 self.counters['expired'] += 1
@@ -413,11 +413,12 @@ class Recorder:
             if row['state'] != 'queued': continue
             try:
                 directory = self.store.verify(row)
-                if self.store.usage() + REVIEW_BYTES > self.config['max_storage_mib'] * 1024**2:
-                    self._error('ANALYSIS_STORAGE_PRESSURE'); return
                 model = self.jobs.catalog['models'][row['model']]
                 budget = model['path'].stat().st_size + SEGMENT_BYTES + REVIEW_BYTES
                 required = budget + RESERVATION
+                # Keep the oldest queued source while reclaiming enough space
+                # for inference, not just the smaller next-capture reservation.
+                self._expire(room=True, reservation=required, keep=row)
                 if (self.disk_usage(self.store.path).free < required + self.config['reserve_mib'] * 1024**2 or
                     self.store.usage() + required > self.config['max_storage_mib'] * 1024**2):
                     self._error('ANALYSIS_STORAGE_PRESSURE'); return

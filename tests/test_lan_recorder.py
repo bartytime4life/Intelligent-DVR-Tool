@@ -205,6 +205,23 @@ class RecorderTest(unittest.TestCase):
         from edge.lan_recorder import RESERVATION
         self.assertLessEqual(rec.store.usage() + RESERVATION, 256 * 1024**2)
 
+    def test_retained_bytes_cannot_starve_queued_analysis(self):
+        self.config['max_storage_mib'] = 256
+        rec = self.make(); self.start(rec)
+        queued = rec.capture
+        synthetic_segment(rec.store.path / queued['id'])
+        self.calls[-1][2].returncode = 0; rec._capture_tick()
+        for i in range(5):
+            row = {'id':format(i, '032x'), 'source':'dock', 'state':'failed', 'created_at':self.now}
+            rec.rows.append(row); directory = rec.store.path / row['id']; directory.mkdir(mode=0o700)
+            with (directory / 'capture.webm').open('wb') as stream: stream.truncate(32 * 1024**2)
+        rec.store.save(); rec.tick()
+        self.assertIs(rec.analysis, queued)
+        self.assertGreaterEqual(rec.counters['expired'], 2)
+        self.finish_analysis(rec)
+        self.assertEqual(queued['state'], 'completed')
+        self.assertEqual(rec.counters['analyzed'], 1)
+
     def test_wrong_result_and_timing_fingerprint_are_rejected(self):
         rec = self.make(); self.start(rec); self.complete(rec); self.finish_analysis(rec)
         row = next(r for r in rec.rows if r['state']=='completed')
@@ -264,12 +281,22 @@ class RecorderTest(unittest.TestCase):
             "from edge.analysis_worker import watch_parent_pipe; import time; watch_parent_pipe(); print('ready', flush=True); time.sleep(60)"],
             stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
         try:
-            self.assertEqual(child.stdout.readline(), b'ready\n')
+            self.assertEqual(child.stdout.readline().strip(), b'ready')
             child.stdin.close()
             self.assertEqual(child.wait(timeout=5), 75)
         finally:
             if child.poll() is None: child.kill(); child.wait()
             child.stdout.close()
+
+    def test_parent_watch_allows_native_runtime_and_normal_worker_exit(self):
+        child = subprocess.Popen([sys.executable, '-c',
+            "from edge.analysis_worker import watch_parent_pipe; watch_parent_pipe(); import cv2; cap = cv2.VideoCapture(); cap.release()"],
+            stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        try:
+            self.assertEqual(child.wait(timeout=10), 0)
+        finally:
+            if child.poll() is None: child.kill(); child.wait()
+            child.stdin.close()
 
     @unittest.skipUnless(sys.platform == 'linux', 'Existing manual last-job recovery is Linux-only')
     def test_managed_analysis_does_not_replace_manual_persistent_result(self):
