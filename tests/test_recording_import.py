@@ -1,16 +1,18 @@
 import hashlib
+import http.client
 import io
 import json
 import os
 from email.message import Message
 from pathlib import Path
 import tempfile
+import threading
 from types import SimpleNamespace
 import unittest
 from unittest.mock import patch
 
 from edge.recording_import import import_recording, ImportError, MAX_IMPORT_BYTES, MAX_INBOX_BYTES
-from edge.local_service import Jobs, Handler, JobError, load_catalog
+from edge.local_service import Jobs, Handler, JobError, LocalServer, load_catalog
 from local_analysis_fixture import build
 
 VIDEO = b'RIFF\0\0\0\0AVI ' + b'synthetic-container'
@@ -113,3 +115,31 @@ class RecordingImportTests(unittest.TestCase):
             self.assertEqual(bundle['receipt']['frames_analyzed'],6)
             self.assertEqual(hashlib.sha256(jobs.artifact(job['id'],'source')[0].read_bytes()).hexdigest(),sha)
         finally: jobs.close()
+
+    @unittest.skipUnless(os.getenv('DVR_TEST_SOCKETS') == '1', 'Real loopback transport runs in CI')
+    def test_real_http_binary_import_is_guarded_and_idempotent(self):
+        build(self.root)
+        jobs=Jobs(self.root/'recordings',load_catalog(self.root/'config.json'),allow_import=True)
+        server=LocalServer(0,jobs,self.root)
+        thread=threading.Thread(target=server.serve_forever,daemon=True);thread.start()
+        def request(**updates):
+            headers={'Host':server.origin.removeprefix('http://'),'Origin':server.origin,'X-DVR-Token':jobs.token,
+                     'Content-Type':'video/x-msvideo','X-DVR-SHA256':SHA,**updates}
+            conn=http.client.HTTPConnection('127.0.0.1',server.server_port,timeout=5)
+            try:
+                conn.request('POST','/api/analysis/recordings',body=VIDEO,headers=headers)
+                response=conn.getresponse();return response.status,json.loads(response.read())
+            finally: conn.close()
+        try:
+            for headers in ({'Origin':'https://other.test'},{'X-DVR-Token':'wrong'},{'Host':'localhost'}):
+                self.assertEqual(request(**headers)[0],403)
+            self.assertEqual(list((self.root/'recordings').glob('import-*')),[])
+            status,first=request();self.assertEqual(status,201);self.assertFalse(first['reused'])
+            status,again=request();self.assertEqual(status,201);self.assertTrue(again['reused'])
+            self.assertEqual(first['recording']['id'],again['recording']['id'])
+            self.assertIsNone(jobs.job)
+            self.assertEqual(request(**{'Content-Type':'text/plain'})[0],400)
+            jobs.allow_import=False
+            self.assertEqual(request()[0],403)
+        finally:
+            server.shutdown();server.server_close();thread.join();jobs.close()

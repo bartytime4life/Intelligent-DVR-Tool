@@ -25,7 +25,7 @@ from .model_profiles import validate_binding
 from .rules import Rule, RuleEngine
 from .local_feeds import Feeds, FeedError, load_sources
 from .result_store import ResultStore, VIDEO_BYTES, REVIEW_BYTES as RESULT_BYTES, EXTENSIONS
-from .recording_import import import_recording, ImportError as RecordingImportError, MAX_IMPORT_BYTES
+from .recording_import import import_recording, ImportError as RecordingImportError, MAX_IMPORT_BYTES, MIMES as IMPORT_MIMES
 
 ROOT = Path(__file__).resolve().parents[1]
 MODEL_BYTES = VIDEO_BYTES
@@ -152,7 +152,9 @@ class Jobs:
                 raise JobError('IMPORT_DISABLED', 'Restart the local app with --allow-recording-import to save selected recordings here.', 403)
             if self.closed or (self.job and self.job['state'] not in TERMINAL):
                 raise JobError('BUSY', 'Wait for the current analysis to finish before importing a recording.', 409)
-            if len(self.available()['recordings']) >= 200:
+            listed = self.available()['recordings']
+            expected_name = 'import-' + expected_hash + IMPORT_MIMES.get(mime, '')
+            if len(listed) >= 200 and not any(item['name'] == expected_name for item in listed):
                 raise JobError('CATALOG_FULL', 'The recording catalog is full. Move older files locally and refresh choices before importing.', 409)
             try:
                 file, reused = import_recording(self.recordings, stream, length, mime, expected_hash)
