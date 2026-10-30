@@ -6,6 +6,7 @@ test('webcam clip to local import, native analysis, verified report and portable
   await expect(page.getByRole('button',{name:'Record webcam clip',exact:true})).toBeDisabled();
   await page.getByRole('button',{name:'Connect source',exact:true}).first().click();
   await page.getByRole('button',{name:'Connect webcam',exact:true}).click();
+  await expect(page.locator('.feed-setup-body [role="status"]')).toContainText('Webcam preview · audio off');
   await page.getByRole('button',{name:'View camera wall',exact:true}).click();
   await page.getByRole('button',{name:'Record webcam clip',exact:true}).click();
   await expect(page.getByText('● Recording webcam clip',{exact:true})).toBeVisible();
