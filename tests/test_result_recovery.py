@@ -50,6 +50,40 @@ class RecoveryTest(unittest.TestCase):
         self.assertEqual(recovered.artifact(job['id'], 'source')[0].read_bytes(), original)
         self.assertIsNone(recovered.thread)
 
+    def test_inspection_preserves_completed_and_interrupted_bytes(self):
+        from edge.pc_setup import persistence_check
+        service, _ = self.completed(); service.close()
+        def snapshot():
+            return {p.relative_to(self.root/'state').as_posix(): (p.read_bytes(), p.stat().st_mode)
+                    for p in (self.root/'state').rglob('*') if p.is_file()}
+        before = snapshot()
+        self.assertEqual(persistence_check(self.root/'state')['recovery'], 'completed')
+        self.assertEqual(snapshot(), before)
+        state = self.root/'state/state.json'; record = json.loads(state.read_text())
+        record['job'].update(state='running',phase='analyzing',result_state=None,error=None)
+        record['artifacts'] = None; state.write_text(json.dumps(record))
+        before = snapshot()
+        self.assertEqual(persistence_check(self.root/'state')['recovery'], 'SERVICE_INTERRUPTED on start')
+        self.assertEqual(snapshot(), before)
+
+    def test_inspection_refuses_live_owner_corruption_and_invalid_paths(self):
+        from edge.pc_setup import persistence_check
+        service, _ = self.completed()
+        with self.assertRaises(ValueError): persistence_check(self.root/'state')
+        service.close()
+        state = self.root/'state/state.json'; state.write_text('{broken')
+        with self.assertRaises(ValueError): persistence_check(self.root/'state')
+        self.assertEqual(state.read_text(), '{broken')
+        for mode in (0o755, 0o500):
+            folder = self.root/str(mode); folder.mkdir(mode=mode)
+            with self.assertRaises(ValueError): persistence_check(folder)
+            folder.chmod(0o700)
+        with self.assertRaises(ValueError): persistence_check(self.root/'missing/child')
+        link = self.root/'linked'; link.symlink_to(self.root/'state', target_is_directory=True)
+        with self.assertRaises(ValueError): persistence_check(link)
+        with patch('edge.result_store.os.getuid', return_value=os.getuid()+1):
+            with self.assertRaises(ValueError): persistence_check(self.root/'state')
+
     def test_new_explicit_job_replaces_only_the_previous_retained_job(self):
         service, first = self.completed(); old = service.retained_directory
         second = self.start(service); self.finish(service)

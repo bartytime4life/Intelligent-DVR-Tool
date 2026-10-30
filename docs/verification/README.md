@@ -1,5 +1,8 @@
 # Verification index
 
+[Linux launcher recovery](launcher-recovery-2026-10-29/README.md) records opt-in
+Start/Check, non-mutating storage inspection and extracted-kit restart testing.
+
 [Recording analysis restart recovery, October 29](analysis-recovery-2026-10-29/README.md):
 opt-in Linux last-job storage, native interruption and browser reopen checks;
 process restart evidence, not recording or power-loss durability.

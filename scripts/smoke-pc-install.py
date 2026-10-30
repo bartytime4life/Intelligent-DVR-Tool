@@ -21,7 +21,7 @@ def main(archive, evidence):
             bundle.extractall(directory)
         root = Path(directory) / 'Intelligent-DVR-PC'
         env = {**os.environ, 'DVR_NONINTERACTIVE':'1', 'DVR_PYTHON':sys.executable}
-        for key in ('DVR_FEEDS_CONFIG', 'DVR_RECORDINGS', 'DVR_ANALYSIS_CONFIG', 'DVR_PORT'):
+        for key in ('DVR_FEEDS_CONFIG', 'DVR_RECORDINGS', 'DVR_ANALYSIS_CONFIG', 'DVR_PORT', 'DVR_STATE_DIR', 'DVR_GEO_LOCAL'):
             env.pop(key, None)
         is_windows = sys.platform == 'win32'
         def launch(action, *extra, ps=False):
@@ -105,6 +105,11 @@ def main(archive, evidence):
                  'physical_devices':'not_tested','camera_connections':0,'inference_jobs':0}
         (evidence/'summary.json').write_text(json.dumps(summary,indent=2)+'\n',encoding='utf-8')
         print(json.dumps(summary),flush=True)
+        if not is_windows:
+            harness = Path(__file__).resolve().with_name('smoke-pc-recovery.py')
+            fixture = harness.parent.parent/'tests/local_analysis_fixture.py'
+            subprocess.run([sys.executable, harness, '--installation', root, '--fixtures', fixture,
+                            '--evidence', evidence/'recovery'], check=True, timeout=240, env=env)
 
 
 if __name__=='__main__':
