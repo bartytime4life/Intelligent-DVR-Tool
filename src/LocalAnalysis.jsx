@@ -1,7 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { activeJob, analysisRequest, localAnalysisOrigin, openJobResult } from './local-analysis.mjs';
+import { activeJob, analysisRequest, localAnalysisOrigin, openJobResult, importRecording } from './local-analysis.mjs';
+import { downloadBlob } from './clip-capture.mjs';
 
-export default function LocalAnalysis({ onResult, onBusy }) {
+export default function LocalAnalysis({ onResult, onBusy, clip, onClip }) {
   const [catalog, setCatalog] = useState(null), [job, setJob] = useState(null);
   const [recording, setRecording] = useState(''), [model, setModel] = useState(''), [rules, setRules] = useState('');
   const [error, setError] = useState(''), [message, setMessage] = useState(''), [working, setWorking] = useState(false);
@@ -42,6 +43,21 @@ export default function LocalAnalysis({ onResult, onBusy }) {
       // A lost response is ambiguous: reconnect to the retained job before retrying.
       setConnected(false); setMessage(''); setError(`${err.message} Reconnect to check whether the job started.`);
     } finally { setWorking(false); }
+  }
+  async function addRecording(file, captured = false) {
+    if (!file || busy || !connected || !catalog?.recording_import?.enabled) return;
+    const ticket = version.current;
+    setWorking(true); setError(''); setMessage('Verifying and saving this recording on this computer…');
+    try {
+      const signal = AbortSignal.any([controller.current.signal, AbortSignal.timeout(35000)]);
+      const result = await importRecording(file, token.current, signal);
+      const value = await request('/session');
+      if (ticket !== version.current) return;
+      token.current = value.token; setCatalog(value); setJob(value.job); setRecording(result.recording.id);
+      setMessage('Recording saved and selected. Choose rules, then press Analyze recording. No inference has started.');
+      if (captured) onClip(null);
+    } catch (err) { if (ticket === version.current) { setConnected(false); setMessage(''); setError(`${err.message} Reconnect and retry the same file if needed; saved imports are reused.`); } }
+    finally { if (ticket === version.current) setWorking(false); }
   }
   async function cancel() {
     setWorking(true); setError('');
@@ -90,7 +106,18 @@ export default function LocalAnalysis({ onResult, onBusy }) {
       <button className="button" disabled={!local || working || opening || (connected && Boolean(activeJob(job)))} onClick={connect}>{connected ? 'Refresh choices' : 'Connect local analysis'}</button>
       {!catalog && <a href="https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/local-analysis-service.md" target="_blank" rel="noreferrer">Local setup guide</a>}
     </div>
+    {clip && <div className="recording-import">
+      <strong>Webcam clip ready</strong><p>{clip.name} · {(clip.blob.size/1024**2).toFixed(1)} MiB. Save or import before closing the page.</p>
+      <div className="local-analysis-actions"><button className="button" onClick={() => downloadBlob(clip.blob, clip.name)}>Save clip</button>
+        <button className="button amber" disabled={busy || !connected || !catalog?.recording_import?.enabled} onClick={() => addRecording(new File([clip.blob], clip.name, {type:clip.blob.type}), true)}>Import webcam clip</button>
+        <button className="text-button" disabled={busy} onClick={() => onClip(null)}>Discard clip</button></div>
+    </div>}
     {catalog && <>
+      <div className="recording-import">
+        {catalog.recording_import?.enabled ? <><label className="button">Import recording from this computer<input type="file" accept="video/*,.avi,.mkv" disabled={busy || !connected} aria-label="Import local recording" onChange={e => { const file=e.target.files?.[0]; e.target.value=''; void addRecording(file); }} /></label>
+          <p>Copies your selected file to this local app’s recording folder. Up to 64 MiB per file; 20 imports / 512 MiB total. Originals stay unchanged. Saved imports remain until you move or delete them locally.</p></> :
+          <p>Recording import is disabled. The local launcher’s <code>--allow-recording-import</code> option enables explicit same-computer file copies. You can still use the configured folder below.</p>}
+      </div>
       <fieldset disabled={busy || !connected} className="local-analysis-fields">
         <label>Recording<select aria-label="Recording to analyze" value={recording} onChange={e => setRecording(e.target.value)}><option value="">Choose a recording…</option>{catalog.recordings.map(r => <option key={r.id} value={r.id}>{r.name} · {(r.bytes/1024**2).toFixed(1)} MiB</option>)}</select></label>
         <label>Model<select aria-label="Analysis model" value={model} onChange={e => setModel(e.target.value)}>{catalog.models.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}</select></label>

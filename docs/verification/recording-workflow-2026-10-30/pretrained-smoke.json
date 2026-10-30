@@ -1,0 +1,15 @@
+{
+  "input": "30 generated VP8 frames; not recognition accuracy evidence",
+  "model_sha256": "c5c2d13e59ae883e6af3b45daea64af4833a4951c92d116ec270d9ddbe998063",
+  "source_sha256": "994170683769f4135585dbac2c88a846449fb07b6d90afbf518f7c3fbdb34a54",
+  "state": "completed",
+  "frames_read": 30,
+  "frames_analyzed": 6,
+  "backend": "opencv-cpu",
+  "timing": {
+    "scope": "local inference and postprocessing only; not end-to-end camera latency",
+    "p50_ms": 426.1744635005016,
+    "p95_ms": 631.4735310006654
+  },
+  "elapsed_seconds": 3.294
+}

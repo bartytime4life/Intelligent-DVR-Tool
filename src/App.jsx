@@ -248,6 +248,14 @@ export function App() {
     [note, setNote] = useState(""),
     [video, setVideo] = useState(null);
   const [liveCount, setLiveCount] = useState(0);
+  const [capturedClip, setCapturedClip] = useState(null);
+  const [capturePending, setCapturePending] = useState(false);
+  useEffect(() => {
+    if (!capturedClip && !capturePending) return;
+    const warn = event => { event.preventDefault(); event.returnValue = ''; };
+    window.addEventListener('beforeunload', warn);
+    return () => window.removeEventListener('beforeunload', warn);
+  }, [capturedClip, capturePending]);
   const [recognitionOpened, setRecognitionOpened] = useState(tab === "Recognition");
   const [clearedEvents, setClearedEvents] = useState(null);
   const [eventMode, setEventMode] = useState("all");
@@ -449,12 +457,12 @@ export function App() {
           <button className="button" onClick={() => download({schema:"intelligent-dvr.rules.v1", rules}, "dvr-rules.json")}>Export rules</button>
         </div>}
         {recognitionOpened && <div hidden={tab !== "Recognition"}><Suspense fallback={<div className="content-page"><h1>Opening recognition review…</h1></div>}>
-          <RecognitionReview active={tab === "Recognition" && !pageHidden} onImport={addObservations} />
+          <RecognitionReview active={tab === "Recognition" && !pageHidden} onImport={addObservations} clip={capturedClip} onClip={setCapturedClip} reviews={events} />
         </Suspense></div>}
         {tab === "Facility" && <Suspense fallback={<div className="content-page"><h1>Opening facility builder…</h1></div>}><FacilityBuilder onPreviewCount={setLiveCount} /></Suspense>}
         {tab === "System" && <Suspense fallback={<div className="content-page"><h1>Opening machine setup…</h1></div>}><SystemSetup setup={resources}
           onApply={setup => setResourceState({ setup, error: "" })} storageError={resourceState.error} download={download} /></Suspense>}
-        {tab === "Monitor" && <LiveMonitor visibleTiles={resources.browser.visibleTiles} onCount={setLiveCount} pageHidden={pageHidden} queue={
+        {tab === "Monitor" && <LiveMonitor visibleTiles={resources.browser.visibleTiles} onCount={setLiveCount} pageHidden={pageHidden} clip={capturedClip} onClip={setCapturedClip} capturePending={capturePending} onCaptureBusy={setCapturePending} onReviewClip={() => setTab('Recognition')} queue={
               <aside className="review-queue">
                 <div className="queue-heading">
                   <h2>
@@ -842,7 +850,7 @@ export function App() {
         <Info size={21} />
         <strong>{liveCount ? `${liveCount} receiving` : 'No camera preview active'}</strong>
         <span className="footer-divider" />
-        <span>Camera previews do not record or run AI. Analyze recordings in Recognition.</span>
+        <span>Record a webcam clip explicitly, then analyze it in Recognition. Live previews do not run AI.</span>
         <span className="footer-end">Edge-first. Human-reviewed.</span>
       </footer>
       <input
@@ -980,7 +988,7 @@ export function App() {
             duration rule. It is not a judgment about a person’s intent.
           </p>
           <p>
-            Recognition can analyze a selected local recording with a configured model and rules. Live camera previews do not record, run AI or track people.
+            Recognition can analyze a selected local recording with a configured model and rules. Monitor can explicitly capture a short webcam clip. Live previews do not run AI or track people.
           </p>
           <div className="notice">
             <WarningCircle size={21} />

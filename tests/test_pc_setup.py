@@ -151,12 +151,28 @@ class PcSetupTest(unittest.TestCase):
                 patch('os.execv', side_effect=SystemExit(0)) as execute:
             with self.assertRaises(SystemExit):
                 pc.main(['--analysis','--recordings',str(self.root),'--config',str(self.root/'catalog.json'),
-                         '--feeds-config',str(feeds),'--state-dir',str(state),'--port','4199','--no-browser'])
+                         '--feeds-config',str(feeds),'--state-dir',str(state),'--port','4199','--no-browser','--allow-recording-import'])
         args = execute.call_args.args[1]
         self.assertEqual(args[args.index('--state-dir')+1], str(state))
         self.assertEqual(args[args.index('--port')+1], '4199')
         self.assertNotIn('--open-browser', args)
+        self.assertIn('--allow-recording-import', args)
         self.assertFalse(state.exists())
+
+    def test_prepared_analysis_paths_are_selected_only_on_explicit_analysis(self):
+        self.write('local-analysis/catalog.json', b'{}')
+        feeds=self.write('local-feeds.json', b'{"sources":[]}')
+        with patch.dict(os.environ, {}, clear=True), patch.object(pc, 'ROOT', self.root), patch.object(pc, 'host_check'), \
+                patch.object(pc.sys, 'platform', 'linux'), patch.object(pc, 'verify_kit'), patch.object(pc, 'built_interface'), \
+                patch.object(pc, 'validate_environment', return_value=Path('/python')), \
+                patch('os.execv', side_effect=SystemExit(0)) as execute:
+            with self.assertRaises(SystemExit): pc.main(['--analysis','--allow-recording-import','--no-browser'])
+            args=execute.call_args.args[1]
+            self.assertEqual(args[args.index('--recordings')+1],str(self.root/'local-analysis/recordings'))
+            self.assertEqual(args[args.index('--config')+1],str(self.root/'local-analysis/catalog.json'))
+            with self.assertRaises(SystemExit): pc.main(['--no-browser'])
+            self.assertNotIn('--config',execute.call_args.args[1])
+            self.assertEqual(pc.main(['--allow-recording-import']),1)
 
     def test_temporary_override_bypasses_state_without_deleting_it(self):
         feeds = self.write('feeds.json', b'{"sources":[]}')

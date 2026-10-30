@@ -5,7 +5,13 @@ playback controls or new sample events. Existing reviewed sample records remain
 readable as legacy samples without invented evidence.
 
 Connect a built-in/USB webcam or a configured RTSP channel explicitly. Previews
-are video-only: they do not record, run detection or track people. The separate
+are video-only: preview alone does not record, run detection or track people.
+Monitor now offers an explicit **Record webcam clip** action for the connected
+browser webcam. It requests a stop at 60 seconds, keeps at most 64 MiB, and
+passes only video tracks to the recorder. Leaving Monitor, hiding the page or
+disconnecting stops capture. Save the clip or import it into the local analyzer;
+the browser copy is lost on reload/close. RTSP and public sources remain previews.
+See [capture through reporting](recording-workflow.md). The separate
 [Recognition workflow](local-analysis-service.md) analyzes selected recordings
 with the existing analyzer and verified review-bundle contract.
 

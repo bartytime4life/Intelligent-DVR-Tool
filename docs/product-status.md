@@ -1,5 +1,12 @@
 # Product status and evidence
 
+October 30 recording-workflow candidate: explicit browser-webcam clips, opt-in
+same-computer recording import, pinned local model preparation, and printable
+HTML/JSON/CSV reporting now join preview to human review. See the
+[workflow and storage limits](recording-workflow.md). Native local checks include
+the actual pinned pretrained model on generated video; physical-camera accuracy,
+continuous recording/live AI and 100-camera acceptance remain unqualified.
+
 [PC test installation](pc-testing.md) provides a prebuilt kit, pinned isolated CPU dependencies,
 readiness diagnostics and separate Install/Check/Start actions. CI installation
 checks do not establish compatibility with a particular physical PC or camera.

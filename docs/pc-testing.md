@@ -250,3 +250,32 @@ This is packaging for PC testing, not unattended DVR deployment. Record OS, kit
 revision, browser, device/firmware, codec/resolution and outcomes locally.
 Physical-device compatibility, sustained operation, recording/retention, live AI,
 tracking, independent detection quality and 100-camera capacity remain separate work.
+## Prepare recording recognition
+
+After installation, select your already downloaded, pinned OpenCV Zoo YOLOX-S
+ONNX file. Setup verifies its exact size and SHA-256, copies it into a new private
+`local-analysis` folder, installs the 80-class labels and whole-frame person
+presence rules, and creates a recording inbox. No download, camera connection or
+inference starts. Existing analysis folders are preserved and never overwritten.
+
+Linux:
+
+```bash
+bash scripts/run-linux.sh --prepare-analysis /absolute/path/to/yolox-s.onnx
+bash scripts/run-linux.sh --analysis --allow-recording-import
+```
+
+Windows PowerShell:
+
+```powershell
+.\scripts\Start-IntelligentDvr.ps1 -PrepareAnalysis 'C:\Models\yolox-s.onnx'
+.\scripts\Start-IntelligentDvr.ps1 -Analysis -AllowRecordingImport
+```
+
+Use `--check --analysis` / `-Check -Analysis` to validate the prepared catalog.
+Explicit `--recordings` and `--config` / `-Recordings` and `-AnalysisConfig`
+continue to support custom configurations. Recovery remains opt-in on Linux;
+add its existing `--state-dir` option when wanted. See
+[capture, analysis, reporting and retention](recording-workflow.md). The pinned
+model source and license are recorded in
+[`edge/candidates/opencv-zoo-yolox-s-2022nov.json`](../edge/candidates/opencv-zoo-yolox-s-2022nov.json).
