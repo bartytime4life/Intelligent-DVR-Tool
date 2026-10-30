@@ -69,3 +69,22 @@
 .local-analysis .local-analysis-footnote { color: #9fadb8; font-size: 12px; margin-top: 18px; }
 .recognition-import-heading { margin-top: 30px; font-size: 16px; }
 @media(max-width: 760px) { .local-analysis-fields { grid-template-columns: minmax(0,1fr); } .local-analysis-heading { display: block; } .local-analysis-badge { display: inline-block; margin-bottom: 14px; } .local-analysis { padding: 18px; } }
+.recording-import { margin:16px 0; padding:16px; border:1px solid #34564f; border-radius:8px; overflow-wrap:anywhere; }
+.recording-import label.button { position:relative; overflow:hidden; }
+.recording-import input[type=file] { position:absolute; inset:0; opacity:0; width:100%; cursor:pointer; }
+.recording-import label:focus-within { outline:2px solid #58dccd; outline-offset:3px; }
+.recognition-report { margin:24px 0; padding:24px; border:1px solid #34564f; border-radius:12px; background:#142528; }
+.recognition-report p { color:#b4c1cb; font-size:13px; line-height:1.6; margin:14px 0; }
+.report-metrics { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; margin:16px 0; }
+.report-metrics > div { padding:16px; border:1px solid #304450; border-radius:8px; background:#101d27; }
+.report-metrics strong { display:block; color:#8be9d9; font-size:28px; font-weight:500; }
+.report-metrics span { display:block; color:#b4c1cb; font-size:12px; margin-top:6px; }
+.report-table-wrap { overflow-x:auto; }
+.recognition-report table { width:100%; border-collapse:collapse; font-size:13px; text-align:left; }
+.recognition-report th,.recognition-report td { padding:12px; border-bottom:1px solid #304450; }
+.recognition-report th { color:#b4c1cb; }
+.report-timeline { display:flex; align-items:stretch; gap:2px; height:70px; padding:8px; background:#101d27; border-radius:8px; }
+.report-timeline button { flex:1; min-width:0; border:0; padding:0; background:transparent; display:flex; align-items:end; cursor:pointer; }
+.report-timeline button span { width:100%; background:#5bbdaf; min-height:3px; border-radius:2px; }
+.report-timeline button:focus-visible { outline:2px solid #e4b975; outline-offset:2px; }
+@media(max-width:600px) { .report-metrics { grid-template-columns:repeat(2,minmax(0,1fr)); } .recognition-report { padding:16px; } .recognition-report th,.recognition-report td { padding:8px; } }

@@ -12,8 +12,9 @@ A local camera-analysis foundation and visual review prototype from BARTA AI Sol
 
 **Local previews and recording review.** Monitor starts empty and can explicitly
 connect a browser webcam or a configured local DVR RTSP channel. Camera previews
-do not record or run AI. Recognition can analyze a selected local recording with
-progress, cancellation and source-matched results.
+do not run AI. Explicit webcam clip capture now connects Monitor to local recording
+import, analysis, human review and downloadable reports. Recognition provides
+progress, cancellation and source-matched results. [Complete recording workflow](docs/recording-workflow.md).
 
 [Connect a webcam or DVR](docs/local-camera-feeds.md) · [Analyze a recording](docs/local-analysis-service.md)
 

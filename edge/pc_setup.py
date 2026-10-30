@@ -304,9 +304,11 @@ def main(argv=None):
     modes = parser.add_mutually_exclusive_group()
     modes.add_argument('--install', action='store_true')
     modes.add_argument('--check', action='store_true')
+    modes.add_argument('--prepare-analysis', type=Path, metavar='MODEL_ONNX', help='Prepare local analysis from the pinned existing YOLOX-S model; no download or inference')
     modes.add_argument('--native-probe', action='store_true', help=argparse.SUPPRESS)
     parser.add_argument('--feeds', action='store_true', help='Compatibility alias; the local feed service is the default')
     parser.add_argument('--analysis', action='store_true')
+    parser.add_argument('--allow-recording-import', action='store_true', help='Enable explicit same-computer recording imports (64 MiB per file)')
     parser.add_argument('--facility', action='store_true', help='Source-only Vite preview, preserving opt-in local geo delivery')
     parser.add_argument('--feeds-config', type=Path, default=Path(os.environ.get('DVR_FEEDS_CONFIG') or ROOT / 'local-feeds.json'))
     parser.add_argument('--recordings', type=Path, default=os.environ.get('DVR_RECORDINGS') or None)
@@ -323,10 +325,25 @@ def main(argv=None):
         if args.native_probe:
             print(json.dumps(native_probe()))
             return 0
+        if args.prepare_analysis:
+            verify_kit()
+            from .prepare_analysis import prepare
+            try:
+                prepare(args.prepare_analysis)
+            except ValueError as exc:
+                raise SetupError(str(exc)) from None
+            print('Analysis prepared: pinned YOLOX-S, 80 class labels and whole-frame person-presence rules. No inference or camera was started.')
+            print('Start with --analysis --allow-recording-import. Review the configured rules before use.')
+            return 0
         if not 1024 <= args.port <= 65535:
             raise SetupError('Use a port from 1024 to 65535.')
+        if args.analysis and not args.recordings and not args.config and (ROOT / 'local-analysis/catalog.json').is_file():
+            args.recordings = ROOT / 'local-analysis/recordings'
+            args.config = ROOT / 'local-analysis/catalog.json'
         if args.analysis and (not args.recordings or not args.config):
             raise SetupError('Supply --recordings and --config together for recording analysis.')
+        if args.allow_recording_import and (not args.recordings or not args.config):
+            raise SetupError('--allow-recording-import requires recording analysis configuration.')
         if args.report and not args.check:
             raise SetupError('--report is available with --check only.')
         state_dir = None if args.temporary else args.state_dir or (Path(os.environ['DVR_STATE_DIR']) if os.environ.get('DVR_STATE_DIR') and not args.install else None)
@@ -374,6 +391,8 @@ def main(argv=None):
             if not args.recordings or not args.config:
                 raise SetupError('Supply the recording folder and analysis catalog together.')
             service += ['--recordings', str(args.recordings), '--config', str(args.config)]
+        if args.allow_recording_import:
+            service.append('--allow-recording-import')
         if state_dir is not None:
             try:
                 persistence_check(state_dir)

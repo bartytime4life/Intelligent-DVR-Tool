@@ -74,7 +74,14 @@ is performed by System or the supplied launchers.
 
 ## Local recording job service
 
-The optional `edge.local_service` binds only to `127.0.0.1`, checks exact Host and browser origin, and requires a per-service token for jobs and artifacts. It accepts opaque catalog selections, never uploaded footage or client paths/commands. One isolated CPU worker invokes the existing analyzer with bounded local snapshots, time, memory, threads and frame/output limits. It is single-user software for owner-approved recordings and hash-pinned models, not a hostile-model sandbox. See [the full boundary and shutdown/recovery behavior](docs/local-analysis-service.md).
+The optional `edge.local_service` binds only to `127.0.0.1`, checks exact Host and browser origin, and requires a per-service token for jobs and artifacts. It accepts opaque catalog selections, never client paths/commands. An explicit `--allow-recording-import` switch enables same-computer file copies with a 64 MiB per-file cap, 20-file/512 MiB inbox limits, 64 MiB free-space reserve, container-header and SHA-256 verification, exclusive publication, and idempotent content-derived names. Imports do not start inference. A folder lock serializes imports across services; a crash can leave a lock/partial file requiring local inspection. No remote upload endpoint or cloud inference is added. One isolated CPU worker invokes the existing analyzer with bounded local snapshots, time, memory, threads and frame/output limits. It is single-user software for owner-approved recordings and hash-pinned models, not a hostile-model sandbox. See [the full boundary and shutdown/recovery behavior](docs/local-analysis-service.md).
+
+Webcam clip capture uses only the connected video track. It requests a stop at
+60 seconds and discards clips exceeding 64 MiB; browser scheduling/encoder
+allocations are not hard real-time or OS-memory guarantees. No microphone is
+requested. Printable reports escape all source/label/rule/note strings, use a
+no-network content security policy, and contain no scripts. CSV cells neutralize
+formula-leading text. Reports may contain private notes; exports are explicit.
 
 ## Local camera preview boundary
 

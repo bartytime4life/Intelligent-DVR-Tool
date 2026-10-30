@@ -25,7 +25,7 @@ not calibrated camera feeds. The browser performs no neural-network inference.
 
 | Component | Source | Role |
 | --- | --- | --- |
-| Camera previews | `src/LiveMonitor.jsx`, `edge/local_feeds.py`, `edge/feed_worker.py` | Explicit browser webcam and configured LAN RTSP preview, bounded lifecycle, no recording or inference |
+| Camera previews and clips | `src/LiveMonitor.jsx`, `src/clip-capture.mjs`, `edge/local_feeds.py`, `edge/feed_worker.py` | Explicit browser webcam and LAN RTSP preview; optional video-only browser webcam clip capture; no live inference |
 | Workspace | `src/App.jsx`, `src/data.mjs` | Review, rules, local video preview, explicit receipt import |
 | Recording recognition | `src/RecognitionReview.jsx`, `src/recognition.mjs` | Explicit review bundle, original-file hash matching, paused sampled detections/counts and Event handoff; connects to the optional same-origin local job API |
 | Facility model | `src/facility.mjs` | Bounded plan validation, local-meter projection, estimated visibility and rehearsal |
@@ -44,7 +44,7 @@ not calibrated camera feeds. The browser performs no neural-network inference.
 | Use sample workspace | Browser memory/localStorage | Generated artwork is not real evidence |
 | Preview a local video | Local browser object URL | Preview is not analysis; no upload is implemented |
 | Open recognition results + matching recording | Transient browser memory and local object URL | SHA-256 match before attachment; metadata and video never uploaded; selected observations can be explicitly imported into localStorage |
-| Start local analysis job | One explicit local folder, frozen input snapshots and same-computer HTTP result transfer; optional Linux private last-job recovery | Token/Host/origin checks; no uploads or cloud inference; [restart storage](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/local-analysis-service.md#optional-linux-restart-recovery) is not continuous recording or a durable human-review database |
+| Start local analysis job | One explicit local folder, frozen input snapshots and same-computer HTTP result transfer; optional Linux private last-job recovery | Token/Host/origin checks; opt-in bounded same-computer recording import, no cloud inference; [restart storage](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/local-analysis-service.md#optional-linux-restart-recovery) is not continuous recording or a durable human-review database |
 | Run analyzer | Explicit local output files | No camera capture or model download |
 | Import receipt/plan | Browser memory/localStorage after validation | Bounds and declared fields are checked |
 | Export reviews/rules/plan | Explicit browser download | User-controlled file copies |

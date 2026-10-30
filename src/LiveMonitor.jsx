@@ -2,9 +2,10 @@ import React, {useEffect, useRef, useState} from 'react';
 import {Camera, Plus, Plug, PlugsConnected, X, ArrowClockwise, WarningCircle, Globe} from '@phosphor-icons/react';
 import {feedRequest, localFeedOrigin, webcamController, visibleFeedTiles} from './live-feeds.mjs';
 import './live-feeds.css';
+import ClipCapture from './ClipCapture.jsx';
 
 const guide = 'https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/local-camera-feeds.md';
-export default function LiveMonitor({queue, visibleTiles=4, onCount, pageHidden}) {
+export default function LiveMonitor({queue, visibleTiles=4, onCount, pageHidden, clip, onClip, onReviewClip, capturePending, onCaptureBusy}) {
   const [webcam, setWebcam] = useState({state:'disconnected', message:'No webcam connected'});
   const [devices, setDevices] = useState([]), [device, setDevice] = useState('');
   const [catalog, setCatalog] = useState(null), [source, setSource] = useState('');
@@ -146,7 +147,8 @@ export default function LiveMonitor({queue, visibleTiles=4, onCount, pageHidden}
       <div className="review-actions"><button className="button" disabled={!active} onClick={() => stopAll()}>Disconnect all</button>
         <button className="button amber" onClick={() => openSetup()} disabled={active >= 4}><Plus />Connect source</button></div></div>
     <div className="live-boundary"><span className={`connection-dot ${live ? 'receiving' : ''}`} />
-      <span>{live ? 'Receiving source images' : 'Connect a webcam, local DVR or approved public webcam'}</span><span className="live-scope">Preview only · audio off · no recording or live AI</span></div>
+      <span>{live ? 'Receiving source images' : 'Connect a webcam, local DVR or approved public webcam'}</span><span className="live-scope">Audio off · clip recording is explicit · no live AI</span></div>
+    <ClipCapture stream={webcam.stream} hidden={pageHidden} clip={clip} onClip={onClip} onReview={onReviewClip} capturePending={capturePending} onCaptureBusy={onCaptureBusy} />
     {error && !setup && <p className="feed-error" role="alert"><WarningCircle />{error}</p>}
     <div className="monitor-layout">
       <section className={`camera-wall wall-${Math.min(4, visibleTiles)}`} aria-label="Camera wall">

@@ -1,4 +1,4 @@
-"""Explicit loopback app and recording job service. No uploads; explicit LAN camera previews are optional."""
+"""Explicit loopback jobs and previews; bounded recording import is opt-in."""
 import argparse
 import hashlib
 import hmac
@@ -25,6 +25,7 @@ from .model_profiles import validate_binding
 from .rules import Rule, RuleEngine
 from .local_feeds import Feeds, FeedError, load_sources
 from .result_store import ResultStore, VIDEO_BYTES, REVIEW_BYTES as RESULT_BYTES, EXTENSIONS
+from .recording_import import import_recording, ImportError as RecordingImportError, MAX_IMPORT_BYTES
 
 ROOT = Path(__file__).resolve().parents[1]
 MODEL_BYTES = VIDEO_BYTES
@@ -95,11 +96,12 @@ def load_catalog(config):
 
 
 class Jobs:
-    def __init__(self, recordings, catalog, *, wall_seconds=300, process_factory=subprocess.Popen, state_dir=None):
+    def __init__(self, recordings, catalog, *, wall_seconds=300, process_factory=subprocess.Popen, state_dir=None, allow_import=False):
         recordings = Path(recordings).absolute()
         if not recordings.is_dir() or any(p.is_symlink() for p in (recordings, *recordings.parents)):
             raise ValueError('Select a regular local recordings directory without symlinks')
         self.recordings, self.catalog = recordings, catalog
+        self.allow_import = allow_import
         self.wall_seconds = min(300, max(.1, wall_seconds))
         self.process_factory = process_factory
         self.lock = threading.RLock()
@@ -140,8 +142,27 @@ class Jobs:
             return {'recordings': [{'id': key, 'name': p.name, 'bytes': sig[2]} for key, (p, sig) in choices.items()],
                     'models': models, 'rules': rules, 'limits': LIMITS,
                     'backend': 'opencv-cpu', 'job': self.snapshot(),
+                    'recording_import': {'enabled': self.allow_import, 'max_bytes': MAX_IMPORT_BYTES},
                     'retention': 'private-local-last-job' if self.store else 'temporary-until-service-exit',
                     'ready': all(importlib.util.find_spec(x) is not None for x in ('cv2', 'numpy'))}
+
+    def receive_recording(self, stream, length, mime, expected_hash):
+        with self.lock:
+            if not self.allow_import:
+                raise JobError('IMPORT_DISABLED', 'Restart the local app with --allow-recording-import to save selected recordings here.', 403)
+            if self.closed or (self.job and self.job['state'] not in TERMINAL):
+                raise JobError('BUSY', 'Wait for the current analysis to finish before importing a recording.', 409)
+            if len(self.available()['recordings']) >= 200:
+                raise JobError('CATALOG_FULL', 'The recording catalog is full. Move older files locally and refresh choices before importing.', 409)
+            try:
+                file, reused = import_recording(self.recordings, stream, length, mime, expected_hash)
+                catalog = self.available()
+                recording = next(item for item in catalog['recordings'] if item['name'] == file.name)
+                return {'recording': recording, 'sha256': expected_hash, 'reused': reused}
+            except RecordingImportError as exc:
+                raise JobError('IMPORT_REFUSED', str(exc)) from None
+            except (OSError, StopIteration):
+                raise JobError('IMPORT_STORAGE', 'Could not publish the recording. Check disk space and permissions; refresh choices before retrying the same file.', 507) from None
 
     def snapshot(self, job_id=None):
         with self.lock:
@@ -414,6 +435,14 @@ class Handler(BaseHTTPRequestHandler):
             return self._json({'token': self.server.token, **feeds.available()})
         if self.command == 'GET' and path == '/api/analysis/session':
             return self._json({'token': jobs.token, **jobs.available()})
+        if self.command == 'POST' and path == '/api/analysis/recordings':
+            # Authentication and same-origin checks above run before reading bytes.
+            lengths = self.headers.get_all('Content-Length') or []
+            if self.headers.get('Transfer-Encoding') or len(lengths) != 1 or not lengths[0].isdigit():
+                raise JobError('BODY', 'Use a recording with one bounded Content-Length.')
+            if len(self.headers.get_all('Content-Type') or []) != 1 or len(self.headers.get_all('X-DVR-SHA256') or []) != 1:
+                raise JobError('BODY', 'Use one video content type and fingerprint.')
+            return self._json(jobs.receive_recording(self.rfile, int(lengths[0]), self.headers['Content-Type'], self.headers['X-DVR-SHA256']), 201)
         if self.command == 'POST':
             if self.headers.get('Transfer-Encoding') or self.headers.get_all('Content-Length') is None or len(self.headers.get_all('Content-Length')) != 1:
                 raise JobError('BODY', 'Use a bounded JSON request.')
@@ -480,6 +509,7 @@ def main(argv=None):
     parser.add_argument('--recordings', type=Path, help='Explicit local folder; direct recordings only')
     parser.add_argument('--config', type=Path, help='Local model/rule allowlist; see edge/local-analysis.example.json')
     parser.add_argument('--state-dir', type=Path, help='Opt-in Linux private last-job storage; no automatic analysis or resume')
+    parser.add_argument('--allow-recording-import', action='store_true', help='Allow explicit same-origin video imports up to 64 MiB; stored locally until manually moved or deleted')
     parser.add_argument('--feeds-config', type=Path, help='Trusted LAN RTSP channels; see edge/local-feeds.example.json')
     parser.add_argument('--port', type=int, default=4173)
     parser.add_argument('--open-browser', action='store_true', help='Open the local app after binding; never connects cameras')
@@ -488,6 +518,8 @@ def main(argv=None):
         parser.error('Use --recordings and --config together')
     if args.state_dir and not args.config:
         parser.error('--state-dir requires recording analysis configuration')
+    if args.allow_recording_import and not args.config:
+        parser.error('--allow-recording-import requires recording analysis configuration')
     if not args.config and not args.feeds_config:
         parser.error('Configure recording analysis, DVR feeds, or both')
     if not 1024 <= args.port <= 65535:
@@ -497,7 +529,7 @@ def main(argv=None):
     jobs = feeds = None
     try:
         if args.config:
-            jobs = Jobs(args.recordings, load_catalog(args.config.absolute()), state_dir=args.state_dir)
+            jobs = Jobs(args.recordings, load_catalog(args.config.absolute()), state_dir=args.state_dir, allow_import=args.allow_recording_import)
         if args.feeds_config:
             feeds = Feeds(load_sources(args.feeds_config.absolute()))
         with LocalServer(args.port, jobs, ROOT / 'dist/client', feeds) as server:

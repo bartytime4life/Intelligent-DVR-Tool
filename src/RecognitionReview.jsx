@@ -2,8 +2,9 @@ import React, { useEffect, useRef, useState } from 'react';
 import { parseRecognition, frameSummary, canShowBoxes, matchRecording, MAX_REVIEW_BYTES } from './recognition.mjs';
 import './recognition.css';
 import LocalAnalysis from './LocalAnalysis.jsx';
+import RecognitionReport from './RecognitionReport.jsx';
 
-export default function RecognitionReview({ onImport, active = true }) {
+export default function RecognitionReview({ onImport, active = true, clip, onClip, reviews = [] }) {
   const [run, setRun] = useState(null), [index, setIndex] = useState(0);
   const [source, setSource] = useState(null), [media, setMedia] = useState({});
   const [threshold, setThreshold] = useState(0.5), [status, setStatus] = useState(''), [error, setError] = useState('');
@@ -24,12 +25,12 @@ export default function RecognitionReview({ onImport, active = true }) {
     const file = event.target.files?.[0]; event.target.value = '';
     if (!file) return;
     const ticket = ++generation.current; sourceGeneration.current++;
-    setRun(null); setSource(null); setMedia({}); setError(''); setStatus('Reading recognition results…');
+    setError(''); setStatus('Reading recognition results…');
     try {
       if (file.size > MAX_REVIEW_BYTES) throw Error('Recognition results exceed 32 MiB. Split the recording before analysis.');
       const parsed = parseRecognition(JSON.parse(await file.text()));
       if (ticket !== generation.current) return;
-      setRun(parsed); setIndex(0); setStatus('Results loaded. Choose the original recording to verify and view the detections.');
+      setRun(parsed); setSource(null); setMedia({}); setIndex(0); setStatus('Results loaded. Choose the original recording to verify and view the detections.');
     } catch (err) { if (ticket === generation.current) { setError(err.message); setStatus(''); } }
   }
   async function loadVideo(event) {
@@ -65,7 +66,7 @@ export default function RecognitionReview({ onImport, active = true }) {
     <p className="eyebrow">LOCAL RECORDING · MODEL OBSERVATIONS</p>
     <h1>Recognition</h1>
     <p className="recognition-intro">See detected people and objects on the recording they came from. Inspect each sampled scene, then send observations for human review.</p>
-    <LocalAnalysis onResult={openLocalResult} onBusy={setAnalysisBusy} />
+    <LocalAnalysis onResult={openLocalResult} onBusy={setAnalysisBusy} clip={clip} onClip={onClip} />
     <h2 className="recognition-import-heading">Or open previously exported results</h2>
     <div className="recognition-loaders">
       <label className="button">1. Open recognition results<input type="file" accept=".json,application/json" onChange={loadRun} disabled={analysisBusy} aria-label="Open recognition results" /></label>
@@ -130,6 +131,7 @@ export default function RecognitionReview({ onImport, active = true }) {
           <div className="recognition-event-list">{run.receipt.events.map((e, i) => <button key={e.id} className="recognition-event" onClick={() => seek(run.eventFrames[i])}><span>+{e.seconds.toFixed(2)}s · {e.rule}</span><span>score {e.score.toFixed(2)} · View frame</span></button>)}</div>
         </> : <p>No configured rules emitted an observation in the analyzed portion. Inspect detections and rule settings before drawing conclusions.</p>}
       </div>
+      <RecognitionReport run={run} threshold={threshold} reviews={reviews} source={source} onSeek={seek} />
       <details className="recognition-provenance"><summary>Provenance and limits</summary>
         <p>Source SHA-256: <code>{run.receipt.source_sha256}</code></p>
         <p>Model SHA-256: <code>{run.receipt.model_sha256}</code></p>

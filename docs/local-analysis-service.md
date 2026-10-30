@@ -70,7 +70,7 @@ encoded bytes must never inherit another recording's boxes.
 | Jobs | One active job, no pending queue, five-minute wall deadline including preparation; cancel wins publication races |
 | CPU | Two OpenCV/native worker threads requested; 6,000 decoded frames; sample every five; 4 GiB Linux virtual-address or Windows process-commit limit; Linux CPU-time/file-size caps |
 | Results | Existing 1,000-observation, 100,000-detection, 32 MiB review contract; browser validates full contract before attaching exact source |
-| HTTP | 2 KiB JSON request; no raw footage upload; one request at a time with five-second socket timeout; output sent in fixed-size chunks |
+| HTTP | 2 KiB JSON controls; optional explicit same-computer binary import up to 64 MiB; one request at a time, five-second socket timeout, 30-second import loop deadline; chunked output |
 | Retention | Default: one private temporary recording/result snapshot until the next explicit job or graceful shutdown. Opt-in Linux storage retains the last job across service restarts; model/config snapshots are removed after processing |
 
 The retained result can be reopened with **Open results again**. Reloading the
@@ -148,6 +148,21 @@ workflow and explicitly rejects this opt-in option.
 Human review decisions remain in browser storage and exports; this store does
 not persist those decisions, capture live cameras, record continuous footage,
 qualify recognition accuracy, or establish 100-camera operation.
+
+### Explicit recording import and reports
+
+`--allow-recording-import` enables the authenticated same-origin recording-copy
+endpoint, on the direct service or Linux launcher. Windows uses
+`-AllowRecordingImport`. It requires an analysis configuration and is off by
+default. Imported files are retained separately from last-job recovery until
+manually moved/deleted; they are not deleted when a job is replaced. See the
+[workflow and exact storage bounds](recording-workflow.md).
+
+Recognition now exports printable HTML, report JSON, observation CSV, the original
+recognition bundle and the matching analyzed recording. Reports incorporate the
+current browser review decisions only when observation identities and evidence
+match. Display thresholds do not rewrite rule outcomes. Imports of invalid
+recognition bundles preserve the previous loaded review.
 
 CPU is the service's default and available fallback path; CUDA remains an explicit
 separate CLI backend with its existing no-silent-fallback policy. This service does

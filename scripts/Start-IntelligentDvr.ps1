@@ -4,6 +4,8 @@ param(
     [switch]$Install,
     [switch]$Check,
     [switch]$Analysis,
+    [switch]$AllowRecordingImport,
+    [string]$PrepareAnalysis = '',
     [switch]$Feeds,
     [switch]$Facility,
     [switch]$NoBrowser,
@@ -26,6 +28,8 @@ try {
     if ($Install) { $TaskArgs += '--install' }
     if ($Check) { $TaskArgs += '--check' }
     if ($Analysis) { $TaskArgs += '--analysis' }
+    if ($AllowRecordingImport) { $TaskArgs += '--allow-recording-import' }
+    if ($PrepareAnalysis) { $TaskArgs += @('--prepare-analysis', $PrepareAnalysis) }
     if ($Feeds) { $TaskArgs += '--feeds' }
     if ($Facility) { $TaskArgs += '--facility' }
     if ($NoBrowser) { $TaskArgs += '--no-browser' }
