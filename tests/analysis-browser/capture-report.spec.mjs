@@ -38,13 +38,30 @@ test('webcam clip to local import, native analysis, verified report and portable
 });
 
 test('explicit file import is idempotent and never starts a job automatically',async({page})=>{
-  await page.goto('/#recognition');await page.getByRole('button',{name:'Connect local analysis',exact:true}).click();
   const jobs=[];page.on('request',r=>{if(r.method()==='POST'&&r.url().endsWith('/jobs'))jobs.push(r.url());});
+  await page.goto('/#recognition');
+  const sessionResponse=page.waitForResponse(r=>new URL(r.url()).pathname==='/api/analysis/session');
+  await page.getByRole('button',{name:'Connect local analysis',exact:true}).click();
+  const session=await (await sessionResponse).json();
+  // The real service retains the previous test's completed job. Wait for its
+  // automatic review recovery: setInputFiles does not wait for enabled inputs.
+  if(session.job?.state==='completed'){
+    await expect(page.locator('.local-analysis-message')).toContainText('Analysis opened. Recording fingerprint matched');
+  }
+  const input=page.getByLabel('Import local recording',{exact:true}), imports=[];
   for(let i=0;i<2;i++){
-    await page.getByLabel('Import local recording',{exact:true}).setInputFiles('qa-local/analysis-browser/recordings/synthetic.webm');
+    await expect(input).toBeEnabled();
+    const imported=page.waitForResponse(r=>r.request().method()==='POST'&&new URL(r.url()).pathname==='/api/analysis/recordings');
+    await input.setInputFiles('qa-local/analysis-browser/recordings/synthetic.webm');
+    const response=await imported;
+    expect(response.ok()).toBe(true);
+    const result=await response.json();imports.push(result);
     await expect(page.locator('.local-analysis-message')).toContainText('Recording saved and selected');
+    await expect(input).toBeEnabled();
+    await expect(page.getByLabel('Recording to analyze')).toHaveValue(result.recording.id);
   }
   expect(jobs).toEqual([]);
-  const value=await page.getByLabel('Recording to analyze').inputValue();
-  expect(value).toMatch(/^[a-f0-9]{32}$/);
+  expect(imports[0].recording.id).toMatch(/^[a-f0-9]{32}$/);
+  expect(imports[1].recording.id).toBe(imports[0].recording.id);
+  expect(imports[1].sha256).toBe(imports[0].sha256);
 });
