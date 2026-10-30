@@ -151,12 +151,14 @@ class PcSetupTest(unittest.TestCase):
                 patch('os.execv', side_effect=SystemExit(0)) as execute:
             with self.assertRaises(SystemExit):
                 pc.main(['--analysis','--recordings',str(self.root),'--config',str(self.root/'catalog.json'),
-                         '--feeds-config',str(feeds),'--state-dir',str(state),'--port','4199','--no-browser','--allow-recording-import'])
+                         '--feeds-config',str(feeds),'--state-dir',str(state),'--port','4199','--no-browser','--allow-recording-import',
+                         '--recorder-config',str(self.root/'recorder.json')])
         args = execute.call_args.args[1]
         self.assertEqual(args[args.index('--state-dir')+1], str(state))
         self.assertEqual(args[args.index('--port')+1], '4199')
         self.assertNotIn('--open-browser', args)
         self.assertIn('--allow-recording-import', args)
+        self.assertEqual(args[args.index('--recorder-config')+1], str(self.root/'recorder.json'))
         self.assertFalse(state.exists())
 
     def test_prepared_analysis_paths_are_selected_only_on_explicit_analysis(self):

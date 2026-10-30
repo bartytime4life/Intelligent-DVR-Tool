@@ -10,7 +10,9 @@ Monitor now offers an explicit **Record webcam clip** action for the connected
 browser webcam. It requests a stop at 60 seconds, keeps at most 64 MiB, and
 passes only video tracks to the recorder. Leaving Monitor, hiding the page or
 disconnecting stops capture. Save the clip or import it into the local analyzer;
-the browser copy is lost on reload/close. RTSP and public sources remain previews.
+the browser copy is lost on reload/close. These RTSP and public source connections remain previews. The separate
+[one-camera LAN recorder](lan-recording.md) records only its explicitly configured
+RTSP channel after Start in Recognition.
 See [capture through reporting](recording-workflow.md). The separate
 [Recognition workflow](local-analysis-service.md) analyzes selected recordings
 with the existing analyzer and verified review-bundle contract.

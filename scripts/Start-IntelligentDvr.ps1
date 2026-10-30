@@ -12,6 +12,7 @@ param(
     [string]$FeedsConfig = '',
     [string]$Recordings = '',
     [string]$AnalysisConfig = '',
+    [string]$RecorderConfig = '',
     [string]$Report = '',
     [string]$Python = '',
     [ValidateRange(1024, 65535)][int]$Port = 4173
@@ -36,6 +37,7 @@ try {
     if ($FeedsConfig) { $TaskArgs += @('--feeds-config', $FeedsConfig) }
     if ($Recordings) { $TaskArgs += @('--recordings', $Recordings) }
     if ($AnalysisConfig) { $TaskArgs += @('--config', $AnalysisConfig) }
+    if ($RecorderConfig) { $TaskArgs += @('--recorder-config', $RecorderConfig) }
     if ($Report) { $TaskArgs += @('--report', $Report) }
     & $TaskPython @TaskPythonArgs @TaskArgs
     if ($LASTEXITCODE -ne 0) { throw "Intelligent DVR returned exit code $LASTEXITCODE. See the message above." }

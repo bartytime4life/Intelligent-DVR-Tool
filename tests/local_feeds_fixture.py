@@ -41,7 +41,7 @@ class SyntheticRtsp(socketserver.ThreadingTCPServer):
     allow_reuse_address=True
     daemon_threads=True
     def __init__(self):
-        self.payloads=jpeg_payloads(); self.redirects=0
+        self.payloads=jpeg_payloads(); self.redirects=0; self.disconnect_after=None
         super().__init__(('127.0.0.1',0),RtspHandler)
         self.thread=threading.Thread(target=self.serve_forever,daemon=True);self.thread.start()
     def close(self): self.shutdown();self.server_close();self.thread.join()
@@ -87,9 +87,13 @@ class RtspHandler(socketserver.StreamRequestHandler):
             self.done.set()
             if sender:sender.join(timeout=1)
     def send_frames(self):
-        seq,stamp=0,0
+        seq,stamp,frames=0,0,0
         try:
             while not self.done.is_set():
+                frames += 1
+                if self.server.disconnect_after is not None and frames > self.server.disconnect_after:
+                    self.request.shutdown(2)
+                    return
                 for i,payload in enumerate(self.server.payloads):
                     packet=struct.pack('!BBHII',128,26|(128 if i==len(self.server.payloads)-1 else 0),seq,stamp,1)+payload
                     with self.lock:self.request.sendall(b'$\0'+len(packet).to_bytes(2,'big')+packet)

@@ -6,7 +6,13 @@ CPU service, including the pinned detector's candidate metadata and label order
 needed to validate an owner-supplied model. Packaging tests validate that binding
 from an extracted kit without borrowing files from a source checkout. Python,
 trained model weights, camera credentials and recordings
-are not included. This is a portable test folder, not a Windows MSI or background recorder.
+are not included. This is a portable test folder, not a Windows MSI or automatically started recording service.
+
+After preparing analysis and a LAN source, the optional [one-camera recorder](lan-recording.md)
+uses `--analysis --recorder-config local-recorder.json` on Linux or
+`-Analysis -RecorderConfig .\local-recorder.json` in PowerShell. It stays stopped
+until Start recording & analysis in Recognition. Its segment recovery works on
+both OSes; existing Linux-only manual last-analysis recovery is unchanged.
 
 ## Get the PC kit
 
