@@ -88,3 +88,7 @@
 .report-timeline button span { width:100%; background:#5bbdaf; min-height:3px; border-radius:2px; }
 .report-timeline button:focus-visible { outline:2px solid #e4b975; outline-offset:2px; }
 @media(max-width:600px) { .report-metrics { grid-template-columns:repeat(2,minmax(0,1fr)); } .recognition-report { padding:16px; } .recognition-report th,.recognition-report td { padding:8px; } }
+.lan-segment-list { max-height: 24rem; overflow: auto; margin-top: 1rem; }
+.lan-segment { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .75rem; padding: .8rem 0; border-top: 1px solid #293e3b; }
+.lan-segment small { display: block; color: #b4c6c2; margin-top: .35rem; }
+.lan-recorder-facts { display: flex; flex-wrap: wrap; gap: .75rem 1.5rem; margin: 1rem 0; color: #b4c6c2; font-size: .85rem; }

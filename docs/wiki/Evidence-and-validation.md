@@ -1,5 +1,10 @@
 # Verification index
 
+[One-camera LAN recorder, October 30](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/lan-recorder-2026-10-30/README.md):
+controlled-source recording, native analysis and fault/recovery tests;
+physical-camera and sustained deployment acceptance remain separate.
+
+
 [Linux launcher recovery](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/launcher-recovery-2026-10-29/README.md) records opt-in
 Start/Check, non-mutating storage inspection and extracted-kit restart testing.
 

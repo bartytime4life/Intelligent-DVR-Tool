@@ -16,7 +16,13 @@ do not run AI. Explicit webcam clip capture now connects Monitor to local record
 import, analysis, human review and downloadable reports. Recognition provides
 progress, cancellation and source-matched results. [Complete recording workflow](docs/recording-workflow.md).
 
-[Connect a webcam or DVR](docs/local-camera-feeds.md) · [Analyze a recording](docs/local-analysis-service.md)
+[Connect a webcam or DVR](docs/local-camera-feeds.md) · [Analyze a recording](docs/local-analysis-service.md) · [Record one LAN camera](docs/lan-recording.md)
+
+**Opt-in LAN recording:** Recognition can explicitly start one configured RTSP
+channel, retain bounded sampled segments, analyze finalized recordings and reopen
+verified pairs. Storage pressure, retention, interrupted work and reconnects are
+visible. Service restart never starts recording. This pilot reconnects between
+segments; gapless archival recording and physical-camera acceptance remain open.
 
 Physical-device compatibility, independently measured recognition quality,
 tracking and **100-camera capacity remain unqualified**. Earlier generated-camera

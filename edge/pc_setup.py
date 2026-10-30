@@ -215,7 +215,7 @@ def persistence_check(directory):
         store.close()
 
 
-def check(port=4173, feeds_config=None, recordings=None, config=None, *, root=ROOT, bind=True, facility=False, state_dir=None):
+def check(port=4173, feeds_config=None, recordings=None, config=None, *, root=ROOT, bind=True, facility=False, state_dir=None, recorder_config=None):
     host_check()
     checks = []
     def record(name, operation):
@@ -248,6 +248,15 @@ def check(port=4173, feeds_config=None, recordings=None, config=None, *, root=RO
         path = Path(feeds_config) if feeds_config else root / 'local-feeds.json'
         return {'configured_sources': len(load_sources(path))}
     record('dvr_config', sources)
+    if recorder_config is not None:
+        def recorder_ready():
+            from .lan_recorder import validate_config
+            from .local_feeds import load_sources
+            if not recordings or not config or facility:
+                raise ValueError('Recorder needs recording analysis and local feeds')
+            settings = validate_config(Path(recorder_config).absolute(), load_sources(Path(feeds_config or root / 'local-feeds.json')))
+            return {'configured': True, 'segment_seconds': settings['segment_seconds'], 'recording_started': False}
+        record('lan_recorder', recorder_ready)
     if recordings or config:
         def analysis():
             from .local_service import Jobs, load_catalog
@@ -287,6 +296,7 @@ def check(port=4173, feeds_config=None, recordings=None, config=None, *, root=RO
 
 
 REMEDIES = {
+    'lan_recorder': 'Use --analysis and --recorder-config with exactly one configured LAN RTSP source. Check storage and codec acceptance separately; Check never connects cameras.',
     'facility_preview': 'Use a source checkout with Node.js 22 for local map services; clear DVR_GEO_LOCAL for the PC camera kit.',
     'kit_integrity': 'Extract a complete unmodified kit, or rebuild from a trusted source checkout.',
     'built_interface': 'Run the installer or extract a complete kit.',
@@ -308,6 +318,7 @@ def main(argv=None):
     modes.add_argument('--native-probe', action='store_true', help=argparse.SUPPRESS)
     parser.add_argument('--feeds', action='store_true', help='Compatibility alias; the local feed service is the default')
     parser.add_argument('--analysis', action='store_true')
+    parser.add_argument('--recorder-config', type=Path, help='Enable one configured LAN recorder in Recognition; never starts capture automatically')
     parser.add_argument('--allow-recording-import', action='store_true', help='Enable explicit same-computer recording imports (64 MiB per file)')
     parser.add_argument('--facility', action='store_true', help='Source-only Vite preview, preserving opt-in local geo delivery')
     parser.add_argument('--feeds-config', type=Path, default=Path(os.environ.get('DVR_FEEDS_CONFIG') or ROOT / 'local-feeds.json'))
@@ -344,6 +355,8 @@ def main(argv=None):
             raise SetupError('Supply --recordings and --config together for recording analysis.')
         if args.allow_recording_import and (not args.recordings or not args.config):
             raise SetupError('--allow-recording-import requires recording analysis configuration.')
+        if args.recorder_config and (not args.recordings or not args.config or args.install):
+            raise SetupError('--recorder-config requires analysis configuration; enable it with Start or Check after installation.')
         if args.report and not args.check:
             raise SetupError('--report is available with --check only.')
         state_dir = None if args.temporary else args.state_dir or (Path(os.environ['DVR_STATE_DIR']) if os.environ.get('DVR_STATE_DIR') and not args.install else None)
@@ -362,7 +375,7 @@ def main(argv=None):
                          args.feeds_config.absolute() != (ROOT / 'local-feeds.json').absolute()):
             raise SetupError('Local geo preview and the camera/analysis service use separate launch modes. Clear DVR_GEO_LOCAL for camera/analysis testing.')
         if args.check:
-            result = check(args.port, args.feeds_config, args.recordings, args.config, facility=facility, state_dir=state_dir)
+            result = check(args.port, args.feeds_config, args.recordings, args.config, facility=facility, state_dir=state_dir, recorder_config=args.recorder_config)
             for item in result['checks']:
                 print(f"{item['status'].upper()}: {item['check']}")
                 if item['status'] == 'fail':
@@ -393,6 +406,8 @@ def main(argv=None):
             service += ['--recordings', str(args.recordings), '--config', str(args.config)]
         if args.allow_recording_import:
             service.append('--allow-recording-import')
+        if args.recorder_config:
+            service += ['--recorder-config', str(args.recorder_config)]
         if state_dir is not None:
             try:
                 persistence_check(state_dir)

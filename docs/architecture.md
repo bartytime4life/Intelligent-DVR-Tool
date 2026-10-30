@@ -19,13 +19,17 @@ service and stop on disconnect, page exit, lease expiry or a processing limit.
 The [feed bridge](local-camera-feeds.md) does not connect to the analyzer or record
 video. The [local job service](local-analysis-service.md) separately connects
 Recognition selections to the existing analyzer and opens source-matched results.
-The scheduler/load model remains a separate preparation component; no live
-inference, tracking or 100-camera capacity is implied. Facility plans are metadata,
+The optional [LAN recorder](lan-recording.md) uses the same relay/decoder and
+feeds verified, finalized segments into that job service. It retains matching
+source/results, has explicit Start/Stop and bounded storage, and exposes gaps
+between connections. The scheduler/load model remains separate preparation;
+tracking and 100-camera capacity are not implied. Facility plans are metadata,
 not calibrated camera feeds. The browser performs no neural-network inference.
 
 | Component | Source | Role |
 | --- | --- | --- |
 | Camera previews and clips | `src/LiveMonitor.jsx`, `src/clip-capture.mjs`, `edge/local_feeds.py`, `edge/feed_worker.py` | Explicit browser webcam and LAN RTSP preview; optional video-only browser webcam clip capture; no live inference |
+| LAN recording | `edge/lan_recorder.py`, `edge/segment_worker.py`, `src/LanRecorder.jsx` | Explicit one-source segment capture, bounded retention and existing CPU job dispatch; no discovery or automatic startup |
 | Workspace | `src/App.jsx`, `src/data.mjs` | Review, rules, local video preview, explicit receipt import |
 | Recording recognition | `src/RecognitionReview.jsx`, `src/recognition.mjs` | Explicit review bundle, original-file hash matching, paused sampled detections/counts and Event handoff; connects to the optional same-origin local job API |
 | Facility model | `src/facility.mjs` | Bounded plan validation, local-meter projection, estimated visibility and rehearsal |

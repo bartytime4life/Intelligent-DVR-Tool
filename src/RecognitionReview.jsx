@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { parseRecognition, frameSummary, canShowBoxes, matchRecording, MAX_REVIEW_BYTES } from './recognition.mjs';
 import './recognition.css';
 import LocalAnalysis from './LocalAnalysis.jsx';
+import LanRecorder from './LanRecorder.jsx';
 import RecognitionReport from './RecognitionReport.jsx';
 
 export default function RecognitionReview({ onImport, active = true, clip, onClip, reviews = [] }) {
@@ -9,6 +10,7 @@ export default function RecognitionReview({ onImport, active = true, clip, onCli
   const [source, setSource] = useState(null), [media, setMedia] = useState({});
   const [threshold, setThreshold] = useState(0.5), [status, setStatus] = useState(''), [error, setError] = useState('');
   const [analysisBusy, setAnalysisBusy] = useState(false);
+  const [recorderBusy, setRecorderBusy] = useState(false);
   const video = useRef(), generation = useRef(0), sourceGeneration = useRef(0);
   useEffect(() => () => { generation.current++; sourceGeneration.current++; }, []);
   useEffect(() => () => { if (source) URL.revokeObjectURL(source.url); }, [source]);
@@ -66,7 +68,8 @@ export default function RecognitionReview({ onImport, active = true, clip, onCli
     <p className="eyebrow">LOCAL RECORDING · MODEL OBSERVATIONS</p>
     <h1>Recognition</h1>
     <p className="recognition-intro">See detected people and objects on the recording they came from. Inspect each sampled scene, then send observations for human review.</p>
-    <LocalAnalysis onResult={openLocalResult} onBusy={setAnalysisBusy} clip={clip} onClip={onClip} />
+    <LanRecorder onResult={openLocalResult} onBusy={setRecorderBusy} blocked={analysisBusy} />
+    <LocalAnalysis onResult={openLocalResult} onBusy={setAnalysisBusy} clip={clip} onClip={onClip} recorderBusy={recorderBusy} />
     <h2 className="recognition-import-heading">Or open previously exported results</h2>
     <div className="recognition-loaders">
       <label className="button">1. Open recognition results<input type="file" accept=".json,application/json" onChange={loadRun} disabled={analysisBusy} aria-label="Open recognition results" /></label>
