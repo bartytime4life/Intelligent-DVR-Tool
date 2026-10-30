@@ -7,7 +7,7 @@ not establish physical-camera compatibility or operational recognition quality.
 
 ## Local checks
 
-- 257 Python tests discovered: 251 passed, 6 socket-dependent tests skipped.
+- 260 Python tests discovered: 254 passed, 6 socket-dependent tests skipped.
 - Frontend suites run directly: 184 passed, 1 loopback test skipped. Direct runs
   avoid this environment's Node test-runner child output limitation.
 - Production build passed. Native VP8 encoding, whole-file decode verification,
@@ -45,3 +45,12 @@ This execution environment refuses loopback socket creation, so local RTSP/HTTP
 and browser acceptance could not run. No physical camera was contacted. The
 [one-camera acceptance checklist](../../lan-recording.md#one-camera-acceptance-before-expansion)
 is required before deployment claims or expansion toward 100 cameras.
+
+## Review corrections
+
+GitHub review of the first candidate identified the inherited RTSP-only protocol
+policy during local segment verification and retention running after queue
+admission. Verification now explicitly selects file-only decoding and restores
+the live policy; age expiration runs before analysis admission. Native regression
+tests reproduce both conditions. A byte-budget test also verifies cleanup before
+another segment reservation.

@@ -184,6 +184,27 @@ class RecorderTest(unittest.TestCase):
         self.now += 61; rec.tick()
         self.assertGreaterEqual(rec.counters['expired'], 2)
 
+    def test_expired_queue_is_pruned_before_analysis_admission(self):
+        self.config['retention_minutes'] = 1
+        rec = self.make(); self.start(rec)
+        directory = rec.store.path / rec.capture['id']; synthetic_segment(directory)
+        self.calls[-1][2].returncode = 0; rec._capture_tick(); rec.stop()
+        self.now += 61; self.start(rec)
+        self.assertIsNone(self.jobs.job)
+        self.assertEqual(rec.counters['expired'], 1); self.assertEqual(rec.counters['dropped'], 1)
+
+    def test_byte_budget_prunes_old_entries_before_reserving_another_segment(self):
+        self.config['max_storage_mib'] = 256
+        rec = self.make()
+        for i in range(9):
+            row = {'id':format(i, '032x'), 'source':'dock', 'state':'failed', 'created_at':self.now}
+            rec.rows.append(row); directory = rec.store.path / row['id']; directory.mkdir(mode=0o700)
+            with (directory / 'capture.webm').open('wb') as stream: stream.truncate(32 * 1024**2)
+        rec.store.save(); self.start(rec)
+        self.assertGreater(rec.counters['expired'], 0)
+        from edge.lan_recorder import RESERVATION
+        self.assertLessEqual(rec.store.usage() + RESERVATION, 256 * 1024**2)
+
     def test_wrong_result_and_timing_fingerprint_are_rejected(self):
         rec = self.make(); self.start(rec); self.complete(rec); self.finish_analysis(rec)
         row = next(r for r in rec.rows if r['state']=='completed')
@@ -208,6 +229,13 @@ class RecorderTest(unittest.TestCase):
         shutil.rmtree(path); path.mkdir(); synthetic_segment(path)
         source = path / 'source.webm'; source.write_bytes(source.read_bytes()[:80])
         with self.assertRaises(ValueError): validate_video(source, 49, (160, 120))
+
+    def test_finalized_video_verification_switches_network_policy_to_local_only(self):
+        directory = self.root / 'verification'; directory.mkdir()
+        with patch.dict(os.environ, {'OPENCV_FFMPEG_CAPTURE_OPTIONS':'rtsp_transport;tcp|protocol_whitelist;rtsp,tcp|allowed_media_types;video'}):
+            synthetic_segment(directory)
+            self.assertIn('protocol_whitelist;rtsp,tcp', os.environ['OPENCV_FFMPEG_CAPTURE_OPTIONS'])
+        self.assertTrue((directory / 'complete.json').is_file())
 
     def test_stopped_analysis_is_queued_and_retried_only_after_explicit_start(self):
         rec = self.make(); self.start(rec)

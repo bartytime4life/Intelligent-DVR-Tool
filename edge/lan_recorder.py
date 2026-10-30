@@ -1,5 +1,4 @@
 """Explicit one-camera capture, bounded local retention, and the existing Jobs queue."""
-import hashlib
 import itertools
 import json
 import math
@@ -409,10 +408,12 @@ class Recorder:
 
     def tick(self):
         with self.lock:
+            # Expired queued recordings must not be admitted for inference when
+            # an operator starts again after a long pause.
+            if self.active: self._expire()
             self._capture_tick()
             self._analysis_tick()
             if self.active:
-                self._expire()
                 if not self.capture and self.clock() >= self.retry_at: self._launch()
 
     def _supervise(self):

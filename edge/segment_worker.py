@@ -45,6 +45,10 @@ def resources():
 def validate_video(path, expected_frames, size):
     """Decode every output frame before publishing a completion marker."""
     import cv2
+    # The live decoder only allows RTSP/TCP. Verification opens an already-local
+    # finalized container and must explicitly use the analyzer's file-only policy.
+    prior = os.environ.get('OPENCV_FFMPEG_CAPTURE_OPTIONS')
+    os.environ['OPENCV_FFMPEG_CAPTURE_OPTIONS'] = 'protocol_whitelist;file'
     cap = cv2.VideoCapture(str(path), cv2.CAP_FFMPEG)
     try:
         if not cap.isOpened():
@@ -61,6 +65,10 @@ def validate_video(path, expected_frames, size):
             raise ValueError('Incomplete segment')
     finally:
         cap.release()
+        if prior is None:
+            os.environ.pop('OPENCV_FFMPEG_CAPTURE_OPTIONS', None)
+        else:
+            os.environ['OPENCV_FFMPEG_CAPTURE_OPTIONS'] = prior
 
 
 def record(url, directory, seconds, *, capture_factory=None, clock=time.monotonic, wall=time.time):
