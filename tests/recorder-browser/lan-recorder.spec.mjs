@@ -29,6 +29,7 @@ test('lost status is visible and never starts recording by retry', async ({page}
   await page.goto('/#recognition');
   const panel = page.getByRole('region',{name:'LAN camera recorder'});
   await panel.getByRole('button',{name:'Connect LAN recorder'}).click();
+  await expect(panel.locator('.local-analysis-badge')).toHaveText('stopped');
   await page.route('**/api/recorder/status', route=>route.abort());
   await expect(panel.getByRole('alert')).toContainText('recording may still be running');
   await expect(panel.getByRole('button',{name:'Start recording & analysis'})).toBeDisabled();
