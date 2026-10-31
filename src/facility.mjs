@@ -95,6 +95,41 @@ function ringsIntersect(a, b) {
 function ringsOverlap(a,b) {
   return ringsIntersect(a,b) || pointInPolygon(a[0],b) || pointInPolygon(b[0],a);
 }
+function closestOnSegment(p, a, b) {
+  const dx = b[0] - a[0], dy = b[1] - a[1], l = dx * dx + dy * dy, t = l ? Math.max(0, Math.min(1, ((p[0] - a[0]) * dx + (p[1] - a[1]) * dy) / l)) : 0;
+  const point = [a[0] + dx * t, a[1] + dy * t];
+  return { point, t, distance: Math.hypot(p[0] - point[0], p[1] - point[1]), normal: l ? [-dy / Math.sqrt(l), dx / Math.sqrt(l)] : [0, 0] };
+}
+const onRing = (p, ring, eps = 1e-6) => ring.slice(1).some((q, i) => closestOnSegment(p, ring[i], q).distance <= eps);
+// 'in' when part of ring's boundary lies strictly inside other; 'on' when all of it lies on other's boundary.
+function boundaryInside(ring, other) {
+  let allOn = true;
+  for (let i = 0; i < ring.length - 1; i++) {
+    const a = ring[i], b = ring[i + 1], cuts = [0, 1];
+    for (let j = 0; j < other.length - 1; j++) {
+      const t = segmentIntersection(a, b, other[j], other[j + 1]);
+      if (t !== null) cuts.push(t);
+      const near = closestOnSegment(other[j], a, b);
+      if (near.distance <= 1e-6) cuts.push(near.t);
+    }
+    cuts.sort((x, y) => x - y);
+    for (let k = 1; k < cuts.length; k++) {
+      if (cuts[k] - cuts[k - 1] < 1e-9) continue;
+      const t = (cuts[k] + cuts[k - 1]) / 2, m = [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
+      if (onRing(m, other)) continue;
+      if (pointInPolygon(m, other)) return 'in';
+      allOn = false;
+    }
+  }
+  return allOn ? 'on' : 'out';
+}
+// Interior overlap only: rings may share walls or touch at corners.
+function ringsInteriorOverlap(a, b) {
+  const ab = boundaryInside(a, b);
+  if (ab === 'in') return true;
+  const ba = boundaryInside(b, a);
+  return ba === 'in' || ab === 'on' && ba === 'on';
+}
 function validHoles(outer, holes = []) {
   return Array.isArray(holes) && holes.length <= 20 && holes.reduce((n,h)=>n+(Array.isArray(h)?h.length:10000),outer.length)<=1000 && holes.every((h,i) => validPolygon(h) &&
     polygonContains(outer,h) && !ringsIntersect(outer,h) && !holes.slice(0,i).some(other => ringsOverlap(h,other))) &&
@@ -157,28 +192,31 @@ haracters.");
   for (const c of d.cameras) if (!pointOK([c.x, c.y]) || !finite(c.z, 0.5, 150) || !finite(c.bearing, 0, 359.99) || !finite(
   c.tilt, 0, 89) || !finite(c.hfov, 5, 170) || !finite(c.vfov, 5, 150) || !finite(c.range, 1, 300) || typeof c.enabled !==
   "boolean") throw Error("Camera position, height, viewing angles or range are outside the allowed limits.");
+  const check = (item, kind, b) => ` Check ${kind} “${item.name}”${b ? ` in ${b.name}` : ''}.`;
   for (const r of d.rooms) {
     const b = d.buildings.find((b2) => b2.id === r.buildingId);
     if (!b || !validPolygon(r.footprint) || !Number.isInteger(r.level) || r.level < 0 || r.level >= b.floors || !finite(
-    r.wallHeight, 0.2, 10) || !polygonContains(b.footprint, r.footprint) || (b.holes || []).some(h=>ringsOverlap(h,r.footprint))) throw Error("Rooms must fit inside their build\
-ing and reference an existing floor.");
+    r.wallHeight, 0.2, 10) || !polygonContains(b.footprint, r.footprint) || (b.holes || []).some(h=>ringsInteriorOverlap(h,r.footprint))) throw Error("Rooms must fit inside their build\
+ing and reference an existing floor." + check(r, 'room', b));
   }
   const openingGroups = new Map();
   for (const opening of openings) {
     const b = d.buildings.find(b => b.id === opening.buildingId);
     if (!b || !Number.isInteger(opening.level) || opening.level < 0 || opening.level >= b.floors || !validPolygon(opening.footprint))
-      throw Error('Floor openings need a valid building, floor and simple closed footprint.');
+      throw Error('Floor openings need a valid building, floor and simple closed footprint.' + check(opening, 'opening', b));
     const key = `${b.id}:${opening.level}`;
-    const group = openingGroups.get(key) || {building:b,holes:[...(b.holes || [])]};
+    const group = openingGroups.get(key) || {building:b,level:opening.level,holes:[...(b.holes || [])]};
     group.holes.push(opening.footprint); openingGroups.set(key,group);
   }
-  for (const {building,holes} of openingGroups.values()) if (!validHoles(building.footprint,holes))
-    throw Error('Floor openings must be strictly inside solid building space, without touching other openings, courtyards or outer walls. Use at most 20 combined holes per floor.');
+  for (const {building,level,holes} of openingGroups.values()) if (!validHoles(building.footprint,holes))
+    throw Error(`Floor openings must be strictly inside solid building space, without touching other openings, courtyards or outer walls. Use at most 20 combined holes per floor. Check ${building.name} level ${level + 1}.`);
   const cleanStairs = stairs.map(stair => {
-    const b = d.buildings.find(b => b.id === stair.buildingId), clean = validateStair(stair,b);
+    const b = d.buildings.find(b => b.id === stair.buildingId);
+    let clean;
+    try { clean = validateStair(stair,b); } catch (e) { throw Error(e.message + check(stair, 'stair', b)); }
     const footprint = stairFootprint(clean,b);
-    if (!footprint.every(pointOK) || !polygonContains(b.footprint,footprint) || (b.holes || []).some(h=>ringsOverlap(h,footprint)))
-      throw Error('Stair flights and landings must fit inside solid building space, outside courtyards.');
+    if (!footprint.every(pointOK) || !polygonContains(b.footprint,footprint) || (b.holes || []).some(h=>ringsInteriorOverlap(h,footprint)))
+      throw Error('Stair flights and landings must fit inside solid building space, outside courtyards.' + check(stair, 'stair', b));
     return clean;
   });
   for (const path of paths) {
@@ -186,11 +224,11 @@ ing and reference an existing floor.");
     if (!b || !Number.isInteger(path.level) || path.level < 0 || path.level >= b.floors ||
         !Array.isArray(path.points) || path.points.length < 2 || path.points.length > 200 || !path.points.every(pointOK) ||
         path.points.slice(1).some((p,i)=>eq(p,path.points[i])) || !polygonContains(b.footprint,path.points))
-      throw Error('Floor paths need an existing level and 2–200 distinct consecutive points inside the building.');
-    if ((b.openFloors || []).includes(path.level)) throw Error('Floor paths need a solid floor; this entire level is open.');
+      throw Error('Floor paths need an existing level and 2–200 distinct consecutive points inside the building.' + check(path, 'pathway', b));
+    if ((b.openFloors || []).includes(path.level)) throw Error('Floor paths need a solid floor; this entire level is open.' + check(path, 'pathway', b));
     const holes = [...(b.holes || []),...openings.filter(o=>o.buildingId===b.id && o.level===path.level).map(o=>o.footprint)];
     if (holes.some(hole=>ringsIntersect(path.points,hole) || path.points.some(p=>pointInPolygon(p,hole))))
-      throw Error('Floor paths cannot cross or touch a courtyard or floor opening on that level.');
+      throw Error('Floor paths cannot cross or touch a courtyard or floor opening on that level.' + check(path, 'pathway', b));
   }
   for (const z of zones) {
     if (!ZONE_TYPES.includes(z.type) || !validPolygon(z.footprint) || typeof z.enabled !== 'boolean' ||
@@ -200,12 +238,19 @@ ing and reference an existing floor.");
     if (z.buildingId !== undefined || z.level !== undefined) {
       const b = d.buildings.find(b => b.id === z.buildingId);
       if (!b || !Number.isInteger(z.level) || z.level < 0 || z.level >= b.floors ||
-          !polygonContains(b.footprint, z.footprint) || (b.holes || []).some(h => ringsOverlap(h,z.footprint)))
-        throw Error('Indoor zones must fit inside their building and reference an existing floor.');
+          !polygonContains(b.footprint, z.footprint) || (b.holes || []).some(h => ringsInteriorOverlap(h,z.footprint)))
+        throw Error('Indoor zones must fit inside their building and reference an existing floor.' + check(z, 'zone', b));
     }
     if (z.imageRegion !== undefined) validateImageRegion(z.imageRegion,d.cameras);
   }
-  for (const l of d.labels) if (!pointOK([l.x, l.y]) || !finite(l.z, 0, 150)) throw Error("Labels need valid positions.");
+  for (const l of d.labels) {
+    if (!pointOK([l.x, l.y]) || !finite(l.z, 0, 150)) throw Error("Labels need valid positions.");
+    // Labels without a level are ground labels; an indoor label names its building and level.
+    if (l.buildingId !== undefined || l.level !== undefined) {
+      const b = d.buildings.find(b => b.id === l.buildingId);
+      if (!b || !Number.isInteger(l.level) || l.level < 0 || l.level >= b.floors) throw Error('Indoor labels need an existing building and floor.' + check(l, 'label', b));
+    }
+  }
   if (!d.route.every(pointOK)) throw Error("Route points must be within 2 km of the origin.");
   return {
     schema: SCHEMA,
@@ -218,7 +263,7 @@ ing and reference an existing floor.");
 ange", "enabled"].map((k) => [k, c[k]]))),
     rooms: d.rooms.map((r) => ({ id: r.id, name: r.name, buildingId: r.buildingId, level: r.level, footprint: r.footprint.
     map((p) => [...p]), wallHeight: r.wallHeight })),
-    labels: d.labels.map((l) => ({ id: l.id, name: l.name, x: l.x, y: l.y, z: l.z })),
+    labels: d.labels.map((l) => ({ id: l.id, name: l.name, x: l.x, y: l.y, z: l.z, ...(l.buildingId !== undefined ? {buildingId:l.buildingId,level:l.level} : {}) })),
     openings: openings.map(o => ({id:o.id,name:o.name,buildingId:o.buildingId,level:o.level,footprint:o.footprint.map(p=>[...p])})),
     stairs: cleanStairs,
     paths: paths.map(p=>({id:p.id,name:p.name,buildingId:p.buildingId,level:p.level,points:p.points.map(q=>[...q])})),
@@ -285,12 +330,14 @@ function groundRange(c) {
   const far = c.tilt - c.vfov / 2 <= 0 ? c.range : Math.min(c.range, c.z / Math.tan(rad(c.tilt - c.vfov / 2)));
   return { near: Math.max(0, near), far };
 }
+// A wall edge this close to the camera is its mounting surface, so facade cameras see out from either side.
+const MOUNT_CLEARANCE = 0.5;
 function clippedRay(c, angle, distance, obstacles) {
   const a = [c.x, c.y], b = [c.x + Math.sin(rad(angle)) * distance, c.y + Math.cos(rad(angle)) * distance];
   let limit = distance;
   for (const wall of obstacles) for (let i = 0; i < wall.polygon.length - 1; i++) {
     const t = segmentIntersection(a, b, wall.polygon[i], wall.polygon[i + 1]);
-    if (t !== null && t > 1e-5) {
+    if (t !== null && t > 1e-5 && closestOnSegment(a, wall.polygon[i], wall.polygon[i + 1]).distance > MOUNT_CLEARANCE) {
       const h = c.z * (1 - t);
       if (h >= wall.base - 1e-4 && h <= wall.top + 1e-4) limit = Math.min(limit, distance * t);
     }
@@ -329,11 +376,20 @@ function routePoint(route, t) {
     remaining -= lengths[i];
   }
 }
-function rehearse(plan, samples = 61) {
-  const obstacles = wallObstacles(plan);
-  return Array.from({ length: samples }, (_, i) => {
-    const t = i / (samples - 1), point = routePoint(plan.route, t);
-    return { seconds: t * 30, point, cameras: plan.cameras.filter((c) => seesPoint(c, point, obstacles)).map((c) => c.id) };
+// Simulated walk at an assumed pace, sampled at most every metre (capped for very long routes).
+const WALK_SPEED = 1.4, MAX_REHEARSAL_SAMPLES = 601;
+function routeLength(route) {
+  return route.slice(1).reduce((sum, p, i) => sum + Math.hypot(p[0] - route[i][0], p[1] - route[i][1]), 0);
+}
+function rehearsalSeconds(route) {
+  return routeLength(route) / WALK_SPEED;
+}
+function rehearse(plan, samples) {
+  const obstacles = wallObstacles(plan), duration = rehearsalSeconds(plan.route);
+  const count = Number.isInteger(samples) && samples > 1 ? samples : Math.max(2, Math.min(MAX_REHEARSAL_SAMPLES, Math.ceil(routeLength(plan.route)) + 1));
+  return Array.from({ length: count }, (_, i) => {
+    const t = i / (count - 1), point = routePoint(plan.route, t);
+    return { seconds: t * duration, point, cameras: plan.cameras.filter((c) => seesPoint(c, point, obstacles)).map((c) => c.id) };
   });
 }
 export {
@@ -344,6 +400,8 @@ export {
   validHoles,
   ringsIntersect,
   ringsOverlap,
+  ringsInteriorOverlap,
+  MOUNT_CLEARANCE,
   LIMITS,
   SCHEMA,
   STEPS,
@@ -359,6 +417,9 @@ export {
   polygonArea,
   polygonContains,
   rehearse,
+  rehearsalSeconds,
+  routeLength,
+  WALK_SPEED,
   routePoint,
   seesPoint,
   segmentIntersection,
@@ -421,4 +482,120 @@ export function createFloorPath(plan, buildingId, level, points, name='Floor pat
   const path={id:uid('path'),name,buildingId,level,points:points.map(p=>[...p])};
   const next=validateFacility({...base,paths:[...base.paths,path]});
   return next.paths.find(p=>p.id===path.id);
+}
+
+// Drawn vertices a few centimetres outside solid space snap to the nearest wall; larger misses stay rejected.
+export const SNAP_TOLERANCE = 0.3;
+function solidMiss(p, b, holes = true) {
+  if (!pointInPolygon(p, b.footprint)) return {where:'outside', ring:b.footprint};
+  const hole = holes ? (b.holes || []).find(h => pointInPolygon(p, h) && !onRing(p, h)) : null;
+  return hole ? {where:'courtyard', ring:hole} : null;
+}
+function nearestOnRing(p, ring) {
+  return ring.slice(1).map((q, i) => closestOnSegment(p, ring[i], q)).reduce((a, n) => n.distance < a.distance ? n : a);
+}
+export function snapToBuilding(points, b, {tolerance = SNAP_TOLERANCE, clearance = 0, holes = true} = {}) {
+  const closed = points.length > 3 && eq(points[0], points.at(-1)), body = closed ? points.slice(0, -1) : points;
+  const solid = p => !solidMiss(p, b) && buildingRings(b).every(r => nearestOnRing(p, r).distance >= clearance / 2);
+  let snapped = 0;
+  const out = body.map(p => {
+    const miss = solidMiss(p, b, holes), near = miss && nearestOnRing(p, miss.ring);
+    if (!near || near.distance > tolerance) return [...p];
+    // Openings must stay strictly inside: try both wall sides, then corner diagonals.
+    const q = near.point, n = near.normal, steps = [[1, 0], [-1, 0], [1, 1], [1, -1], [-1, 1], [-1, -1]];
+    const inset = clearance && steps.map(([s, t]) => [q[0] + (n[0] * s + n[1] * t) * clearance, q[1] + (n[1] * s - n[0] * t) * clearance]).find(solid);
+    snapped++;
+    return inset || q;
+  });
+  return {points:closed ? [...out, [...out[0]]] : out, snapped};
+}
+// First vertex or edge outside solid building space, for an explicit rejection message.
+export function solidSpaceProblem(points, b, {holes = true} = {}) {
+  const closed = points.length > 3 && eq(points[0], points.at(-1)), body = closed ? points.slice(0, -1) : points;
+  for (let i = 0; i < body.length; i++) {
+    const miss = solidMiss(body[i], b, holes);
+    if (miss) return {vertex:i + 1, where:miss.where, distance:nearestOnRing(body[i], miss.ring).distance};
+  }
+  for (let i = 0; i < points.length - 1; i++) {
+    const edge = [points[i], points[i + 1]];
+    if (!polygonContains(b.footprint, edge) || holes && (b.holes || []).some(h => boundaryInside(edge, h) === 'in'))
+      return {edge:[i + 1, closed && i + 1 === body.length ? 1 : i + 2]};
+  }
+  return null;
+}
+
+export function fittingRectangle(b, size = 4, avoid = []) {
+  const pts = b.footprint.slice(0, -1), [cx, cy] = centroid(b.footprint), n = 40, cm = v => Math.round(v * 100) / 100;
+  const lo = [0, 1].map(k => Math.min(...pts.map(p => p[k]))), hi = [0, 1].map(k => Math.max(...pts.map(p => p[k])));
+  const fits = r => polygonContains(b.footprint, r) && !(b.holes || []).some(h => ringsInteriorOverlap(h, r));
+  const candidates = [[cx, cy]];
+  for (let i = 0; i <= n; i++) for (let j = 0; j <= n; j++) candidates.push([lo[0] + (hi[0] - lo[0]) * i / n, lo[1] + (hi[1] - lo[1]) * j / n]);
+  candidates.sort((p, q) => Math.hypot(p[0] - cx, p[1] - cy) - Math.hypot(q[0] - cx, q[1] - cy));
+  for (const free of [true, false]) for (const s of [size, size / 2, size / 4]) for (const [x, y] of candidates) {
+    const r = box(cm(x - s / 2), cm(y - s / 2), s, s);
+    if (fits(r) && (!free || !avoid.some(a => ringsInteriorOverlap(a, r)))) return r;
+  }
+  throw Error('No space for a rectangular room was found in this building. Draw the room instead.');
+}
+
+// Detect a translation/rotation between equal ring sets; resizes and reshapes return null.
+export function buildingMotion(before, after, tolerance = 1e-6) {
+  const a = buildingRings(before), b = buildingRings(after);
+  if (a.length !== b.length || a.some((r, i) => !Array.isArray(b[i]) || r.length !== b[i].length)) return null;
+  const from = a.flat(), to = b.flat();
+  if (!to.every(p => Array.isArray(p) && p.every(Number.isFinite))) return null;
+  const mean = ps => [0, 1].map(k => ps.reduce((s, p) => s + p[k], 0) / ps.length), ca = mean(from), cb = mean(to);
+  let dot = 0, cross = 0;
+  from.forEach((p, i) => { const u = [p[0] - ca[0], p[1] - ca[1]], v = [to[i][0] - cb[0], to[i][1] - cb[1]]; dot += u[0] * v[0] + u[1] * v[1]; cross += u[0] * v[1] - u[1] * v[0]; });
+  let angle = Math.atan2(cross, dot);
+  if (Math.abs(angle) < 1e-12) angle = 0;
+  const cos = Math.cos(angle), sin = Math.sin(angle), dx = to[0][0] - from[0][0], dy = to[0][1] - from[0][1];
+  const apply = angle ? p => [cb[0] + (p[0] - ca[0]) * cos - (p[1] - ca[1]) * sin, cb[1] + (p[0] - ca[0]) * sin + (p[1] - ca[1]) * cos] : p => [p[0] + dx, p[1] + dy];
+  if (from.some((p, i) => { const q = apply(p); return !(Math.hypot(q[0] - to[i][0], q[1] - to[i][1]) <= tolerance); })) return null;
+  return {angle, apply, identity:!angle && !dx && !dy};
+}
+const turnBearing = (bearing, degrees) => { if (!degrees) return bearing; const b = Math.round(((bearing - degrees) % 360 + 360) % 360 * 100) / 100; return b > 359.99 ? 0 : b; };
+// Rooms, floor items, indoor zones, cameras on or within mounting distance of the walls, and labels inside move rigidly.
+export function carryBuildingContents(plan, before, motion) {
+  const id = before.id, deg = motion.angle * 180 / Math.PI, ring = r => r.map(motion.apply);
+  const at = (o, p) => { const [x, y] = motion.apply(p); return {...o, x, y}; };
+  const mounted = p => pointInPolygon(p, before.footprint) || buildingRings(before).some(r => nearestOnRing(p, r).distance <= MOUNT_CLEARANCE);
+  const own = list => (list || []).map(o => o.buildingId === id ? {...o, ...(o.footprint ? {footprint:ring(o.footprint)} : {}), ...(o.points ? {points:ring(o.points)} : {})} : o);
+  return {...plan, rooms:own(plan.rooms), openings:own(plan.openings), paths:own(plan.paths), zones:own(plan.zones),
+    stairs:(plan.stairs || []).map(s => s.buildingId === id ? {...at(s, [s.x, s.y]), bearing:turnBearing(s.bearing, deg)} : s),
+    cameras:plan.cameras.map(c => mounted([c.x, c.y]) ? {...at(c, [c.x, c.y]), bearing:turnBearing(c.bearing, deg)} : c),
+    labels:plan.labels.map(l => l.buildingId === id || !l.buildingId && pointInPolygon([l.x, l.y], before.footprint) ? at(l, [l.x, l.y]) : l)};
+}
+export function levelDependents(plan, buildingId, floors) {
+  const on = (list, label) => (list || []).filter(o => o.buildingId === buildingId && o.level >= floors).map(o => `${label} “${o.name}” (Level ${o.level + 1})`);
+  return [...on(plan.rooms, 'room'), ...on(plan.openings, 'opening'), ...on(plan.paths, 'pathway'), ...on(plan.zones, 'zone'), ...on(plan.labels, 'label'),
+    ...(plan.stairs || []).filter(s => s.buildingId === buildingId && s.toLevel >= floors).map(s => `stair “${s.name}” (Levels ${s.fromLevel + 1}–${s.toLevel + 1})`),
+    ...(plan.buildings.find(b => b.id === buildingId)?.openFloors || []).filter(l => l >= floors).map(l => `the open-floor setting on Level ${l + 1}`)];
+}
+// Returns an unvalidated plan with the building draft applied; a move or rotation carries its contents.
+export function applyBuildingEdit(plan, draft) {
+  const before = plan.buildings.find(b => b.id === draft?.id);
+  if (!before) throw Error('Choose an existing building.');
+  let next = {...plan, buildings:plan.buildings.map(b => b.id === draft.id ? draft : b)};
+  const motion = buildingMotion(before, draft);
+  if (motion && !motion.identity) next = carryBuildingContents(next, before, motion);
+  if (Number.isInteger(draft.floors) && draft.floors < before.floors) {
+    const blocked = levelDependents(next, draft.id, draft.floors);
+    if (blocked.length) throw Error(`${before.name} cannot have ${draft.floors} ${draft.floors === 1 ? 'floor' : 'floors'} while ${blocked.slice(0, 4).join(', ')}${blocked.length > 4 ? ` and ${blocked.length - 4} more` : ''} ${blocked.length === 1 ? 'uses' : 'use'} a higher level. Move or remove ${blocked.length === 1 ? 'it' : 'them'} first.`);
+  }
+  return next;
+}
+
+// Re-centre the local grid on a new origin while every item keeps its map position.
+export function reoriginPlan(plan, origin) {
+  if (!Array.isArray(origin) || !origin.every(Number.isFinite)) throw Error('Enter a valid latitude and longitude.');
+  const [dx, dy] = fromLngLat(plan.origin, origin).map(v => Math.round(v * 1e6) / 1e6), p = q => [q[0] + dx, q[1] + dy], at = o => ({...o, x:o.x + dx, y:o.y + dy});
+  const ring = o => ({...o, footprint:o.footprint.map(p)});
+  const next = {...plan, origin:[...origin], buildings:plan.buildings.map(b => transformBuilding(b, p)), rooms:plan.rooms.map(ring),
+    openings:(plan.openings || []).map(ring), zones:(plan.zones || []).map(ring), paths:(plan.paths || []).map(o => ({...o, points:o.points.map(p)})),
+    stairs:(plan.stairs || []).map(at), cameras:plan.cameras.map(at), labels:plan.labels.map(at), route:plan.route.map(p)};
+  const far = [...next.buildings.flatMap(buildingRings).flat(), ...next.rooms.flatMap(r => r.footprint), ...next.zones.flatMap(z => z.footprint), ...next.route,
+    ...[...next.cameras, ...next.labels, ...next.stairs].map(o => [o.x, o.y])].some(q => Math.abs(q[0]) > 2e3 || Math.abs(q[1]) > 2e3);
+  if (far) throw Error(`The new origin is ${Math.round(Math.hypot(dx, dy))} m from the current one, so keeping map positions would place items outside the 2 km local grid. Clear “Keep buildings at their map positions” to move the plan with the origin.`);
+  return next;
 }

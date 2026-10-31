@@ -1,14 +1,15 @@
 import React,{useEffect,useRef,useState} from 'react';
 import {blankFacility,exampleFacility} from './facility.mjs';
 import FacilitySwitcher from './FacilitySwitcher.jsx';
-import {LIBRARY_KEY,loadLibrary,persistLibrary,addFacility,replaceActive,selectFacility,duplicateActive,parseFacilityFile,importFacilities} from './facility-library.mjs';
+import {LIBRARY_KEY,loadLibrary,persistLibrary,addFacility,replaceActive,selectFacility,duplicateActive,removeFacility,parseFacilityFile,importFacilities,facilityFilename} from './facility-library.mjs';
 
 export function downloadFacilityData(data,filename) {
   const contents=typeof data==='string'?data:JSON.stringify(data);
   const url=URL.createObjectURL(new Blob([contents],{type:'application/json'}));
   const a=document.createElement('a');a.href=url;a.download=filename;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
-export default function FacilityLibrary({children}) {
+// onDirtyChange(true) while leaving would discard pending edits/drafts or memory-only (unsaved) facilities.
+export default function FacilityLibrary({children,onDirtyChange}) {
   const initial=useRef();
   if(!initial.current){let storage;try{storage=window.localStorage;}catch{}initial.current={...loadLibrary(storage),storage};}
   const [library,setLibrary]=useState(initial.current.library),[dirty,setDirty]=useState(false);
@@ -30,6 +31,9 @@ export default function FacilityLibrary({children}) {
     window.addEventListener('storage',external);return()=>window.removeEventListener('storage',external);
   },[]);
   useEffect(()=>{const leave=e=>{if(dirty || !saved){e.preventDefault();e.returnValue='';}};window.addEventListener('beforeunload',leave);return()=>window.removeEventListener('beforeunload',leave);},[dirty,saved]);
+  const dirtyCallback=useRef(onDirtyChange);dirtyCallback.current=onDirtyChange;
+  useEffect(()=>{dirtyCallback.current?.(dirty || !saved);},[dirty,saved]);
+  useEffect(()=>()=>dirtyCallback.current?.(false),[]);
   function mutate(fn){if(dirtyRef.current){setError('Save or discard your preview before changing facilities.');return false;}try{save(fn(libraryRef.current));return true;}catch(e){setError(e.message);return false;}}
   function importText(text){
     if(dirtyRef.current)throw Error('Save or discard your preview before importing facilities.');
@@ -42,7 +46,9 @@ export default function FacilityLibrary({children}) {
       savedState={saved?'Saved in this browser · export a backup':'Memory only · export a backup'}
       onSwitch={id=>mutate(l=>selectFacility(l,id))}
       onCreate={name=>mutate(l=>addFacility(l,{...blankFacility(),name}))}
-      onDuplicate={()=>mutate(duplicateActive)} onSample={()=>mutate(l=>addFacility(l,exampleFacility()))}
+      onDuplicate={()=>mutate(duplicateActive)} onSample={()=>mutate(l=>addFacility(l,exampleFacility(),{rename:true}))}
+      onRemove={()=>mutate(l=>removeFacility(l,l.activeId))}
+      onExportActive={()=>{const current=libraryRef.current.facilities.find(f=>f.id===libraryRef.current.activeId);if(!dirty && current)downloadFacilityData(current.plan,facilityFilename(current.plan));}}
       onImport={()=>fileInput.current?.click()}
       onExportAll={()=>{if(!dirty)downloadFacilityData(libraryRef.current,'dvr-facilities-backup.json');}}/>
     {error && <div className="facility-library-error" role="alert"><p>{error}</p>{!blocked.current && <button type="button" disabled={dirty} onClick={()=>save(libraryRef.current)}>Retry saving</button>}{blocked.current && typeof initial.current.recoveryRaw==='string' && <button type="button" onClick={()=>downloadFacilityData(initial.current.recoveryRaw,'dvr-facilities-recovery.json')}>Download stored data</button>}</div>}

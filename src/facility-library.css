@@ -39,4 +39,9 @@
 @media(max-width:900px){.facility-switcher{margin-bottom:16px}.facility-library-actions{grid-template-columns:repeat(2,minmax(0,1fr))}.facility-empty-state{inset:210px 18px 55px}}
 @media(max-width:620px){.facility-stage:has(.facility-empty-state){min-height:610px}.facility-empty-state{inset:208px 12px 52px}.facility-empty-card{padding:20px 14px}.facility-empty-card h2{font-size:21px}.facility-empty-mark{width:49px;height:49px;margin-bottom:12px}.facility-empty-actions{display:grid;grid-template-columns:1fr}.facility-empty-actions button{font-size:12px}.facility-empty-card>p:not(.facility-empty-eyebrow){margin-bottom:13px}}
 
+.facility-remove-confirm{display:grid;gap:8px;padding:10px;border:1px solid #806044;border-radius:8px;background:#2c2523}
+.facility-remove-confirm p{color:#ffe2c7}.facility-remove-confirm strong{display:block;color:#fff1e2}
+.facility-remove-confirm>div{display:grid;gap:6px}
+.facility-library-backups button.facility-library-danger{border-color:#a5604f;background:#4a2722;color:#ffd9cf}.facility-library-backups button.facility-library-danger svg{color:#ff9f8a}
+.facility-library-backups button.facility-library-cancel{border-color:transparent;background:transparent}
 .facility-library-error{font-size:11px;line-height:1.6;background:#472e28;border:1px solid #806044;border-radius:8px;padding:10px;margin-bottom:14px;color:#ffe2c7}.facility-library-error button{font-size:11px;padding:6px;margin-top:5px}

@@ -124,10 +124,12 @@ function uniqueName(facilities, requested) {
   return stem;
 }
 
-export function addFacility(library, plan) {
+// Examples and imports get a distinct name so identical copies stay distinguishable.
+export function addFacility(library, plan, {rename = false} = {}) {
   const clean = validateLibrary(library);
-  if (clean.facilities.length >= MAX_FACILITIES) throw Error('This browser collection already has 30 facilities. Export a backup before creating another collection.');
-  const supplied = plan ?? {...blankFacility(), name:uniqueName(clean.facilities, 'My facility')};
+  if (clean.facilities.length >= MAX_FACILITIES) throw Error('This browser collection already has 30 facilities. Export a backup or remove a facility before adding another.');
+  const supplied = plan ? rename && typeof plan.name === 'string' ? {...plan, name:uniqueName(clean.facilities, plan.name)} : plan :
+    {...blankFacility(), name:uniqueName(clean.facilities, 'My facility')};
   const item = record(supplied, clean.facilities.map(item => item.id));
   return validateLibrary({...clean, activeId:item.id, facilities:[...clean.facilities,item]});
 }
@@ -141,6 +143,16 @@ export function selectFacility(library, id) {
   const clean = validateLibrary(library);
   if (!clean.facilities.some(item => item.id === id)) throw Error('Choose an existing saved facility.');
   return {...clean, activeId:id};
+}
+
+// The collection always keeps one facility; removing the active one opens its neighbour.
+export function removeFacility(library, id) {
+  const clean = validateLibrary(library), index = clean.facilities.findIndex(item => item.id === id);
+  if (index < 0) throw Error('Choose an existing saved facility.');
+  if (clean.facilities.length === 1) throw Error('Keep at least one facility. Create or import another before removing this one.');
+  const facilities = clean.facilities.filter(item => item.id !== id);
+  const activeId = clean.activeId === id ? facilities[Math.min(index, facilities.length - 1)].id : clean.activeId;
+  return validateLibrary({...clean, activeId, facilities});
 }
 
 export function duplicateActive(library) {
@@ -164,7 +176,7 @@ export function importFacilities(library, plans) {
     next = {...createLibrary(imported[0]), revision:clean.revision};
     remaining = imported.slice(1);
   }
-  for (const plan of remaining) next = addFacility(next, plan);
+  for (const plan of remaining) next = addFacility(next, plan, {rename:true});
   return next;
 }
 

@@ -1221,6 +1221,8 @@
 .facility-paste-modal form > .error {
   margin-bottom: 14px;
 }
+.facility-point-list textarea {width:100%;resize:vertical;font-family:ui-monospace,monospace;font-size:12px;line-height:1.6;padding:8px 9px;border:1px solid #2d4c60;border-radius:4px;background:#0a2130;color:#dfedf5;}
+.facility-point-list > button {margin-top:8px;}
 
 .facility-place-results {list-style:none;padding:0;display:grid;gap:8px;}
 .facility-place-results button {width:100%;white-space:normal;text-align:left;display:block;}

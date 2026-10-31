@@ -2,14 +2,18 @@ import React, {useEffect, useState} from 'react';
 import {Plus, ArrowUpRight, Check, Trash} from '@phosphor-icons/react';
 import {STAIR_REFERENCE, defaultStair, stairDimensions} from './facility-stairs.mjs';
 import {polygonContains, ringsOverlap} from './facility.mjs';
+import {displayLength, enteredLength} from './facility-shape-edit.mjs';
 import './facility-stairs.css';
 
 const formatDistance=(value,units)=>`${Number((value/(units==='imperial' ? .3048 : 1)).toFixed(3))} ${units==='imperial' ? 'ft' : 'm'}`;
 
 function LengthField({label,value,onChange,units,min=.05,max=100,step='any'}) {
   const factor=units==='imperial' ? .3048 : 1, suffix=units==='imperial' ? 'ft' : 'm';
-  const displayed=typeof value==='number' && Number.isFinite(value) ? Number((value/factor).toFixed(5)) : value ?? '';
-  return <label className="facility-field"><span>{label}<small>{suffix}</small></span><input aria-label={`${label} (${suffix})`} type="number" min={min/factor} max={max/factor} step={step} required value={displayed} onChange={e=>onChange(e.target.value==='' ? '' : Number(e.target.value)*factor)}/></label>;
+  // Only a changed number is converted, and stored to 0.1 mm, so feet display cannot drift the saved metres.
+  // Limits round outward and snap, so the displayed minimum (0.984 ft) still means 0.3 m.
+  const displayed=displayLength(value,units) ?? '', lo=Math.floor(min/factor*1e3)/1e3, hi=Math.ceil(max/factor*1e3)/1e3;
+  function change(text){if(text==='')return onChange('');const n=Number(text);let metres=enteredLength(n,value,units);if(metres<min && n>=lo)metres=min;if(metres>max && n<=hi)metres=max;onChange(metres);}
+  return <label className="facility-field"><span>{label}<small>{suffix}</small></span><input aria-label={`${label} (${suffix})`} type="number" min={lo} max={hi} step={step} required value={displayed} onChange={e=>change(e.target.value)}/></label>;
 }
 
 export default function FacilityStairs({plan,building,floor=0,commit,selectedId,onSelect,disabled=false,onDirtyChange,units='metric'}) {
@@ -31,7 +35,7 @@ export default function FacilityStairs({plan,building,floor=0,commit,selectedId,
     <button className="facility-secondary" disabled={disabled || dirty || !building || building.floors<2 || (plan.stairs || []).length>=100} onClick={add}><Plus/>Add straight stair</button>
     {(!building || building.floors<2) && <p className="facility-caption">Add an upper level first, then reserve space for the stair and landings.</p>}
     <div className="facility-item-list compact">{stairs.map(stair=><button key={stair.id} disabled={disabled || dirty && stair.id!==selectedId} className={selectedId===stair.id ? 'selected' : ''} onClick={()=>onSelect?.(stair.id,'stair')}><ArrowUpRight/><span>{stair.name}<small>Level {stair.fromLevel+1} → {stair.toLevel+1}</small></span></button>)}</div>
-    {draft && saved?.id===draft.id && <form className="facility-stair-form" onSubmit={save}>
+    {draft && saved?.id===draft.id && <form noValidate className="facility-stair-form" onSubmit={save}>
       <label className="facility-field"><span>Stair name</span><input aria-label="Stair name" required maxLength={100} value={draft.name} onChange={e=>change('name',e.target.value)}/></label>
       <label className="facility-field"><span>Stair levels</span><select aria-label="Stair levels" value={draft.fromLevel} onChange={e=>{const fromLevel=Number(e.target.value);setDraft(d=>({...d,fromLevel,toLevel:fromLevel+1}));}}>{Array.from({length:Math.max(0,(activeBuilding?.floors || 1)-1)},(_,level)=><option key={level} value={level}>Level {level+1} → Level {level+2}</option>)}</select></label>
       {dims && <div className="facility-stair-summary" role="status"><strong>{formatDistance(dims.rise,units)} level rise</strong><span>{draft.risers} equal risers × {formatDistance(dims.riser,units)} ({(dims.riser/.0254).toFixed(2)} in)</span><span>{draft.risers-1} treads · {formatDistance(dims.run,units)} flight run</span><span>Clear reservation {formatDistance(dims.width,units)} × {formatDistance(dims.length,units)} including two landings</span></div>}

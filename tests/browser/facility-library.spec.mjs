@@ -89,7 +89,8 @@ test('named save files and collection backups import as additional facilities wi
   expect(library.facilities).toHaveLength(2);
   expect(library.activeId).not.toBe(before.activeId);
   expect(library.facilities.find(f=>f.id===before.activeId).plan).toEqual(firstPlan);
-  expect(await savedPlan(page)).toEqual(firstPlan);
+  // The imported copy gets a distinct name so the switcher can tell the two apart.
+  expect(await savedPlan(page)).toEqual({...firstPlan,name:'Campus North 2'});
   await backupMenu(page);
   const backingUp=page.waitForEvent('download');
   await page.getByRole('button',{name:'Export all facilities',exact:true}).click();

@@ -1,6 +1,21 @@
 export const unitFactor = units => units === 'imperial' ? 0.3048 : 1;
 export const unitLabel = units => units === 'imperial' ? 'ft' : 'm';
-export const displayLength = (value, units) => typeof value === 'number' && Number.isFinite(value) ? +(value / unitFactor(units)).toFixed(4) : value;
+// Feet show 3 decimals (0.3 mm) so any entered value survives the 0.1 mm metre storage unchanged.
+export const displayLength = (value, units) => typeof value === 'number' && Number.isFinite(value) ? +(value / unitFactor(units)).toFixed(units === 'imperial' ? 3 : 4) : value;
+// Entered lengths are stored to 0.1 mm: whole feet and the 11 in stair tread stay exact, float noise does not.
+export const toMetres = (value, units) => Math.round(value * unitFactor(units) * 1e4) / 1e4;
+// Lengths entered as a displayed value convert only when the number actually differs from what was shown.
+export function enteredLength(text, metres, units) {
+  const n = typeof text === 'number' ? text : String(text).trim() === '' ? NaN : Number(text);
+  return Number.isFinite(n) && n === displayLength(metres, units) ? metres : toMetres(n, units);
+}
+// Rewrites metre ranges in validation messages ("height 1–150 m") into the active unit.
+export function localizeLengths(message, units) {
+  if (units !== 'imperial' || typeof message !== 'string') return message;
+  const ft = text => +(Number(text.replace(/,/g, '')) / 0.3048).toFixed(2);
+  return message.replace(/(?<![\d.,])(-?\d{1,3}(?:,\d{3})+(?:\.\d+)?|-?\d+(?:\.\d+)?)(?:(\s?[–-]\s?)(-?\d{1,3}(?:,\d{3})+(?:\.\d+)?|-?\d+(?:\.\d+)?))? m(?![²\w])/g,
+    (_, a, dash, b) => `${ft(a)}${b === undefined ? '' : dash + ft(b)} ft`);
+}
 export function shapeBounds(shape) {
   const p=shape.footprint.slice(0,-1), xs=p.map(p=>p[0]), ys=p.map(p=>p[1]);
   const min=[Math.min(...xs),Math.min(...ys)], max=[Math.max(...xs),Math.max(...ys)];
@@ -17,6 +32,12 @@ export function moveShape(shape, axis, position) {
   if(!Number.isFinite(position)) throw Error('Enter a finite position.');
   const bounds=shapeBounds(shape),i=axis==='x'?0:1, offset=position-bounds[axis];
   return transform(shape,p=>p.map((n,j)=>j===i?n+offset:n));
+}
+// Counter-clockwise about the bounds center, matching the shape builder's rotation.
+export function rotateShape(shape, degrees) {
+  if(!Number.isFinite(degrees)) throw Error('Enter a finite rotation in degrees.');
+  const {x,y}=shapeBounds(shape),r=degrees*Math.PI/180,cos=Math.cos(r),sin=Math.sin(r);
+  return transform(shape,([a,b])=>[x+(a-x)*cos-(b-y)*sin,y+(a-x)*sin+(b-y)*cos]);
 }
 export function resizeEdge(shape,index,length) {
   if(!Number.isInteger(index)||index<0||index>=shape.footprint.length-1||!Number.isFinite(length)||length<=0) throw Error('Choose an edge and a positive length.');

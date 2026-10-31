@@ -2,6 +2,7 @@ import React, {useState} from 'react';
 import {Plus, Copy, Stack} from '@phosphor-icons/react';
 import {addBuildingLevel, copyRoomsToNextLevel, ceilingOpenings} from './facility.mjs';
 import {formatDistance} from './facility-measurements.mjs';
+import {localizeLengths} from './facility-shape-edit.mjs';
 import './facility-planning.css';
 
 export default function FacilityLevels({plan, building, floor, onFloor, commit, disabled=false, onSelect, units='metric'}) {
@@ -31,6 +32,6 @@ export default function FacilityLevels({plan, building, floor, onFloor, commit, 
       <button type="button" className="facility-secondary" disabled={disabled || !rooms.length} onClick={()=>perform(true)}><Copy/>Copy rooms upstairs</button></div>
     <p className="facility-caption">Add top level keeps the current floor spacing. Copy rooms adds the next level when needed and requires it to be empty. Stairs, openings and pathways are not copied. Both changes can be undone.</p>
     <p className="facility-caption">A floor opening on Level {activeFloor+1} also opens the ceiling of {activeFloor===0 ? 'the space beneath the lowest modeled floor' : `Level ${activeFloor}`}. Openings on other levels remain independent.</p>
-    {error && <p className="error" role="alert">{error}</p>}
+    {error && <p className="error" role="alert">{localizeLengths(error,units)}</p>}
   </section>;
 }
