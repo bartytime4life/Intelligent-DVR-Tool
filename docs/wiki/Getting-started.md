@@ -1,6 +1,6 @@
 # Your first five minutes
 
-[Home](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Home) · [Install for PC testing](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/PC-testing) · [Product status](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Product-status)
+[Home](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Home) · [Install for PC testing](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/PC-testing) · [Field acceptance](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/field-acceptance.md) · [Product status](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Product-status)
 
 ## Install, check and start
 
@@ -9,6 +9,8 @@ or use the same launch scripts from a source checkout. Install finishes without
 starting a service. Check validates the software setup. Start opens the local
 application at http://127.0.0.1:4173 with all cameras disconnected.
 
+Running `npm run dev` alone only serves the browser preview. It does **not** start the local DVR preview, recorder or analysis service; use the PC launcher for those features.
+
 A fresh Monitor has no stock photos or fake events. Existing historical review
 records remain available without invented imagery.
 
@@ -16,7 +18,8 @@ records remain available without invented imagery.
 
 | Workspace | First action | Expected result |
 | --- | --- | --- |
-| Monitor | Connect source → webcam → Connect webcam; allow browser permission | Live video-only preview, visible connection status, explicit disconnect |
+| Monitor | Connect source → webcam → Connect webcam; allow browser permission | Live preview without automatic inference, visible status and explicit disconnect |
+| Webcam clip | Record webcam clip → Stop recording → Open clip in Recognition | Opt-in bounded clip ready for a separately authorized local import and analysis job |
 | Local DVR | Configure local-feeds.json, restart, load/select a channel and connect | Bounded RTSP/TCP preview; actionable connection errors |
 | Recognition | Configure an approved recordings folder/model/rules; connect and explicitly analyze | Progress, cancellation and source-matched results using the existing analyzer |
 | Events | Send a verified observation for review; add a note, confirm/dismiss and export | Decisions remain through workspace switches; no new simulated events |
@@ -55,7 +58,7 @@ assumptions. See [map drafting](https://github.com/bartytime4life/Intelligent-DV
 
 ## Troubleshooting
 
-Run the [readiness check](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/PC-testing) first. It reports missing dependencies,
+Run the [readiness check](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/PC-testing) first. Use the [field-acceptance runbook](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/field-acceptance.md) when recording physical webcam, DVR and recovery results. It reports missing dependencies,
 config problems, native codec failures and occupied ports without probing devices.
 Browser camera permissions, DVR credentials/channel paths and physical network
 access still need testing on the actual PC. Facility requires working WebGL.
