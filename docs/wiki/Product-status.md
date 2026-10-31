@@ -8,8 +8,13 @@ facility edits prompt before leaving, facade-mounted cameras keep coverage,
 Windows file-sharing and non-ASCII path failures are handled, the local service
 handles requests concurrently, and on Linux it refuses other accounts on the same
 computer. The interface font is now bundled. [Test evidence](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/review-fixes-2026-10-30/README.md).
-Four follow-up pull requests (#47–#50) for review speed, camera stills in Zones,
-camera planning metrics and service diagnostics are open and not yet shipped.
+Four follow-up pull requests merged on October 31 (#47–#50): local observation
+stills and keyboard review with filters, CSV and bulk dismiss; zones drawn on a
+camera still with an analyzer-ready rule export; pixel-density and coverage
+planning estimates with an installer sheet; and specific failure causes, a
+local diagnostic log, model reuse and hash-pinned installs. They are tested with
+synthetic fixtures and CI only; see the [roadmap](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Roadmap#review-follow-up--october-30-2026)
+for what each still needs before you rely on it.
 
 [Recording coverage validation](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/recording-coverage.md) now checks alleged EOF
 before publishing completion, rejects early/corrupt decoding, and distinguishes
