@@ -47,6 +47,10 @@ test('receipt import preserves review decisions and review exports restore an em
   await page.locator('.event-table-row').filter({hasText:'test-recording'}).click();
   await page.getByLabel('Review note').fill('Checked the original recording');
   await page.getByRole('button',{name:'Dismiss event'}).click();
+  // Review advances to the next item awaiting review (a retained sample here); close it.
+  await expect(page.getByRole('dialog',{name:'Review observation'})).toContainText('Legacy sample observation');
+  await page.keyboard.press('Escape');
+  await expect(page.getByRole('dialog')).toHaveCount(0);
   const reviewed = (await stored(page)).find(e=>e.mode==='offline-model');
   await page.getByLabel('Import receipt or review export').setInputFiles(upload(receipt));
   expect((await stored(page)).find(e=>e.id===reviewed.id)).toEqual(reviewed);

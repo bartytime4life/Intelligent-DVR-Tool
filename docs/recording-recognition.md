@@ -124,6 +124,35 @@ A reused ID with different source/model/observation fields is rejected. Queue
 capacity is 1,000 records across model and sample observations. Every insertion
 refuses overflow without truncating older records.
 
+## Faster review
+
+- **Keyboard review.** In the review dialog, **C** confirms, **D** dismisses and
+  **J/K** (or the arrow keys) move between observations awaiting review. Keys are
+  ignored while you type a note. After a decision the dialog opens the next
+  observation awaiting review in the order Events is showing, with "N of M".
+- **Filters and order.** Filter by camera or source and by recording (the first
+  eight characters of its SHA-256), as well as status, kind and search text.
+  Sort by newest added, highest score or clip time.
+- **Bulk dismissal.** **Dismiss N shown awaiting review** applies to the current
+  filters only, after a confirmation. Undo lasts until the page closes and keeps
+  any decision you made afterwards.
+- **CSV export.** **Export shown as CSV** downloads the shown rows with status,
+  source, clip time, scores, hashes and notes. Cells that a spreadsheet would
+  treat as formulas are neutralized.
+- **Stills.** Sending observations from a matched recording, or with
+  **Send to Events** on a completed LAN segment, keeps one small JPEG still
+  (160 px wide) per observation in this browser's IndexedDB. Stills are drawn
+  from the verified local recording, are never uploaded, and are removed when
+  their observations leave the queue; they stay while **Undo clear** can restore
+  them. A still is a visual reminder, not evidence: open the recording in
+  Recognition to verify.
+- **LAN segments.** Each completed segment shows its observation count when the
+  service reports it. **Only segments with observations** narrows the list,
+  and a badge counts completed segments you have not reviewed or sent yet in this
+  page. **Send to Events** is explicit per segment and leaves the current review
+  open; nothing enters the queue automatically. A warning appears when sampled
+  times may lag real time by more than 0.5 s.
+
 Events includes source/status/search filters, queue counts, review export and an
 explicit **Clear queue** dialog. Export first to retain decisions outside the
 browser. Clear leaves an actually empty queue, allowing a full 1,000-observation

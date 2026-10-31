@@ -55,11 +55,11 @@ export function summarizeReport(parsed, { threshold = .5, reviews = [], sourceMa
 }
 
 const escapeHTML = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const cell = v => { let s=String(v ?? ''); if (/^[\s]*[=+\-@]/.test(s)) s="'"+s; return '"'+s.replaceAll('"','""')+'"'; };
+export const csvCell = v => { let s=String(v ?? ''); if (/^[\s]*[=+\-@]/.test(s)) s="'"+s; return '"'+s.replaceAll('"','""')+'"'; };
 export function reportCSV(report) {
   const rows = [['source_sha256','analysis_state','seconds','label','rule','model_score','review_status','review_note','recording_coverage_status','analysis_termination']];
   for (const e of report.observations) rows.push([report.source.sha256,report.analysis.state,e.seconds,e.label,e.rule,e.score,e.status,e.note,report.coverage.declaration?.status || 'legacy-unverified',report.coverage.declaration?.termination || 'unspecified']);
-  return rows.map(row=>row.map(cell).join(',')).join('\r\n')+'\r\n';
+  return rows.map(row=>row.map(csvCell).join(',')).join('\r\n')+'\r\n';
 }
 
 export function comparisonCSV(report) {
@@ -67,7 +67,7 @@ export function comparisonCSV(report) {
   if (!c) throw Error('This report has no sharpening comparison.');
   const rows=[['source_sha256','profile','implementation_sha256','frame_index','seconds','display_threshold','original_detections','sharpened_detections','original_processing_ms','enhanced_processing_ms','source_pixels_sha256','enhanced_pixels_sha256','qualification']];
   for (const s of c.samples) rows.push([report.source.sha256,c.declaration.profile,c.declaration.implementation_sha256,s.frame_index,s.seconds,report.analysis.display_threshold,s.original,s.sharpened,s.original_processing_ms,s.enhanced_processing_ms,s.source_pixels_sha256,s.enhanced_pixels_sha256,'unqualified']);
-  return rows.map(row=>row.map(cell).join(',')).join('\r\n')+'\r\n';
+  return rows.map(row=>row.map(csvCell).join(',')).join('\r\n')+'\r\n';
 }
 
 export function reportHTML(report) {

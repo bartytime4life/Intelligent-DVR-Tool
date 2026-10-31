@@ -105,6 +105,7 @@ export function parseReceipt(v) {
       title: `${e.label} observed in zone`,
       label: e.label,
       time: `Clip +${e.seconds.toFixed(1)}s`,
+      seconds: e.seconds,
       score: e.score,
       rule: e.rule,
       status: "pending",

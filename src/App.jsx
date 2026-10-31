@@ -6,6 +6,8 @@ const RecognitionReview = lazy(() => import("./RecognitionReview.jsx"));
 import { mergeRecognitionEvents } from './recognition.mjs';
 import { workspaceFromHash, readWorkspace, writeWorkspace, preserveUnreadable, reviewExport, parseReviewExport } from './workspace-state.mjs';
 import { backdropDismiss } from './dialog-dismiss.mjs';
+import { getImage, pruneImages } from './local-images.mjs';
+import { filterEvents, queueChoices, nextPending, queueCSV, dismissPending, restorePending } from './review-queue.mjs';
 import { DEFAULT_SETUP, parseSetup } from "./resources.mjs";
 import {
   Monitor,
@@ -55,8 +57,8 @@ function download(data, name) {
   a.click();
   setTimeout(() => URL.revokeObjectURL(u), 1000);
 }
-function downloadText(text, name) {
-  const u = URL.createObjectURL(new Blob([text], { type: "text/plain" }));
+function downloadText(text, name, type = "text/plain") {
+  const u = URL.createObjectURL(new Blob([text], { type }));
   const a = document.createElement("a");
   a.href = u;
   a.download = name;
@@ -232,12 +234,25 @@ function Overlay({
     />
   );
 }
+// Bumped when observations arrive so stills saved just before them are read again.
+const StillVersion = React.createContext(0);
+function Still({ id, large = false, fallback = null }) {
+  const version = React.useContext(StillVersion);
+  const [url, setUrl] = useState("");
+  useEffect(() => {
+    let live = true, made = "";
+    setUrl("");
+    getImage("thumbnails", id).then((blob) => { if (live && blob) { made = URL.createObjectURL(blob); setUrl(made); } });
+    return () => { live = false; if (made) URL.revokeObjectURL(made); };
+  }, [id, version]);
+  return url ? <img className={`event-still${large ? " large" : ""}`} src={url} alt="Still from the verified source recording at this observation" /> : fallback;
+}
 function EventRow({ event, review, zone }) {
   const c = cameraOf(event);
   return (
     <article className="event-card">
       <div className="event-preview">
-        <Camera size={35} />
+        <Still id={event.id} fallback={<Camera size={35} />} />
         <span className="sample-badge">
           {event.mode === "sample" ? "SAMPLE" : "OFFLINE"}
         </span>
@@ -290,6 +305,8 @@ export function App() {
   const [liveCount, setLiveCount] = useState(0);
   const [capturedClip, setCapturedClip] = useState(null);
   const [evidence, setEvidence] = useState(null);
+  const [sourceFilter, setSourceFilter] = useState("all"), [recordingFilter, setRecordingFilter] = useState("all"), [sort, setSort] = useState("newest");
+  const [bulkUndo, setBulkUndo] = useState(null), [stillVersion, setStillVersion] = useState(0), [recorderStatus, setRecorderStatus] = useState(null);
   const [capturePending, setCapturePending] = useState(false);
   useEffect(() => {
     if (!capturedClip && !capturePending) return;
@@ -337,7 +354,8 @@ export function App() {
       const newCount = merged.length - eventsRef.current.length;
       eventsRef.current = merged;
       setEvents(merged);
-      if (openEvents) { setFilter("all"); setEventMode("all"); setQuery(""); setTab("Events"); }
+      setStillVersion((v) => v + 1);
+      if (openEvents) { clearFilters(); setTab("Events"); }
       setToast(`${newCount} new observations added. Existing decisions kept. Footage stays local.`);
       return true;
     } catch (err) { setToast(err.message); return false; }
@@ -410,13 +428,44 @@ export function App() {
     setNote(e.note || "");
     setModal({ type: "review", event: e });
   }
+  // Review moves through pending items in the order the user is looking at.
+  const reviewList = () => (tab === "Events" ? visible : pending);
   function decide(status) {
-    setEvents((es) => reviewEvent(es, modal.event.id, status, note));
-    setModal(null);
-    setToast(
-      `${status === "confirmed" ? "Observation confirmed" : "Event dismissed"}. Review updated.`,
-    );
+    const current = modal.event, next = nextPending(reviewList(), current.id);
+    setEvents((es) => reviewEvent(es, current.id, status, note));
+    if (next) review(next); else setModal(null);
+    setToast(`${status === "confirmed" ? "Observation confirmed" : "Event dismissed"}.${next ? " Showing the next one awaiting review." : " Nothing else here awaits review."}`);
   }
+  function step(direction) {
+    const next = nextPending(reviewList(), modal.event.id, direction);
+    if (next) review(next);
+  }
+  useEffect(() => {
+    if (modal?.type !== "review") return;
+    const key = (e) => {
+      if (e.defaultPrevented || e.ctrlKey || e.metaKey || e.altKey || e.target.closest?.("textarea, input, select")) return;
+      const action = { c: () => decide("confirmed"), d: () => decide("dismissed"), j: () => step(1), k: () => step(-1), ArrowRight: () => step(1), ArrowLeft: () => step(-1) }[e.key.length === 1 ? e.key.toLowerCase() : e.key];
+      if (action) { e.preventDefault(); action(); }
+    };
+    document.addEventListener("keydown", key);
+    return () => document.removeEventListener("keydown", key);
+  });
+  function clearFilters() { setFilter("all"); setEventMode("all"); setSourceFilter("all"); setRecordingFilter("all"); setSort("newest"); setQuery(""); }
+  function dismissShown() {
+    const result = dismissPending(eventsRef.current, visible.filter((e) => e.status === "pending").map((e) => e.id), "Dismissed in bulk from Events.");
+    eventsRef.current = result.events; setEvents(result.events); setBulkUndo(result); setModal(null);
+    setToast(`${result.previous.length} observations dismissed. Undo is available in Events.`);
+  }
+  function undoBulk() {
+    const restored = restorePending(eventsRef.current, bulkUndo);
+    eventsRef.current = restored; setEvents(restored); setBulkUndo(null);
+    setToast("Bulk dismissal undone. Later decisions were kept.");
+  }
+  // Stills follow the queue: removed with their observations, kept while Undo can restore them.
+  useEffect(() => {
+    const timer = setTimeout(() => { pruneImages("thumbnails", new Set([...events, ...(clearedEvents || [])].map((e) => e.id))); }, 2000);
+    return () => clearTimeout(timer);
+  }, [events, clearedEvents]);
   function saveRule(e) {
     e.preventDefault();
     const problem = validateRule(draft);
@@ -452,15 +501,10 @@ export function App() {
     setVideo({ url: URL.createObjectURL(f), name: f.name });
     setModal({ type: "video" });
   }
-  const visible = events.filter(
-    (e) =>
-      (filter === "all" || e.status === filter) &&
-      (eventMode === "all" || e.mode === eventMode) &&
-      `${e.title} ${cameraOf(e)?.name || e.cameraName} ${e.rule}`
-        .toLowerCase()
-        .includes(query.toLowerCase()),
-  );
+  const visible = filterEvents(events, { status: filter, mode: eventMode, source: sourceFilter, recording: recordingFilter, query, sort, label: (e) => cameraOf(e)?.name || e.cameraName });
+  const choices = queueChoices(events), shownPending = visible.filter((e) => e.status === "pending").length;
   return (
+    <StillVersion.Provider value={stillVersion}>
     <div className="app-shell">
       <a className="skip-link" href="#workspace">
         Skip to workspace
@@ -532,7 +576,7 @@ export function App() {
           {(eventsRecovery || rulesRecovery) && <button className="text-button" onClick={() => { eventsRecovery?.dismiss(); rulesRecovery?.dismiss(); }}>Dismiss</button>}
         </div>}
         {recognitionOpened && <div hidden={tab !== "Recognition"}><WorkspaceBoundary name="Recognition"><Suspense fallback={<div className="content-page"><h1>Opening recognition review…</h1></div>}>
-          <RecognitionReview active={tab === "Recognition" && !pageHidden} onImport={addObservations} clip={capturedClip} onClip={setCapturedClip} reviews={events} evidence={evidence} />
+          <RecognitionReview active={tab === "Recognition" && !pageHidden} onImport={addObservations} clip={capturedClip} onClip={setCapturedClip} reviews={events} evidence={evidence} onRecorderStatus={setRecorderStatus} />
         </Suspense></WorkspaceBoundary></div>}
         {tab === "Facility" && <WorkspaceBoundary name="Facility"><Suspense fallback={<div className="content-page"><h1>Opening facility builder…</h1></div>}><FacilityBuilder onPreviewCount={setLiveCount} onDirtyChange={(dirty) => { facilityDirty.current = dirty; }} /></Suspense></WorkspaceBoundary>}
         {tab === "System" && <WorkspaceBoundary name="System"><Suspense fallback={<div className="content-page"><h1>Opening machine setup…</h1></div>}><SystemSetup setup={resources}
@@ -638,10 +682,28 @@ export function App() {
                 <option value="dismissed">Dismissed</option>
               </select>
               <select aria-label="Observation source" value={eventMode} onChange={e => setEventMode(e.target.value)}>
-                <option value="all">All sources</option><option value="offline-model">Model observations</option><option value="sample">Samples</option>
+                <option value="all">All kinds</option><option value="offline-model">Model observations</option><option value="sample">Samples</option>
+              </select>
+              <select aria-label="Camera or source" value={sourceFilter} onChange={(e) => setSourceFilter(e.target.value)}>
+                <option value="all">All cameras</option>
+                {choices.sources.map((s) => <option key={s.value} value={s.value}>{s.value} ({s.count})</option>)}
+              </select>
+              <select aria-label="Recording" value={recordingFilter} onChange={(e) => setRecordingFilter(e.target.value)}>
+                <option value="all">All recordings</option>
+                {choices.recordings.map((r) => <option key={r.value} value={r.value}>rec {r.value.slice(0, 8)} ({r.count})</option>)}
+              </select>
+              <select aria-label="Sort events" value={sort} onChange={(e) => setSort(e.target.value)}>
+                <option value="newest">Newest added</option><option value="score">Highest score</option><option value="clip">Clip time</option>
               </select>
               <button className="button" onClick={() => importRef.current.click()}><UploadSimple />Import receipt or reviews</button>
             </div>
+            <div className="event-bulk-actions">
+              <span>{visible.length} shown · {shownPending} awaiting review</span>
+              <button className="text-button" disabled={!visible.length} onClick={() => downloadText(queueCSV(visible), "dvr-events.csv", "text/csv")}><DownloadSimple size={15} />Export shown as CSV</button>
+              <button className="text-button" disabled={!shownPending} onClick={() => setModal({ type: "bulk-dismiss" })}><X size={15} />Dismiss {shownPending} shown awaiting review</button>
+              <span className="hint">Shortcuts while reviewing: C confirm · D dismiss · J/K or ←/→ next and previous.</span>
+            </div>
+            {bulkUndo && <div className="review-recovery" role="status"><span>{bulkUndo.previous.length} observations were dismissed in bulk.</span><button className="button" onClick={undoBulk}>Undo bulk dismissal</button></div>}
             <div className="event-table">
               {visible.length ? (
                 visible.map((e) => (
@@ -651,11 +713,7 @@ export function App() {
                     onClick={() => review(e)}
                   >
                     <span className="table-icon">
-                      {e.label === "person" ? (
-                        <User size={24} />
-                      ) : (
-                        <Cube size={24} />
-                      )}
+                      <Still id={e.id} fallback={e.label === "person" ? <User size={24} /> : <Cube size={24} />} />
                     </span>
                     <span className="event-row-title">
                       {e.title}
@@ -677,7 +735,7 @@ export function App() {
                   <MagnifyingGlass size={30} />
                   <h3>{events.length ? "No matching events" : "Your review queue is empty"}</h3>
                   <p>{events.length ? "Change the filters to see other observations." : "Open recognition results or restore a review export to start."}</p>
-                  {events.length ? <button className="button" onClick={() => { setFilter("all"); setEventMode("all"); setQuery(""); }}>Clear filters</button> : <button className="button" onClick={() => setTab("Recognition")}>Open Recognition</button>}
+                  {events.length ? <button className="button" onClick={clearFilters}>Clear filters</button> : <button className="button" onClick={() => setTab("Recognition")}>Open Recognition</button>}
                 </div>
               )}
             </div>
@@ -935,6 +993,7 @@ export function App() {
       <footer className="footer">
         <Info size={21} />
         <strong>{liveCount ? `${liveCount} receiving` : 'No camera preview active'}</strong>
+        {recorderStatus?.active && <><span className="footer-divider" /><strong className="footer-recording">LAN recording active{recorderStatus.name ? ` · ${recorderStatus.name}` : ''}</strong></>}
         <span className="footer-divider" />
         <span>Record a webcam clip explicitly, then analyze it in Recognition. Live previews do not run AI.</span>
         <span className="footer-end">Edge-first. Human-reviewed.</span>
@@ -972,7 +1031,7 @@ export function App() {
           <div className="review-dialog-layout">
             <div>
               <div className="missing-evidence">
-                <Camera size={44} />
+                <Still id={modal.event.id} large fallback={<Camera size={44} />} />
                 <h3>{modal.event.mode === 'sample' ? 'Legacy sample observation' : 'Original footage stays local'}</h3>
                 <p>{modal.event.mode === 'sample' ? 'This retained sample has no real camera evidence. Your previous decision and notes are preserved.' : `Open the source recording at ${modal.event.time} in Recognition to verify this observation.`}</p>
                 {modal.event.provenance?.source_sha256 && <button className="button" onClick={() => {
@@ -987,6 +1046,14 @@ export function App() {
               </p>
             </div>
             <div className="review-details">
+              {(() => {
+                const queue = reviewList().filter((e) => e.status === "pending"), at = queue.findIndex((e) => e.id === modal.event.id);
+                return <div className="review-stepper">
+                  <button className="text-button" disabled={queue.length < (at < 0 ? 1 : 2)} onClick={() => step(-1)}>← Previous</button>
+                  <span>{at < 0 ? `${queue.length} awaiting review` : `${at + 1} of ${queue.length} awaiting review`}</span>
+                  <button className="text-button" disabled={queue.length < (at < 0 ? 1 : 2)} onClick={() => step(1)}>Next →</button>
+                </div>;
+              })()}
               <h3>{modal.event.title}</h3>
               <dl>
                 <dt>Configured rule</dt>
@@ -1040,10 +1107,20 @@ export function App() {
                 Dismiss event
               </button>
               <p className="hint">
-                Confirming records your review. It does not establish intent or
-                trigger external actions.
+                Confirming records your review and opens the next one awaiting review. It does not establish intent or
+                trigger external actions. Keys: C confirm · D dismiss · J/K move.
               </p>
             </div>
+          </div>
+        </Modal>
+      )}
+      {modal?.type === "bulk-dismiss" && (
+        <Modal title={`Dismiss ${shownPending} observations?`} close={() => setModal(null)}>
+          <p>This dismisses the {shownPending} shown observations that await review, using your current filters. Confirmed and dismissed items are unchanged.</p>
+          <p className="hint">Undo is available in Events until this page closes. Later decisions are kept when you undo.</p>
+          <div className="review-actions">
+            <button className="button amber" onClick={dismissShown}>Dismiss {shownPending}</button>
+            <button className="button" onClick={() => setModal(null)}>Keep them</button>
           </div>
         </Modal>
       )}
@@ -1137,6 +1214,6 @@ export function App() {
         </Modal>
       )}
     </div>
+    </StillVersion.Provider>
   );
 }
-
