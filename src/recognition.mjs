@@ -1,4 +1,5 @@
 import { parseReceipt } from './data.mjs';
+import { validateEnhancement } from './enhancement.mjs';
 
 export const MAX_REVIEW_BYTES = 32 * 1024 ** 2;
 export const MAX_VIDEO_BYTES = 512 * 1024 ** 2;
@@ -36,7 +37,8 @@ export function parseRecognition(value) {
   }
   const eventFrames = r.events.map(e => Math.round(e.seconds * r.fps_metadata / r.stride));
   require(r.events.every((e, i) => e.camera === r.camera && t.frames[eventFrames[i]] && Math.abs(t.frames[eventFrames[i]].seconds - e.seconds) <= 1e-6), 'Observation refers to an unanalyzed frame or another camera.');
-  return { receipt: r, trace: t, events, eventFrames };
+  const enhancement = validateEnhancement(r, t);
+  return { receipt: r, trace: t, events, eventFrames, enhancement };
 }
 
 export function mergeRecognitionEvents(existing, added) {

@@ -1,5 +1,8 @@
 # Explore Intelligent DVR
 
+For experimental paired original/sharpened detection checks, see
+[saved-recording sharpening comparison](enhancement-comparison.md).
+
 Start with [PC installation and live-device testing](pc-testing.md).
 
 [One-camera LAN recording](lan-recording.md) connects finalized RTSP segments to

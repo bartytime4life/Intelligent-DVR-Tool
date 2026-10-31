@@ -1,5 +1,9 @@
 # Verification index
 
+[Saved-recording sharpening comparison, October 30](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/enhancement-2026-10-30/README.md):
+paired native pixel/model checks, source preservation, separate evaluation,
+failure handling and recovery; physical-camera accuracy remains unqualified.
+
 [One-camera LAN recorder, October 30](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/lan-recorder-2026-10-30/README.md):
 controlled-source recording, native analysis and fault/recovery tests;
 physical-camera and sustained deployment acceptance remain separate.

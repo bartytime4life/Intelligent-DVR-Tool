@@ -16,3 +16,16 @@ export function recognitionFixture(source = 'a'.repeat(64)) {
     ] },
   };
 }
+
+export function sharpeningFixture(source) {
+  const value=recognitionFixture(source);
+  const declaration={schema:'intelligent-dvr.enhancement-comparison.v1',profile:'mild-unsharp-v1',
+    parameters:{kernel_size:5,sigma:1,amount:.5,threshold:3,border:'reflect-101',scale:1},
+    implementation_sha256:'f'.repeat(64),qualification:'unqualified',rule_observations:'original-only'};
+  value.receipt.enhancement_comparison=structuredClone(declaration);
+  value.trace.enhancement_comparison=structuredClone(declaration);
+  for(const f of value.trace.frames) f.comparison={detections:[],original_processing_ms:10,
+    enhanced_processing_ms:14,enhancement_ms:2,source_pixels_sha256:'1'.repeat(64),enhanced_pixels_sha256:'2'.repeat(64)};
+  value.trace.frames[1].comparison.detections=[{label:'truck',score:.8,box:[.1,.2,.2,.3]}];
+  return value;
+}

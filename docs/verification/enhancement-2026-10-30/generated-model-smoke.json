@@ -1,0 +1,19 @@
+{
+  "source_kind": "generated shapes, not camera footage",
+  "model_sha256": "c5c2d13e59ae883e6af3b45daea64af4833a4951c92d116ec270d9ddbe998063",
+  "source_sha256": "76ebbba783e31a75659fd922cc651ce84845145427b6632fffb2c3e10fe31d94",
+  "frames_read": 30,
+  "samples": 6,
+  "source_unchanged": true,
+  "original_detections_match_separate_baseline": true,
+  "original_rule_observations_match": true,
+  "pixel_changed_samples": 6,
+  "original_detections": 4,
+  "sharpened_detections": 6,
+  "mean_original_processing_ms": 280.76234000036493,
+  "mean_enhanced_processing_ms": 270.1387740041052,
+  "recognition_accuracy": "unmeasured",
+  "qualification": "unqualified",
+  "implementation_sha256": "6122201b962c45350e59aeb3fc87fde8e095e43b6e9d5d082913c7ee54ab6edc",
+  "current_implementation_smoke": "passed"
+}

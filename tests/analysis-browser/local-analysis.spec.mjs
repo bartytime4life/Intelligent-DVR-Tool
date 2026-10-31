@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { readFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
-import { recognitionFixture } from '../fixtures/recognition.mjs';
+import { recognitionFixture, sharpeningFixture } from '../fixtures/recognition.mjs';
 
 async function connect(page) {
   await page.goto('/#recognition');
@@ -41,6 +41,48 @@ test('invalid file produces an actionable error and the next valid job succeeds'
   await select(page);
   await page.getByRole('button',{name:'Analyze recording',exact:true}).click();
   await expect(page.locator('.recognition-boxes rect')).toHaveCount(1);
+});
+
+test('explicit sharpening comparison uses native analysis, survives export and labels original footage', async ({page}) => {
+  await connect(page); await select(page);
+  const option=page.getByRole('checkbox',{name:'Compare mild sharpening (experimental)'});
+  await expect(option).not.toBeChecked();
+  await option.check();
+  await page.getByRole('button',{name:'Analyze recording',exact:true}).click();
+  await expect(page.getByLabel('Sharpening comparison')).toBeVisible();
+  await expect(page.locator('.recognition-boxes rect')).toHaveCount(1);
+  await page.getByLabel('Detection input').selectOption('sharpened');
+  await expect(page.locator('.recognition-caption')).toContainText('Original footage · sharpened-input detections');
+  await expect(page.getByLabel('Sharpening report')).toContainText('Original detections');
+  const downloaded=page.waitForEvent('download');
+  await page.getByRole('button',{name:'Download sharpening CSV'}).click();
+  const file=await downloaded; expect(file.suggestedFilename()).toMatch(/-sharpening.csv$/);
+  await expect(page.getByRole('button',{name:'Send 1 observations to Events'})).toBeVisible();
+  await page.setViewportSize({width:390,height:844});
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBe(true);
+  await page.screenshot({path:'test-results/sharpening-mobile.png',fullPage:true});
+});
+
+test('candidate overlays stay separate and a malformed replacement preserves the current review', async ({page}) => {
+  await page.goto('/#recognition');
+  const bytes=await readFile('qa-local/analysis-browser/recordings/synthetic.webm');
+  const fixture=sharpeningFixture(createHash('sha256').update(bytes).digest('hex'));
+  const load=async value=>page.getByLabel('Open recognition results').setInputFiles({name:'paired.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(value))});
+  await load(fixture);
+  await page.getByLabel('Match original recording').setInputFiles('qa-local/analysis-browser/recordings/synthetic.webm');
+  await expect(page.locator('.recognition-boxes rect')).toHaveCount(2);
+  await page.getByRole('button',{name:'Next sample',exact:true}).click();
+  await expect(page.locator('.recognition-boxes rect')).toHaveCount(0);
+  await page.getByLabel('Detection input').selectOption('sharpened');
+  await expect(page.locator('.recognition-boxes rect')).toHaveCount(1);
+  await expect(page.locator('.recognition-scene')).toContainText('truck');
+  fixture.trace.enhancement_comparison.implementation_sha256='0'.repeat(64);
+  await load(fixture);
+  await expect(page.getByRole('alert')).toContainText('sharpening declarations do not match');
+  await expect(page.locator('.recognition-boxes rect')).toHaveCount(1);
+  await page.locator('.recognition-event').first().click();
+  await expect(page.getByLabel('Detection input')).toHaveValue('original');
+  await expect(page.locator('.recognition-boxes rect')).toHaveCount(2);
 });
 
 // Controlled transport faults exercise the UI state machine. The first two

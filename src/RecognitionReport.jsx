@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { recognitionReport, reportCSV, reportHTML } from './recognition-report.mjs';
+import { recognitionReport, reportCSV, reportHTML, comparisonCSV } from './recognition-report.mjs';
 import { downloadBlob } from './clip-capture.mjs';
 
 export default function RecognitionReport({ run, threshold, reviews, source, onSeek }) {
@@ -21,10 +21,16 @@ export default function RecognitionReport({ run, threshold, reviews, source, onS
     <div className="report-table-wrap"><table><thead><tr><th>Class</th><th>Detections</th><th>Samples</th><th>Peak / sample</th><th>First → last (s)</th></tr></thead><tbody>{r.classes.map(c=><tr key={c.label}><td>{c.label}</td><td>{c.detections}</td><td>{c.samples}</td><td>{c.peak_in_sample}</td><td>{c.first_seconds.toFixed(2)} → {c.last_seconds.toFixed(2)}</td></tr>)}</tbody></table></div>
     {!r.classes.length && <p>No detections meet the report threshold. This does not establish an empty scene.</p>}
     <p>{r.summary.confirmed} confirmed · {r.summary.dismissed} dismissed. Review decisions and notes come from this browser’s Events queue.</p>
+    {r.enhancement_comparison && <div aria-label="Sharpening report">
+      <h3>Experimental sharpening comparison</h3>
+      <p>Repeated detections at the same display threshold. More detections do not establish better accuracy. Rule observations above use original detections only.</p>
+      <div className="report-table-wrap"><table><thead><tr><th>Class</th><th>Original detections</th><th>Sharpened detections</th></tr></thead><tbody>{r.enhancement_comparison.classes.map(c => <tr key={c.label}><td>{c.label}</td><td>{c.original}</td><td>{c.sharpened}</td></tr>)}</tbody></table></div>
+    </div>}
     <div className="local-analysis-actions">
       <button className="button" onClick={()=>save(reportHTML(r),'text/html',`${prefix}-report.html`)}>Download printable report</button>
       <button className="button" onClick={()=>save(JSON.stringify(r,null,2),'application/json',`${prefix}-report.json`)}>Download report JSON</button>
       <button className="button" onClick={()=>save(reportCSV(r),'text/csv',`${prefix}-observations.csv`)}>Download observations CSV</button>
+      {r.enhancement_comparison && <button className="button" onClick={()=>save(comparisonCSV(r),'text/csv',`${prefix}-sharpening.csv`)}>Download sharpening CSV</button>}
       <button className="button" onClick={()=>save(JSON.stringify({schema:'intelligent-dvr.recognition-review.v1',receipt:run.receipt,trace:run.trace}),'application/json',`${prefix}-recognition.json`)}>Save recognition results</button>
       {source && <a className="button" href={source.url} download={source.name}>Save analyzed recording</a>}
     </div><p className="hint">Reports contain source hashes and review notes, without video. The printable report opens offline and can be printed to PDF. Save recognition results plus the exact recording to reopen overlays later.</p>

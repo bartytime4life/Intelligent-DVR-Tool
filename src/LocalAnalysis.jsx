@@ -7,6 +7,7 @@ export default function LocalAnalysis({ onResult, onBusy, clip, onClip, recorder
   const [recording, setRecording] = useState(''), [model, setModel] = useState(''), [rules, setRules] = useState('');
   const [error, setError] = useState(''), [message, setMessage] = useState(''), [working, setWorking] = useState(false);
   const [connected, setConnected] = useState(false), [opening, setOpening] = useState(false);
+  const [compareEnhancement, setCompareEnhancement] = useState(false);
   const token = useRef(''), version = useRef(0), opened = useRef(''), controller = useRef(null);
   const resultHandler = useRef(onResult); resultHandler.current = onResult;
   const busy = Boolean(working || opening || activeJob(job) || recorderBusy);
@@ -38,7 +39,8 @@ export default function LocalAnalysis({ onResult, onBusy, clip, onClip, recorder
   async function start() {
     setWorking(true); setError(''); setMessage('Starting the selected recording…');
     opened.current = '';
-    try { setJob(await request('/jobs', { method: 'POST', body: { recording, model, rules } })); }
+    try { setJob(await request('/jobs', { method: 'POST', body: { recording, model, rules,
+      ...(compareEnhancement && catalog?.enhancement_comparisons?.includes('mild-unsharp-v1') ? {compare_enhancement:'mild-unsharp-v1'} : {}) } })); }
     catch (err) {
       // A lost response is ambiguous: reconnect to the retained job before retrying.
       setConnected(false); setMessage(''); setError(`${err.message} Reconnect to check whether the job started.`);
@@ -123,6 +125,10 @@ export default function LocalAnalysis({ onResult, onBusy, clip, onClip, recorder
         <label>Model<select aria-label="Analysis model" value={model} onChange={e => setModel(e.target.value)}>{catalog.models.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}</select></label>
         <label>Rules<select aria-label="Analysis rules" value={rules} onChange={e => setRules(e.target.value)}>{catalog.rules.map(r => <option key={r.id} value={r.id}>{r.name}</option>)}</select></label>
       </fieldset>
+      {catalog.enhancement_comparisons?.includes('mild-unsharp-v1') && <div className="recording-import">
+        <label><input type="checkbox" checked={compareEnhancement} disabled={busy || !connected} onChange={e => setCompareEnhancement(e.target.checked)} /> Compare mild sharpening (experimental)</label>
+        <p>Runs the same detector on original and sharpened samples. Extra processing shares the five-minute job limit. Original footage stays unchanged; rule observations use original detections. Detection accuracy is unqualified.</p>
+      </div>}
       {!catalog.recordings.length && <p>No supported recordings found. Add an MP4/MOV, WebM/MKV or AVI file up to 512 MiB to the configured folder, then refresh choices.</p>}
       {catalog.rules.find(r => r.id === rules)?.summary.map((line, i) => <p className="local-analysis-rule" key={i}>{line}</p>)}
       {!compatible && <p className="recognition-error">Choose rules whose labels are available in this model.</p>}
@@ -137,6 +143,7 @@ export default function LocalAnalysis({ onResult, onBusy, clip, onClip, recorder
     {job && <div className="local-analysis-job" aria-live="polite">
       <strong>{job.recording}</strong><span>{job.phase} · {job.elapsed_seconds}s</span>
       {job.recovered && <p>Recovered from local storage after a service restart. No analysis was rerun.</p>}
+      {job.compare_enhancement && <p>Original + mild sharpening comparison · original-only rule observations</p>}
       <p>{job.frames_analyzed} sampled frames · {job.frames_read} decoded / {job.max_frames} frame cap</p>
       {activeJob(job) && <progress aria-label="Analysis frame budget" value={job.frames_read} max={job.max_frames} />}
       {job.error && <p className={job.state === 'failed' ? 'recognition-error' : ''}>{job.error.message}</p>}
