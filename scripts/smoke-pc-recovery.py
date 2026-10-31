@@ -6,6 +6,7 @@ import http.client
 import json
 import os
 from pathlib import Path
+import re
 import shutil
 import signal
 import socket
@@ -88,6 +89,20 @@ w.release()
         return {p.relative_to(folder).as_posix():[hashlib.sha256(p.read_bytes()).hexdigest(),p.stat().st_mode & 0o777]
                 for p in folder.rglob('*') if p.is_file()}
 
+    # The service appends its start and stop to the diagnostic log; job artifacts must not change.
+    def artifacts(files):
+        return {name:value for name,value in files.items() if not name.startswith('diagnostics/')}
+
+    def diagnostics():
+        folder=state/'diagnostics'
+        assert folder.stat().st_mode & 0o777 == 0o700
+        assert all(p.name in ('service.log','service.log.1','service.log.2') and p.stat().st_mode & 0o777 == 0o600
+                   for p in folder.iterdir())
+        lines=(folder/'service.log').read_text(encoding='ascii').splitlines()
+        for line in lines:  # Codes, hex ids and numbers only.
+            assert re.fullmatch(r'\d+ [A-Z][A-Z0-9_]*( [a-z_]+=([A-Z][A-Z0-9_]*|[a-f0-9]{8,64}|-?\d+(\.\d+)?|REDACTED))*',line), line
+        return lines
+
     report=evidence/'recovery-readiness.json'
     run('--check',*analysis,'--report',str(report))
     assert not state.exists(), 'Check must not create the store'
@@ -107,6 +122,9 @@ w.release()
     run('--check',*analysis)
     run('--install')  # Inherited opt-in must not interfere with reinstall.
     assert snapshot()==before, 'Check/reinstall changed retained state'
+    logged=diagnostics()
+    assert [line.split()[1] for line in logged]==['SERVICE_START','JOB_FINISHED','SERVICE_STOP'], logged
+    assert f"job={job['id']} state=COMPLETED" in logged[1], logged
     with server('restart') as (_,recovered):
         assert recovered['job']['id']==job['id'] and recovered['job']['recovered']
         assert recovered['token']!=session['token']
@@ -114,7 +132,9 @@ w.release()
         assert request('/api/analysis/jobs/'+job['id']+'/source',token=recovered['token'])==source
         time.sleep(.2)
         assert request('/api/analysis/session')['job']['id']==job['id']
-    assert snapshot()==before
+    assert artifacts(snapshot())==artifacts(before), 'Restart changed retained job artifacts'
+    assert [line.split()[1] for line in diagnostics()[len(logged):]]==['SERVICE_START','SERVICE_STOP']
+    before=snapshot()
 
     # Invalid state must fail both Check and Start and retain all input bytes.
     invalid=[]
