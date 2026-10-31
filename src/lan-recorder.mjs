@@ -40,4 +40,11 @@ export const recorderErrors = {
   ANALYSIS_START_FAILED: 'Segment analysis could not start. Check the configured model, rules and recording integrity.',
   ANALYSIS_INTERRUPTED: 'Analysis was interrupted. The verified recording remains queued for the next explicit Start.',
   STORAGE_OR_WORKER_FAILED: 'Recording stopped after a storage or worker failure. Restart the service after checking storage; it will remain stopped.',
+  SERVICE_INTERRUPTED: 'The service stopped while this segment was recording. The partial recording was discarded.',
+  INTEGRITY_FAILED: 'The retained recording or its result no longer matches its fingerprint. Preserve the local files for inspection.',
+  RECORDER_FAILED: 'The recorder stopped after a failure. Check local storage, then restart the service before recording again.',
 };
+// Describe a code the service sends, without echoing unknown text as an explanation.
+export const recorderMessage = code => recorderErrors[code] || (typeof code === 'string' && /^[A-Z_]{1,40}$/.test(code) ? `Recorder reported ${code}.` : 'Recorder reported an unknown problem.');
+// Segments whose sampled frames fell behind real time can shift dwell timing.
+export const TIMING_DRIFT_WARNING_SECONDS = .5;

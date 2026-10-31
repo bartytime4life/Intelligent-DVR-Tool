@@ -46,6 +46,10 @@ export function validateRule(r) {
     return "Duration must be 0–3,600 seconds.";
   if (!Number.isFinite(r.threshold) || r.threshold < 0.1 || r.threshold > 1)
     return "Model score must be 0.10–1.00.";
+  if (r.maxGap !== undefined && (!Number.isFinite(r.maxGap) || r.maxGap <= 0 || r.maxGap > 60))
+    return "Allowed gap must be more than 0 and at most 60 seconds.";
+  if (r.planName !== undefined && (typeof r.planName !== "string" || r.planName.length > 40))
+    return "Use a camera name of up to 40 characters.";
   const [x, y, w, h] = r.rect;
   if (
     ![x, y, w, h].every(Number.isFinite) ||
@@ -105,6 +109,7 @@ export function parseReceipt(v) {
       title: `${e.label} observed in zone`,
       label: e.label,
       time: `Clip +${e.seconds.toFixed(1)}s`,
+      seconds: e.seconds,
       score: e.score,
       rule: e.rule,
       status: "pending",

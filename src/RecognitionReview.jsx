@@ -5,14 +5,16 @@ import LocalAnalysis from './LocalAnalysis.jsx';
 import LanRecorder from './LanRecorder.jsx';
 import RecognitionReport from './RecognitionReport.jsx';
 import { coverageLabel } from './media-coverage.mjs';
+import { saveObservationStills, grabFrame } from './local-images.mjs';
 
-export default function RecognitionReview({ onImport, active = true, clip, onClip, reviews = [], evidence = null }) {
+export default function RecognitionReview({ onImport, active = true, clip, onClip, reviews = [], evidence = null, onRecorderStatus, onZoneStill }) {
   const [run, setRun] = useState(null), [index, setIndex] = useState(0);
   const [source, setSource] = useState(null), [media, setMedia] = useState({});
   const [threshold, setThreshold] = useState(0.5), [status, setStatus] = useState(''), [error, setError] = useState('');
   const [analysisBusy, setAnalysisBusy] = useState(false);
   const [recorderBusy, setRecorderBusy] = useState(false);
   const [detectionInput, setDetectionInput] = useState('original');
+  const [sending, setSending] = useState(false);
   const video = useRef(), generation = useRef(0), sourceGeneration = useRef(0);
   useEffect(() => () => { generation.current++; sourceGeneration.current++; }, []);
   useEffect(() => () => { if (source) URL.revokeObjectURL(source.url); }, [source]);
@@ -66,6 +68,14 @@ export default function RecognitionReview({ onImport, active = true, clip, onCli
     seek(run.eventFrames[i]);
     setStatus(`Showing the sampled frame for the observation at ${evidence.time}.`);
   }, [evidence]);
+  // Keep a small still per observation from the verified recording, then hand the observations to Events.
+  async function sendToEvents() {
+    const sent = run, from = source;
+    setSending(true);
+    try { if (from) await saveObservationStills(from.url, sent); }
+    finally { setSending(false); }
+    onImport(sent.events);
+  }
   function readMedia() {
     const el = video.current;
     if (el) setMedia({ ready: el.readyState >= 2, paused: el.paused, seeking: el.seeking, seconds: el.currentTime, width: el.videoWidth, height: el.videoHeight });
@@ -79,7 +89,7 @@ export default function RecognitionReview({ onImport, active = true, clip, onCli
     <p className="eyebrow">LOCAL RECORDING · MODEL OBSERVATIONS</p>
     <h1>Recognition</h1>
     <p className="recognition-intro">See detected people and objects on the recording they came from. Inspect each sampled scene, then send observations for human review.</p>
-    <LanRecorder onResult={openLocalResult} onBusy={setRecorderBusy} blocked={analysisBusy} />
+    <LanRecorder onResult={openLocalResult} onBusy={setRecorderBusy} blocked={analysisBusy} onImport={onImport} onStatus={onRecorderStatus} />
     <LocalAnalysis onResult={openLocalResult} onBusy={setAnalysisBusy} clip={clip} onClip={onClip} recorderBusy={recorderBusy} currentRun={run} />
     <h2 className="recognition-import-heading">Or open previously exported results</h2>
     <div className="recognition-loaders">
@@ -134,6 +144,9 @@ export default function RecognitionReview({ onImport, active = true, clip, onCli
             <label>Sample {index+1} of {run.trace.frames.length}<input aria-label="Analyzed sample" type="range" min="0" max={run.trace.frames.length-1} value={index} onChange={e => seek(Number(e.target.value))} /></label>
             <button className="button" disabled={index === run.trace.frames.length-1} onClick={() => seek(index+1)}>Next sample</button>
           </div>
+          {onZoneStill && source && <button className="text-button recognition-zone-still" disabled={!media.ready || media.seeking} onClick={async () => {
+            try { onZoneStill(await grabFrame(video.current), `${run.receipt.camera} · +${(media.seconds ?? 0).toFixed(2)}s`); } catch (err) { setError(err.message); }
+          }}>Use this frame for zones</button>}
         </div>
         <aside className="recognition-scene">
           <p className="eyebrow">SAMPLED SCENE · +{frame.seconds.toFixed(3)}s</p>
@@ -150,7 +163,8 @@ export default function RecognitionReview({ onImport, active = true, clip, onCli
         <h2>Rule observations <small>{run.events.length}</small></h2>
         <p>Presence and dwell follow the configured zones and class labels. They do not establish intent, an anomaly or continuity of the same person.</p>
         {run.events.length > 0 ? <>
-          <button className="button amber" onClick={() => onImport(run.events)}>Send {run.events.length} observations to Events</button>
+          <button className="button amber" disabled={sending} onClick={sendToEvents}>{sending ? 'Saving stills…' : `Send ${run.events.length} observations to Events`}</button>
+          {source && <p className="hint">Each observation keeps a small still from this verified recording in this browser. Stills are cleared with the queue and never uploaded.</p>}
           <div className="recognition-event-list">{run.receipt.events.map((e, i) => <button key={e.id} className="recognition-event" onClick={() => {setDetectionInput('original'); seek(run.eventFrames[i]);}}><span>+{e.seconds.toFixed(2)}s · {e.rule}</span><span>score {e.score.toFixed(2)} · View frame</span></button>)}</div>
         </> : <p>No configured rules emitted an observation in the analyzed portion. Inspect detections and rule settings before drawing conclusions.</p>}
       </div>

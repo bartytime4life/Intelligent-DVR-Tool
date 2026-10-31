@@ -35,3 +35,10 @@ test('cancelled opening never replaces the current review', async () => {
   const ctl = new AbortController(); ctl.abort();
   await assert.rejects(openSegment(row,'token',ctl.signal,serve()), /cancelled/);
 });
+
+test('recorder codes are explained and unknown text is never echoed as an explanation', async () => {
+  const {recorderMessage} = await import('../src/lan-recorder.mjs');
+  assert.match(recorderMessage('INTEGRITY_FAILED'), /fingerprint/);
+  assert.equal(recorderMessage('NEW_CODE'), 'Recorder reported NEW_CODE.');
+  assert.equal(recorderMessage('<img src=x>'), 'Recorder reported an unknown problem.');
+});

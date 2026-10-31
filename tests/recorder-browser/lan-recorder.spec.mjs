@@ -13,6 +13,14 @@ test('explicit native RTSP recording, existing CPU analysis, source-matched revi
   await expect(page.locator('.recognition-boxes rect')).toHaveCount(1);
   await expect(page.locator('.recognition-status')).toContainText('fingerprint matched');
   await expect.poll(()=>page.locator('video').evaluate(el=>el.readyState)).toBe(4);
+  await expect(page.locator('.footer-recording')).toContainText('LAN recording active');
+  // Explicit per-segment hand-off keeps the open review and queues observations for human review.
+  await panel.getByRole('button',{name:'Send to Events'}).first().click();
+  await expect(panel.locator('.local-analysis-message')).toContainText(/sent to Events for review|no rule observations/);
+  await expect(page).toHaveURL(/#recognition$/);
+  await expect(page.locator('.recognition-status')).toContainText('fingerprint matched');
+  const sent = await page.evaluate(()=>JSON.parse(localStorage.getItem('dvr.events.v1')||'[]').filter(e=>e.mode==='offline-model').length);
+  if (await panel.locator('.local-analysis-message').textContent().then(t=>/sent to Events/.test(t))) expect(sent).toBeGreaterThan(0);
   await page.screenshot({path:'test-results/recorder/desktop.png',fullPage:true});
   await page.reload();
   await panel.getByRole('button',{name:'Connect LAN recorder'}).click();

@@ -6,6 +6,9 @@ const RecognitionReview = lazy(() => import("./RecognitionReview.jsx"));
 import { mergeRecognitionEvents } from './recognition.mjs';
 import { workspaceFromHash, readWorkspace, writeWorkspace, preserveUnreadable, reviewExport, parseReviewExport } from './workspace-state.mjs';
 import { backdropDismiss } from './dialog-dismiss.mjs';
+import { getImage, putImage, deleteImage, pruneImages, imageFileFrame } from './local-images.mjs';
+import { ANALYZER_CLASSES, DEFAULT_MAX_GAP, analyzerRules, analyzerFilename } from './zone-rules.mjs';
+import { filterEvents, queueChoices, nextPending, queueCSV, dismissPending, restorePending } from './review-queue.mjs';
 import { DEFAULT_SETUP, parseSetup } from "./resources.mjs";
 import {
   Monitor,
@@ -55,8 +58,8 @@ function download(data, name) {
   a.click();
   setTimeout(() => URL.revokeObjectURL(u), 1000);
 }
-function downloadText(text, name) {
-  const u = URL.createObjectURL(new Blob([text], { type: "text/plain" }));
+function downloadText(text, name, type = "text/plain") {
+  const u = URL.createObjectURL(new Blob([text], { type }));
   const a = document.createElement("a");
   a.href = u;
   a.download = name;
@@ -146,7 +149,13 @@ function Modal({ title, close, children, wide = false }) {
     </dialog>
   );
 }
-function project(w, h) {
+// With a camera still, rules map to the full frame exactly (normalized like edge/rules.py);
+// without one, the planning grid keeps its virtual 3:2 image.
+function project(w, h, aspect) {
+  if (aspect) {
+    const iw = Math.min(w, h * aspect), ih = iw / aspect;
+    return { iw, ih, ox: (w - iw) / 2, oy: (h - ih) / 2 };
+  }
   const scale = Math.max(w / 1536, h / 1024),
     iw = 1536 * scale,
     ih = 1024 * scale;
@@ -157,6 +166,7 @@ function Overlay({
   edit = false,
   onRect,
   pixelScale = 2,
+  aspect = 0,
 }) {
   const ref = useRef(),
     start = useRef();
@@ -170,7 +180,7 @@ function Overlay({
       el.height = h * pixelScale;
       ctx.scale(pixelScale, pixelScale);
       ctx.clearRect(0, 0, w, h);
-      const { iw, ih, ox, oy } = project(w, h);
+      const { iw, ih, ox, oy } = project(w, h, aspect);
       if (rule?.enabled || edit) {
         const [x, y, rw, rh] = rule.rect;
         ctx.strokeStyle = "#ffbc3c";
@@ -186,10 +196,10 @@ function Overlay({
     const o = new ResizeObserver(draw);
     o.observe(el);
     return () => o.disconnect();
-  }, [rule, edit, pixelScale]);
+  }, [rule, edit, pixelScale, aspect]);
   function point(e) {
     const r = e.currentTarget.getBoundingClientRect(),
-      { iw, ih, ox, oy } = project(r.width, r.height);
+      { iw, ih, ox, oy } = project(r.width, r.height, aspect);
     return [
       Math.max(0, Math.min(1, (e.clientX - r.left - ox) / iw)),
       Math.max(0, Math.min(1, (e.clientY - r.top - oy) / ih)),
@@ -232,12 +242,25 @@ function Overlay({
     />
   );
 }
+// Bumped when observations arrive so stills saved just before them are read again.
+const StillVersion = React.createContext(0);
+function Still({ id, large = false, fallback = null }) {
+  const version = React.useContext(StillVersion);
+  const [url, setUrl] = useState("");
+  useEffect(() => {
+    let live = true, made = "";
+    setUrl("");
+    getImage("thumbnails", id).then((blob) => { if (live && blob) { made = URL.createObjectURL(blob); setUrl(made); } });
+    return () => { live = false; if (made) URL.revokeObjectURL(made); };
+  }, [id, version]);
+  return url ? <img className={`event-still${large ? " large" : ""}`} src={url} alt="Still from the verified source recording at this observation" /> : fallback;
+}
 function EventRow({ event, review, zone }) {
   const c = cameraOf(event);
   return (
     <article className="event-card">
       <div className="event-preview">
-        <Camera size={35} />
+        <Still id={event.id} fallback={<Camera size={35} />} />
         <span className="sample-badge">
           {event.mode === "sample" ? "SAMPLE" : "OFFLINE"}
         </span>
@@ -290,6 +313,10 @@ export function App() {
   const [liveCount, setLiveCount] = useState(0);
   const [capturedClip, setCapturedClip] = useState(null);
   const [evidence, setEvidence] = useState(null);
+  const [sourceFilter, setSourceFilter] = useState("all"), [recordingFilter, setRecordingFilter] = useState("all"), [sort, setSort] = useState("newest");
+  const [bulkUndo, setBulkUndo] = useState(null), [stillVersion, setStillVersion] = useState(0), [recorderStatus, setRecorderStatus] = useState(null);
+  // A captured camera still waits for an explicit "Use for Plan N"; the saved still is per plan.
+  const [stillOffer, setStillOffer] = useState(null), [zoneStill, setZoneStill] = useState(null), [zoneStillVersion, setZoneStillVersion] = useState(0);
   const [capturePending, setCapturePending] = useState(false);
   useEffect(() => {
     if (!capturedClip && !capturePending) return;
@@ -337,7 +364,8 @@ export function App() {
       const newCount = merged.length - eventsRef.current.length;
       eventsRef.current = merged;
       setEvents(merged);
-      if (openEvents) { setFilter("all"); setEventMode("all"); setQuery(""); setTab("Events"); }
+      setStillVersion((v) => v + 1);
+      if (openEvents) { clearFilters(); setTab("Events"); }
       setToast(`${newCount} new observations added. Existing decisions kept. Footage stays local.`);
       return true;
     } catch (err) { setToast(err.message); return false; }
@@ -400,6 +428,43 @@ export function App() {
     setSelected(id);
     setTab("Zones");
   }
+  useEffect(() => {
+    if (tab !== "Zones") return;
+    let live = true, made = "";
+    getImage("zone-stills", `plan-${selected}`).then((blob) => {
+      if (!live) return;
+      if (!blob) { setZoneStill(null); return; }
+      made = URL.createObjectURL(blob);
+      const image = new Image();
+      image.onload = () => { if (live) setZoneStill({ url: made, width: image.naturalWidth, height: image.naturalHeight }); };
+      image.onerror = () => { if (live) setZoneStill(null); };
+      image.src = made;
+    });
+    return () => { live = false; if (made) URL.revokeObjectURL(made); };
+  }, [tab, selected, zoneStillVersion]);
+  useEffect(() => () => { if (stillOffer?.url) URL.revokeObjectURL(stillOffer.url); }, [stillOffer]);
+  function offerZoneStill(frame, source) {
+    setStillOffer({ ...frame, source, url: URL.createObjectURL(frame.blob) });
+    setTab("Zones");
+  }
+  async function useOfferedStill() {
+    if (!(await putImage("zone-stills", `plan-${selected}`, stillOffer.blob))) { setToast("This browser could not store the still. Zones still work on the planning grid."); return; }
+    setStillOffer(null); setZoneStillVersion((v) => v + 1);
+    setToast(`Still saved for Plan ${selected}. Draw the zone on the image; rectangles use full-frame coordinates.`);
+  }
+  async function removeZoneStill() {
+    await deleteImage("zone-stills", `plan-${selected}`);
+    setZoneStillVersion((v) => v + 1);
+  }
+  async function chooseStillFile(e) {
+    const file = e.target.files?.[0]; e.target.value = "";
+    if (!file) return;
+    try { offerZoneStill(await imageFileFrame(file), file.name); } catch (err) { setToast(err.message); }
+  }
+  function exportAnalyzerRules() {
+    try { const value = analyzerRules(draft); download(value, analyzerFilename(draft)); setError(""); setToast("Analyzer rules downloaded. List the file in the local app's analysis configuration to use it."); }
+    catch (err) { setError(err.message); }
+  }
   // Every way into Zones (navigation, links, Back/Forward) edits the saved rule for the selected plan.
   useEffect(() => {
     if (tab !== "Zones") return;
@@ -410,13 +475,44 @@ export function App() {
     setNote(e.note || "");
     setModal({ type: "review", event: e });
   }
+  // Review moves through pending items in the order the user is looking at.
+  const reviewList = () => (tab === "Events" ? visible : pending);
   function decide(status) {
-    setEvents((es) => reviewEvent(es, modal.event.id, status, note));
-    setModal(null);
-    setToast(
-      `${status === "confirmed" ? "Observation confirmed" : "Event dismissed"}. Review updated.`,
-    );
+    const current = modal.event, next = nextPending(reviewList(), current.id);
+    setEvents((es) => reviewEvent(es, current.id, status, note));
+    if (next) review(next); else setModal(null);
+    setToast(`${status === "confirmed" ? "Observation confirmed" : "Event dismissed"}.${next ? " Showing the next one awaiting review." : " Nothing else here awaits review."}`);
   }
+  function step(direction) {
+    const next = nextPending(reviewList(), modal.event.id, direction);
+    if (next) review(next);
+  }
+  useEffect(() => {
+    if (modal?.type !== "review") return;
+    const key = (e) => {
+      if (e.defaultPrevented || e.ctrlKey || e.metaKey || e.altKey || e.target.closest?.("textarea, input, select")) return;
+      const action = { c: () => decide("confirmed"), d: () => decide("dismissed"), j: () => step(1), k: () => step(-1), ArrowRight: () => step(1), ArrowLeft: () => step(-1) }[e.key.length === 1 ? e.key.toLowerCase() : e.key];
+      if (action) { e.preventDefault(); action(); }
+    };
+    document.addEventListener("keydown", key);
+    return () => document.removeEventListener("keydown", key);
+  });
+  function clearFilters() { setFilter("all"); setEventMode("all"); setSourceFilter("all"); setRecordingFilter("all"); setSort("newest"); setQuery(""); }
+  function dismissShown() {
+    const result = dismissPending(eventsRef.current, visible.filter((e) => e.status === "pending").map((e) => e.id), "Dismissed in bulk from Events.");
+    eventsRef.current = result.events; setEvents(result.events); setBulkUndo(result); setModal(null);
+    setToast(`${result.previous.length} observations dismissed. Undo is available in Events.`);
+  }
+  function undoBulk() {
+    const restored = restorePending(eventsRef.current, bulkUndo);
+    eventsRef.current = restored; setEvents(restored); setBulkUndo(null);
+    setToast("Bulk dismissal undone. Later decisions were kept.");
+  }
+  // Stills follow the queue: removed with their observations, kept while Undo can restore them.
+  useEffect(() => {
+    const timer = setTimeout(() => { pruneImages("thumbnails", new Set([...events, ...(clearedEvents || [])].map((e) => e.id))); }, 2000);
+    return () => clearTimeout(timer);
+  }, [events, clearedEvents]);
   function saveRule(e) {
     e.preventDefault();
     const problem = validateRule(draft);
@@ -452,15 +548,10 @@ export function App() {
     setVideo({ url: URL.createObjectURL(f), name: f.name });
     setModal({ type: "video" });
   }
-  const visible = events.filter(
-    (e) =>
-      (filter === "all" || e.status === filter) &&
-      (eventMode === "all" || e.mode === eventMode) &&
-      `${e.title} ${cameraOf(e)?.name || e.cameraName} ${e.rule}`
-        .toLowerCase()
-        .includes(query.toLowerCase()),
-  );
+  const visible = filterEvents(events, { status: filter, mode: eventMode, source: sourceFilter, recording: recordingFilter, query, sort, label: (e) => cameraOf(e)?.name || e.cameraName });
+  const choices = queueChoices(events), shownPending = visible.filter((e) => e.status === "pending").length;
   return (
+    <StillVersion.Provider value={stillVersion}>
     <div className="app-shell">
       <a className="skip-link" href="#workspace">
         Skip to workspace
@@ -532,12 +623,12 @@ export function App() {
           {(eventsRecovery || rulesRecovery) && <button className="text-button" onClick={() => { eventsRecovery?.dismiss(); rulesRecovery?.dismiss(); }}>Dismiss</button>}
         </div>}
         {recognitionOpened && <div hidden={tab !== "Recognition"}><WorkspaceBoundary name="Recognition"><Suspense fallback={<div className="content-page"><h1>Opening recognition review…</h1></div>}>
-          <RecognitionReview active={tab === "Recognition" && !pageHidden} onImport={addObservations} clip={capturedClip} onClip={setCapturedClip} reviews={events} evidence={evidence} />
+          <RecognitionReview active={tab === "Recognition" && !pageHidden} onImport={addObservations} clip={capturedClip} onClip={setCapturedClip} reviews={events} evidence={evidence} onRecorderStatus={setRecorderStatus} onZoneStill={offerZoneStill} />
         </Suspense></WorkspaceBoundary></div>}
         {tab === "Facility" && <WorkspaceBoundary name="Facility"><Suspense fallback={<div className="content-page"><h1>Opening facility builder…</h1></div>}><FacilityBuilder onPreviewCount={setLiveCount} onDirtyChange={(dirty) => { facilityDirty.current = dirty; }} /></Suspense></WorkspaceBoundary>}
         {tab === "System" && <WorkspaceBoundary name="System"><Suspense fallback={<div className="content-page"><h1>Opening machine setup…</h1></div>}><SystemSetup setup={resources}
           onApply={setup => setResourceState(s => ({ ...s, setup, error: "" }))} storageError={resourceState.error} download={download} /></Suspense></WorkspaceBoundary>}
-        {tab === "Monitor" && <WorkspaceBoundary name="Monitor"><LiveMonitor visibleTiles={resources.browser.visibleTiles} onCount={setLiveCount} pageHidden={pageHidden} clip={capturedClip} onClip={setCapturedClip} capturePending={capturePending} onCaptureBusy={setCapturePending} onReviewClip={() => setTab('Recognition')} queue={
+        {tab === "Monitor" && <WorkspaceBoundary name="Monitor"><LiveMonitor onZoneStill={offerZoneStill} visibleTiles={resources.browser.visibleTiles} onCount={setLiveCount} pageHidden={pageHidden} clip={capturedClip} onClip={setCapturedClip} capturePending={capturePending} onCaptureBusy={setCapturePending} onReviewClip={() => setTab('Recognition')} queue={
               <aside className="review-queue">
                 <div className="queue-heading">
                   <h2>
@@ -638,10 +729,28 @@ export function App() {
                 <option value="dismissed">Dismissed</option>
               </select>
               <select aria-label="Observation source" value={eventMode} onChange={e => setEventMode(e.target.value)}>
-                <option value="all">All sources</option><option value="offline-model">Model observations</option><option value="sample">Samples</option>
+                <option value="all">All kinds</option><option value="offline-model">Model observations</option><option value="sample">Samples</option>
+              </select>
+              <select aria-label="Camera or source" value={sourceFilter} onChange={(e) => setSourceFilter(e.target.value)}>
+                <option value="all">All cameras</option>
+                {choices.sources.map((s) => <option key={s.value} value={s.value}>{s.value} ({s.count})</option>)}
+              </select>
+              <select aria-label="Recording" value={recordingFilter} onChange={(e) => setRecordingFilter(e.target.value)}>
+                <option value="all">All recordings</option>
+                {choices.recordings.map((r) => <option key={r.value} value={r.value}>rec {r.value.slice(0, 8)} ({r.count})</option>)}
+              </select>
+              <select aria-label="Sort events" value={sort} onChange={(e) => setSort(e.target.value)}>
+                <option value="newest">Newest added</option><option value="score">Highest score</option><option value="clip">Clip time</option>
               </select>
               <button className="button" onClick={() => importRef.current.click()}><UploadSimple />Import receipt or reviews</button>
             </div>
+            <div className="event-bulk-actions">
+              <span>{visible.length} shown · {shownPending} awaiting review</span>
+              <button className="text-button" disabled={!visible.length} onClick={() => downloadText(queueCSV(visible), "dvr-events.csv", "text/csv")}><DownloadSimple size={15} />Export shown as CSV</button>
+              <button className="text-button" disabled={!shownPending} onClick={() => setModal({ type: "bulk-dismiss" })}><X size={15} />Dismiss {shownPending} shown awaiting review</button>
+              <span className="hint">Shortcuts while reviewing: C confirm · D dismiss · J/K or ←/→ next and previous.</span>
+            </div>
+            {bulkUndo && <div className="review-recovery" role="status"><span>{bulkUndo.previous.length} observations were dismissed in bulk.</span><button className="button" onClick={undoBulk}>Undo bulk dismissal</button></div>}
             <div className="event-table">
               {visible.length ? (
                 visible.map((e) => (
@@ -651,11 +760,7 @@ export function App() {
                     onClick={() => review(e)}
                   >
                     <span className="table-icon">
-                      {e.label === "person" ? (
-                        <User size={24} />
-                      ) : (
-                        <Cube size={24} />
-                      )}
+                      <Still id={e.id} fallback={e.label === "person" ? <User size={24} /> : <Cube size={24} />} />
                     </span>
                     <span className="event-row-title">
                       {e.title}
@@ -677,7 +782,7 @@ export function App() {
                   <MagnifyingGlass size={30} />
                   <h3>{events.length ? "No matching events" : "Your review queue is empty"}</h3>
                   <p>{events.length ? "Change the filters to see other observations." : "Open recognition results or restore a review export to start."}</p>
-                  {events.length ? <button className="button" onClick={() => { setFilter("all"); setEventMode("all"); setQuery(""); }}>Clear filters</button> : <button className="button" onClick={() => setTab("Recognition")}>Open Recognition</button>}
+                  {events.length ? <button className="button" onClick={clearFilters}>Clear filters</button> : <button className="button" onClick={() => setTab("Recognition")}>Open Recognition</button>}
                 </div>
               )}
             </div>
@@ -690,7 +795,7 @@ export function App() {
                 <p className="eyebrow">EXPLICIT RULES · HUMAN REVIEW</p>
                 <h1>Define what needs attention</h1>
                 <p>
-                  Saved rule plans are retained here. They are not attached to connected feeds; live analysis is not running.
+                  Draw each rule on a still from its camera, then export it for the local analyzer. Rules are not attached to live feeds; live analysis is not running.
                 </p>
               </div>
               <select
@@ -700,26 +805,40 @@ export function App() {
               >
                 {cameras.map((c) => (
                   <option value={c.id} key={c.id}>
-                    Plan {c.id} · {c.name}
+                    Plan {c.id} · {ruleFor(rules, c.id).planName || c.name}
                   </option>
                 ))}
               </select>
             </div>
+            {stillOffer && (
+              <div className="zone-still-offer" role="status">
+                <img src={stillOffer.url} alt={`Captured still from ${stillOffer.source}`} />
+                <div><strong>New camera still</strong><span>{stillOffer.source} · {stillOffer.width}×{stillOffer.height} · stays in this browser</span></div>
+                <button className="button amber" onClick={useOfferedStill}>Use for Plan {selected}</button>
+                <button className="text-button" onClick={() => setStillOffer(null)}>Discard</button>
+              </div>
+            )}
             <div className="zone-layout">
               <div>
-                <div className="zone-editor">
-                  <div className="zone-planning-grid" />
+                <div className="zone-editor" style={zoneStill ? { aspectRatio: `${zoneStill.width} / ${zoneStill.height}` } : undefined}>
+                  {zoneStill ? <img className="zone-still" src={zoneStill.url} alt={`Camera still for Plan ${selected}`} /> : <div className="zone-planning-grid" />}
                   <Overlay
                     rule={draft}
                     edit
                     pixelScale={resources.browser.overlayScale}
+                    aspect={zoneStill ? zoneStill.width / zoneStill.height : 0}
                     onRect={(rect) => setDraft((r) => ({ ...r, rect }))}
                   />
-                  <span className="sample-badge">RULE PLAN · NO CAMERA IMAGE</span>
+                  <span className="sample-badge">{zoneStill ? `CAMERA STILL · ${zoneStill.width}×${zoneStill.height}` : "RULE PLAN · NO CAMERA IMAGE"}</span>
+                </div>
+                <div className="zone-still-actions">
+                  <label className="text-button">Choose image file<input type="file" accept="image/jpeg,image/png,image/webp" aria-label="Choose a camera still image" onChange={chooseStillFile} /></label>
+                  {zoneStill && <button className="text-button" onClick={removeZoneStill}>Remove still</button>}
+                  <span className="hint">Or use <strong>Use for zones</strong> on a Monitor preview or a Recognition frame.</span>
                 </div>
                 <p className="hint">
                   <Info size={16} />
-                  Define normalized coordinates on this planning grid, or use the keyboard controls below.
+                  {zoneStill ? "Rectangles use full-frame coordinates of this still, the same convention the analyzer uses. Keyboard controls are below." : "Define normalized coordinates on this planning grid, or use the keyboard controls below."}
                 </p>
                 <div className="geometry-fields">
                   {["Left", "Top", "Width", "Height"].map((label, i) => (
@@ -746,6 +865,15 @@ export function App() {
               <form className="rule-form" onSubmit={saveRule}>
                 <h2>Review rule</h2>
                 <label>
+                  Camera name for this plan
+                  <input
+                    maxLength="40"
+                    placeholder={cameras.find((c) => c.id === draft.camera)?.name}
+                    value={draft.planName || ""}
+                    onChange={(e) => setDraft((r) => ({ ...r, planName: e.target.value || undefined }))}
+                  />
+                </label>
+                <label>
                   Zone name
                   <input
                     maxLength="60"
@@ -763,8 +891,8 @@ export function App() {
                       setDraft((r) => ({ ...r, label: e.target.value }))
                     }
                   >
-                    <option value="person">Person</option>
-                    <option value="object">Object</option>
+                    {!ANALYZER_CLASSES.includes(draft.label) && <option value={draft.label}>{draft.label} (legacy; choose a model class to export)</option>}
+                    {ANALYZER_CLASSES.map((c) => <option key={c} value={c}>{c}</option>)}
                   </select>
                 </label>
                 <label>
@@ -792,6 +920,17 @@ export function App() {
                     }
                   />
                 </label>
+                <label>
+                  Allowed gap between sightings (seconds)
+                  <input
+                    type="number"
+                    min="0.1"
+                    max="60"
+                    step="0.1"
+                    value={draft.maxGap ?? DEFAULT_MAX_GAP}
+                    onChange={(e) => setDraft((r) => ({ ...r, maxGap: +e.target.value }))}
+                  />
+                </label>
                 <label className="checkbox-label">
                   <input
                     type="checkbox"
@@ -803,9 +942,7 @@ export function App() {
                   Enable review rule
                 </label>
                 <p className="hint">
-                  A score is a model output, not a probability of danger.
-                  “Object” is a sample category; real models need explicit
-                  supported labels.
+                  A score is a model output, not a probability of danger. Classes are the bundled COCO model's labels; other models need matching labels. A longer gap lets brief missed detections continue one dwell run.
                 </p>
                 {error && (
                   <p className="error" role="alert">
@@ -816,6 +953,11 @@ export function App() {
                   Save review rule
                   <Check />
                 </button>
+                <button className="button" type="button" onClick={exportAnalyzerRules}>
+                  <DownloadSimple />
+                  Export analyzer rules
+                </button>
+                <p className="hint">Exports the rule as shown as a file the local analyzer accepts. Add the file to the analysis configuration on this computer to use it.</p>
                 <button
                   className="text-button"
                   type="button"
@@ -827,7 +969,7 @@ export function App() {
                   }
                 >
                   <DownloadSimple />
-                  Export browser rules
+                  Back up browser rules (not an analyzer file)
                 </button>
               </form>
             </div>
@@ -935,6 +1077,7 @@ export function App() {
       <footer className="footer">
         <Info size={21} />
         <strong>{liveCount ? `${liveCount} receiving` : 'No camera preview active'}</strong>
+        {recorderStatus?.active && <><span className="footer-divider" /><strong className="footer-recording">LAN recording active{recorderStatus.name ? ` · ${recorderStatus.name}` : ''}</strong></>}
         <span className="footer-divider" />
         <span>Record a webcam clip explicitly, then analyze it in Recognition. Live previews do not run AI.</span>
         <span className="footer-end">Edge-first. Human-reviewed.</span>
@@ -972,7 +1115,7 @@ export function App() {
           <div className="review-dialog-layout">
             <div>
               <div className="missing-evidence">
-                <Camera size={44} />
+                <Still id={modal.event.id} large fallback={<Camera size={44} />} />
                 <h3>{modal.event.mode === 'sample' ? 'Legacy sample observation' : 'Original footage stays local'}</h3>
                 <p>{modal.event.mode === 'sample' ? 'This retained sample has no real camera evidence. Your previous decision and notes are preserved.' : `Open the source recording at ${modal.event.time} in Recognition to verify this observation.`}</p>
                 {modal.event.provenance?.source_sha256 && <button className="button" onClick={() => {
@@ -987,6 +1130,14 @@ export function App() {
               </p>
             </div>
             <div className="review-details">
+              {(() => {
+                const queue = reviewList().filter((e) => e.status === "pending"), at = queue.findIndex((e) => e.id === modal.event.id);
+                return <div className="review-stepper">
+                  <button className="text-button" disabled={queue.length < (at < 0 ? 1 : 2)} onClick={() => step(-1)}>← Previous</button>
+                  <span>{at < 0 ? `${queue.length} awaiting review` : `${at + 1} of ${queue.length} awaiting review`}</span>
+                  <button className="text-button" disabled={queue.length < (at < 0 ? 1 : 2)} onClick={() => step(1)}>Next →</button>
+                </div>;
+              })()}
               <h3>{modal.event.title}</h3>
               <dl>
                 <dt>Configured rule</dt>
@@ -1040,10 +1191,20 @@ export function App() {
                 Dismiss event
               </button>
               <p className="hint">
-                Confirming records your review. It does not establish intent or
-                trigger external actions.
+                Confirming records your review and opens the next one awaiting review. It does not establish intent or
+                trigger external actions. Keys: C confirm · D dismiss · J/K move.
               </p>
             </div>
+          </div>
+        </Modal>
+      )}
+      {modal?.type === "bulk-dismiss" && (
+        <Modal title={`Dismiss ${shownPending} observations?`} close={() => setModal(null)}>
+          <p>This dismisses the {shownPending} shown observations that await review, using your current filters. Confirmed and dismissed items are unchanged.</p>
+          <p className="hint">Undo is available in Events until this page closes. Later decisions are kept when you undo.</p>
+          <div className="review-actions">
+            <button className="button amber" onClick={dismissShown}>Dismiss {shownPending}</button>
+            <button className="button" onClick={() => setModal(null)}>Keep them</button>
           </div>
         </Modal>
       )}
@@ -1137,6 +1298,6 @@ export function App() {
         </Modal>
       )}
     </div>
+    </StillVersion.Provider>
   );
 }
-

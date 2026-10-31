@@ -94,3 +94,6 @@
 .lan-segment { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .75rem; padding: .8rem 0; border-top: 1px solid #293e3b; }
 .lan-segment small { display: block; color: #b4c6c2; margin-top: .35rem; }
 .lan-recorder-facts { display: flex; flex-wrap: wrap; gap: .75rem 1.5rem; margin: 1rem 0; color: #b4c6c2; font-size: .85rem; }
+.lan-segment-tools { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .75rem; margin-top: 1rem; }
+.lan-new-badge { font-size: 12px; padding: .2rem .6rem; border-radius: 999px; background: #3a3020; color: #ffd68e; }
+.lan-segment.unhandled { box-shadow: inset 3px 0 0 #f5b94e; padding-left: .75rem; }

@@ -71,3 +71,12 @@ test('one, two and four visible feed limits always include the selected source',
   assert.deepEqual(visibleFeedTiles([],'absent',2),[]);
   assert.deepEqual(visibleFeedTiles(tiles,'absent',2),tiles.slice(0,2));
 });
+
+test('previews are delayed after 2 s, or after the next refresh for snapshot sources', async () => {
+  const {frameDelayed} = await import('../src/live-feeds.mjs');
+  assert.equal(frameDelayed({kind:'rtsp', frame_age_seconds:1.5}), false);
+  assert.equal(frameDelayed({kind:'rtsp', frame_age_seconds:2.5}), true);
+  assert.equal(frameDelayed({kind:'public-jpeg', refresh_seconds:30, frame_age_seconds:25}), false);
+  assert.equal(frameDelayed({kind:'public-jpeg', refresh_seconds:30, frame_age_seconds:33}), true);
+  assert.equal(frameDelayed({kind:'rtsp', frame_age_seconds:null}), false);
+});

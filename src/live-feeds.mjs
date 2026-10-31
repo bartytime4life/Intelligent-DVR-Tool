@@ -3,6 +3,9 @@ export const localFeedOrigin = location => location?.protocol === 'http:' && loc
 // The service accepts only its exact 127.0.0.1 address. Offer it when the same app was opened as localhost.
 export const loopbackAddress = location => location?.protocol === 'http:' && ['localhost', '[::1]'].includes(location?.hostname)
   ? `http://127.0.0.1${location.port ? `:${location.port}` : ''}${location.pathname}${location.hash}` : '';
+// A snapshot source is fresh until its next scheduled refresh; motion sources should update within 2 s.
+export const frameDelayed = t => Number.isFinite(t?.frame_age_seconds) && t.frame_age_seconds > (t.kind === 'public-jpeg' ? (t.refresh_seconds || 0) + 2 : 2);
+export const WEBCAM_KEY = 'dvr.webcam.device';
 export function stopStream(stream) { stream?.getTracks().forEach(track => track.stop()); }
 export function webcamError(error) {
   return ({NotAllowedError:'Camera access was denied. Allow camera access for this app in your browser, then connect again.',

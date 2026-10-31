@@ -1,15 +1,16 @@
 import React, {useEffect, useRef, useState} from 'react';
 import {Camera, Plus, Plug, PlugsConnected, X, ArrowClockwise, WarningCircle, Globe} from '@phosphor-icons/react';
-import {feedRequest, localFeedOrigin, loopbackAddress, webcamController, visibleFeedTiles} from './live-feeds.mjs';
+import {feedRequest, localFeedOrigin, loopbackAddress, webcamController, visibleFeedTiles, frameDelayed, WEBCAM_KEY} from './live-feeds.mjs';
 import './live-feeds.css';
 import ClipCapture from './ClipCapture.jsx';
 import {backdropDismiss} from './dialog-dismiss.mjs';
+import {grabFrame} from './local-images.mjs';
 
 const guide = 'https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/local-camera-feeds.md';
 const publicGuide = 'https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/public-webcams.md';
-export default function LiveMonitor({queue, visibleTiles=4, onCount, pageHidden, clip, onClip, onReviewClip, capturePending, onCaptureBusy}) {
+export default function LiveMonitor({onZoneStill, queue, visibleTiles=4, onCount, pageHidden, clip, onClip, onReviewClip, capturePending, onCaptureBusy}) {
   const [webcam, setWebcam] = useState({state:'disconnected', message:'No webcam connected'});
-  const [devices, setDevices] = useState([]), [device, setDevice] = useState('');
+  const [devices, setDevices] = useState([]), [device, setDevice] = useState(() => { try { return localStorage.getItem(WEBCAM_KEY) || ''; } catch { return ''; } });
   const [catalog, setCatalog] = useState(null), [source, setSource] = useState('');
   const [feeds, setFeeds] = useState([]), [setup, setSetup] = useState(''), [error, setError] = useState('');
   const [working, setWorking] = useState(false), [selected, setSelected] = useState('webcam');
@@ -97,15 +98,26 @@ export default function LiveMonitor({queue, visibleTiles=4, onCount, pageHidden,
     poll();
     return () => { disposed = true; clearTimeout(timer); for (const s of sessions.current.values()) s.abort?.abort(); };
   }, []);
-  async function refreshDevices() {
-    setError('');
+  async function refreshDevices(quiet = false) {
+    if (!quiet) setError('');
     try {
       if (!navigator.mediaDevices?.enumerateDevices) throw Error('Open this app on HTTPS or localhost to use a webcam.');
       const list = (await navigator.mediaDevices.enumerateDevices()).filter(d => d.kind === 'videoinput');
-      setDevices(list); setDevice(d => list.some(v => v.deviceId === d) ? d : '');
-      if (!list.length) setError('No webcam is visible. Attach a camera and check browser permissions.');
-    } catch (err) { setError(err.message); }
+      if (!alive.current) return;
+      // Before permission, device ids are hidden; keep the remembered choice until real ids are listed.
+      setDevices(list); setDevice(d => !list.some(v => v.deviceId) || list.some(v => v.deviceId === d) ? d : '');
+      if (!list.length && !quiet) setError('No webcam is visible. Attach a camera and check browser permissions.');
+    } catch (err) { if (!quiet) setError(err.message); }
   }
+  function chooseDevice(id) { setDevice(id); try { id ? localStorage.setItem(WEBCAM_KEY, id) : localStorage.removeItem(WEBCAM_KEY); } catch { /* A remembered camera is only a convenience. */ } }
+  // Hot-plugged cameras appear without a manual refresh; labels arrive once permission is granted.
+  useEffect(() => {
+    const media = navigator.mediaDevices, changed = () => { void refreshDevices(true); };
+    media?.addEventListener?.('devicechange', changed);
+    void refreshDevices(true);
+    return () => media?.removeEventListener?.('devicechange', changed);
+  }, []);
+  useEffect(() => { if (webcam.state === 'live') void refreshDevices(true); }, [webcam.state]);
   async function refreshDvr() {
     if (busy.current) return;
     busy.current = true; setWorking(true); setError(''); const ticket = generation.current;
@@ -169,10 +181,14 @@ export default function LiveMonitor({queue, visibleTiles=4, onCount, pageHidden,
             {t.id !== 'webcam' && t.image && <img src={t.image} alt={`${t.name} current preview frame`} onError={() => {const s=sessions.current.get(t.id); if(s){s.state='failed';s.error={message:'The browser could not display this frame. Disconnect and retry.'};URL.revokeObjectURL(s.image);s.image='';sync();}}} />}
             {((t.id === 'webcam' && t.state !== 'live') || (t.id !== 'webcam' && !t.image)) && <div className="feed-placeholder"><Camera size={34}/><h3>{t.state === 'connecting' ? 'Connecting…' : t.state === 'failed' ? 'Connection needs attention' : t.state === 'interrupted' ? 'Frames interrupted' : t.state === 'live' ? 'Waiting for frames' : 'Preview stopped'}</h3>
               <p>{t.message || t.error?.message || 'Waiting for the first image from this source…'}</p></div>}
-            <div className="live-tile-heading"><strong>{t.name}</strong><span className={`feed-status ${t.state}`}>{t.state === 'live' ? 'Receiving' : t.state}</span></div>
+            <div className="live-tile-heading"><strong>{t.name}</strong><span className={`feed-status ${t.state}${t.state === 'live' && frameDelayed(t) ? ' delayed' : ''}`}>{t.state === 'live' ? frameDelayed(t) ? 'Delayed' : 'Receiving' : t.state}</span></div>
           </div>
           {t.kind?.startsWith('public-') && <div className="public-source-credit"><a href={t.provider_url} target="_blank" rel="noreferrer noopener">{t.provider} ↗</a><span>{t.kind === 'public-jpeg' ? `Snapshot · refresh ${t.refresh_seconds}s` : 'Public MJPEG · preview ≤ 4 fps'}{t.frame_age_seconds != null ? ` · retrieved ${Math.floor(t.frame_age_seconds)}s ago` : ''}</span><small>Provider capture time and freshness unverified</small></div>}
-          <div className="live-tile-controls" onClick={e => e.stopPropagation()}><span>{t.id === 'webcam' ? 'Webcam · video only' : t.kind?.startsWith('public-') ? 'Internet source · local preview' : 'DVR · sampled preview ≤ 4 fps'}</span>
+          <div className="live-tile-controls" onClick={e => e.stopPropagation()}><span>{t.id === 'webcam' ? 'Webcam · video only' : t.kind?.startsWith('public-') ? 'Internet source · local preview' : `DVR · sampled preview ≤ 4 fps${Number.isFinite(t.frame_age_seconds) ? ` · frame ${t.frame_age_seconds < 1 ? '<1' : Math.floor(t.frame_age_seconds)}s ago` : ''}`}</span>
+            {onZoneStill && t.state === 'live' && <button className="text-button" onClick={async e => {
+              const picture = e.currentTarget.closest('article')?.querySelector('.live-picture video, .live-picture > img');
+              try { if (!picture) throw Error('No frame is shown yet.'); onZoneStill(await grabFrame(picture), t.name); } catch (err) { setError(err.message); }
+            }}>Use for zones</button>}
             <button className="text-button" onClick={() => t.id === 'webcam' ? controller.current.stop() : disconnect(t.id)}>{t.state === 'connecting' ? 'Cancel' : t.id !== 'webcam' && ['failed','disconnected'].includes(t.state) ? 'Remove' : 'Disconnect'}</button>
             {t.id === 'webcam' && ['failed','disconnected'].includes(t.state) && <button className="text-button" onClick={() => openSetup()}>Reconnect</button>}</div>
         </article>)}
@@ -193,8 +209,8 @@ export default function LiveMonitor({queue, visibleTiles=4, onCount, pageHidden,
       <div className="modal-heading"><div><p className="eyebrow">EXPLICIT CONNECTION · SOURCE PREVIEW</p><h2 id="feed-dialog-title">Connect a camera source</h2></div><button className="icon-button" aria-label="Close connection setup" onClick={closeSetup}><X/></button></div>
       <div className="feed-kind" role="group" aria-label="Source type"><button className={`button ${setup === 'webcam' ? 'active' : ''}`} aria-pressed={setup === 'webcam'} onClick={() => switchSetup('webcam')}><Camera/>This computer’s webcam</button><button className={`button ${setup === 'dvr' ? 'active' : ''}`} aria-pressed={setup === 'dvr'} onClick={() => switchSetup('dvr')}><Plug/>Local DVR / IP camera</button><button className={`button ${publicMode ? 'active' : ''}`} aria-pressed={publicMode} onClick={() => switchSetup('public')}><Globe/>Public internet webcam</button></div>
       {setup === 'webcam' ? <div className="feed-setup-body"><h3>Use a built-in or USB webcam</h3><p>Your browser will ask for camera permission. Video stays in this browser. The microphone stays off.</p>
-        <label>Webcam<select aria-label="Webcam" value={device} onChange={e => setDevice(e.target.value)} disabled={webcamActive}><option value="">Browser default camera</option>{devices.filter(d=>d.deviceId).map((d,i)=><option key={d.deviceId} value={d.deviceId}>{d.label || `Camera ${i+1}`}</option>)}</select></label>
-        <button className="text-button" onClick={refreshDevices}><ArrowClockwise/>Refresh devices</button>
+        <label>Webcam<select aria-label="Webcam" value={device} onChange={e => chooseDevice(e.target.value)} disabled={webcamActive}><option value="">Browser default camera</option>{devices.filter(d=>d.deviceId).map((d,i)=><option key={d.deviceId} value={d.deviceId}>{d.label || `Camera ${i+1}`}</option>)}</select></label>
+        <button className="text-button" onClick={() => refreshDevices()}><ArrowClockwise/>Refresh devices</button>
         <p className={webcam.state === 'failed' ? 'feed-error' : 'hint'} role="status">{webcam.message}</p>
         <div className="review-actions"><button className="button amber" disabled={webcamActive || active >= 4} onClick={async () => {setSelected('webcam');await controller.current.connect(device);}}>Connect webcam</button>
           {webcamActive && <button className="button" onClick={() => controller.current.stop('Camera connection cancelled.')}>{webcam.state === 'connecting' ? 'Cancel connection' : 'Disconnect webcam'}</button>}
