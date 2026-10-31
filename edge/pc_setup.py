@@ -139,8 +139,7 @@ def install(root=ROOT):
 def native_probe():
     # Bounded child only: no endpoint, trained model, recording or user path input.
     from . import analysis_worker
-    analysis_worker.MEMORY_BYTES = 2 * 1024**3
-    handle = analysis_worker.constrain()
+    handle = analysis_worker.constrain(2 * 1024**3, 300)
     for key in ('OMP_NUM_THREADS', 'OPENBLAS_NUM_THREADS', 'MKL_NUM_THREADS'):
         os.environ[key] = '1'
     os.environ['OPENCV_FFMPEG_CAPTURE_OPTIONS'] = 'protocol_whitelist;file'

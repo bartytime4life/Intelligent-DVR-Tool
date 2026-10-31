@@ -90,7 +90,7 @@ there is no tile-prefetch, bulk-download or offline-download feature. See the
 [OSMF tile policy](https://operations.osmfoundation.org/policies/tiles/).
 Private/offline deployments should supply independently licensed, self-hosted
 tiles, imagery, fonts and other assets; no public tile service SLA is assumed.
-The workspace's pre-existing optional Google Font has a system-font fallback.
+The workspace font is bundled locally; it makes no external request.
 
 ## Bounds and capacity
 

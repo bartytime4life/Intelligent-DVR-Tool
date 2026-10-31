@@ -1,5 +1,6 @@
 import {formatDistance,formatArea} from './facility-measurements.mjs';
 import { polygonArea } from "./facility.mjs";
+import { displayLength, enteredLength, localizeLengths } from "./facility-shape-edit.mjs";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { SHAPES, OSM_SERVERS, shapeFootprint, dimensions, searchBounds, parseOsmBuildings, fetchOsmBuildings, draftFacility, clearFootprintCache, polygonAreaSelection, parseAreaVertices } from "./facility-starter.mjs";
 import { FOOTPRINT_SERVICES } from "./facility-services.mjs";
@@ -36,8 +37,9 @@ function ShapeBuilder({ add, disabled, units, onUnits, onDirtyChange }) {
   } catch (e) {
     error = e.message;
   }
-  const distance = (label, value, setter, min, max) => <Numeric label={`${label} (${unit})`} value={value === "" ? "" : +(value /
-  factor).toFixed(3)} min={min / factor} max={max / factor} onChange={(v) => setter(v === "" ? "" : v * factor)} />;
+  const system = unit === "ft" ? "imperial" : "metric";
+  const distance = (label, value, setter, min, max) => <Numeric label={`${label} (${unit})`} value={value === "" ? "" : displayLength(value,
+  system)} min={Math.floor(min / factor * 1e3) / 1e3} max={Math.ceil(max / factor * 1e3) / 1e3} onChange={(v) => setter(v === "" ? "" : enteredLength(v, value, system))} />;
   return <details className="facility-starter" open={open} onToggle={(e) => setOpen(e.currentTarget.open)}><summary>Common building shapes</summary><form onSubmit={(e) => {
     e.preventDefault();
     if (!ring || disabled) return;
@@ -57,7 +59,7 @@ function ShapeBuilder({ add, disabled, units, onUnits, onDirtyChange }) {
   -1800, 1800)}</div>
     <Numeric label="Shape rotation (degrees)" value={angle} onChange={setAngle} min={-360} max={360} />
     <div className="facility-field-pair">{distance("Shape height", height, setHeight, 1, 150)}<Numeric label="Shape floors" value={floors} onChange={setFloors} min={1} max={40} step="1" /></div>
-    {ring ? <MeasurementSummary ring={ring} units={units || (unit==='ft'?'imperial':'metric')}/> : <p role="alert" className="facility-caption">{error}</p>}
+    {ring ? <MeasurementSummary ring={ring} units={units || (unit==='ft'?'imperial':'metric')}/> : <p role="alert" className="facility-caption">{localizeLengths(error, system)}</p>}
     <button className="facility-primary" disabled={disabled || !ring}>Add selected shape</button>
     {dirty && <button type="button" className="facility-link" onClick={discardShape}>Discard shape draft</button>}
     <p role="status" className="facility-caption">{note}</p>
@@ -71,7 +73,7 @@ function ConstructionGuide() {
     <p className="facility-caption"><a href="https://codes.iccsafe.org/s/IBC2024P1/chapter-12-interior-environment/IBC2024P1-Ch12-Sec1208.2" target="_blank" rel="noreferrer">IBC reference</a> · <a href="https://www.access-board.gov/ada/guides/chapter-4-accessible-routes/" target="_blank" rel="noreferrer">ADA routes</a> · <a href="https://www.access-board.gov/ada/guides/chapter-4-entrances-doors-and-gates/" target="_blank" rel="noreferrer">ADA doors</a> · <a href="https://steelconstruction.info/topics/cost-of-structural-steelwork/cost-planning-industrial-buildings" target="_blank" rel="noreferrer">SCI examples</a></p>
   </details>;
 }
-function OpenMapStarter({ plan, commit, onPreview, onArea, disabled, drawnArea, onDrawArea, onCancelArea, ready }) {
+function OpenMapStarter({ plan, commit, onPreview, onArea, disabled, drawnArea, onDrawArea, onCancelArea, ready, units = 'metric' }) {
   const [open, setOpen] = useState(false), [east, setEast] = useState(0), [north, setNorth] = useState(0), [width, setWidth] = useState(
   250), [depth, setDepth] = useState(250), [result, setResult] = useState(null), [checked, setChecked] = useState([]), [
   busy, setBusy] = useState(false), [message, setMessage] = useState(""), [mode, setMode] = useState("append"), [paste, setPaste] = useState(
@@ -90,6 +92,9 @@ function OpenMapStarter({ plan, commit, onPreview, onArea, disabled, drawnArea, 
     }
   }, [plan.origin, east, north, width, depth, areaMode, vertices]);
   const bounds=selection?.bounds || null;
+  // Search extents are stored in metres; the fields follow the workspace unit choice.
+  const unit = units === 'imperial' ? 'ft' : 'm';
+  const span = (label, value, setter, min, max) => <Numeric label={`${label} (${unit})`} value={value === '' ? '' : displayLength(value, units)} min={displayLength(min, units)} max={displayLength(max, units)} onChange={v => setter(v === '' ? '' : enteredLength(v, value, units))} />;
   const priorOrigin = useRef(plan.origin.join(","));
   useEffect(()=>{const next=plan.origin.join(",");if(next!==priorOrigin.current){priorOrigin.current=next;setOpen(true);}},[plan.origin]);
   const chosen = useMemo(() => result?.buildings.filter((b) => checked.includes(b.id)) || [], [result, checked]);
@@ -172,8 +177,8 @@ ry a smaller nearby area or draw a shape.`);
     <label className="facility-field"><span>Area shape</span><select aria-label="Area shape" value={areaMode} onChange={e=>{onCancelArea();setAreaMode(e.target.value);}}><option value="rectangle">Rectangle</option><option value="polygon">Custom polygon</option></select></label>
     <button className="facility-secondary" disabled={!ready || disabled} onClick={()=>{setOpen(true);onDrawArea();}}>Draw search area</button>
     {areaMode==='polygon' && <label className="facility-field"><span>Area vertices (east,north meters; one per line)</span><textarea aria-label="Area vertices" rows={6} maxLength={5000} value={vertices} onChange={e=>setVertices(e.target.value)}/><small>Edit, add or remove corners here with the keyboard. The closing point is added automatically. Whole intersecting buildings are retained.</small></label>}
-    {areaMode==='rectangle' && <><div className="facility-field-pair"><Numeric label="Search width (m)" value={width} onChange={setWidth} min={20} max={500} /><Numeric label="Search depth (m)" value={depth} onChange={setDepth} min={20} max={500} /></div>
-    <div className="facility-field-pair"><Numeric label="Search east (m)" value={east} onChange={setEast} min={-1700} max={1700} /><Numeric label="Search north (m)" value={north} onChange={setNorth} min={-1700} max={1700} /></div></>}
+    {areaMode==='rectangle' && <><div className="facility-field-pair">{span("Search width", width, setWidth, 20, 500)}{span("Search depth", depth, setDepth, 20, 500)}</div>
+    <div className="facility-field-pair">{span("Search east", east, setEast, -1700, 1700)}{span("Search north", north, setNorth, -1700, 1700)}</div></>}
     <label className="facility-field"><span>Building source</span><select aria-label="Building source" value={endpoint} onChange={e=>setEndpoint(e.target.value)}>{FOOTPRINT_SERVICES.map(s=><option key={s.url} value={s.url}>{s.label}</option>)}</select></label>
     <p className="facility-caption">Load sends only this area's coordinates to {endpoint.startsWith('/') ? `this site’s ${endpoint} service (operator must configure it)` : new URL(endpoint).hostname}. It does not send cameras, rooms or recordings. Public service availability varies; import an extract if unavailable. Requests are limited to 500 × 500 m, 300 features and 2 MB. No subscription or API key.</p>
     <p className="facility-caption"><a href={endpoint.includes("overpass-api.de") ? "https://dev.overpass-api.de/overpass-doc/en/preface/commons.html" : "https://overpass.private.coffee/"} target="_blank" rel="noreferrer">Map service terms and privacy</a> · Used for draft planning only. Verify all geometry before operational use.</p>
@@ -185,12 +190,12 @@ ry a smaller nearby area or draw a shape.`);
     setBusy(false);
     setMessage("Request cancelled.");
   }}>Cancel map request</button>}
-    {!bounds && <p className="facility-caption" role="alert">Use a simple closed area with bounds 20–500 m per side within 1,800 m of the saved origin; at most 50 corners. Courtyard or crossing outlines must be valid.</p>}
+    {!bounds && <p className="facility-caption" role="alert">Use a simple closed area with bounds {formatDistance(20, units)}–{formatDistance(500, units)} per side within {formatDistance(1800, units)} of the saved origin; at most 50 corners. Courtyard or crossing outlines must be valid.</p>}
     <p role="status" className="facility-caption">{message}</p>
     {result && <><details><summary>Why some features were skipped</summary><ul className="facility-caption">{Object.entries(result.reasons).map(([reason,count])=><li key={reason}>{count}: {reason}</li>)}</ul></details><div className="facility-import-list">{result.buildings.map((b) => <label className="facility-draft-choice" key={b.
   id}><input type="checkbox" aria-label={`Include ${b.name}`} checked={checked.includes(b.id)} onChange={(e) => setChecked((ids) => e.target.checked ? [...ids,
-  b.id] : ids.filter((id) => id !== b.id))} /><span><strong>{b.name}</strong><MeasurementSummary ring={b.footprint} holes={b.holes} /><small>Height: {b.
-  height} m above ground; base {b.base || 0} m; {b.holes?.length || 0} courtyards. {b.part ? "Independent part. " : ""} — {b.source.heightBasis}. Floors: {b.floors} — {b.source.floorsBasis}. {b.crossing ? "Crosses area bound\
+  b.id] : ids.filter((id) => id !== b.id))} /><span><strong>{b.name}</strong><MeasurementSummary ring={b.footprint} holes={b.holes} units={units} /><small>Height: {formatDistance(b.
+  height, units)} above ground; base {formatDistance(b.base || 0, units)}; {b.holes?.length || 0} courtyards. {b.part ? "Independent part. " : ""} — {b.source.heightBasis}. Floors: {b.floors} — {b.source.floorsBasis}. {b.crossing ? "Crosses area bound\
 ary; the whole footprint will be kept." : ""} Source: {b.source.id}. Updated: {b.source.updated}. Imported: {b.source.retrieved}.</small></span></label>)}</div>
       <label className="facility-field"><span>Apply drafts</span><select aria-label="Apply building drafts" value={mode} onChange={(e) => setMode(
   e.target.value)}><option value="append">Add to existing plan</option><option value="new">Replace with a clean site</option></select></label>

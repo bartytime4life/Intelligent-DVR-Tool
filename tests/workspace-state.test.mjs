@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 import { initialEvents, parseReceipt, reviewEvent, restoreSnapshot } from '../src/data.mjs';
 import { mergeRecognitionEvents } from '../src/recognition.mjs';
 import { recognitionFixture } from './fixtures/recognition.mjs';
-import { workspaceFromHash, readWorkspace, writeWorkspace, reviewExport, parseReviewExport, resetSamples } from '../src/workspace-state.mjs';
+import { workspaceFromHash, readWorkspace, writeWorkspace, preserveUnreadable, unreadableKey, reviewExport, parseReviewExport, resetSamples } from '../src/workspace-state.mjs';
+import { outsideDialog, backdropDismiss } from '../src/dialog-dismiss.mjs';
 
 const imported = () => parseReceipt(recognitionFixture().receipt);
 test('receipt reimport preserves human decisions, notes and review time', () => {
@@ -55,14 +56,38 @@ test('review restoration rejects malformed, duplicated and misbound saved eviden
 });
 test('corrupt or unavailable storage is reported without replacing the saved entry', () => {
   const storage = {getItem:() => '{broken', setItem:() => { throw Error('must not write'); }};
-  assert.match(readWorkspace(storage, 'dvr.events.v1', initialEvents).error, /not been replaced/);
+  const loaded = readWorkspace(storage, 'dvr.events.v1', initialEvents);
+  assert.match(loaded.error, /kept as a browser backup/);
+  assert.equal(loaded.raw, '{broken');
   assert.match(readWorkspace({getItem:() => {throw Error('denied');}}, 'dvr.events.v1', []).error, /could not be loaded/);
   assert.match(writeWorkspace(storage, 'dvr.events.v1', imported()), /only in memory/);
+  const full = {getItem:() => null, setItem:() => { throw Error('quota'); }};
+  assert.equal(preserveUnreadable(full, 'dvr.events.v1', loaded.raw), false);
+});
+test('the first unreadable entry is backed up once before replacement', () => {
+  const map = new Map(), storage = {getItem:k => map.get(k) ?? null, setItem:(k,v) => map.set(k,v)};
+  assert.equal(preserveUnreadable(storage, 'dvr.rules.v1', '{first'), true);
+  assert.equal(preserveUnreadable(storage, 'dvr.rules.v1', '{second'), true);
+  assert.equal(map.get(unreadableKey('dvr.rules.v1')), '{first');
 });
 test('storage round trip includes empty queues and can recover after a quota error', () => {
   const map = new Map(), storage = {getItem:k => map.get(k) ?? null, setItem:(k,v) => map.set(k,v)};
   assert.equal(writeWorkspace(storage, 'dvr.events.v1', []), '');
   assert.deepEqual(readWorkspace(storage, 'dvr.events.v1', initialEvents), {value:[],error:''});
+});
+test('dialogs dismiss only for presses that start and end on the backdrop', () => {
+  const dialog = {dataset:{}, getBoundingClientRect:() => ({left:100, right:500, top:100, bottom:400})};
+  const at = (x, y, target = dialog) => ({currentTarget:dialog, target, clientX:x, clientY:y});
+  assert.equal(outsideDialog(at(110, 110)), false); // the dialog's own padding
+  assert.equal(outsideDialog(at(20, 20)), true);
+  assert.equal(outsideDialog(at(20, 20, {})), false);
+  let closed = 0;
+  const props = backdropDismiss(() => closed++);
+  props.onPointerDown(at(200, 200)); props.onClick(at(20, 20)); // a selection dragged out of the dialog
+  props.onPointerDown(at(20, 20)); props.onClick(at(200, 200));
+  assert.equal(closed, 0);
+  props.onPointerDown(at(20, 20)); props.onClick(at(30, 30));
+  assert.equal(closed, 1);
 });
 test('every workspace has a bookmark while skip links remain local anchors', () => {
   for(const name of ['Monitor','Recognition','Facility','Events','Zones','System','Settings']) assert.equal(workspaceFromHash(`#${name.toLowerCase()}`), name);

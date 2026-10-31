@@ -1,8 +1,8 @@
 import React, {useEffect,useRef,useState} from 'react';
 import {formatDistance} from './facility-measurements.mjs';
-import {editableLineLength,lineInputValue,setLineSegmentLength,setLineVertex,validateEditableLine} from './facility-line-edit.mjs';
+import {editableLineLength,lineInputValue,setLineSegmentLength,setLineVertex,validateEditableLine,isClosedLine} from './facility-line-edit.mjs';
 
-const display = (value,units) => Number(lineInputValue(value,units).toFixed(4));
+const display = (value,units) => Number(lineInputValue(value,units).toFixed(units==='imperial' ? 3 : 4));
 const inputValues=(points,segment,vertex,units)=>{
   try {
     const clean=validateEditableLine(points),s=Math.min(segment,clean.length-2),v=Math.min(vertex,clean.length-1),a=clean[s],b=clean[s+1],p=clean[v];
@@ -17,7 +17,7 @@ export default function LineDimensions({points,onChange,units='metric',disabled=
   const [error,setError]=useState(''),[status,setStatus]=useState('');
   let clean=[], invalid='';
   try {clean=validateEditableLine(points);} catch(e) {invalid=e.message;}
-  const currentSegment=Math.min(segment,Math.max(0,clean.length-2)),currentVertex=Math.min(vertex,Math.max(0,clean.length-1));
+  const closed=isClosedLine(clean),currentSegment=Math.min(segment,Math.max(0,clean.length-2)),currentVertex=Math.min(vertex,Math.max(0,clean.length-(closed?2:1)));
   const expected=inputValues(points,currentSegment,currentVertex,units);
   const dirty=!invalid && (!sameValue(length,expected.length) || !sameValue(east,expected.east) || !sameValue(north,expected.north));
   const dirtyCallback=useRef(onDirtyChange);dirtyCallback.current=onDirtyChange;
@@ -29,6 +29,8 @@ export default function LineDimensions({points,onChange,units='metric',disabled=
   const suffix=units==='imperial' ? 'ft' : 'm';
   const parse=value=>typeof value==='number' ? value : value.trim()==='' ? NaN : Number(value);
   function apply(kind) {
+    // Re-applying the displayed (rounded) value is a no-op, so feet display cannot drift the stored metres.
+    if (kind==='segment' ? sameValue(length,expected.length) : sameValue(east,expected.east) && sameValue(north,expected.north)) {setError('');setStatus('No change to apply.');return;}
     try {
       const next=kind==='segment' ? setLineSegmentLength(points,currentSegment,parse(length),units) : setLineVertex(points,currentVertex,parse(east),parse(north),units);
       if(onChange(next) === false) return;
@@ -42,9 +44,9 @@ export default function LineDimensions({points,onChange,units='metric',disabled=
     </select></label>
     <div className="facility-field-pair"><label className="facility-field"><span>Segment length<small>{suffix}</small></span><input aria-label="Segment length" disabled={disabled} type="number" min="0.0001" step="any" value={length} onChange={e=>setLength(e.target.value)}/></label>
       <button type="button" className="facility-secondary" disabled={disabled} onClick={()=>apply('segment')}>Apply segment length</button></div>
-    <p className="facility-caption">The segment keeps its direction. Its endpoint and every later vertex move together. Review the updated path before saving.</p>
+    <p className="facility-caption">{closed ? 'Closed loop: the segment keeps its direction and later vertices move together, while the loop end stays on its start (the closing segment absorbs the change).' : 'The segment keeps its direction. Its endpoint and every later vertex move together.'} Review the updated path before saving.</p>
     <details className="facility-advanced"><summary>Edit a line vertex</summary>
-      <label className="facility-field"><span>Vertex</span><select aria-label="Line vertex" disabled={disabled || dirty} value={currentVertex} onChange={e=>setVertex(Number(e.target.value))}>{clean.map((_,i)=><option key={i} value={i}>Vertex {i+1}</option>)}</select></label>
+      <label className="facility-field"><span>Vertex</span><select aria-label="Line vertex" disabled={disabled || dirty} value={currentVertex} onChange={e=>setVertex(Number(e.target.value))}>{clean.slice(0,closed ? -1 : undefined).map((_,i)=><option key={i} value={i}>Vertex {i+1}{closed && i===0 ? ' · loop start and end' : ''}</option>)}</select></label>
       <div className="facility-field-pair"><label className="facility-field"><span>Vertex east<small>{suffix}</small></span><input aria-label="Vertex east" disabled={disabled} type="number" step="any" value={east} onChange={e=>setEast(e.target.value)}/></label>
         <label className="facility-field"><span>Vertex north<small>{suffix}</small></span><input aria-label="Vertex north" disabled={disabled} type="number" step="any" value={north} onChange={e=>setNorth(e.target.value)}/></label></div>
       <button type="button" className="facility-secondary" disabled={disabled} onClick={()=>apply('vertex')}>Apply vertex position</button>

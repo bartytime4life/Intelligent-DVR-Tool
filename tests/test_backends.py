@@ -1,13 +1,16 @@
 """Backend safety contracts use fake ORT sessions, never claim GPU hardware tests."""
 import contextlib
+import hashlib
 import io
 import json
 from pathlib import Path
+import tempfile
 from types import SimpleNamespace
 import unittest
 from unittest.mock import patch
 
 from edge.inference import CUDA_OPTIONS, ORT_VERSION, create_backend, OnnxRuntimeCuda
+from edge.cpu_backend import create_backend as verified_backend
 from edge.model_profiles import YOLOX_PROFILE
 
 
@@ -90,13 +93,23 @@ class BackendTest(unittest.TestCase):
     def test_cpu_path_never_imports_onnxruntime(self):
         net = SimpleNamespace(setPreferableBackend=lambda x: None, setPreferableTarget=lambda x: None,
                               setInput=lambda x: None, forward=lambda: 'cpu-output')
-        cv2 = SimpleNamespace(dnn=SimpleNamespace(readNetFromONNX=lambda p: net,
+        loaded = []
+        cv2 = SimpleNamespace(dnn=SimpleNamespace(readNetFromONNX=lambda p: loaded.append(p) or net,
                              DNN_BACKEND_OPENCV=1, DNN_TARGET_CPU=2))
-        with patch('edge.inference.importlib.import_module', side_effect=AssertionError('Unexpected import')):
-            backend = create_backend('opencv-cpu', Path('model.onnx'), 'yolov8-raw-640', cv2, NP, 2)
+        np = SimpleNamespace(uint8='uint8', frombuffer=lambda data, dtype: ('buffer', bytes(data), dtype))
+        with tempfile.TemporaryDirectory(prefix='modèle-') as directory, \
+                patch('edge.inference.importlib.import_module', side_effect=AssertionError('Unexpected import')):
+            model = Path(directory) / 'model.onnx'; model.write_bytes(b'onnx-bytes')
+            backend = verified_backend('opencv-cpu', model, 'yolov8-raw-640', cv2, np, 2,
+                                     model_sha256=hashlib.sha256(b'onnx-bytes').hexdigest())
             self.assertEqual(backend.forward('blob'), 'cpu-output')
             self.assertEqual(backend.runtime['backend'], 'OpenCV CPU')
             self.assertEqual(backend.runtime['threads'], 2)
+            # The verified bytes, never a (possibly non-ASCII) path, reach OpenCV.
+            self.assertEqual(loaded, [('buffer', b'onnx-bytes', 'uint8')])
+            with self.assertRaisesRegex(ValueError, 'changed'):
+                verified_backend('opencv-cpu', model, 'yolov8-raw-640', cv2, np, 2, model_sha256='0' * 64)
+            self.assertEqual(len(loaded), 1)
 
     def test_cuda_runtime_missing_fails_without_cpu(self):
         with patch('edge.inference.importlib.import_module', side_effect=ImportError):

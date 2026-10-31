@@ -1,10 +1,23 @@
 import React,{useState} from 'react';
 import {Polygon,Path,Trash,Check} from '@phosphor-icons/react';
-import {createFloorOpening,ceilingOpenings} from './facility.mjs';
+import {createFloorOpening,createFloorPath,ceilingOpenings} from './facility.mjs';
 import {stairRunFootprint} from './facility-stairs.mjs';
+import {parsePointList} from './facility-line-edit.mjs';
 import ShapeDimensions from './ShapeDimensions.jsx';
 import LineDimensions from './LineDimensions.jsx';
 import './floor-geometry.css';
+
+// Pointer-free alternative to drawing an open line.
+export function PointListEntry({label,units='metric',disabled=false,submitLabel='Save points',onSubmit,hint=''}) {
+  const [text,setText]=useState(''),[error,setError]=useState('');
+  function submit(){try{if(onSubmit(parsePointList(text,units))!==false){setText('');setError('');}}catch(e){setError(e.message);}}
+  return <details className="facility-advanced facility-point-list"><summary>Enter {label.toLowerCase()} as coordinates</summary>
+    <label className="facility-field"><span>{label}<small>east, north · {units==='imperial'?'ft':'m'}</small></span><textarea aria-label={label} rows={4} value={text} disabled={disabled} spellCheck={false} placeholder={'0, -20\n15, -20\n30, 5'} onChange={e=>{setText(e.target.value);setError('');}}/></label>
+    <p className="facility-caption">One point per line, measured east and north of the site origin. {hint}</p>
+    <button type="button" className="facility-secondary" disabled={disabled || !text.trim()} onClick={submit}>{submitLabel}</button>
+    {error && <p className="error" role="alert">{error}</p>}
+  </details>;
+}
 
 export default function FloorGeometry({plan,building,floor:requestedFloor,selected,draft,onDraft,onSelect,commit,onDraw,disabled=false,ready,units='metric',pending=false,onPendingChange}) {
   const [error,setError]=useState('');
@@ -31,6 +44,10 @@ export default function FloorGeometry({plan,building,floor:requestedFloor,select
     const openFloors=open ? (building.openFloors || []).filter(level=>level!==floor) : [...(building.openFloors || []),floor].sort((a,b)=>a-b);
     if(commit({...plan,buildings:plan.buildings.map(b=>b.id===building.id?{...b,openFloors}:b)},open?'Solid floor restored; partial openings retained':'Entire level opened; ceiling below updated'))setError('');
   }
+  function addPath(points){
+    try{const path=createFloorPath(plan,building.id,floor,points);if(!commit({...plan,paths:[...(plan.paths || []),path]},'Floor path saved from point list — Undo available'))return false;onSelect(path.id,'path');setError('');return true;}
+    catch(e){setError(e.message);return false;}
+  }
   function save(e){e.preventDefault();const key=selected.kind==='opening'?'openings':'paths';if(commit({...plan,[key]:(plan[key] || []).map(o=>o.id===item.id?item:o)},'Floor geometry saved; ceiling below updated'))setError('');}
   function remove(){const key=selected.kind==='opening'?'openings':'paths';if(commit({...plan,[key]:(plan[key] || []).filter(o=>o.id!==item.id)},selected.kind==='opening'?'Opening closed with solid floor — Undo available':'Path removed — Undo available')){onSelect(building.id,'building');setError('');}}
   return <section className="facility-floor-geometry" aria-label="Floor surfaces and pathways">
@@ -41,6 +58,7 @@ export default function FloorGeometry({plan,building,floor:requestedFloor,select
     {room && <button className="facility-secondary" disabled={disabled || pending || open} onClick={()=>addOpening(room.footprint,floor,room.name+' opening',true)}>Convert selected room to opening</button>}
     {stair && <button className="facility-secondary" disabled={disabled || pending || (building.openFloors || []).includes(stair.toLevel)} onClick={()=>addOpening(stairRunFootprint(stair,building),stair.toLevel,stair.name+' upper opening')}>Cut upper floor over stair run</button>}
     <p className="facility-caption">Pathways stay inside solid floor; openings cannot be crossed. Stair cutouts reserve the flight run and keep both landings. Verify headroom and guards on site.</p>
+    <PointListEntry label="Pathway points" units={units} disabled={disabled || pending || open} submitLabel={`Add pathway on Level ${floor+1}`} onSubmit={addPath} hint="Points must stay on solid floor inside this building."/>
     <div className="facility-item-list compact">{[...openings.map(o=>({...o,kind:'opening'})),...paths.map(o=>({...o,kind:'path'}))].map(o=><button key={o.id} disabled={disabled || pending} className={selected.id===o.id?'selected':''} onClick={()=>onSelect(o.id,o.kind)}>{o.kind==='opening'?<Polygon/>:<Path/>}<span>{o.name}<small>{o.kind==='opening'?'Open to below':'Floor pathway'}</small></span></button>)}</div>
     {!!ceilingOpenings(plan,building.id,floor).length && <p className="facility-caption">Dashed boundaries show ceiling openings from the level above.</p>}
     {item && <form onSubmit={save}>

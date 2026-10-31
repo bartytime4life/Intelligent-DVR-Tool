@@ -68,3 +68,24 @@ test('custom AOI filters the enclosing rectangle while retaining whole intersect
   for(const text of ['0,0\n600,0\n0,600','0,0\n1,0\n0,1','0,0\nfoo,20','0,0\n100,100\n0,100\n100,0','0,\n100,0\n0,100',',0\n100,0\n0,100'])assert.throws(()=>polygonAreaSelection(origin,parseAreaVertices(text)));
   assert.match(osmQuery(selection.bounds),/building:part/);
 });
+import {ringsInteriorOverlap} from '../src/facility.mjs';
+test('rooms, indoor zones and stairs may share a courtyard wall or corner but not overlap the courtyard',()=>{
+  const plan=extra=>({...blankFacility(),buildings:[shell],...extra});
+  const room=footprint=>({id:'r',name:'Room',buildingId:'b',level:0,wallHeight:2.8,footprint});
+  for(const footprint of [box(-20,-10,10,20),box(-20,-20,10,10),box(-10,10,5,5)]) assert.doesNotThrow(()=>validateFacility(plan({rooms:[room(footprint)]})));
+  for(const footprint of [box(-20,-10,10.5,20),box(-10,-10,20,20),box(-12,-12,24,24)]) assert.throws(()=>validateFacility(plan({rooms:[room(footprint)]})),/Rooms .*Check room “Room”/);
+  const zone={id:'z',name:'Zone',type:'restricted',footprint:box(10,-5,5,10),enabled:true,expectedClasses:['person'],dwellSeconds:2,buildingId:'b',level:1};
+  assert.doesNotThrow(()=>validateFacility(plan({zones:[zone]})));
+  assert.throws(()=>validateFacility(plan({zones:[{...zone,footprint:box(9,-5,5,10)}]})),/Indoor zones .*Check zone “Zone”/);
+  const stair={id:'st',name:'Stair',buildingId:'b',fromLevel:0,toLevel:1,x:10.6,y:0,bearing:0,width:1.2,tread:.28,risers:20,landing:1.2};
+  assert.doesNotThrow(()=>validateFacility(plan({stairs:[stair]})));
+  assert.throws(()=>validateFacility(plan({stairs:[{...stair,x:10.3}]})),/Stair flights.*Check stair “Stair”/);
+  const square=box(0,0,4,4);
+  assert.equal(ringsInteriorOverlap(square,box(0,0,4,4)),true);
+  assert.equal(ringsInteriorOverlap(square,box(1,1,1,1)),true);
+  assert.equal(ringsInteriorOverlap(square,box(4,0,4,4)),false);
+  assert.equal(ringsInteriorOverlap(square,box(4,4,1,1)),false);
+  assert.equal(ringsInteriorOverlap(square,box(2,4,1,1)),false);
+  assert.equal(ringsInteriorOverlap(square,box(3,3,4,4)),true);
+  assert.equal(ringsInteriorOverlap(square,[[-1,2],[2,-1],[5,2],[2,5],[-1,2]]),true);
+});

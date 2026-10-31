@@ -1,7 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { analysisRequest, localAnalysisOrigin, boundedBody } from './local-analysis.mjs';
+import { analysisRequest, localAnalysisOrigin, boundedBody, refused } from './local-analysis.mjs';
 import { recorderRequest, openSegment, recorderErrors } from './lan-recorder.mjs';
 import { downloadBlob } from './clip-capture.mjs';
+import { loopbackAddress } from './live-feeds.mjs';
 
 const mib = bytes => Number.isFinite(bytes) ? `${(bytes / 1024**2).toFixed(1)} MiB` : 'not available';
 
@@ -9,7 +10,7 @@ export default function LanRecorder({onResult, onBusy, blocked}) {
   const [status, setStatus] = useState(null), [catalog, setCatalog] = useState(null);
   const [model, setModel] = useState(''), [rules, setRules] = useState('');
   const [error, setError] = useState(''), [working, setWorking] = useState(false), [connected, setConnected] = useState(false);
-  const token = useRef(''), lifetime = useRef(null);
+  const token = useRef(''), lifetime = useRef(null), misses = useRef(0);
   const local = localAnalysisOrigin(globalThis.location);
   useEffect(() => { lifetime.current = new AbortController(); return () => lifetime.current.abort(); }, []);
   useEffect(() => { onBusy(Boolean(working || status?.active || status?.state === 'stopping')); }, [working, status?.active, status?.state, onBusy]);
@@ -30,15 +31,22 @@ export default function LanRecorder({onResult, onBusy, blocked}) {
     if (!connected) return;
     let disposed = false;
     const timer = setTimeout(async () => {
-      try { const next = await (await request('/status')).json(); if (!disposed) setStatus(next); }
-      catch (err) { if (!disposed) { setConnected(false); setError(`Status unavailable; recording may still be running. ${err.message}`); } }
+      try { const next = await (await request('/status')).json(); misses.current = 0; if (!disposed) setStatus(next); }
+      catch (err) {
+        if (disposed) return;
+        if (!refused(err) && ++misses.current < 3) { setStatus(s => s && {...s}); return; }
+        misses.current = 0; setConnected(false); setError(`Status unavailable; recording may still be running. ${err.message}`);
+      }
     }, 1000);
     return () => { disposed = true; clearTimeout(timer); };
   }, [connected, status]);
   async function action(name) {
     setWorking(true); setError('');
     try { setStatus(await (await request('/' + name, name === 'start' ? {model, rules} : {})).json()); }
-    catch (err) { setConnected(false); setError(`${err.message} Refresh status to confirm whether the action completed.`); }
+    catch (err) {
+      if (refused(err)) setError(err.message);
+      else { setConnected(false); setError(`${err.message} Refresh status to confirm whether the action completed.`); }
+    }
     finally { setWorking(false); }
   }
   async function open(row) {
@@ -60,7 +68,7 @@ export default function LanRecorder({onResult, onBusy, blocked}) {
     <p>Record bounded video-only segments and analyze them on this computer. Recording starts only when you press Start recording & analysis. It continues when you leave this page, until Stop or service shutdown.</p>
     <div className="local-analysis-actions"><button className="button" disabled={!local || working} onClick={connect}>{status ? 'Refresh recorder status' : 'Connect LAN recorder'}</button>
       <a href="https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/lan-recording.md" target="_blank" rel="noreferrer">LAN recording guide</a></div>
-    {!local && <p>Use the configured local application on this computer for LAN recording.</p>}
+    {!local && <p>Use the configured local application on this computer for LAN recording.{loopbackAddress(globalThis.location) && <> <a href={loopbackAddress(globalThis.location)}>Open this page at 127.0.0.1</a></>}</p>}
     {status && <>
       <h3>{status.name}</h3>
       <p>{status.limits.segment_seconds}s segments · up to 10 fps / 960px · retention {status.limits.retention_minutes} minutes / {status.limits.max_segments} segments / {status.limits.max_storage_mib} MiB. Oldest retained files, including pending work, can expire. Export evidence you need to keep.</p>

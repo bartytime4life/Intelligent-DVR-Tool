@@ -11,7 +11,7 @@ import platform
 import re
 import subprocess
 
-from .evaluation import canonical_hash, local_file, read_json, require
+from .evaluation import anchor, canonical_hash, local_file, read_json, require
 
 BUNDLE_SCHEMA = 'intelligent-dvr.local-evidence.v1'
 PLAN_SCHEMA = 'intelligent-dvr.qualification-plan.v1'
@@ -32,8 +32,8 @@ UNQUALIFIED = {key: 'unqualified' for key in (
 
 
 def project_root(value):
-    root = Path(value).absolute()
-    require(root.is_dir() and not any(p.is_symlink() for p in (root, *root.parents)),
+    root = anchor(value)  # OS links above the project are accepted; none at or beneath it.
+    require(root.is_dir() and not root.is_symlink(),
             'Project must be a local directory without symlink components')
     return root
 
@@ -44,11 +44,11 @@ def member(root, name):
     path = Path(name)
     require(not path.is_absolute() and '..' not in path.parts and ':' not in name,
             'Evidence inputs must stay inside the explicit project directory')
-    return local_file(root / path)
+    return local_file(root / path, root)
 
 
 def fingerprint(path, root, limit):
-    local_file(path)
+    local_file(path, root)
     before = path.stat()
     require(before.st_size <= limit, 'File exceeds the inventory size bound')
     h = hashlib.sha256()
@@ -151,7 +151,7 @@ def collect(root, artifacts=()):
                 continue
             require(len(files) + len(omitted) < MAX_FILES, 'Source inventory exceeds 4,000 entries')
             try:
-                local_file(path)
+                local_file(path, root)
                 require(path.stat().st_size <= MAX_TOTAL_BYTES - total_bytes,
                         'Source byte count exceeds the inventory bound')
                 record = fingerprint(path, root, MAX_SOURCE_BYTES)
@@ -304,9 +304,8 @@ def preflight(plan):
 
 
 def write_new(path, document):
-    path = Path(path)
+    path = anchor(path)  # The chosen output folder is resolved once.
     require(not path.exists() and not path.is_symlink(), 'Output must be a new file')
-    require(not any(p.is_symlink() for p in path.parents), 'Output parents must not be symlinks')
     raw = json.dumps(document, indent=2, allow_nan=False) + '\n'
     with path.open('x', encoding='utf-8') as stream:
         stream.write(raw)

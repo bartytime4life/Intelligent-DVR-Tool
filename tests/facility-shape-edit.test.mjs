@@ -5,3 +5,16 @@ const shape={footprint:[[0,0],[10,0],[10,20],[0,20],[0,0]],holes:[[[2,2],[4,2],[
 test('feet entry converts exact physical geometry without unit-toggle mutation',()=>{assert.equal(unitFactor('imperial'),.3048);assert.equal(displayLength(3.048,'imperial'),10);assert.equal(displayLength(3.048,'metric'),3.048);assert.equal(shapeBounds(resizeShape(shape,'width',10*.3048)).width,3.048);});
 test('resizing and moving preserve courtyard relation and immutable original',()=>{const s=resizeShape(shape,'width',20);assert.deepEqual(s.holes[0][0],[-1,2]);assert.equal(shapeBounds(s).x,5);assert.equal(shapeBounds(moveShape(s,'x',50)).x,50);assert.deepEqual(shape.holes[0][0],[2,2]);});
 test('individual edge length updates its end and maintains ring closure',()=>{assert.equal(resizeEdge(shape,0,12).footprint[1][0],12);const r=resizeEdge(shape,3,10).footprint;assert.deepEqual(r[0],r.at(-1));assert.equal(Math.hypot(r[4][0]-r[3][0],r[4][1]-r[3][1]),10);assert.throws(()=>resizeEdge(shape,0,NaN));});
+import {rotateShape} from '../src/facility-shape-edit.mjs';
+test('rotation turns every ring counter-clockwise about the bounds center and rejects non-finite input',()=>{const r=rotateShape(shape,90),c=(p,q)=>assert.ok(Math.hypot(p[0]-q[0],p[1]-q[1])<1e-9);c(r.footprint[0],[15,5]);c(r.holes[0][0],[13,7]);c(r.footprint.at(-1),r.footprint[0]);assert.deepEqual(shape.footprint[0],[0,0]);assert.throws(()=>rotateShape(shape,NaN));});
+import {toMetres,enteredLength,localizeLengths} from '../src/facility-shape-edit.mjs';
+test('feet entry converts only changed numbers, stores 0.1 mm and words messages in the active unit',()=>{
+  assert.equal(displayLength(8,'imperial'),26.247);assert.equal(enteredLength('26.247',8,'imperial'),8);
+  assert.equal(enteredLength('26.2467',8,'imperial'),8);assert.equal(enteredLength('26.25',8,'imperial'),8.001);
+  assert.equal(toMetres(4,'imperial'),1.2192);assert.equal(toMetres(2.80000001,'metric'),2.8);
+  for(const ft of [0.984,3.281,4.1,26.25,492.126]) assert.equal(displayLength(toMetres(ft,'imperial'),'imperial'),ft);
+  assert.ok(Number.isNaN(enteredLength('',8,'imperial')));
+  assert.equal(localizeLengths('Buildings need height 1–150 m, and 1–40 floors.','imperial'),'Buildings need height 3.28–492.13 ft, and 1–40 floors.');
+  assert.equal(localizeLengths('Area 4 m² within 2 km; 2 MB; dimensions 2–1,000 m.','imperial'),'Area 4 m² within 2 km; 2 MB; dimensions 6.56–3280.84 ft.');
+  assert.equal(localizeLengths('height 1–150 m','metric'),'height 1–150 m');
+});

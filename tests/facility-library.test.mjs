@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {blankFacility, exampleFacility} from '../src/facility.mjs';
-import {LIBRARY_KEY, LEGACY_KEY, LIBRARY_SCHEMA, MAX_LIBRARY_BYTES, MAX_FACILITY_BYTES, createLibrary, validateLibrary, loadLibrary, persistLibrary, addFacility, replaceActive, selectFacility, duplicateActive, importFacilities, facilityFilename, parseFacilityFile} from '../src/facility-library.mjs';
+import {LIBRARY_KEY, LEGACY_KEY, LIBRARY_SCHEMA, MAX_LIBRARY_BYTES, MAX_FACILITY_BYTES, createLibrary, validateLibrary, loadLibrary, persistLibrary, addFacility, replaceActive, selectFacility, duplicateActive, removeFacility, importFacilities, facilityFilename, parseFacilityFile} from '../src/facility-library.mjs';
 
 function memoryStorage(entries = {}) {
   const values = new Map(Object.entries(entries));
@@ -160,4 +160,33 @@ test('download filenames contain no path, control, device-name or Unicode surpri
   assert.equal(facilityFilename({name:'CON'}),'dvr-con.json');
   assert.equal(facilityFilename({name:'\u0000/\\'}),'dvr-facility.json');
   assert.match(facilityFilename({name:'x'.repeat(100)}),/^dvr-[a-z0-9-]{1,64}\.json$/);
+});
+
+test('removing a facility keeps at least one, opens a neighbour and leaves the others untouched',()=>{
+  let library=createLibrary({...blankFacility(),name:'A'});
+  library=addFacility(library,{...blankFacility(),name:'B'});library=addFacility(library,exampleFacility());
+  const [a,b,c]=library.facilities,selected=selectFacility(library,b.id),before=structuredClone(selected);
+  const removed=removeFacility(selected,b.id);
+  assert.deepEqual(removed.facilities.map(item=>item.id),[a.id,c.id]);assert.equal(removed.activeId,c.id);
+  assert.deepEqual(removed.facilities[1],c);assert.deepEqual(selected,before);
+  assert.equal(removeFacility(removed,c.id).activeId,a.id);
+  assert.equal(removeFacility(selected,a.id).activeId,b.id);
+  const single=createLibrary();
+  assert.throws(()=>removeFacility(single,single.activeId),/at least one/);
+  assert.throws(()=>removeFacility(library,'missing'),/existing/);
+  let full=createLibrary();for(let i=1;i<30;i++)full=addFacility(full);
+  assert.throws(()=>addFacility(full),/remove a facility/);
+  assert.equal(addFacility(removeFacility(full,full.facilities[3].id)).facilities.length,30);
+});
+
+test('examples and imports get distinct names without changing their geometry',()=>{
+  const example=exampleFacility();
+  let library=createLibrary(example);
+  library=addFacility(library,exampleFacility(),{rename:true});library=addFacility(library,exampleFacility(),{rename:true});
+  assert.deepEqual(library.facilities.map(item=>item.plan.name),[example.name,example.name+' 2',example.name+' 3']);
+  const imported=importFacilities(library,parseFacilityFile(JSON.stringify(example))),last=imported.facilities.at(-1).plan;
+  assert.equal(last.name,example.name+' 4');assert.deepEqual({...last,name:example.name},example);
+  const offices=importFacilities(createLibrary({...blankFacility(),name:'Office'}),[{...blankFacility(),name:'Office'},{...blankFacility(),name:'Office'}]);
+  assert.deepEqual(offices.facilities.map(item=>item.plan.name),['Office','Office 2','Office 3']);
+  assert.equal(addFacility(createLibrary({...blankFacility(),name:'Office'}),{...blankFacility(),name:'Office'}).facilities[1].plan.name,'Office');
 });

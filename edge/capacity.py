@@ -1,5 +1,6 @@
 """Deterministic concurrent-source load model; never opens cameras or runs inference."""
 import argparse
+from fractions import Fraction
 import heapq
 import json
 import math
@@ -48,6 +49,9 @@ def simulate(cameras=MINIMUM_CAMERA_TARGET, sample_fps=2, workers=8,
             heapq.heappush(completions, (round(now+service_ms/1000, 9), work.token,
                                         work.sample.captured_at))
     state = scheduler.snapshot()
+    # Exact decimal arithmetic: 3 cameras x 1 fps x 700 ms is exactly 3 workers at 70%,
+    # not 4 from binary rounding. str() recovers the decimal a CLI float was parsed from.
+    offered_ms = Fraction(str(cameras)) * Fraction(str(sample_fps)) * Fraction(str(service_ms))
     totals = {key: sum(s[key] for s in state['per_camera'].values())
               for key in ('received', 'accepted', 'replaced', 'stale', 'budget_dropped',
                           'dispatched', 'completed', 'failed')}
@@ -61,8 +65,8 @@ def simulate(cameras=MINIMUM_CAMERA_TARGET, sample_fps=2, workers=8,
                             'payload': 'shared synthetic text, not decoded image memory'},
             'modeled_offered_samples_per_second': cameras*sample_fps,
             'idealized_worker_service_samples_per_second': workers*1000/service_ms,
-            'modeled_overload': cameras*sample_fps > workers*1000/service_ms,
-            'worker_equivalents_at_70_percent_utilization': math.ceil(cameras*sample_fps*service_ms/1000/.7),
+            'modeled_overload': offered_ms > workers*1000,
+            'worker_equivalents_at_70_percent_utilization': math.ceil(offered_ms / 700),
             'modeled_drain_finished_seconds': now, 'totals': totals,
             'cameras_served': len(first_dispatch),
             'modeled_max_first_dispatch_seconds': max(first_dispatch.values(), default=None),

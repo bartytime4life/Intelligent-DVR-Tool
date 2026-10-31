@@ -1,18 +1,19 @@
 import React, {useEffect, useState} from 'react';
 import {Polygon, Plus, ShieldWarning, Eye, DownloadSimple, Trash, Check} from '@phosphor-icons/react';
-import {centroid} from './facility.mjs';
+import {centroid, snapToBuilding, solidSpaceProblem, SNAP_TOLERANCE} from './facility.mjs';
+import {formatDistance} from './facility-measurements.mjs';
 import {FACILITY_CLASSES, createFacilityZone, compileZoneRules} from './facility-zones.mjs';
 import ShapeDimensions from './ShapeDimensions.jsx';
 import './facility-planning.css';
 
 export default function FacilityZones({plan,selectedId,onSelect,onDraw,commit,disabled=false,ready=false,building,floor=0,onDirtyChange,units='metric'}) {
-  const [drafts,setDrafts]=useState({}), [error,setError]=useState('');
+  const [drafts,setDrafts]=useState({}), [error,setError]=useState(''), [note,setNote]=useState('');
   const zones=plan.zones || [], saved=zones.find(z=>z.id===selectedId), draft=saved && (drafts[selectedId] || saved);
   const dirty=!!saved && JSON.stringify(draft)!==JSON.stringify(saved);
   const anyDirty=zones.some(z=>drafts[z.id] && JSON.stringify(drafts[z.id])!==JSON.stringify(z));
   useEffect(()=>{onDirtyChange?.(!!anyDirty);},[anyDirty,onDirtyChange]);
   useEffect(()=>()=>onDirtyChange?.(false),[onDirtyChange]);
-  useEffect(()=>{setDrafts({});setError('');},[plan]);
+  useEffect(()=>{setDrafts({});setError('');setNote('');},[plan]);
   function change(key,value) {setDrafts(previous=>({...previous,[selectedId]:{...draft,[key]:value}}));setError('');}
   function clearDraft() {setDrafts(previous=>{const next={...previous};delete next[selectedId];return next;});}
   function addRectangle() {
@@ -41,11 +42,19 @@ export default function FacilityZones({plan,selectedId,onSelect,onDraw,commit,di
       <ShapeDimensions shape={draft} onChange={next=>setDrafts(previous=>({...previous,[selectedId]:next}))} units={units}/>
       <label className="facility-field"><span>Zone purpose</span><select aria-label="Zone purpose" value={draft.type} onChange={e=>change('type',e.target.value)}><option value="restricted">Restricted area · person present</option><option value="object_watch">Out-of-place classes · review required</option></select></label>
       <label className="facility-field"><span>Zone floor</span><select aria-label="Zone floor" value={draft.buildingId ? `${draft.buildingId}:${draft.level}` : 'outdoor'} onChange={e=>{
-        const value=e.target.value;const next={...draft};delete next.buildingId;delete next.level;
-        if(value!=='outdoor'){const [id,level]=value.split(':');next.buildingId=id;next.level=Number(level);}
+        const value=e.target.value;const next={...draft};delete next.buildingId;delete next.level;setNote('');setError('');
+        if(value!=='outdoor'){
+          const [id,level]=value.split(':'),target=plan.buildings.find(b=>b.id===id);next.buildingId=id;next.level=Number(level);
+          // Corners up to 30 cm outside the building snap to its wall; larger misses are named, not saved.
+          const fit=snapToBuilding(next.footprint,target),problem=solidSpaceProblem(fit.points,target);
+          next.footprint=fit.points;
+          if(fit.snapped)setNote(`${fit.snapped} ${fit.snapped===1?'corner':'corners'} snapped to the ${target.name} outline. Save to keep.`);
+          if(problem)setError(problem.edge ? `Edge ${problem.edge[0]}–${problem.edge[1]} of this zone crosses outside the solid floor of ${target.name}. Move or resize it before saving.` :
+            `Corner ${problem.vertex} of this zone is ${formatDistance(problem.distance,units)} ${problem.where==='courtyard'?'inside a courtyard of':'outside'} ${target.name}; corners within ${formatDistance(SNAP_TOLERANCE,units)} snap automatically. Move or resize it before saving.`);
+        }
         setDrafts(previous=>({...previous,[selectedId]:next}));
       }}><option value="outdoor">Outdoor / ground plan</option>{plan.buildings.flatMap(b=>Array.from({length:b.floors},(_,i)=><option value={`${b.id}:${i}`} key={`${b.id}:${i}`}>{b.name} · Level {i+1}</option>))}</select></label>
-      {draft.buildingId && <p className="facility-caption">The polygon must fit inside the selected building, outside courtyards.</p>}
+      {draft.buildingId && <p className="facility-caption">The polygon must fit inside the selected building, outside courtyards.</p>}{note && <p className="facility-caption" role="status">{note}</p>}
       <label className="facility-field"><span>Presence before review <small>seconds</small></span><input aria-label="Presence before review" type="number" min={0} max={3600} step="0.1" required value={draft.dwellSeconds} onChange={e=>change('dwellSeconds',e.target.value==='' ? '' : Number(e.target.value))}/></label>
       {draft.type==='object_watch' && <details className="facility-expected-classes" open><summary>Expected classes · {draft.expectedClasses.length} allowed</summary><p className="facility-caption">Choose everything normally allowed here. Other COCO80 classes become review candidates; unfamiliar objects outside those model classes cannot be detected by this rule.</p><div>{FACILITY_CLASSES.map(label=><label key={label}><input type="checkbox" checked={draft.expectedClasses.includes(label)} onChange={e=>change('expectedClasses',e.target.checked ? [...draft.expectedClasses,label] : draft.expectedClasses.filter(v=>v!==label))}/>{label}</label>)}</div></details>}
       <label className="facility-checkbox"><input type="checkbox" checked={draft.enabled} onChange={e=>change('enabled',e.target.checked)}/>Enable in plan and rule export</label>

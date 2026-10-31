@@ -1,15 +1,18 @@
-import { boundedBody } from './local-analysis.mjs';
+import { boundedBody, serviceFailure } from './local-analysis.mjs';
 import { parseRecognition, matchRecording, MAX_REVIEW_BYTES, MAX_VIDEO_BYTES } from './recognition.mjs';
 
 export async function recorderRequest(path, {token, body, signal, fetcher = fetch} = {}) {
-  const response = await fetcher('/api/recorder' + path, {method: body ? 'POST' : 'GET',
-    credentials: 'omit', cache: 'no-store', redirect: 'error', signal,
-    headers: {'X-DVR-Token': token, ...(body ? {'Content-Type': 'application/json'} : {})},
-    ...(body ? {body: JSON.stringify(body)} : {})});
+  let response;
+  try {
+    response = await fetcher('/api/recorder' + path, {method: body ? 'POST' : 'GET',
+      credentials: 'omit', cache: 'no-store', redirect: 'error', signal,
+      headers: {'X-DVR-Token': token, ...(body ? {'Content-Type': 'application/json'} : {})},
+      ...(body ? {body: JSON.stringify(body)} : {})});
+  } catch (error) { throw serviceFailure(error, 'recorder service'); }
   if (!response.ok) {
     let message = 'Recorder unavailable. Refresh status before trying again.';
     try { message = (await response.json()).error?.message || message; } catch { /* No JSON endpoint. */ }
-    throw Error(message);
+    throw Object.assign(Error(message), {status: response.status});
   }
   return response;
 }

@@ -190,12 +190,13 @@ class RecoveryTest(unittest.TestCase):
 
     def test_failed_atomic_publication_recovers_interruption_instead_of_success(self):
         service=self.service(state_dir=self.root/'state',process_factory=self.success)
-        original=Path.replace
+        original=os.replace
         def replace(path,target):
+            path=Path(path)
             if path.name=='state.tmp' and json.loads(path.read_text())['job']['state']=='completed':
                 raise OSError('injected rename failure')
             return original(path,target)
-        with patch.object(Path,'replace',replace):
+        with patch('edge.fileops.os.replace',replace):
             job=self.start(service); self.assertEqual(self.finish(service)['error']['code'],'STORE_WRITE_FAILED')
         service.close(); recovered=self.service(state_dir=self.root/'state')
         self.assertEqual(recovered.snapshot()['error']['code'],'SERVICE_INTERRUPTED')

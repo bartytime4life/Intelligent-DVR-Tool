@@ -2,11 +2,11 @@
 import argparse
 import hashlib
 import hmac
-from http.server import BaseHTTPRequestHandler, HTTPServer
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import importlib.util
+import ipaddress
 import itertools
 import json
-import mimetypes
 import os
 from pathlib import Path
 import re
@@ -20,7 +20,8 @@ import threading
 import time
 from urllib.parse import urlsplit, unquote
 
-from .evaluation import local_file, read_json, relative_file
+from .evaluation import anchor, local_file, read_json, relative_file
+from .fileops import open_regular
 from .model_profiles import validate_binding
 from .rules import Rule, RuleEngine
 from .local_feeds import Feeds, FeedError, load_sources
@@ -34,6 +35,57 @@ MODEL_BYTES = VIDEO_BYTES
 LIMITS = {'video_bytes': VIDEO_BYTES, 'wall_seconds': 300, 'max_frames': 6000,
           'stride': 5, 'threads': 2, 'active_jobs': 1, 'memory_bytes': 4 * 1024**3}
 TERMINAL = {'completed', 'failed', 'cancelled'}
+# Fixed types: mimetypes reads Windows registry overrides (e.g. .js as text/plain),
+# which nosniff then turns into a blank module-script UI.
+TYPES = {'.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8',
+         '.mjs': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8',
+         '.json': 'application/json', '.svg': 'image/svg+xml', '.wasm': 'application/wasm',
+         '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp',
+         '.woff2': 'font/woff2', '.ico': 'image/x-icon', '.txt': 'text/plain; charset=utf-8',
+         '.webm': 'video/webm', '.mkv': 'video/x-matroska', '.mp4': 'video/mp4', '.m4v': 'video/mp4',
+         '.mov': 'video/quicktime', '.avi': 'video/x-msvideo'}
+
+
+def content_type(path):
+    return TYPES.get(Path(path).suffix.lower(), 'application/octet-stream')
+
+
+def _endpoint(text):
+    # /proc/net/tcp{,6}: 32-bit words of the address in host byte order, hex port.
+    address, port = text.split(':')
+    ip = ipaddress.ip_address(b''.join(int(address[i:i + 8], 16).to_bytes(4, sys.byteorder) for i in range(0, len(address), 8)))
+    return str(getattr(ip, 'ipv4_mapped', None) or ip), int(port, 16)
+
+
+def peer_uid(client, port, tables=('/proc/net/tcp', '/proc/net/tcp6')):
+    """Linux UID owning the client end of a loopback connection to port, or None
+    when no live entry is visible (callers fail closed). A dual-stack client socket
+    appears in tcp6 as an IPv4-mapped address."""
+    wanted, suffixes = ((client[0], client[1]), ('127.0.0.1', port)), (':%04X' % client[1], ':%04X' % port)
+    for table in tables:
+        try:
+            with open(table, encoding='ascii') as rows:
+                next(rows, None)
+                for row in rows:
+                    fields = row.split()
+                    if (len(fields) > 7 and fields[1].endswith(suffixes[0]) and fields[2].endswith(suffixes[1]) and
+                            (_endpoint(fields[1]), _endpoint(fields[2])) == wanted):
+                        return int(fields[7])
+        except OSError:
+            continue  # e.g. IPv6 disabled; nothing visible means refusal.
+    return None
+
+
+class Upload:
+    """A request body bounded by its Content-Length; tracks what is still unread."""
+    def __init__(self, stream, length):
+        self.stream, self.remaining = stream, length
+
+    def read(self, size=-1):
+        size = self.remaining if size is None or size < 0 else min(size, self.remaining)
+        block = self.stream.read(size) if size > 0 else b''
+        self.remaining -= len(block)
+        return block
 
 
 class JobError(Exception):
@@ -99,8 +151,9 @@ def load_catalog(config):
 
 class Jobs:
     def __init__(self, recordings, catalog, *, wall_seconds=300, process_factory=subprocess.Popen, state_dir=None, allow_import=False):
-        recordings = Path(recordings).absolute()
-        if not recordings.is_dir() or any(p.is_symlink() for p in (recordings, *recordings.parents)):
+        # Resolved once (OS links above it are fine); the folder and its entries are not links.
+        recordings = anchor(recordings)
+        if not recordings.is_dir() or recordings.is_symlink():
             raise ValueError('Select a regular local recordings directory without symlinks')
         self.recordings, self.catalog = recordings, catalog
         self.allow_import = allow_import
@@ -113,6 +166,7 @@ class Jobs:
         self.closed = False
         self.owner = None
         self.managed = False
+        self.importing = False
         self.token = secrets.token_urlsafe(32)
         self.store = ResultStore(state_dir) if state_dir is not None else None
         self.store_failed = False
@@ -158,19 +212,28 @@ class Jobs:
                 raise JobError('IMPORT_DISABLED', 'Restart the local app with --allow-recording-import to save selected recordings here.', 403)
             if self.closed or self.owner is not None or (self.job and self.job['state'] not in TERMINAL):
                 raise JobError('BUSY', 'Wait for the current analysis to finish before importing a recording.', 409)
+            if self.importing:
+                raise JobError('BUSY', 'Another recording import is in progress. Retry after it finishes.', 409)
             listed = self.available()['recordings']
             expected_name = 'import-' + expected_hash + IMPORT_MIMES.get(mime, '')
             if len(listed) >= 200 and not any(item['name'] == expected_name for item in listed):
                 raise JobError('CATALOG_FULL', 'The recording catalog is full. Move older files locally and refresh choices before importing.', 409)
-            try:
-                file, reused = import_recording(self.recordings, stream, length, mime, expected_hash)
+            # The bounded transfer runs unlocked so status, cancel and recorder
+            # supervision stay responsive; starts are refused until it ends.
+            self.importing = True
+        try:
+            file, reused = import_recording(self.recordings, stream, length, mime, expected_hash)
+            with self.lock:
                 catalog = self.available()
                 recording = next(item for item in catalog['recordings'] if item['name'] == file.name)
-                return {'recording': recording, 'sha256': expected_hash, 'reused': reused}
-            except RecordingImportError as exc:
-                raise JobError('IMPORT_REFUSED', str(exc)) from None
-            except (OSError, StopIteration):
-                raise JobError('IMPORT_STORAGE', 'Could not publish the recording. Check disk space and permissions; refresh choices before retrying the same file.', 507) from None
+            return {'recording': recording, 'sha256': expected_hash, 'reused': reused}
+        except RecordingImportError as exc:
+            raise JobError('IMPORT_REFUSED', str(exc)) from None
+        except (OSError, StopIteration):
+            raise JobError('IMPORT_STORAGE', 'Could not publish the recording. Check disk space and permissions; refresh choices before retrying the same file.', 507) from None
+        finally:
+            with self.lock:
+                self.importing = False
 
     def snapshot(self, job_id=None):
         with self.lock:
@@ -184,6 +247,8 @@ class Jobs:
                 raise JobError('STOPPED', 'Analysis is unavailable. Check storage and restart the local service.', 503)
             if self.owner is not None or (self.job and self.job['state'] not in TERMINAL):
                 raise JobError('BUSY', 'Wait for analysis or stop the LAN recorder first.', 409)
+            if self.importing:
+                raise JobError('BUSY', 'Wait for the recording import to finish.', 409)
             self.owner = owner
 
     def release(self, owner):
@@ -197,7 +262,11 @@ class Jobs:
             if self.owner is not owner or not self.managed or (self.job and self.job['state'] not in TERMINAL):
                 return
             if self.directory:
-                self.directory.cleanup(); self.directory = None
+                try:
+                    self.directory.cleanup()
+                except OSError:
+                    return  # Windows: a download still holds a file open; the next start removes it.
+                self.directory = None
             self.job = None
 
     def start(self, request, *, owner=None, source=None, expected_sha=None, camera='local-recording', scratch_parent=None):
@@ -210,6 +279,8 @@ class Jobs:
                 raise JobError('STORE_UNAVAILABLE', 'Result storage failed. Check free space and permissions, then restart the service before another job.', 503)
             if self.job and self.job['state'] not in TERMINAL:
                 raise JobError('BUSY', 'A recording is already processing. Wait or cancel it first.', 409)
+            if self.importing:
+                raise JobError('BUSY', 'Wait for the recording import to finish, then refresh the choices.', 409)
             if (not isinstance(request, dict) or set(request) not in
                     ({'recording', 'model', 'rules'}, {'recording', 'model', 'rules', 'compare_enhancement'})
                     or any(not isinstance(v, str) for v in request.values())
@@ -268,9 +339,12 @@ class Jobs:
         before = source.stat()
         if expected and signature(before) != expected:
             raise JobError('SOURCE_CHANGED', 'The selected recording changed. Refresh the choices and select it again.')
-        flags = os.O_RDONLY | getattr(os, 'O_BINARY', 0) | getattr(os, 'O_NOFOLLOW', 0)
-        fd = os.open(source, flags)
-        with os.fdopen(fd, 'rb') as src, target.open('xb') as dst:
+        try:
+            # Non-blocking open + fstat: a FIFO swapped in after the check cannot hang the job.
+            src = open_regular(source)
+        except ValueError:
+            raise JobError('INPUT_CHANGED', 'An input changed. Restore the configured files and retry.') from None
+        with src, target.open('xb') as dst:
             opened = os.fstat(src.fileno())
             if not stat.S_ISREG(opened.st_mode) or signature(opened) != signature(before):
                 raise JobError('INPUT_CHANGED', 'An input changed. Restore the configured files and retry.')
@@ -316,7 +390,7 @@ class Jobs:
                 raise ValueError('Incompatible rules')
             args = ['--video', str(video), '--model', str(directory / 'model.onnx'), '--labels', str(directory / 'labels.json'),
                     '--rules', str(directory / 'rules.json'), '--profile', model['profile'], '--backend', 'opencv-cpu',
-                    '--threads', '2', '--max-frames', '6000', '--stride', '5', '--camera', camera,
+                    '--threads', '2', '--max-frames', '6000', '--stride', '5', '--camera=' + camera,
                     '--output', str(directory / 'receipt.json'), '--review-output', str(directory / 'review.json')]
             if self.job.get('compare_enhancement'):
                 args += ['--compare-enhancement', self.job['compare_enhancement']]
@@ -414,7 +488,13 @@ class Jobs:
             if kind == 'result':
                 return regular(directory / 'review.json', RESULT_BYTES), 'application/json'
             source = next(directory.glob('source.*'))
-            return regular(source, VIDEO_BYTES), mimetypes.guess_type(source.name)[0] or 'application/octet-stream'
+            return regular(source, VIDEO_BYTES), content_type(source)
+
+    def open_artifact(self, job_id, kind):
+        """Check and open under the lock; the caller streams after releasing it."""
+        with self.lock:
+            path, mime = self.artifact(job_id, kind)
+            return path.open('rb'), mime
 
     def close(self):
         with self.lock:
@@ -428,19 +508,39 @@ class Jobs:
             self.store.close()
 
 
-class LocalServer(HTTPServer):
-    # Sequential requests bound concurrent file transfers and memory. Analysis is
-    # the one background worker; each connection has a short read/write timeout.
+class LocalServer(ThreadingHTTPServer):
+    # One daemon thread per connection, each with a short read/write timeout, so an
+    # idle speculative connection or slow download cannot stall preview leases or
+    # other API calls. At most HANDLERS run at once; extra connections are closed
+    # unanswered. Jobs, Feeds and Recorder lock their own state; file transfers
+    # stream after those locks are released. Shutdown does not wait for slow readers.
     # Linux TIME_WAIT sockets must not prevent a normal stop/restart. An active
     # listener still owns its exact loopback address. Windows reuse has different
     # semantics and remains disabled.
     allow_reuse_address = sys.platform == 'linux'
+    block_on_close = False
+    HANDLERS = 16
     def __init__(self, port, jobs, static_root, feeds=None, recorder=None):
         self.jobs, self.static_root, self.feeds = jobs, Path(static_root).resolve(), feeds
         self.recorder = recorder
         self.token = jobs.token if jobs else secrets.token_urlsafe(32)
+        self.slots = threading.BoundedSemaphore(self.HANDLERS)
         super().__init__(('127.0.0.1', port), Handler)
         self.origin = f'http://127.0.0.1:{self.server_port}'
+
+    def process_request(self, request, client_address):
+        if not self.slots.acquire(blocking=False):
+            return self.shutdown_request(request)
+        try:
+            super().process_request(request, client_address)
+        except BaseException:
+            self.slots.release(); raise
+
+    def process_request_thread(self, request, client_address):
+        try:
+            super().process_request_thread(request, client_address)
+        finally:
+            self.slots.release()
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -452,13 +552,19 @@ class Handler(BaseHTTPRequestHandler):
         super().setup()
         self.connection.settimeout(5)
 
-    def _guard(self, api=False):
+    def _guard(self, token=False, account=False):
         expected_host = self.server.origin.removeprefix('http://')
         if self.headers.get_all('Host') != [expected_host] or self.client_address[0] != '127.0.0.1':
             raise JobError('HOST', 'Use the exact local application address.', 403)
         if self.headers.get('Origin') not in (None, self.server.origin) or self.headers.get('Sec-Fetch-Site') not in (None, 'same-origin', 'none'):
             raise JobError('ORIGIN', 'Open the application directly on this computer.', 403)
-        if api and not hmac.compare_digest(self.headers.get('X-DVR-Token', ''), self.server.token):
+        # Loopback is reachable by every local account. On Linux, the API (including
+        # the token-issuing session endpoints) answers only this account's sockets.
+        if account and sys.platform == 'linux' and peer_uid(self.client_address, self.server.server_port) != os.getuid():
+            raise JobError('ACCOUNT', 'This local service belongs to another account on this computer. Open the app from the account that started it.', 403)
+        value = self.headers.get('X-DVR-Token', '')
+        # compare_digest refuses non-ASCII str; such a token is simply wrong.
+        if token and not (isinstance(value, str) and value.isascii() and hmac.compare_digest(value, self.server.token)):
             raise JobError('SESSION', 'Reconnect to the local service and retry.', 403)
 
     def _headers(self, status, mime, size):
@@ -476,15 +582,28 @@ class Handler(BaseHTTPRequestHandler):
         self._headers(status, 'application/json', len(body))
         self.wfile.write(body)
 
-    def _file(self, path, mime):
-        with path.open('rb') as stream:
+    def _file(self, stream, mime):
+        with stream:
             self._headers(200, mime, os.fstat(stream.fileno()).st_size)
             shutil.copyfileobj(stream, self.wfile, 256 * 1024)
+
+    @staticmethod
+    def _drain(body, seconds=30):
+        """Read the rest of an import (bounded) before replying, so a refusal or
+        idempotent reuse arrives as JSON instead of a connection reset."""
+        if body.remaining > MAX_IMPORT_BYTES:
+            return  # Oversized protocol violation: reply and close without reading it.
+        deadline = time.monotonic() + seconds
+        try:
+            while body.remaining > 0 and time.monotonic() < deadline and body.read(256 * 1024):
+                pass
+        except OSError:
+            pass  # The five-second socket timeout bounds a stalled sender.
 
     def _dispatch(self):
         path = urlsplit(self.path).path
         api = path.startswith('/api/')
-        self._guard(api and path not in ('/api/analysis/session', '/api/feeds/session'))
+        self._guard(token=api and path not in ('/api/analysis/session', '/api/feeds/session'), account=api)
         jobs, feeds = self.server.jobs, self.server.feeds
         recorder = getattr(self.server, 'recorder', None)
         if path.startswith('/api/recorder/') and recorder is None:
@@ -500,11 +619,16 @@ class Handler(BaseHTTPRequestHandler):
         if self.command == 'POST' and path == '/api/analysis/recordings':
             # Authentication and same-origin checks above run before reading bytes.
             lengths = self.headers.get_all('Content-Length') or []
-            if self.headers.get('Transfer-Encoding') or len(lengths) != 1 or not lengths[0].isdigit():
+            if self.headers.get('Transfer-Encoding') or len(lengths) != 1 or not (lengths[0].isascii() and lengths[0].isdigit()):
                 raise JobError('BODY', 'Use a recording with one bounded Content-Length.')
-            if len(self.headers.get_all('Content-Type') or []) != 1 or len(self.headers.get_all('X-DVR-SHA256') or []) != 1:
-                raise JobError('BODY', 'Use one video content type and fingerprint.')
-            return self._json(jobs.receive_recording(self.rfile, int(lengths[0]), self.headers['Content-Type'], self.headers['X-DVR-SHA256']), 201)
+            body = Upload(self.rfile, int(lengths[0]))
+            try:
+                if len(self.headers.get_all('Content-Type') or []) != 1 or len(self.headers.get_all('X-DVR-SHA256') or []) != 1:
+                    raise JobError('BODY', 'Use one video content type and fingerprint.')
+                result = jobs.receive_recording(body, body.remaining, self.headers['Content-Type'], self.headers['X-DVR-SHA256'])
+            finally:
+                self._drain(body)
+            return self._json(result, 201)
         if self.command == 'POST':
             if self.headers.get('Transfer-Encoding') or self.headers.get_all('Content-Length') is None or len(self.headers.get_all('Content-Length')) != 1:
                 raise JobError('BODY', 'Use a bounded JSON request.')
@@ -539,10 +663,10 @@ class Handler(BaseHTTPRequestHandler):
                 return self._json(recorder.status())
             match = re.fullmatch('/api/recorder/segments/([a-f0-9]{32})/(source|result|timing)', path)
             if match:
-                # Pin retention through the transfer; another tick cannot unlink
-                # the source between verification and opening it on either OS.
-                with recorder.lock:
-                    return self._file(*recorder.artifact(match[1], match[2]))
+                # Verified and opened under the recorder lock; retention skips the
+                # row while it streams, without blocking supervision on a slow reader.
+                with recorder.open_artifact(match[1], match[2]) as (stream, mime):
+                    return self._file(stream, mime)
             match = re.fullmatch('/api/feeds/([a-f0-9]{32})(/frame)?', path)
             if match:
                 if match[2]:
@@ -553,7 +677,7 @@ class Handler(BaseHTTPRequestHandler):
             match = re.fullmatch('/api/analysis/jobs/([a-f0-9]{32})(/(result|source))?', path)
             if match:
                 if match[3]:
-                    return self._file(*jobs.artifact(match[1], match[3]))
+                    return self._file(*jobs.open_artifact(match[1], match[3]))
                 return self._json(jobs.snapshot(match[1]))
             if not api:
                 relative = unquote(path).lstrip('/') or 'index.html'
@@ -561,10 +685,11 @@ class Handler(BaseHTTPRequestHandler):
                 if file.is_relative_to(self.server.static_root) and not any(part.startswith('.') for part in Path(relative).parts):
                     try:
                         regular(file, 32 * 1024**2)
+                        stream = file.open('rb')
                     except (ValueError, OSError):
                         pass
                     else:
-                        return self._file(file, mimetypes.guess_type(file.name)[0] or 'application/octet-stream')
+                        return self._file(stream, content_type(file))
         raise JobError('NOT_FOUND', 'This local resource is unavailable.', 404)
 
     def do_GET(self):

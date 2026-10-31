@@ -6,7 +6,7 @@ import LanRecorder from './LanRecorder.jsx';
 import RecognitionReport from './RecognitionReport.jsx';
 import { coverageLabel } from './media-coverage.mjs';
 
-export default function RecognitionReview({ onImport, active = true, clip, onClip, reviews = [] }) {
+export default function RecognitionReview({ onImport, active = true, clip, onClip, reviews = [], evidence = null }) {
   const [run, setRun] = useState(null), [index, setIndex] = useState(0);
   const [source, setSource] = useState(null), [media, setMedia] = useState({});
   const [threshold, setThreshold] = useState(0.5), [status, setStatus] = useState(''), [error, setError] = useState('');
@@ -57,6 +57,15 @@ export default function RecognitionReview({ onImport, active = true, clip, onCli
     setMedia({}); setError('');
     setStatus('Recording fingerprint matched. Analysis is ready for human review.');
   }
+  // An Events observation opens its frame only in the run with the same source and model fingerprints.
+  useEffect(() => {
+    if (!evidence) return;
+    const i = run && run.receipt.source_sha256 === evidence.sha && run.receipt.model_sha256 === evidence.model
+      ? run.receipt.events.findIndex(e => e.id === evidence.sourceId) : -1;
+    if (i < 0) { setStatus(`That observation (${evidence.time}) belongs to recording ${evidence.sha.slice(0, 12)}…. Open its results and original recording here to inspect the frame.`); return; }
+    seek(run.eventFrames[i]);
+    setStatus(`Showing the sampled frame for the observation at ${evidence.time}.`);
+  }, [evidence]);
   function readMedia() {
     const el = video.current;
     if (el) setMedia({ ready: el.readyState >= 2, paused: el.paused, seeking: el.seeking, seconds: el.currentTime, width: el.videoWidth, height: el.videoHeight });
@@ -71,7 +80,7 @@ export default function RecognitionReview({ onImport, active = true, clip, onCli
     <h1>Recognition</h1>
     <p className="recognition-intro">See detected people and objects on the recording they came from. Inspect each sampled scene, then send observations for human review.</p>
     <LanRecorder onResult={openLocalResult} onBusy={setRecorderBusy} blocked={analysisBusy} />
-    <LocalAnalysis onResult={openLocalResult} onBusy={setAnalysisBusy} clip={clip} onClip={onClip} recorderBusy={recorderBusy} />
+    <LocalAnalysis onResult={openLocalResult} onBusy={setAnalysisBusy} clip={clip} onClip={onClip} recorderBusy={recorderBusy} currentRun={run} />
     <h2 className="recognition-import-heading">Or open previously exported results</h2>
     <div className="recognition-loaders">
       <label className="button">1. Open recognition results<input type="file" accept=".json,application/json" onChange={loadRun} disabled={analysisBusy} aria-label="Open recognition results" /></label>

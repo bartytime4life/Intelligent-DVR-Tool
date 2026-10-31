@@ -57,7 +57,7 @@ not calibrated camera feeds. The browser performs no neural-network inference.
 | Load building drafts | Selected Private.coffee/OSM public Overpass or configured same-origin local service receives selected bounds | Explicit Load; no cameras, rooms, routes or recordings sent by the adapter |
 | Open offline OSM JSON | Browser file/paste review | Does not contact a footprint provider; online tiles remain a separate choice |
 | Use my location | Browser location service after a click | Review the suggestion; no continuous tracking |
-| Load optional font | Google Fonts, when available | External request with a system-font fallback |
+| Load interface font | Bundled with the app | No external request |
 
 Local analysis does not make every optional browser asset/provider offline. Default local paths are `/geo/search` and `/geo/overpass`; the operator must configure their fixed upstream services. The Sites Worker does not implement them. Same-origin routing does not certify downstream egress, and failure never silently switches to a public provider. See [service contracts](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Facility-setup-reliability#local-and-offline-delivery), [SECURITY.md](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/SECURITY.md) and the provider disclosures.
 

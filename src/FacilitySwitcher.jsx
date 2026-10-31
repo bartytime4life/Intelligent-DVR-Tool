@@ -1,11 +1,13 @@
 import React, {useEffect, useState} from 'react';
-import {Buildings, Plus, Copy, DownloadSimple, UploadSimple, MapPin, Polygon, Sparkle, FolderOpen} from '@phosphor-icons/react';
+import {Buildings, Plus, Copy, DownloadSimple, UploadSimple, MapPin, Polygon, Sparkle, FolderOpen, Trash} from '@phosphor-icons/react';
 import './facility-library.css';
 
-export default function FacilitySwitcher({facilities=[],activeId,onSwitch,onCreate,onDuplicate,onExportAll,onImport,onSample,disabled=false,savedState}) {
+export default function FacilitySwitcher({facilities=[],activeId,onSwitch,onCreate,onDuplicate,onExportAll,onImport,onSample,onRemove,onExportActive,disabled=false,savedState}) {
   const [creating,setCreating]=useState(false),[name,setName]=useState(''),[pending,setPending]=useState(false),[error,setError]=useState('');
+  const [removing,setRemoving]=useState(false),[exported,setExported]=useState(false);
   const active=facilities.find(f=>f.id===activeId), plan=active?.plan;
-  useEffect(()=>{setCreating(false);setName('');setError('');},[activeId]);
+  useEffect(()=>{setCreating(false);setName('');setError('');setRemoving(false);setExported(false);},[activeId]);
+  useEffect(()=>{if(disabled)setRemoving(false);},[disabled]);
   async function create(e) {
     e.preventDefault();
     const clean=name.trim();
@@ -35,6 +37,14 @@ export default function FacilitySwitcher({facilities=[],activeId,onSwitch,onCrea
       <button type="button" disabled={disabled || pending} onClick={onImport}><UploadSimple aria-hidden="true"/>Import facility file</button>
       <p>Keep a JSON backup to move between devices or restore after clearing browser data. Imports add facilities.</p>
       <button type="button" disabled={disabled || pending} onClick={onSample}><Sparkle aria-hidden="true"/>Open example facility</button><p>The example opens as a separate facility. Your saved sites stay intact.</p>
+      {onRemove && <button type="button" disabled={disabled || pending || !active || facilities.length<2} onClick={()=>{setRemoving(true);setExported(false);setCreating(false);}}><Trash aria-hidden="true"/>Remove this facility</button>}
+      {onRemove && facilities.length<2 && <p>At least one facility stays in this browser. Add another before removing this one.</p>}
+      {removing && active && <div className="facility-remove-confirm" role="group" aria-label="Confirm facility removal">
+        <p><strong>Remove “{plan.name}” from this browser?</strong> Undo cannot restore it. Export it first to keep a copy.</p>
+        <div><button type="button" disabled={disabled} onClick={()=>{onExportActive?.();setExported(true);}}><DownloadSimple aria-hidden="true"/>{exported?'Exported · export again':'Export this facility'}</button>
+          <button type="button" className="facility-library-danger" disabled={disabled} onClick={async()=>{if(await onRemove()!==false)setRemoving(false);}}><Trash aria-hidden="true"/>Remove facility</button>
+          <button type="button" className="facility-library-cancel" onClick={()=>setRemoving(false)}>Keep facility</button></div>
+      </div>}
     </div></details>
   </section>;
 }

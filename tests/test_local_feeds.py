@@ -2,14 +2,16 @@ import io
 import json
 import os
 from pathlib import Path
+import shutil
 import subprocess
 import sys
 import tempfile
+import threading
 import time
 import unittest
 from unittest.mock import patch
 
-from edge.local_feeds import Feeds, FeedError, load_sources, LIMITS
+from edge.local_feeds import Feeds, FeedError, load_sources, LIMITS, ROOT
 from edge.feed_worker import relay_messages
 
 SOURCE = {'id':'dock', 'name':'Dock channel', 'host':'192.168.1.20', 'port':554,
@@ -93,16 +95,38 @@ class FeedsTest(unittest.TestCase):
         self.assertEqual(result['error']['code'],'START_FAILED'); self.assertNotIn('secret',json.dumps(result))
         service.process_factory=lambda *a,**k:Process(); self.assertEqual(self.start(service)['state'],'connecting')
     def test_credentials_only_pass_through_stdin(self):
-        calls=[]
-        class Input(io.BytesIO):
-            def close(self): calls.append(json.loads(self.getvalue())); super().close()
+        threads=[]
         def process(command,**kwargs):
             self.assertNotIn('192.168',str(command)); self.assertNotIn('password',str(command))
             self.assertEqual(kwargs['stderr'],subprocess.DEVNULL)
-            result=Process(); result.stdin=Input(); return result
+            self.assertEqual(kwargs['env']['DVR_FEED_PARENT_PID'],str(os.getpid()))
+            threads.append(threading.current_thread()); return Process()
         service=self.service(process_factory=process); state=self.start(service)
-        self.assertEqual(calls[0]['password'],SOURCE['password'])
+        stdin=service.sessions[state['id']]['process'].stdin
+        # One line on the private pipe, which stays open as the worker's lifetime lease.
+        self.assertFalse(stdin.closed); self.assertEqual(json.loads(stdin.getvalue())['password'],SOURCE['password'])
+        self.assertTrue(stdin.getvalue().endswith(b'\n'))
         self.assertEqual(list(Path(service.sessions[state['id']]['directory'].name).iterdir()),[])
+        # Linux parent-death signals follow the spawning thread: never a request thread.
+        self.start(service,'camera-1'); self.assertIs(threads[0],threads[1]); self.assertIsNot(threads[0],threading.current_thread())
+        service.disconnect(state['id']); self.assertTrue(stdin.closed)
+    def test_cleanup_and_supervision_failures_never_stop_the_reaper(self):
+        service=self.service(); first=self.start(service); directory=service.sessions[first['id']]['directory'].name
+        self.frame(service,first['id'])
+        try:
+            # A Windows sharing violation during cleanup still ends the session.
+            with patch('os.unlink',side_effect=PermissionError('sharing violation')):
+                self.assertEqual(service.disconnect(first['id'])['state'],'disconnected')
+        finally: shutil.rmtree(directory,ignore_errors=True)
+        broken=self.start(service,'camera-1'); healthy=self.start(service,'camera-2')
+        def fail(): raise OSError('invalid handle')
+        service.sessions[broken['id']]['process'].poll=fail
+        self.now+=16; deadline=time.monotonic()+3
+        while any(service.sessions[i]['state']=='connecting' for i in (broken['id'],healthy['id'])) and time.monotonic()<deadline: time.sleep(.05)
+        self.assertEqual(service.sessions[broken['id']]['error']['code'],'PREVIEW_FAILED')
+        self.assertEqual(service.status(healthy['id'])['error']['code'],'LEASE_EXPIRED')
+        self.assertTrue(service.thread.is_alive())
+        self.assertEqual(self.start(service,'camera-3')['state'],'connecting')
     def test_invalid_and_oversized_frames_are_never_served(self):
         for data in (b'not-jpeg', b'\xff\xd8'+b'x'*LIMITS['frame_bytes']+b'\xff\xd9'):
             service=self.service(); first=self.start(service); self.frame(service,first['id'],data)
@@ -118,6 +142,34 @@ class FeedsTest(unittest.TestCase):
         directory=service.sessions[state['id']]['directory'].name
         service.close(); self.assertIsNotNone(children[0].poll()); self.assertFalse(Path(directory).exists())
         with self.assertRaises(FeedError): self.start(service)
+    def test_preview_worker_exits_when_service_pipe_closes(self):
+        # Production main()/limits with the network decoder replaced by a blocked stand-in.
+        script=("import sys, time, types; from edge import feed_worker as w\n"
+                "w.PinnedRelay = lambda *a: types.SimpleNamespace(local_port=9, close=lambda: None)\n"
+                "def capture(*a):\n"
+                "    if sys.platform == 'linux':\n"
+                "        import resource; limit = resource.getrlimit(resource.RLIMIT_CPU)[0]\n"
+                "    else: limit = w.CPU_SECONDS\n"
+                "    print('ready', limit, flush=True); time.sleep(60)\n"
+                "w.capture = capture; w.main(sys.argv[1])")
+        child=subprocess.Popen([sys.executable,'-c',script,str(self.root)],cwd=ROOT,
+            stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.DEVNULL)
+        try:
+            child.stdin.write(json.dumps(SOURCE).encode()+b'\n'); child.stdin.flush()
+            ready,cpu=child.stdout.readline().split()
+            self.assertEqual(ready,b'ready')
+            # RLIMIT_CPU sums threads; a full 900 s preview must fit inside it.
+            self.assertGreaterEqual(int(cpu),LIMITS['session_seconds']+60)
+            child.stdin.close()  # Service death closes the pipe even if the decoder is blocked.
+            self.assertEqual(child.wait(timeout=5),75)
+        finally:
+            if child.poll() is None: child.kill(); child.wait()
+            child.stdout.close()
+    @unittest.skipUnless(sys.platform=='linux','Parent-death signal is Linux-only')
+    def test_linux_preview_worker_arms_owned_child_before_reading_credentials(self):
+        result=subprocess.run([sys.executable,'-m','edge.feed_worker',str(self.root)],cwd=ROOT,input=b'',
+            env={**os.environ,'DVR_FEED_PARENT_PID':'0'},capture_output=True,timeout=20)
+        self.assertEqual(result.returncode,72)
     def test_unknown_session_does_not_auto_reconnect(self):
         service=self.service()
         for action in (service.status,service.frame,service.disconnect):

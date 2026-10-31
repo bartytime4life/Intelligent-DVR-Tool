@@ -1,4 +1,6 @@
 """Explicit, short-lived previews of owner-configured LAN and public webcam sources."""
+from concurrent.futures import ThreadPoolExecutor
+import contextlib
 import importlib.util
 import ipaddress
 import json
@@ -73,6 +75,9 @@ class Feeds:
         self.lock = threading.RLock()
         self.sessions = {}
         self.closed = threading.Event()
+        # Linux parent-death signals follow the spawning *thread*. Spawn from one
+        # long-lived thread, never a short-lived HTTP request thread.
+        self.spawner = ThreadPoolExecutor(1, thread_name_prefix='dvr-feed-spawn')
         self.thread = threading.Thread(target=self._supervise, daemon=True)
         self.thread.start()
 
@@ -99,7 +104,7 @@ class Feeds:
             for key in list(self.sessions):
                 if self.sessions[key]['state'] not in ('connecting', 'live'):
                     del self.sessions[key]
-            directory = tempfile.TemporaryDirectory(prefix='intelligent-dvr-feed-')
+            directory = tempfile.TemporaryDirectory(prefix='intelligent-dvr-feed-', ignore_cleanup_errors=True)
             source = self.sources[body['source']]
             identifier = secrets.token_hex(16)
             session = {'id': identifier, 'source': source['id'], 'name': source['name'], 'state': 'connecting',
@@ -108,11 +113,13 @@ class Feeds:
                        'directory': directory, 'process': None, 'stamp': None}
             self.sessions[identifier] = session
             try:
-                # A private pipe, not command-line arguments, disk or logs, carries credentials.
-                process = self.process_factory([sys.executable, '-m', 'edge.feed_worker', directory.name],
-                    cwd=ROOT, stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                # A private pipe, not command-line arguments, disk or logs, carries
+                # credentials. It stays open as the worker's parent-lifetime lease.
+                process = self.spawner.submit(self.process_factory, [sys.executable, '-m', 'edge.feed_worker', directory.name],
+                    cwd=ROOT, stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                    env={**os.environ, 'DVR_FEED_PARENT_PID': str(os.getpid())}).result()
                 session['process'] = process
-                process.stdin.write(json.dumps(source).encode()); process.stdin.close()
+                process.stdin.write(json.dumps(source).encode() + b'\n'); process.stdin.flush()
             except (OSError, ValueError):
                 self._stop(session, 'failed', 'START_FAILED', 'Preview could not start. Check the local Python/OpenCV installation and retry.')
             return self._public(session)
@@ -162,11 +169,16 @@ class Feeds:
             if process.poll() is None:
                 process.kill()
             process.wait()
-        s['process'] = None
-        s['directory'].cleanup()
+            if process.stdin and not process.stdin.closed:
+                with contextlib.suppress(OSError):
+                    process.stdin.close()
+            s['process'] = None
+        # Terminal before cleanup: a Windows sharing violation can only leave a
+        # temporary folder behind, never a "live" session without a worker.
         s['state'] = state
         s['error'] = {'code': code, 'message': message} if code else None
         s['frame_at'] = None
+        s['directory'].cleanup()
 
     def _reap(self):
         now = self.clock()
@@ -174,32 +186,47 @@ class Feeds:
             if s['state'] not in ('connecting', 'live'):
                 continue
             try:
-                stamp = (Path(s['directory'].name) / 'frame.jpg').stat().st_mtime_ns
-                if stamp != s['stamp']:
-                    s['stamp'], s['frame_at'], s['state'] = stamp, now, 'live'
-            except OSError:
-                pass
-            error = None
-            if now - s['touched'] > LIMITS['lease_seconds']:
-                error = ('LEASE_EXPIRED', 'Preview stopped because this page stopped checking it. Connect again when ready.')
-            elif now - s['began'] > LIMITS['session_seconds']:
-                error = ('SESSION_LIMIT', 'The 15-minute preview ended. Explicitly connect again to continue.')
-            elif s['process'] is None or s['process'].poll() is not None:
-                error = ('CONNECTION_FAILED', 'Public webcam unavailable. Check provider availability, permission, direct JPEG/MJPEG path, public IPv4 DNS and valid HTTPS certificate. Redirects, login pages and oversized images are refused. Reconnect explicitly.' if s.get('kind') in KINDS else 'No usable RTSP stream. Check DVR power, LAN access, RTSP port, channel path and credentials; use a substream up to 1080p. Redirects are refused.')
-            elif s['frame_at'] is None and now - s['began'] > LIMITS['open_seconds']:
-                error = ('OPEN_TIMEOUT', 'Source did not provide an image in 12 seconds. Check the source settings and network, then retry.')
-            elif s['frame_at'] is not None and now - s['frame_at'] > (s.get('refresh_seconds', 0) + LIMITS['open_seconds'] if s.get('kind') == 'public-jpeg' else LIMITS['stale_seconds']):
-                error = ('STALE', 'Images stopped arriving. Check the source and reconnect. The previous image has been removed.')
-            if error:
-                self._stop(s, 'failed', *error)
+                self._reap_one(s, now)
+            except Exception:
+                # One session's OS failure must not stop supervising the others.
+                with contextlib.suppress(Exception):
+                    s['process'].kill()
+                if s['state'] in ('connecting', 'live'):
+                    s.update(state='failed', frame_at=None, error={'code': 'PREVIEW_FAILED',
+                        'message': 'The local preview worker could not be supervised. Reconnect explicitly; restart the app if this repeats.'})
+                s['directory'].cleanup()
+
+    def _reap_one(self, s, now):
+        try:
+            stamp = (Path(s['directory'].name) / 'frame.jpg').stat().st_mtime_ns
+            if stamp != s['stamp']:
+                s['stamp'], s['frame_at'], s['state'] = stamp, now, 'live'
+        except OSError:
+            pass
+        error = None
+        if now - s['touched'] > LIMITS['lease_seconds']:
+            error = ('LEASE_EXPIRED', 'Preview stopped because this page stopped checking it. Connect again when ready.')
+        elif now - s['began'] > LIMITS['session_seconds']:
+            error = ('SESSION_LIMIT', 'The 15-minute preview ended. Explicitly connect again to continue.')
+        elif s['process'] is None or s['process'].poll() is not None:
+            error = ('CONNECTION_FAILED', 'Public webcam unavailable. Check provider availability, permission, direct JPEG/MJPEG path, public IPv4 DNS and valid HTTPS certificate. Redirects, login pages and oversized images are refused. Reconnect explicitly.' if s.get('kind') in KINDS else 'No usable RTSP stream. Check DVR power, LAN access, RTSP port, channel path and credentials; use a substream up to 1080p. Redirects are refused.')
+        elif s['frame_at'] is None and now - s['began'] > LIMITS['open_seconds']:
+            error = ('OPEN_TIMEOUT', 'Source did not provide an image in 12 seconds. Check the source settings and network, then retry.')
+        elif s['frame_at'] is not None and now - s['frame_at'] > (s.get('refresh_seconds', 0) + LIMITS['open_seconds'] if s.get('kind') == 'public-jpeg' else LIMITS['stale_seconds']):
+            error = ('STALE', 'Images stopped arriving. Check the source and reconnect. The previous image has been removed.')
+        if error:
+            self._stop(s, 'failed', *error)
 
     def _supervise(self):
         while not self.closed.wait(.25):
-            with self.lock:
+            # Per-session failures are recorded on that session; this loop never exits early.
+            with self.lock, contextlib.suppress(Exception):
                 self._reap()
 
     def close(self):
         self.closed.set(); self.thread.join(timeout=2)
         with self.lock:
             for s in self.sessions.values():
-                self._stop(s, 'disconnected', None, None)
+                with contextlib.suppress(Exception):
+                    self._stop(s, 'disconnected', None, None)
+        self.spawner.shutdown()
