@@ -192,6 +192,13 @@ haracters.");
   for (const c of d.cameras) if (!pointOK([c.x, c.y]) || !finite(c.z, 0.5, 150) || !finite(c.bearing, 0, 359.99) || !finite(
   c.tilt, 0, 89) || !finite(c.hfov, 5, 170) || !finite(c.vfov, 5, 150) || !finite(c.range, 1, 300) || typeof c.enabled !==
   "boolean") throw Error("Camera position, height, viewing angles or range are outside the allowed limits.");
+  // Optional planning fields: horizontal resolution and a recorder channel note (never a stream address).
+  for (const c of d.cameras) {
+    if (c.pixelsWide !== undefined && (!Number.isInteger(c.pixelsWide) || c.pixelsWide < 320 || c.pixelsWide > 7680))
+      throw Error(`Camera horizontal resolution must be a whole number of 320–7680 pixels. Check camera “${c.name}”.`);
+    if (c.channel !== undefined && (typeof c.channel !== 'string' || c.channel.length > 60 || /[\u0000-\u001f\u007f]/.test(c.channel)))
+      throw Error(`Camera channel labels must be text of up to 60 characters. Check camera “${c.name}”.`);
+  }
   const check = (item, kind, b) => ` Check ${kind} “${item.name}”${b ? ` in ${b.name}` : ''}.`;
   for (const r of d.rooms) {
     const b = d.buildings.find((b2) => b2.id === r.buildingId);
@@ -259,8 +266,8 @@ ing and reference an existing floor." + check(r, 'room', b));
     buildings: d.buildings.map((b) => ({ id: b.id, name: b.name, footprint: b.footprint.map((p) => [...p]), height: b.height,
     floors: b.floors, ...(b.openFloors !== undefined ? {openFloors:[...b.openFloors].sort((a,b)=>a-b)} : {}), ...(b.holes ? {holes:b.holes.map(h=>h.map(p=>[...p]))} : {}),
     ...(b.base !== undefined ? {base:b.base} : {}), ...(b.part !== undefined ? {part:b.part} : {}), ...(b.source ? { source: Object.fromEntries(['provider','id','license','retrieved','updated','heightBasis','floorsBasis'].map(k=>[k,b.source[k]])) } : {}) })),
-    cameras: d.cameras.map((c) => Object.fromEntries(["id", "name", "x", "y", "z", "bearing", "tilt", "hfov", "vfov", "r\
-ange", "enabled"].map((k) => [k, c[k]]))),
+    cameras: d.cameras.map((c) => ({ ...Object.fromEntries(["id", "name", "x", "y", "z", "bearing", "tilt", "hfov", "vfov", "r\
+ange", "enabled"].map((k) => [k, c[k]])), ...(c.pixelsWide !== undefined ? {pixelsWide:c.pixelsWide} : {}), ...(c.channel ? {channel:c.channel} : {}) })),
     rooms: d.rooms.map((r) => ({ id: r.id, name: r.name, buildingId: r.buildingId, level: r.level, footprint: r.footprint.
     map((p) => [...p]), wallHeight: r.wallHeight })),
     labels: d.labels.map((l) => ({ id: l.id, name: l.name, x: l.x, y: l.y, z: l.z, ...(l.buildingId !== undefined ? {buildingId:l.buildingId,level:l.level} : {}) })),

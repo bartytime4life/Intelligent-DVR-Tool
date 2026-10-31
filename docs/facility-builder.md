@@ -40,14 +40,20 @@ saves reopen the last active site. See [saved facilities and backups](saved-faci
    place labels, and inspect the floor view. Floors divide building height evenly.
 4. Place a camera on the map or add one with coordinates. Set ground-relative
    mounting elevation, direction clockwise from north, downward tilt, horizontal
-   and vertical field of view, and maximum viewing range. Save the camera.
-5. Inspect the selected camera's ground-plane visibility estimate and 3D volume.
+   and vertical field of view, and maximum viewing range. Optionally add a
+   recorder channel label, a typical lens preset and the horizontal resolution
+   for [pixel-density estimates](#camera-planning-estimates). Drag the selected
+   camera or its heading handle on the map, or use the keyboard, then Save the camera.
+5. Inspect the selected camera's ground-plane visibility estimate and 3D volume,
+   estimated zone and route coverage, and the blind-spot overlay for one zone.
 6. Draw a route, run the 30-second rehearsal, scrub it, and review proposed camera
    transitions. Links and separations are session-only simulation decisions.
 
 Drawing uses clicks and polygon closure (line routes finish by double-click).
-Escape cancels. Building and camera placement have numeric alternatives. Rooms
-currently require pointer drawing; keyboard room drawing is an accessibility gap.
+Escape cancels. Building and camera placement have numeric alternatives; a
+selected camera also accepts Alt+Arrow (0.5 m east/west/north/south) and `[` / `]`
+(5° rotation) when focus is not in a text field. Rooms currently require pointer
+drawing; keyboard room drawing is an accessibility gap.
 Undo restores the previous 20 committed edits in the current editor session.
 Facility file imports and the Paste JSON dialog validate the entire input, then
 add separate facilities without replacing saved sites. Export plan saves named
@@ -64,9 +70,44 @@ wall spans the ray's height. The displayed sector samples 49 directions.
 
 This approximation treats wall polygons as opaque and does **not** model floor or
 roof slabs, door openings, windows, furniture, terrain, lens distortion, lighting,
-pixel density, motion blur, or recognition quality. A colored footprint is not a
-claim that a person can be detected or identified at that location. The current
-Three.js volume is an illustrative rendering of that estimate.
+motion blur, or recognition quality. Pixel density is a separate, centre-of-image
+planning estimate (below). A colored footprint is not a claim that a person can be
+detected or identified at that location. The current Three.js volume is an
+illustrative rendering of that estimate.
+
+## Camera planning estimates
+
+Everything in this section is labelled **Planning estimate — assumes ideal focus
+and no compression**. None of it is a calibration, compliance or
+recognition-quality claim.
+
+- **Pixel density (DORI).** An optional `pixelsWide` (integer 320–7680) gives
+  horizontal pixels per metre at slant distance *d* as `W / (2·d·tan(hfov/2))`.
+  The IEC 62676-4 figures — Detect 25, Observe 62.5, Recognize 125 and Identify
+  250 px/m — are used as planning thresholds. Each band's ground distance is
+  `√(d² − z²)` for mount height *z*, clipped to the camera's modeled near/far
+  ground range. The camera form shows a distance table; colored arcs on the
+  selected camera's fan mark each limit and break where modeled walls shorten
+  the view. Lens presets (2.8–12 mm) fill a **typical** horizontal view only;
+  vertical view is unchanged, and a datasheet value always wins.
+- **Coverage metrics.** The Coverage step grid-samples each enabled outdoor
+  zone (at most 20,000 cells, minimum 0.25 m) and the handoff route (about every
+  0.5 m, at most 20,000 samples) against the same cached fans the map draws,
+  with a camera bounding-box prefilter and no polygon-union library. It reports
+  coverage (≥1 camera) and overlap (≥2 cameras), includes any unsaved camera
+  preview, and can overlay one zone's uncovered cells as merged row rectangles.
+  Indoor and level zones show "not estimated" because coverage is ground-plane only.
+- **Direct manipulation.** Dragging the selected camera (mouse or touch) or its
+  round heading handle previews the move live on the map; release, Alt+Arrow and
+  `[` / `]` change only the unsaved draft. Save camera commits, Discard preview
+  restores it and Undo covers the commit. Escape cancels a drag.
+- **Installer sheet.** Download installer sheet writes a printable, offline HTML
+  page of the saved plan with the same restrictive CSP as the recognition report:
+  an inline SVG plan (buildings, outdoor zones, route, estimated fans and camera
+  bearings), and a per-camera table of ID, name, an optional `channel` label
+  (≤60 characters), east/north, mount height, bearing, tilt, H/V field of view,
+  range, resolution and DORI ground distances, followed by its interpretation
+  limits. It contains no credentials, stream addresses or footage.
 
 The route is a planned, simulated path. It is not an observed trajectory. Rehearsal
 uses 61 distance-spaced samples over 30 seconds and labels gaps explicitly.
@@ -98,7 +139,8 @@ The JSON contract permits at most 100 buildings, 500 cameras, 500 rooms, 1,000
 labels and 200 route points, in a 2 MB file. Coordinates are within 2 km of the
 origin. It rejects invalid IDs, duplicate IDs, unsupported numeric ranges,
 self-crossing/degenerate footprints, and orphaned or out-of-floor rooms. It copies
-only declared fields and does not fetch media URLs from imported metadata.
+only declared fields (cameras may add optional `pixelsWide` and `channel`, which
+v3 files without them do not need) and does not fetch media URLs from imported metadata.
 
 The map renders camera inventory points as GPU features, limits coverage sectors
 to 12 cameras (including the selection), displays at most 80 general text labels plus the selected camera label, and

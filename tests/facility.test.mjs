@@ -215,3 +215,20 @@ test("rehearsal time follows route distance at walking pace and samples at most 
   assert.equal(rehearse({ ...p, route: [[0, 0], [1900, 0], [1900, 1900], [0, 1900]] }).length, 601);
   assert.equal(rehearsalSeconds([[1, 1]]), 0);
 });
+test("optional camera resolution and channel labels round trip, strip unknown fields and reject bad values", () => {
+  const plan = exampleFacility();
+  plan.cameras[0] = { ...plan.cameras[0], pixelsWide: 2560, channel: "NVR-1 · ch 3", streamUrl: "rtsp://user:pass@camera.invalid/1" };
+  const clean = validateFacility(plan);
+  assert.equal(clean.cameras[0].pixelsWide, 2560);
+  assert.equal(clean.cameras[0].channel, "NVR-1 · ch 3");
+  assert.equal(clean.cameras[0].streamUrl, undefined);
+  assert.equal("pixelsWide" in clean.cameras[1] || "channel" in clean.cameras[1], false);
+  assert.deepEqual(parseFacility(JSON.stringify(clean)), clean);
+  assert.deepEqual(validateFacility(exampleFacility()), exampleFacility());
+  assert.equal("channel" in validateFacility({ ...plan, cameras: [{ ...plan.cameras[0], channel: "" }] }).cameras[0], false);
+  const legacy = { ...blankFacility(), schema: "intelligent-dvr.facility.v1", cameras: [{ ...camera, pixelsWide: 1920 }] };
+  for (const k of ["zones", "openings", "stairs", "paths"]) delete legacy[k];
+  assert.equal(validateFacility(legacy).cameras[0].pixelsWide, 1920);
+  for (const bad of [{ pixelsWide: 319 }, { pixelsWide: 7681 }, { pixelsWide: 1920.5 }, { pixelsWide: "1920" }, { pixelsWide: null },
+    { channel: "x".repeat(61) }, { channel: 42 }, { channel: "ch\n3" }]) assert.throws(() => validateFacility({ ...plan, cameras: [{ ...plan.cameras[0], ...bad }] }), /resolution|channel/);
+});

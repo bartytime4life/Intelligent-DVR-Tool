@@ -21,6 +21,7 @@ import {
   Pause,
   MagnifyingGlass,
   WarningCircle,
+  Printer,
   X
 } from "@phosphor-icons/react";
 import "maplibre-gl/dist/maplibre-gl.css";
@@ -39,7 +40,8 @@ import {
   seesPoint,
   wallObstacles,
   polygonArea,
-  pointInPolygon
+  pointInPolygon,
+  groundRange
 } from "./facility.mjs";
 import { createFacilityMap } from "./facility-map.mjs";
 import { OpenMapStarter, ShapeBuilder, MeasurementSummary, ConstructionGuide } from './FacilityStarter.jsx';
@@ -57,6 +59,10 @@ import FacilityLevels from './FacilityLevels.jsx';
 import FacilityZones from './FacilityZones.jsx';
 import { createFacilityZone } from './facility-zones.mjs';
 import FacilityCameraPreview from './FacilityCameraPreview.jsx';
+import { fanCache, coverageMetrics, zoneCoverage, enabledFans, MAX_COVERAGE_CELLS } from './facility-coverage.mjs';
+import { DORI_NOTE, LENS_PRESETS, lensPreset, doriDistances, densityAtGround, PIXELS_WIDE, pixelsWideOK } from './facility-dori.mjs';
+import { installerSheetHTML, installerSheetFilename } from './facility-installer.mjs';
+import './facility-camera-planning.css';
 const MeasurementUnits = React.createContext("metric");
 import FacilityLibrary,{downloadFacilityData} from './FacilityLibrary.jsx';
 import {facilityFilename} from './facility-library.mjs';
@@ -65,7 +71,7 @@ const keyOf = { building: "buildings", camera: "cameras", room: "rooms", label: 
 const round = (n) => Math.round(n * 100) / 100;
 function download(data){downloadFacilityData(data,facilityFilename(data));}
 // Length fields keep the typed text and convert only a changed number; limits round outward so 3.28 ft still means 1 m.
-function Field({ name, label, value, onChange, min, max, step = "any", type = "number", suffix }) {
+function Field({ name, label, value, onChange, min, max, step = "any", type = "number", suffix, maxLength = 100 }) {
   const units=useContext(MeasurementUnits), length=suffix==='m',factor=length?unitFactor(units):1;
   const shown=String((length?displayLength(value,units):value) ?? ''), [text,setText]=useState(shown);
   const sent=useRef(value), base=useRef({value,units});
@@ -81,7 +87,7 @@ function Field({ name, label, value, onChange, min, max, step = "any", type = "n
     if (length && max!==undefined && next>max && n<=hi) next=max;
     sent.current=next;onChange(next);
   }
-  return <label className="facility-field"><span>{label}{suffix && <small>{length?unitLabel(units):suffix}</small>}</span><input name={name} aria-label={label} type={type} value={type==='number'?text:value ?? ''} required min={lo} max={hi} step={type === 'number' ? step : undefined} maxLength={type === 'text' ? 100 : undefined} onChange={e=>change(e.target.value)}/></label>;
+  return <label className="facility-field"><span>{label}{suffix && <small>{length?unitLabel(units):suffix}</small>}</span><input name={name} aria-label={label} type={type} value={type==='number'?text:value ?? ''} required min={lo} max={hi} step={type === 'number' ? step : undefined} maxLength={type === 'text' ? maxLength : undefined} onChange={e=>change(e.target.value)}/></label>;
 }
 // Steps that can select an item kind in place; other kinds open their own step.
 const STEP_KINDS = [[], ["building"], ["building", "room", "label", "opening", "path", "stair"], ["camera"], ["camera"], ["camera"], ["zone"]];
@@ -96,6 +102,7 @@ function FacilityEditor({onPreviewCount,initialPlan,facilityControls,onPersist,o
   const [measurements, setMeasurements] = useState(true), [units, setUnits] = useState(()=>{try{return localStorage.getItem("dvr.facility.units")==="imperial"?"imperial":"metric";}catch{return "metric";}}), [mapBearing, setMapBearing] = useState(-27);
   const [pickedOrigin,setPickedOrigin]=useState(null), [drawnArea,setDrawnArea]=useState(null);
   const [pasteOpen, setPasteOpen] = useState(false);
+  const [blindZone, setBlindZone] = useState(''), [dragging, setDragging] = useState('');
   const [mapDrafts, setMapDrafts] = useState([]), [searchArea, setSearchArea] = useState(null);
   const [replaceDrafts, setReplaceDrafts] = useState(false);
   const [draftPreviewError, setDraftPreviewError] = useState('');
@@ -115,7 +122,8 @@ function FacilityEditor({onPreviewCount,initialPlan,facilityControls,onPersist,o
     0
   ), [decisions, setDecisions] = useState({});
   useEffect(()=>{try{localStorage.setItem("dvr.facility.units",units);}catch{}},[units]);
-  const mapEl = useRef(), api = useRef(), input = useRef(), latest = useRef();
+  const mapEl = useRef(), api = useRef(), input = useRef(), latest = useRef(), fans = useRef();
+  fans.current ||= fanCache();
   const selectedItem = plan[keyOf[selected.kind]]?.find((x) => x.id === selected.id);
   const propertyDirty = !['zone','stair'].includes(selected.kind) && !!(draft && selectedItem && draft.id === selectedItem.id && JSON.stringify(draft) !== JSON.stringify(selectedItem));
   const dirty = propertyDirty || zoneDirty || stairDirty || siteDirty;
@@ -291,26 +299,48 @@ function FacilityEditor({onPreviewCount,initialPlan,facilityControls,onPersist,o
  view" : indoor.buildingId ? `Label placed on ${b.name} \u00b7 Level ${floor + 1}` : "Label placed")) select(item.id, kind);
   }
   function aimCamera(p) {
-    if (selected.kind !== 'camera' || !draft) return;
+    if (selected.kind !== 'camera' || !draft) return false;
     const dx = p[0] - draft.x, dy = p[1] - draft.y;
-    if (Math.hypot(dx,dy) < .05) { setError('Choose a point away from the camera to aim its view.'); return; }
+    if (Math.hypot(dx,dy) < .05) { setError('Choose a point away from the camera to aim its view.'); return false; }
     setDraft(d => ({...d, bearing: Math.min(359.99, round((Math.atan2(dx,dy)*180/Math.PI+360)%360))}));
     setError('');
+    return true;
   }
   const outsideGrid = p => Math.abs(p[0]) > 2e3 || Math.abs(p[1]) > 2e3 ? `That point is ${formatDistance(Math.hypot(p[0], p[1]), units)} from the site origin. Plan items must stay within ${formatDistance(2e3, units)} east and north of it; move the site origin first.` : '';
   function moveCamera(p) {
-    if (selected.kind !== 'camera' || !draft) return;
+    if (selected.kind !== 'camera' || !draft) return false;
     const far = outsideGrid(p);
-    if (far) { setError(far); return; }
+    if (far) { setError(far); return false; }
     setDraft(d => ({...d,x:round(p[0]),y:round(p[1])}));
     setError('');
+    return true;
   }
-  latest.current = { undo, redo, onBearing:setMapBearing, onAim:aimCamera, onMoveCamera:moveCamera, onPin: p=>setPickedOrigin(p), onDraw, onPlace: place, onSelect: selectOnMap, onToolDone: () => {
+  // Direct manipulation (drag, rotate handle, Alt+Arrow, [ and ]) edits only the unsaved draft; Save camera commits.
+  const manipulate = (step === 3 || step === 4) && selected.kind === 'camera' && !!draft && draft.id === selected.id && tool === 'select';
+  function cameraKey(e) {
+    if (!manipulate || e.ctrlKey || e.metaKey) return false;
+    const nudge = {ArrowUp:[0,.5],ArrowDown:[0,-.5],ArrowLeft:[-.5,0],ArrowRight:[.5,0]}[e.key];
+    // Functional updates keep fast key repeats cumulative before the next render.
+    if (e.altKey && nudge) {
+      const p = [draft.x + nudge[0], draft.y + nudge[1]], far = p.every(Number.isFinite) ? outsideGrid(p) : 'Enter a valid camera position before nudging it.';
+      if (far) { setError(far); return true; }
+      setDraft(d => ({...d, x: round(d.x + nudge[0]), y: round(d.y + nudge[1])}));
+      setError('');
+      return true;
+    }
+    if (e.altKey || !['[', ']'].includes(e.key)) return false;
+    if (!Number.isFinite(draft.bearing)) { setError('Enter a valid direction before rotating the camera.'); return true; }
+    const turn = b => { const t = round(((b + (e.key === ']' ? 5 : -5)) % 360 + 360) % 360); return t > 359.99 ? 0 : t; };
+    setDraft(d => ({...d, bearing: turn(d.bearing)}));
+    setError('');
+    return true;
+  }
+  latest.current = { undo, redo, cameraKey, onBearing:setMapBearing, onAim:aimCamera, onMoveCamera:moveCamera, onCameraDrag:(kind,active)=>setDragging(active ? kind : ''), onPin: p=>setPickedOrigin(p), onDraw, onPlace: place, onSelect: selectOnMap, onToolDone: () => {
     setTool("select");
   }, onReady: () => setReady(true), onError: setMapError };
   useEffect(() => {
     try {
-      api.current = createFacilityMap(mapEl.current, Object.fromEntries(["onBearing", "onAim", "onMoveCamera", "onPin", "onDraw", "onPlace", "onSelect", "onToolDone", "onReady", "onError"].map((k) => [k, (...args) => latest.current[k](...args)])), plan);
+      api.current = createFacilityMap(mapEl.current, Object.fromEntries(["onBearing", "onAim", "onMoveCamera", "onCameraDrag", "onPin", "onDraw", "onPlace", "onSelect", "onToolDone", "onReady", "onError"].map((k) => [k, (...args) => latest.current[k](...args)])), plan, {fans: fans.current});
     } catch (e) {
       setMapError("3D graphics are unavailable here. You can still edit numeric properties and export the plan. " + e.message);
     }
@@ -342,8 +372,15 @@ function FacilityEditor({onPreviewCount,initialPlan,facilityControls,onPersist,o
       try { displayed = draftFacility(preview, mapDrafts, replaceDrafts); } catch(e) { failure = e.message; }
     }
     setDraftPreviewError(failure);
-    api.current?.update(displayed, selected.id, view, floor, {measurements, units, floorBuildingId:b?.id});
-  }, [preview, mapDrafts, replaceDrafts, selected.id, view, floor, ready, measurements, units, b?.id]);
+    api.current?.update(displayed, selected.id, view, floor, {measurements, units, floorBuildingId:b?.id, manipulate});
+  }, [preview, mapDrafts, replaceDrafts, selected.id, view, floor, ready, measurements, units, b?.id, manipulate]);
+  // Coverage metrics sample the same cached fans the map draws, from the previewed plan.
+  const coverage = useMemo(() => step === 4 ? coverageMetrics(preview, fans.current(wallObstacles(preview))) : null, [step, preview]);
+  const blindSpots = useMemo(() => {
+    const zone = step === 4 && (preview.zones || []).find(z => z.id === blindZone && z.enabled && z.buildingId === undefined);
+    return zone ? zoneCoverage(zone.footprint, enabledFans(preview, fans.current(wallObstacles(preview))), {blindSpots:true}).blindSpots : null;
+  }, [step, preview, blindZone]);
+  useEffect(() => api.current?.setBlindSpots(blindSpots), [blindSpots, ready]);
   useEffect(() => api.current?.setArea(searchArea), [searchArea, ready]);
   useEffect(() => api.current?.setTrack(step === 5 ? position : null), [step, seconds, plan, ready]);
   useEffect(() => {
@@ -355,6 +392,7 @@ function FacilityEditor({onPreviewCount,initialPlan,facilityControls,onPersist,o
       // Ctrl/Cmd+Z undo, Ctrl/Cmd+Shift+Z or Ctrl+Y redo, unless focus is in a text-entry control.
       const t = e.target, key = e.key?.toLowerCase();
       const typing = t?.isContentEditable || ["TEXTAREA", "SELECT"].includes(t?.tagName) || t?.tagName === "INPUT" && !["checkbox", "radio", "button", "submit", "range", "file", "color"].includes(t.type);
+      if (!typing && !t?.closest?.("dialog") && latest.current.cameraKey(e)) { e.preventDefault(); return; }
       if (!(e.ctrlKey || e.metaKey) || e.altKey || typing || !["z", "y"].includes(key)) return;
       e.preventDefault();
       if (key === "y" || e.shiftKey) latest.current.redo(); else latest.current.undo();
@@ -454,6 +492,15 @@ function FacilityEditor({onPreviewCount,initialPlan,facilityControls,onPersist,o
     setStatus(result.saved?'Edit redone':'Redone in memory — export a backup');
   }
 
+  function downloadInstallerSheet() {
+    try {
+      const url = URL.createObjectURL(new Blob([installerSheetHTML(plan, {units, fanOf:fans.current(wallObstacles(plan))})], {type:'text/html'}));
+      const a = document.createElement('a'); a.href = url; a.download = installerSheetFilename(plan); a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);
+      setError(''); setStatus('Installer sheet downloaded — planning estimate, verify on site');
+    } catch (x) { setError(x.message); }
+  }
+  // Optional camera fields are removed, not stored empty, when their input is cleared.
+  const optional = (key, value) => setDraft(d => { const next = {...d}; if (String(value ?? '').trim() === '') delete next[key]; else next[key] = value; return next; });
   function addRectangle() {
     if (editingDirty) {
       setError("Save or discard your preview before adding a building.");
@@ -536,6 +583,7 @@ street map \xB7 OpenStreetMap" : `Local grid · ${formatDistance(20,units)} spac
     api.current?.setTool("select");
     setTool("select");
   }}>Cancel</button></div>}
+      {dragging && <div className="facility-draw-hint facility-drag-hint" role="status"><VideoCamera /><span>{dragging === 'move' ? 'Moving the selected camera' : 'Aiming the selected camera'}<small>Release to update the unsaved preview. Escape cancels. Save camera commits.</small></span></div>}
       {(step === 2 || view === "floors") && <div className="facility-floor-picker"><Stack size={18} /><select aria-label="Building for floor editing" value={b?.
   id || ""} onChange={(e) => {
     if(editingDirty) {setError("Save or discard your preview before changing floors.");return;}
@@ -548,7 +596,7 @@ street map \xB7 OpenStreetMap" : `Local grid · ${formatDistance(20,units)} spac
     setView("floors");
   }}>{Array.from({ length: b?.floors || 1 }, (_, i) => <option key={i} value={i}>{i === 0 ? b?.base ? `Lowest modeled floor (${formatDistance(b.base,units)})` : "Ground floor" : "Level " + (i +
   1)}</option>)}</select><button className="facility-secondary" aria-label="Center active building" onClick={()=>b&&api.current?.centerSelection(b.id)}><Crosshair size={17}/></button></div>}
-      <div className="facility-map-legend"><span><i className="coverage-key" />Estimated visibility</span><span><i className="route-key" />Route / object watch</span><span><i className="restricted-key" />Restricted</span><span>Only the selected camera’s 3D volume is shown.</span></div>
+      <div className="facility-map-legend"><span><i className="coverage-key" />Estimated visibility</span><span><i className="route-key" />Route / object watch</span><span><i className="restricted-key" />Restricted</span><span>Only the selected camera’s 3D volume is shown.</span>{!!blindSpots?.length && <span><i className="blind-spot-key" />Blind spot · estimate</span>}</div>
       {step === 5 && <div className="facility-rehearsal"><div className="facility-rehearsal-top"><button aria-label={playing ?
   "Pause rehearsal" : "Play rehearsal"} disabled={plan.route.length < 2} onClick={() => {
     if (seconds >= duration) setSeconds(0);
@@ -628,7 +676,7 @@ pect its modeled view.", "Draw a route and review proposed camera transitions.",
     place("label", [0, 0]);
   }}>Add label at origin</button>
       </>}
-      {(step === 3 || step === 4) && <><div className="facility-action-row"><button className="facility-secondary" disabled={!ready} onClick={() => startTool(
+      {(step === 3 || step === 4) && <>{step === 4 && coverage && <CoverageMetrics metrics={coverage} blindZone={blindZone} onBlindZone={setBlindZone} blindSpots={blindSpots} dirty={propertyDirty} units={units}/>}<div className="facility-action-row"><button className="facility-secondary" disabled={!ready} onClick={() => startTool(
     "camera"
   )}><Plus />Place camera</button><button className="facility-link" onClick={() => place("camera", [0, -20])}>Add with coordinates</button></div>
         <label className="facility-field"><span>Selected camera</span><select aria-label="Selected camera" value={selected.
@@ -636,10 +684,12 @@ pect its modeled view.", "Draw a route and review proposed camera transitions.",
   cameras.map((c) => <option key={c.id} value={c.id}>{c.id} · {c.name}</option>)}</select></label>
         {selected.kind === 'camera' && draft?.id === selected.id && <>
           <div className="facility-camera-actions"><button className="facility-secondary" disabled={!ready} onClick={()=>api.current?.centerCamera(selected.id)}><Crosshair/>Center camera</button><button className="facility-secondary" disabled={!ready} onClick={()=>startTool('aim-camera')}>Aim on map</button><button className="facility-secondary" disabled={!ready} onClick={()=>startTool('move-camera')}>Move on map</button></div>
+          <p className="facility-caption facility-manipulate-help">Drag the selected camera or its round heading handle on the map. With the map or a button focused, Alt+Arrow nudges 0.5 m and [ or ] rotates 5°. These change the preview only; Save camera commits.</p>
           <FacilityCameraPreview onCount={onPreviewCount} key={selected.id} camera={preview.cameras.find(c=>c.id===selected.id)} onCenter={()=>api.current?.centerCamera(selected.id)} onAim={()=>startTool('aim-camera')}/>
         </>}
         {selected.kind === "camera" && draft?.id === selected.id ? <form noValidate className="facility-camera-form" onSubmit={saveSelected}>
           <Field label="Camera name" type="text" value={draft.name} onChange={(v) => change("name", v)} />
+          <Field label="Recorder channel" type="text" suffix="optional" maxLength={60} value={draft.channel ?? ''} onChange={(v) => optional("channel", v)} />
 
           <Field label="Mount elevation above ground" suffix="m" value={draft.z} min={0.5} max={150} onChange={(v) => change(
     "z",
@@ -658,10 +708,13 @@ pect its modeled view.", "Draw a route and review proposed camera transitions.",
     "hfov",
     v
   )} />
+          <label className="facility-field"><span>Lens preset<small>typical</small></span><select aria-label="Lens preset (typical)" value={lensPreset(draft.hfov)?.id || ''} onChange={(e) => { const lens = LENS_PRESETS.find(l => l.id === e.target.value); if (lens) change("hfov", lens.hfov); }}><option value="">Custom angle</option>{LENS_PRESETS.map(l => <option key={l.id} value={l.id}>{l.label} · {l.hfov}°</option>)}</select></label>
           <Field label="Maximum viewing range" suffix="m" value={draft.range} min={1} max={300} onChange={(v) => change(
     "range",
     v
   )} />
+          <Field label="Horizontal resolution" suffix="px" value={draft.pixelsWide} min={PIXELS_WIDE.min} max={PIXELS_WIDE.max} step="1" onChange={(v) => optional("pixelsWide", v)} />
+          <PixelDensity camera={draft} units={units} />
           <details className="facility-advanced"><summary>Position and vertical field of view</summary><div className="facility-field-pair"><Field label="Camera east" suffix="m" value={draft.
   x} min={-2e3} max={2e3} onChange={(v) => change("x", v)} /><Field label="Camera north" suffix="m" value={draft.y} min={-2e3} max={2e3} onChange={(v) => change(
     "y",
@@ -675,6 +728,8 @@ nabled", e.target.checked)} />Include in coverage estimates</label>
           {note}<button className="facility-primary" type="submit">Save camera<Check /></button>
         </form> : <p className="facility-caption">Select a camera in the inventory, or place the first camera.</p>}
         {step === 3 && <p className="hint">Use the source preview to compare your camera placement. View guides are estimates; centering moves the map, not a physical camera.</p>}
+        <button type="button" className="facility-secondary facility-installer-button" disabled={navigationDirty || !plan.cameras.length} title={navigationDirty ? 'Save or discard edits first' : undefined} onClick={downloadInstallerSheet}><Printer />Download installer sheet</button>
+        <p className="facility-caption">Printable offline page of the saved plan: mounts, angles, lenses and DORI distances. {DORI_NOTE}.</p>
       </>}
       {step === 2 && <><FloorGeometry pending={linePending} onPendingChange={setLinePending} plan={plan} building={b} floor={floor} selected={selected} draft={draft} onDraft={setDraft} onSelect={select} commit={commit} onDraw={startTool} disabled={dirty} ready={ready} units={units}/><FacilityStairs plan={plan} building={b} floor={floor} selectedId={selected.kind==='stair'?selected.id:''} onSelect={id=>select(id,'stair')} commit={commit} disabled={propertyDirty || zoneDirty || linePending} units={units} onDirtyChange={setStairDirty}/></>}
       {step === 5 && <><div className="facility-action-row"><button className="facility-primary" disabled={!ready} onClick={() => startTool(
@@ -705,6 +760,29 @@ Kept as separate tracks."} This does not verify identity.</p>}</div>) : <p class
   )}>Export plan<DownloadSimple /></button>}</div></div>
     </aside><>{pasteOpen && <PlanPasteDialog close={() => setPasteOpen(false)} onImport={text=>onImportFacilities(text)} />}</><input ref={input} hidden type="file" accept=".json,application/json" aria-label="Import facility plan" onChange={importFile} />
   </section></MeasurementUnits.Provider>;
+}
+const percent = v => `${(Math.round(v * 1000) / 10).toFixed(1)}%`;
+// Pixel density bands for the draft camera; nothing is shown until a horizontal resolution is entered.
+function PixelDensity({ camera, units }) {
+  const bands = doriDistances(camera);
+  if (!bands) return <p className="facility-caption facility-dori-empty">{pixelsWideOK(camera?.pixelsWide) ? 'Enter a valid height, viewing angles and range to estimate pixel-density distances.' : `Enter the horizontal resolution (${PIXELS_WIDE.min}–${PIXELS_WIDE.max} px) to estimate Detect, Observe, Recognize and Identify distances.`}</p>;
+  const { near, far } = groundRange(camera), d = v => formatDistance(v, units);
+  return <div className="facility-dori" role="group" aria-label="Pixel density estimate">
+    <p className="facility-dori-note"><WarningCircle size={15} />{DORI_NOTE}</p>
+    <table><thead><tr><th>Band</th><th>≥ px/m</th><th>Slant ≤</th><th>Ground distance</th></tr></thead><tbody>{bands.map(band => <tr key={band.id}><th scope="row"><i style={{ background: band.color }} />{band.name}</th><td>{band.ppm}</td><td>{d(band.slant)}</td><td>{band.reached ? `${d(band.from)}–${d(band.to)}${band.limited ? ' · view limit' : ''}` : 'Not reached'}</td></tr>)}</tbody></table>
+    <p className="facility-caption">Slant d = width ÷ (2 · px/m · tan(HFOV ÷ 2)); ground distance √(d² − height²), clipped to the {d(near)}–{d(Math.max(near, far))} ground view. About {Math.round(densityAtGround(camera, far))} px/m at the far ground limit. IEC 62676-4 figures used as planning thresholds; colored arcs on the map mark each limit.</p>
+  </div>;
+}
+function CoverageMetrics({ metrics, blindZone, onBlindZone, blindSpots, dirty, units }) {
+  const shown = metrics.zones.find(z => z.id === blindZone && z.estimated);
+  return <section className="facility-coverage-metrics" aria-label="Estimated coverage metrics"><h3 className="facility-subheading">Estimated coverage</h3>
+    {metrics.zones.length || metrics.route ? <table><thead><tr><th>Area</th><th>Coverage<small>≥1 camera</small></th><th>Overlap<small>≥2 cameras</small></th><th aria-label="Blind-spot overlay" /></tr></thead><tbody>
+      {metrics.zones.map(z => <tr key={z.id}><th scope="row">{z.name}<small>{z.type === 'object_watch' ? 'Object watch' : 'Restricted'}{z.estimated ? '' : ' · indoor'}</small></th>{z.estimated ? <><td>{percent(z.coverage)}</td><td>{percent(z.overlap)}</td><td><button type="button" className="facility-blind-toggle" aria-pressed={blindZone === z.id} aria-label={`Blind spots for ${z.name}`} onClick={() => onBlindZone(blindZone === z.id ? '' : z.id)}>Blind spots</button></td></> : <td colSpan={3} className="facility-not-estimated">Not estimated · ground-plane only</td>}</tr>)}
+      {metrics.route && <tr><th scope="row">Handoff route<small>{formatDistance(metrics.route.length, units)} · {metrics.route.samples} samples</small></th><td>{percent(metrics.route.coverage)}</td><td>{percent(metrics.route.overlap)}</td><td /></tr>}
+    </tbody></table> : <p className="facility-caption">Add an enabled outdoor zone (step 7) or a handoff route (step 6) to estimate coverage.</p>}
+    {shown && blindSpots && <p className="facility-caption" role="status">{blindSpots.length ? `Map shows uncovered sample cells in ${shown.name} (cells about ${formatDistance(shown.cell, units)}).` : `No uncovered sample cells in ${shown.name}.`}</p>}
+    <p className="facility-caption">Grid sample of up to {MAX_COVERAGE_CELLS.toLocaleString('en-US')} cells per zone, and about every {formatDistance(.5, units)} along the route, tested against the drawn ground fans of {metrics.cameras} included {metrics.cameras === 1 ? 'camera' : 'cameras'}. {dirty ? 'Includes the unsaved camera preview. ' : ''}Indoor and level zones are not estimated because coverage is ground-plane only. Planning estimate; verify on site.</p>
+  </section>;
 }
 function SiteForm({ plan, commit, center, pickedOrigin, onPin, ready, onDirtyChange }) {
   const [name, setName] = useState(plan.name), [lng, setLng] = useState(plan.origin[0]), [lat, setLat] = useState(plan.origin[1]);

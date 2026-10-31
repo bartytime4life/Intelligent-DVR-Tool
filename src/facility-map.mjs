@@ -5,7 +5,9 @@ import { TerraDraw, TerraDrawPolygonMode, TerraDrawLineStringMode } from "./vend
 import { TerraDrawMapLibreGLAdapter } from "./vendor/terra-maplibre.mjs";
 import { centroid, toLngLat, fromLngLat, coverageFan, wallObstacles, buildingFeature, floorSlabRings, ceilingOpenings } from "./facility.mjs";
 import { stairDimensions, stairFootprint, stairTreadPolygons } from "./facility-stairs.mjs";
-import { measurementLabels, lineRibbonSegments, floorRenderPlan, floorElevation, visibleLabelIndices } from "./facility-measurements.mjs";
+import { measurementLabels, lineRibbonSegments, floorRenderPlan, floorElevation, visibleLabelIndices, formatDistance } from "./facility-measurements.mjs";
+import { fanCache } from "./facility-coverage.mjs";
+import { doriArcs } from "./facility-dori.mjs";
 import "./facility-map-geometry.css";
 setWorkerUrl(workerUrl);
 const fc = (features) => ({ type: "FeatureCollection", features });
@@ -20,19 +22,8 @@ const viewPitch = (view, tool) => view === "2d" || OVERHEAD_TOOLS.includes(tool)
 const PLAN_METRE_SCALE = 2 * Math.PI * 6371008.8 / 360 / 111320;
 const PICK_LAYERS = ["cameras", "zones", "openings", "stairs", "stair-steps", "floor-paths", "rooms", "room-areas", "floor-slabs", "ghost-envelope", "buildings"];
 const BACKGROUND_LAYERS = ["floor-slabs", "ghost-envelope", "buildings"];
-// Fans are cached per camera geometry and reset whenever the wall set changes.
-function fanCache() {
-  let walls = "", fans = new globalThis.Map();
-  return (obstacles) => {
-    const key = JSON.stringify(obstacles);
-    if (key !== walls || fans.size > 2000) { walls = key; fans = new globalThis.Map(); }
-    return (c) => {
-      const id = [c.x, c.y, c.z, c.bearing, c.tilt, c.hfov, c.vfov, c.range, c.enabled].join(",");
-      if (!fans.has(id)) fans.set(id, coverageFan(c, obstacles));
-      return fans.get(id);
-    };
-  };
-}
+const headingTip = c => { const a = c.bearing * Math.PI / 180, l = Math.min(c.range, 12); return [c.x + Math.sin(a) * l, c.y + Math.cos(a) * l]; };
+const cm = v => Math.round(v * 100) / 100;
 function structureBuilding(plan, selected, view, options) {
   if (view === "2d") return undefined;
   const owner = [...plan.rooms, ...(plan.openings || []), ...(plan.stairs || []), ...(plan.paths || [])].find(item => item.id === selected);
@@ -154,7 +145,8 @@ class CameraVolumes {
     this.renderer?.dispose();
   }
 }
-function createFacilityMap(container, callbacks, initialPlan) {
+// options.fans shares the fan cache with coverage metrics so both use the same drawn fans.
+function createFacilityMap(container, callbacks, initialPlan, options = {}) {
   const map = new Map({
     container,
     center: initialPlan.origin,
@@ -175,11 +167,13 @@ function createFacilityMap(container, callbacks, initialPlan) {
   map.addControl(new NavigationControl({ visualizePitch: true }), "bottom-right");
   const scaleControl = new ScaleControl({ unit: "metric" });
   map.addControl(scaleControl, "bottom-left");
-  const volumes = new CameraVolumes(), fans = fanCache();
+  const volumes = new CameraVolumes(), fans = options.fans || fanCache();
   let draw, ready = false, suppressSelection = false, current = initialPlan, selected = "C-07", view = "3d", floor = 0, tool = "\
 select", markers = [];
   let displayOptions = {measurements: true, units: "metric", floorBuildingId: null};
   let labelRecords = [], labelFrame = null, markerKey = "";
+  // Direct manipulation of the selected camera: drag state, the rotate handle and markers that follow a drag.
+  let fanOf = null, volumeOptions = null, drag = null, handle = null, cameraLabel = null, doriLabels = [];
   function declutterLabels() {
     labelFrame = null;
     const visible = visibleLabelIndices(labelRecords.map(record => ({priority:record.priority,keep:record.keep,rect:record.element.getBoundingClientRect()})));
@@ -200,7 +194,7 @@ select", markers = [];
   map.on("webglcontextlost", () => callbacks.onError("3D graphics were interrupted. Save or export the plan, then reload\
  to recover."));
   map.on("load", () => {
-    const sources = ["grid", "site", "buildings", "rooms", "room-areas", "coverage", "cameras", "route", "track", "search-area", "zones", "camera-heading", "floor-slabs", "ghost-envelope", "openings", "stairs", "stair-steps", "stair-heading", "floor-paths"];
+    const sources = ["grid", "site", "buildings", "rooms", "room-areas", "coverage", "cameras", "route", "track", "search-area", "zones", "camera-heading", "floor-slabs", "ghost-envelope", "openings", "stairs", "stair-steps", "stair-heading", "floor-paths", "blind-spots", "dori-arcs"];
     for (const id of sources) map.addSource(id, { type: "geojson", data: empty() });
     map.addLayer({ id: "grid", type: "line", source: "grid", paint: { "line-color": "#36505c", "line-opacity": 0.26, "li\
 ne-width": 0.6 } });
@@ -265,6 +259,9 @@ ll-extrusion-base": ["get", "base"], "fill-extrusion-height": ["get", "top"], "f
       "line-color": ["case", ["!", ["get", "enabled"]], "#81919e", ["==", ["get", "type"], "object_watch"], "#f3b65d", "#f27782"],
       "line-width": ["case", ["get", "selected"], 3, 1.5], "line-dasharray": [3, 2],
     }});
+    map.addLayer({id: "blind-spots", type: "fill", source: "blind-spots", paint: {"fill-color": "#ff5d73", "fill-opacity": .34}});
+    map.addLayer({id: "blind-spots-edge", type: "line", source: "blind-spots", paint: {"line-color": "#ff8a9a", "line-width": .6, "line-opacity": .7}});
+    map.addLayer({id: "dori-arcs", type: "line", source: "dori-arcs", paint: {"line-color": ["get", "color"], "line-width": 2, "line-opacity": .9}});
     map.addLayer({id: "camera-heading", type: "line", source: "camera-heading", paint: {"line-color": "#9bfff0", "line-width": 2, "line-dasharray": [2,2]}});
     map.addLayer(volumes);
     map.addLayer({ id: "route", type: "line", source: "route", paint: { "line-color": "#ffc15a", "line-width": 3, "line-\
@@ -342,6 +339,88 @@ e-stroke-width": 2 } });
     const hit = hits.find(h => !BACKGROUND_LAYERS.includes(h.layer.id)) || hits[0];
     if (hit) callbacks.onSelect(hit.properties.id, hit.layer.id === "cameras" ? "camera" : hit.layer.id === "zones" ? "zone" : hit.layer.id === "openings" ? "opening" : hit.layer.id === "floor-paths" ? "path" : ["stairs", "stair-steps"].includes(hit.layer.id) ? "stair" : ["rooms", "room-areas"].includes(hit.layer.id) ? "room" : "building");
   });
+  // Only the selected camera can be dragged, and only while the editor enables manipulation.
+  const cameraHit = (point, radius) => ready && !drag && tool === "select" && !!displayOptions.manipulate &&
+    map.queryRenderedFeatures([[point.x - radius, point.y - radius], [point.x + radius, point.y + radius]], {layers: ["cameras"]}).some(f => f.properties.id === selected);
+  map.on("mousedown", (e) => { if (e.originalEvent.button === 0 && cameraHit(e.point, 7)) { e.preventDefault(); begin("move", e.originalEvent); } });
+  map.on("touchstart", (e) => { if (e.originalEvent.touches.length === 1 && cameraHit(e.point, 16)) { e.preventDefault(); begin("move", e.originalEvent.touches[0]); } });
+  map.on("mousemove", (e) => { if (!drag && tool === "select" && displayOptions.manipulate && ready) map.getCanvas().style.cursor = cameraHit(e.point, 7) ? "move" : ""; });
+  // A drag previews through setData only; release reports one point and the editor updates its unsaved draft.
+  function begin(kind, start) {
+    const cam = current.cameras.find(c => c.id === selected);
+    if (!ready || drag || !cam) return;
+    map.dragPan.disable();
+    const at = p => { const r = map.getCanvasContainer().getBoundingClientRect(), l = map.unproject([p.clientX - r.left, p.clientY - r.top]); return fromLngLat([l.lng, l.lat], current.origin); };
+    const paint = () => {
+      drag.frame = null;
+      renderCameras(current, drag.preview);
+      if (volumeOptions) volumes.update({...current, cameras: current.cameras.map(c => c.id === cam.id ? drag.preview : c)}, selected, view, floor, volumeOptions);
+      if (kind === "move") cameraLabel?.setLngLat(toLngLat([drag.preview.x, drag.preview.y], current.origin));
+    };
+    const move = (e) => {
+      const p = e.touches ? e.touches[0] : e;
+      if (!drag || !p) return;
+      if (e.cancelable) e.preventDefault();
+      if (!drag.moved && Math.hypot(p.clientX - drag.start[0], p.clientY - drag.start[1]) < 3) return;
+      const point = at(p), dx = point[0] - cam.x, dy = point[1] - cam.y;
+      if (kind === "rotate" && Math.hypot(dx, dy) < .05) return;
+      if (!drag.moved) { drag.moved = true; for (const el of doriLabels) el.style.visibility = "hidden"; callbacks.onCameraDrag?.(kind, true); }
+      drag.point = point;
+      drag.preview = kind === "move" ? {...cam, x: cm(point[0]), y: cm(point[1])} : {...cam, bearing: Math.min(359.99, cm((Math.atan2(dx, dy) * 180 / Math.PI + 360) % 360))};
+      if (drag.frame === null) drag.frame = requestAnimationFrame(paint);
+    };
+    const finish = (accept) => {
+      document.removeEventListener("mousemove", move); document.removeEventListener("mouseup", up);
+      document.removeEventListener("touchmove", move); document.removeEventListener("touchend", up); document.removeEventListener("touchcancel", cancel);
+      document.removeEventListener("keydown", key, true);
+      const done = drag;
+      drag = null;
+      if (done.frame !== null) cancelAnimationFrame(done.frame);
+      map.dragPan.enable();
+      suppressSelection = true;
+      requestAnimationFrame(() => { suppressSelection = false; });
+      if (!done.moved) return;
+      const kept = accept && (done.kind === "move" ? callbacks.onMoveCamera?.(done.point) : callbacks.onAim?.(done.point)) !== false;
+      callbacks.onCameraDrag?.(done.kind, false);
+      if (!kept) { renderCameras(current); if (volumeOptions) volumes.update(current, selected, view, floor, volumeOptions); cameraLabel?.setLngLat(toLngLat([cam.x, cam.y], current.origin)); }
+      scheduleLabels();
+    };
+    const up = () => finish(true), cancel = () => finish(false);
+    const key = (e) => { if (e.key === "Escape") { e.stopPropagation(); cancel(); } };
+    drag = {kind, start: [start.clientX, start.clientY], moved: false, point: null, preview: null, frame: null, cancel};
+    document.addEventListener("mousemove", move); document.addEventListener("mouseup", up);
+    document.addEventListener("touchmove", move, {passive: false}); document.addEventListener("touchend", up); document.addEventListener("touchcancel", cancel);
+    document.addEventListener("keydown", key, true);
+  }
+  function handleElement() {
+    const el = document.createElement("span");
+    el.className = "facility-rotate-handle";
+    el.title = "Drag to aim this camera \u00b7 [ and ] rotate 5\u00b0";
+    el.setAttribute("aria-hidden", "true");
+    el.addEventListener("mousedown", (e) => { if (e.button !== 0) return; e.preventDefault(); e.stopPropagation(); begin("rotate", e); });
+    el.addEventListener("touchstart", (e) => { if (e.touches.length !== 1) return; e.preventDefault(); e.stopPropagation(); begin("rotate", e.touches[0]); }, {passive: false});
+    el.addEventListener("click", (e) => e.stopPropagation());
+    return el;
+  }
+  let handleShown = false;
+  // Cameras, their fans, the heading line, DORI arcs and the rotate handle; `moved` replaces one camera during a drag.
+  function renderCameras(plan, moved = null) {
+    const o = plan.origin, cameras = moved ? plan.cameras.map(c => c.id === moved.id ? moved : c) : plan.cameras, cam = cameras.find(c => c.id === selected);
+    map.getSource("coverage").setData(fc(cameras.filter((c) => c.enabled || c.id === selected).map((c) => ({ c, fan: fanOf(c) })).filter((x) => x.fan.
+    length > 3).map(({ c, fan }) => polygon(fan, o, { selected: c.id === selected }))));
+    map.getSource("cameras").setData(fc(cameras.map((c) => feat("Point", toLngLat([c.x, c.y], o), { id: c.id, selected: c.
+    id === selected, enabled: c.enabled }))));
+    map.getSource("camera-heading").setData(fc(cam ? [feat("LineString", [toLngLat([cam.x, cam.y], o), toLngLat(headingTip(cam), o)])] : []));
+    map.getSource("dori-arcs").setData(fc(cam?.enabled ? doriArcs(cam, fanOf(cam)).flatMap(arc => arc.lines.map(line => feat("LineString", line.map(p => toLngLat(p, o)), {band: arc.id, color: arc.color}))) : []));
+    const show = !!(displayOptions.manipulate && cam && tool === "select");
+    if (show) {
+      handle ||= new Marker({element: handleElement(), anchor: "center"});
+      handle.setLngLat(toLngLat(headingTip(cam), o));
+      if (!handleShown) handle.addTo(map);
+    } else if (handleShown) handle.remove();
+    handleShown = show;
+    return cam;
+  }
   function update(plan, selection, mode, level, options = {}) {
     displayOptions = {...displayOptions, ...options};
     const originChanged = current.origin[0] !== plan.origin[0] || current.origin[1] !== plan.origin[1];
@@ -412,12 +491,8 @@ e-stroke-width": 2 } });
       const base = building ? floorElevation(building,zone.level,floorDrawing) : 0;
       return polygon(zone.footprint, o, {id: zone.id, type: zone.type, enabled: zone.enabled !== false, selected: zone.id === selected, base, top: base + .2});
     })));
-    const fanOf = fans(wallObstacles(plan));
-    const visible = plan.cameras.filter((c) => c.enabled || c.id === selected);
-    map.getSource("coverage").setData(fc(visible.map((c) => ({ c, fan: fanOf(c) })).filter((x) => x.fan.
-    length > 3).map(({ c, fan }) => polygon(fan, o, { selected: c.id === selected }))));
-    map.getSource("cameras").setData(fc(plan.cameras.map((c) => feat("Point", toLngLat([c.x, c.y], o), { id: c.id, selected: c.
-    id === selected, enabled: c.enabled }))));
+    fanOf = fans(wallObstacles(plan));
+    renderCameras(plan, drag?.preview);
     map.getSource("route").setData(fc(plan.route.length > 1 ? [feat("LineString", plan.route.map((p) => toLngLat(p, o)))] :
     []));
     const labels = [...plan.buildings.map((b) => {
@@ -441,7 +516,8 @@ e-stroke-width": 2 } });
     });
     const cam = plan.cameras.find((c) => c.id === selected);
     if (cam) specs.push({ className: "facility-map-label selected-camera-label", text: cam.id + " \xB7 " + cam.name, priority: 1, keep: false, anchor: "top", offset: [0, 14], lngLat: toLngLat([cam.x, cam.y], o) });
-    map.getSource("camera-heading").setData(fc(cam ? [feat("LineString", [toLngLat([cam.x,cam.y],o), toLngLat([cam.x + Math.sin(cam.bearing*Math.PI/180) * Math.min(cam.range,12),cam.y + Math.cos(cam.bearing*Math.PI/180) * Math.min(cam.range,12)],o)])] : []));
+    if (cam?.enabled) for (const arc of doriArcs(cam, fanOf(cam))) specs.push({ className: "facility-map-label facility-dori-label", text: `${arc.name} \u2264 ${formatDistance(arc.to, displayOptions.units)}`,
+      title: "Pixel-density planning estimate \u00b7 assumes ideal focus and no compression", priority: 3, keep: false, anchor: "center", offset: [0, 0], lngLat: toLngLat(arc.label, o) });
     if (displayOptions.measurements) for (const label of measurementLabels(plan, selected, {...displayOptions, floor, view: mode})) specs.push({
       className: `facility-map-label facility-dimension-label${label.summary ? " facility-measurement-summary" : ""}${label.route ? " facility-route-dimension" : ""}`,
       text: label.text, title: "Plan dimensions · verify on site", priority: label.primary ? 0 : label.summary ? 2 : 3, keep: !!label.primary,
@@ -452,17 +528,23 @@ e-stroke-width": 2 } });
       for (const m of markers) m.remove();
       markers = [];
       labelRecords = [];
+      cameraLabel = null;
+      doriLabels = [];
       for (const spec of specs) {
         const el = document.createElement("span");
         el.className = spec.className;
         el.textContent = spec.text;
         if (spec.title) el.title = spec.title;
         trackLabel(el, spec.priority, spec.keep);
-        markers.push(new Marker({ element: el, anchor: spec.anchor, offset: spec.offset }).setLngLat(spec.lngLat).addTo(map));
+        const marker = new Marker({ element: el, anchor: spec.anchor, offset: spec.offset }).setLngLat(spec.lngLat).addTo(map);
+        markers.push(marker);
+        if (spec.className.includes("selected-camera-label")) cameraLabel = marker;
+        if (spec.className.includes("facility-dori-label")) doriLabels.push(el);
       }
     }
     scheduleLabels();
-    volumes.update(plan, selected, mode, floor, {...displayOptions,floorDrawing,fanOf});
+    volumeOptions = {...displayOptions,floorDrawing,fanOf};
+    volumes.update(plan, selected, mode, floor, volumeOptions);
     const nextHasOsm = plan.buildings.some(b=>b.source?.provider==='OpenStreetMap');
     if(nextHasOsm!==hasOsm) {
       map.removeControl(attribution);
@@ -545,7 +627,12 @@ aster-saturation": -1, "raster-brightness-max": 0.55 } }, "grid");
     setTrack(point) {
       if (ready) map.getSource("track").setData(fc(point ? [feat("Point", toLngLat(point, current.origin))] : []));
     },
+    setBlindSpots(rings) {
+      if (ready) map.getSource("blind-spots").setData(fc((rings || []).map(ring => polygon(ring, current.origin))));
+    },
     destroy() {
+      drag?.cancel();
+      handle?.remove();
       if (labelFrame !== null) cancelAnimationFrame(labelFrame);
       labelRecords = [];
       for (const m of markers) m.remove();
