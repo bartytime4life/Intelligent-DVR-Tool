@@ -181,6 +181,22 @@ class NativeCoverageTest(unittest.TestCase):
 
     def test_missing_inventory_is_explicitly_unverified_and_not_a_frame_limit(self):
         import av
+        import numpy as np
+        from fractions import Fraction
+        # A real, valid nonzero-origin WebM reports a container extent of 5s
+        # for frames spanning 2s..5s. Do not mistake the origin for lost footage.
+        offset=self.root/'offset.webm'
+        with av.open(str(offset),'w') as c:
+            stream=c.add_stream('libvpx',rate=10);stream.width=320;stream.height=240;stream.pix_fmt='yuv420p'
+            for i in range(30):
+                frame=av.VideoFrame.from_ndarray(np.full((240,320,3),80,np.uint8),format='bgr24')
+                frame.pts=i+20;frame.time_base=Fraction(1,10)
+                for packet in stream.encode(frame):c.mux(packet)
+            for packet in stream.encode():c.mux(packet)
+        result=verify(offset,digest(offset),30)
+        self.assertEqual(result['status'],'unverified')
+        self.assertEqual(result['validated_frames'],30)
+        validate(result,digest(offset),30,'partial')
         with patch.object(av,'open',self.no_inventory(av.open)):
             self.analyze(self.args())
         bundle=json.loads((self.root/'review.json').read_text());r=bundle['receipt']

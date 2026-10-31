@@ -23,6 +23,11 @@ Exactly one video track is required; audio is ignored. Container duration is not
 used as a video-duration anchor when another track might run longer. Resolution
 and source-byte bounds remain 4K pixels and 512 MiB.
 
+Container-only duration is also ignored when the first presentation timestamp
+is nonzero or its basis is unknown. A valid WebM can report the timeline extent
+rather than the video span; guessing a normalization would misclassify it. If
+no frame-count anchor remains, that case is explicitly unverified/partial.
+
 This is an inventory/decoder agreement check, **not proof that every byte is
 intact, metadata is truthful, or all original camera footage was captured**.
 PyAV and OpenCV both use FFmpeg libraries; they are separate decoding passes,

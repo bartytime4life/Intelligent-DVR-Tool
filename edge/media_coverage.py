@@ -67,11 +67,13 @@ def verify(source, source_hash, observed_frames, progress=None):
                 codec.options = {**codec.options, 'err_detect': 'crccheck+bitstream+buffer+explode'}
                 declared_frames = video.frames if video.frames > 0 else None
                 duration = None
+                container_duration = False
                 if video.duration is not None and video.time_base is not None:
                     duration = float(video.duration * video.time_base)
                 elif len(container.streams) == 1 and container.duration is not None:
                     # Container duration can include longer audio; never use it for mixed tracks.
                     duration = float(container.duration / av.time_base)
+                    container_duration = True
                 if duration is not None and (not math.isfinite(duration) or duration <= 0):
                     duration = None
                 first = last_end = None
@@ -105,6 +107,11 @@ def verify(source, source_hash, observed_frames, progress=None):
                     raise CoverageError('MEDIA_INVENTORY_MISMATCH')
                 if declared_frames is not None and declared_frames != count:
                     raise CoverageError('MEDIA_INVENTORY_MISMATCH')
+                # Container duration can describe an extent from timeline zero,
+                # rather than the span from the first frame. Do not guess a
+                # normalization for nonzero/unknown origins (e.g. valid WebM).
+                if container_duration and (not timing_valid or first is None or abs(first) > tick / 2 + .000001):
+                    duration = None
                 decoded_duration = last_end - first if timing_valid and first is not None and last_end is not None else None
                 duration_checked = duration is not None and decoded_duration is not None
                 tolerance = tick / 2 + .000001 if duration_checked else None
