@@ -1,7 +1,11 @@
 import { parseRecognition, mergeRecognitionEvents } from './recognition.mjs';
 
-export function recognitionReport(run, { threshold = .5, reviews = [], sourceMatched = false, sourceName = '', generatedAt = new Date().toISOString() } = {}) {
-  const parsed = parseRecognition({ schema:'intelligent-dvr.recognition-review.v1', receipt:run.receipt, trace:run.trace });
+export const validateReportRun = run => parseRecognition({ schema:'intelligent-dvr.recognition-review.v1', receipt:run.receipt, trace:run.trace });
+
+export function recognitionReport(run, options) { return summarizeReport(validateReportRun(run), options); }
+
+// Takes a run already returned by validateReportRun, so a threshold change does not revalidate the whole trace.
+export function summarizeReport(parsed, { threshold = .5, reviews = [], sourceMatched = false, sourceName = '', generatedAt = new Date().toISOString() } = {}) {
   if (!Number.isFinite(threshold) || threshold < .1 || threshold > 1) throw Error('Report threshold must be 0.10–1.00.');
   const { receipt, trace } = parsed, classes = new Map();
   const samples = trace.frames.map(frame => {
@@ -65,7 +69,7 @@ export function reportHTML(report) {
 <p>${h(report.analysis.profile)} · ${h(report.analysis.backend)}<br>${report.analysis.sampled_frames} samples / ${report.analysis.decoded_frames} decoded frames · stride ${report.analysis.stride} · container FPS ${report.analysis.fps_metadata}<br>Last analyzed sample +${report.analysis.last_sample_seconds.toFixed(3)}s · display score ≥ ${report.analysis.display_threshold.toFixed(2)}</p>
 <h2>Sampled class inventory</h2><p>${report.summary.detections} detections across ${report.summary.samples_with_detections} samples. Repeated sightings are counted repeatedly.</p>
 <div class="scroll"><table><thead><tr><th>Class</th><th>Detections</th><th>Samples</th><th>Peak / sample</th><th>First / last sample (s)</th><th>Max score</th></tr></thead><tbody>${report.classes.map(c=>`<tr><td>${h(c.label)}</td><td>${c.detections}</td><td>${c.samples}</td><td>${c.peak_in_sample}</td><td>${c.first_seconds.toFixed(3)} / ${c.last_seconds.toFixed(3)}</td><td>${c.max_score.toFixed(3)}</td></tr>`).join('')}</tbody></table></div>
-<h2>Rule observations and decisions</h2><p>${report.summary.pending} pending · ${report.summary.confirmed} confirmed · ${report.summary.dismissed} dismissed. Decisions reflect the current local review queue at export.</p>
+<h2>Rule observations and decisions</h2><p>${report.summary.pending} not yet reviewed ·${report.summary.confirmed} confirmed · ${report.summary.dismissed} dismissed. Decisions reflect the current local review queue at export.</p>
 <div class="scroll"><table><thead><tr><th>Time (s)</th><th>Class / rule</th><th>Score</th><th>Decision</th><th>Notes</th></tr></thead><tbody>${report.observations.map(e=>`<tr><td>${e.seconds.toFixed(3)}</td><td>${h(e.label)}<br>${h(e.rule)}</td><td>${e.score.toFixed(3)}</td><td>${h(e.status)}</td><td>${h(e.note)}</td></tr>`).join('')}</tbody></table></div>
 <h2>Interpretation limits</h2><ul>${report.limits.map(v=>`<li>${h(v)}</li>`).join('')}</ul></html>`;
 }

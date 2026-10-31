@@ -1,5 +1,8 @@
 import {visibleCameraSlots} from './resources.mjs';
 export const localFeedOrigin = location => location?.protocol === 'http:' && location?.hostname === '127.0.0.1';
+// The service accepts only its exact 127.0.0.1 address. Offer it when the same app was opened as localhost.
+export const loopbackAddress = location => location?.protocol === 'http:' && ['localhost', '[::1]'].includes(location?.hostname)
+  ? `http://127.0.0.1${location.port ? `:${location.port}` : ''}${location.pathname}${location.hash}` : '';
 export function stopStream(stream) { stream?.getTracks().forEach(track => track.stop()); }
 export function webcamError(error) {
   return ({NotAllowedError:'Camera access was denied. Allow camera access for this app in your browser, then connect again.',
@@ -51,7 +54,7 @@ export async function feedRequest(path, {token='', body, signal} = {}, fetcher=f
       headers:{...(token ? {'X-DVR-Token':token} : {}), ...(body === undefined ? {} : {'Content-Type':'application/json'})},
       ...(body === undefined ? {} : {body:JSON.stringify(body)}), cache:'no-store', credentials:'same-origin', signal});
   } catch (err) {
-    if (err.name === 'AbortError') throw err;
+    if (err.name === 'AbortError' || err.name === 'TimeoutError') throw err;
     throw Error('Local DVR service is unavailable. Open the configured local app and retry.');
   }
   if (!response.ok) {

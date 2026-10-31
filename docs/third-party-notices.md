@@ -1,7 +1,9 @@
 # Third-party components
 
 - Phosphor React icons: https://github.com/phosphor-icons/react — MIT.
-- Inter font: https://github.com/rsms/inter — SIL Open Font License 1.1.
+- Inter font: https://github.com/rsms/inter — SIL Open Font License 1.1. The Latin
+  variable subsets from `@fontsource-variable/inter` 5.3.0 are bundled in
+  `src/vendor/fonts/` with [the license](../public/licenses/inter-LICENSE.txt).
 - React / React DOM: https://github.com/facebook/react — MIT.
 - Vite: https://github.com/vitejs/vite — MIT.
 - Optional OpenCV Python: https://github.com/opencv/opencv-python — see upstream

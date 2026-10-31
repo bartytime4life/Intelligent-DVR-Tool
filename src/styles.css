@@ -1,4 +1,20 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;450;500;550;600;650;700&display=swap");
+/* Bundled Inter variable font (OFL-1.1, public/licenses/inter-LICENSE.txt): no external font request. */
+@font-face {
+  font-family: Inter;
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url(./vendor/fonts/inter-latin-ext-wght-normal.woff2) format("woff2-variations");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: Inter;
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url(./vendor/fonts/inter-latin-wght-normal.woff2) format("woff2-variations");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
 :root {
   font-family: Inter, Arial, sans-serif;
   color: #e7edf4;
@@ -486,6 +502,19 @@ h3 {
   background: #ffcc70;
   border-color: #ffcc70;
 }
+.button:disabled,
+.button.disabled {
+  opacity: .45;
+  cursor: not-allowed;
+}
+.button:disabled:hover {
+  background: #152938;
+  border-color: #3b5266;
+}
+.button.amber:disabled:hover {
+  background: var(--amber);
+  border-color: var(--amber);
+}
 .event-content .button {
   font-size: 11px;
   padding: 9px 10px;
@@ -689,6 +718,10 @@ h1 {
   flex: 1;
   max-width: 450px;
   background: #0b1d2b;
+}
+.search-field:focus-within {
+  outline: 2px solid var(--cyan);
+  outline-offset: 2px;
 }
 .search-field input {
   background: none;
@@ -1562,3 +1595,6 @@ textarea::placeholder {
 .event-filters { flex-wrap: wrap; }
 .review-actions .button:disabled { opacity: .45; cursor: not-allowed; }
 
+.queue-more { display: inline-flex; align-items: center; gap: 6px; margin: 4px 0 8px; font-size: 12px; }
+.event-recording { color: #8ea3ab; font-variant-numeric: tabular-nums; }
+.missing-evidence .button { margin-top: 14px; }

@@ -1,10 +1,11 @@
-import React, { lazy, Suspense, useEffect, useRef, useState } from "react";
+import React, { lazy, Suspense, useEffect, useId, useRef, useState } from "react";
 const FacilityBuilder = lazy(() => import("./FacilityBuilder.jsx").then(m => ({default:m.FacilityBuilder})));
 const SystemSetup = lazy(() => import("./SystemSetup.jsx"));
 import LiveMonitor from "./LiveMonitor.jsx";
 const RecognitionReview = lazy(() => import("./RecognitionReview.jsx"));
 import { mergeRecognitionEvents } from './recognition.mjs';
-import { workspaceFromHash, readWorkspace, writeWorkspace, reviewExport, parseReviewExport } from './workspace-state.mjs';
+import { workspaceFromHash, readWorkspace, writeWorkspace, preserveUnreadable, reviewExport, parseReviewExport } from './workspace-state.mjs';
+import { backdropDismiss } from './dialog-dismiss.mjs';
 import { DEFAULT_SETUP, parseSetup } from "./resources.mjs";
 import {
   Monitor,
@@ -12,13 +13,8 @@ import {
   ListBullets,
   Selection,
   GearSix,
-  CaretDown,
   CaretRight,
-  Play,
-  Pause,
   Eye,
-  EyeSlash,
-  ArrowsOutSimple,
   X,
   Info,
   Cube,
@@ -41,9 +37,14 @@ import {
   validateRule,
   parseReceipt,
   reviewEvent,
-  restoreSnapshot,
 } from "./data.mjs";
 const cameraOf = (e) => cameras.find((c) => c.id === e.camera);
+// Observations from different recordings of one camera otherwise look identical.
+const recordingTag = (e) => e.provenance?.source_sha256 ? <span className="event-recording" title={`Source SHA-256 ${e.provenance.source_sha256}`}> · rec {e.provenance.source_sha256.slice(0, 8)}</span> : null;
+const ruleFor = (rules, camera) => {
+  const r = rules.find((r) => r.camera === camera) || initialRules.find((r) => r.camera === camera) || initialRules[0];
+  return { ...r, rect: [...r.rect] };
+};
 function download(data, name) {
   const u = URL.createObjectURL(
     new Blob([JSON.stringify(data, null, 2)], { type: "application/json" }),
@@ -54,18 +55,67 @@ function download(data, name) {
   a.click();
   setTimeout(() => URL.revokeObjectURL(u), 1000);
 }
+function downloadText(text, name) {
+  const u = URL.createObjectURL(new Blob([text], { type: "text/plain" }));
+  const a = document.createElement("a");
+  a.href = u;
+  a.download = name;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(u), 1000);
+}
+const browserStorage = () => ({ getItem: key => localStorage.getItem(key), setItem: (key, value) => localStorage.setItem(key, value) });
 function useStored(key, initial) {
-  const [loaded] = useState(() => readWorkspace({ getItem: key => localStorage.getItem(key) }, key, initial));
+  const [loaded] = useState(() => readWorkspace(browserStorage(), key, initial));
   const [v, set] = useState(loaded.value);
-  const [storageError, setStorageError] = useState(loaded.error);
+  const [saveError, setSaveError] = useState("");
+  const [recoveryOpen, setRecoveryOpen] = useState(Boolean(loaded.error));
+  const adopted = useRef(null);
   useEffect(() => {
-    if (loaded.error && v === loaded.value) return;
-    setStorageError(writeWorkspace({ setItem: (key, value) => localStorage.setItem(key, value) }, key, v));
+    if ((loaded.error && v === loaded.value) || v === adopted.current) return;
+    if (loaded.raw != null && !preserveUnreadable(browserStorage(), key, loaded.raw)) {
+      setSaveError("Changes are only in memory. The unreadable saved entry could not be backed up, so it was not replaced. Export before closing this page.");
+      return;
+    }
+    setSaveError(writeWorkspace(browserStorage(), key, v));
   }, [key, v, loaded]);
-  return [v, set, storageError];
+  useEffect(() => {
+    // Another tab saved newer data. Adopt it instead of overwriting it with this tab's older copy.
+    const changed = e => {
+      if (e.storageArea !== localStorage || e.key !== key || e.newValue === null) return;
+      const next = readWorkspace({ getItem: () => e.newValue }, key, null);
+      if (next.error || !next.value) return;
+      adopted.current = next.value;
+      set(next.value);
+      setSaveError("");
+    };
+    window.addEventListener("storage", changed);
+    return () => window.removeEventListener("storage", changed);
+  }, [key]);
+  const recovery = recoveryOpen ? { message: loaded.error, raw: loaded.raw, dismiss: () => setRecoveryOpen(false) } : null;
+  return [v, set, saveError || recovery?.message || "", recovery];
+}
+class WorkspaceBoundary extends React.Component {
+  state = { error: null };
+  static getDerivedStateFromError(error) { return { error }; }
+  render() {
+    if (!this.state.error) return this.props.children;
+    return (
+      <section className="content-page workspace-error" role="alert">
+        <p className="eyebrow">{this.props.name.toUpperCase()}</p>
+        <h1>This workspace stopped unexpectedly</h1>
+        <p>Other workspaces, saved reviews and the current Recognition session are unaffected. Try again, or reload if the app was just updated. Reloading clears unsaved in-memory clips.</p>
+        <p className="hint">{this.state.error?.message}</p>
+        <div className="review-actions">
+          <button className="button" onClick={() => this.setState({ error: null })}>Try again</button>
+          <button className="button" onClick={() => window.location.reload()}>Reload page</button>
+        </div>
+      </section>
+    );
+  }
 }
 function Modal({ title, close, children, wide = false }) {
   const ref = useRef();
+  const titleId = useId();
   useEffect(() => {
     const before = document.activeElement;
     ref.current.showModal();
@@ -75,15 +125,14 @@ function Modal({ title, close, children, wide = false }) {
     <dialog
       ref={ref}
       className={`modal ${wide ? "wide" : ""}`}
+      aria-labelledby={titleId}
       onCancel={close}
-      onClick={(e) => {
-        if (e.target === e.currentTarget) close();
-      }}
+      {...backdropDismiss(close)}
     >
       <div className="modal-heading">
         <div>
           <p className="eyebrow">INTELLIGENT DVR</p>
-          <h2>{title}</h2>
+          <h2 id={titleId}>{title}</h2>
         </div>
         <button
           className="icon-button"
@@ -104,12 +153,9 @@ function project(w, h) {
   return { iw, ih, ox: (w - iw) / 2, oy: (h - ih) / 2 };
 }
 function Overlay({
-  camera,
   rule,
-  visible = true,
   edit = false,
   onRect,
-  time = 0,
   pixelScale = 2,
 }) {
   const ref = useRef(),
@@ -124,7 +170,6 @@ function Overlay({
       el.height = h * pixelScale;
       ctx.scale(pixelScale, pixelScale);
       ctx.clearRect(0, 0, w, h);
-      if (!visible) return;
       const { iw, ih, ox, oy } = project(w, h);
       if (rule?.enabled || edit) {
         const [x, y, rw, rh] = rule.rect;
@@ -136,18 +181,12 @@ function Overlay({
         ctx.strokeRect(x * iw + ox, y * ih + oy, rw * iw, rh * ih);
         ctx.setLineDash([]);
       }
-      if (camera?.box && !edit) {
-        const [x, y, bw, bh] = camera.box;
-        ctx.strokeStyle = "#ffbc3c";
-        ctx.lineWidth = 1.6;
-        ctx.strokeRect(x * iw + ox, y * ih + oy, bw * iw, bh * ih);
-      }
     }
     draw();
     const o = new ResizeObserver(draw);
     o.observe(el);
     return () => o.disconnect();
-  }, [camera, rule, visible, edit, time, pixelScale]);
+  }, [rule, edit, pixelScale]);
   function point(e) {
     const r = e.currentTarget.getBoundingClientRect(),
       { iw, ih, ox, oy } = project(r.width, r.height);
@@ -207,6 +246,7 @@ function EventRow({ event, review, zone }) {
         <time>{event.time}</time>
         <p className="event-source">
           {c ? `Cam ${c.id} · ${c.name}` : event.cameraName}
+          {recordingTag(event)}
         </p>
         <div className="event-description">
           {event.label === "person" ? <User size={23} /> : <Cube size={23} />}
@@ -237,18 +277,19 @@ function EventRow({ event, review, zone }) {
 export function App() {
   const [tab, updateTab] = useState(() => workspaceFromHash(window.location.hash) || "Monitor"),
     [selected, setSelected] = useState(1),
-    [events, setEvents, eventsStorageError] = useStored("dvr.events.v1", []),
-    [rules, setRules, rulesStorageError] = useStored("dvr.rules.v1", initialRules),
+    [events, setEvents, eventsStorageError, eventsRecovery] = useStored("dvr.events.v1", []),
+    [rules, setRules, rulesStorageError, rulesRecovery] = useStored("dvr.rules.v1", initialRules),
     [modal, setModal] = useState(null),
     [toast, setToast] = useState(""),
     [query, setQuery] = useState(""),
     [filter, setFilter] = useState("all"),
-    [draft, setDraft] = useState(initialRules[0]),
+    [draft, setDraft] = useState(() => ruleFor(rules, 1)),
     [error, setError] = useState(""),
     [note, setNote] = useState(""),
     [video, setVideo] = useState(null);
   const [liveCount, setLiveCount] = useState(0);
   const [capturedClip, setCapturedClip] = useState(null);
+  const [evidence, setEvidence] = useState(null);
   const [capturePending, setCapturePending] = useState(false);
   useEffect(() => {
     if (!capturedClip && !capturePending) return;
@@ -262,7 +303,17 @@ export function App() {
   // Read the latest queue after asynchronous file reads and rapid consecutive imports.
   const eventsRef = useRef(events);
   eventsRef.current = events;
+  // Leaving Facility unmounts the builder, so unsaved drafts and its undo history would be lost silently.
+  const tabRef = useRef(tab), facilityDirty = useRef(false);
+  tabRef.current = tab;
+  const mayLeave = (next) => {
+    if (tabRef.current !== "Facility" || next === "Facility" || !facilityDirty.current) return true;
+    if (!window.confirm("Leave the facility builder? Unsaved facility edits, drafts and undo history will be discarded.")) return false;
+    facilityDirty.current = false; // popstate and hashchange can both report one Back press.
+    return true;
+  };
   function setTab(next) {
+    if (!mayLeave(next)) return;
     if (next === "Recognition") setRecognitionOpened(true);
     updateTab(next);
     const hash = `#${next.toLowerCase()}`;
@@ -272,6 +323,7 @@ export function App() {
     const changed = () => {
       const next = workspaceFromHash(window.location.hash);
       if (!next) return; // Preserve the skip-to-workspace anchor.
+      if (!mayLeave(next)) { window.history.pushState(null, "", "#facility"); return; }
       if (next === "Recognition") setRecognitionOpened(true);
       updateTab(next);
     };
@@ -295,13 +347,15 @@ export function App() {
     if (clearedEvents && addObservations(clearedEvents)) setClearedEvents(null);
   }
   const [resourceState, setResourceState] = useState(() => {
+    let saved = null;
     try {
-      const saved = localStorage.getItem("dvr.setup.v1");
+      saved = localStorage.getItem("dvr.setup.v1");
       return { setup: saved ? parseSetup(saved) : structuredClone(DEFAULT_SETUP), error: "" };
     } catch {
-      return { setup: structuredClone(DEFAULT_SETUP), error: "Saved machine setup was unavailable or invalid. Defaults are shown; export your plan if storage is unavailable." };
+      return { setup: structuredClone(DEFAULT_SETUP), unreadable: saved, error: "Saved machine setup was unavailable or invalid. Defaults are shown; the unreadable entry is kept as a browser backup. Export your plan if storage is unavailable." };
     }
   });
+  const loadedSetup = useRef(resourceState.setup), adoptedSetup = useRef(null);
   const [pageHidden, setPageHidden] = useState(document.hidden);
   const resources = resourceState.setup;
   useEffect(() => {
@@ -310,9 +364,23 @@ export function App() {
     return () => document.removeEventListener("visibilitychange", changed);
   }, []);
   useEffect(() => {
-    try { localStorage.setItem("dvr.setup.v1", JSON.stringify(resources)); }
+    // Nothing changed yet: never replace an unreadable or another tab's entry on load.
+    if (resources === loadedSetup.current || resources === adoptedSetup.current) return;
+    try {
+      if (resourceState.unreadable != null && !preserveUnreadable(localStorage, "dvr.setup.v1", resourceState.unreadable)) throw Error("backup failed");
+      localStorage.setItem("dvr.setup.v1", JSON.stringify(resources));
+    }
     catch { setResourceState(s => ({ ...s, error: "Machine setup could not be saved in this browser. Export the setup plan to keep it." })); }
   }, [resources]);
+  useEffect(() => {
+    const changed = (e) => {
+      if (e.storageArea !== localStorage || e.key !== "dvr.setup.v1" || e.newValue === null) return;
+      try { const setup = parseSetup(e.newValue); adoptedSetup.current = setup; setResourceState(s => ({ ...s, setup, error: "" })); }
+      catch { /* Keep this tab's valid setup; the other tab reports its own problem. */ }
+    };
+    window.addEventListener("storage", changed);
+    return () => window.removeEventListener("storage", changed);
+  }, []);
   const importRef = useRef(),
     videoRef = useRef(),
     pending = events.filter((e) => e.status === "pending");
@@ -328,12 +396,16 @@ export function App() {
     [video],
   );
   function zone(id = selected) {
+    if (!mayLeave("Zones")) return;
     setSelected(id);
-    const r = rules.find((r) => r.camera === id);
-    setDraft({ ...r, rect: [...r.rect] });
-    setError("");
     setTab("Zones");
   }
+  // Every way into Zones (navigation, links, Back/Forward) edits the saved rule for the selected plan.
+  useEffect(() => {
+    if (tab !== "Zones") return;
+    setDraft(ruleFor(rules, selected));
+    setError("");
+  }, [tab, selected]);
   function review(e) {
     setNote(e.note || "");
     setModal({ type: "review", event: e });
@@ -352,7 +424,7 @@ export function App() {
       setError(problem);
       return;
     }
-    setRules((rs) => rs.map((r) => (r.camera === selected ? draft : r)));
+    setRules((rs) => rs.map((r) => (r.camera === draft.camera ? draft : r)));
     setError("");
     setToast("Review rule updated.");
   }
@@ -400,13 +472,13 @@ export function App() {
         <div className="wordmark">Intelligent DVR</div>
         <span className="header-divider" />
         <span className="pilot-label">{tab === "Recognition" ? "Recording recognition" : tab === "Facility" ? "Guided facility builder" : "Local camera workspace"}</span>
-        <button className="workspace-select" onClick={() => setTab("Settings")}>
-          {tab === "Recognition" ? "Local recording review" : "Local workspace"}
-          <CaretDown size={14} />
+        <button className="workspace-select" onClick={() => setTab("Settings")} aria-label="Open workspace settings">
+          Local workspace
+          <GearSix size={14} />
         </button>
         <div className="header-right">
           <span className="header-date">
-            {tab === "Recognition" ? <>Offline <span>· human review</span></> : <>Local <span>· human reviewed</span></>}
+            Local <span>· human review</span>
           </span>
           <button
             className="icon-button"
@@ -455,14 +527,17 @@ export function App() {
           {rulesStorageError && <p>Rules: {rulesStorageError}</p>}</div>
           <button className="button" onClick={exportReviews}>Export reviews</button>
           <button className="button" onClick={() => download({schema:"intelligent-dvr.rules.v1", rules}, "dvr-rules.json")}>Export rules</button>
+          {eventsRecovery?.raw != null && <button className="button" onClick={() => downloadText(eventsRecovery.raw, "dvr-unreadable-reviews.json")}>Download unreadable reviews</button>}
+          {rulesRecovery?.raw != null && <button className="button" onClick={() => downloadText(rulesRecovery.raw, "dvr-unreadable-rules.json")}>Download unreadable rules</button>}
+          {(eventsRecovery || rulesRecovery) && <button className="text-button" onClick={() => { eventsRecovery?.dismiss(); rulesRecovery?.dismiss(); }}>Dismiss</button>}
         </div>}
-        {recognitionOpened && <div hidden={tab !== "Recognition"}><Suspense fallback={<div className="content-page"><h1>Opening recognition review…</h1></div>}>
-          <RecognitionReview active={tab === "Recognition" && !pageHidden} onImport={addObservations} clip={capturedClip} onClip={setCapturedClip} reviews={events} />
-        </Suspense></div>}
-        {tab === "Facility" && <Suspense fallback={<div className="content-page"><h1>Opening facility builder…</h1></div>}><FacilityBuilder onPreviewCount={setLiveCount} /></Suspense>}
-        {tab === "System" && <Suspense fallback={<div className="content-page"><h1>Opening machine setup…</h1></div>}><SystemSetup setup={resources}
-          onApply={setup => setResourceState({ setup, error: "" })} storageError={resourceState.error} download={download} /></Suspense>}
-        {tab === "Monitor" && <LiveMonitor visibleTiles={resources.browser.visibleTiles} onCount={setLiveCount} pageHidden={pageHidden} clip={capturedClip} onClip={setCapturedClip} capturePending={capturePending} onCaptureBusy={setCapturePending} onReviewClip={() => setTab('Recognition')} queue={
+        {recognitionOpened && <div hidden={tab !== "Recognition"}><WorkspaceBoundary name="Recognition"><Suspense fallback={<div className="content-page"><h1>Opening recognition review…</h1></div>}>
+          <RecognitionReview active={tab === "Recognition" && !pageHidden} onImport={addObservations} clip={capturedClip} onClip={setCapturedClip} reviews={events} evidence={evidence} />
+        </Suspense></WorkspaceBoundary></div>}
+        {tab === "Facility" && <WorkspaceBoundary name="Facility"><Suspense fallback={<div className="content-page"><h1>Opening facility builder…</h1></div>}><FacilityBuilder onPreviewCount={setLiveCount} onDirtyChange={(dirty) => { facilityDirty.current = dirty; }} /></Suspense></WorkspaceBoundary>}
+        {tab === "System" && <WorkspaceBoundary name="System"><Suspense fallback={<div className="content-page"><h1>Opening machine setup…</h1></div>}><SystemSetup setup={resources}
+          onApply={setup => setResourceState(s => ({ ...s, setup, error: "" }))} storageError={resourceState.error} download={download} /></Suspense></WorkspaceBoundary>}
+        {tab === "Monitor" && <WorkspaceBoundary name="Monitor"><LiveMonitor visibleTiles={resources.browser.visibleTiles} onCount={setLiveCount} pageHidden={pageHidden} clip={capturedClip} onClip={setCapturedClip} capturePending={capturePending} onCaptureBusy={setCapturePending} onReviewClip={() => setTab('Recognition')} queue={
               <aside className="review-queue">
                 <div className="queue-heading">
                   <h2>
@@ -489,6 +564,12 @@ export function App() {
                       zone={zone}
                     />
                   ))}
+                  {pending.length > 3 && (
+                    <button className="text-button queue-more" onClick={() => { setFilter("pending"); setEventMode("all"); setQuery(""); setTab("Events"); }}>
+                      View all {pending.length} awaiting review
+                      <CaretRight size={13} />
+                    </button>
+                  )}
                   {!pending.length && (
                     <div className="empty-state">
                       <Check size={32} />
@@ -512,7 +593,7 @@ export function App() {
                   </p>
                 </div>
               </aside>
-        } />}
+        } /></WorkspaceBoundary>}
         {tab === "Events" && (
           <section className="content-page">
             <div className="page-heading">
@@ -579,7 +660,7 @@ export function App() {
                     <span className="event-row-title">
                       {e.title}
                       <small>
-                        {cameraOf(e)?.name || e.cameraName} · {e.time}
+                        {cameraOf(e)?.name || e.cameraName} · {e.time}{recordingTag(e)}
                       </small>
                     </span>
                     <span className="mode-tag">
@@ -631,6 +712,7 @@ export function App() {
                   <Overlay
                     rule={draft}
                     edit
+                    pixelScale={resources.browser.overlayScale}
                     onRect={(rect) => setDraft((r) => ({ ...r, rect }))}
                   />
                   <span className="sample-badge">RULE PLAN · NO CAMERA IMAGE</span>
@@ -775,8 +857,12 @@ export function App() {
                   <strong>{liveCount} receiving</strong>
                 </div>
                 <div className="setting-row">
+                  <span>Live detection on previews</span>
+                  <strong>Off · recordings only</strong>
+                </div>
+                <div className="setting-row">
                   <span>Detection model</span>
-                  <strong>Not configured</strong>
+                  <button className="text-button" onClick={() => setTab("Recognition")}>Chosen per analysis in Recognition</button>
                 </div>
                 <div className="setting-row">
                   <span>Measured latency</span>
@@ -889,6 +975,11 @@ export function App() {
                 <Camera size={44} />
                 <h3>{modal.event.mode === 'sample' ? 'Legacy sample observation' : 'Original footage stays local'}</h3>
                 <p>{modal.event.mode === 'sample' ? 'This retained sample has no real camera evidence. Your previous decision and notes are preserved.' : `Open the source recording at ${modal.event.time} in Recognition to verify this observation.`}</p>
+                {modal.event.provenance?.source_sha256 && <button className="button" onClick={() => {
+                  const e = modal.event;
+                  setEvidence({ sourceId: e.sourceId, sha: e.provenance.source_sha256, model: e.provenance.model_sha256, time: e.time, nonce: Date.now() });
+                  setModal(null); setTab("Recognition");
+                }}>Open in Recognition<CaretRight size={15} /></button>}
               </div>
               <p className="hint">
                 {modal.event.time} ·{" "}
@@ -957,7 +1048,7 @@ export function App() {
         </Modal>
       )}
       {modal?.type === "video" && video && (
-        <Modal title="Local video preview" wide close={() => setModal(null)}>
+        <Modal title="Local video preview" wide close={() => { setModal(null); setVideo(null); }}>
           <p>{video.name}</p>
           <video
             className="local-video"

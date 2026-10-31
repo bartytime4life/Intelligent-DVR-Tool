@@ -100,7 +100,8 @@ export function calculateSetup(input) {
 export function resourcePolicy(input) {
   const s = validateSetup(input), c = s.compute;
   return { schema: POLICY_SCHEMA, platform: s.platform,
-    browser: { visible_tiles: s.browser.visibleTiles, pause_when_hidden: s.browser.pauseHidden, overlay_scale: s.browser.overlayScale },
+    // The browser always pauses previews and playback on hidden pages; older saved setups may still hold false.
+    browser: { visible_tiles: s.browser.visibleTiles, pause_when_hidden: true, overlay_scale: s.browser.overlayScale },
     analysis: { opencv_threads: c.threads, worker_slots: c.workerSlots, thread_budget: c.threadBudget,
       max_sample_bytes: 640 * 640 * 3, max_buffer_bytes: c.bufferMiB * MiB,
       max_age_seconds: c.maxAgeSeconds, max_frames: c.maxFrames } };

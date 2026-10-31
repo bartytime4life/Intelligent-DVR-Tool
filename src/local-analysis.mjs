@@ -14,9 +14,12 @@ export async function importRecording(file, token, signal, fetcher = fetch) {
   const digest = await crypto.subtle.digest('SHA-256', bytes);
   const sha = [...new Uint8Array(digest)].map(x => x.toString(16).padStart(2, '0')).join('');
   if (signal?.aborted) throw new DOMException('Import cancelled', 'AbortError');
-  const response = await fetcher(base + '/recordings', { method:'POST', body:bytes, signal,
-    credentials:'omit', cache:'no-store', redirect:'error',
-    headers:{'X-DVR-Token':token, 'X-DVR-SHA256':sha, 'Content-Type':mime} });
+  let response;
+  try {
+    response = await fetcher(base + '/recordings', { method:'POST', body:bytes, signal,
+      credentials:'omit', cache:'no-store', redirect:'error',
+      headers:{'X-DVR-Token':token, 'X-DVR-SHA256':sha, 'Content-Type':mime} });
+  } catch (error) { throw serviceFailure(error, 'analysis service'); }
   let result;
   try { result = await response.json(); } catch { throw Error('Import response was lost. Reconnect and retry the same file to avoid duplicates.'); }
   if (!response.ok) throw Error(result.error?.message || 'Recording import failed. Reconnect and refresh choices.');
@@ -24,19 +27,31 @@ export async function importRecording(file, token, signal, fetcher = fetch) {
   return result;
 }
 
+// Browser fetch failures read "Failed to fetch"; explain them in the app's terms. Cancellation stays an AbortError.
+export function serviceFailure(error, service) {
+  if (error?.name === 'AbortError') return error;
+  if (error?.name === 'TimeoutError') return Error(`The local ${service} did not respond in time. Check that the local app is still running, then reconnect.`);
+  return Error(`The local ${service} is unavailable. Open the configured local application on this computer, then reconnect.`);
+}
+
 export async function analysisRequest(path, { token, method = 'GET', body, signal, fetcher = fetch } = {}) {
-  const response = await fetcher(base + path, {
-    method, signal, cache: 'no-store', credentials: 'omit', redirect: 'error',
-    headers: { ...(token ? { 'X-DVR-Token': token } : {}), ...(body ? { 'Content-Type': 'application/json' } : {}) },
-    ...(body ? { body: JSON.stringify(body) } : {}),
-  });
+  let response;
+  try {
+    response = await fetcher(base + path, {
+      method, signal, cache: 'no-store', credentials: 'omit', redirect: 'error',
+      headers: { ...(token ? { 'X-DVR-Token': token } : {}), ...(body ? { 'Content-Type': 'application/json' } : {}) },
+      ...(body ? { body: JSON.stringify(body) } : {}),
+    });
+  } catch (error) { throw serviceFailure(error, 'analysis service'); }
   if (!response.ok) {
     let message = 'The local analysis service is unavailable. Open the configured local application, then reconnect.';
     try { message = (await response.json()).error?.message || message; } catch { /* Static previews have no job API. */ }
-    throw Error(message);
+    throw Object.assign(Error(message), { status: response.status });
   }
   return response;
 }
+// The service answered and refused the request, so nothing started. Only a lost response or a rejected session is ambiguous.
+export const refused = error => Number.isInteger(error?.status) && error.status !== 403;
 
 export async function boundedBody(response, limit) {
   if (Number(response.headers.get('content-length')) > limit) throw Error('The local result exceeds its size limit. Try a shorter recording.');

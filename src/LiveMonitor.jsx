@@ -1,10 +1,12 @@
 import React, {useEffect, useRef, useState} from 'react';
 import {Camera, Plus, Plug, PlugsConnected, X, ArrowClockwise, WarningCircle, Globe} from '@phosphor-icons/react';
-import {feedRequest, localFeedOrigin, webcamController, visibleFeedTiles} from './live-feeds.mjs';
+import {feedRequest, localFeedOrigin, loopbackAddress, webcamController, visibleFeedTiles} from './live-feeds.mjs';
 import './live-feeds.css';
 import ClipCapture from './ClipCapture.jsx';
+import {backdropDismiss} from './dialog-dismiss.mjs';
 
 const guide = 'https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/local-camera-feeds.md';
+const publicGuide = 'https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/public-webcams.md';
 export default function LiveMonitor({queue, visibleTiles=4, onCount, pageHidden, clip, onClip, onReviewClip, capturePending, onCaptureBusy}) {
   const [webcam, setWebcam] = useState({state:'disconnected', message:'No webcam connected'});
   const [devices, setDevices] = useState([]), [device, setDevice] = useState('');
@@ -13,9 +15,9 @@ export default function LiveMonitor({queue, visibleTiles=4, onCount, pageHidden,
   const [working, setWorking] = useState(false), [selected, setSelected] = useState('webcam');
   const video = useRef(), dialog = useRef(), token = useRef(''), sessions = useRef(new Map());
   const generation = useRef(0), busy = useRef(false), alive = useRef(true);
-  const controller = useRef(null);
+  const controller = useRef(null), shown = useRef(new Set());
   if (!controller.current) controller.current = webcamController(navigator.mediaDevices, state => { if (alive.current) setWebcam(state); });
-  const local = localFeedOrigin(window.location);
+  const local = localFeedOrigin(window.location), loopbackUrl = loopbackAddress(window.location);
   const publicMode = setup === 'public';
   const choices = (catalog?.sources || []).filter(s => publicMode ? s.kind?.startsWith('public-') : s.kind === 'rtsp');
   const chosen = choices.find(s => s.id === source);
@@ -45,17 +47,20 @@ export default function LiveMonitor({queue, visibleTiles=4, onCount, pageHidden,
   }, []);
   useEffect(() => { onCount(live); }, [live, onCount]);
   useEffect(() => { if (pageHidden) { stopAll('Preview stopped while the page was hidden. Connect again when ready.'); setSetup(''); } }, [pageHidden]);
+  // Tiles remount when the displayed set changes. Attach the stream to every new element, but never reload an attached one.
+  function attachVideo(el) {
+    video.current = el;
+    if (!el || el.srcObject === (webcam.stream || null)) return;
+    el.srcObject = webcam.stream || null;
+    if (webcam.stream) el.play().catch(err => { if (err.name !== 'AbortError') controller.current.stop('Playback was blocked. Connect again to resume.'); });
+  }
+  const setupOpen = Boolean(setup);
   useEffect(() => {
-    if (video.current) {
-      video.current.srcObject = webcam.stream || null;
-      if (webcam.stream) video.current.play().catch(() => controller.current.stop('Playback was blocked. Connect again to resume.'));
-    }
-  }, [webcam.stream, selected, visibleTiles]);
-  useEffect(() => {
-    if (!setup) return;
+    // Return focus to the control that opened the dialog, not to a source-type button inside it.
+    if (!setupOpen) return;
     const previous = document.activeElement; dialog.current.showModal();
     return () => previous?.focus();
-  }, [setup]);
+  }, [setupOpen]);
   useEffect(() => {
     let disposed = false, timer;
     async function poll() {
@@ -67,16 +72,21 @@ export default function LiveMonitor({queue, visibleTiles=4, onCount, pageHidden,
           const next = await (await feedRequest(`/${s.id}`, {token:s.token, signal:s.abort.signal})).json();
           if (disposed || !sessions.current.has(s.id)) continue;
           Object.assign(s, next);
-          if (s.state === 'live') {
+          // Status polls keep every lease alive; only tiles on the wall download frames.
+          if (s.state === 'live' && shown.current.has(s.id)) {
             const response = await feedRequest(`/${s.id}/frame`, {token:s.token, signal:s.abort.signal});
             const blob = await response.blob();
             if (blob.size > 512 * 1024 || blob.type !== 'image/jpeg') throw Error('Unsupported preview frame. Reconnect the channel.');
             if (disposed || !sessions.current.has(s.id)) continue;
             const old = s.image; s.image = URL.createObjectURL(blob); if (old) URL.revokeObjectURL(old);
-          } else if (s.image) { URL.revokeObjectURL(s.image); s.image = ''; }
+          } else if (s.state !== 'live' && s.image) { URL.revokeObjectURL(s.image); s.image = ''; }
+          s.misses = 0;
         } catch (err) {
-          if (!disposed && sessions.current.has(s.id)) {
-            s.state = 'failed'; s.error = {message:'Preview connection was lost. Check the local service and reconnect. The camera lease expires within 15 seconds.'};
+          // One slow reply from the local service (for example during a large result download) is not a lost camera.
+          // Three consecutive misses stay inside the 15-second lease.
+          if (!disposed && sessions.current.has(s.id) && (s.misses = (s.misses || 0) + 1) >= 3) {
+            s.state = 'failed';
+            s.error = {message:`${err.name === 'AbortError' ? 'Preview requests timed out.' : err.message} Check the local service and reconnect. The camera lease expires within 15 seconds.`};
             if (s.image) URL.revokeObjectURL(s.image); s.image = '';
           }
         } finally { clearTimeout(deadline); }
@@ -141,6 +151,7 @@ export default function LiveMonitor({queue, visibleTiles=4, onCount, pageHidden,
     ...feeds,
   ];
   const displayed = visibleFeedTiles(tiles, selected, visibleTiles);
+  shown.current = new Set(displayed.map(t => t.id));
   const blanks = Math.max(0, Math.min(4, visibleTiles) - displayed.length);
   return <div className="live-monitor">
     <div className="live-heading"><div><p className="eyebrow">YOUR CAMERAS · LOCAL PREVIEW</p><h1>Monitor <span>{live} receiving</span></h1></div>
@@ -154,14 +165,14 @@ export default function LiveMonitor({queue, visibleTiles=4, onCount, pageHidden,
       <section className={`camera-wall wall-${Math.min(4, visibleTiles)}`} aria-label="Camera wall">
         {displayed.map(t => <article key={t.id} className={`camera-tile live-tile ${selected === t.id ? 'selected' : ''}`} onClick={() => setSelected(t.id)} aria-label={`${t.name} preview`}>
           <div className="live-picture">
-            {t.id === 'webcam' && webcam.stream && <video ref={video} autoPlay muted playsInline aria-label="Webcam video" />}
+            {t.id === 'webcam' && webcam.stream && <video ref={attachVideo} autoPlay muted playsInline aria-label="Webcam video" />}
             {t.id !== 'webcam' && t.image && <img src={t.image} alt={`${t.name} current preview frame`} onError={() => {const s=sessions.current.get(t.id); if(s){s.state='failed';s.error={message:'The browser could not display this frame. Disconnect and retry.'};URL.revokeObjectURL(s.image);s.image='';sync();}}} />}
-            {((t.id === 'webcam' && t.state !== 'live') || (t.id !== 'webcam' && !t.image)) && <div className="feed-placeholder"><Camera size={34}/><h3>{t.state === 'connecting' ? 'Connecting…' : t.state === 'failed' ? 'Connection needs attention' : 'Preview stopped'}</h3>
+            {((t.id === 'webcam' && t.state !== 'live') || (t.id !== 'webcam' && !t.image)) && <div className="feed-placeholder"><Camera size={34}/><h3>{t.state === 'connecting' ? 'Connecting…' : t.state === 'failed' ? 'Connection needs attention' : t.state === 'interrupted' ? 'Frames interrupted' : t.state === 'live' ? 'Waiting for frames' : 'Preview stopped'}</h3>
               <p>{t.message || t.error?.message || 'Waiting for the first image from this source…'}</p></div>}
             <div className="live-tile-heading"><strong>{t.name}</strong><span className={`feed-status ${t.state}`}>{t.state === 'live' ? 'Receiving' : t.state}</span></div>
           </div>
           {t.kind?.startsWith('public-') && <div className="public-source-credit"><a href={t.provider_url} target="_blank" rel="noreferrer noopener">{t.provider} ↗</a><span>{t.kind === 'public-jpeg' ? `Snapshot · refresh ${t.refresh_seconds}s` : 'Public MJPEG · preview ≤ 4 fps'}{t.frame_age_seconds != null ? ` · retrieved ${Math.floor(t.frame_age_seconds)}s ago` : ''}</span><small>Provider capture time and freshness unverified</small></div>}
-          <div className="live-tile-controls"><span>{t.id === 'webcam' ? 'Webcam · video only' : t.kind?.startsWith('public-') ? 'Internet source · local preview' : 'DVR · sampled preview ≤ 4 fps'}</span>
+          <div className="live-tile-controls" onClick={e => e.stopPropagation()}><span>{t.id === 'webcam' ? 'Webcam · video only' : t.kind?.startsWith('public-') ? 'Internet source · local preview' : 'DVR · sampled preview ≤ 4 fps'}</span>
             <button className="text-button" onClick={() => t.id === 'webcam' ? controller.current.stop() : disconnect(t.id)}>{t.state === 'connecting' ? 'Cancel' : t.id !== 'webcam' && ['failed','disconnected'].includes(t.state) ? 'Remove' : 'Disconnect'}</button>
             {t.id === 'webcam' && ['failed','disconnected'].includes(t.state) && <button className="text-button" onClick={() => openSetup()}>Reconnect</button>}</div>
         </article>)}
@@ -178,9 +189,9 @@ export default function LiveMonitor({queue, visibleTiles=4, onCount, pageHidden,
         {!tiles.length && <p>No saved footage is being presented as a camera feed.</p>}
         <button className="text-button" onClick={() => openSetup('dvr')}><Plug/>Set up local DVR</button><button className="text-button" onClick={() => openSetup('public')}><Globe/>Public webcams</button></div>
     </section>
-    {setup && <dialog className="modal wide feed-dialog" ref={dialog} onCancel={e => {e.preventDefault(); closeSetup();}} onClick={e => {if(e.target===e.currentTarget)closeSetup();}}>
-      <div className="modal-heading"><div><p className="eyebrow">EXPLICIT CONNECTION · SOURCE PREVIEW</p><h2>Connect a camera source</h2></div><button className="icon-button" aria-label="Close connection setup" onClick={closeSetup}><X/></button></div>
-      <div className="feed-kind"><button className={`button ${setup === 'webcam' ? 'active' : ''}`} onClick={() => switchSetup('webcam')}><Camera/>This computer’s webcam</button><button className={`button ${setup === 'dvr' ? 'active' : ''}`} onClick={() => switchSetup('dvr')}><Plug/>Local DVR / IP camera</button><button className={`button ${publicMode ? 'active' : ''}`} onClick={() => switchSetup('public')}><Globe/>Public internet webcam</button></div>
+    {setup && <dialog className="modal wide feed-dialog" ref={dialog} aria-labelledby="feed-dialog-title" onCancel={e => {e.preventDefault(); closeSetup();}} {...backdropDismiss(closeSetup)}>
+      <div className="modal-heading"><div><p className="eyebrow">EXPLICIT CONNECTION · SOURCE PREVIEW</p><h2 id="feed-dialog-title">Connect a camera source</h2></div><button className="icon-button" aria-label="Close connection setup" onClick={closeSetup}><X/></button></div>
+      <div className="feed-kind" role="group" aria-label="Source type"><button className={`button ${setup === 'webcam' ? 'active' : ''}`} aria-pressed={setup === 'webcam'} onClick={() => switchSetup('webcam')}><Camera/>This computer’s webcam</button><button className={`button ${setup === 'dvr' ? 'active' : ''}`} aria-pressed={setup === 'dvr'} onClick={() => switchSetup('dvr')}><Plug/>Local DVR / IP camera</button><button className={`button ${publicMode ? 'active' : ''}`} aria-pressed={publicMode} onClick={() => switchSetup('public')}><Globe/>Public internet webcam</button></div>
       {setup === 'webcam' ? <div className="feed-setup-body"><h3>Use a built-in or USB webcam</h3><p>Your browser will ask for camera permission. Video stays in this browser. The microphone stays off.</p>
         <label>Webcam<select aria-label="Webcam" value={device} onChange={e => setDevice(e.target.value)} disabled={webcamActive}><option value="">Browser default camera</option>{devices.filter(d=>d.deviceId).map((d,i)=><option key={d.deviceId} value={d.deviceId}>{d.label || `Camera ${i+1}`}</option>)}</select></label>
         <button className="text-button" onClick={refreshDevices}><ArrowClockwise/>Refresh devices</button>
@@ -189,7 +200,7 @@ export default function LiveMonitor({queue, visibleTiles=4, onCount, pageHidden,
           {webcamActive && <button className="button" onClick={() => controller.current.stop('Camera connection cancelled.')}>{webcam.state === 'connecting' ? 'Cancel connection' : 'Disconnect webcam'}</button>}
           {webcam.state === 'live' && <button className="button" onClick={closeSetup}>View camera wall</button>}</div>
       </div> : <div className="feed-setup-body"><h3>{publicMode ? 'Choose an approved public webcam' : 'Choose an RTSP channel on your LAN'}</h3><p>{publicMode ? 'Use a provider-published direct HTTPS JPEG or MJPEG endpoint with permission for public viewing. Connecting sends this computer’s public IP and the requested path to that provider. Your local feeds and recordings are not uploaded.' : 'The local app bridges a configured DVR channel into this browser. Each channel has its own RTSP path. It connects only when you press Connect DVR channel.'}</p>
-        {!local && <p className="feed-error">Network source access needs the local app at http://127.0.0.1. Open the installed app to connect.</p>}
+        {!local && <p className="feed-error">Network source access needs the local app at http://127.0.0.1. {loopbackUrl ? <a href={loopbackUrl}>Open this page at 127.0.0.1</a> : 'Open the installed app to connect.'}</p>}
         <button className="button" disabled={!local || working} onClick={refreshDvr}><ArrowClockwise/>{publicMode ? 'Load approved public webcams' : catalog ? 'Refresh DVR sources' : 'Load configured DVR sources'}</button>
         {catalog && <><label>{publicMode ? 'Public webcam' : 'DVR channel'}<select aria-label={publicMode ? 'Public webcam' : 'DVR channel'} value={source} onChange={e=>setSource(e.target.value)} disabled={working}><option value="">Choose a source…</option>{choices.map(s=><option key={s.id} value={s.id}>{s.name}</option>)}</select></label>
           {!choices.length && <p>{publicMode ? 'No public webcams approved yet. Add a permitted direct HTTPS source, attribution and provider page to local-feeds.json, then restart the app. Loading this list does not contact providers.' : 'No DVR channels configured. Add the channel’s private IPv4 address, RTSP port, path and credentials to the local source file, then restart the local app.'}</p>}
@@ -197,7 +208,7 @@ export default function LiveMonitor({queue, visibleTiles=4, onCount, pageHidden,
           {!catalog.ready && <p className="feed-error">OpenCV is unavailable. Install the local edge requirements on Linux or Windows and restart the app.</p>}
           <button className="button amber" disabled={!chosen || working || !catalog.ready || active >= 4} onClick={connectDvr}><PlugsConnected/>{working ? 'Connecting…' : publicMode ? 'Connect public webcam' : 'Connect DVR channel'}</button></>}
         <p className="hint">{publicMode ? 'Use only intentionally published, permitted webcams. Public visibility alone does not grant reuse permission. HTTPS port 443 only; no logins, redirects, HTML players or HLS playlists. Previews stop on hidden pages and expire after 15 minutes.' : 'Use a read-only viewer account and a substream at or below 1080p. Credentials stay in the local source file; the browser receives channel names only.'}</p>
-        <a href={guide} target="_blank" rel="noreferrer">DVR setup guide and supported connection format</a>
+        <a href={publicMode ? publicGuide : guide} target="_blank" rel="noreferrer">{publicMode ? 'Public webcam guide and approval checklist' : 'DVR setup guide and supported connection format'}</a>
       </div>}
       {error && <p className="feed-error" role="alert">{error}</p>}
       <p className="feed-dialog-note">Previews stop when you leave Monitor, hide the page or disconnect. Network previews also end after 15 minutes. Recording recognition remains in the Recognition workspace.</p>

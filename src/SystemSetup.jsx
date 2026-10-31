@@ -53,16 +53,17 @@ export default function SystemSetup({ setup, onApply, storageError, download }) 
     } catch (err) { setFileError(err.message); }
   }
   function useObserved() {
+    const ram = snapshot.ram_total_bytes === null ? null : Math.floor(snapshot.ram_total_bytes / GiB);
+    if (ram !== null && ram < 2) { setStatus("The snapshot reports under 2 GiB of RAM, below this planner's minimum. The draft was not changed."); return; }
     setDraft(s => {
       const budget = Math.min(256, snapshot.cpu_logical);
       const threads = Math.min(s.compute.threads, budget);
-      const ram = snapshot.ram_total_bytes === null ? s.compute.ramGiB : Math.floor(snapshot.ram_total_bytes / GiB);
-      if (ram < 2) return s;
-      return { ...s, platform: snapshot.platform, compute: { ...s.compute, ramGiB: ram,
-        reserveGiB: Math.min(s.compute.reserveGiB, Math.floor(ram / 4)), threadBudget: budget, threads,
+      const ramGiB = ram ?? s.compute.ramGiB;
+      return { ...s, platform: snapshot.platform, compute: { ...s.compute, ramGiB,
+        reserveGiB: Math.min(s.compute.reserveGiB, Math.floor(ramGiB / 4)), threadBudget: budget, threads,
         workerSlots: Math.min(s.compute.workerSlots, Math.floor(budget / threads)) } };
     });
-    setDirty(true); setStatus("Reported CPU count and RAM copied into the draft. These are not OS quotas.");
+    setDirty(true); setStatus(ram === null ? "Reported CPU count copied into the draft; RAM was not reported, so it is unchanged. These are not OS quotas." : "Reported CPU count and RAM copied into the draft. These are not OS quotas.");
   }
   return <section className="content-page system-page">
     <div className="page-heading system-heading"><div><p className="eyebrow">SYSTEM / LOCAL MACHINE SETUP</p>
@@ -138,9 +139,8 @@ export default function SystemSetup({ setup, onApply, storageError, download }) 
         </Card>
         <Card icon={Desktop} title="A quieter camera wall" caption="These controls take effect in this browser when applied.">
           <label className="system-field"><span>Camera wall tiles</span><select value={draft.browser.visibleTiles} onChange={e => change("browser", "visibleTiles", Number(e.target.value))}><option value="1">1 · Focus</option><option value="2">2 · Balanced</option><option value="4">4 · Camera wall</option></select></label>
-          <label className="checkbox-label"><input type="checkbox" checked={draft.browser.pauseHidden} onChange={e => change("browser", "pauseHidden", e.target.checked)} />Pause sample playback in hidden tabs</label>
-          <label className="system-field system-overlay-field"><span>Camera overlay pixel scale</span><select value={draft.browser.overlayScale} onChange={e => change("browser", "overlayScale", Number(e.target.value))}><option value="1">1× · Lower canvas cost</option><option value="2">2× · Sharper overlay lines</option></select></label>
-          <p className="hint">Reducing wall tiles unmounts the others; selected sources remain visible. 1× uses one quarter of the overlay pixels of 2×, without changing scene images. Expanded views are separate.</p>
+          <label className="system-field system-overlay-field"><span>Zone overlay pixel scale</span><select value={draft.browser.overlayScale} onChange={e => change("browser", "overlayScale", Number(e.target.value))}><option value="1">1× · Lower canvas cost</option><option value="2">2× · Sharper overlay lines</option></select></label>
+          <p className="hint">Reducing wall tiles unmounts the others; selected sources remain visible. 1× uses one quarter of the Zones overlay pixels of 2×, without changing scene images. Camera previews and recording playback always pause while this page is hidden.</p>
         </Card>
         <Card icon={Lightning} title="Power & startup budget" caption="A simultaneous-load estimate, not a measured wall-power reading." className="system-power">
           <div className="system-fields three">

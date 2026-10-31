@@ -8,15 +8,25 @@ export function workspaceFromHash(hash) {
 }
 
 export function readWorkspace(storage, key, fallback) {
+  let raw = null;
   try {
-    const raw = storage.getItem(key);
+    raw = storage.getItem(key);
     if (raw === null) return { value: fallback, error: '' };
     const value = restoreSnapshot(key, JSON.parse(raw), null);
     if (!value) throw Error('Invalid saved data');
     return { value, error: '' };
   } catch {
-    return { value: fallback, error: 'Saved data could not be loaded. Defaults are shown; the original saved entry has not been replaced.' };
+    return { value: fallback, raw, error: 'Saved data could not be loaded. Defaults are shown; the original saved entry is kept as a browser backup. Download it before relying on this workspace.' };
   }
+}
+
+export const unreadableKey = key => `${key}.unreadable`;
+// Keep the first unreadable entry before anything replaces it. A failed backup must block the replacement.
+export function preserveUnreadable(storage, key, raw) {
+  try {
+    if (storage.getItem(unreadableKey(key)) === null) storage.setItem(unreadableKey(key), raw);
+    return true;
+  } catch { return false; }
 }
 
 export function writeWorkspace(storage, key, value) {
