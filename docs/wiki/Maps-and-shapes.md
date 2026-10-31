@@ -67,8 +67,9 @@ must be checked for the actual facility.
 
 The default 8 m template height is an editable example. No structural member
 sizing, fire/egress analysis or accessible-route compliance calculation is made.
-Round uses 32 segments. U wings have an open recess; fully enclosed courtyards
-require a future holes-capable geometry schema.
+Round uses 32 segments. U wings have an open recess; the shape templates do not
+create fully enclosed courtyards, which arrive through imported v2 geometry (OSM
+drafts or facility JSON).
 
 ## Bounds, provenance and service
 

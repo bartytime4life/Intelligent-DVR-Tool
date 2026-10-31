@@ -8,7 +8,7 @@ The minimum capacity goal is **100 simultaneously active cameras**. Five generat
 | --- | --- | --- |
 | Review | Wall, queue, notes, history, rules and exports | Accessibility/mobile/long-session acceptance; durable authenticated records |
 | Facility | Buildings/floors/rooms/labels, cameras, estimates and rehearsal | Site measurements, optical calibration and qualified visibility |
-| Easy setup | Submitted address search, GPS/numeric origin, rectangular area, selectable services, offline-file review, supported outer-only OSM relations, seven shapes | Live-provider/local-deployment and real-site qualification; holes/parts and polygon AOI; novice-user study |
+| Easy setup | Submitted address search, GPS/numeric/map-pin origin, rectangular or custom polygon area, selectable services, offline-file review, OSM relations with courtyards, raised bases and independent parts, seven shapes | Live-provider/installed local-service and real-site qualification; overlapping-part decomposition; novice-user study |
 | Detection | Offline ONNX adapter; prior YOLOX-S compatibility probes | Independent labels, precision/recall, false alerts and held-out scenes |
 | Performance | Bounded scheduler, budgets, synthetic overload model | Sustained decode/inference/end-to-end rates on intended hardware |
 | 100-camera operation | Owner requirement and staged acceptance design | Ingest/recording/worker implementation and simultaneous-source qualification |
