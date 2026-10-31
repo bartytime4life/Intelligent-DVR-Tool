@@ -87,13 +87,20 @@ def run(directory):
     def progress(**fields):
         nonlocal last
         now = time.monotonic()
-        if fields['phase'] == 'analyzing' and now - last < .25:
+        if fields['phase'] in ('analyzing', 'verifying') and now - last < .25:
             return
         last = now
         temporary = directory / 'progress.tmp'
         temporary.write_text(json.dumps(fields), encoding='utf-8')
         temporary.replace(directory / 'progress.json')
-    main(args, progress=progress, local_capture=True)
+    from .media_coverage import CoverageError
+    try:
+        main(args, progress=progress, local_capture=True)
+    except CoverageError as error:
+        temporary = directory / 'failure.tmp'
+        temporary.write_text(json.dumps({'code':error.code}), encoding='utf-8')
+        temporary.replace(directory / 'failure.json')
+        raise
     return handle
 
 

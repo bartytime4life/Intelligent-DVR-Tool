@@ -21,6 +21,7 @@ from .model_profiles import (DEFAULT_PROFILE, YOLOX_PROFILE, PROFILES, prepare,
 from .resources import load_policy, analyzer_limits
 from .inference import BACKENDS, create_backend
 from .enhancement import PROFILE as ENHANCEMENT_PROFILE, declaration, sharpen
+from .media_coverage import verify as verify_coverage, unchecked, validate as validate_coverage
 
 
 def digest(path):
@@ -123,7 +124,7 @@ def main(argv=None, progress=None, local_capture=False):
         parser.error('Enhancement comparison requires --trace-output or --review-output')
     if retain_frames and math.ceil(args.max_frames/args.stride) > MAX_FRAMES:
         parser.error('Trace mode permits up to 10,000 sampled frames; reduce max-frames or increase stride')
-    input_hashes = {p: digest(p) for p in (args.video, args.model, args.labels, args.rules)} if args.review_output or args.compare_enhancement else {}
+    input_hashes = {p: digest(p) for p in (args.video, args.model, args.labels, args.rules)}
     enhancement = declaration() if args.compare_enhancement else None
     if enhancement:
         from . import enhancement as enhancement_module
@@ -165,7 +166,7 @@ def main(argv=None, progress=None, local_capture=False):
     runtime={'python':platform.python_version(),'opencv':cv2.__version__,
              'numpy':np.__version__,'machine':platform.machine(),**backend.runtime}
     frames=0;processed=0;events=[];latencies=[];partial=False
-    trace_frames=[];detection_count=0
+    trace_frames=[];detection_count=0;termination='source-end'
     report(phase='analyzing', frames_read=0, frames_analyzed=0)
     try:
         while frames < args.max_frames:
@@ -213,15 +214,20 @@ def main(argv=None, progress=None, local_capture=False):
                 if comparison is not None:
                     trace_frames[-1]['comparison'] = comparison
             if len(events) >= 1000:
-                events=events[:1000];partial=True;break
+                events=events[:1000];partial=True;termination='event-limit';break
         else:
-            partial=True
+            partial=True;termination='frame-limit'
     finally:
         capture.release()
         backend.close()
     if not processed:
         raise ValueError('No frames were decoded; no receipt was written')
     report(phase='verifying', frames_read=frames, frames_analyzed=processed)
+    coverage = unchecked(source_hash, frames, termination) if partial else verify_coverage(
+        args.video, source_hash, frames,
+        progress=lambda count: report(phase='verifying', frames_read=frames, frames_analyzed=processed))
+    partial = partial or coverage['status'] != 'inventory-matched'
+    validate_coverage(coverage, source_hash, frames, 'partial' if partial else 'completed')
     if input_hashes and any(digest(p) != expected for p, expected in input_hashes.items()):
         raise ValueError('An input changed during analysis; no review result was written')
     ordered=sorted(latencies)
@@ -232,6 +238,7 @@ def main(argv=None, progress=None, local_capture=False):
              'rules_sha256':canonical_hash(config),'rules_file_sha256':digest(args.rules),
              'frames_read':frames,'frames_analyzed':processed,'fps_metadata':fps,'stride':args.stride,
              'runtime':runtime,
+             'media_coverage':coverage,
              'timing':{'scope':'local inference and postprocessing only; not end-to-end camera latency',
                        'p50_ms':statistics.median(ordered),'p95_ms':ordered[math.ceil(.95*len(ordered))-1]},
              'limitations':['No identity tracking: dwell is continuous class presence, not the same object.',
@@ -256,6 +263,7 @@ def main(argv=None, progress=None, local_capture=False):
                  'fps_metadata':fps,'stride':args.stride,'frames':trace_frames,'events':events,
                  'runtime':dict(runtime),
                  'timing_scope':receipt['timing']['scope'],'human_review_required':True}
+        trace['media_coverage'] = coverage
         if enhancement:
             trace['enhancement_comparison'] = enhancement
         if policy_hash is not None:

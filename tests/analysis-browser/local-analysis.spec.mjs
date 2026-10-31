@@ -43,6 +43,36 @@ test('invalid file produces an actionable error and the next valid job succeeds'
   await expect(page.locator('.recognition-boxes rect')).toHaveCount(1);
 });
 
+test('truncated media fails native validation without a result and healthy retry succeeds', async ({page}) => {
+  await connect(page);await select(page,'truncated.webm');
+  await page.getByRole('button',{name:'Analyze recording',exact:true}).click();
+  await expect(page.locator('.local-analysis-job')).toContainText('failed');
+  const job=await page.evaluate(async()=>{
+    const session=await(await fetch('/api/analysis/session')).json();
+    const response=await fetch(`/api/analysis/jobs/${session.job.id}/result`,{headers:{'X-DVR-Token':session.token}});
+    return {job:session.job,resultStatus:response.status};
+  });
+  expect(['MEDIA_CORRUPT','MEDIA_INVENTORY_MISMATCH']).toContain(job.job.error.code);
+  expect(job.resultStatus).toBe(409);
+  await select(page);await page.getByRole('button',{name:'Analyze recording',exact:true}).click();
+  await expect(page.locator('.recognition-facts')).toContainText('Decoded recording inventory matched');
+  await expect(page.locator('.recognition-boxes rect')).toHaveCount(1);
+});
+
+test('unknown completeness is shown separately from limits and legacy results remain unverified',async({page})=>{
+  await page.goto('/#recognition');
+  const fixture=recognitionFixture();fixture.receipt.state=fixture.trace.state='partial';
+  const c={schema:'intelligent-dvr.media-coverage.v1',source_sha256:fixture.receipt.source_sha256,
+    status:'unverified',termination:'source-end',analysis_frames:6,validated_frames:6,declared_frames:null,
+    declared_duration_seconds:null,decoded_duration_seconds:.6,duration_tolerance_seconds:null,anchor:'none',validator_version:'synthetic-fixture'};
+  fixture.receipt.media_coverage=structuredClone(c);fixture.trace.media_coverage=structuredClone(c);
+  await page.getByLabel('Open recognition results').setInputFiles({name:'unknown.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(fixture))});
+  await expect(page.locator('.recognition-facts')).toContainText('recording completeness unverified');
+  await expect(page.locator('.recognition-facts')).not.toContainText('limit reached');
+  await page.getByLabel('Open recognition results').setInputFiles({name:'legacy.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(recognitionFixture()))});
+  await expect(page.locator('.recognition-facts')).toContainText('Legacy result · recording coverage unverified');
+});
+
 test('explicit sharpening comparison uses native analysis, survives export and labels original footage', async ({page}) => {
   await connect(page); await select(page);
   const option=page.getByRole('checkbox',{name:'Compare mild sharpening (experimental)'});

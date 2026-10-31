@@ -1,0 +1,27 @@
+{
+  "source_kind": "generated shapes, not camera footage",
+  "source_sha256": "76ebbba783e31a75659fd922cc651ce84845145427b6632fffb2c3e10fe31d94",
+  "model_sha256": "c5c2d13e59ae883e6af3b45daea64af4833a4951c92d116ec270d9ddbe998063",
+  "healthy_frames": 30,
+  "healthy_samples": 6,
+  "healthy_state": "completed",
+  "coverage": {
+    "schema": "intelligent-dvr.media-coverage.v1",
+    "source_sha256": "76ebbba783e31a75659fd922cc651ce84845145427b6632fffb2c3e10fe31d94",
+    "status": "inventory-matched",
+    "termination": "source-end",
+    "analysis_frames": 30,
+    "validated_frames": 30,
+    "declared_frames": 30,
+    "declared_duration_seconds": 3.0,
+    "decoded_duration_seconds": 3.0,
+    "duration_tolerance_seconds": 0.050001000000000004,
+    "anchor": "frames+duration",
+    "validator_version": "19.0.2"
+  },
+  "controlled_early_stop_after_frames": 7,
+  "controlled_early_stop_error": "MEDIA_INCOMPLETE",
+  "failed_result_published": false,
+  "source_unchanged": true,
+  "recognition_accuracy": "unmeasured"
+}

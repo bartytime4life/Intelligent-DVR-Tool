@@ -4,8 +4,9 @@ Recognition has an **optional, experimental mild-sharpening comparison**. It
 reuses the configured detector on the exact same decoded samples. The original
 recording stays unchanged. Original detections remain the source of rule
 observations, decisions and Events. Sharpened detections are separate comparison
-data. This control uses OpenCV without new dependencies, weights, downloads or
-GPU setup. It does not implement Real-ESRGAN/SwinIR, increase resolution, restore
+data. This transform uses OpenCV without neural weights, downloads or GPU setup.
+Recording analysis also requires [coverage validation](recording-coverage.md),
+which adds the optional PyAV dependency. It does not implement Real-ESRGAN/SwinIR, increase resolution, restore
 faces or identities, or establish better detection accuracy.
 
 ## Use in Recognition

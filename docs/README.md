@@ -1,5 +1,8 @@
 # Explore Intelligent DVR
 
+[Recording coverage](recording-coverage.md) explains strict decode/inventory
+checks, incomplete-media errors and legacy/unverified result labels.
+
 For experimental paired original/sharpened detection checks, see
 [saved-recording sharpening comparison](enhancement-comparison.md).
 

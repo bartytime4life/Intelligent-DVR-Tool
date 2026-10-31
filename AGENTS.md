@@ -111,3 +111,9 @@ and original-only rule observations, record separate candidate detections and
 provenance, and require independently labeled comparisons before accuracy claims.
 Research Real-ESRGAN/SwinIR as optional later candidates; no automatic weights,
 face restoration, camera activation or installed-service replacement.
+
+Recording-coverage follow-up (2026-10-30): a failed frame read must not by itself
+produce completed coverage. Bind new results to bounded strict decode/inventory
+checks; reject early/corrupt decoding, label unknown completeness separately from
+intentional limits, and retain historical results as explicitly unverified.
+Preserve source bytes, existing worker bounds, recovery and explicit activation.

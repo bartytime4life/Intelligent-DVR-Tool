@@ -31,7 +31,7 @@ test('recognition rejects mixed provenance and displays partial coverage on a na
   await expect(page.locator('.recognition-stage')).toHaveCount(0);
   const partial = recognitionFixture(); partial.receipt.state = partial.trace.state = 'partial';
   await page.getByLabel('Open recognition results').setInputFiles(upload(partial));
-  await expect(page.getByText('PARTIAL — analysis limit reached')).toBeVisible();
+  await expect(page.getByText('PARTIAL · legacy result; coverage unverified', {exact:true})).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
 });
 
@@ -59,7 +59,7 @@ test('matching synthetic recording enables boxes only at paused analyzed samples
   expect(await page.locator('video').evaluate(el=>el.paused)).toBe(true);
   await page.getByRole('navigation',{name:'Main navigation'}).getByRole('button',{name:'Recognition'}).click();
   await expect(page.locator('.recognition-boxes rect')).toHaveCount(2);
-  await expect(page.getByText('Analyzer finished · recording fingerprint matched')).toBeVisible();
+  await expect(page.getByText('Legacy result · recording coverage unverified', {exact:true})).toBeVisible();
   await page.screenshot({path:'test-results/recognition-desktop.png',fullPage:true});
   await page.locator('video').evaluate(el=>el.play());
   await expect(page.locator('.recognition-boxes')).toHaveCount(0);
