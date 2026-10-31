@@ -9,6 +9,8 @@ import threading
 import time
 from urllib.parse import quote
 
+from . import failures
+from .failures import Failure
 from .fileops import replace
 from .local_feeds import LIMITS
 
@@ -16,7 +18,7 @@ from .local_feeds import LIMITS
 CPU_SECONDS = 2 * LIMITS['session_seconds'] + 60
 
 
-def relay_messages(reader, writer):
+def relay_messages(reader, writer, on_status=None):
     """Bound RTSP replies/RTP packets; never pass a redirect to the decoder."""
     while True:
         first = reader.read(1)
@@ -25,38 +27,42 @@ def relay_messages(reader, writer):
         if first == b'$':
             header = reader.read(3)
             if len(header) != 3:
-                raise ValueError('Incomplete interleaved packet')
+                raise Failure('STREAM_INTERRUPTED', 'Incomplete interleaved packet')
             length = int.from_bytes(header[1:], 'big')
             body = reader.read(length)
             if len(body) != length:
-                raise ValueError('Incomplete interleaved payload')
+                raise Failure('STREAM_INTERRUPTED', 'Incomplete interleaved payload')
             writer.sendall(first + header + body)
             continue
         line = first + reader.readline(4096)
-        if not re.fullmatch(rb'RTSP/1\.0 [1-5][0-9][0-9] [^\r\n]*\r\n', line) or 300 <= int(line.split()[1]) < 400:
-            raise ValueError('Unsupported response or redirect')
+        if not re.fullmatch(rb'RTSP/1\.0 [1-5][0-9][0-9] [^\r\n]*\r\n', line):
+            raise Failure('RTSP_RESPONSE_INVALID', 'Unsupported response')
+        if 300 <= int(line.split()[1]) < 400:
+            raise Failure('REDIRECT_REFUSED', 'Unsupported response or redirect')
+        if on_status:
+            on_status(int(line.split()[1]))
         headers, total, length, lengths = [line], len(line), 0, 0
         while True:
             line = reader.readline(8192)
             total += len(line)
             if not line.endswith(b'\r\n') or total > 64 * 1024:
-                raise ValueError('Oversized RTSP headers')
+                raise Failure('RTSP_RESPONSE_INVALID', 'Oversized RTSP headers')
             headers.append(line)
             if line == b'\r\n':
                 break
             key, sep, value = line.partition(b':')
             if not sep:
-                raise ValueError('Malformed RTSP header')
+                raise Failure('RTSP_RESPONSE_INVALID', 'Malformed RTSP header')
             if key.lower() == b'location':
-                raise ValueError('Redirect refused')
+                raise Failure('REDIRECT_REFUSED', 'Redirect refused')
             if key.lower() == b'content-length':
                 lengths += 1
                 length = int(value.strip())
                 if lengths != 1 or not 0 <= length <= 64 * 1024:
-                    raise ValueError('Oversized RTSP body')
+                    raise Failure('RTSP_RESPONSE_INVALID', 'Oversized RTSP body')
         body = reader.read(length)
         if len(body) != length:
-            raise ValueError('Incomplete RTSP body')
+            raise Failure('RTSP_RESPONSE_INVALID', 'Incomplete RTSP body')
         writer.sendall(b''.join(headers) + body)
 
 
@@ -67,7 +73,7 @@ class PinnedRelay:
         self.listener = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.listener.bind(('127.0.0.1', 0)); self.listener.listen(1); self.listener.settimeout(10)
         self.local_port = self.listener.getsockname()[1]
-        self.connections = []
+        self.connections = []; self.failure = self.status = None
         self.thread = threading.Thread(target=self.run, daemon=True); self.thread.start()
 
     def run(self):
@@ -75,7 +81,10 @@ class PinnedRelay:
             downstream, address = self.listener.accept()
             self.connections.append(downstream); downstream.settimeout(8)
             self.listener.close()  # Exactly one decoder connection.
-            upstream = socket.create_connection((self.host, self.port), timeout=5)
+            try:
+                upstream = socket.create_connection((self.host, self.port), timeout=5)
+            except OSError:
+                self.failure = 'UPSTREAM_UNREACHABLE'; raise
             self.connections.append(upstream); upstream.settimeout(8)
             def requests():
                 try:
@@ -95,11 +104,23 @@ class PinnedRelay:
                     self.close()
             threading.Thread(target=requests, daemon=True).start()
             with upstream.makefile('rb') as reader:
-                relay_messages(reader, downstream)
+                relay_messages(reader, downstream, lambda status: setattr(self, 'status', status))
+        except Failure as error:
+            self.failure = self.failure or error.failure
         except (OSError, ValueError):
             pass
         finally:
             self.close()
+
+    def cause(self, default):
+        """A specific fixed code for a decoder open/read failure; never the address or path."""
+        if self.failure:
+            return self.failure
+        if self.status in (401, 403):
+            return 'RTSP_UNAUTHORIZED'
+        if self.status == 404:
+            return 'RTSP_NOT_FOUND'
+        return {4: 'RTSP_STATUS_4XX', 5: 'RTSP_STATUS_5XX'}.get((self.status or 0) // 100, default)
 
     def close(self):
         self.listener.close()
@@ -118,15 +139,15 @@ def capture(url, directory, *, seconds=900):
                           cv2.CAP_PROP_READ_TIMEOUT_MSEC, 5000, cv2.CAP_PROP_N_THREADS, 1])
     try:
         if not cap.isOpened():
-            raise ValueError('Cannot open stream')
+            raise Failure('STREAM_OPEN_FAILED', 'Cannot open stream')
         began, emitted = time.monotonic(), 0
         while time.monotonic() - began < seconds:
             ok, frame = cap.read()
             if not ok or frame is None:
-                raise ValueError('No frame')
+                raise Failure('STREAM_INTERRUPTED', 'No frame')
             height, width = frame.shape[:2]
             if not 0 < width * height <= LIMITS['input_pixels']:
-                raise ValueError('Use a stream at or below 1080p')
+                raise Failure('DIMENSIONS_UNSUPPORTED', 'Use a stream at or below 1080p')
             now = time.monotonic()
             if now - emitted < 1 / LIMITS['preview_fps']:
                 continue
@@ -136,7 +157,7 @@ def capture(url, directory, *, seconds=900):
                 frame = cv2.resize(frame, (max(1, int(width * scale)), max(1, int(height * scale))))
             ok, encoded = cv2.imencode('.jpg', frame, [cv2.IMWRITE_JPEG_QUALITY, 75])
             if not ok or len(encoded) > LIMITS['frame_bytes']:
-                raise ValueError('Frame limit')
+                raise Failure('FRAME_LIMIT', 'Frame limit')
             temporary = directory / 'frame.tmp'
             temporary.write_bytes(encoded.tobytes()); replace(temporary, directory / 'frame.jpg', best_effort=True)
     finally:
@@ -161,6 +182,18 @@ def relay_url(data, relay):
     return f'rtsp://{credentials}127.0.0.1:{relay.local_port}{data["path"]}'
 
 
+def relayed(relay, operation, *args):
+    """Run a decoder against the relay; refine stream failures with what the relay saw."""
+    try:
+        return operation(*args)
+    except Failure as error:
+        if error.failure in ('STREAM_OPEN_FAILED', 'STREAM_INTERRUPTED'):
+            error.failure = relay.cause(error.failure)
+        raise
+    finally:
+        relay.close()
+
+
 def main(directory):
     handle = configure_capture()
     # As in segment_worker, stdin stays open for the worker's lifetime: EOF ends
@@ -173,10 +206,7 @@ def main(directory):
         capture_public(data, Path(directory))
         return handle
     relay = PinnedRelay(data['host'], data['port'])
-    try:
-        capture(relay_url(data, relay), Path(directory))
-    finally:
-        relay.close()
+    relayed(relay, capture, relay_url(data, relay), Path(directory))
     return handle
 
 
@@ -187,5 +217,6 @@ if __name__ == '__main__':
             _owned_child(int(os.environ['DVR_FEED_PARENT_PID']), main, sys.argv[1])
         else:
             main(sys.argv[1])
-    except BaseException:
+    except BaseException as error:
+        if len(sys.argv) > 1: failures.record(sys.argv[1], error, failures.FEED)  # One fixed code, never native text.
         sys.exit(1)  # Native details and credentials never reach app logs.

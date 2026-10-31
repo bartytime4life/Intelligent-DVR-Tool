@@ -88,6 +88,19 @@ available for another explicit attempt. A previous loaded review is retained if
 a new job fails validation. A frame-budget stop is marked **PARTIAL**, not complete
 coverage of the recording. A time-limit stop produces no review result.
 
+A failed job's `error.code` names the cause when the worker or OS reports one.
+The worker writes a bounded `failure.json` with one fixed code, and the service
+parses it strictly. Codes include the coverage codes (`MEDIA_*`),
+`VIDEO_OPEN_FAILED`, `FRAME_RATE_INVALID`, `STRIDE_EXCEEDS_GAP`,
+`MODEL_LOAD_FAILED`, `MODEL_OUTPUT_INVALID`, `INFERENCE_FAILED`,
+`FRAME_TOO_LARGE`, `NO_FRAMES`, `DETECTION_LIMIT`, `RESULT_LIMIT`,
+`INPUT_CHANGED`, `DEPENDENCY_MISSING` and `MEMORY_LIMIT`. Exits without a code
+are classified as `CPU_LIMIT` (SIGXCPU), `FILE_SIZE_LIMIT` (SIGXFSZ),
+`WORKER_KILLED` (SIGKILL, for example the kernel's out-of-memory killer),
+`WORKER_CRASHED`, or Windows `MEMORY_LIMIT` (STATUS_NO_MEMORY or
+STATUS_COMMITMENT_LIMIT). Everything else stays `PROCESS_FAILED`. Messages are
+fixed text. Codes never include paths or native output.
+
 In the default temporary mode, stopping the service cancels its active job and deletes its temporary inputs.
 A service restart does not resume or replay a job. Abrupt host/process termination
 can leave an `intelligent-dvr-job-*` private directory in the OS temporary folder;
@@ -151,6 +164,13 @@ the private store first. Windows persistent-storage permission/locking semantics
 are not qualified by this implementation; Windows retains the default temporary
 workflow and explicitly rejects this opt-in option.
 
+The same opt-in store holds the service's
+[diagnostic log](../SECURITY.md#worker-failure-codes-and-the-diagnostic-log):
+`diagnostics/service.log`, rotated at 1 MiB across three 0600 files. It records
+event codes, job/segment/session IDs and numbers only, such as `JOB_FINISHED` with
+the terminal state and error code. Store inspection accepts only those three file
+names. Without `--state-dir` there is no log.
+
 Human review decisions remain in browser storage and exports; this store does
 not persist those decisions, capture live cameras, record continuous footage,
 qualify recognition accuracy, or establish 100-camera operation.
@@ -176,8 +196,13 @@ not automatically switch GPU/CPU or claim GPU job qualification. Native decoder
 network protocols are restricted to local files. Map-provider choices elsewhere in
 the app remain optional and separate; the analysis service makes no cloud calls.
 
-Browser source matching retains the existing 512 MiB ceiling and full-buffer hash.
-It is not a streaming-memory optimization. This workflow does not establish
+Browser source matching keeps the 512 MiB ceiling. It hashes the file in 4 MiB
+`Blob.slice` chunks with a pure-JS SHA-256 in a module Web Worker. If a worker is
+unavailable it runs on the page and yields between chunks. It never holds the whole
+recording in one buffer and does not need WebCrypto's secure context. An
+`AbortSignal` passed in options stops the hash early. Throughput is lower than native
+WebCrypto: about 215 MiB/s in Node 22 on the 2026-10-31 measurement host, or about
+2.4 s for a 512 MiB file. This workflow does not establish
 live-camera ingest/recording, person identity tracking, learned behavior,
 independently measured recognition quality or sustained 100-camera capacity.
 

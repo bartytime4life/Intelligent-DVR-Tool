@@ -1,6 +1,7 @@
 import { parseReceipt } from './data.mjs';
 import { validateEnhancement } from './enhancement.mjs';
 import { validateCoverage } from './media-coverage.mjs';
+import { sha256File } from './sha256.mjs';
 
 export const MAX_REVIEW_BYTES = 32 * 1024 ** 2;
 export const MAX_VIDEO_BYTES = 512 * 1024 ** 2;
@@ -80,13 +81,16 @@ export function canShowBoxes(frame, fps, { matched, ready, paused, seeking, seco
     Math.abs(seconds - frame.seconds) <= 0.5 / fps && width === frame.width && height === frame.height);
 }
 
-export async function matchRecording(file, expectedHash) {
+// Vite bundles this literal worker URL; Node and worker-less contexts hash on the same thread.
+const recordingWorker = () => typeof Worker === 'function'
+  ? new Worker(new URL('./sha256-worker.mjs', import.meta.url), { type: 'module' }) : null;
+
+// Streams 4 MiB slices (no whole-recording buffer, no secure-context requirement). An
+// aborted options.signal rejects with its reason and stops reading.
+export async function matchRecording(file, expectedHash, { signal, createWorker = recordingWorker } = {}) {
   require(hash(expectedHash), 'Invalid source fingerprint.');
   require(file && file.size > 0 && file.size <= MAX_VIDEO_BYTES, 'Choose a nonempty recording up to 512 MiB; split larger recordings before analysis.');
-  require(globalThis.crypto?.subtle, 'Recording verification requires a secure browser context (HTTPS or localhost).');
-  const bytes = await file.arrayBuffer();
-  const result = await crypto.subtle.digest('SHA-256', bytes);
-  const actual = [...new Uint8Array(result)].map(x => x.toString(16).padStart(2, '0')).join('');
+  const actual = await sha256File(file, { signal, createWorker });
   require(actual === expectedHash, 'This recording does not match the analyzed source. Choose the original file; no boxes have been attached.');
   return actual;
 }

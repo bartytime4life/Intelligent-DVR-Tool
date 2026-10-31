@@ -13,7 +13,7 @@ MESSAGES = {
 
 class CoverageError(ValueError):
     def __init__(self, code):
-        self.code = code
+        self.code = self.failure = code  # failure: the worker's fixed failure-file code.
         super().__init__(MESSAGES[code])
 
 

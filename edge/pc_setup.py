@@ -29,6 +29,20 @@ def host_check():
         raise SetupError('Install 64-bit Python 3.12 with pip and venv support, then retry.')
 
 
+def pins(text):
+    """Exact name==version pins, each with PyPI wheel SHA-256 hashes (pip --require-hashes format)."""
+    result = {}
+    for line in re.sub(r'\\\r?\n', ' ', text).splitlines():
+        line = line.strip()
+        if not line or line.startswith('#'):
+            continue
+        match = re.fullmatch(r'([A-Za-z0-9_.-]+)==([A-Za-z0-9_.+-]+)((?:\s+--hash=sha256:[a-f0-9]{64})+)', line)
+        if not match or match[1] in result:
+            raise SetupError('The pinned requirements file is malformed. Extract a fresh complete kit.')
+        result[match[1]] = match[2]
+    return result
+
+
 def digest(path):
     result = hashlib.sha256()
     with path.open('rb') as stream:
@@ -129,7 +143,8 @@ def install(root=ROOT):
         command([sys.executable, '-m', 'venv', root / '.venv'],
                 'Could not create .venv. Install Python 3.12 venv/pip support and use a writable folder.', root=root)
     python = validate_environment(root)
-    command([python, '-m', 'pip', 'install', '--only-binary=:all:', '-r', REQUIREMENTS],
+    # Every pinned wheel must match a PyPI-published SHA-256 (CPython 3.12, Linux x86-64 / Windows amd64).
+    command([python, '-m', 'pip', 'install', '--only-binary=:all:', '--require-hashes', '-r', REQUIREMENTS],
             'Pinned runtime installation failed. Check network access and rerun; settings are preserved.', root=root)
     command([python, '-m', 'pip', 'check'], 'Python dependencies conflict. Install in a fresh folder.', root=root)
     create_settings(root)
@@ -144,10 +159,7 @@ def native_probe():
         os.environ[key] = '1'
     os.environ['OPENCV_FFMPEG_CAPTURE_OPTIONS'] = 'protocol_whitelist;file'
     versions = {}
-    for line in (ROOT / REQUIREMENTS).read_text(encoding='utf-8').splitlines():
-        if not line or line.startswith('#'):
-            continue
-        package, expected = line.split('==')
+    for package, expected in pins((ROOT / REQUIREMENTS).read_text(encoding='utf-8')).items():
         actual = importlib.metadata.version(package)
         if actual != expected:
             raise SetupError('Pinned dependency mismatch. Rerun the installer in this folder.')
@@ -245,11 +257,14 @@ def check(port=4173, feeds_config=None, recordings=None, config=None, *, root=RO
             path.unlink()
         return 'temporary write and cleanup passed'
     record('temporary_storage', temporary_storage)
+    feeds_path = Path(feeds_config) if feeds_config else root / 'local-feeds.json'
     def sources():
         from .local_feeds import load_sources
-        path = Path(feeds_config) if feeds_config else root / 'local-feeds.json'
-        return {'configured_sources': len(load_sources(path))}
+        return {'configured_sources': len(load_sources(feeds_path))}
     record('dvr_config', sources)
+    from .local_feeds import shared_config
+    if shared_config(feeds_path):  # A warning: readiness still passes, the credentials file is just exposed.
+        checks.append({'check': 'dvr_config_permissions', 'status': 'warn'})
     if recorder_config is not None:
         def recorder_ready():
             from .lan_recorder import validate_config
@@ -308,6 +323,7 @@ REMEDIES = {
     'analysis_config': 'Supply the recording folder and catalog together; verify local paths, model hash, labels and rules.',
     'analysis_persistence': 'Use --state-dir with recording analysis on Linux. Use a dedicated owner-owned 0700 folder, no symlinks, with an existing writable parent. Stop any other store owner. Preserve suspect state for inspection; --temporary bypasses it without deleting it.',
     'loopback_port': 'Close the existing app or choose an unused --port / -Port. Keep the origin stable for saved reviews.',
+    'dvr_config_permissions': 'local-feeds.json holds camera credentials and is readable by other accounts on this computer. Restrict it: chmod 600 local-feeds.json',
 }
 
 
@@ -380,7 +396,7 @@ def main(argv=None):
             result = check(args.port, args.feeds_config, args.recordings, args.config, facility=facility, state_dir=state_dir, recorder_config=args.recorder_config)
             for item in result['checks']:
                 print(f"{item['status'].upper()}: {item['check']}")
-                if item['status'] == 'fail':
+                if item['status'] in ('fail', 'warn'):
                     print('  ' + REMEDIES[item['check']])
                 elif item['check'] == 'dvr_config':
                     print(f"  {item['detail']['configured_sources']} configured channels; none connected.")

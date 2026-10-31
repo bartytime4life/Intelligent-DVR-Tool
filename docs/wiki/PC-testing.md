@@ -90,6 +90,11 @@ The last command opens **http://127.0.0.1:4173/**. Keep its terminal open and st
 with Ctrl+C. **DVR_PYTHON=/path/to/python3.12** selects an interpreter;
 **--no-browser** suppresses browser opening.
 
+Install runs pip with --only-binary and --require-hashes, so every pinned wheel
+must match a PyPI-published SHA-256 for CPython 3.12 on Linux x86-64 or Windows
+amd64. A changed or unexpected download stops the install. Other platforms or
+Python versions are not covered by these hashes.
+
 An incompatible existing .venv is refused and retained. Install in a fresh folder
 instead of deleting an environment you may need. Reinstall preserves
 local-feeds.json. After updating a source checkout, rerun Install to rebuild it.
@@ -103,7 +108,9 @@ local-feeds.json. After updating a source checkout, rerun Install to rebuild it.
 2. **DVR/IP camera:** stop the app and edit local-feeds.json using
    edge/local-feeds.example.json as the shape. Enter the device's actual private
    IPv4, RTSP/TCP port, exact substream path and viewer account locally. Restrict
-   this plaintext credentials file to your OS account. Run Check, Start, then
+   this plaintext credentials file to your OS account (on Linux:
+   **chmod 600 local-feeds.json**). Check reports **WARN: dvr_config_permissions**,
+   and Start prints a warning, while group or other accounts can read it. Run Check, Start, then
    Set up local DVR → Load configured DVR sources → select channel → Connect DVR channel.
 3. **Recovery:** disconnect. Try an incorrect channel in a disposable test
    configuration, observe the error, restore the settings, restart and reconnect.
@@ -238,7 +245,8 @@ local-feeds.json or private recordings as diagnostics.
 | Runtime probe fails | Rerun Install; use a fresh folder if the environment conflicts |
 | Config fails | Validate against examples; use only owner-approved private LAN endpoints |
 | Camera permission denied | Adjust permission for this local origin, then explicitly reconnect |
-| RTSP fails | Verify power/LAN, port/path, viewer credentials and <=1080p substream |
+| RTSP fails | Verify power/LAN, port/path, viewer credentials and <=1080p substream; the preview's cause (for example RTSP_UNAUTHORIZED or RTSP_NOT_FOUND) narrows it down |
+| WARN: dvr_config_permissions | Other accounts can read local-feeds.json; run chmod 600 local-feeds.json (readiness still passes) |
 | Browser cannot play analyzed video | Convert a copy to a supported codec, then analyze that copy |
 
 Use the same browser profile and exact **http://127.0.0.1:4173** origin for

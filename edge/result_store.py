@@ -124,11 +124,14 @@ class ResultStore:
             raise
 
     def _check_contents(self):
-        entries = list(islice(self.directory.iterdir(), 6))
-        if len(entries) > 5:
+        entries = list(islice(self.directory.iterdir(), 7))
+        if len(entries) > 6:
             raise ValueError('Unexpected result-store contents; preserve the folder for inspection')
         for path in entries:
-            if path.name in ('owner.lock', 'state.json', 'state.tmp'):
+            if path.name == 'diagnostics':
+                from .diagnostics import check
+                check(path)  # The service's opt-in code/id log; never part of a job.
+            elif path.name in ('owner.lock', 'state.json', 'state.tmp'):
                 private(path)
                 if path.name != 'owner.lock' and path.stat().st_size > 16384:
                     raise ValueError('Oversized result-store metadata')

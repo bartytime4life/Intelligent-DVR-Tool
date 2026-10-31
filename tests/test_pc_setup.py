@@ -223,6 +223,29 @@ class PcSetupTest(unittest.TestCase):
         self.assertNotIn(str(state), json.dumps(report))
         self.assertEqual(next(c for c in report['checks'] if c['check']=='analysis_persistence')['detail']['recovery'], 'no retained job')
 
+    def test_every_pinned_wheel_has_published_hashes_and_the_probe_parser_reads_them(self):
+        text = (Path(__file__).resolve().parents[1] / pc.REQUIREMENTS).read_text(encoding='utf-8')
+        pins = pc.pins(text)
+        self.assertEqual(set(pins), {'opencv-python-headless', 'numpy', 'onnx', 'ml_dtypes', 'protobuf', 'typing_extensions', 'av'})
+        blocks = [b for b in text.replace('\\\n', ' ').splitlines() if b and not b.startswith('#')]
+        self.assertEqual(len(blocks), len(pins))
+        # Binary or platform wheels need one hash each for Linux x86-64 and Windows amd64.
+        for block in blocks:
+            self.assertGreaterEqual(block.count('--hash=sha256:'), 1 if block.startswith('typing_extensions') else 2, block[:40])
+        for malformed in ('numpy==2.5.4\n', 'numpy>=2 --hash=sha256:' + 'a' * 64, 'numpy==2.5.4 --hash=sha256:' + 'a' * 63,
+                          'numpy==1 --hash=sha256:' + 'a' * 64 + '\nnumpy==2 --hash=sha256:' + 'b' * 64):
+            with self.subTest(malformed=malformed[:30]), self.assertRaises(pc.SetupError): pc.pins(malformed)
+    @unittest.skipUnless(os.name == 'posix', 'POSIX permission bits')
+    def test_readiness_warns_when_the_credentials_file_is_readable_by_others(self):
+        self.kit(); pc.create_settings(self.root); path = self.root / 'local-feeds.json'
+        with patch.object(pc, 'host_check'), patch.object(pc, 'validate_environment', return_value=sys.executable), \
+                patch.object(pc, 'command', return_value='{}'):
+            report = pc.check(root=self.root, bind=False)
+            self.assertNotIn('dvr_config_permissions', [c['check'] for c in report['checks']])
+            os.chmod(path, 0o644); report = pc.check(root=self.root, bind=False)
+        self.assertTrue(report['ready'])  # A warning, not a failed readiness check.
+        self.assertIn({'check': 'dvr_config_permissions', 'status': 'warn'}, report['checks'])
+        self.assertIn('chmod 600', pc.REMEDIES['dvr_config_permissions'])
     def test_subprocess_failure_and_timeout_are_actionable(self):
         for failure in (OSError('private path'), subprocess.TimeoutExpired('private command', 1)):
             with patch('subprocess.run', side_effect=failure), self.assertRaisesRegex(pc.SetupError, '^Retry setup$'):
@@ -237,7 +260,7 @@ class PcSetupTest(unittest.TestCase):
                 patch('shutil.which', side_effect=AssertionError('Kit must not need Node')):
             pc.install(self.root)
         self.assertIn(pc.REQUIREMENTS, calls[0])
-        self.assertIn('--only-binary=:all:', calls[0])
+        self.assertIn('--only-binary=:all:', calls[0]); self.assertIn('--require-hashes', calls[0])
         self.assertEqual((self.root/'local-feeds.json').read_bytes(), b'owner settings')
         self.assertFalse(any('local_service' in str(c) for c in calls))
     def test_package_allowlist_excludes_private_data_and_is_reproducible(self):

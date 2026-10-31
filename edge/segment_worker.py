@@ -6,7 +6,9 @@ from pathlib import Path
 import sys
 import time
 
-from .feed_worker import PinnedRelay, configure_capture, relay_url
+from . import failures
+from .failures import Failure
+from .feed_worker import PinnedRelay, configure_capture, relay_url, relayed
 from .fileops import replace, sync_directory
 from .local_feeds import LIMITS
 
@@ -52,7 +54,7 @@ def validate_video(path, expected_frames, size):
     cap = cv2.VideoCapture(str(path), cv2.CAP_FFMPEG)
     try:
         if not cap.isOpened():
-            raise ValueError('Invalid segment')
+            raise Failure('SEGMENT_VERIFY_FAILED', 'Invalid segment')
         count = 0
         while True:
             ok, frame = cap.read()
@@ -60,9 +62,9 @@ def validate_video(path, expected_frames, size):
                 break
             count += 1
             if count > expected_frames or (frame.shape[1], frame.shape[0]) != size:
-                raise ValueError('Invalid frame inventory')
+                raise Failure('SEGMENT_VERIFY_FAILED', 'Invalid frame inventory')
         if count != expected_frames or count < 2:
-            raise ValueError('Incomplete segment')
+            raise Failure('SEGMENT_VERIFY_FAILED', 'Incomplete segment')
     finally:
         cap.release()
         if prior is None:
@@ -83,19 +85,19 @@ def record(url, directory, seconds, *, capture_factory=None, clock=time.monotoni
     size = None
     try:
         if not cap.isOpened():
-            raise ValueError('No stream')
+            raise Failure('STREAM_OPEN_FAILED', 'No stream')
         while True:
             ok, frame = cap.read()
             if not ok or frame is None:
-                raise ValueError('Interrupted stream')
+                raise Failure('STREAM_INTERRUPTED', 'Interrupted stream')
             now = clock(); elapsed = now - began
             if offsets and elapsed >= seconds:
                 break
             if elapsed > seconds + 5:
-                raise ValueError('Capture deadline')
+                raise Failure('CAPTURE_DEADLINE', 'Capture deadline')
             height, width = frame.shape[:2]
             if not 0 < width * height <= LIMITS['input_pixels']:
-                raise ValueError('Unsupported dimensions')
+                raise Failure('DIMENSIONS_UNSUPPORTED', 'Unsupported dimensions')
             decoded += 1
             if offsets and int(elapsed * FPS) <= int(offsets[-1] * FPS):
                 continue
@@ -105,22 +107,22 @@ def record(url, directory, seconds, *, capture_factory=None, clock=time.monotoni
                 size = output_size
                 writer = cv2.VideoWriter(str(temporary), cv2.CAP_FFMPEG, cv2.VideoWriter_fourcc(*'VP80'), FPS, size)
                 if not writer.isOpened():
-                    raise ValueError('VP8 encoder unavailable')
+                    raise Failure('ENCODER_UNAVAILABLE', 'VP8 encoder unavailable')
             if size != output_size:
-                raise ValueError('Camera changed dimensions')
+                raise Failure('DIMENSIONS_UNSUPPORTED', 'Camera changed dimensions')
             if offsets:
                 missed += max(0, int(elapsed * FPS) - int(offsets[-1] * FPS) - 1)
             writer.write(cv2.resize(frame, size) if (width, height) != size else frame)
             offsets.append(round(elapsed, 6))
             if temporary.stat().st_size > SEGMENT_BYTES or len(offsets) > seconds * FPS + 1:
-                raise ValueError('Segment bound exceeded')
+                raise Failure('SEGMENT_LIMIT', 'Segment bound exceeded')
             if now - last_progress >= .5:
                 atomic_json(directory / 'progress.json', {'frames': len(offsets), 'decoded_frames': decoded,
                     'elapsed_seconds': round(elapsed, 3), 'missed_sample_slots': missed, **resources()}, best_effort=True)
                 last_progress = now
         writer.release(); writer = None
         if not 16 <= temporary.stat().st_size <= SEGMENT_BYTES:
-            raise ValueError('Segment size')
+            raise Failure('SEGMENT_LIMIT', 'Segment size')
         validate_video(temporary, len(offsets), size)
         with temporary.open('r+b') as stream:
             os.fsync(stream.fileno())
@@ -145,10 +147,7 @@ def main(directory, seconds):
     from .analysis_worker import watch_parent_pipe
     watch_parent_pipe()
     relay = PinnedRelay(data['host'], data['port'])
-    try:
-        record(relay_url(data, relay), Path(directory), int(seconds))
-    finally:
-        relay.close()
+    relayed(relay, record, relay_url(data, relay), Path(directory), int(seconds))
     return handle
 
 
@@ -161,5 +160,7 @@ if __name__ == '__main__':
             _owned_child(int(os.environ['DVR_SEGMENT_PARENT_PID']), main, sys.argv[1], sys.argv[2])
         else:
             main(sys.argv[1], sys.argv[2])
-    except BaseException:
-        sys.exit(1)  # Never expose native exceptions, addresses or credentials.
+    except BaseException as error:
+        # One fixed code beside the discarded segment; never native text, addresses or credentials.
+        if len(sys.argv) > 1: failures.record(sys.argv[1], error, failures.CAPTURE)
+        sys.exit(1)
