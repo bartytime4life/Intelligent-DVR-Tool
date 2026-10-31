@@ -100,13 +100,11 @@ def run(directory):
         temporary = directory / 'progress.tmp'
         temporary.write_text(json.dumps(fields), encoding='utf-8')
         replace(temporary, directory / 'progress.json', best_effort=True)  # The parent polls this file.
-    from .media_coverage import CoverageError
+    from . import failures
     try:
         main(args, progress=progress, local_capture=True)
-    except CoverageError as error:
-        temporary = directory / 'failure.tmp'
-        temporary.write_text(json.dumps({'code':error.code}), encoding='utf-8')
-        replace(temporary, directory / 'failure.json')
+    except BaseException as error:
+        failures.record(directory, error, failures.ANALYSIS)  # One allowlisted code; never native text or paths.
         raise
     return handle
 

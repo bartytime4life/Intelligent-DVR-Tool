@@ -76,6 +76,27 @@ is performed by System or the supplied launchers.
 
 The optional `edge.local_service` binds only to `127.0.0.1`, checks exact Host and browser origin, and requires a per-service token for jobs and artifacts. Loopback is reachable by every account on the computer. On Linux, every API request, including the token-issuing session endpoints, must come from a TCP socket owned by the service's own OS account (looked up in `/proc/net/tcp` and `tcp6`, IPv4-mapped clients included); if those tables are unavailable, as on WSL1, API requests are refused. Windows has no such check: any local account can open the session endpoints and obtain the token, so run the service only on a computer whose other accounts you trust. It accepts opaque catalog selections, never client paths/commands. An explicit `--allow-recording-import` switch enables same-computer file copies with a 64 MiB per-file cap, 20-file/512 MiB inbox limits, 64 MiB free-space reserve, container-header and SHA-256 verification, exclusive publication, and idempotent content-derived names. Imports do not start inference. An OS-released folder lock serializes imports across services; after a crash, the next import reclaims the left-over partial file. No remote upload endpoint or cloud inference is added. One isolated CPU worker invokes the existing analyzer with bounded local snapshots, time, memory, threads and frame/output limits. It is single-user software for owner-approved recordings and hash-pinned models, not a hostile-model sandbox. See [the full boundary and shutdown/recovery behavior](docs/local-analysis-service.md).
 
+### Worker failure codes and the diagnostic log
+
+Analysis, segment and preview workers report a failure only as `failure.json`
+containing exactly `{"code": ...}` from a fixed allowlist (see `edge/failures.py`).
+Parents accept at most 1 KiB, exactly that key and a listed code; anything else is
+ignored. Signal and Windows NTSTATUS exits are classified (`CPU_LIMIT`,
+`FILE_SIZE_LIMIT`, `WORKER_KILLED`, `WORKER_CRASHED`, `MEMORY_LIMIT`). Codes never
+contain native messages, paths, URLs, addresses or credentials.
+
+With `--state-dir` (Linux), the service also keeps a local diagnostic log in
+`<state-dir>/diagnostics/service.log`, rotated at 1 MiB across three owner-only
+(0600) files in a 0700 folder. Each line is a time, a fixed event code and values
+that are only fixed codes, opaque hex job/segment/session IDs or numbers. Any other
+value is written as `REDACTED`, so paths, recording/model/source names, URLs, IP
+addresses, credentials and host or user names cannot be logged. Without a state
+directory the log is off. The log is unsigned and editable by the same account,
+so it is not an audit trail. It is never uploaded. Review it before you share it.
+
+The service and Check warn when `local-feeds.json` is readable by group or other
+accounts on POSIX. The warning does not change file permissions.
+
 Webcam clip capture uses only the connected video track. It requests a stop at
 60 seconds and discards clips exceeding 64 MiB; browser scheduling/encoder
 allocations are not hard real-time or OS-memory guarantees. No microphone is
@@ -116,3 +137,8 @@ with Host/origin/token checks. Recording recovery never starts capture. Retentio
 can delete queued/completed evidence; export what must remain. Use account-private
 storage (0700 on Linux; restricted inherited ACLs on Windows). This is not an
 encrypted vault, forensic audit log, gapless DVR or power-loss durability claim.
+During an explicit recording session, segment jobs reuse one model copy in the
+recorder's private `work/` folder. That copy is SHA-256 verified once per Start
+and then reused only while its file signature is unchanged. Each receipt still
+binds the hash of the model bytes the analyzer parsed, and the service checks that
+hash against the pinned catalog value.

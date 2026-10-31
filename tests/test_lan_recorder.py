@@ -399,7 +399,9 @@ class RecorderTest(unittest.TestCase):
     def test_analysis_scratch_is_owned_bounded_and_cleaned_on_restart(self):
         rec = self.make(); self.start(rec); self.complete(rec)
         self.assertTrue(Path(self.jobs.directory.name).is_relative_to(rec.work))
-        self.finish_analysis(rec); self.assertEqual(list(rec.work.iterdir()), [])
+        # Only the hash-verified model copy reused by later segment jobs remains.
+        self.finish_analysis(rec); self.assertEqual(list(rec.work.iterdir()), [rec.work / 'model.onnx'])
+        rec.stop(); self.assertEqual(list(rec.work.iterdir()), [])
         rec._kill_capture(); scratch = rec.work / 'intelligent-dvr-job-abcdefgh'; scratch.mkdir(mode=0o700)
         (scratch / 'model.onnx').write_bytes(b'interrupted model copy')
         rec.store.close(); self.jobs.release(rec)
@@ -427,6 +429,134 @@ class RecorderTest(unittest.TestCase):
         finally:
             if child.poll() is None: child.kill(); child.wait()
             child.stdin.close()
+
+    def test_worker_failure_files_never_fail_inspection_and_become_the_segment_cause(self):
+        # Regression: the analyzer's failure.json (media coverage and other fixed codes) is
+        # present between its coded exit and Jobs cleanup; Store.inspect used to refuse it,
+        # permanently failing the supervisor.
+        from test_local_service import FakeProcess
+        running = FakeProcess()
+        def analyzer(command, **kwargs):
+            directory = Path(command[-1]); (directory / 'failure.tmp').write_text('{}')
+            (directory / 'failure.json').write_text('{"code":"NO_FRAMES"}'); return running
+        self.jobs.close(); self.jobs = Jobs(self.root / 'recordings', load_catalog(self.root / 'config.json'), process_factory=analyzer)
+        rec = self.make(); self.start(rec); self.complete(rec)
+        deadline = time.monotonic() + 10
+        while self.jobs.process is None and time.monotonic() < deadline: time.sleep(.01)
+        scratch = Path(self.jobs.directory.name)
+        self.assertTrue((scratch / 'failure.json').is_file()); rec.store.inspect()
+        for _ in range(3): rec.tick()  # usage() -> inspect() on every active tick.
+        self.assertFalse(rec.failed)
+        running.returncode = 1; self.finish_analysis(rec)
+        row = rec.rows[0]
+        self.assertEqual((row['state'], row['error'], row['cause']), ('failed', 'ANALYSIS_FAILED', 'NO_FRAMES'))
+        self.assertNotIn('observations', row)
+        rec.close(); store = Store(rec.store.path)
+        try: self.assertEqual(store.data['rows'][0]['cause'], 'NO_FRAMES')
+        finally: store.close()
+
+    def test_capture_exit_cause_comes_from_strict_failure_file_or_signal(self):
+        rec = self.make(); self.start(rec)
+        for written, code, cause in (('{"code":"RTSP_UNAUTHORIZED"}', 1, 'RTSP_UNAUTHORIZED'),
+                                     ('{"code":"/home/user/camera"}', 1, None), ('{"code":"STREAM_OPEN_FAILED","url":"rtsp://x"}', 1, None),
+                                     (None, -24, 'CPU_LIMIT'), (None, -9, 'WORKER_KILLED'), (None, 1, None)):
+            with self.subTest(code=code, written=written):
+                row = rec.capture; directory = rec.store.path / row['id']
+                if written: (directory / 'failure.json').write_text(written)
+                rec.store.inspect()  # A coded segment failure file is an expected artifact.
+                self.calls[-1][2].returncode = code; rec.tick()
+                self.assertEqual((row['state'], row['error'], row['cause']), ('interrupted', 'CONNECTION_OR_ENCODER_FAILED', cause))
+                self.assertFalse(directory.exists())
+                self.now += 120; rec.tick()
+        self.assertNotIn('rtsp://', json.dumps(rec.status()))
+
+    def test_retention_counters_split_by_reason_and_legacy_state_migrates(self):
+        from edge.lan_recorder import RESERVATION
+        MiB = 1024**2; self.config.update(max_segments=4, retention_minutes=1); rec = self.make()
+        old = self.row(rec, 0, MiB); old['created_at'] = self.now - 61
+        rows = [self.row(rec, i, 8 * MiB) for i in range(1, 5)]; rec.store.save()
+        rec._expire(room=True)  # Age first, then the four-entry count budget.
+        self.assertNotIn(old, rec.rows); self.assertNotIn(rows[0], rec.rows)
+        floor = self.config['reserve_mib'] * MiB + RESERVATION
+        rec.disk_usage = lambda p: SimpleNamespace(free=floor - 4 * MiB)
+        rec._expire(room=True)  # The volume's free-space reserve.
+        self.assertEqual(rec.rows, rows[2:])
+        self.assertEqual({k: rec.counters[k] for k in ('expired', 'expired_age', 'evicted_space', 'evicted_disk')},
+                         {'expired': 3, 'expired_age': 1, 'evicted_space': 1, 'evicted_disk': 1})
+        self.assertEqual(rec.status()['counters']['evicted_disk'], 1)
+        rec.close(); state = rec.store.path / 'state.json'; data = json.loads(state.read_text())
+        data['counters'] = {k: v for k, v in data['counters'].items() if k not in ('expired_age', 'evicted_space', 'evicted_disk')}
+        data['counters']['expired'] = 7; atomic_json(state, data)
+        migrated = Store(rec.store.path)
+        try:  # Pre-split removals stay only in the total; nothing is invented.
+            self.assertEqual({k: migrated.data['counters'][k] for k in ('expired', 'expired_age', 'evicted_space', 'evicted_disk')},
+                             {'expired': 7, 'expired_age': 0, 'evicted_space': 0, 'evicted_disk': 0})
+        finally: migrated.close()
+        data['counters'].update(expired=0, expired_age=1, evicted_space=0, evicted_disk=0); atomic_json(state, data)
+        with self.assertRaises(ValueError): Store(rec.store.path)
+
+    def test_completed_rows_report_observations_and_timing_drift_without_retiming_rules(self):
+        rec = self.make(); self.start(rec); directory = rec.store.path / rec.capture['id']
+        clock = [0.0]; cap = GeneratedCapture(clock); read = cap.read
+        def slow_read():  # Some receive slots are missed: 0.25 s between frames.
+            result = read(); clock[0] += .149; return result
+        cap.read = slow_read
+        record('unused-injected-source', directory, 5, capture_factory=lambda: cap, clock=lambda: clock[0], wall=lambda: 1000 + clock[0])
+        self.calls[-1][2].returncode = 0; rec.tick(); self.finish_analysis(rec)
+        row = rec.rows[0]; timing = json.loads((directory / 'complete.json').read_text())
+        self.assertGreater(row['missed_sample_slots'], 0)
+        self.assertEqual(row['timing_drift_seconds'], round(timing['missed_sample_slots'] * .1, 3))
+        review = json.loads(rec.artifact(row['id'], 'result')[0].read_text())
+        self.assertEqual(row['observations'], len(review['receipt']['events'])); self.assertEqual(row['observations'], 1)
+        self.assertEqual(review['receipt']['fps_metadata'], 10)  # Clip time stays nominal CFR.
+        self.assertEqual(review['trace']['frames'][1]['seconds'], .5)
+        # Rows completed before observation counts existed are backfilled on restart.
+        del row['observations']; rec.close(); recovered = self.make()
+        self.assertEqual(recovered.rows[0]['observations'], 1)
+
+    def test_supervisor_liveness_and_tick_age_are_visible(self):
+        rec = self.make()
+        self.assertEqual(rec.status()['supervisor'], {'alive': False, 'last_tick_age_seconds': None})
+        rec.tick(); self.now += 2.5
+        self.assertEqual(rec.status()['supervisor'], {'alive': False, 'last_tick_age_seconds': 2.5})
+        rec.close()
+        live = Recorder(self.config, {'dock': SOURCE}, self.jobs, self.root / 'recordings' / '.lan-recorder',
+                        disk_usage=lambda p: SimpleNamespace(free=self.free), process_factory=lambda *a, **k: Process())
+        self.recorders.append(live)
+        deadline = time.monotonic() + 5
+        while live.status()['supervisor']['last_tick_age_seconds'] is None and time.monotonic() < deadline: time.sleep(.05)
+        state = live.status()['supervisor']
+        self.assertTrue(state['alive']); self.assertLess(state['last_tick_age_seconds'], 2)
+        def broken(): raise ValueError('Unexpected analysis work file')
+        live._capture_tick = broken; live.thread.join(5)
+        self.assertEqual(live.status()['supervisor']['alive'], False); self.assertEqual(live.state, 'failed')
+
+    def test_model_is_verified_once_per_start_and_reused_by_signature(self):
+        from edge import local_service
+        copies = []; original = local_service.Jobs._copy
+        def copy(jobs, source, target, *args, **kwargs):
+            copies.append(Path(target).name); return original(jobs, source, target, *args, **kwargs)
+        with patch.object(local_service.Jobs, '_copy', copy):
+            rec = self.make(); self.start(rec)
+            for _ in range(2): self.complete(rec); self.finish_analysis(rec)
+            self.assertEqual(rec.counters['analyzed'], 2)
+            self.assertEqual(copies.count('model.onnx'), 1)  # Second segment: signature check only.
+            cache = rec.work / 'model.onnx'
+            self.assertEqual(hashlib.sha256(cache.read_bytes()).hexdigest(), self.jobs.catalog['models']['synthetic']['sha256'])
+            self.assertEqual(self.jobs.model_cache[2][2], cache.stat().st_size)
+            # A changed signature (here: a fresh copy with a new inode/mtime) is copied and verified again.
+            data = cache.read_bytes(); cache.unlink(); cache.write_bytes(data)
+            self.complete(rec); self.finish_analysis(rec); self.assertEqual(copies.count('model.onnx'), 2)
+            # A same-size in-place edit with its mtime restored keeps the signature; the analyzer's
+            # model hash, bound into the receipt and checked by Jobs, still refuses the result.
+            info = cache.stat(); cache.write_bytes(bytes(len(data))); os.utime(cache, ns=(info.st_atime_ns, info.st_mtime_ns))
+            self.complete(rec); analyzed = rec.analysis; self.finish_analysis(rec)
+            self.assertEqual(copies.count('model.onnx'), 2)
+            self.assertEqual(analyzed['state'], 'failed'); self.assertIn(analyzed['cause'], ('MODEL_LOAD_FAILED', 'RESULT_MISMATCH'))
+            rec.stop(); self.assertFalse(cache.exists())  # Released with the recorder's claim.
+            self.start(rec); self.complete(rec); analyzed = rec.analysis; self.finish_analysis(rec)
+            self.assertEqual(copies.count('model.onnx'), 3)  # A new Start verifies once again.
+            self.assertEqual(analyzed['state'], 'completed')
 
     @unittest.skipUnless(sys.platform == 'linux', 'Existing manual last-job recovery is Linux-only')
     def test_managed_analysis_does_not_replace_manual_persistent_result(self):

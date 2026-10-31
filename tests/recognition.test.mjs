@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { parseRecognition, frameSummary, canShowBoxes, matchRecording, mergeRecognitionEvents, MAX_VIDEO_BYTES } from '../src/recognition.mjs';
+import { Sha256, sha256Blob, sha256File } from '../src/sha256.mjs';
 import { recognitionFixture } from './fixtures/recognition.mjs';
 
 test('recognition review retains real class names, provenance and event-frame association', () => {
@@ -68,6 +69,74 @@ test('hash match admits exact local bytes and rejects changed/oversized/empty re
   await assert.rejects(matchRecording(new Blob(['different']), sha), /does not match/);
   await assert.rejects(matchRecording(new Blob([]), sha), /nonempty/);
   await assert.rejects(matchRecording({size: MAX_VIDEO_BYTES+1}, sha), /512 MiB/);
+});
+
+const reference = bytes => createHash('sha256').update(bytes).digest('hex');
+const pattern = length => Uint8Array.from({length}, (_, i) => (i * 131 + (i >> 8) * 7 + 13) & 255);
+
+test('streaming SHA-256 matches node:crypto and WebCrypto across padding and slice boundaries', async () => {
+  for (const length of [0, 1, 3, 55, 56, 57, 63, 64, 65, 119, 120, 127, 128, 1000, 4097]) {
+    const bytes = pattern(length);
+    assert.equal(await sha256Blob(new Blob([bytes])), reference(bytes), `length ${length}`);
+    const web = [...new Uint8Array(await crypto.subtle.digest('SHA-256', bytes))].map(x => x.toString(16).padStart(2, '0')).join('');
+    assert.equal(new Sha256().update(bytes).hex(), web);
+  }
+  const large = pattern(3 * 1024 ** 2 + 77), blob = new Blob([large]), expected = reference(large);
+  const small = new Blob([large.subarray(0, 4099)]), smallSha = reference(large.subarray(0, 4099));
+  for (const chunkBytes of [1, 63, 1000]) assert.equal(await sha256Blob(small, {chunkBytes, yieldBetween: false}), smallSha, `chunk ${chunkBytes}`);
+  for (const chunkBytes of [64 * 1024, 1024 ** 2 + 5, undefined]) assert.equal(await sha256Blob(blob, {chunkBytes}), expected, `chunk ${chunkBytes}`);
+  // Uneven incremental updates equal one update; finalization is single-use.
+  const parts = new Sha256(); for (let i = 0; i < large.length;) { const step = 1 + (i % 97); parts.update(large.subarray(i, i += step)); }
+  assert.equal(parts.hex(), expected); assert.throws(() => parts.update(new Uint8Array(1)), /finalized/);
+  // The 64-bit bit-length field stays exact past 2^29 bytes (the 512 MiB recording ceiling).
+  class Probe extends Sha256 { update(data) { this.tail = data; return super.update(data); } }
+  const probe = new Probe(); probe.bytes = 2 ** 29 + 3; probe.used = 3; probe.hex();
+  const view = new DataView(probe.tail.buffer);
+  assert.deepEqual([probe.tail.length, view.getUint32(probe.tail.length - 8), view.getUint32(probe.tail.length - 4)], [61, 1, 24]);
+});
+
+test('recording hashing yields between slices and stops on AbortSignal', async () => {
+  const blob = new Blob([pattern(256 * 1024)]);
+  let reads = 0; const slice = blob.slice.bind(blob);
+  const counted = {size: blob.size, slice: (...args) => { reads++; return slice(...args); }};
+  const controller = new AbortController();
+  const pending = sha256Blob(counted, {signal: controller.signal, chunkBytes: 1024});
+  await new Promise(resolve => setTimeout(resolve, 5)); controller.abort();
+  await assert.rejects(pending, {name: 'AbortError'});
+  assert.ok(reads > 0 && reads < 256, `stopped after ${reads} of 256 slices`);
+  const already = new AbortController(); already.abort();
+  await assert.rejects(matchRecording(blob, reference(pattern(256 * 1024)), {signal: already.signal}), {name: 'AbortError'});
+  const reason = new AbortController(); reason.abort(new DOMException('Opening cancelled', 'AbortError'));
+  await assert.rejects(sha256File(blob, {signal: reason.signal}), /Opening cancelled/);
+});
+
+test('a module worker hashes off the page, and any worker failure falls back to the same thread', async () => {
+  const bytes = pattern(70000), blob = new Blob([bytes]), sha = reference(bytes);
+  const made = [];
+  class FakeWorker {
+    constructor(mode) { this.mode = mode; this.terminated = false; made.push(this); }
+    postMessage(data) {
+      if (this.mode === 'throws') throw new DOMException('cannot clone', 'DataCloneError');
+      setTimeout(async () => {
+        if (this.terminated) return;
+        if (this.mode === 'error') this.onerror({preventDefault() {}});
+        else if (this.mode === 'garbage') this.onmessage({data: {hash: 'not-a-hash'}});
+        else if (this.mode === 'hang') return;
+        else this.onmessage({data: {hash: await sha256Blob(data, {yieldBetween: false})}});
+      });
+    }
+    terminate() { this.terminated = true; }
+  }
+  for (const mode of ['ok', 'error', 'garbage', 'throws']) {
+    assert.equal(await matchRecording(blob, sha, {createWorker: () => new FakeWorker(mode)}), sha, mode);
+    assert.equal(made.at(-1).terminated, true);
+  }
+  assert.equal(await matchRecording(blob, sha, {createWorker: () => { throw Error('CSP refused the worker'); }}), sha);
+  await assert.rejects(matchRecording(new Blob(['other']), sha, {createWorker: () => new FakeWorker('ok')}), /does not match/);
+  const controller = new AbortController();
+  const pending = matchRecording(blob, sha, {signal: controller.signal, createWorker: () => new FakeWorker('hang')});
+  setTimeout(() => controller.abort(), 5);
+  await assert.rejects(pending, {name: 'AbortError'}); assert.equal(made.at(-1).terminated, true);
 });
 
 test('untrusted class text stays data and prototype-like labels can be counted', () => {

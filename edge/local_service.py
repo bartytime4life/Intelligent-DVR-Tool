@@ -20,15 +20,17 @@ import threading
 import time
 from urllib.parse import urlsplit, unquote
 
+from .diagnostics import Diagnostics
 from .evaluation import anchor, local_file, read_json, relative_file
+from . import failures
 from .fileops import open_regular
 from .model_profiles import validate_binding
 from .rules import Rule, RuleEngine
-from .local_feeds import Feeds, FeedError, load_sources
+from .local_feeds import Feeds, FeedError, load_sources, shared_config
 from .result_store import ResultStore, VIDEO_BYTES, REVIEW_BYTES as RESULT_BYTES, EXTENSIONS
 from .recording_import import import_recording, ImportError as RecordingImportError, MAX_IMPORT_BYTES, MIMES as IMPORT_MIMES
 from .enhancement import PROFILE as ENHANCEMENT_PROFILE, validate_trace as validate_enhancement
-from .media_coverage import MESSAGES as COVERAGE_ERRORS, validate as validate_coverage
+from .media_coverage import validate as validate_coverage
 
 ROOT = Path(__file__).resolve().parents[1]
 MODEL_BYTES = VIDEO_BYTES
@@ -169,8 +171,11 @@ class Jobs:
         self.importing = False
         self.token = secrets.token_urlsafe(32)
         self.store = ResultStore(state_dir) if state_dir is not None else None
+        # Codes/ids only, inside the validated private store; off without --state-dir.
+        self.diagnostics = Diagnostics(self.store.directory / 'diagnostics' if self.store else None)
         self.store_failed = False
         self.retained_directory = None
+        self.model_cache = None  # (path, sha256, file signature) verified for the current owner's session
         if self.store:
             self.job, self.retained_directory = self.store.job, self.store.job_directory
 
@@ -249,12 +254,16 @@ class Jobs:
                 raise JobError('BUSY', 'Wait for analysis or stop the LAN recorder first.', 409)
             if self.importing:
                 raise JobError('BUSY', 'Wait for the recording import to finish.', 409)
-            self.owner = owner
+            self.owner = owner; self.model_cache = None
 
     def release(self, owner):
         with self.lock:
             if self.owner is owner:
                 self.owner = None
+                cache, self.model_cache = self.model_cache, None
+                if cache and not (self.job and self.job['state'] not in TERMINAL):
+                    try: cache[0].unlink(missing_ok=True)
+                    except OSError: pass  # Restart recovery removes the recorder's work folder.
 
     def discard_managed_result(self, owner):
         """Recorder has archived the pair (or recorded failure); remove its scratch copy."""
@@ -269,7 +278,7 @@ class Jobs:
                 self.directory = None
             self.job = None
 
-    def start(self, request, *, owner=None, source=None, expected_sha=None, camera='local-recording', scratch_parent=None):
+    def start(self, request, *, owner=None, source=None, expected_sha=None, camera='local-recording', scratch_parent=None, model_cache=None):
         with self.lock:
             if self.owner is not owner:
                 raise JobError('BUSY', 'Stop the LAN recorder before starting a separate analysis.', 409)
@@ -316,7 +325,8 @@ class Jobs:
             self.cancel_event = threading.Event()
             self.job = job
             self.managed = owner is not None
-            self.thread = threading.Thread(target=self._run, args=(directory, source, sig, model, rules, expected_sha, camera), daemon=True)
+            self.thread = threading.Thread(target=self._run, args=(directory, source, sig, model, rules, expected_sha, camera,
+                                           model_cache if owner is not None else None), daemon=True)
             self.thread.start()
             return self.snapshot()
 
@@ -364,7 +374,33 @@ class Jobs:
                 raise JobError('INPUT_CHANGED', 'An input changed during preparation. Refresh and retry.')
         return digest.hexdigest()
 
-    def _run(self, directory, source, sig, model, rules, expected_sha=None, camera='local-recording'):
+    def _model(self, model, directory, began, cache):
+        """Manual jobs snapshot the model. Owner jobs reuse one copy verified since claim():
+        the same pinned SHA-256 and an unchanged file signature, else copy and verify again."""
+        if cache is None:
+            target = directory / 'model.onnx'
+            if self._copy(model['path'], target, MODEL_BYTES, began) != model['sha256']:
+                raise JobError('MODEL_CHANGED', 'The model does not match its configured SHA-256. Restore the approved model before retrying.')
+            return target
+        with self.lock:
+            known = self.model_cache
+        try:
+            info = cache.lstat()
+            if known and known[:2] == (cache, model['sha256']) and stat.S_ISREG(info.st_mode) and info.st_nlink == 1 and signature(info) == known[2]:
+                return cache
+        except OSError:
+            pass
+        with self.lock:
+            self.model_cache = (cache, None, None)  # Unverified: release() still removes a partial copy.
+        cache.unlink(missing_ok=True)
+        if self._copy(model['path'], cache, MODEL_BYTES, began) != model['sha256']:
+            cache.unlink(missing_ok=True)
+            raise JobError('MODEL_CHANGED', 'The model does not match its configured SHA-256. Restore the approved model before retrying.')
+        with self.lock:
+            self.model_cache = (cache, model['sha256'], signature(cache.lstat()))
+        return cache
+
+    def _run(self, directory, source, sig, model, rules, expected_sha=None, camera='local-recording', cache=None):
         began = time.monotonic()
         terminal, error, result_state = 'failed', None, None
         try:
@@ -375,9 +411,7 @@ class Jobs:
             with video.open('rb') as stream:
                 if not video_header(stream.read(16)):
                     raise JobError('INVALID_VIDEO', 'Choose an MP4/MOV, WebM/MKV or AVI recording. Playlists and text files are not supported.')
-            model_hash = self._copy(model['path'], directory / 'model.onnx', MODEL_BYTES, began)
-            if model_hash != model['sha256']:
-                raise JobError('MODEL_CHANGED', 'The model does not match its configured SHA-256. Restore the approved model before retrying.')
+            model_path, model_hash = self._model(model, directory, began, cache), model['sha256']
             labels_hash = self._copy(model['labels'], directory / 'labels.json', 64 * 1024, began)
             rules_hash = self._copy(rules['path'], directory / 'rules.json', 64 * 1024, began)
             if labels_hash != model['labels_sha256'] or rules_hash != rules['sha256']:
@@ -388,7 +422,7 @@ class Jobs:
             RuleEngine(parsed_rules)
             if not parsed_rules or any(r.label not in labels for r in parsed_rules):
                 raise ValueError('Incompatible rules')
-            args = ['--video', str(video), '--model', str(directory / 'model.onnx'), '--labels', str(directory / 'labels.json'),
+            args = ['--video', str(video), '--model', str(model_path), '--labels', str(directory / 'labels.json'),
                     '--rules', str(directory / 'rules.json'), '--profile', model['profile'], '--backend', 'opencv-cpu',
                     '--threads', '2', '--max-frames', '6000', '--stride', '5', '--camera=' + camera,
                     '--output', str(directory / 'receipt.json'), '--review-output', str(directory / 'review.json')]
@@ -405,12 +439,10 @@ class Jobs:
                 self.cancel_event.wait(.1)
             self._check(began)
             if self.process.returncode != 0:
-                try:
-                    failure = read_json(directory / 'failure.json', 1024)
-                    if set(failure) == {'code'} and failure['code'] in COVERAGE_ERRORS:
-                        raise JobError(failure['code'], COVERAGE_ERRORS[failure['code']])
-                except (OSError, ValueError, TypeError):
-                    pass
+                # Strict {"code"} file from the worker, else a classified signal/NTSTATUS exit.
+                code = failures.read(directory, failures.ANALYSIS) or failures.exit_cause(self.process.returncode)
+                if code:
+                    raise JobError(code, failures.ANALYSIS[code])
                 raise JobError('PROCESS_FAILED', 'The analyzer stopped. Check that the recording plays, the model matches its profile, and the CPU dependencies are installed. Try a shorter recording; memory and CPU limits also stop jobs.')
             review = read_json(directory / 'review.json', RESULT_BYTES)
             receipt, trace = review['receipt'], review['trace']
@@ -462,6 +494,9 @@ class Jobs:
                         error={'code':'STORE_WRITE_FAILED' if self.store else 'CLEANUP_FAILED',
                                'message':'Analysis finished without a confirmed result. Check local storage and restart; no result was opened.'})
                 self.job.update(finished)
+                self.diagnostics.event('JOB_FINISHED', job=finished['id'], state=finished['state'].upper(), managed=self.managed,
+                    code=(finished['error'] or {}).get('code'), result=(finished['result_state'] or '').upper() or None,
+                    seconds=finished['elapsed_seconds'])
 
     def _progress(self, directory, began):
         with self.lock:
@@ -731,16 +766,24 @@ def main(argv=None):
     if not (ROOT / 'dist/client/index.html').is_file():
         parser.error('Build the local app first with npm run build')
     jobs = feeds = recorder = None
+    diagnostics = Diagnostics()
     try:
         if args.config:
             jobs = Jobs(args.recordings, load_catalog(args.config.absolute()), state_dir=args.state_dir, allow_import=args.allow_recording_import)
+            diagnostics = jobs.diagnostics
         if args.feeds_config:
-            feeds = Feeds(load_sources(args.feeds_config.absolute()))
+            feeds = Feeds(load_sources(args.feeds_config.absolute()), diagnostics=diagnostics)
+            if shared_config(args.feeds_config):
+                diagnostics.event('FEEDS_CONFIG_SHARED')
+                print('Warning: the DVR source list (it holds camera credentials) is readable by other accounts on this computer. '
+                      'Restrict it to your account, for example: chmod 600 local-feeds.json', file=sys.stderr, flush=True)
         if args.recorder_config:
             from .lan_recorder import Recorder, validate_config
             config = validate_config(args.recorder_config.absolute(), feeds.sources)
-            recorder = Recorder(config, feeds.sources, jobs, jobs.recordings / '.lan-recorder')
+            recorder = Recorder(config, feeds.sources, jobs, jobs.recordings / '.lan-recorder', diagnostics=diagnostics)
         with LocalServer(args.port, jobs, ROOT / 'dist/client', feeds, recorder) as server:
+            diagnostics.event('SERVICE_START', analysis=jobs is not None, feeds=feeds is not None, recorder=recorder is not None,
+                              imports=args.allow_recording_import)
             print(f'Local Intelligent DVR: {server.origin}/ — explicit connections and jobs only; Ctrl+C stops.', flush=True)
             if args.open_browser:
                 import webbrowser
@@ -758,6 +801,7 @@ def main(argv=None):
     finally:
         if recorder:
             recorder.close()
+        diagnostics.event('SERVICE_STOP')  # Before the result store releases its owner lock.
         if jobs:
             jobs.close()
         if feeds:

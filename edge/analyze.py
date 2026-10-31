@@ -22,6 +22,7 @@ from .resources import load_policy, analyzer_limits
 from .inference import BACKENDS
 from .cpu_backend import create_backend
 from .enhancement import PROFILE as ENHANCEMENT_PROFILE, declaration, sharpen
+from .failures import Failure, failing, tag
 from .media_coverage import verify as verify_coverage, unchecked, validate as validate_coverage
 
 
@@ -93,6 +94,12 @@ def main(argv=None, progress=None, local_capture=False):
     parser.add_argument('--stride',type=int,default=5)
     parser.add_argument('--max-frames',type=int,help='Decoded-frame ceiling; default 6000 or policy cap')
     args=parser.parse_args(argv)
+    def refuse(code, message):
+        # The CLI keeps argparse's message and exit status; the service worker records only the code.
+        try:
+            parser.error(message)
+        except SystemExit as error:
+            tag(code, error); raise
     report = progress or (lambda **fields: None)
     report(phase='validating', frames_read=0, frames_analyzed=0)
     if args.backend == 'onnxruntime-cuda' and args.profile != YOLOX_PROFILE:
@@ -131,7 +138,7 @@ def main(argv=None, progress=None, local_capture=False):
         from . import enhancement as enhancement_module
         input_hashes[Path(enhancement_module.__file__)] = enhancement['implementation_sha256']
     labels=json.loads(args.labels.read_text())
-    model_hash=digest(args.model)
+    model_hash=input_hashes[args.model]  # One streaming hash; the CPU backend binds its parsed bytes to it.
     try:
         validate_binding(args.profile,model_hash,labels)
     except ValueError as error:
@@ -146,7 +153,7 @@ def main(argv=None, progress=None, local_capture=False):
         import cv2
         import numpy as np
     except ImportError:
-        parser.error('Install the optional edge requirements first; see edge/README.md')
+        refuse('DEPENDENCY_MISSING', 'Install the optional edge requirements first; see edge/README.md')
     source_hash=digest(args.video)
     run_id=hashlib.sha256((source_hash+model_hash).encode()).hexdigest()
     engine=RuleEngine(rules,args.camera,run_id)
@@ -158,15 +165,16 @@ def main(argv=None, progress=None, local_capture=False):
     else:
         capture=cv2.VideoCapture(str(args.video))
     if not capture.isOpened():
-        parser.error('Video could not be opened')
+        refuse('VIDEO_OPEN_FAILED', 'Video could not be opened')
     fps=capture.get(cv2.CAP_PROP_FPS)
     if not math.isfinite(fps) or fps <= 0:
-        capture.release();parser.error('A valid frame rate is required for recording timestamps')
+        capture.release();refuse('FRAME_RATE_INVALID', 'A valid frame rate is required for recording timestamps')
     if any(args.stride/fps > r.max_gap for r in rules):
-        capture.release();parser.error('Sampling interval exceeds a rule max_gap; reduce stride')
+        capture.release();refuse('STRIDE_EXCEEDS_GAP', 'Sampling interval exceeds a rule max_gap; reduce stride')
     cv2.setNumThreads(args.threads)
     try:
-        backend=create_backend(args.backend,args.model,args.profile,cv2,np,args.threads,model_sha256=model_hash)
+        with failing('MODEL_LOAD_FAILED'):
+            backend=create_backend(args.backend,args.model,args.profile,cv2,np,args.threads,model_sha256=model_hash)
     except Exception:
         capture.release()
         raise
@@ -184,12 +192,14 @@ def main(argv=None, progress=None, local_capture=False):
             if index % args.stride:
                 continue
             if frame.shape[0]*frame.shape[1] > 3840*2160:
-                raise ValueError('Video exceeds the 4K pixel bound')
+                raise Failure('FRAME_TOO_LARGE', 'Video exceeds the 4K pixel bound')
             processing_began=time.perf_counter()
             blob,scale,padding=prepare(frame,args.profile,cv2,np)
             began=time.perf_counter()
-            raw=backend.forward(blob)
-            detections=decode(raw,labels,frame.shape,scale,padding,cv2,np,args.profile)
+            with failing('INFERENCE_FAILED'):
+                raw=backend.forward(blob)
+            with failing('MODEL_OUTPUT_INVALID'):
+                detections=decode(raw,labels,frame.shape,scale,padding,cv2,np,args.profile)
             elapsed=(time.perf_counter()-began)*1000
             original_processing_ms=(time.perf_counter()-processing_began)*1000
             comparison = None
@@ -214,7 +224,7 @@ def main(argv=None, progress=None, local_capture=False):
             if retain_frames:
                 detection_count += len(detections) + (len(comparison['detections']) if comparison else 0)
                 if detection_count > MAX_DETECTIONS:
-                    raise ValueError('Evaluation trace exceeds 100,000 detections; split the recording')
+                    raise Failure('DETECTION_LIMIT', 'Evaluation trace exceeds 100,000 detections; split the recording')
                 trace_frames.append({'frame_index':index,'seconds':index/fps,
                                      'width':int(frame.shape[1]),'height':int(frame.shape[0]),
                                      'detections':detections,'inference_decode_ms':elapsed})
@@ -228,15 +238,18 @@ def main(argv=None, progress=None, local_capture=False):
         capture.release()
         backend.close()
     if not processed:
-        raise ValueError('No frames were decoded; no receipt was written')
+        raise Failure('NO_FRAMES', 'No frames were decoded; no receipt was written')
     report(phase='verifying', frames_read=frames, frames_analyzed=processed)
     coverage = unchecked(source_hash, frames, termination) if partial else verify_coverage(
         args.video, source_hash, frames,
         progress=lambda count: report(phase='verifying', frames_read=frames, frames_analyzed=processed))
     partial = partial or coverage['status'] != 'inventory-matched'
     validate_coverage(coverage, source_hash, frames, 'partial' if partial else 'completed')
-    if input_hashes and any(digest(p) != expected for p, expected in input_hashes.items()):
-        raise ValueError('An input changed during analysis; no review result was written')
+    # The CPU backend already verified the bytes it parsed against model_hash; later file
+    # changes cannot alter this run, so only other backends re-hash the model file here.
+    if input_hashes and any(digest(p) != expected for p, expected in input_hashes.items()
+                            if not (p == args.model and args.backend == 'opencv-cpu')):
+        raise Failure('INPUT_CHANGED', 'An input changed during analysis; no review result was written')
     ordered=sorted(latencies)
     receipt={'schema':'intelligent-dvr.receipt.v1','mode':'offline-model',
              'state':'partial' if partial else 'completed','events':events,
@@ -300,7 +313,7 @@ def main(argv=None, progress=None, local_capture=False):
                 json.dump(document,stream,indent=2,allow_nan=False)
                 stream.write('\n')
                 if document.get('schema') in (TRACE_SCHEMA, 'intelligent-dvr.recognition-review.v1') and stream.tell() > 32*1024**2:
-                    raise ValueError('Trace/review exceeds the 32 MiB JSON bound; split the recording')
+                    raise Failure('RESULT_LIMIT', 'Trace/review exceeds the 32 MiB JSON bound; split the recording')
     except BaseException:
         for path in created:
             path.unlink()

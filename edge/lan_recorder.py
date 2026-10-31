@@ -14,21 +14,29 @@ import sys
 import threading
 import time
 
+from .diagnostics import Diagnostics
 from .evaluation import anchor, digest, read_json
+from .failures import CAPTURE, exit_cause, read as read_failure
 from .local_feeds import FeedError, ROOT
 from .result_store import REVIEW_BYTES, VIDEO_BYTES
 from .fileops import sync_directory
-from .segment_worker import SEGMENT_BYTES, atomic_json
+from .segment_worker import FPS, SEGMENT_BYTES, atomic_json
 
 DEFAULTS = {'segment_seconds': 10, 'max_segments': 20, 'max_storage_mib': 1024,
             'retention_minutes': 60, 'reserve_mib': 512}
 BOUNDS = {'segment_seconds': (5, 60), 'max_segments': (2, 100), 'max_storage_mib': (256, 8192),
           'retention_minutes': (1, 10080), 'reserve_mib': (256, 16384)}
-ENTRY_FILES = {'capture.webm', 'source.webm', 'complete.json', 'complete.tmp',
-               'progress.json', 'progress.tmp', 'review.json', 'review.tmp'}
+ENTRY_FILES = {'capture.webm', 'source.webm', 'complete.json', 'complete.tmp', 'progress.json',
+               'progress.tmp', 'review.json', 'review.tmp', 'failure.json', 'failure.tmp'}
 STATES = {'recording', 'queued', 'analyzing', 'completed', 'failed', 'interrupted'}
-WORK_FILES = {'source.webm', 'model.onnx', 'labels.json', 'rules.json', 'args.json',
-              'receipt.json', 'review.json', 'progress.json', 'progress.tmp'}
+# Worker failure files appear between a coded exit and the parent's cleanup.
+WORK_FILES = {'source.webm', 'model.onnx', 'labels.json', 'rules.json', 'args.json', 'receipt.json',
+              'review.json', 'progress.json', 'progress.tmp', 'failure.json', 'failure.tmp'}
+MODEL_CACHE = 'model.onnx'  # work/model.onnx: one hash-verified copy reused by segment jobs since Start.
+# expired is the total; legacy stores keep pre-split removals only in that total.
+COUNTERS = ('recorded', 'analyzed', 'dropped', 'expired', 'expired_age', 'evicted_space', 'evicted_disk',
+            'reconnects', 'interrupted')
+REASONS = ('expired_age', 'evicted_space', 'evicted_disk')
 # Account for output + result, encoder buffering, and bounded metadata per row.
 RESERVATION = SEGMENT_BYTES + REVIEW_BYTES + 4 * 1024**2
 
@@ -82,8 +90,10 @@ class Store:
             self.inspect()
             state = self.path / 'state.json'
             self.data = read_json(state, 512 * 1024) if state.exists() else {
-                'schema': 'intelligent-dvr.lan-recorder.v1', 'rows': [],
-                'counters': {'recorded': 0, 'analyzed': 0, 'dropped': 0, 'expired': 0, 'reconnects': 0, 'interrupted': 0}}
+                'schema': 'intelligent-dvr.lan-recorder.v1', 'rows': [], 'counters': dict.fromkeys(COUNTERS, 0)}
+            counters = self.data.get('counters') if isinstance(self.data, dict) else None
+            if isinstance(counters, dict) and set(counters) == set(COUNTERS) - set(REASONS):
+                counters.update(dict.fromkeys(REASONS, 0))
             self.validate()
         except BaseException:
             self.close()
@@ -100,13 +110,19 @@ class Store:
                     raise ValueError('Recorder metadata exceeds its bound')
             elif path.name == 'work':
                 safe(path, True)
-                jobs = list(itertools.islice(path.iterdir(), 2))
-                if len(jobs) > 1: raise ValueError('Too many recorder analysis workers')
+                entries = list(itertools.islice(path.iterdir(), 3))
+                jobs = [entry for entry in entries if entry.name != MODEL_CACHE]
+                if len(entries) > 2 or len(jobs) > 1: raise ValueError('Too many recorder analysis workers')
+                if len(jobs) < len(entries):
+                    try:
+                        safe(path / MODEL_CACHE)
+                        if (path / MODEL_CACHE).stat().st_size > VIDEO_BYTES: raise ValueError('Oversized analysis model cache')
+                    except FileNotFoundError: pass
                 for job in jobs:
                     safe(job, True)
                     if not re.fullmatch('intelligent-dvr-job-[a-z0-9_]{8}', job.name):
                         raise ValueError('Unexpected recorder working directory')
-                    files = list(itertools.islice(job.iterdir(), 10))
+                    files = list(itertools.islice(job.iterdir(), len(WORK_FILES) + 1))
                     if len(files) > len(WORK_FILES): raise ValueError('Unexpected analysis work files')
                     for file in files:
                         if file.name not in WORK_FILES: raise ValueError('Unexpected analysis work file')
@@ -117,7 +133,7 @@ class Store:
                         except FileNotFoundError: pass
             elif re.fullmatch('[a-f0-9]{32}', path.name):
                 safe(path, True)
-                files = list(itertools.islice(path.iterdir(), 10))
+                files = list(itertools.islice(path.iterdir(), len(ENTRY_FILES) + 1))
                 if len(files) > len(ENTRY_FILES):
                     raise ValueError('Unexpected recorder contents')
                 for file in files:
@@ -136,9 +152,9 @@ class Store:
         d = self.data
         if not isinstance(d, dict) or d.get('schema') != 'intelligent-dvr.lan-recorder.v1' or not isinstance(d.get('rows'), list) or len(d['rows']) > 100:
             raise ValueError('Invalid recorder state')
-        if set(d.get('counters', {})) != {'recorded', 'analyzed', 'dropped', 'expired', 'reconnects', 'interrupted'}:
+        if not isinstance(d.get('counters'), dict) or set(d['counters']) != set(COUNTERS):
             raise ValueError('Invalid recorder counters')
-        if any(type(n) is not int or n < 0 for n in d['counters'].values()):
+        if any(type(n) is not int or n < 0 for n in d['counters'].values()) or d['counters']['expired'] < sum(d['counters'][k] for k in REASONS):
             raise ValueError('Invalid recorder counter')
         ids = set()
         for row in d['rows']:
@@ -149,6 +165,8 @@ class Store:
                 raise ValueError('Invalid recording time')
             if not re.fullmatch('[a-z0-9-]{1,40}', row.get('source', '')):
                 raise ValueError('Invalid recording source')
+            if row.get('cause') is not None and not re.fullmatch('[A-Z][A-Z0-9_]{0,39}', str(row['cause'])):
+                raise ValueError('Invalid recording failure cause')
 
     def save(self):
         self.validate()
@@ -199,7 +217,8 @@ class Store:
             review = directory / 'review.json'; safe(review)
             if not 0 < review.stat().st_size <= REVIEW_BYTES or digest(review) != row.get('review_sha256'):
                 raise ValueError('Review fingerprint mismatch')
-            self.bind_review(read_json(review, REVIEW_BYTES), row)
+            events = self.bind_review(read_json(review, REVIEW_BYTES), row)
+            row.setdefault('observations', events)  # Backfills rows completed before counts were recorded.
         return directory
 
     @staticmethod
@@ -208,8 +227,10 @@ class Store:
             any(review.get(k, {}).get('source_sha256') != row.get('sha256') for k in ('receipt', 'trace')) or
             review['receipt'].get('state') != 'completed' or review['trace'].get('state') != 'completed' or
             any(review[k].get('frames_read') != row.get('frames') or review[k].get('camera') != row['source'] or
-                review[k].get('fps_metadata') != 10 for k in ('receipt', 'trace'))):
+                review[k].get('fps_metadata') != 10 for k in ('receipt', 'trace')) or
+            not isinstance(review['receipt'].get('events'), list)):
             raise ValueError('Incomplete or mismatched segment analysis')
+        return len(review['receipt']['events'])
 
     def close(self):
         if self.fd is not None:
@@ -218,9 +239,10 @@ class Store:
 
 class Recorder:
     def __init__(self, config, sources, jobs, directory, *, process_factory=subprocess.Popen,
-                 clock=time.monotonic, wall=time.time, disk_usage=shutil.disk_usage, supervise=True):
+                 clock=time.monotonic, wall=time.time, disk_usage=shutil.disk_usage, supervise=True, diagnostics=None):
         self.config, self.sources, self.jobs = config, sources, jobs
         self.process_factory, self.clock, self.wall, self.disk_usage = process_factory, clock, wall, disk_usage
+        self.log = (diagnostics or Diagnostics()).event; self.last_tick = None
         self.lock = threading.RLock(); self.closed = threading.Event()
         self.active = False; self.state = 'stopped'; self.error = None
         self.failed = False
@@ -280,9 +302,10 @@ class Recorder:
                 if not set(rules['classes']) <= set(model['classes']): raise KeyError()
             except KeyError:
                 raise FeedError('SELECTION', 'Select compatible configured model and rules.') from None
-            self.jobs.claim(self)
+            self.jobs.claim(self)  # Also invalidates the verified model copy: the next job re-verifies once.
             self.active = True; self.state = 'starting'; self.error = None; self.selection = dict(body)
             self.failures = 0; self.retry_at = 0
+            self.log('RECORDER_START')
             return self.status()
 
     def _kill_capture(self):
@@ -292,18 +315,20 @@ class Recorder:
             if self.process.stdin and not self.process.stdin.closed: self.process.stdin.close()
             self.process = None
 
-    def _discard(self, code):
+    def _discard(self, code, cause=None):
         self._kill_capture()
         if self.capture:
             directory = self.store.path / self.capture['id']
             if directory.exists(): shutil.rmtree(directory)
-            self.capture.update(state='interrupted', error=code)
+            self.capture.update(state='interrupted', error=code, cause=cause)
             self.counters['dropped'] += 1; self.counters['interrupted'] += 1
+            self.log('SEGMENT_INTERRUPTED', segment=self.capture['id'], code=code, cause=cause)
             self.capture = None
         self._error(code)
 
     def stop(self, body=None):
         with self.lock:
+            if self.active: self.log('RECORDER_STOP')
             self.active = False; self.state = 'stopped'
             self._discard('OPERATOR_STOP') if self.capture else None
             if self.analysis:
@@ -330,12 +355,15 @@ class Recorder:
         if sum(sizes.values()) < deficit: deficit = 0
         changed = False
         for row in rows:
-            expired = now - row['created_at'] >= self.config['retention_minutes'] * 60
-            full = room and (len(self.rows) >= self.config['max_segments'] or deficit > 0 or
-                             self._committed() + reservation > self.config['max_storage_mib'] * 1024**2)
-            if expired or full:
+            # Age first, then this store's count/byte budget, then the volume's free-space reserve.
+            reason = ('expired_age' if now - row['created_at'] >= self.config['retention_minutes'] * 60 else
+                      'evicted_space' if room and (len(self.rows) >= self.config['max_segments'] or
+                          self._committed() + reservation > self.config['max_storage_mib'] * 1024**2) else
+                      'evicted_disk' if room and deficit > 0 else None)
+            if reason:
                 if row['state'] in ('queued', 'analyzing'): self.counters['dropped'] += 1
-                self.counters['expired'] += 1
+                self.counters['expired'] += 1; self.counters[reason] += 1
+                self.log('SEGMENT_REMOVED', segment=row['id'], reason=reason.upper(), state=row['state'].upper())
                 deficit -= sizes.get(id(row), 0)
                 self.store.remove(row)
                 changed = True
@@ -366,8 +394,8 @@ class Recorder:
         except (OSError, ValueError):
             self._connection_failed('START_FAILED')
 
-    def _connection_failed(self, code):
-        self._discard(code); self.failures += 1; self.counters['reconnects'] += 1
+    def _connection_failed(self, code, cause=None):
+        self._discard(code, cause); self.failures += 1; self.counters['reconnects'] += 1
         self.retry_at = self.clock() + min(60, 2 ** min(self.failures, 6))
         self.state = 'reconnecting'; self.store.save()
 
@@ -388,7 +416,8 @@ class Recorder:
             return
         self._kill_capture()
         if code:
-            self._connection_failed('CONNECTION_OR_ENCODER_FAILED'); return
+            # The worker's bounded coded failure file, or its classified signal/NTSTATUS exit.
+            self._connection_failed('CONNECTION_OR_ENCODER_FAILED', read_failure(directory, CAPTURE) or exit_cause(code)); return
         try:
             result = read_json(directory / 'complete.json', 64 * 1024)
             if (not re.fullmatch('[a-f0-9]{64}', result.get('sha256', '')) or
@@ -402,6 +431,8 @@ class Recorder:
             self.capture.update(state='queued', ended_at=result['ended_at'], frames=result['frames'],
                 first_frame_at=result['started_at'] + result['receive_offsets_seconds'][0],
                 capture_seconds=result['capture_wall_seconds'], missed_sample_slots=result['missed_sample_slots'],
+                # Each skipped 0.1 s receive slot is absent from CFR clip time; rule timing still uses clip time.
+                timing_drift_seconds=round(result['missed_sample_slots'] / FPS, 3),
                 completion_lag_seconds=round(max(0, self.wall() - result['ended_at']), 3))
             previous = [r for r in self.rows if r is not self.capture and 'ended_at' in r]
             self.capture['gap_before_seconds'] = round(max(0, self.capture['first_frame_at'] - previous[-1]['ended_at']), 3) if previous else None
@@ -416,24 +447,34 @@ class Recorder:
         if self.analysis:
             row = self.analysis; job = self.jobs.snapshot(row['job_id'])
             if job['state'] not in ('completed', 'failed', 'cancelled'): return
+            # cause names the step that failed; a failed job contributes its own fixed code.
+            cause = (job.get('error') or {}).get('code') or 'ANALYSIS_FAILED'
             try:
-                if job['state'] != 'completed' or job.get('result_state') != 'completed':
-                    raise ValueError('Analysis failed or incomplete')
-                directory = self.store.verify(row)
+                if job['state'] != 'completed': raise ValueError('Analysis failed')
+                cause = 'RESULT_PARTIAL'
+                if job.get('result_state') != 'completed': raise ValueError('Incomplete analysis coverage')
+                cause = 'INTEGRITY_FAILED'; directory = self.store.verify(row)
+                cause = 'RESULT_STORAGE_PRESSURE'
                 if (self.store.usage() + REVIEW_BYTES > self.config['max_storage_mib'] * 1024**2 or
                     self.disk_usage(self.store.path).free < self.config['reserve_mib'] * 1024**2 + REVIEW_BYTES):
                     raise OSError('No room to retain result')
+                cause = 'RESULT_MISMATCH'
                 path, _ = self.jobs.artifact(job['id'], 'result')
-                review = read_json(path, REVIEW_BYTES); self.store.bind_review(review, row)
+                review = read_json(path, REVIEW_BYTES); observations = self.store.bind_review(review, row)
+                cause = 'RESULT_WRITE_FAILED'
                 atomic_json(directory / 'review.json', review); sync_directory(directory)
-                row.update(review_sha256=digest(directory / 'review.json'))
-                self.store.verify(row, True)
-                row.update(state='completed', error=None, analysis_seconds=job['elapsed_seconds'],
+                row.update(review_sha256=digest(directory / 'review.json'), observations=observations)
+                cause = 'INTEGRITY_FAILED'; self.store.verify(row, True)
+                row.update(state='completed', error=None, cause=None, analysis_seconds=job['elapsed_seconds'],
                     analysis_lag_seconds=round(max(0, self.wall() - row['ended_at']), 3))
                 self.counters['analyzed'] += 1
             except (OSError, ValueError, KeyError, TypeError):
-                row.update(state='queued' if not self.active else 'failed', error='ANALYSIS_INTERRUPTED' if not self.active else 'ANALYSIS_FAILED')
-                if self.active: self.counters['dropped'] += 1
+                row.pop('observations', None)
+                if self.active:
+                    row.update(state='failed', error='ANALYSIS_FAILED', cause=cause); self.counters['dropped'] += 1
+                    self.log('SEGMENT_ANALYSIS_FAILED', segment=row['id'], job=job['id'], cause=cause)
+                else:
+                    row.update(state='queued', error='ANALYSIS_INTERRUPTED', cause=None)
                 self._error(row['error'])
             self.analysis = None; self.analysis_budget = 0; self.store.save()
             self.jobs.discard_managed_result(self)
@@ -441,11 +482,14 @@ class Recorder:
             self.jobs.release(self); self.state = 'stopped'; return
         for row in self.rows:
             if row['state'] != 'queued': continue
+            cause = 'INTEGRITY_FAILED'
             try:
                 directory = self.store.verify(row)
-                model = self.jobs.catalog['models'][row['model']]
+                cause = 'SELECTION'; model = self.jobs.catalog['models'][row['model']]
+                cause = None
                 budget = model['path'].stat().st_size + SEGMENT_BYTES + REVIEW_BYTES
-                required = budget + RESERVATION
+                # Bytes already under work/ (the verified model copy) belong to this budget, not on top of it.
+                required = RESERVATION + max(0, budget - self.store.usage(split=True)[1])
                 # Keep the oldest queued source while reclaiming enough space
                 # for inference, not just the smaller next-capture reservation.
                 self._expire(room=True, reservation=required, keep=row)
@@ -454,11 +498,14 @@ class Recorder:
                     self._error('ANALYSIS_STORAGE_PRESSURE'); return
                 row.update(state='analyzing'); self.store.save()
                 job = self.jobs.start({'recording': row['id'], 'model': row['model'], 'rules': row['rules']}, owner=self,
-                    source=directory / 'source.webm', expected_sha=row['sha256'], camera=row['source'], scratch_parent=self.work)
+                    source=directory / 'source.webm', expected_sha=row['sha256'], camera=row['source'], scratch_parent=self.work,
+                    model_cache=self.work / MODEL_CACHE)
                 row['job_id'] = job['id']; self.analysis = row; self.analysis_budget = budget; self.store.save()
                 return
-            except Exception:
-                row.update(state='failed', error='ANALYSIS_START_FAILED'); self.counters['dropped'] += 1
+            except Exception as exc:
+                cause = exc.code if isinstance(getattr(exc, 'code', None), str) else cause
+                row.update(state='failed', error='ANALYSIS_START_FAILED', cause=cause); self.counters['dropped'] += 1
+                self.log('SEGMENT_ANALYSIS_FAILED', segment=row['id'], code='ANALYSIS_START_FAILED', cause=cause)
                 self._error('ANALYSIS_START_FAILED'); self.store.save()
 
     def tick(self):
@@ -470,13 +517,15 @@ class Recorder:
             self._analysis_tick()
             if self.active:
                 if not self.capture and self.clock() >= self.retry_at: self._launch()
+            self.last_tick = self.clock()
 
     def _supervise(self):
         while not self.closed.wait(.25):
             try: self.tick()
-            except Exception:
+            except Exception as exc:
                 job = None
                 try:
+                    self.log('SUPERVISOR_FAILED', error=type(exc).__name__.upper())
                     with self.lock:
                         self.active = False; self.failed = True; self.state = 'failed'; self.error = 'STORAGE_OR_WORKER_FAILED'
                         job = self.analysis and self.analysis.get('job_id')
@@ -516,6 +565,9 @@ class Recorder:
                 'seconds_since_completed_segment': None if self.last_finished is None else round(self.clock() - self.last_finished, 1),
                 'retry_seconds': round(max(0, self.retry_at - self.clock()), 1) if self.active else 0,
                 'storage_bytes': self.store.usage(), 'disk_free_bytes': self.disk_usage(self.store.path).free,
+                # A stopped thread or a growing tick age means nothing records, analyzes or expires.
+                'supervisor': {'alive': bool(self.thread and self.thread.is_alive()),
+                               'last_tick_age_seconds': None if self.last_tick is None else round(self.clock() - self.last_tick, 1)},
                 'worker': dict(self.metrics), 'segments': [dict(r) for r in reversed(self.rows)]}
 
     def artifact(self, identifier, kind):

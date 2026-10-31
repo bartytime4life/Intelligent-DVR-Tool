@@ -6,6 +6,8 @@ import socket
 import ssl
 import time
 
+from .failures import Failure, failing
+
 MAX_IMAGE = 2 * 1024 * 1024
 MAX_PIXELS = 1920 * 1080
 KINDS = ('public-jpeg', 'public-mjpeg')
@@ -46,18 +48,19 @@ def public_source(item):
 
 def resolve_public(host, resolver=socket.getaddrinfo):
     """Validate every returned address, then use an exact IPv4 without resolving again."""
-    addresses = resolver(host, 443, socket.AF_UNSPEC, socket.SOCK_STREAM)
+    with failing('DNS_FAILED'):
+        addresses = resolver(host, 443, socket.AF_UNSPEC, socket.SOCK_STREAM)
     if not addresses or len(addresses) > 32:
-        raise ValueError('Unsupported DNS answer')
+        raise Failure('ADDRESS_REFUSED', 'Unsupported DNS answer')
     ipv4 = []
     for family, _, _, _, address in addresses:
         ip = ipaddress.ip_address(address[0])
         if not ip.is_global or ip.is_multicast or ip.is_reserved or ip.is_unspecified:
-            raise ValueError('Public webcams cannot address private, local or reserved networks')
+            raise Failure('ADDRESS_REFUSED', 'Public webcams cannot address private, local or reserved networks')
         if family == socket.AF_INET and isinstance(ip, ipaddress.IPv4Address):
             ipv4.append(str(ip))
     if not ipv4:
-        raise ValueError('An approved public IPv4 answer is required')
+        raise Failure('ADDRESS_REFUSED', 'An approved public IPv4 answer is required')
     return sorted(set(ipv4))[0]
 
 
@@ -74,17 +77,38 @@ class PinnedHTTPS(http.client.HTTPSConnection):
             raise
 
 
+def network_cause(error):
+    """Fixed code for a transport failure; the exception and its text stay unchanged."""
+    if isinstance(error, ssl.SSLCertVerificationError):
+        return 'TLS_VERIFY_FAILED'
+    if isinstance(error, ssl.SSLError):
+        return 'TLS_FAILED'
+    if isinstance(error, socket.gaierror):
+        return 'DNS_FAILED'
+    if isinstance(error, TimeoutError):
+        return 'HTTP_TIMEOUT'
+    return 'CONNECT_FAILED' if isinstance(error, OSError) else 'HTTP_RESPONSE_INVALID'
+
+
+def status_cause(response):
+    if 300 <= response.status < 400 or response.getheader('Location') is not None:
+        return 'REDIRECT_REFUSED'
+    return {4: 'HTTP_STATUS_4XX', 5: 'HTTP_STATUS_5XX'}.get(response.status // 100,
+        'HTTP_RESPONSE_INVALID' if response.status == 200 else 'HTTP_STATUS_OTHER')
+
+
 def open_image(source, factory=PinnedHTTPS):
     connection = factory(source['host'], port=443, timeout=5, context=ssl.create_default_context())
     try:
-        connection.request('GET', source['path'], headers={
-            'Accept': 'image/jpeg' if source['kind'] == 'public-jpeg' else 'multipart/x-mixed-replace',
-            'Accept-Encoding': 'identity', 'User-Agent': 'Intelligent-DVR-local-preview/1', 'Connection': 'close'})
-        response = connection.getresponse()
+        with failing(network_cause):
+            connection.request('GET', source['path'], headers={
+                'Accept': 'image/jpeg' if source['kind'] == 'public-jpeg' else 'multipart/x-mixed-replace',
+                'Accept-Encoding': 'identity', 'User-Agent': 'Intelligent-DVR-local-preview/1', 'Connection': 'close'})
+            response = connection.getresponse()
         if (response.status != 200 or response.getheader('Location') is not None or
                 response.getheader('Content-Encoding', 'identity').lower() != 'identity' or
                 sum(len(k) + len(v) for k, v in response.getheaders()) > 16 * 1024):
-            raise ValueError('Unsupported response; redirects, authentication and encoded bodies are refused')
+            raise Failure(status_cause(response), 'Unsupported response; redirects, authentication and encoded bodies are refused')
         return connection, response
     except BaseException:
         connection.close()
@@ -94,11 +118,11 @@ def open_image(source, factory=PinnedHTTPS):
 def jpeg_dimensions(data):
     """Check JPEG SOF dimensions before invoking the native decoder."""
     if not data.startswith(b'\xff\xd8') or not data.endswith(b'\xff\xd9') or len(data) > MAX_IMAGE:
-        raise ValueError('Invalid JPEG')
+        raise Failure('IMAGE_INVALID', 'Invalid JPEG')
     offset = 2
     while offset + 4 <= len(data):
         if data[offset] != 255:
-            raise ValueError('Invalid JPEG marker')
+            raise Failure('IMAGE_INVALID', 'Invalid JPEG marker')
         while offset < len(data) and data[offset] == 255:
             offset += 1
         if offset >= len(data):
@@ -108,34 +132,35 @@ def jpeg_dimensions(data):
             break
         length = int.from_bytes(data[offset:offset+2], 'big')
         if length < 2 or offset + length > len(data):
-            raise ValueError('Invalid JPEG segment')
+            raise Failure('IMAGE_INVALID', 'Invalid JPEG segment')
         if marker in (0xC0, 0xC1, 0xC2):
             if length < 8:
-                raise ValueError('Invalid JPEG dimensions')
+                raise Failure('IMAGE_INVALID', 'Invalid JPEG dimensions')
             height = int.from_bytes(data[offset+3:offset+5], 'big')
             width = int.from_bytes(data[offset+5:offset+7], 'big')
             if not 0 < width * height <= MAX_PIXELS or max(width, height) > 4096:
-                raise ValueError('Use a public image at or below 1080p')
+                raise Failure('IMAGE_LIMIT', 'Use a public image at or below 1080p')
             return width, height
         offset += length
-    raise ValueError('Unsupported JPEG structure')
+    raise Failure('IMAGE_INVALID', 'Unsupported JPEG structure')
 
 
 def image_bytes(response, length=None):
     if length is not None and not 4 <= length <= MAX_IMAGE:
-        raise ValueError('Oversized image')
+        raise Failure('IMAGE_LIMIT', 'Oversized image')
     end, data = time.monotonic() + 8, bytearray()
     while length is None or len(data) < length:
         if time.monotonic() > end:
-            raise ValueError('Image deadline exceeded')
-        block = response.read1(min(65536, (length - len(data)) if length else MAX_IMAGE + 1 - len(data)))
+            raise Failure('IMAGE_TIMEOUT', 'Image deadline exceeded')
+        with failing(network_cause):
+            block = response.read1(min(65536, (length - len(data)) if length else MAX_IMAGE + 1 - len(data)))
         if not block:
             break
         data.extend(block)
         if len(data) > MAX_IMAGE:
-            raise ValueError('Oversized image')
+            raise Failure('IMAGE_LIMIT', 'Oversized image')
     if length is not None and len(data) != length:
-        raise ValueError('Incomplete image')
+        raise Failure('IMAGE_INVALID', 'Incomplete image')
     jpeg_dimensions(data)
     return bytes(data)
 
@@ -144,7 +169,7 @@ def mjpeg_images(response):
     content_type = response.getheader('Content-Type', '')
     match = re.fullmatch(r'multipart/x-mixed-replace\s*;\s*boundary="?([A-Za-z0-9_-]{1,70})"?', content_type, re.I)
     if not match:
-        raise ValueError('Use a direct MJPEG endpoint with a supported boundary')
+        raise Failure('CONTENT_TYPE_REFUSED', 'Use a direct MJPEG endpoint with a supported boundary')
     boundary = b'--' + match[1].encode('ascii')
     while True:
         line = response.readline(128)
@@ -153,20 +178,20 @@ def mjpeg_images(response):
         if line.rstrip(b'\r\n') == boundary + b'--':
             return
         if line != boundary + b'\r\n':
-            raise ValueError('Invalid multipart boundary')
+            raise Failure('MJPEG_INVALID', 'Invalid multipart boundary')
         headers, total = {}, 0
         while True:
             line = response.readline(4096); total += len(line)
             if total > 8192 or not line.endswith(b'\r\n'):
-                raise ValueError('Oversized multipart header')
+                raise Failure('MJPEG_INVALID', 'Oversized multipart header')
             if line == b'\r\n':
                 break
             key, sep, value = line.partition(b':'); key = key.lower()
             if not sep or key in headers:
-                raise ValueError('Invalid multipart headers')
+                raise Failure('MJPEG_INVALID', 'Invalid multipart headers')
             headers[key] = value.strip()
         if headers.get(b'content-type', b'').lower() != b'image/jpeg' or b'content-length' not in headers:
-            raise ValueError('MJPEG parts must be length-bounded JPEG images')
+            raise Failure('MJPEG_INVALID', 'MJPEG parts must be length-bounded JPEG images')
         yield image_bytes(response, int(headers[b'content-length']))
 
 
@@ -177,13 +202,13 @@ def publish(data, directory):
     expected = jpeg_dimensions(data)
     frame = cv2.imdecode(np.frombuffer(data, dtype=np.uint8), cv2.IMREAD_COLOR)
     if frame is None or (frame.shape[1], frame.shape[0]) != expected:
-        raise ValueError('JPEG decode failed')
+        raise Failure('IMAGE_INVALID', 'JPEG decode failed')
     scale = min(1, LIMITS['preview_width'] / max(frame.shape[:2]))
     if scale < 1:
         frame = cv2.resize(frame, (max(1, int(expected[0] * scale)), max(1, int(expected[1] * scale))))
     ok, encoded = cv2.imencode('.jpg', frame, [cv2.IMWRITE_JPEG_QUALITY, 75])
     if not ok or len(encoded) > LIMITS['frame_bytes']:
-        raise ValueError('Preview frame too large')
+        raise Failure('FRAME_LIMIT', 'Preview frame too large')
     from .fileops import replace
     temporary = directory / 'frame.tmp'
     temporary.write_bytes(encoded.tobytes()); replace(temporary, directory / 'frame.jpg', best_effort=True)
@@ -200,7 +225,7 @@ def capture_public(source, directory):
         try:
             if source['kind'] == 'public-jpeg':
                 if response.getheader('Content-Type', '').split(';')[0].strip().lower() != 'image/jpeg':
-                    raise ValueError('Use the direct JPEG endpoint, not a website or player')
+                    raise Failure('CONTENT_TYPE_REFUSED', 'Use the direct JPEG endpoint, not a website or player')
                 publish(image_bytes(response), directory)
             else:
                 for data in mjpeg_images(response):
