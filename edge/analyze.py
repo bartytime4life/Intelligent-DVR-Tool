@@ -21,6 +21,8 @@ from .model_profiles import (DEFAULT_PROFILE, YOLOX_PROFILE, PROFILES, prepare,
 from .resources import load_policy, analyzer_limits
 from .inference import BACKENDS
 from .cpu_backend import create_backend
+from .enhancement import PROFILE as ENHANCEMENT_PROFILE, declaration, sharpen
+from .media_coverage import verify as verify_coverage, unchecked, validate as validate_coverage
 
 
 def digest(path):
@@ -83,6 +85,8 @@ def main(argv=None, progress=None, local_capture=False):
                         help='Optional new frame-level evaluation trace; metadata only')
     parser.add_argument('--review-output',type=Path,
                         help='Optional new recognition review bundle; metadata only, open in Recognition')
+    parser.add_argument('--compare-enhancement', choices=(ENHANCEMENT_PROFILE,),
+                        help='Opt-in paired original/sharpened detection comparison; original-only rule observations')
     parser.add_argument('--threads',type=int,help='OpenCV CPU threads, 1–8; default 1 or policy cap')
     parser.add_argument('--resource-policy',type=Path,help='Explicit local resource policy exported from System')
     parser.add_argument('--camera',default='offline-camera')
@@ -117,9 +121,15 @@ def main(argv=None, progress=None, local_capture=False):
     if any(p.exists() or p.is_symlink() for p in outputs):
         parser.error('Output must be a new file')
     retain_frames = args.trace_output is not None or args.review_output is not None
+    if args.compare_enhancement and not retain_frames:
+        parser.error('Enhancement comparison requires --trace-output or --review-output')
     if retain_frames and math.ceil(args.max_frames/args.stride) > MAX_FRAMES:
         parser.error('Trace mode permits up to 10,000 sampled frames; reduce max-frames or increase stride')
-    input_hashes = {p: digest(p) for p in (args.video, args.model, args.labels, args.rules)} if args.review_output else {}
+    input_hashes = {p: digest(p) for p in (args.video, args.model, args.labels, args.rules)}
+    enhancement = declaration() if args.compare_enhancement else None
+    if enhancement:
+        from . import enhancement as enhancement_module
+        input_hashes[Path(enhancement_module.__file__)] = enhancement['implementation_sha256']
     labels=json.loads(args.labels.read_text())
     model_hash=digest(args.model)
     try:
@@ -163,7 +173,7 @@ def main(argv=None, progress=None, local_capture=False):
     runtime={'python':platform.python_version(),'opencv':cv2.__version__,
              'numpy':np.__version__,'machine':platform.machine(),**backend.runtime}
     frames=0;processed=0;events=[];latencies=[];partial=False
-    trace_frames=[];detection_count=0
+    trace_frames=[];detection_count=0;termination='source-end'
     report(phase='analyzing', frames_read=0, frames_analyzed=0)
     try:
         while frames < args.max_frames:
@@ -175,31 +185,56 @@ def main(argv=None, progress=None, local_capture=False):
                 continue
             if frame.shape[0]*frame.shape[1] > 3840*2160:
                 raise ValueError('Video exceeds the 4K pixel bound')
+            processing_began=time.perf_counter()
             blob,scale,padding=prepare(frame,args.profile,cv2,np)
             began=time.perf_counter()
             raw=backend.forward(blob)
             detections=decode(raw,labels,frame.shape,scale,padding,cv2,np,args.profile)
             elapsed=(time.perf_counter()-began)*1000
+            original_processing_ms=(time.perf_counter()-processing_began)*1000
+            comparison = None
+            if enhancement:
+                processing_began=time.perf_counter()
+                enhanced=sharpen(frame,cv2,np)
+                enhancement_ms=(time.perf_counter()-processing_began)*1000
+                candidate_blob,candidate_scale,candidate_padding=prepare(enhanced,args.profile,cv2,np)
+                candidate_detections=decode(backend.forward(candidate_blob),labels,enhanced.shape,
+                                            candidate_scale,candidate_padding,cv2,np,args.profile)
+                enhanced_processing_ms=(time.perf_counter()-processing_began)*1000
+                comparison={'detections':candidate_detections,
+                            'original_processing_ms':original_processing_ms,
+                            'enhanced_processing_ms':enhanced_processing_ms,
+                            'enhancement_ms':enhancement_ms,
+                            'source_pixels_sha256':hashlib.sha256(frame.tobytes()).hexdigest(),
+                            'enhanced_pixels_sha256':hashlib.sha256(enhanced.tobytes()).hexdigest()}
+                del enhanced, candidate_blob
             latencies.append(elapsed)
             processed+=1;events.extend(engine.update(index/fps,detections))
             report(phase='analyzing', frames_read=frames, frames_analyzed=processed)
             if retain_frames:
-                detection_count += len(detections)
+                detection_count += len(detections) + (len(comparison['detections']) if comparison else 0)
                 if detection_count > MAX_DETECTIONS:
                     raise ValueError('Evaluation trace exceeds 100,000 detections; split the recording')
                 trace_frames.append({'frame_index':index,'seconds':index/fps,
                                      'width':int(frame.shape[1]),'height':int(frame.shape[0]),
                                      'detections':detections,'inference_decode_ms':elapsed})
+                if comparison is not None:
+                    trace_frames[-1]['comparison'] = comparison
             if len(events) >= 1000:
-                events=events[:1000];partial=True;break
+                events=events[:1000];partial=True;termination='event-limit';break
         else:
-            partial=True
+            partial=True;termination='frame-limit'
     finally:
         capture.release()
         backend.close()
     if not processed:
         raise ValueError('No frames were decoded; no receipt was written')
     report(phase='verifying', frames_read=frames, frames_analyzed=processed)
+    coverage = unchecked(source_hash, frames, termination) if partial else verify_coverage(
+        args.video, source_hash, frames,
+        progress=lambda count: report(phase='verifying', frames_read=frames, frames_analyzed=processed))
+    partial = partial or coverage['status'] != 'inventory-matched'
+    validate_coverage(coverage, source_hash, frames, 'partial' if partial else 'completed')
     if input_hashes and any(digest(p) != expected for p, expected in input_hashes.items()):
         raise ValueError('An input changed during analysis; no review result was written')
     ordered=sorted(latencies)
@@ -210,12 +245,16 @@ def main(argv=None, progress=None, local_capture=False):
              'rules_sha256':canonical_hash(config),'rules_file_sha256':digest(args.rules),
              'frames_read':frames,'frames_analyzed':processed,'fps_metadata':fps,'stride':args.stride,
              'runtime':runtime,
+             'media_coverage':coverage,
              'timing':{'scope':'local inference and postprocessing only; not end-to-end camera latency',
                        'p50_ms':statistics.median(ordered),'p95_ms':ordered[math.ceil(.95*len(ordered))-1]},
              'limitations':['No identity tracking: dwell is continuous class presence, not the same object.',
                             'Frame timing assumes a constant-frame-rate recording; verify variable-rate sources.',
                             'No camera compatibility or production detection quality has been qualified.']}
     documents = [(args.output, receipt)]
+    if enhancement:
+        receipt['enhancement_comparison'] = enhancement
+        receipt['limitations'].append('Sharpening comparison is experimental; rule observations use original detections only. More detections do not establish better accuracy.')
     if policy_hash is not None:
         receipt['resource_policy'] = {'sha256': policy_hash, 'opencv_threads': args.threads,
                                       'max_frames': args.max_frames,
@@ -231,6 +270,9 @@ def main(argv=None, progress=None, local_capture=False):
                  'fps_metadata':fps,'stride':args.stride,'frames':trace_frames,'events':events,
                  'runtime':dict(runtime),
                  'timing_scope':receipt['timing']['scope'],'human_review_required':True}
+        trace['media_coverage'] = coverage
+        if enhancement:
+            trace['enhancement_comparison'] = enhancement
         if policy_hash is not None:
             trace['runtime']['resource_policy_sha256'] = policy_hash
         if args.trace_output is not None:

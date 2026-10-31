@@ -28,6 +28,12 @@ class RecoveryTest(unittest.TestCase):
                  'labels_sha256':directory/'labels.json', 'rules_file_sha256':directory/'rules.json'}
         receipt = {key:hashlib.sha256(path.read_bytes()).hexdigest() for key,path in names.items()}
         receipt['state'] = 'completed'
+        receipt['frames_read'] = 1
+        receipt['media_coverage'] = {'schema':'intelligent-dvr.media-coverage.v1',
+            'source_sha256':receipt['source_sha256'], 'status':'inventory-matched',
+            'termination':'source-end', 'analysis_frames':1, 'validated_frames':1,
+            'declared_frames':1, 'declared_duration_seconds':None, 'decoded_duration_seconds':None,
+            'duration_tolerance_seconds':None, 'anchor':'frames', 'validator_version':'synthetic-fixture'}
         (directory/'review.json').write_text(json.dumps({'schema':'intelligent-dvr.recognition-review.v1', 'receipt':receipt, 'trace':receipt}))
         return fixtures.FakeProcess(0)
 

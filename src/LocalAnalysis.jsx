@@ -8,6 +8,7 @@ export default function LocalAnalysis({ onResult, onBusy, clip, onClip, recorder
   const [recording, setRecording] = useState(''), [model, setModel] = useState(''), [rules, setRules] = useState('');
   const [error, setError] = useState(''), [message, setMessage] = useState(''), [working, setWorking] = useState(false);
   const [connected, setConnected] = useState(false), [opening, setOpening] = useState(false);
+  const [compareEnhancement, setCompareEnhancement] = useState(false);
   const token = useRef(''), version = useRef(0), opened = useRef(''), controller = useRef(null);
   // Results open automatically when nothing is loaded, or for a job started here while the same review stayed loaded.
   // They never silently replace a different review.
@@ -41,7 +42,7 @@ export default function LocalAnalysis({ onResult, onBusy, clip, onClip, recorder
       setRecording(previous => value.recordings.some(r => r.id === previous) ? previous : '');
       setModel(previous => value.models.some(m => m.id === previous) ? previous : value.models[0]?.id || '');
       setRules(previous => value.rules.some(r => r.id === previous) ? previous : value.rules[0]?.id || '');
-      setMessage(value.ready ? 'Choose a recording, model and rules. Analysis starts only when you press Analyze recording.' : 'CPU dependencies are missing. Install the optional edge requirements in the service environment, then reconnect.');
+      setMessage(value.ready ? 'Choose a recording, model and rules. Analysis starts only when you press Analyze recording.' : 'Analysis or recording-validation dependencies are missing. Run the current installer or install the optional edge requirements, then reconnect.');
     } catch (err) { if (ticket === version.current) { setError(err.message); setMessage(''); } }
     finally { if (ticket === version.current) setWorking(false); }
   }
@@ -49,7 +50,8 @@ export default function LocalAnalysis({ onResult, onBusy, clip, onClip, recorder
     setWorking(true); setError(''); setMessage('Starting the selected recording…');
     opened.current = '';
     try {
-      const next = await request('/jobs', { method: 'POST', body: { recording, model, rules } }, 120000);
+      const next = await request('/jobs', { method: 'POST', body: { recording, model, rules,
+        ...(compareEnhancement && catalog?.enhancement_comparisons?.includes('mild-unsharp-v1') ? {compare_enhancement:'mild-unsharp-v1'} : {}) } }, 120000);
       autoOpen.current = next.id; runAtStart.current = runRef.current; setJob(next);
     } catch (err) {
       setMessage('');
@@ -149,6 +151,10 @@ export default function LocalAnalysis({ onResult, onBusy, clip, onClip, recorder
         <label>Model<select aria-label="Analysis model" value={model} onChange={e => setModel(e.target.value)}>{catalog.models.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}</select></label>
         <label>Rules<select aria-label="Analysis rules" value={rules} onChange={e => setRules(e.target.value)}>{catalog.rules.map(r => <option key={r.id} value={r.id}>{r.name}</option>)}</select></label>
       </fieldset>
+      {catalog.enhancement_comparisons?.includes('mild-unsharp-v1') && <div className="recording-import">
+        <label><input type="checkbox" checked={compareEnhancement} disabled={busy || !connected} onChange={e => setCompareEnhancement(e.target.checked)} /> Compare mild sharpening (experimental)</label>
+        <p>Runs the same detector on original and sharpened samples. Extra processing shares the five-minute job limit. Original footage stays unchanged; rule observations use original detections. Detection accuracy is unqualified.</p>
+      </div>}
       {!catalog.recordings.length && <p>No supported recordings found. Add an MP4/MOV, WebM/MKV or AVI file up to 512 MiB to the configured folder, then refresh choices.</p>}
       {catalog.rules.find(r => r.id === rules)?.summary.map((line, i) => <p className="local-analysis-rule" key={i}>{line}</p>)}
       {!catalog.rules.length ? <p className="recognition-error">No rule sets are configured. Add a rules file to the local application’s configuration, then refresh choices.</p>
@@ -165,6 +171,7 @@ export default function LocalAnalysis({ onResult, onBusy, clip, onClip, recorder
     {job && <div className="local-analysis-job" aria-live="polite">
       <strong>{job.recording}</strong><span>{job.phase} · {job.elapsed_seconds}s</span>
       {job.recovered && <p>Recovered from local storage after a service restart. No analysis was rerun.</p>}
+      {job.compare_enhancement && <p>Original + mild sharpening comparison · original-only rule observations</p>}
       <p>{job.frames_analyzed} sampled frames · {job.frames_read} decoded / {job.max_frames} frame cap</p>
       {activeJob(job) && <progress aria-label="Analysis frame budget" value={job.frames_read} max={job.max_frames} />}
       {job.error && <p className={job.state === 'failed' ? 'recognition-error' : ''}>{job.error.message}</p>}

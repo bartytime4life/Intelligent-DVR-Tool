@@ -1,5 +1,16 @@
 # Reproducible offline detection pilot
 
+New analyzer results bind [recording coverage validation](recording-coverage.md).
+The evaluator checks those declarations and refuses partial/unverified coverage;
+historical traces retain explicit null validation metadata instead of being
+retroactively certified. Reported counts/durations and decoder agreement cannot
+prove source authenticity or capture completeness.
+
+The optional [saved-recording sharpening comparison](enhancement-comparison.md)
+adds separately evaluated candidate boxes on the same labeled samples. Original
+quality/alert fields keep their existing meaning. Paired reports never promote
+accuracy or operational qualification automatically.
+
 This infrastructure evaluates explicitly selected local files. It does not open
 cameras, capture video, start services, download weights, transmit footage or
 use a paid service. The current committed corpus contains **supplied synthetic
@@ -99,9 +110,11 @@ bounded to 10,000 sampled frames and 100,000 detections; split longer recordings
 The analyzer retains its 100,000 decoded-frame maximum, 4K sampled-image bound
 and 1,000-event ceiling. Exhausting a frame/event bound produces a partial trace
 that evaluation rejects. Set `max-frames` **above** the independently verified
-source frame count so the decoder can reach EOF. OpenCV read failure still
-cannot distinguish clean EOF from damaged media; count agreement is a necessary
-coverage check, not proof of file integrity. No hard inference deadline or
+source frame count so the decoder can reach EOF. OpenCV read failure alone
+cannot distinguish clean EOF from damaged media. New analysis adds a strict
+PyAV decode and available inventory checks before completion; legacy traces
+have no such coverage declaration. Inventory agreement is not proof of file
+integrity or camera-source completeness. No hard inference deadline or
 native-code sandbox was added to the recording analyzer.
 
 ## Manifest contract

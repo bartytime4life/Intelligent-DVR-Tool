@@ -17,7 +17,7 @@ VIDEO_BYTES = 512 * 1024**2
 REVIEW_BYTES = 32 * 1024**2
 EXTENSIONS = {'.mp4', '.m4v', '.mov', '.avi', '.mkv', '.webm'}
 JOB_KEYS = {'id', 'state', 'phase', 'recording', 'model', 'rules', 'frames_read',
-            'frames_analyzed', 'max_frames', 'elapsed_seconds', 'error', 'result_state'}
+            'frames_analyzed', 'max_frames', 'elapsed_seconds', 'error', 'result_state', 'compare_enhancement'}
 
 
 def private(path, directory=False):
@@ -72,6 +72,10 @@ def validate_job(job):
         raise ValueError('Invalid retained error')
     if job.get('result_state') not in (None, 'completed', 'partial'):
         raise ValueError('Invalid retained analysis coverage')
+    if 'compare_enhancement' in job:
+        from .enhancement import PROFILE
+        if job['compare_enhancement'] != PROFILE:
+            raise ValueError('Invalid retained enhancement selection')
 
 
 class ResultStore:
@@ -135,7 +139,7 @@ class ResultStore:
                     raise ValueError('Unexpected retained job contents')
                 for file in files:
                     if file.name not in ('model.onnx', 'labels.json', 'rules.json', 'args.json', 'receipt.json',
-                            'review.json', 'progress.json', 'progress.tmp') and not (file.stem == 'source' and file.suffix in EXTENSIONS):
+                            'review.json', 'progress.json', 'progress.tmp', 'failure.json', 'failure.tmp') and not (file.stem == 'source' and file.suffix in EXTENSIONS):
                         raise ValueError('Unexpected retained job file')
                     # Work-in-progress files are protected by their 0700 directory.
                     info = file.lstat()

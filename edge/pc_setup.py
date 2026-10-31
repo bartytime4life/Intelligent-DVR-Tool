@@ -177,6 +177,9 @@ def native_probe():
                 raise SetupError('The local JPEG round trip failed.')
         finally:
             capture.release()
+        from .media_coverage import verify
+        if verify(Path(path), digest(Path(path)), 3)['status'] != 'inventory-matched':
+            raise SetupError('Local recording coverage validation failed. Reinstall the pinned runtime.')
     return {'packages': versions, 'synthetic_codec': 'passed', 'worker_memory_limit': 'applied'}
 
 

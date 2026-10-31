@@ -31,6 +31,9 @@ def build(root):
     for _ in range(30):
         writer.write(np.full((240, 320, 3), (55, 65, 35), dtype=np.uint8))
     writer.release()
+    # Deliberately incomplete local video for native browser failure/retry checks.
+    source_bytes=(recordings/'synthetic.webm').read_bytes()
+    (recordings/'truncated.webm').write_bytes(source_bytes[:len(source_bytes)//2])
     (recordings / 'invalid.mp4').write_text('not a video')
     (root / 'labels.json').write_text('["person"]')
     (root / 'rules.json').write_text('[{"name":"whole frame","label":"person","rect":[0,0,1,1],"dwell":1}]')

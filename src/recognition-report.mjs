@@ -1,4 +1,6 @@
 import { parseRecognition, mergeRecognitionEvents } from './recognition.mjs';
+import { comparisonSummary } from './enhancement.mjs';
+import { coverageLabel } from './media-coverage.mjs';
 
 export const validateReportRun = run => parseRecognition({ schema:'intelligent-dvr.recognition-review.v1', receipt:run.receipt, trace:run.trace });
 
@@ -35,16 +37,18 @@ export function summarizeReport(parsed, { threshold = .5, reviews = [], sourceMa
       model_sha256:receipt.model_sha256, labels_sha256:receipt.labels_sha256, rules_sha256:receipt.rules_sha256, rules_file_sha256:receipt.rules_file_sha256,
       decoded_frames:receipt.frames_read, sampled_frames:trace.frames.length, stride:receipt.stride, fps_metadata:receipt.fps_metadata,
       last_sample_seconds:trace.frames.at(-1).seconds, display_threshold:threshold },
+    coverage:{label:coverageLabel(receipt), declaration:receipt.media_coverage || null},
     summary:{ detections:samples.reduce((n,s)=>n+s.detections,0), samples_with_detections:samples.filter(s=>s.detections>0).length,
       observations:observations.length, pending:observations.filter(e=>e.status==='pending').length,
       confirmed:observations.filter(e=>e.status==='confirmed').length, dismissed:observations.filter(e=>e.status==='dismissed').length },
     classes:[...classes.values()].sort((a,b)=>b.detections-a.detections || a.label.localeCompare(b.label)), samples, observations,
+    ...(parsed.enhancement ? {enhancement_comparison:comparisonSummary(trace,threshold)} : {}),
     limits:[
       'Detections are repeated sampled observations, not unique people, objects, identities or tracks.',
       'Model scores are not calibrated probabilities. A missing detection does not establish absence.',
       'Report threshold filters detection summaries only; original rules and observations are unchanged.',
       'Frame times use container FPS and assume constant frame rate; variable-rate timing needs separate verification.',
-      receipt.state === 'partial' ? 'PARTIAL: the analyzer stopped at its limit; unprocessed footage is not covered.' : 'The analyzer reached its terminal state; sampled frames do not establish continuous coverage.',
+      coverageLabel(receipt) + '. Sampled frames do not establish continuous coverage; inventory checks do not prove every byte intact or camera-source completeness.',
       'Source fingerprints establish byte correspondence, not authenticity. Reports and local decisions are unsigned; recognition accuracy remains unmeasured.',
     ],
   };
@@ -53,8 +57,16 @@ export function summarizeReport(parsed, { threshold = .5, reviews = [], sourceMa
 const escapeHTML = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const cell = v => { let s=String(v ?? ''); if (/^[\s]*[=+\-@]/.test(s)) s="'"+s; return '"'+s.replaceAll('"','""')+'"'; };
 export function reportCSV(report) {
-  const rows = [['source_sha256','analysis_state','seconds','label','rule','model_score','review_status','review_note']];
-  for (const e of report.observations) rows.push([report.source.sha256,report.analysis.state,e.seconds,e.label,e.rule,e.score,e.status,e.note]);
+  const rows = [['source_sha256','analysis_state','seconds','label','rule','model_score','review_status','review_note','recording_coverage_status','analysis_termination']];
+  for (const e of report.observations) rows.push([report.source.sha256,report.analysis.state,e.seconds,e.label,e.rule,e.score,e.status,e.note,report.coverage.declaration?.status || 'legacy-unverified',report.coverage.declaration?.termination || 'unspecified']);
+  return rows.map(row=>row.map(cell).join(',')).join('\r\n')+'\r\n';
+}
+
+export function comparisonCSV(report) {
+  const c=report.enhancement_comparison;
+  if (!c) throw Error('This report has no sharpening comparison.');
+  const rows=[['source_sha256','profile','implementation_sha256','frame_index','seconds','display_threshold','original_detections','sharpened_detections','original_processing_ms','enhanced_processing_ms','source_pixels_sha256','enhanced_pixels_sha256','qualification']];
+  for (const s of c.samples) rows.push([report.source.sha256,c.declaration.profile,c.declaration.implementation_sha256,s.frame_index,s.seconds,report.analysis.display_threshold,s.original,s.sharpened,s.original_processing_ms,s.enhanced_processing_ms,s.source_pixels_sha256,s.enhanced_pixels_sha256,'unqualified']);
   return rows.map(row=>row.map(cell).join(',')).join('\r\n')+'\r\n';
 }
 
@@ -67,9 +79,16 @@ export function reportHTML(report) {
 <p class="notice"><strong>${h(report.analysis.state.toUpperCase())} · ${report.source.fingerprint_matched ? 'Recording fingerprint matched' : 'Recording NOT matched'}</strong><br>Human review required. Sampled observations do not establish identity, intent or continuous coverage.</p>
 <h2>Source and analysis</h2><p>${h(report.source.name)}<br>Source SHA-256: <code>${h(report.source.sha256)}</code><br>Model SHA-256: <code>${h(report.analysis.model_sha256)}</code><br>Rules SHA-256: <code>${h(report.analysis.rules_sha256)}</code><br>Rules file SHA-256: <code>${h(report.analysis.rules_file_sha256)}</code><br>Labels SHA-256: <code>${h(report.analysis.labels_sha256)}</code></p>
 <p>${h(report.analysis.profile)} · ${h(report.analysis.backend)}<br>${report.analysis.sampled_frames} samples / ${report.analysis.decoded_frames} decoded frames · stride ${report.analysis.stride} · container FPS ${report.analysis.fps_metadata}<br>Last analyzed sample +${report.analysis.last_sample_seconds.toFixed(3)}s · display score ≥ ${report.analysis.display_threshold.toFixed(2)}</p>
+<p>Recording coverage: ${h(report.coverage.label)}</p>
 <h2>Sampled class inventory</h2><p>${report.summary.detections} detections across ${report.summary.samples_with_detections} samples. Repeated sightings are counted repeatedly.</p>
 <div class="scroll"><table><thead><tr><th>Class</th><th>Detections</th><th>Samples</th><th>Peak / sample</th><th>First / last sample (s)</th><th>Max score</th></tr></thead><tbody>${report.classes.map(c=>`<tr><td>${h(c.label)}</td><td>${c.detections}</td><td>${c.samples}</td><td>${c.peak_in_sample}</td><td>${c.first_seconds.toFixed(3)} / ${c.last_seconds.toFixed(3)}</td><td>${c.max_score.toFixed(3)}</td></tr>`).join('')}</tbody></table></div>
 <h2>Rule observations and decisions</h2><p>${report.summary.pending} not yet reviewed ·${report.summary.confirmed} confirmed · ${report.summary.dismissed} dismissed. Decisions reflect the current local review queue at export.</p>
 <div class="scroll"><table><thead><tr><th>Time (s)</th><th>Class / rule</th><th>Score</th><th>Decision</th><th>Notes</th></tr></thead><tbody>${report.observations.map(e=>`<tr><td>${e.seconds.toFixed(3)}</td><td>${h(e.label)}<br>${h(e.rule)}</td><td>${e.score.toFixed(3)}</td><td>${h(e.status)}</td><td>${h(e.note)}</td></tr>`).join('')}</tbody></table></div>
+${report.enhancement_comparison ? comparisonHTML(report.enhancement_comparison) : ''}
 <h2>Interpretation limits</h2><ul>${report.limits.map(v=>`<li>${h(v)}</li>`).join('')}</ul></html>`;
+}
+
+function comparisonHTML(c) {
+  const h=escapeHTML;
+  return `<h2>Experimental sharpening comparison</h2><p>Original-only rule observations. Counts repeat across samples. More detections do not establish better accuracy. Qualification: unqualified.</p><p>Profile: ${h(c.declaration.profile)}<br>Parameters: ${h(JSON.stringify(c.declaration.parameters))}<br>Implementation SHA-256: <code>${h(c.declaration.implementation_sha256)}</code></p><table><thead><tr><th>Class</th><th>Original detections</th><th>Sharpened detections</th></tr></thead><tbody>${c.classes.map(row=>`<tr><td>${h(row.label)}</td><td>${row.original}</td><td>${row.sharpened}</td></tr>`).join('')}</tbody></table><p>Mean sampled-frame processing: original ${c.mean_original_processing_ms.toFixed(1)} ms; sharpened ${c.mean_enhanced_processing_ms.toFixed(1)} ms. Includes preprocessing and inference; excludes media reads, hashing and reporting. Original runs first; these are sequential measurements.</p>`;
 }

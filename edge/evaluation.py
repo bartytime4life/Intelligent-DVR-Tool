@@ -210,6 +210,11 @@ def validate_trace(trace, labels, labels_hash, clip):
         number(frame.get('inference_decode_ms'), 'inference_decode_ms', 0, 3600000)
         replayed.extend(engine.update(frame['seconds'], detections))
     require(trace.get('events') == replayed, 'Trace events differ from deterministic rule replay')
+    from .enhancement import validate_trace as validate_enhancement
+    validate_enhancement(trace, labels, current_code=True)
+    if 'media_coverage' in trace:
+        from .media_coverage import validate as validate_coverage
+        validate_coverage(trace['media_coverage'], trace['source_sha256'], frame_count, trace['state'])
     return frames, replayed
 
 
@@ -257,6 +262,10 @@ def evaluate(manifest_path, reviews_path=None, score_threshold=.5, iou_threshold
     counts = {label: {'TP': 0, 'FP': 0, 'FN': 0} for label in classes}
     evidence, clip_results, used_decisions, identity = [], [], set(), None
     all_timings = []
+    enhancement_identity = None
+    enhancement_counts = {label: {'TP': 0, 'FP': 0, 'FN': 0} for label in classes}
+    enhancement_evidence, original_processing, enhanced_processing, enhancement_times = [], [], [], []
+    comparison_clips = 0
     frames_annotated = 0
     for clip in clips:
         source = relative_file(base, clip['source'])
@@ -267,6 +276,15 @@ def evaluate(manifest_path, reviews_path=None, score_threshold=.5, iou_threshold
         require(kind == 'synthetic' or trace.get('origin') == 'offline-analyzer',
                 'Precomputed synthetic traces cannot evaluate representative recordings')
         frames, events = validate_trace(trace, labels, labels_hash, clip)
+        enhancement = trace.get('enhancement_comparison')
+        if enhancement:
+            require(enhancement_identity is None or enhancement_identity == enhancement,
+                    'Do not pool different enhancement implementations')
+            enhancement_identity = enhancement
+            comparison_clips += 1
+            original_processing.extend(f['comparison']['original_processing_ms'] for f in frames[warmup_frames:])
+            enhanced_processing.extend(f['comparison']['enhanced_processing_ms'] for f in frames[warmup_frames:])
+            enhancement_times.extend(f['comparison']['enhancement_ms'] for f in frames[warmup_frames:])
         model_identity = (trace['inference_profile'], trace['model_sha256'])
         require(identity is None or identity == model_identity, 'Do not pool different models/profiles')
         identity = model_identity
@@ -289,6 +307,12 @@ def evaluate(manifest_path, reviews_path=None, score_threshold=.5, iou_threshold
                 counts[row['label']][row['outcome']] += 1
                 evidence.append({**row, 'camera': clip['camera'], 'source_sha256': clip['source_sha256'],
                                  'trace_sha256': trace_hash, 'frame_index': index, 'seconds': frame['seconds']})
+            if enhancement:
+                for row in match_frame(frame['comparison']['detections'], objects, classes, score_threshold, iou_threshold):
+                    enhancement_counts[row['label']][row['outcome']] += 1
+                    enhancement_evidence.append({**row, 'camera': clip['camera'], 'source_sha256': clip['source_sha256'],
+                        'trace_sha256': trace_hash, 'frame_index': index, 'seconds': frame['seconds'],
+                        'enhanced_pixels_sha256': frame['comparison']['enhanced_pixels_sha256']})
         frames_annotated += len(seen)
         intervals = clip.get('alert_review_intervals', [])
         require(isinstance(intervals, list) and len(intervals) <= 1000, 'Invalid review intervals')
@@ -327,6 +351,7 @@ def evaluate(manifest_path, reviews_path=None, score_threshold=.5, iou_threshold
                              'rules_sha256': trace['rules_sha256'], 'rules': trace['rules'],
                              'rules_file_sha256': trace.get('rules_file_sha256'),
                              'runtime': trace.get('runtime'), 'timing': timing_distribution(times),
+                             'media_coverage': trace.get('media_coverage'),
                              'alert_review_intervals': intervals, 'reviewed_camera_hours': hours,
                              'covered_alerts': len(covered_rows), 'pending_alert_reviews': pending,
                              'reviewed_false_alerts': false,
@@ -335,13 +360,14 @@ def evaluate(manifest_path, reviews_path=None, score_threshold=.5, iou_threshold
                              ('no_reviewed_coverage' if not hours else 'incomplete_alert_reviews'),
                              'alerts': alert_rows})
     require(set(decisions) == used_decisions, 'Review references an unknown trace/event')
+    require(comparison_clips in (0, len(clips)), 'Every clip must include the paired comparison before pooling')
     hours = sum(c['reviewed_camera_hours'] for c in clip_results)
     rate_available = hours > 0 and all(c['pending_alert_reviews'] == 0 for c in clip_results)
     false = sum(c['reviewed_false_alerts'] for c in clip_results)
     provenance = None
     if identity[0] == YOLOX_PROFILE:
         provenance = read_json(ASSETS / 'candidates' / (YOLOX_PROFILE + '.json'))
-    return {'schema': SCHEMA, 'state': 'evaluated', 'data_kind': kind,
+    result = {'schema': SCHEMA, 'state': 'evaluated', 'data_kind': kind,
             'capacity_target_cameras': MINIMUM_CAMERA_TARGET,
             'manifest_sha256': digest(manifest_path), 'reviews_sha256': review_hash,
             'evaluator_sha256': digest(Path(__file__)), 'approval_declarations': approval,
@@ -373,3 +399,15 @@ def evaluate(manifest_path, reviews_path=None, score_threshold=.5, iou_threshold
                             'Traces and human reviews are unsigned local evidence, not an authenticated audit trail.',
                             'Timings exclude capture, preprocessing, rendering and review; sequential clips do not measure camera concurrency.',
                             'No cameras, continuous monitoring, footage transmission or paid services are used.']}
+    if enhancement_identity:
+        result['enhancement_comparison'] = {
+            'declaration': enhancement_identity,
+            'per_class': {label: quality(enhancement_counts[label]) for label in classes},
+            'micro': quality({k: sum(c[k] for c in enhancement_counts.values()) for k in ('TP', 'FP', 'FN')}),
+            'original_processing': timing_distribution(original_processing),
+            'enhanced_processing': timing_distribution(enhanced_processing),
+            'enhancement_only': timing_distribution(enhancement_times),
+            'detection_evidence': enhancement_evidence,
+            'timing_scope': 'Sampled-frame transform, preprocessing, inference and decode; excludes media reads, pixel hashing, reporting and human review. Original is always run first; this is not a randomized benchmark.',
+            'rule_observations': 'original-only', 'qualification': 'unqualified'}
+    return result

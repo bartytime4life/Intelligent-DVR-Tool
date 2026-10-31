@@ -4,6 +4,7 @@ import './recognition.css';
 import LocalAnalysis from './LocalAnalysis.jsx';
 import LanRecorder from './LanRecorder.jsx';
 import RecognitionReport from './RecognitionReport.jsx';
+import { coverageLabel } from './media-coverage.mjs';
 
 export default function RecognitionReview({ onImport, active = true, clip, onClip, reviews = [], evidence = null }) {
   const [run, setRun] = useState(null), [index, setIndex] = useState(0);
@@ -11,6 +12,7 @@ export default function RecognitionReview({ onImport, active = true, clip, onCli
   const [threshold, setThreshold] = useState(0.5), [status, setStatus] = useState(''), [error, setError] = useState('');
   const [analysisBusy, setAnalysisBusy] = useState(false);
   const [recorderBusy, setRecorderBusy] = useState(false);
+  const [detectionInput, setDetectionInput] = useState('original');
   const video = useRef(), generation = useRef(0), sourceGeneration = useRef(0);
   useEffect(() => () => { generation.current++; sourceGeneration.current++; }, []);
   useEffect(() => () => { if (source) URL.revokeObjectURL(source.url); }, [source]);
@@ -19,7 +21,7 @@ export default function RecognitionReview({ onImport, active = true, clip, onCli
     else readMedia();
   }, [active]);
   const frame = run?.trace.frames[index];
-  const summary = frame ? frameSummary(frame, threshold) : null;
+  const summary = frame ? frameSummary(detectionInput === 'sharpened' && frame.comparison ? {...frame, detections:frame.comparison.detections} : frame, threshold) : null;
   const displayed = summary?.detections.slice(0, 200) || [];
   const boxesVisible = active && frame && canShowBoxes(frame, run.receipt.fps_metadata, { ...media, matched: Boolean(source) });
 
@@ -32,7 +34,7 @@ export default function RecognitionReview({ onImport, active = true, clip, onCli
       if (file.size > MAX_REVIEW_BYTES) throw Error('Recognition results exceed 32 MiB. Split the recording before analysis.');
       const parsed = parseRecognition(JSON.parse(await file.text()));
       if (ticket !== generation.current) return;
-      setRun(parsed); setSource(null); setMedia({}); setIndex(0); setStatus('Results loaded. Choose the original recording to verify and view the detections.');
+      setRun(parsed); setDetectionInput('original'); setSource(null); setMedia({}); setIndex(0); setStatus('Results loaded. Choose the original recording to verify and view the detections.');
     } catch (err) { if (ticket === generation.current) { setError(err.message); setStatus(''); } }
   }
   async function loadVideo(event) {
@@ -51,7 +53,7 @@ export default function RecognitionReview({ onImport, active = true, clip, onCli
   }
   function openLocalResult({ bundle, file, name }) {
     generation.current++; sourceGeneration.current++;
-    setRun(bundle); setIndex(0); setSource({ url: URL.createObjectURL(file), name });
+    setRun(bundle); setDetectionInput('original'); setIndex(0); setSource({ url: URL.createObjectURL(file), name });
     setMedia({}); setError('');
     setStatus('Recording fingerprint matched. Analysis is ready for human review.');
   }
@@ -101,8 +103,17 @@ export default function RecognitionReview({ onImport, active = true, clip, onCli
       <div className="recognition-facts">
         <span><strong>{run.receipt.camera}</strong> · {run.receipt.runtime?.backend_id === 'onnxruntime-cuda' ? 'CUDA analysis' : run.receipt.runtime?.backend_id === 'opencv-cpu' ? 'CPU analysis' : 'Backend unspecified'}</span>
         <span>{run.trace.frames.length.toLocaleString()} sampled frames · every {run.receipt.stride} source frames</span>
-        <span className={run.receipt.state === 'partial' ? 'recognition-error' : ''}>{run.receipt.state === 'partial' ? 'PARTIAL — analysis limit reached' : source ? 'Analyzer finished · recording fingerprint matched' : 'Analyzer finished — recording not matched'}</span>
+        <span className={run.receipt.state === 'partial' ? 'recognition-error' : ''}>{coverageLabel(run.receipt)}</span>
+        <span>{source ? 'Result loaded · recording fingerprint matched' : 'Recording not matched'}</span>
       </div>
+      {run.enhancement && <div className="recording-import" aria-label="Sharpening comparison">
+        <label>Detection input <select aria-label="Detection input" value={detectionInput} onChange={e => setDetectionInput(e.target.value)}>
+          <option value="original">Original</option><option value="sharpened">Mild sharpening (experimental)</option>
+        </select></label>
+        <p>The player shows original footage. Boxes and scene counts use the selected detector input. Rule observations and Events use original detections only. Sharpening is unqualified; additional detections may be false.</p>
+        <p>Current sample at score ≥ {threshold.toFixed(2)}: original {frameSummary(frame,threshold).detections.length} · sharpened {frameSummary({...frame,detections:frame.comparison.detections},threshold).detections.length} detections.</p>
+        <p>Sample processing: original {frame.comparison.original_processing_ms.toFixed(1)} ms · sharpened {frame.comparison.enhanced_processing_ms.toFixed(1)} ms. Includes preprocessing and inference; excludes media reads and pixel hashing.</p>
+      </div>}
       <div className="recognition-layout">
         <div>
           <div className="recognition-stage" style={{ aspectRatio: `${frame.width}/${frame.height}` }}>
@@ -117,7 +128,7 @@ export default function RecognitionReview({ onImport, active = true, clip, onCli
               {boxesVisible && <div className="recognition-box-labels" aria-hidden="true">{displayed.map((d, i) => <span key={i} style={{left:`${d.box[0]*100}%`, top:`${d.box[1]*100}%`}}>{d.label} {d.score.toFixed(2)}</span>)}</div>}
             </> : <p>Match the original recording to view this scene.</p>}
           </div>
-          <p className="recognition-caption">{source ? boxesVisible ? 'Boxes correspond to this paused, sampled frame.' : 'Boxes hidden. Select a sample to pause on its analyzed frame.' : 'No recording attached. Results alone are unverified metadata.'}</p>
+          <p className="recognition-caption">{run.enhancement && `Original footage · ${detectionInput === 'sharpened' ? 'sharpened-input' : 'original-input'} detections. `}{source ? boxesVisible ? 'Boxes correspond to this paused, sampled frame.' : 'Boxes hidden. Select a sample to pause on its analyzed frame.' : 'No recording attached. Results alone are unverified metadata.'}</p>
           <div className="recognition-timeline">
             <button className="button" disabled={index === 0} onClick={() => seek(index-1)}>Previous sample</button>
             <label>Sample {index+1} of {run.trace.frames.length}<input aria-label="Analyzed sample" type="range" min="0" max={run.trace.frames.length-1} value={index} onChange={e => seek(Number(e.target.value))} /></label>
@@ -140,13 +151,14 @@ export default function RecognitionReview({ onImport, active = true, clip, onCli
         <p>Presence and dwell follow the configured zones and class labels. They do not establish intent, an anomaly or continuity of the same person.</p>
         {run.events.length > 0 ? <>
           <button className="button amber" onClick={() => onImport(run.events)}>Send {run.events.length} observations to Events</button>
-          <div className="recognition-event-list">{run.receipt.events.map((e, i) => <button key={e.id} className="recognition-event" onClick={() => seek(run.eventFrames[i])}><span>+{e.seconds.toFixed(2)}s · {e.rule}</span><span>score {e.score.toFixed(2)} · View frame</span></button>)}</div>
+          <div className="recognition-event-list">{run.receipt.events.map((e, i) => <button key={e.id} className="recognition-event" onClick={() => {setDetectionInput('original'); seek(run.eventFrames[i]);}}><span>+{e.seconds.toFixed(2)}s · {e.rule}</span><span>score {e.score.toFixed(2)} · View frame</span></button>)}</div>
         </> : <p>No configured rules emitted an observation in the analyzed portion. Inspect detections and rule settings before drawing conclusions.</p>}
       </div>
       <RecognitionReport run={run} threshold={threshold} reviews={reviews} source={source} onSeek={seek} />
       <details className="recognition-provenance"><summary>Provenance and limits</summary>
         <p>Source SHA-256: <code>{run.receipt.source_sha256}</code></p>
         <p>Model SHA-256: <code>{run.receipt.model_sha256}</code></p>
+        <p>{coverageLabel(run.receipt)}. Inventory checks do not authenticate the recording or establish continuous camera visibility.</p>
         <p>Profile: {run.receipt.inference_profile}. Timing assumes constant frame rate ({run.receipt.fps_metadata.toFixed(3)} FPS).</p>
         <p>A matching recording fingerprint proves file correspondence, not authenticity or recognition accuracy. These results are unsigned. No live camera, identity tracking, learned scene interpretation or 100-camera acceptance is established.</p>
       </details>

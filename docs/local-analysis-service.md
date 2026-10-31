@@ -61,6 +61,12 @@ encoded bytes must never inherit another recording's boxes.
 
 ## Limits and recovery
 
+Completed analysis now requires [recording coverage validation](recording-coverage.md).
+The current runtime includes PyAV; strict decode/inventory checks share the job
+deadline. Missing inventory metadata stays explicitly unverified/partial, and
+early or corrupt decoding publishes no result. Reopened legacy results are
+labeled unverified instead of being retroactively validated.
+
 | Boundary | Enforced behavior |
 | --- | --- |
 | Access | Exact IPv4 loopback Host; same-origin browser requests; per-service random token for job/result/source APIs; on Linux, API sockets must belong to the service's OS account (Windows: trust other local accounts); no CORS or uploads |
