@@ -224,7 +224,7 @@ class NativeCoverageTest(unittest.TestCase):
             return FakeProcess(1)
         service=Jobs(self.root/'recordings',load_catalog(self.root/'config.json'),process_factory=fail)
         try:
-            choice=service.available()['recordings'][0]['id']
+            choice=next(item['id'] for item in service.available()['recordings'] if item['name']=='synthetic.webm')
             job=service.start({'recording':choice,'model':'synthetic','rules':'presence'})
             service.thread.join(20);self.assertFalse(service.thread.is_alive())
             result=service.snapshot();self.assertEqual(result['state'],'failed')
