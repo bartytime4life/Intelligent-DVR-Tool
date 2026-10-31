@@ -244,6 +244,7 @@ class NativeFeedTest(unittest.TestCase):
                 if state['state']=='failed':break
                 time.sleep(.1)
             self.assertEqual(state['state'],'failed');self.assertGreater(fixture.redirects,0)
+            self.assertEqual((state['error']['code'],state['cause']),('CONNECTION_FAILED','REDIRECT_REFUSED'))
         finally:
             feeds.close();server.shutdown();server.server_close();thread.join();fixture.close()
 

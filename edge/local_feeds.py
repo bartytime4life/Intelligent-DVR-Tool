@@ -14,7 +14,9 @@ import tempfile
 import threading
 import time
 
+from .diagnostics import Diagnostics
 from .evaluation import read_json
+from .failures import FEED, exit_cause, read as read_failure
 from .public_feed import KINDS, public_source
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -23,6 +25,21 @@ LIMITS = {'active_feeds': 4, 'lease_seconds': 15, 'session_seconds': 900,
           'preview_width': 960, 'input_pixels': 1920 * 1080, 'frame_bytes': 512 * 1024,
           'memory_bytes': 2 * 1024**3}
 PRIVATE = tuple(ipaddress.ip_network(n) for n in ('10.0.0.0/8', '172.16.0.0/12', '192.168.0.0/16'))
+# Specific guidance for a worker's fixed failure code; the error code stays CONNECTION_FAILED.
+CAUSES = {
+    'UPSTREAM_UNREACHABLE': 'The DVR did not accept a connection. Check its power, LAN cable/Wi-Fi, address and RTSP port.',
+    'RTSP_UNAUTHORIZED': 'The DVR refused the configured viewer account. Check the username and password in the local source list.',
+    'RTSP_NOT_FOUND': 'The DVR has no stream at the configured channel path. Check the exact substream path.',
+    'REDIRECT_REFUSED': 'The source answered with a redirect, which is refused. Configure the final direct address.',
+    'DIMENSIONS_UNSUPPORTED': 'The stream exceeds 1080p. Select a lower-resolution substream.',
+    'DNS_FAILED': 'The public webcam host name could not be resolved. Check the configured host and network.',
+    'ADDRESS_REFUSED': 'The public webcam resolved to a private, local or non-IPv4 address, which is refused.',
+    'TLS_VERIFY_FAILED': 'The public webcam certificate could not be verified. Its HTTPS identity is not trusted.',
+    'HTTP_STATUS_4XX': 'The provider refused the image request (HTTP 4xx). Check the direct image path and provider permission.',
+    'HTTP_STATUS_5XX': 'The provider reported a server error (HTTP 5xx). Try again later.',
+    'CONTENT_TYPE_REFUSED': 'The provider did not return a direct JPEG/MJPEG image. Websites, players and playlists are refused.',
+    'IMAGE_LIMIT': 'The provider image exceeds the 2 MiB or 1080p preview bound.',
+}
 
 
 class FeedError(Exception):
@@ -69,9 +86,18 @@ def load_sources(config):
     return sources
 
 
+def shared_config(path):
+    """POSIX group/other read access to the plaintext source list, which holds credentials."""
+    try:
+        return os.name == 'posix' and bool(Path(path).stat().st_mode & 0o044)
+    except OSError:
+        return False
+
+
 class Feeds:
-    def __init__(self, sources, *, process_factory=subprocess.Popen, clock=time.monotonic):
+    def __init__(self, sources, *, process_factory=subprocess.Popen, clock=time.monotonic, diagnostics=None):
         self.sources, self.process_factory, self.clock = sources, process_factory, clock
+        self.log = (diagnostics or Diagnostics()).event
         self.lock = threading.RLock()
         self.sessions = {}
         self.closed = threading.Event()
@@ -109,7 +135,7 @@ class Feeds:
             identifier = secrets.token_hex(16)
             session = {'id': identifier, 'source': source['id'], 'name': source['name'], 'state': 'connecting',
                        **{k: v for k, v in self._source_info(source).items() if k not in ('id', 'name')},
-                       'error': None, 'began': self.clock(), 'touched': self.clock(), 'frame_at': None,
+                       'error': None, 'cause': None, 'began': self.clock(), 'touched': self.clock(), 'frame_at': None,
                        'directory': directory, 'process': None, 'stamp': None}
             self.sessions[identifier] = session
             try:
@@ -126,7 +152,7 @@ class Feeds:
 
     def _public(self, s):
         age = None if s['frame_at'] is None else round(max(0, self.clock() - s['frame_at']), 1)
-        return {k: s[k] for k in ('id', 'source', 'name', 'state', 'error', 'kind', 'provider', 'provider_url', 'refresh_seconds') if k in s} | {'frame_age_seconds': age, 'limits': LIMITS}
+        return {k: s[k] for k in ('id', 'source', 'name', 'state', 'error', 'cause', 'kind', 'provider', 'provider_url', 'refresh_seconds') if k in s} | {'frame_age_seconds': age, 'limits': LIMITS}
 
     def _find(self, identifier):
         if identifier not in self.sessions:
@@ -163,7 +189,7 @@ class Feeds:
             self._stop(s, 'disconnected', None, None)
             return self._public(s)
 
-    def _stop(self, s, state, code, message):
+    def _stop(self, s, state, code, message, cause=None):
         process = s['process']
         if process is not None:
             if process.poll() is None:
@@ -177,7 +203,8 @@ class Feeds:
         # temporary folder behind, never a "live" session without a worker.
         s['state'] = state
         s['error'] = {'code': code, 'message': message} if code else None
-        s['frame_at'] = None
+        s['cause'] = cause; s['frame_at'] = None
+        if code: self.log('FEED_FAILED', session=s['id'], code=code, cause=cause)
         s['directory'].cleanup()
 
     def _reap(self):
@@ -209,7 +236,11 @@ class Feeds:
         elif now - s['began'] > LIMITS['session_seconds']:
             error = ('SESSION_LIMIT', 'The 15-minute preview ended. Explicitly connect again to continue.')
         elif s['process'] is None or s['process'].poll() is not None:
-            error = ('CONNECTION_FAILED', 'Public webcam unavailable. Check provider availability, permission, direct JPEG/MJPEG path, public IPv4 DNS and valid HTTPS certificate. Redirects, login pages and oversized images are refused. Reconnect explicitly.' if s.get('kind') in KINDS else 'No usable RTSP stream. Check DVR power, LAN access, RTSP port, channel path and credentials; use a substream up to 1080p. Redirects are refused.')
+            # The worker's coded failure file, or a classified signal exit, refines the message.
+            cause = None if s['process'] is None else (read_failure(Path(s['directory'].name), FEED) or exit_cause(s['process'].poll()))
+            lead, advice = (('Public webcam unavailable.', 'Check provider availability, permission, direct JPEG/MJPEG path, public IPv4 DNS and valid HTTPS certificate. Redirects, login pages and oversized images are refused. Reconnect explicitly.')
+                            if s.get('kind') in KINDS else ('No usable RTSP stream.', 'Check DVR power, LAN access, RTSP port, channel path and credentials; use a substream up to 1080p. Redirects are refused.'))
+            error = ('CONNECTION_FAILED', lead + ' ' + CAUSES.get(cause, advice), cause)
         elif s['frame_at'] is None and now - s['began'] > LIMITS['open_seconds']:
             error = ('OPEN_TIMEOUT', 'Source did not provide an image in 12 seconds. Check the source settings and network, then retry.')
         elif s['frame_at'] is not None and now - s['frame_at'] > (s.get('refresh_seconds', 0) + LIMITS['open_seconds'] if s.get('kind') == 'public-jpeg' else LIMITS['stale_seconds']):

@@ -98,9 +98,88 @@ application storage management, not an OS disk quota or protection against a hos
 Expired files are deleted. Export required evidence before retention removes it.
 `dropped` counts failed/interrupted segment attempts, failed analyses and expired
 queued segments; it is not a count of camera packets or lost frames. `expired`
-also counts successful pairs removed by retention. Counters persist across restarts;
-the list retains only the bounded most recent entries. They are unsigned local
-operational metadata, not an authenticated forensic audit log.
+is the total number of entries removed by retention, including successful pairs.
+Each removal is also counted by reason:
+
+| Counter | Removal reason |
+| --- | --- |
+| `expired_age` | Older than `retention_minutes` |
+| `evicted_space` | This store's `max_segments` or `max_storage_mib` budget needed room |
+| `evicted_disk` | The volume's free space fell below `reserve_mib` and removing entries restored it |
+
+Stores created before this split keep their earlier removals in `expired` only,
+with the three reason counters starting at zero. Counters persist across restarts.
+The list keeps only a bounded number of recent entries. These counters are unsigned
+local operating data, not an authenticated audit log.
+
+## Status fields and failure causes
+
+`GET /api/recorder/status` also reports:
+
+- `supervisor: {alive, last_tick_age_seconds}` — whether the supervision thread is
+  running and how long ago it last finished a tick. If the thread has stopped, or
+  the tick age keeps growing, nothing records, analyzes or expires.
+- On each row, `cause` is a fixed code that refines `error`. It is never a path,
+  URL, address or credential. For `ANALYSIS_FAILED`, it is the analysis job's
+  code. Examples: `NO_FRAMES`, `VIDEO_OPEN_FAILED`, `MODEL_LOAD_FAILED`,
+  `STRIDE_EXCEEDS_GAP`, `MEDIA_INCOMPLETE`, `TIME_LIMIT`, `CPU_LIMIT` (SIGXCPU),
+  `MEMORY_LIMIT`, `WORKER_KILLED`. When a later step fails, the cause names that
+  step: `RESULT_PARTIAL`, `INTEGRITY_FAILED`, `RESULT_STORAGE_PRESSURE`,
+  `RESULT_MISMATCH` or `RESULT_WRITE_FAILED`. For `CONNECTION_OR_ENCODER_FAILED`,
+  the cause comes from the capture worker: `STREAM_OPEN_FAILED`,
+  `STREAM_INTERRUPTED`, `UPSTREAM_UNREACHABLE`, `RTSP_UNAUTHORIZED`,
+  `RTSP_NOT_FOUND`, `RTSP_STATUS_4XX`/`5XX`, `REDIRECT_REFUSED`,
+  `RTSP_RESPONSE_INVALID`, `DIMENSIONS_UNSUPPORTED`, `ENCODER_UNAVAILABLE`,
+  `CAPTURE_DEADLINE`, `SEGMENT_LIMIT` or `SEGMENT_VERIFY_FAILED`. A signal exit
+  without a code is also classified. The cause is `null` when nothing more
+  specific is known.
+- Completed rows have `observations`, the number of events in that segment's
+  retained review receipt. Rows completed before this field existed are filled in
+  at the next service start.
+- Recorded rows have `timing_drift_seconds` = `missed_sample_slots` × 0.1. Clip
+  time runs behind local receive time by this amount at the end of the segment.
+
+A worker reports its code through a bounded `failure.json` file, which the parent
+parses strictly. This file is an expected artifact in segment and analysis working
+folders and never blocks storage inspection. With `--state-dir`, the same codes and
+row/job IDs go to the [diagnostic log](../SECURITY.md#worker-failure-codes-and-the-diagnostic-log).
+
+## Per-segment analysis cost
+
+Each Start verifies the selected model once. The first segment job copies it into
+the recorder's private `work/model.onnx` and checks the copy against the pinned
+SHA-256. Later segment jobs in the same session reuse that copy while its file
+signature (device, inode, size, modification time) is unchanged. Otherwise the
+next job copies and verifies it again. Stop removes the copy, and a restart clears
+`work/`. The analyzer now hashes the model once. The CPU backend checks the parsed
+bytes against that hash, and the hash is bound into the receipt. The service still
+compares the receipt's model hash with the pinned value, so a copy that changed
+without a signature change is refused (`MODEL_LOAD_FAILED` or `RESULT_MISMATCH`).
+The cached copy counts toward `max_storage_mib` and toward the running analysis
+reservation.
+
+Measured on 2026-10-31 (AMD Ryzen 9 9950X, Linux, Python 3.12), using the synthetic
+fixture: a 10-second, 99-frame 640×480 segment, with 21 segment jobs per row after
+the first. These are plumbing timings, not camera or model performance:
+
+| Fixture model | Version | Parent preparation | Worker run | Job wall time |
+| --- | --- | ---: | ---: | ---: |
+| 393 B constant ONNX | before | 0.9 ms | 146 ms | 0.203 s |
+| 393 B constant ONNX | after | 0.7 ms | 144 ms | 0.203 s |
+| 36 MiB (padded constant ONNX) | before | 23.7 ms | 251 ms | 0.327 s |
+| 36 MiB (padded constant ONNX) | after | 0.9 ms | 211 ms | 0.303 s |
+
+With the tiny CI model the change is within noise. With a model about the size of
+YOLOX-S, segments after the first save about 23 ms of copy and hash work in the
+parent and about 40 ms of duplicate hashing in the worker. The first segment after
+each Start costs the same as before. The parent checks the worker every 0.1 s, so
+job wall times fall into 0.1 s steps. That polling, plus starting the worker
+process and loading the model for every segment, is now the larger fixed cost.
+
+Each segment still runs in its own analysis process. The per-process `RLIMIT_CPU`
+backstop adds up over the process's lifetime, so a persistent worker would need a
+different CPU budget model. That is a separate follow-up, together with waiting on
+the process instead of polling.
 
 ## Timing, recovery and failure semantics
 
@@ -111,8 +190,12 @@ operational metadata, not an authenticated forensic audit log.
   existing analyzer use nominal CFR 10 fps. The separate fingerprint-bound timing
   file maps output frame indices to local receive offsets and records skipped
   sampling slots. Variable-rate input, buffering and network delays can make clip
-  time differ from wall time. Dwell rules are evaluated in clip time. These are not
-  calibrated camera timestamps or a guarantee of chronological event accuracy.
+  time differ from wall time. `timing_drift_seconds` (skipped slots × 0.1 s) shows
+  how far clip time lags receive time at the end of a segment. Dwell rules are still
+  evaluated in clip time. The constant-frame-rate contract is shared by the
+  analyzer, the evaluator, the browser review and the segment binding check, so
+  this release does not change it. These are not calibrated camera timestamps or
+  a guarantee of chronological event accuracy.
 - Completion lag measures acceptance after the final sampled frame's local receive
   time. Analysis lag measures retained-result completion after that receive time.
   Queue age, time since last completed segment, capture CPU time and peak RSS are

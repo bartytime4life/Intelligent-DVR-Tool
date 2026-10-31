@@ -39,8 +39,10 @@ read-only viewer account and a low-bandwidth substream at or below 1080p.
 2. Copy [the example](../edge/local-feeds.example.json) to `local-feeds.json` in
    the repository root. This local filename is ignored by Git. Replace the example
    address/path with your DVR’s exact settings. Add one entry per channel.
-3. Restrict the file to your OS account. Credentials are local plaintext settings,
-   not a credential vault. Do not commit, export to a hosted Site or upload it.
+3. Restrict the file to your OS account (`chmod 600 local-feeds.json` on Linux).
+   Credentials are local plaintext settings, not a credential vault. Do not commit,
+   export to a hosted Site or upload it. On POSIX, the service and Check warn while
+   group or other accounts can read the file.
 4. Start the local app, then use **Set up local DVR → Load configured DVR sources**.
    Select a channel and press **Connect DVR channel**. Startup/loading choices does
    not connect cameras.
@@ -84,6 +86,7 @@ webcams but cannot bridge LAN DVR channels through this local service.
 | Lifetime | 12 seconds to first frame, 8 seconds without a new frame, 15-second client lease, 15-minute maximum preview |
 | Browser | Sequential frame requests, one retained object URL per channel; hide or leave Monitor to disconnect; webcam tracks stop immediately |
 | Failure | Drop last image and show an actionable error. No stale image is presented as a current feed. Explicit retry required |
+| Failure cause | A worker exit stays `CONNECTION_FAILED`, plus a fixed `cause` from the worker's bounded failure file or a classified signal exit, such as `UPSTREAM_UNREACHABLE`, `RTSP_UNAUTHORIZED`, `RTSP_NOT_FOUND`, `REDIRECT_REFUSED`, `DIMENSIONS_UNSUPPORTED`, `HTTP_STATUS_4XX`, `CONTENT_TYPE_REFUSED`, `TLS_VERIFY_FAILED` or `CPU_LIMIT`. Known causes get a specific message. Causes never contain addresses, paths or credentials |
 | Shutdown | Kill/reap workers and remove temporary frames. If the service dies, its private worker pipe closes and the worker exits on Linux and Windows; Linux also arms a parent-death kill. Abrupt death may leave temporary frames for OS cleanup |
 
 RTSP without TLS sends media on the LAN and may use Basic authentication. Use a

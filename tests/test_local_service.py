@@ -159,6 +159,66 @@ class ServiceTest(unittest.TestCase):
             return FakeProcess(0)
         service = self.service(process_factory=process); self.start(service)
         self.assertEqual(self.finish(service)['error']['code'], 'RESULT_MISMATCH')
+    def test_worker_failure_codes_are_parsed_strictly_and_signal_deaths_classified(self):
+        from edge.failures import ANALYSIS
+        cases = [('{"code":"NO_FRAMES"}', 1, 'NO_FRAMES'), ('{"code":"STRIDE_EXCEEDS_GAP"}', 1, 'STRIDE_EXCEEDS_GAP'),
+                 ('{"code":"MEDIA_CORRUPT"}', 1, 'MEDIA_CORRUPT'),
+                 ('{"code":"NO_FRAMES","path":"/home/user/private.mp4"}', 1, 'PROCESS_FAILED'),
+                 ('{"code":"/home/user/private.mp4"}', 1, 'PROCESS_FAILED'), ('{"code":["NO_FRAMES"]}', 1, 'PROCESS_FAILED'),
+                 ('{"code":"NO_FRAMES","code":"CPU_LIMIT"}', 1, 'PROCESS_FAILED'), ('{"code":"' + 'A' * 2000 + '"}', 1, 'PROCESS_FAILED'),
+                 (None, -24, 'CPU_LIMIT'), (None, -25, 'FILE_SIZE_LIMIT'), (None, -9, 'WORKER_KILLED'),
+                 (None, -11, 'WORKER_CRASHED'), (None, 1, 'PROCESS_FAILED')]
+        for written, code, expected in cases:
+            with self.subTest(written=written and written[:60], code=code):
+                def process(command, **kwargs):
+                    if written: (Path(command[-1]) / 'failure.json').write_text(written)
+                    return FakeProcess(code)
+                service = self.service(process_factory=process); self.start(service); state = self.finish(service)
+                self.assertEqual(state['error']['code'], expected)
+                if expected != 'PROCESS_FAILED': self.assertEqual(state['error']['message'], ANALYSIS[expected])
+                self.assertNotIn('/home/user', json.dumps(state))
+                self.assertEqual(list(Path(service.directory.name).iterdir()), [])
+        from edge.failures import exit_cause
+        with patch('edge.failures.sys.platform', 'win32'):
+            self.assertEqual([exit_cause(c) for c in (0xC0000017, 0xC000012D, 0xC0000005, 1)],
+                             ['MEMORY_LIMIT', 'MEMORY_LIMIT', 'WORKER_CRASHED', None])
+    @unittest.skipUnless(sys.platform == 'linux', 'Opt-in --state-dir (and its diagnostic log) is Linux-only')
+    def test_diagnostic_log_is_opt_in_private_codes_only_and_survives_store_inspection(self):
+        from edge.result_store import ResultStore
+        service = self.service(process_factory=lambda *a, **k: FakeProcess(1))
+        self.assertIsNone(service.diagnostics.directory)  # Off without a state directory.
+        self.start(service); self.finish(service)
+        self.assertFalse(any(p.name.startswith('service.log') for p in self.root.rglob('*')))
+        state = self.root / 'state'
+        def failing(command, **kwargs):
+            (Path(command[-1]) / 'failure.json').write_text('{"code":"VIDEO_OPEN_FAILED"}'); return FakeProcess(1)
+        service = self.service(process_factory=failing, state_dir=state); self.start(service); self.finish(service)
+        service.diagnostics.event('PROBE', path=str(self.root / 'video.avi'), url='rtsp://viewer:secret@192.168.1.5/x',
+                                  user='alice', name='video.avi', count=3, ratio=.25, job='a' * 32)
+        log = state / 'diagnostics' / 'service.log'; text = log.read_text()
+        self.assertIn('JOB_FINISHED job=', text); self.assertIn('code=VIDEO_OPEN_FAILED', text)
+        self.assertIn('count=3 ratio=0.25 job=' + 'a' * 32, text)
+        for leaked in (str(self.root), 'video.avi', 'secret', '192.168', 'alice', 'Test model', 'Presence'):
+            self.assertNotIn(leaked, text)
+        self.assertEqual(text.count('REDACTED'), 4)
+        self.assertEqual((state / 'diagnostics').stat().st_mode & 0o777, 0o700)
+        self.assertEqual(log.stat().st_mode & 0o777, 0o600)
+        service.close(); self.services.remove(service)
+        reopened = ResultStore(state); reopened.close()  # The log folder is an expected store entry.
+        ResultStore(state, inspect_only=True).close()
+        (state / 'diagnostics' / 'notes.txt').write_text('x'); os.chmod(state / 'diagnostics' / 'notes.txt', 0o600)
+        with self.assertRaises(ValueError): ResultStore(state)
+    def test_diagnostic_log_rotates_at_one_mebibyte_across_three_files(self):
+        from edge.diagnostics import Diagnostics, LIMIT, NAMES
+        directory = self.root / 'diagnostics'; log = Diagnostics(directory)
+        for i in range(3 * LIMIT // 60 + 2000):
+            log.event('SEGMENT_REMOVED', segment=format(i, '032x'), reason='EXPIRED_AGE')
+        files = sorted(p.name for p in directory.iterdir())
+        self.assertEqual(files, sorted(NAMES))
+        self.assertTrue(all((directory / name).stat().st_size <= LIMIT for name in files))
+        newest = (directory / NAMES[0]).read_text().splitlines()[-1]
+        self.assertTrue(newest.endswith('segment=' + format(i, '032x') + ' reason=EXPIRED_AGE'))
+        Diagnostics(None).event('ANY', value='/no/log')  # Disabled logging is a no-op.
     def test_disk_or_process_spawn_failure_is_actionable_and_recoverable(self):
         def broken(*args, **kwargs): raise OSError('sensitive /host/path')
         service = self.service(process_factory=broken); self.start(service)

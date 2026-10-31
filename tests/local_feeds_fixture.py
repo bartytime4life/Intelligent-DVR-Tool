@@ -108,11 +108,17 @@ def sources(port):
                   'username':'viewer','password':'fixture-secret'} for name in ('video','missing','stall','redirect')}
 
 
+def port(default):
+    """Optional --port N, so parallel checkouts can run the browser suites side by side."""
+    import sys
+    return int(sys.argv[sys.argv.index('--port')+1]) if '--port' in sys.argv else default
+
+
 if __name__=='__main__':
     from edge.local_feeds import Feeds
     from edge.local_service import LocalServer
     fixture=SyntheticRtsp();feeds=Feeds(sources(fixture.server_address[1]))
     try:
-        with LocalServer(4184,None,Path('dist/client'),feeds) as server:
+        with LocalServer(port(4184),None,Path('dist/client'),feeds) as server:
             print('Synthetic-only RTSP browser fixture ready',flush=True);server.serve_forever()
     finally:feeds.close();fixture.close()
