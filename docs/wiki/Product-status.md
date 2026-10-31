@@ -1,5 +1,7 @@
 # Product status and evidence
 
+**Field-testing guidance (October 31, 2026):** use the [field-acceptance runbook](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/field-acceptance.md) with the [PC kit](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/PC-testing) to verify real webcam, RTSP, recording, review and interruption behavior. CI, simulated feeds and generated recordings below are not field acceptance.
+
 October 30 [full review](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/review-2026-10-30.md): 61 verified defects across the
 browser workspaces, facility editor and local service were fixed in PR #45, and
 the Windows launchers' line endings in PR #46. Highlights: unreadable saved data
@@ -58,7 +60,7 @@ source matching. See [setup, resource limits and recovery](https://github.com/ba
 This is a recording workflow; live cameras, tracking, representative accuracy and
 100-camera acceptance remain separate gates.
 
-Updated October 28, 2026. Audited application baseline:
+**Historical audited application baseline (October 27–28, 2026; not the current HEAD):**
 [`82c862c68735720b8840461fc624e8dbe148a53a`](https://github.com/bartytime4life/Intelligent-DVR-Tool/commit/82c862c68735720b8840461fc624e8dbe148a53a)
 (the merged PR #11 revision). Later native-runtime and optional-CUDA work has
 its own dated evidence in the verification index below.
@@ -67,9 +69,10 @@ its own dated evidence in the verification index below.
 
 Intelligent DVR is a local camera-analysis and human-review prototype with an
 editable facility planner and System resource-planning workspace. At least **100
-simultaneously active cameras** is the owner's requirement. Live ingest/recording,
-representative field/event accuracy, cross-platform GPU deployment and actual
-100-camera capacity remain unqualified. The optional CUDA route has bounded
+simultaneously active cameras** is the owner's requirement. Sustained multi-camera ingest/recording, representative field/event accuracy,
+cross-platform GPU deployment and actual 100-camera capacity remain unqualified.
+The one-camera LAN recorder has separate controlled-source test evidence, not
+physical-device acceptance. The optional CUDA route has bounded
 owner-PC execution evidence in its dated record.
 
 The [facility follow-up](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/facility-2026-10-28/README.md) records the
@@ -92,7 +95,7 @@ saves migrate without deleting the original. See [saved facilities](https://gith
 | System controls | Planning arithmetic, applied browser limits, setup/policy exports and host-snapshot import; [control contract](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Resource-controls) | Browser controls and analyzer thread/frame caps have explicit scopes. RAM/VRAM/power/storage estimates are not OS quotas or activated hardware. |
 | Offline detection | One local recording per run, default OpenCV CPU and explicit pinned YOLOX-S CUDA option, bounded rule receipts/traces with backend metadata; [analyzer](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/edge/analyze.py) | [CUDA qualification](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/cuda-2026-10-28/README.md) covers the owner PC and bounded inputs. Field/event accuracy, sustained capacity and other GPU/OS combinations remain unqualified. No detector weights are bundled. |
 | Evaluation | Annotation matching, precision/recall, timing distributions and reviewed false alerts; [guide](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/offline-evaluation.md) | Synthetic fixtures verify calculation/evidence plumbing. Approved representative labels and held-out quality measurement remain required. |
-| Scale preparation | Bounded fair scheduler, explicit 1–4 thread processors, optional Linux process supervision/local outcome journal and virtual-time 100/125-source tests; [guide](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/performance-100-cameras.md) | [Thread trials](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/workers-2026-10-28/README.md), [process recovery](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/recovery-2026-10-28/README.md) and [parent-crash journal](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/journal-2026-10-28/README.md) use bounded offline inputs. The [batching record](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/batching-2026-10-28/README.md) separates atomic commits/index changes from consumer acknowledgment timing. Durable dispatched outcomes are optional; no distributed service, live ingest, rule-state or recording integration; physical/sustained 100-camera operation remains unqualified. |
+| Scale preparation | Bounded fair scheduler, explicit 1–4 thread processors, optional Linux process supervision/local outcome journal and virtual-time 100/125-source tests; [guide](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/performance-100-cameras.md) | [Thread trials](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/workers-2026-10-28/README.md), [process recovery](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/recovery-2026-10-28/README.md) and [parent-crash journal](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/journal-2026-10-28/README.md) use bounded offline inputs. The [batching record](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/batching-2026-10-28/README.md) separates atomic commits/index changes from consumer acknowledgment timing. Durable dispatched outcomes are optional; the scale subsystem is not integrated with multi-camera live ingest/recording, per-camera rule state or distributed services; physical/sustained 100-camera operation remains unqualified. |
 | Linux/Windows delivery | Pinned isolated install, prebuilt PC kit, integrity/readiness checks and foreground loopback service; [PC guide](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/PC-testing) | Fresh extracted-kit installation, repeated install/settings preservation and HTTP startup are checked on Linux/Windows CI. Physical-device/target-PC and unattended service acceptance remain separate. |
 
 ## Read the status labels

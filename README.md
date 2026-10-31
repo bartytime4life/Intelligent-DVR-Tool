@@ -10,6 +10,16 @@ A local camera-analysis foundation and visual review prototype from BARTA AI Sol
 
 </div>
 
+## Choose a launch path
+
+| What you want to do | Follow |
+| --- | --- |
+| Install and test the actual local PC app on Linux or Windows | [Prebuilt PC kit: Install / Check / Start](docs/pc-testing.md) |
+| Qualify a webcam, DVR, recording, recognition and recovery on real hardware | [Field acceptance runbook](docs/field-acceptance.md) |
+| Develop the browser-only interface | [Source-only Vite preview](#run-the-source-only-ui-preview) |
+
+**Acceptance boundary:** browser webcam and local RTSP previews, opt-in webcam clips, one LAN recording source and bounded local recording analysis are implemented. Physical-device endurance, independent detection accuracy, continuous multi-camera recording and 100-camera capacity **remain unqualified**. [Product status](docs/product-status.md) · [Verification](docs/verification/README.md).
+
 **Local previews and recording review.** Monitor starts empty and can explicitly
 connect a browser webcam or a configured local DVR RTSP channel. Camera previews
 do not run AI. Explicit webcam clip capture now connects Monitor to local recording
@@ -58,7 +68,7 @@ The new **System** workspace combines recording/retention sizing, RAM and VRAM b
 
 [Hardware and drive shortlist](docs/hardware-guide.md) · [Linux setup](docs/setup-linux.md) · [Windows setup](docs/setup-windows.md) · [GPU planning](docs/gpu-planning.md) · [Control scopes](docs/resource-controls.md)
 
-## Run the review prototype
+## Run the source-only UI preview
 
 Use Node.js 22 and npm. From the repository root:
 
@@ -67,7 +77,7 @@ npm ci
 npm run dev -- --host 127.0.0.1 --port 4173
 ```
 
-Open the address Vite prints. **Monitor**, **Facility**, **Events**, **Zones**, **System** and **Settings** are the workspace areas. Start with the [five-minute walkthrough](docs/getting-started.md).
+Open the address Vite prints. **This Vite command only starts the browser preview**; it does not start the Python camera bridge, LAN recorder or native analysis jobs. To use those features, follow the [PC test-kit launcher](docs/pc-testing.md). **Monitor**, **Facility**, **Events**, **Zones**, **System** and **Settings** are the workspace areas. Start with the [five-minute walkthrough](docs/getting-started.md).
 
 The browser prototype needs no subscription, paid inference, API key, camera credentials or remote backend. Review decisions, rules and plans save in this browser's localStorage; they are editable and can be lost when storage is cleared. Export anything you need to keep. The interface font is bundled; explicitly enabled online maps are the external requests. [Data boundaries](docs/architecture.md#where-data-goes).
 
@@ -86,7 +96,7 @@ The [October 28 PC report](docs/verification/host-2026-10-28/README.md) records 
 | A pretrained YOLOX-S artifact previously ran through compatibility probes | [October 26 model report](docs/model-qualification-20261026.md) and JSON receipts | Historical synthetic-input/recording smoke tests; no recognition-quality result |
 | The scheduler can be exercised with 100 synthetic source IDs | [Fresh load-model reports](docs/verification/2026-10-27/README.md) | Virtual time, assumed service costs and synthetic payloads; no camera throughput measured |
 
-The [verification index](docs/verification/README.md) separates the latest audited application baseline (**116 passing tests on Linux; 113 on Windows with 3 skips**) from earlier dated runs. The six browser scenarios are reported separately. [Machine-setup evidence](docs/verification/hardware-2026-10-27/README.md) and [earlier documentation-refresh evidence](docs/verification/2026-10-27/README.md) retain their original revisions and counts. **No detector weights or representative recordings are bundled.**
+The [verification index](docs/verification/README.md) keeps the historical October 27 audited application baseline (**116 passing tests on Linux; 113 on Windows with 3 skips**) alongside newer, separately scoped tests. The six browser scenarios are reported separately. [Machine-setup evidence](docs/verification/hardware-2026-10-27/README.md) and [earlier documentation-refresh evidence](docs/verification/2026-10-27/README.md) retain their original revisions and counts. **No detector weights or representative recordings are bundled.**
 
 ## From a recording to evidence
 
@@ -111,7 +121,7 @@ The browser does not run the detector. Imported observations never borrow the ge
 
 ## Build toward 100 cameras
 
-**At least 100 simultaneously active cameras is the owner's requirement.** The bounded scheduler, fair dispatch, stale/drop accounting and deterministic load model prepare that work. Live ingest, recording services, accelerated inference and distributed workers still need implementation and qualification.
+**At least 100 simultaneously active cameras is the owner's requirement.** The bounded scheduler, fair dispatch, stale/drop accounting and deterministic load model prepare that work. The one-camera RTSP recording pilot is separate from the scheduler; multi-camera recording, integrated continuous inference and distributed workers still need implementation and field qualification.
 
 Connection count, recording continuity, analysis cadence and visible browser tiles are separate workloads. [Scaling plan](docs/performance-100-cameras.md) · [Evidence-led roadmap](docs/roadmap.md).
 
@@ -122,6 +132,7 @@ Connection count, recording continuity, analysis cadence and visible browser til
 | Check implemented, simulated and pending scope | [Product status](docs/product-status.md) |
 | See what the program does | [Visual tour](docs/visual-tour.md) |
 | Try the prototype and preserve my work | [Getting started](docs/getting-started.md) |
+| Qualify a real webcam, DVR, recording and AI review | [Field-acceptance runbook](docs/field-acceptance.md) |
 | Draw buildings and place cameras | [Facility builder](docs/facility-builder.md) |
 | Use maps, dimensions and common shapes | [Map starter](docs/map-measurements-and-shapes.md) |
 | Understand evidence, storage and trust boundaries | [Architecture](docs/architecture.md) |
@@ -144,6 +155,3 @@ Install `edge/requirements-test.txt` in an isolated Python environment to enable
 
 This repository does **not** currently assign a software license. No open-source licensing grant is implied by public availability. [Third-party notices](docs/third-party-notices.md) cover separately licensed components and model sources; [SECURITY.md](SECURITY.md) describes the prototype boundary. Historical documentation imagery is generated sample artwork; the current Monitor starts empty and uses explicitly connected sources.
 
-### Local recording analysis
-
-Use the [local analysis application](docs/local-analysis-service.md) to choose an approved recording, model and rules, start a bounded CPU job, follow progress, cancel and open source-matched results in Recognition. Inference and footage remain on the local computer; analysis starts only on request. This does not qualify live-camera operation, tracking, recognition accuracy or 100-camera capacity.
