@@ -20,7 +20,7 @@ records remain available without invented imagery.
 | Local DVR | Configure local-feeds.json, restart, load/select a channel and connect | Bounded RTSP/TCP preview; actionable connection errors |
 | Recognition | Configure an approved recordings folder/model/rules; connect and explicitly analyze | Progress, cancellation and source-matched results using the existing analyzer |
 | Events | Send a verified observation for review; add a note, confirm/dismiss and export | Decisions remain through workspace switches; no new simulated events |
-| Zones | Edit and export a rule plan | Planning geometry, labels, dwell and thresholds; no live inference implied |
+| Zones | Use a still from a Monitor preview, a Recognition frame or an image file, draw the zone and **Export analyzer rules** | A rule file the local analyzer accepts, in full-frame coordinates of that camera's image; no live inference implied |
 | Facility | Add a shape or import open footprints, edit cameras and Undo | Estimated coverage and explicitly simulated route rehearsal |
 | System | Review the machine plan and apply 1/2/4 visible-tile limits | Selected live feed stays visible within the chosen limit |
 
@@ -31,7 +31,7 @@ separate testing.
 
 ## Preserve your work
 
-Use Export reviews, Export browser rules and Export plan. Browser localStorage
+Use Export reviews, Back up browser rules and Export plan. Browser localStorage
 belongs to the exact origin and browser profile; it is not a backup or shared
 audit system. Keep http://127.0.0.1:4173 stable across updates. Export before
 changing the browser profile, port or installation. Keep credentials and footage

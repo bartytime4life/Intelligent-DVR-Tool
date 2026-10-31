@@ -4,10 +4,11 @@ import {feedRequest, localFeedOrigin, loopbackAddress, webcamController, visible
 import './live-feeds.css';
 import ClipCapture from './ClipCapture.jsx';
 import {backdropDismiss} from './dialog-dismiss.mjs';
+import {grabFrame} from './local-images.mjs';
 
 const guide = 'https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/local-camera-feeds.md';
 const publicGuide = 'https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/public-webcams.md';
-export default function LiveMonitor({queue, visibleTiles=4, onCount, pageHidden, clip, onClip, onReviewClip, capturePending, onCaptureBusy}) {
+export default function LiveMonitor({onZoneStill, queue, visibleTiles=4, onCount, pageHidden, clip, onClip, onReviewClip, capturePending, onCaptureBusy}) {
   const [webcam, setWebcam] = useState({state:'disconnected', message:'No webcam connected'});
   const [devices, setDevices] = useState([]), [device, setDevice] = useState(() => { try { return localStorage.getItem(WEBCAM_KEY) || ''; } catch { return ''; } });
   const [catalog, setCatalog] = useState(null), [source, setSource] = useState('');
@@ -184,6 +185,10 @@ export default function LiveMonitor({queue, visibleTiles=4, onCount, pageHidden,
           </div>
           {t.kind?.startsWith('public-') && <div className="public-source-credit"><a href={t.provider_url} target="_blank" rel="noreferrer noopener">{t.provider} ↗</a><span>{t.kind === 'public-jpeg' ? `Snapshot · refresh ${t.refresh_seconds}s` : 'Public MJPEG · preview ≤ 4 fps'}{t.frame_age_seconds != null ? ` · retrieved ${Math.floor(t.frame_age_seconds)}s ago` : ''}</span><small>Provider capture time and freshness unverified</small></div>}
           <div className="live-tile-controls" onClick={e => e.stopPropagation()}><span>{t.id === 'webcam' ? 'Webcam · video only' : t.kind?.startsWith('public-') ? 'Internet source · local preview' : `DVR · sampled preview ≤ 4 fps${Number.isFinite(t.frame_age_seconds) ? ` · frame ${t.frame_age_seconds < 1 ? '<1' : Math.floor(t.frame_age_seconds)}s ago` : ''}`}</span>
+            {onZoneStill && t.state === 'live' && <button className="text-button" onClick={async e => {
+              const picture = e.currentTarget.closest('article')?.querySelector('.live-picture video, .live-picture > img');
+              try { if (!picture) throw Error('No frame is shown yet.'); onZoneStill(await grabFrame(picture), t.name); } catch (err) { setError(err.message); }
+            }}>Use for zones</button>}
             <button className="text-button" onClick={() => t.id === 'webcam' ? controller.current.stop() : disconnect(t.id)}>{t.state === 'connecting' ? 'Cancel' : t.id !== 'webcam' && ['failed','disconnected'].includes(t.state) ? 'Remove' : 'Disconnect'}</button>
             {t.id === 'webcam' && ['failed','disconnected'].includes(t.state) && <button className="text-button" onClick={() => openSetup()}>Reconnect</button>}</div>
         </article>)}

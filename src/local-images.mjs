@@ -108,3 +108,24 @@ export async function saveObservationStills(source, run, options) {
   }
   return saved;
 }
+
+// Copy the frame currently shown by an <img> or <video> into a JPEG; re-encoding drops file metadata.
+export async function grabFrame(element, {maxWidth = 1920, quality = .85} = {}) {
+  const width = element.videoWidth || element.naturalWidth, height = element.videoHeight || element.naturalHeight;
+  if (!width || !height) throw Error('No image is available from this source yet.');
+  const scale = Math.min(1, maxWidth / width), canvas = document.createElement('canvas');
+  canvas.width = Math.round(width * scale); canvas.height = Math.round(height * scale);
+  canvas.getContext('2d').drawImage(element, 0, 0, canvas.width, canvas.height);
+  const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', quality));
+  if (!blob) throw Error('This image could not be captured.');
+  return {blob, width: canvas.width, height: canvas.height};
+}
+
+export async function imageFileFrame(file) {
+  if (!file?.type?.startsWith('image/') || file.size > 20 * 1024 ** 2) throw Error('Choose a JPEG, PNG or WebP image up to 20 MiB.');
+  const url = URL.createObjectURL(file), image = new Image();
+  try {
+    await new Promise((resolve, reject) => { image.onload = resolve; image.onerror = () => reject(Error('This image could not be opened.')); image.src = url; });
+    return await grabFrame(image);
+  } finally { URL.revokeObjectURL(url); }
+}

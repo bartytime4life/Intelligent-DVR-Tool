@@ -124,6 +124,27 @@ A reused ID with different source/model/observation fields is rejected. Queue
 capacity is 1,000 records across model and sample observations. Every insertion
 refuses overflow without truncating older records.
 
+## Zones from camera images
+
+Zones can be drawn on a real still instead of the planning grid. Use
+**Use for zones** on a live Monitor preview, **Use this frame for zones** under a
+matched Recognition sample, or **Choose image file** in Zones. A captured still
+waits until you choose **Use for Plan N**; it is re-encoded as JPEG (dropping
+file metadata) and kept in this browser's IndexedDB for that plan. With a still,
+the editor takes the image's aspect ratio and rectangles use normalized
+full-frame coordinates, the same convention as `edge/rules.py` and the analyzer's
+detection boxes.
+
+Pick the model class to observe from the bundled COCO labels and set the allowed
+gap between sightings. **Export analyzer rules** writes a bare JSON list of
+`{name, label, rect, dwell, threshold, max_gap}` that `edge/rules.py` loads
+unchanged; list the file in the local analysis configuration to use it. Rules
+still saved with the legacy `object` label load, but must choose a model class
+before export. **Back up browser rules** keeps the browser's own format and is not
+an analyzer file. A still from a different resolution or framing than the
+recordings you analyze will misplace the zone; capture it from the same camera
+stream.
+
 ## Faster review
 
 - **Keyboard review.** In the review dialog, **C** confirms, **D** dismisses and
