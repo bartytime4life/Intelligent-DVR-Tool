@@ -1,5 +1,8 @@
 # Explore Intelligent DVR
 
+The [October 30 full review](review-2026-10-30.md) lists the defects fixed on
+`main` and the follow-up pull requests still in review.
+
 [Recording coverage](recording-coverage.md) explains strict decode/inventory
 checks, incomplete-media errors and legacy/unverified result labels.
 

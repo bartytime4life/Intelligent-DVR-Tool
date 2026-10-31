@@ -1,5 +1,16 @@
 # Product status and evidence
 
+October 30 [full review](review-2026-10-30.md): 61 verified defects across the
+browser workspaces, facility editor and local service were fixed in PR #45, and
+the Windows launchers' line endings in PR #46. Highlights: unreadable saved data
+is backed up instead of overwritten, other tabs' saves are adopted, unsaved
+facility edits prompt before leaving, facade-mounted cameras keep coverage,
+Windows file-sharing and non-ASCII path failures are handled, the local service
+handles requests concurrently, and on Linux it refuses other accounts on the same
+computer. The interface font is now bundled. [Test evidence](verification/review-fixes-2026-10-30/README.md).
+Four follow-up pull requests (#47–#50) for review speed, camera stills in Zones,
+camera planning metrics and service diagnostics are open and not yet shipped.
+
 [Recording coverage validation](recording-coverage.md) now checks alleged EOF
 before publishing completion, rejects early/corrupt decoding, and distinguishes
 unknown coverage from intentional limits. Legacy results remain unverified.

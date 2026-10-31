@@ -117,3 +117,14 @@ produce completed coverage. Bind new results to bounded strict decode/inventory
 checks; reject early/corrupt decoding, label unknown completeness separately from
 intentional limits, and retain historical results as explicitly unverified.
 Preserve source bytes, existing worker bounds, recovery and explicit activation.
+
+Owner review follow-up (2026-10-31): implement the October 30 review's missed
+opportunities as four separate PRs — review workflow, zones on real camera
+stills, camera planning metrics and local service robustness (see
+docs/review-2026-10-30.md). Observation thumbnails and zone stills may be stored
+in this browser's IndexedDB only, drawn from verified local recordings or explicit
+captures, removed with their records and never uploaded. LAN-recorder segment
+observations reach Events only through an explicit per-segment Send to Events;
+never queue them automatically. Keep edge/inference.py, journal.py,
+supervision.py, scheduler.py and profiling.py byte-identical while the
+durable-overload evidence pins their hashes.
