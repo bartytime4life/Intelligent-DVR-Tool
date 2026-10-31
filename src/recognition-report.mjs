@@ -1,5 +1,6 @@
 import { parseRecognition, mergeRecognitionEvents } from './recognition.mjs';
 import { comparisonSummary } from './enhancement.mjs';
+import { coverageLabel } from './media-coverage.mjs';
 
 export function recognitionReport(run, { threshold = .5, reviews = [], sourceMatched = false, sourceName = '', generatedAt = new Date().toISOString() } = {}) {
   const parsed = parseRecognition({ schema:'intelligent-dvr.recognition-review.v1', receipt:run.receipt, trace:run.trace });
@@ -32,6 +33,7 @@ export function recognitionReport(run, { threshold = .5, reviews = [], sourceMat
       model_sha256:receipt.model_sha256, labels_sha256:receipt.labels_sha256, rules_sha256:receipt.rules_sha256, rules_file_sha256:receipt.rules_file_sha256,
       decoded_frames:receipt.frames_read, sampled_frames:trace.frames.length, stride:receipt.stride, fps_metadata:receipt.fps_metadata,
       last_sample_seconds:trace.frames.at(-1).seconds, display_threshold:threshold },
+    coverage:{label:coverageLabel(receipt), declaration:receipt.media_coverage || null},
     summary:{ detections:samples.reduce((n,s)=>n+s.detections,0), samples_with_detections:samples.filter(s=>s.detections>0).length,
       observations:observations.length, pending:observations.filter(e=>e.status==='pending').length,
       confirmed:observations.filter(e=>e.status==='confirmed').length, dismissed:observations.filter(e=>e.status==='dismissed').length },
@@ -42,7 +44,7 @@ export function recognitionReport(run, { threshold = .5, reviews = [], sourceMat
       'Model scores are not calibrated probabilities. A missing detection does not establish absence.',
       'Report threshold filters detection summaries only; original rules and observations are unchanged.',
       'Frame times use container FPS and assume constant frame rate; variable-rate timing needs separate verification.',
-      receipt.state === 'partial' ? 'PARTIAL: the analyzer stopped at its limit; unprocessed footage is not covered.' : 'The analyzer reached its terminal state; sampled frames do not establish continuous coverage.',
+      coverageLabel(receipt) + '. Sampled frames do not establish continuous coverage; inventory checks do not prove every byte intact or camera-source completeness.',
       'Source fingerprints establish byte correspondence, not authenticity. Reports and local decisions are unsigned; recognition accuracy remains unmeasured.',
     ],
   };
@@ -51,8 +53,8 @@ export function recognitionReport(run, { threshold = .5, reviews = [], sourceMat
 const escapeHTML = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const cell = v => { let s=String(v ?? ''); if (/^[\s]*[=+\-@]/.test(s)) s="'"+s; return '"'+s.replaceAll('"','""')+'"'; };
 export function reportCSV(report) {
-  const rows = [['source_sha256','analysis_state','seconds','label','rule','model_score','review_status','review_note']];
-  for (const e of report.observations) rows.push([report.source.sha256,report.analysis.state,e.seconds,e.label,e.rule,e.score,e.status,e.note]);
+  const rows = [['source_sha256','analysis_state','seconds','label','rule','model_score','review_status','review_note','recording_coverage_status','analysis_termination']];
+  for (const e of report.observations) rows.push([report.source.sha256,report.analysis.state,e.seconds,e.label,e.rule,e.score,e.status,e.note,report.coverage.declaration?.status || 'legacy-unverified',report.coverage.declaration?.termination || 'unspecified']);
   return rows.map(row=>row.map(cell).join(',')).join('\r\n')+'\r\n';
 }
 
@@ -73,6 +75,7 @@ export function reportHTML(report) {
 <p class="notice"><strong>${h(report.analysis.state.toUpperCase())} · ${report.source.fingerprint_matched ? 'Recording fingerprint matched' : 'Recording NOT matched'}</strong><br>Human review required. Sampled observations do not establish identity, intent or continuous coverage.</p>
 <h2>Source and analysis</h2><p>${h(report.source.name)}<br>Source SHA-256: <code>${h(report.source.sha256)}</code><br>Model SHA-256: <code>${h(report.analysis.model_sha256)}</code><br>Rules SHA-256: <code>${h(report.analysis.rules_sha256)}</code><br>Rules file SHA-256: <code>${h(report.analysis.rules_file_sha256)}</code><br>Labels SHA-256: <code>${h(report.analysis.labels_sha256)}</code></p>
 <p>${h(report.analysis.profile)} · ${h(report.analysis.backend)}<br>${report.analysis.sampled_frames} samples / ${report.analysis.decoded_frames} decoded frames · stride ${report.analysis.stride} · container FPS ${report.analysis.fps_metadata}<br>Last analyzed sample +${report.analysis.last_sample_seconds.toFixed(3)}s · display score ≥ ${report.analysis.display_threshold.toFixed(2)}</p>
+<p>Recording coverage: ${h(report.coverage.label)}</p>
 <h2>Sampled class inventory</h2><p>${report.summary.detections} detections across ${report.summary.samples_with_detections} samples. Repeated sightings are counted repeatedly.</p>
 <div class="scroll"><table><thead><tr><th>Class</th><th>Detections</th><th>Samples</th><th>Peak / sample</th><th>First / last sample (s)</th><th>Max score</th></tr></thead><tbody>${report.classes.map(c=>`<tr><td>${h(c.label)}</td><td>${c.detections}</td><td>${c.samples}</td><td>${c.peak_in_sample}</td><td>${c.first_seconds.toFixed(3)} / ${c.last_seconds.toFixed(3)}</td><td>${c.max_score.toFixed(3)}</td></tr>`).join('')}</tbody></table></div>
 <h2>Rule observations and decisions</h2><p>${report.summary.pending} pending · ${report.summary.confirmed} confirmed · ${report.summary.dismissed} dismissed. Decisions reflect the current local review queue at export.</p>

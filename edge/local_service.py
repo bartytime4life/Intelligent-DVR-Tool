@@ -27,6 +27,7 @@ from .local_feeds import Feeds, FeedError, load_sources
 from .result_store import ResultStore, VIDEO_BYTES, REVIEW_BYTES as RESULT_BYTES, EXTENSIONS
 from .recording_import import import_recording, ImportError as RecordingImportError, MAX_IMPORT_BYTES, MIMES as IMPORT_MIMES
 from .enhancement import PROFILE as ENHANCEMENT_PROFILE, validate_trace as validate_enhancement
+from .media_coverage import MESSAGES as COVERAGE_ERRORS, validate as validate_coverage
 
 ROOT = Path(__file__).resolve().parents[1]
 MODEL_BYTES = VIDEO_BYTES
@@ -149,7 +150,7 @@ class Jobs:
                     'recorder_active': self.owner is not None,
                     'recording_import': {'enabled': self.allow_import, 'max_bytes': MAX_IMPORT_BYTES},
                     'retention': 'private-local-last-job' if self.store else 'temporary-until-service-exit',
-                    'ready': all(importlib.util.find_spec(x) is not None for x in ('cv2', 'numpy'))}
+                    'ready': all(importlib.util.find_spec(x) is not None for x in ('cv2', 'numpy', 'av'))}
 
     def receive_recording(self, stream, length, mime, expected_hash):
         with self.lock:
@@ -330,6 +331,12 @@ class Jobs:
                 self.cancel_event.wait(.1)
             self._check(began)
             if self.process.returncode != 0:
+                try:
+                    failure = read_json(directory / 'failure.json', 1024)
+                    if set(failure) == {'code'} and failure['code'] in COVERAGE_ERRORS:
+                        raise JobError(failure['code'], COVERAGE_ERRORS[failure['code']])
+                except (OSError, ValueError, TypeError):
+                    pass
                 raise JobError('PROCESS_FAILED', 'The analyzer stopped. Check that the recording plays, the model matches its profile, and the CPU dependencies are installed. Try a shorter recording; memory and CPU limits also stop jobs.')
             review = read_json(directory / 'review.json', RESULT_BYTES)
             receipt, trace = review['receipt'], review['trace']
@@ -340,6 +347,9 @@ class Jobs:
                     receipt['state'] not in ('completed', 'partial')):
                 raise JobError('RESULT_MISMATCH', 'Analyzer results do not match this job. Nothing was opened; retry the recording.')
             comparison = validate_enhancement(trace, labels, current_code=True)
+            if receipt.get('media_coverage') != trace.get('media_coverage'):
+                raise JobError('RESULT_MISMATCH', 'Recording coverage does not match this job. Nothing was opened; retry the recording.')
+            validate_coverage(receipt.get('media_coverage'), source_hash, receipt['frames_read'], receipt['state'])
             if (receipt.get('enhancement_comparison') != comparison or
                     bool(comparison) != bool(self.job.get('compare_enhancement'))):
                 raise JobError('RESULT_MISMATCH', 'Sharpening results do not match this job. Nothing was opened; retry the recording.')
@@ -365,7 +375,7 @@ class Jobs:
                 finished = {**self.job, 'state':terminal, 'phase':terminal, 'error':error,
                             'result_state':result_state, 'elapsed_seconds':round(time.monotonic() - began, 1)}
                 try:
-                    for name in ('model.onnx', 'labels.json', 'rules.json', 'args.json', 'receipt.json', 'progress.json', 'progress.tmp'):
+                    for name in ('model.onnx', 'labels.json', 'rules.json', 'args.json', 'receipt.json', 'progress.json', 'progress.tmp', 'failure.json', 'failure.tmp'):
                         (directory / name).unlink(missing_ok=True)
                     if terminal != 'completed':
                         for path in directory.iterdir():

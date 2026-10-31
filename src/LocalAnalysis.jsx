@@ -32,7 +32,7 @@ export default function LocalAnalysis({ onResult, onBusy, clip, onClip, recorder
       setRecording(previous => value.recordings.some(r => r.id === previous) ? previous : '');
       setModel(previous => value.models.some(m => m.id === previous) ? previous : value.models[0]?.id || '');
       setRules(previous => value.rules.some(r => r.id === previous) ? previous : value.rules[0]?.id || '');
-      setMessage(value.ready ? 'Choose a recording, model and rules. Analysis starts only when you press Analyze recording.' : 'CPU dependencies are missing. Install the optional edge requirements in the service environment, then reconnect.');
+      setMessage(value.ready ? 'Choose a recording, model and rules. Analysis starts only when you press Analyze recording.' : 'Analysis or recording-validation dependencies are missing. Run the current installer or install the optional edge requirements, then reconnect.');
     } catch (err) { if (ticket === version.current) { setError(err.message); setMessage(''); } }
     finally { if (ticket === version.current) setWorking(false); }
   }

@@ -195,6 +195,9 @@ def validate_trace(trace, labels, labels_hash, clip):
     require(trace.get('events') == replayed, 'Trace events differ from deterministic rule replay')
     from .enhancement import validate_trace as validate_enhancement
     validate_enhancement(trace, labels, current_code=True)
+    if 'media_coverage' in trace:
+        from .media_coverage import validate as validate_coverage
+        validate_coverage(trace['media_coverage'], trace['source_sha256'], frame_count, trace['state'])
     return frames, replayed
 
 
@@ -331,6 +334,7 @@ def evaluate(manifest_path, reviews_path=None, score_threshold=.5, iou_threshold
                              'rules_sha256': trace['rules_sha256'], 'rules': trace['rules'],
                              'rules_file_sha256': trace.get('rules_file_sha256'),
                              'runtime': trace.get('runtime'), 'timing': timing_distribution(times),
+                             'media_coverage': trace.get('media_coverage'),
                              'alert_review_intervals': intervals, 'reviewed_camera_hours': hours,
                              'covered_alerts': len(covered_rows), 'pending_alert_reviews': pending,
                              'reviewed_false_alerts': false,

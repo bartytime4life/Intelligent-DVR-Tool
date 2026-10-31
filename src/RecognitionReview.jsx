@@ -4,6 +4,7 @@ import './recognition.css';
 import LocalAnalysis from './LocalAnalysis.jsx';
 import LanRecorder from './LanRecorder.jsx';
 import RecognitionReport from './RecognitionReport.jsx';
+import { coverageLabel } from './media-coverage.mjs';
 
 export default function RecognitionReview({ onImport, active = true, clip, onClip, reviews = [] }) {
   const [run, setRun] = useState(null), [index, setIndex] = useState(0);
@@ -93,7 +94,7 @@ export default function RecognitionReview({ onImport, active = true, clip, onCli
       <div className="recognition-facts">
         <span><strong>{run.receipt.camera}</strong> · {run.receipt.runtime?.backend_id === 'onnxruntime-cuda' ? 'CUDA analysis' : run.receipt.runtime?.backend_id === 'opencv-cpu' ? 'CPU analysis' : 'Backend unspecified'}</span>
         <span>{run.trace.frames.length.toLocaleString()} sampled frames · every {run.receipt.stride} source frames</span>
-        <span className={run.receipt.state === 'partial' ? 'recognition-error' : ''}>{run.receipt.state === 'partial' ? 'PARTIAL — analysis limit reached' : source ? 'Analyzer finished · recording fingerprint matched' : 'Analyzer finished — recording not matched'}</span>
+        <span className={run.receipt.state === 'partial' ? 'recognition-error' : ''}>{coverageLabel(run.receipt)}</span>
       </div>
       {run.enhancement && <div className="recording-import" aria-label="Sharpening comparison">
         <label>Detection input <select aria-label="Detection input" value={detectionInput} onChange={e => setDetectionInput(e.target.value)}>
@@ -147,6 +148,7 @@ export default function RecognitionReview({ onImport, active = true, clip, onCli
       <details className="recognition-provenance"><summary>Provenance and limits</summary>
         <p>Source SHA-256: <code>{run.receipt.source_sha256}</code></p>
         <p>Model SHA-256: <code>{run.receipt.model_sha256}</code></p>
+        <p>{coverageLabel(run.receipt)}. Inventory checks do not authenticate the recording or establish continuous camera visibility.</p>
         <p>Profile: {run.receipt.inference_profile}. Timing assumes constant frame rate ({run.receipt.fps_metadata.toFixed(3)} FPS).</p>
         <p>A matching recording fingerprint proves file correspondence, not authenticity or recognition accuracy. These results are unsigned. No live camera, identity tracking, learned scene interpretation or 100-camera acceptance is established.</p>
       </details>

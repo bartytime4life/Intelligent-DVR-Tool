@@ -137,7 +137,7 @@ class ResultStore:
                     raise ValueError('Unexpected retained job contents')
                 for file in files:
                     if file.name not in ('model.onnx', 'labels.json', 'rules.json', 'args.json', 'receipt.json',
-                            'review.json', 'progress.json', 'progress.tmp') and not (file.stem == 'source' and file.suffix in EXTENSIONS):
+                            'review.json', 'progress.json', 'progress.tmp', 'failure.json', 'failure.tmp') and not (file.stem == 'source' and file.suffix in EXTENSIONS):
                         raise ValueError('Unexpected retained job file')
                     # Work-in-progress files are protected by their 0700 directory.
                     info = file.lstat()

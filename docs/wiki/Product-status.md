@@ -1,5 +1,10 @@
 # Product status and evidence
 
+[Recording coverage validation](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/recording-coverage.md) now checks alleged EOF
+before publishing completion, rejects early/corrupt decoding, and distinguishes
+unknown coverage from intentional limits. Legacy results remain unverified.
+The PC runtime adds pinned PyAV for this bounded local validation pass.
+
 Optional saved-recording [sharpening comparison](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/enhancement-comparison.md) reuses
 the existing detector on paired original and mildly sharpened samples, with
 separate review overlays, reports and labeled evaluation. Original-only rule

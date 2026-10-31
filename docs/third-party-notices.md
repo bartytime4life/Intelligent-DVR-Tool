@@ -7,6 +7,9 @@
 - Optional OpenCV Python: https://github.com/opencv/opencv-python — see upstream
   wheel notices, including bundled components; OpenCV uses Apache-2.0.
 - Optional NumPy: https://numpy.org/ — BSD-3-Clause; bundled notices may apply.
+- Optional PyAV recording validator: https://github.com/PyAV-Org/PyAV — see its
+  BSD-3-Clause license and the FFmpeg/library notices supplied in each installed wheel.
+  The PC runtime pins 19.0.2; no native runtime binaries are vendored in this repository.
 - Optional ONNX (synthetic integration tests only): https://onnx.ai/ — Apache-2.0.
 
 Model weights and training datasets are not included; their licenses and
