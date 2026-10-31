@@ -189,3 +189,80 @@ test('opening and pathway helpers retain exact converted imperial dimensions wit
   opening.footprint[0][0]=100;path.points[0][0]=100;
   assert.equal(ring[0][0],left);assert.equal(points[0][0],left);
 });
+
+import {coverageFan} from '../src/facility.mjs';
+import {DORI_BANDS, DORI_NOTE, LENS_PRESETS, lensPreset, pixelsPerMetre, doriDistances, doriArcs} from '../src/facility-dori.mjs';
+import {fanCache, enabledFans, zoneCoverage, routeCoverage, coverageMetrics, MAX_COVERAGE_CELLS} from '../src/facility-coverage.mjs';
+import {installerSheetHTML, installerRows, installerSheetFilename, INSTALLER_LIMITS} from '../src/facility-installer.mjs';
+const lens = {id:'C1',name:'North',x:0,y:0,z:4,bearing:0,tilt:30,hfov:90,vfov:60,range:50,enabled:true,pixelsWide:1920};
+const rect = (x0,y0,x1,y1) => [[x0,y0],[x1,y0],[x1,y1],[x0,y1],[x0,y0]];
+const near = (a,b,eps=1e-3) => assert.ok(Math.abs(a-b)<eps,`${a} ≉ ${b}`);
+
+test('DORI bands use W/(2·d·tan(hfov/2)) with ground distance √(d²−z²) clipped to the ground view',()=>{
+  assert.deepEqual(DORI_BANDS.map(b=>b.ppm),[25,62.5,125,250]);
+  near(pixelsPerMetre(1920,90,10),96,1e-9);
+  const [detect,observe,recognize,identify]=doriDistances(lens);
+  near(detect.slant,38.4);near(detect.to,Math.sqrt(38.4**2-16));assert.equal(detect.limited,false);
+  near(observe.to,Math.sqrt(15.36**2-16));near(recognize.to,Math.sqrt(7.68**2-16));near(recognize.from,4/Math.tan(Math.PI/3));
+  assert.equal(identify.reached,false);
+  const short=doriDistances({...lens,range:20})[0];assert.equal(short.to,20);assert.equal(short.limited,true);
+  assert.equal(doriDistances({...lens,pixelsWide:undefined}),null);assert.equal(doriDistances({...lens,pixelsWide:100}),null);
+  assert.equal(lensPreset(84).id,'4');assert.equal(lensPreset(85),null);assert.ok(LENS_PRESETS.every(p=>p.hfov>=5&&p.hfov<=170));
+  assert.match(DORI_NOTE,/^Planning estimate — assumes ideal focus and no compression$/);
+});
+
+test('DORI arcs follow the drawn fan and break where a wall shortens rays',()=>{
+  const open=doriArcs(lens,coverageFan(lens,[]));
+  assert.deepEqual(open.map(a=>a.id),['detect','observe','recognize']);
+  for(const arc of open){assert.equal(arc.lines.length,1);assert.equal(arc.lines[0].length,49);for(const p of arc.lines[0])near(Math.hypot(...p),arc.to,1e-9);}
+  const wall={polygon:rect(-2,10,2,10.5),base:0,top:6},blocked=doriArcs(lens,coverageFan(lens,[wall]));
+  assert.equal(blocked.find(a=>a.id==='observe').lines.length,2);assert.equal(blocked.find(a=>a.id==='recognize').lines.length,1);
+  assert.deepEqual(doriArcs({...lens,enabled:false},coverageFan({...lens,enabled:false},[])),[]);
+});
+
+test('coverage metrics grid-sample the shared cached fans with bounded cells, overlap and blind-spot runs',()=>{
+  const fans=fanCache()([]),plan={...blankFacility(),cameras:[lens,{...lens,id:'C2',x:200}]};
+  assert.equal(fans(lens),fans({...lens}));assert.equal(enabledFans(plan,fans)[0].ring,fans(lens));
+  const inside=zoneCoverage(rect(-5,10,5,20),enabledFans(plan,fans));
+  assert.equal(inside.coverage,1);assert.equal(inside.overlap,0);assert.equal(inside.cameras,1);
+  const twice=zoneCoverage(rect(-5,10,5,20),enabledFans({...plan,cameras:[lens,{...lens,id:'C3'}]},fans));
+  assert.equal(twice.overlap,1);
+  const half=zoneCoverage(rect(-30,10,30,20),enabledFans(plan,fans),{blindSpots:true});
+  near(half.coverage,.5,.02);
+  const blindArea=half.blindSpots.reduce((sum,r)=>sum+(r[1][0]-r[0][0])*(r[2][1]-r[1][1]),0);
+  near(blindArea,(1-half.coverage)*half.cells*half.cell**2,1e-6);
+  assert.ok(half.blindSpots.every(r=>r.length===5)&&half.blindSpots.length<half.cells/10);
+  const huge=zoneCoverage(rect(-1000,-1000,1000,1000),[]);
+  assert.ok(huge.cells<=MAX_COVERAGE_CELLS&&huge.cells>15000);assert.equal(huge.coverage,0);
+  assert.equal(zoneCoverage(rect(0,0,1,1),[]).cell,.25);
+  const route=routeCoverage([[0,-10],[0,20]],enabledFans(plan,fans));
+  assert.equal(route.samples,61);near(route.coverage,36/61,1e-9);assert.equal(route.overlap,0);
+  assert.equal(routeCoverage([[1,1]],[]),null);assert.equal(routeCoverage([[1,1],[1,1]],[]),null);
+});
+
+test('coverage metrics list enabled ground zones and the route; indoor zones are not estimated',()=>{
+  const plan={...blankFacility(),buildings:[{id:'b',name:'Hall',footprint:rect(40,40,60,60),height:6,floors:1}],cameras:[lens,{...lens,id:'off',enabled:false}],route:[[0,5],[0,15]],
+    zones:[{...zone(),id:'yard',footprint:rect(-5,10,5,20)},{...zone(),id:'hall',footprint:rect(45,45,50,50),buildingId:'b',level:0},{...zone(),id:'zone-off',enabled:false}]};
+  const metrics=coverageMetrics(validateFacility(plan),fanCache()(wallObstacles(plan)));
+  assert.equal(metrics.cameras,1);
+  assert.deepEqual(metrics.zones.map(z=>[z.id,z.estimated]),[['yard',true],['hall',false]]);
+  assert.equal(metrics.zones[0].coverage,1);assert.equal(metrics.zones[1].coverage,undefined);
+  assert.equal(metrics.route.coverage,1);
+});
+
+test('installer sheet is offline, escaped, CSP-restricted HTML with an inline SVG plan and closing limits',()=>{
+  const plan=exampleFacility();plan.name='Yard <b>&</b>';
+  plan.cameras[0]={...plan.cameras[0],pixelsWide:1920,channel:'<script>alert(1)</script>'};
+  const html=installerSheetHTML(plan,{generatedAt:'2026-10-31T00:00:00.000Z'});
+  assert.ok(html.includes(`<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'">`));
+  assert.ok(!html.includes('<script')&&html.includes('&lt;script&gt;alert(1)&lt;/script&gt;')&&html.includes('Yard &lt;b&gt;&amp;&lt;/b&gt;'));
+  assert.match(html,/<svg class="plan"[^>]*role="img"/);assert.doesNotMatch(html,/<img|data:|https?:\/\//);
+  assert.ok(html.includes(DORI_NOTE)&&html.includes('@media print'));
+  assert.ok(html.indexOf('Interpretation limits')>html.indexOf('</table>')&&INSTALLER_LIMITS.every(v=>html.includes(v.replaceAll('’','’'))));
+  assert.equal(installerSheetFilename(plan),'dvr-yard-b-b-installer-sheet.html');
+  const rows=installerRows(plan);
+  assert.equal(rows[0].channel,'<script>alert(1)</script>');assert.equal(rows[0].resolution,'1920 px wide');
+  assert.equal(rows[0].dori.length,4);assert.match(rows[0].dori[0],/^≤ \d+\.\d m$/);assert.ok(rows[1].dori.every(v=>v==='—'));
+  assert.match(installerRows(plan,'imperial')[0].east,/ ft$/);
+  assert.throws(()=>installerSheetHTML({...plan,cameras:[{...plan.cameras[0],pixelsWide:12}]}),/resolution/);
+});

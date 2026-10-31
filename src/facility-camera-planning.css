@@ -1,0 +1,26 @@
+/* Camera planning: pixel density, coverage metrics, direct manipulation and the installer sheet action. */
+.facility-camera-form > .facility-field select {width:100%;min-height:36px;font-size:11px;padding:6px;color:#deedf1;background:#0a2130;border:1px solid #2d4c60;border-radius:4px;}
+.facility-dori {margin:0 0 14px;padding:10px;border:1px solid #2f4d5b;border-radius:7px;background:#0d2532;}
+.facility-dori-note {display:flex;gap:6px;align-items:flex-start;margin:0 0 8px;font-size:10px;line-height:1.5;color:#e2c98a;font-weight:550;}
+.facility-dori-note svg {flex:none;color:#ffbc3c;margin-top:1px;}
+.facility-dori table,.facility-coverage-metrics table {width:100%;border-collapse:collapse;font-size:10px;font-variant-numeric:tabular-nums;color:#c5dbe5;margin:0 0 9px;}
+.facility-dori th,.facility-dori td,.facility-coverage-metrics th,.facility-coverage-metrics td {text-align:left;padding:5px 4px;border-bottom:1px solid #22404d;vertical-align:top;font-weight:400;}
+.facility-dori thead th,.facility-coverage-metrics thead th {color:#87a8b9;font-size:9px;font-weight:550;}
+.facility-dori tbody th {white-space:nowrap;color:#e0eef3;}
+.facility-dori tbody th i {display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;vertical-align:middle;}
+.facility-dori .facility-caption,.facility-dori-empty {margin-bottom:0;}
+.facility-dori-empty {margin:-4px 0 14px;}
+.facility-coverage-metrics {margin:0 0 16px;}
+.facility-coverage-metrics .facility-subheading {margin-top:0;}
+.facility-coverage-metrics tbody th {color:#e0eef3;overflow-wrap:anywhere;}
+.facility-coverage-metrics small {display:block;font-size:9px;color:#7f9fb1;}
+.facility-not-estimated {color:#9fb6c2;font-style:italic;}
+.facility-blind-toggle {font-size:9px;padding:4px 6px;border:1px solid #3b5c6a;border-radius:4px;background:#132f3d;color:#c7dde6;white-space:nowrap;}
+.facility-blind-toggle[aria-pressed="true"] {border-color:#ff8a9a;background:#3a1f2b;color:#ffd4da;}
+.facility-installer-button {width:100%;justify-content:center;margin:12px 0 6px;}
+.facility-manipulate-help {margin:-4px 0 12px;}
+.facility-map-legend .blind-spot-key {background:#ff5d73;}
+.facility-dori-label {font-size:9px!important;padding:2px 5px!important;color:#f6e7c1!important;background:#0a1e28e0!important;pointer-events:none;}
+.facility-rotate-handle {display:block;width:18px;height:18px;border-radius:50%;background:#0b2a35;border:2px solid #9bfff0;box-shadow:0 0 0 3px #9bfff033,0 2px 6px #000a;cursor:grab;touch-action:none;z-index:3;}
+.facility-rotate-handle:active {cursor:grabbing;background:#9bfff0;}
+.facility-drag-hint {pointer-events:none;}
