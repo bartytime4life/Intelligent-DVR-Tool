@@ -18,6 +18,13 @@ progress, cancellation and source-matched results. [Complete recording workflow]
 
 [Connect a webcam or DVR](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/local-camera-feeds.md) · [Analyze a recording](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/local-analysis-service.md) · [Record one LAN camera](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/lan-recording.md)
 
+**October 30 review:** 61 verified defects fixed across review continuity,
+facility editing and the local service (Windows file handling, concurrent
+requests, same-account API access on Linux). [What changed](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/review-2026-10-30.md)
+· [Evidence](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/review-fixes-2026-10-30/README.md). Follow-up
+features for faster review, camera stills in Zones, camera planning metrics and
+service diagnostics are open pull requests #47–#50.
+
 **Opt-in LAN recording:** Recognition can explicitly start one configured RTSP
 channel, retain bounded sampled segments, analyze finalized recordings and reopen
 verified pairs. Storage pressure, retention, interrupted work and reconnects are
