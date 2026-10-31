@@ -95,6 +95,7 @@ export default function RecognitionReview({ onImport, active = true, clip, onCli
         <span><strong>{run.receipt.camera}</strong> · {run.receipt.runtime?.backend_id === 'onnxruntime-cuda' ? 'CUDA analysis' : run.receipt.runtime?.backend_id === 'opencv-cpu' ? 'CPU analysis' : 'Backend unspecified'}</span>
         <span>{run.trace.frames.length.toLocaleString()} sampled frames · every {run.receipt.stride} source frames</span>
         <span className={run.receipt.state === 'partial' ? 'recognition-error' : ''}>{coverageLabel(run.receipt)}</span>
+        <span>{source ? 'Result loaded · recording fingerprint matched' : 'Recording not matched'}</span>
       </div>
       {run.enhancement && <div className="recording-import" aria-label="Sharpening comparison">
         <label>Detection input <select aria-label="Detection input" value={detectionInput} onChange={e => setDetectionInput(e.target.value)}>
