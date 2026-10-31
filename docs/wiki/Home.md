@@ -21,9 +21,10 @@ progress, cancellation and source-matched results. [Complete recording workflow]
 **October 30 review:** 61 verified defects fixed across review continuity,
 facility editing and the local service (Windows file handling, concurrent
 requests, same-account API access on Linux). [What changed](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/review-2026-10-30.md)
-· [Evidence](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/review-fixes-2026-10-30/README.md). Follow-up
-features for faster review, camera stills in Zones, camera planning metrics and
-service diagnostics are open pull requests #47–#50.
+· [Evidence](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/review-fixes-2026-10-30/README.md). Follow-ups
+merged October 31 (#47–#50): faster review with local stills and keyboard
+shortcuts, zones drawn on camera stills with an analyzer-ready export, camera
+planning estimates, and specific failure causes with a local diagnostic log.
 
 **Opt-in LAN recording:** Recognition can explicitly start one configured RTSP
 channel, retain bounded sampled segments, analyze finalized recordings and reopen
