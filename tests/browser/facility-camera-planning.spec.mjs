@@ -24,10 +24,12 @@ async function openFixture(page) {
   await expect(page.getByLabel('Facility name',{exact:true})).toHaveValue('Coverage fixture');
 }
 // Overhead view centred on the selected camera, so the camera sits at the map centre.
+// No pause between 2D and Center camera: centering now states the view's pitch, so the
+// interrupted view switch cannot leave the map tilted.
 async function centreCamera(page) {
   await page.getByRole('button',{name:'2D',exact:true}).click();
-  await page.waitForTimeout(600);
   await page.getByRole('button',{name:'Center camera',exact:true}).click();
+  await expect.poll(()=>page.evaluate(()=>document.querySelector('.maplibregl-ctrl-compass .maplibregl-ctrl-icon')?.style.transform)).toContain('rotateX(0deg)');
   await page.waitForTimeout(700);
   const box = await page.locator('.facility-map').boundingBox();
   return [box.x + box.width / 2, box.y + box.height / 2];

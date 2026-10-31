@@ -187,9 +187,11 @@ OSM relations and seven common shapes are implemented. See the
 [facility reliability guide](facility-setup-reliability.md) for workflow,
 disclosures, provenance, preservation/Undo behavior and scoped evidence.
 
-Courtyards/holes, building parts, raised bases and invalid/incomplete geometry are
-excluded. A polygon AOI, imagery assistance, generic GIS/BIM adapters, live-provider
-and local-service deployment qualification, current-site accuracy and the novice
+The October 28 follow-up added map-pin location, a custom polygon area, facility v2
+courtyards/holes, raised bases and independent non-overlapping building parts.
+Overlapping parts/envelopes and invalid/incomplete geometry are still excluded
+with a visible reason. Imagery assistance, generic GIS/BIM adapters, live-provider
+and installed local-service qualification, current-site accuracy and the novice
 study remain open. [Issue #6](https://github.com/bartytime4life/Intelligent-DVR-Tool/issues/6)
 tracks remaining acceptance; [setup research](easy-facility-setup.md) retains dated
 proposals. Address search is implemented, with external availability unqualified.

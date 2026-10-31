@@ -56,7 +56,7 @@ Seven shapes are available. Rotation and metric/imperial inputs help with starte
 
 The current starter offers submitted address search, GPS/numeric origin, selectable public/local Overpass services and offline JSON file/paste review. It supports complete simple ways and selected outer-only relations, preserving provider, way/relation ID, ODbL license and height/floor basis. Review precedes explicit additive/replacement apply. The image above captures an earlier panel; its [media provenance](media/README.md) is unchanged.
 
-The original capture sweep inspected the panel and ran adapter tests. It did **not** establish live provider availability, completeness of a real facility, GPS accuracy, interior reconstruction or building-code compliance. Supported outer-only relations were added later; courtyards, parts, raised bases and invalid/incomplete geometry remain excluded. [Current evidence](facility-setup-reliability.md) · [Dimensions and source limits](map-measurements-and-shapes.md).
+The original capture sweep inspected the panel and ran adapter tests. It did **not** establish live provider availability, completeness of a real facility, GPS accuracy, interior reconstruction or building-code compliance. Supported outer-only relations, then v2 courtyards, raised bases and independent parts, were added later; overlapping parts and invalid/incomplete geometry remain excluded. [Current evidence](facility-setup-reliability.md) · [Dimensions and source limits](map-measurements-and-shapes.md).
 
 ## 6. Rehearse the handoff
 

@@ -46,7 +46,7 @@ screenshots in the [historical tour](docs/visual-tour.md) document previous vers
 
 *A planned route, scrubbed across 31 captured states and played faster for this illustration. Proposed camera transitions are simulated and unverified. [Static view](docs/media/route-15.webp) · [Visibility-model limits](docs/facility-builder.md#visibility-model-and-evidence-limits).*
 
-- **Start from a map:** submit an address/place search, use a one-shot location suggestion or enter coordinates; review a bounded area and supported OpenStreetMap exterior drafts before applying. Choose a disclosed public/local service or import an offline JSON file.
+- **Start from a map:** submit an address/place search, use a one-shot location suggestion, pick a map pin or enter coordinates; review a rectangular or custom polygon area and supported OpenStreetMap exterior drafts (with courtyards and raised bases) before applying. Choose a disclosed public/local service or import an offline JSON file.
 - **Start from a shape:** rectangle, L wing, T wing, U wing, cross, octagon or round, with editable dimensions and rotation.
 - **Refine the plan:** add floors, rooms and labels; place and aim cameras; inspect estimated ground-plane visibility; undo edits and export the plan.
 

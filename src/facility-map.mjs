@@ -591,19 +591,21 @@ e-stroke-width": 2 } });
     },
     center: fitPlan,
     reset() { fitPlan(); },
-    north() { if (ready) map.easeTo({bearing: 0, duration: 300}); },
+    // Each ease names the view's pitch: easeTo stops any running animation and would
+    // otherwise keep a half-finished 2D/3D switch tilted (noted in the October 30 review).
+    north() { if (ready) map.easeTo({bearing: 0, pitch: viewPitch(view, tool), duration: 300}); },
     centerCamera(id = selected) {
       const camera = current.cameras.find(c => c.id === id);
-      if (ready && camera) map.easeTo({center: toLngLat([camera.x,camera.y],current.origin), zoom: Math.max(map.getZoom(),19), duration: 350});
+      if (ready && camera) map.easeTo({center: toLngLat([camera.x,camera.y],current.origin), zoom: Math.max(map.getZoom(),19), pitch: viewPitch(view, tool), duration: 350});
     },
     centerSelection(id = selected) {
       const pointItem = [...current.cameras,...current.labels,...(current.stairs || [])].find(item => item.id === id);
       const shape = [...current.buildings,...current.rooms,...(current.zones || []),...(current.openings || []),...(current.paths || []).map(path => ({...path,footprint:path.points}))].find(item => item.id === id);
       if (!ready) return;
-      if (pointItem) map.easeTo({center: toLngLat([pointItem.x,pointItem.y],current.origin), duration: 350});
+      if (pointItem) map.easeTo({center: toLngLat([pointItem.x,pointItem.y],current.origin), pitch: viewPitch(view, tool), duration: 350});
       else if (shape) {
         const points = shape.footprint;
-        map.fitBounds([toLngLat([Math.min(...points.map(p=>p[0]))-5,Math.min(...points.map(p=>p[1]))-5],current.origin),toLngLat([Math.max(...points.map(p=>p[0]))+5,Math.max(...points.map(p=>p[1]))+5],current.origin)],{padding: 60,maxZoom:21,duration:350});
+        map.fitBounds([toLngLat([Math.min(...points.map(p=>p[0]))-5,Math.min(...points.map(p=>p[1]))-5],current.origin),toLngLat([Math.max(...points.map(p=>p[0]))+5,Math.max(...points.map(p=>p[1]))+5],current.origin)],{padding: 60,maxZoom:21,pitch: viewPitch(view, tool),duration:350});
       }
     },
     setBasemap(enabled) {

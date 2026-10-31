@@ -48,6 +48,33 @@ test('copy rooms upstairs, add a level, and undo preserve lower floor elevations
   expect(errors).toEqual([]);
 });
 
+// The compass icon mirrors the map pitch (NavigationControl visualizePitch), so it reports the settled tilt.
+const compassPitch = page => page.evaluate(() => {
+  const match = /rotateX\((-?[\d.]+)deg\)/.exec(document.querySelector('.maplibregl-ctrl-compass .maplibregl-ctrl-icon')?.style.transform || '');
+  return match ? Number(match[1]) : null;
+});
+
+test('centering right after a view switch settles at that view\'s pitch',async({page})=>{
+  await openFacility(page);
+  await page.getByRole('button',{name:/^4 Cameras/}).click();
+  await page.getByRole('button',{name:'3D',exact:true}).click();
+  await expect.poll(()=>compassPitch(page)).toBe(52);
+  // Press 2D and centre before the 350 ms pitch animation finishes: the map must still end flat.
+  await page.getByRole('button',{name:'2D',exact:true}).click();
+  await page.getByRole('button',{name:'Center camera',exact:true}).click();
+  await expect.poll(()=>compassPitch(page)).toBe(0);
+  await page.waitForTimeout(500);
+  expect(await compassPitch(page)).toBe(0);
+  await page.getByRole('button',{name:'3D',exact:true}).click();
+  await page.getByRole('button',{name:'Center camera',exact:true}).click();
+  await expect.poll(()=>compassPitch(page)).toBe(52);
+  await page.getByRole('button',{name:'2D',exact:true}).click();
+  await page.getByRole('button',{name:'Point map north',exact:true}).click();
+  await expect.poll(()=>compassPitch(page)).toBe(0);
+  await page.waitForTimeout(500);
+  expect(await compassPitch(page)).toBe(0);
+});
+
 test('camera edits retain unsaved changes across center and aim tools',async({page})=>{
   await openFacility(page);
   await page.getByRole('button',{name:/^4 Cameras/}).click();
