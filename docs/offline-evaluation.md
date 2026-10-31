@@ -1,5 +1,10 @@
 # Reproducible offline detection pilot
 
+The optional [saved-recording sharpening comparison](enhancement-comparison.md)
+adds separately evaluated candidate boxes on the same labeled samples. Original
+quality/alert fields keep their existing meaning. Paired reports never promote
+accuracy or operational qualification automatically.
+
 This infrastructure evaluates explicitly selected local files. It does not open
 cameras, capture video, start services, download weights, transmit footage or
 use a paid service. The current committed corpus contains **supplied synthetic

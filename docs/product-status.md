@@ -1,5 +1,11 @@
 # Product status and evidence
 
+Optional saved-recording [sharpening comparison](enhancement-comparison.md) reuses
+the existing detector on paired original and mildly sharpened samples, with
+separate review overlays, reports and labeled evaluation. Original-only rule
+observations and unchanged source recordings are preserved. This non-learned
+experimental control does not install Real-ESRGAN/SwinIR or qualify accuracy.
+
 October 30 LAN-recorder follow-up: [one configured RTSP channel](lan-recording.md)
 now supports explicit sampled segment capture, bounded retention, reconnects,
 restart recovery and the existing local analysis/review path. It is a one-camera

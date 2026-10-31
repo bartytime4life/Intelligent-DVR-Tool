@@ -1,5 +1,9 @@
 # Offline analysis foundation
 
+Optional [saved-recording sharpening comparisons](../docs/enhancement-comparison.md)
+use `--compare-enhancement mild-unsharp-v1` with trace/review output. They retain
+original-only rules, separate candidate detections and unqualified accuracy.
+
 For read-only source/log reconciliation and an explicit workload-plan preflight,
 use the [offline qualification checklist](../docs/offline-qualification.md).
 It runs separately from this analyzer and does not execute inference.

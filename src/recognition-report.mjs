@@ -1,4 +1,5 @@
 import { parseRecognition, mergeRecognitionEvents } from './recognition.mjs';
+import { comparisonSummary } from './enhancement.mjs';
 
 export function recognitionReport(run, { threshold = .5, reviews = [], sourceMatched = false, sourceName = '', generatedAt = new Date().toISOString() } = {}) {
   const parsed = parseRecognition({ schema:'intelligent-dvr.recognition-review.v1', receipt:run.receipt, trace:run.trace });
@@ -35,6 +36,7 @@ export function recognitionReport(run, { threshold = .5, reviews = [], sourceMat
       observations:observations.length, pending:observations.filter(e=>e.status==='pending').length,
       confirmed:observations.filter(e=>e.status==='confirmed').length, dismissed:observations.filter(e=>e.status==='dismissed').length },
     classes:[...classes.values()].sort((a,b)=>b.detections-a.detections || a.label.localeCompare(b.label)), samples, observations,
+    ...(parsed.enhancement ? {enhancement_comparison:comparisonSummary(trace,threshold)} : {}),
     limits:[
       'Detections are repeated sampled observations, not unique people, objects, identities or tracks.',
       'Model scores are not calibrated probabilities. A missing detection does not establish absence.',
@@ -54,6 +56,14 @@ export function reportCSV(report) {
   return rows.map(row=>row.map(cell).join(',')).join('\r\n')+'\r\n';
 }
 
+export function comparisonCSV(report) {
+  const c=report.enhancement_comparison;
+  if (!c) throw Error('This report has no sharpening comparison.');
+  const rows=[['source_sha256','profile','implementation_sha256','frame_index','seconds','display_threshold','original_detections','sharpened_detections','original_processing_ms','enhanced_processing_ms','source_pixels_sha256','enhanced_pixels_sha256','qualification']];
+  for (const s of c.samples) rows.push([report.source.sha256,c.declaration.profile,c.declaration.implementation_sha256,s.frame_index,s.seconds,report.analysis.display_threshold,s.original,s.sharpened,s.original_processing_ms,s.enhanced_processing_ms,s.source_pixels_sha256,s.enhanced_pixels_sha256,'unqualified']);
+  return rows.map(row=>row.map(cell).join(',')).join('\r\n')+'\r\n';
+}
+
 export function reportHTML(report) {
   const h=escapeHTML;
   return `<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -67,5 +77,11 @@ export function reportHTML(report) {
 <div class="scroll"><table><thead><tr><th>Class</th><th>Detections</th><th>Samples</th><th>Peak / sample</th><th>First / last sample (s)</th><th>Max score</th></tr></thead><tbody>${report.classes.map(c=>`<tr><td>${h(c.label)}</td><td>${c.detections}</td><td>${c.samples}</td><td>${c.peak_in_sample}</td><td>${c.first_seconds.toFixed(3)} / ${c.last_seconds.toFixed(3)}</td><td>${c.max_score.toFixed(3)}</td></tr>`).join('')}</tbody></table></div>
 <h2>Rule observations and decisions</h2><p>${report.summary.pending} pending · ${report.summary.confirmed} confirmed · ${report.summary.dismissed} dismissed. Decisions reflect the current local review queue at export.</p>
 <div class="scroll"><table><thead><tr><th>Time (s)</th><th>Class / rule</th><th>Score</th><th>Decision</th><th>Notes</th></tr></thead><tbody>${report.observations.map(e=>`<tr><td>${e.seconds.toFixed(3)}</td><td>${h(e.label)}<br>${h(e.rule)}</td><td>${e.score.toFixed(3)}</td><td>${h(e.status)}</td><td>${h(e.note)}</td></tr>`).join('')}</tbody></table></div>
+${report.enhancement_comparison ? comparisonHTML(report.enhancement_comparison) : ''}
 <h2>Interpretation limits</h2><ul>${report.limits.map(v=>`<li>${h(v)}</li>`).join('')}</ul></html>`;
+}
+
+function comparisonHTML(c) {
+  const h=escapeHTML;
+  return `<h2>Experimental sharpening comparison</h2><p>Original-only rule observations. Counts repeat across samples. More detections do not establish better accuracy. Qualification: unqualified.</p><p>Profile: ${h(c.declaration.profile)}<br>Parameters: ${h(JSON.stringify(c.declaration.parameters))}<br>Implementation SHA-256: <code>${h(c.declaration.implementation_sha256)}</code></p><table><thead><tr><th>Class</th><th>Original detections</th><th>Sharpened detections</th></tr></thead><tbody>${c.classes.map(row=>`<tr><td>${h(row.label)}</td><td>${row.original}</td><td>${row.sharpened}</td></tr>`).join('')}</tbody></table><p>Mean sampled-frame processing: original ${c.mean_original_processing_ms.toFixed(1)} ms; sharpened ${c.mean_enhanced_processing_ms.toFixed(1)} ms. Includes preprocessing and inference; excludes media reads, hashing and reporting. Original runs first; these are sequential measurements.</p>`;
 }

@@ -16,7 +16,7 @@ VIDEO_BYTES = 512 * 1024**2
 REVIEW_BYTES = 32 * 1024**2
 EXTENSIONS = {'.mp4', '.m4v', '.mov', '.avi', '.mkv', '.webm'}
 JOB_KEYS = {'id', 'state', 'phase', 'recording', 'model', 'rules', 'frames_read',
-            'frames_analyzed', 'max_frames', 'elapsed_seconds', 'error', 'result_state'}
+            'frames_analyzed', 'max_frames', 'elapsed_seconds', 'error', 'result_state', 'compare_enhancement'}
 
 
 def private(path, directory=False):
@@ -71,6 +71,10 @@ def validate_job(job):
         raise ValueError('Invalid retained error')
     if job.get('result_state') not in (None, 'completed', 'partial'):
         raise ValueError('Invalid retained analysis coverage')
+    if 'compare_enhancement' in job:
+        from .enhancement import PROFILE
+        if job['compare_enhancement'] != PROFILE:
+            raise ValueError('Invalid retained enhancement selection')
 
 
 class ResultStore:

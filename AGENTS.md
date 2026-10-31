@@ -104,3 +104,10 @@ boundaries. Support separate named facilities, browser saves, portable named
 JSON files and collection backups. Preserve legacy single-facility data during
 migration, add imported/example plans as new facilities, and prevent pending
 edits or storage failures from silently overwriting saved work.
+
+Owner saved-video enhancement decision (2026-10-30): add opt-in post-recording
+sharpening comparisons through the existing analyzer. Preserve original footage
+and original-only rule observations, record separate candidate detections and
+provenance, and require independently labeled comparisons before accuracy claims.
+Research Real-ESRGAN/SwinIR as optional later candidates; no automatic weights,
+face restoration, camera activation or installed-service replacement.
