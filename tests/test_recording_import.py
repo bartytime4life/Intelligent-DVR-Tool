@@ -24,7 +24,8 @@ SHA = hashlib.sha256(VIDEO).hexdigest()
 class RecordingImportTests(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
-        self.root = Path(self.temp.name)
+        # Imports resolve their folder; on Windows that expands 8.3 names such as RUNNER~1.
+        self.root = Path(self.temp.name).resolve()
     def tearDown(self):
         self.temp.cleanup()
     def entries(self):

@@ -589,7 +589,9 @@ export function applyBuildingEdit(plan, draft) {
 // Re-centre the local grid on a new origin while every item keeps its map position.
 export function reoriginPlan(plan, origin) {
   if (!Array.isArray(origin) || !origin.every(Number.isFinite)) throw Error('Enter a valid latitude and longitude.');
-  const [dx, dy] = fromLngLat(plan.origin, origin).map(v => Math.round(v * 1e6) / 1e6), p = q => [q[0] + dx, q[1] + dy], at = o => ({...o, x:o.x + dx, y:o.y + dy});
+  // Reproject each point: eastings scale with the origin latitude, so a uniform shift would move items.
+  const [dx, dy] = fromLngLat(plan.origin, origin), p = q => fromLngLat(toLngLat(q, plan.origin), origin).map(v => Math.round(v * 1e6) / 1e6);
+  const at = o => { const [x, y] = p([o.x, o.y]); return {...o, x, y}; };
   const ring = o => ({...o, footprint:o.footprint.map(p)});
   const next = {...plan, origin:[...origin], buildings:plan.buildings.map(b => transformBuilding(b, p)), rooms:plan.rooms.map(ring),
     openings:(plan.openings || []).map(ring), zones:(plan.zones || []).map(ring), paths:(plan.paths || []).map(o => ({...o, points:o.points.map(p)})),

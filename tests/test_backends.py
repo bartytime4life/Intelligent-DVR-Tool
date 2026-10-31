@@ -10,6 +10,7 @@ import unittest
 from unittest.mock import patch
 
 from edge.inference import CUDA_OPTIONS, ORT_VERSION, create_backend, OnnxRuntimeCuda
+from edge.cpu_backend import create_backend as verified_backend
 from edge.model_profiles import YOLOX_PROFILE
 
 
@@ -99,7 +100,7 @@ class BackendTest(unittest.TestCase):
         with tempfile.TemporaryDirectory(prefix='modèle-') as directory, \
                 patch('edge.inference.importlib.import_module', side_effect=AssertionError('Unexpected import')):
             model = Path(directory) / 'model.onnx'; model.write_bytes(b'onnx-bytes')
-            backend = create_backend('opencv-cpu', model, 'yolov8-raw-640', cv2, np, 2,
+            backend = verified_backend('opencv-cpu', model, 'yolov8-raw-640', cv2, np, 2,
                                      model_sha256=hashlib.sha256(b'onnx-bytes').hexdigest())
             self.assertEqual(backend.forward('blob'), 'cpu-output')
             self.assertEqual(backend.runtime['backend'], 'OpenCV CPU')
@@ -107,7 +108,7 @@ class BackendTest(unittest.TestCase):
             # The verified bytes, never a (possibly non-ASCII) path, reach OpenCV.
             self.assertEqual(loaded, [('buffer', b'onnx-bytes', 'uint8')])
             with self.assertRaisesRegex(ValueError, 'changed'):
-                create_backend('opencv-cpu', model, 'yolov8-raw-640', cv2, np, 2, model_sha256='0' * 64)
+                verified_backend('opencv-cpu', model, 'yolov8-raw-640', cv2, np, 2, model_sha256='0' * 64)
             self.assertEqual(len(loaded), 1)
 
     def test_cuda_runtime_missing_fails_without_cpu(self):

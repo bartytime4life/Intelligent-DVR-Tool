@@ -19,7 +19,8 @@ from .evaluation import (TRACE_SCHEMA, MAX_FRAMES, MAX_DETECTIONS, canonical_has
 from .model_profiles import (DEFAULT_PROFILE, YOLOX_PROFILE, PROFILES, prepare,
                              validate_binding, yolox_to_yolov8)
 from .resources import load_policy, analyzer_limits
-from .inference import BACKENDS, create_backend
+from .inference import BACKENDS
+from .cpu_backend import create_backend
 
 
 def digest(path):

@@ -171,14 +171,19 @@ test("resizes keep contents in place with a named error, and level cuts list wha
   const noUpper = { ...plan, rooms: plan.rooms.filter((r) => r.id !== "u") };
   assert.equal(validateFacility(applyBuildingEdit(noUpper, { ...hall, floors: 2 })).buildings[0].floors, 2);
 });
-test("re-centring the site origin can keep every item at its map position and exact dimensions", () => {
+test("re-centring the site origin can keep every item at its map position and dimensions", () => {
   const plan = hallPlan(), origin = [plan.origin[0] + 0.001, plan.origin[1] + 0.0005], next = reoriginPlan(plan, origin);
   const ground = (p, o) => fromLngLat(toLngLat(p, o), plan.origin);
   for (const [a, b] of [[plan.buildings[0].footprint[2], next.buildings[0].footprint[2]], [[plan.cameras[0].x, plan.cameras[0].y], [next.cameras[0].x, next.cameras[0].y]]]) {
     const q = ground(b, next.origin);
-    assert.ok(Math.hypot(q[0] - a[0], q[1] - a[1]) < 0.02);
+    assert.ok(Math.hypot(q[0] - a[0], q[1] - a[1]) < 1e-4);
   }
-  assert.ok(Math.abs(next.rooms[0].footprint[2][0] - next.rooms[0].footprint[0][0] - 5) < 1e-9);
+  // Local eastings rescale with the origin latitude (parts per million here), so widths stay within 1 mm.
+  assert.ok(Math.abs(next.rooms[0].footprint[2][0] - next.rooms[0].footprint[0][0] - 5) < 1e-3);
+  // Far from the equator a uniform shift would move a camera 1,900 m east by about 1.9 m.
+  const polar = {...plan, origin:[0, 79.98], cameras:[{...plan.cameras[0], x:1900, y:0}]}, moved = reoriginPlan(polar, [0, 79.99]);
+  const q = fromLngLat(toLngLat([moved.cameras[0].x, moved.cameras[0].y], moved.origin), polar.origin);
+  assert.ok(Math.hypot(q[0] - 1900, q[1]) < 1e-4);
   assert.equal(validateFacility(next).origin[0], origin[0]);
   assert.throws(() => reoriginPlan(plan, [plan.origin[0] + 0.05, plan.origin[1]]), /2 km/);
 });
