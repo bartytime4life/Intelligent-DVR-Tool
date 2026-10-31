@@ -8,6 +8,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import threading
 import time
 import unittest
 from types import SimpleNamespace
@@ -95,6 +96,7 @@ class RecorderTest(unittest.TestCase):
         command, options, process = self.calls[0]
         self.assertNotIn('192.168', str(command)); self.assertNotIn('fixture-private', str(command))
         self.assertEqual(options['stderr'], subprocess.DEVNULL)
+        self.assertEqual(options['env']['DVR_SEGMENT_PARENT_PID'], str(os.getpid()))
         self.assertEqual(json.loads(process.stdin.getvalue())['password'], SOURCE['password'])
         self.assertNotIn(SOURCE['password'], json.dumps(rec.status()))
         self.assertNotIn(SOURCE['password'], (rec.store.path / 'state.json').read_text())
@@ -221,6 +223,134 @@ class RecorderTest(unittest.TestCase):
         self.finish_analysis(rec)
         self.assertEqual(queued['state'], 'completed')
         self.assertEqual(rec.counters['analyzed'], 1)
+
+    def row(self, rec, index, size, state='failed'):
+        row = {'id':format(index, '032x'), 'source':'dock', 'state':state, 'created_at':self.now}
+        rec.rows.append(row); directory = rec.store.path / row['id']; directory.mkdir(mode=0o700)
+        with (directory / 'capture.webm').open('wb') as stream: stream.truncate(size)
+        return row
+
+    def test_in_flight_analysis_scratch_is_reserved_once(self):
+        from edge.lan_recorder import RESERVATION
+        from edge.result_store import REVIEW_BYTES
+        self.config['max_storage_mib'] = 256; rec = self.make(); MiB = 1024**2
+        rows = [self.row(rec, i, 16 * MiB) for i in range(2)]; analyzing = self.row(rec, 2, 0, 'analyzing')
+        rec.store.save()
+        scratch = rec.work / 'intelligent-dvr-job-abcdefgh'; scratch.mkdir(mode=0o700)
+        with (scratch / 'model.onnx').open('wb') as stream: stream.truncate(60 * MiB)
+        with (scratch / 'source.webm').open('wb') as stream: stream.truncate(32 * MiB)
+        # A running job: its scratch bytes are part of, not additional to, its budget.
+        rec.analysis = analyzing; rec.analysis_budget = 60 * MiB + 32 * MiB + REVIEW_BYTES
+        total, work = rec.store.usage(split=True); self.assertEqual(work, 92 * MiB)
+        self.assertGreater(total + RESERVATION + rec.analysis_budget, 256 * MiB)  # Former double count.
+        rec._expire(room=True)
+        self.assertEqual(rec.counters['expired'], 0); self.assertTrue(all(r in rec.rows for r in rows))
+        self.assertTrue(rec._space())
+        rec.analysis_budget = 160 * MiB  # A genuinely larger reservation still evicts the oldest row.
+        rec._expire(room=True)
+        self.assertNotIn(rows[0], rec.rows); self.assertIn(rows[1], rec.rows); self.assertIn(analyzing, rec.rows)
+        rec.analysis = None; rec.analysis_budget = 0
+
+    def test_external_free_space_pressure_evicts_oldest_unprotected_rows(self):
+        from edge.lan_recorder import RESERVATION
+        MiB = 1024**2; rec = self.make()
+        rows = [self.row(rec, i, 8 * MiB) for i in range(3)]; rec.store.save()
+        floor = self.config['reserve_mib'] * MiB + RESERVATION; capacity = [0]
+        rec.disk_usage = lambda p: SimpleNamespace(free=capacity[0] - rec.store.usage())
+        # Eviction cannot restore the reserve: keep the evidence and report pressure.
+        capacity[0] = floor - 64 * MiB + rec.store.usage(); self.start(rec)
+        self.assertEqual(rec.state, 'disk_pressure'); self.assertEqual(rec.counters['expired'], 0)
+        self.assertEqual(self.calls, [])
+        # Another application leaves 4 MiB too little: only the oldest row is removed.
+        capacity[0] = floor - 4 * MiB + rec.store.usage(); rec.tick()
+        self.assertEqual(rec.state, 'recording'); self.assertEqual(rec.counters['expired'], 1)
+        self.assertEqual(rec.rows[:2], rows[1:]); self.assertFalse((rec.store.path / rows[0]['id']).exists())
+        # Retained rows are evicted oldest first; the in-progress capture never is.
+        capture = rec.capture; capacity[0] = floor - 12 * MiB + rec.store.usage(); rec._expire(room=True)
+        self.assertEqual(rec.rows, [capture]); self.assertEqual(rec.counters['expired'], 3)
+
+    def test_finished_segment_is_accepted_after_a_supervisor_stall(self):
+        rec = self.make(); self.start(rec)
+        synthetic_segment(rec.store.path / rec.capture['id']); self.calls[-1][2].returncode = 0
+        # The worker exited before the deadline/free-space checks were next run.
+        self.now += self.config['segment_seconds'] + 30; self.free = 1; rec.tick()
+        self.assertEqual(rec.counters['recorded'], 1); self.assertEqual(rec.counters['dropped'], 0)
+        self.assertEqual(rec.rows[0]['state'], 'queued')
+        # Pressure now blocks only the next capture/analysis; nothing was discarded.
+        self.assertEqual((rec.state, rec.error), ('disk_pressure', 'STORAGE_PRESSURE'))
+
+    def test_segment_download_streams_without_the_lock_and_pins_retention(self):
+        rec = self.make(); self.start(rec); self.complete(rec); self.finish_analysis(rec); rec.stop()
+        row = next(r for r in rec.rows if r['state'] == 'completed')
+        with rec.open_artifact(row['id'], 'source') as (stream, mime):
+            self.assertEqual(mime, 'video/webm')
+            acquired = []
+            thread = threading.Thread(target=lambda: acquired.append(rec.lock.acquire(timeout=2)) or rec.lock.release())
+            thread.start(); thread.join(5); self.assertEqual(acquired, [True])
+            self.now += self.config['retention_minutes'] * 60 + 1; rec._expire()
+            self.assertIn(row, rec.rows)
+            self.assertEqual(hashlib.sha256(stream.read()).hexdigest(), row['sha256'])
+        rec._expire(); self.assertNotIn(row, rec.rows); self.assertEqual(rec.reading, {})
+
+    def test_supervisor_failure_during_analysis_returns_jobs_after_cancel(self):
+        rec = self.make(); self.start(rec); self.complete(rec)
+        row = rec.analysis; job = row['job_id']
+        def broken(): raise OSError('storage vanished')
+        rec._capture_tick = broken
+        rec._supervise()  # One failing tick; returns after the failure hand-off.
+        self.assertTrue(rec.failed); self.assertEqual(rec.state, 'failed')
+        self.assertIn(self.jobs.snapshot(job)['state'], ('completed', 'failed', 'cancelled'))
+        self.assertIsNone(self.jobs.owner); self.assertIsNone(rec.analysis)
+        self.assertEqual((row['state'], row['error']), ('queued', 'ANALYSIS_INTERRUPTED'))
+        # Manual analysis works without restarting the service.
+        recording = next(r for r in self.jobs.available()['recordings'] if r['name'] == 'synthetic.webm')
+        self.jobs.start({'recording':recording['id'], 'model':'synthetic', 'rules':'presence'})
+        self.jobs.thread.join(timeout=15); self.assertEqual(self.jobs.snapshot()['state'], 'completed')
+        with self.assertRaises(FeedError): rec.start({'model':'synthetic', 'rules':'presence'})
+
+    def test_segment_directory_is_synced_before_its_row_is_committed(self):
+        rec = self.make(); self.start(rec); directory = rec.store.path / rec.capture['id']; events = []
+        with patch('edge.segment_worker.sync_directory', side_effect=lambda p: events.append(
+                ('worker', Path(p), sorted(f.name for f in Path(p).iterdir())))):
+            synthetic_segment(directory)
+        # After both final renames (capture.webm -> source.webm, complete.json).
+        self.assertEqual(events, [('worker', directory, ['complete.json', 'progress.json', 'source.webm'])])
+        save = rec.store.save; events.clear()
+        with patch('edge.lan_recorder.sync_directory', side_effect=lambda p: events.append(('sync', Path(p)))), \
+                patch.object(rec.store, 'save', side_effect=lambda: (events.append(('save', rec.rows[0]['state'])), save())):
+            self.calls[-1][2].returncode = 0; rec._capture_tick()
+        # Segment folder first, then the state commit (which syncs the store folder itself).
+        self.assertEqual(events, [('sync', directory), ('save', 'queued'), ('sync', rec.store.path)])
+
+    @unittest.skipUnless(sys.platform == 'linux', 'Parent-death signal is Linux-only')
+    def test_linux_segment_worker_arms_owned_child_before_reading_credentials(self):
+        result = subprocess.run([sys.executable, '-m', 'edge.segment_worker', str(self.root), '5'], input=b'',
+            env={**os.environ, 'DVR_SEGMENT_PARENT_PID': '0'}, capture_output=True, timeout=20)
+        self.assertEqual(result.returncode, 72)
+
+    def test_symlinked_ancestor_is_resolved_but_links_at_or_beneath_roots_are_refused(self):
+        # Silverblue-style /home -> /var/home above every configured folder.
+        alias = self.root / 'home'
+        try: alias.symlink_to(self.root, target_is_directory=True)
+        except OSError: self.skipTest('Host does not permit test symlinks')
+        catalog = load_catalog(alias / 'config.json')
+        self.assertEqual(catalog['models']['synthetic']['path'], (self.root / 'fixture.onnx').resolve())
+        jobs = Jobs(alias / 'recordings', catalog)
+        try:
+            self.assertIn('synthetic.webm', [r['name'] for r in jobs.available()['recordings']])
+            Store(alias / 'recordings' / 'aliased-store').close()
+            if sys.platform == 'linux':
+                from edge.result_store import ResultStore
+                ResultStore(alias / 'state').close()
+        finally: jobs.close()
+        # A link named as the root, or anywhere beneath it, still cannot redirect inputs or storage.
+        (self.root / 'linked').symlink_to(self.root, target_is_directory=True)
+        config = json.loads((self.root / 'config.json').read_text()); config['models'][0]['path'] = 'linked/fixture.onnx'
+        (self.root / 'linked-config.json').write_text(json.dumps(config))
+        with self.assertRaises(ValueError): load_catalog(alias / 'linked-config.json')
+        with self.assertRaises(ValueError): Jobs(alias / 'linked', catalog)
+        (self.root / 'store-link').symlink_to(self.root / 'recordings' / 'aliased-store', target_is_directory=True)
+        with self.assertRaises(ValueError): Store(alias / 'store-link')
 
     def test_wrong_result_and_timing_fingerprint_are_rejected(self):
         rec = self.make(); self.start(rec); self.complete(rec); self.finish_analysis(rec)

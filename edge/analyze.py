@@ -139,7 +139,13 @@ def main(argv=None, progress=None, local_capture=False):
     source_hash=digest(args.video)
     run_id=hashlib.sha256((source_hash+model_hash).encode()).hexdigest()
     engine=RuleEngine(rules,args.camera,run_id)
-    capture=cv2.VideoCapture(str(args.video), cv2.CAP_FFMPEG) if local_capture else cv2.VideoCapture(str(args.video))
+    if local_capture:
+        # Service worker: FFmpeg only, and decoder threads under the same cap as
+        # inference so the summed CPU-time limit holds (older builds lack the property).
+        params=[cv2.CAP_PROP_N_THREADS,args.threads] if hasattr(cv2,'CAP_PROP_N_THREADS') else None
+        capture=cv2.VideoCapture(str(args.video), cv2.CAP_FFMPEG, params) if params else cv2.VideoCapture(str(args.video), cv2.CAP_FFMPEG)
+    else:
+        capture=cv2.VideoCapture(str(args.video))
     if not capture.isOpened():
         parser.error('Video could not be opened')
     fps=capture.get(cv2.CAP_PROP_FPS)
@@ -149,7 +155,7 @@ def main(argv=None, progress=None, local_capture=False):
         capture.release();parser.error('Sampling interval exceeds a rule max_gap; reduce stride')
     cv2.setNumThreads(args.threads)
     try:
-        backend=create_backend(args.backend,args.model,args.profile,cv2,np,args.threads)
+        backend=create_backend(args.backend,args.model,args.profile,cv2,np,args.threads,model_sha256=model_hash)
     except Exception:
         capture.release()
         raise

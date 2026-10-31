@@ -57,11 +57,28 @@ def sha(value):
     return value
 
 
-def local_file(path):
-    path = Path(path)
-    # Reject symlinks in every component, including linked parent directories.
-    require(not any(p.is_symlink() for p in (path, *path.parents))
-            and path.is_file(), 'Require local regular files, without symlinks')
+def anchor(path):
+    """Absolute path with its parent resolved once. OS links above a configured
+    entry (e.g. Silverblue's /home -> /var/home) are accepted; callers refuse a
+    link at the entry itself and beneath it, so nothing escapes a managed tree."""
+    path = Path(path).absolute()
+    require(path.name not in ('', '..'), 'Name a specific local folder or file')
+    return path.parent.resolve() / path.name
+
+
+def local_file(path, root=None):
+    """A regular file with no symlink at or beneath root (default: its own folder).
+    root is resolved once, so links above it are accepted; the returned path uses it."""
+    path = Path(path).absolute()
+    base = path.parent if root is None else Path(root).absolute()
+    require(path.is_relative_to(base), 'Inputs must stay inside their configured folder')
+    parts = path.relative_to(base).parts
+    require(parts and '..' not in parts, 'Inputs must stay inside their configured folder')
+    path = base.resolve()
+    for part in parts:
+        path = path / part
+        require(not path.is_symlink(), 'Require local regular files, without symlinks')
+    require(path.is_file(), 'Require local regular files, without symlinks')
     return path
 
 
@@ -89,7 +106,7 @@ def relative_file(base, value):
     path = Path(name)
     require(not path.is_absolute() and '..' not in path.parts and ':' not in name,
             'Inputs must be relative paths inside the manifest directory')
-    return local_file(base / path)
+    return local_file(Path(base) / path, base)
 
 
 def box(value):

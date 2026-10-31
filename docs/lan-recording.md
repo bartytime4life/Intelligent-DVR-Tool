@@ -68,7 +68,7 @@ also runs on Windows; Linux-only manual `--state-dir` restrictions are unchanged
 | Native capture | 1 worker | Existing 2 GiB process bound; input at most 1080p, output at most 960px / 10 sampled fps |
 | Segment | 32 MiB | Video-only VP8/WebM, fully decoded and frame-count checked before completion |
 | Recognition | 1 CPU job | Existing 2 threads, stride 5, 6,000-frame / 300-second / 4 GiB limits; incomplete results are not promoted |
-| Queue policy | FIFO | Oldest unprotected entries expire by age, count or byte budget, including pending work |
+| Queue policy | FIFO | Oldest unprotected entries expire by age, count, byte budget or free-space reserve, including pending work |
 | Reconnect | 2–60 seconds | Bounded exponential delay after failure while explicitly running; Stop cancels retries |
 
 Storage lives under `.lan-recorder` in the configured recordings folder. The
@@ -80,13 +80,18 @@ vault or encrypt footage. Do not place it on a shared/public filesystem.
 
 Retention runs while the recorder is explicitly active. Stopped services preserve
 files; the next Start applies elapsed-age limits before processing queued work.
-Active capture/analysis entries are protected until their operation ends. The
-quota includes partial files, retained result JSON and the single analysis working
-directory. Conservative allocation estimates include source/model/result copies
+Active capture/analysis entries, and entries being downloaded, are protected until
+their operation ends. The quota includes partial files, retained result JSON and the
+single analysis working directory, which counts once against the running analysis
+reservation. Conservative allocation estimates include source/model/result copies
 before analysis and another segment before capture. A service restart removes
-recognized interrupted working files before accepting a new session. Free-space checks cannot
-reserve space against other applications; external disk pressure can still cause
-an explicit failure. Native encoder buffering permits a small transient overshoot,
+recognized interrupted working files before accepting a new session. When other
+data drops free space below `reserve_mib`, the oldest unprotected entries are
+expired only if removing them restores the reserve; otherwise the recorder reports
+`disk_pressure` and keeps them. Free-space checks cannot reserve space against other
+applications, so external disk pressure can still cause an explicit failure. A
+segment whose worker already finished is accepted on its integrity checks even if
+the supervisor observes it late. Native encoder buffering permits a small transient overshoot,
 especially on Windows, which has no per-process file-size quota. This is bounded
 application storage management, not an OS disk quota or protection against a hostile OS.
 
@@ -119,7 +124,8 @@ operational metadata, not an authenticated forensic audit log.
   worker exit and source/timing fingerprint checks. The analyzer snapshots the
   source with the expected hash; results must match that hash, camera, frame count,
   nominal FPS and completed state. Downloads verify the retained pair again.
-- Atomic metadata replacement and file sync preserve completed pairs across normal
+- Atomic metadata replacement, file sync and (on Linux) segment-folder sync before
+  each state commit preserve completed pairs across normal
   process restarts. Restart marks capture intent `SERVICE_INTERRUPTED`; it never
   promotes leftover bytes or resumes capture. Interrupted analysis of an intact
   completed segment returns to `queued`, requiring explicit Start. Corrupt committed

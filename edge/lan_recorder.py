@@ -1,4 +1,5 @@
 """Explicit one-camera capture, bounded local retention, and the existing Jobs queue."""
+import contextlib
 import itertools
 import json
 import math
@@ -13,9 +14,10 @@ import sys
 import threading
 import time
 
-from .evaluation import digest, read_json
+from .evaluation import anchor, digest, read_json
 from .local_feeds import FeedError, ROOT
 from .result_store import REVIEW_BYTES, VIDEO_BYTES
+from .fileops import sync_directory
 from .segment_worker import SEGMENT_BYTES, atomic_json
 
 DEFAULTS = {'segment_seconds': 10, 'max_segments': 20, 'max_storage_mib': 1024,
@@ -56,8 +58,9 @@ def safe(path, directory=False):
 class Store:
     """Dedicated directory and OS-released owner lock; never remove unrecognized files."""
     def __init__(self, directory):
-        self.path = Path(directory).absolute(); self.fd = None
-        if any(p.is_symlink() for p in (self.path, *self.path.parents)):
+        # OS links above the store are resolved once; the store and its contents are never links.
+        self.path = anchor(directory); self.fd = None
+        if self.path.is_symlink():
             raise ValueError('Recorder path cannot contain symlinks')
         self.path.mkdir(mode=0o700, exist_ok=True)
         safe(self.path, True)
@@ -150,17 +153,27 @@ class Store:
     def save(self):
         self.validate()
         atomic_json(self.path / 'state.json', self.data)
-        if sys.platform == 'linux':
-            fd = os.open(self.path, os.O_RDONLY | os.O_DIRECTORY)
-            try: os.fsync(fd)
-            finally: os.close(fd)
+        sync_directory(self.path)
 
-    def usage(self):
+    def usage(self, split=False):
+        """Regular-file bytes; split=True returns (total, analysis scratch under work/)."""
         self.inspect()
-        total = 0
+        total = scratch = 0
         for path in self.path.rglob('*'):
             try:
                 info = path.stat()
+                if stat.S_ISREG(info.st_mode):
+                    total += info.st_size
+                    if path.relative_to(self.path).parts[0] == 'work': scratch += info.st_size
+            except FileNotFoundError:
+                pass
+        return (total, scratch) if split else total
+
+    def footprint(self, row):
+        total = 0
+        for path in (self.path / row['id']).glob('*'):
+            try:
+                info = path.lstat()
                 if stat.S_ISREG(info.st_mode): total += info.st_size
             except FileNotFoundError:
                 pass
@@ -212,7 +225,7 @@ class Recorder:
         self.active = False; self.state = 'stopped'; self.error = None
         self.failed = False
         self.process = self.capture = self.analysis = None
-        self.analysis_budget = 0
+        self.analysis_budget = 0; self.reading = {}
         self.retry_at = 0; self.failures = 0; self.selection = None
         self.metrics = {}; self.last_finished = None
         self.store = Store(directory)
@@ -302,23 +315,35 @@ class Recorder:
             self.store.save()
             return self.status()
 
+    def _committed(self):
+        # In-flight analysis scratch under work/ already counts toward its budget.
+        total, scratch = self.store.usage(split=True)
+        return total - scratch + max(scratch, self.analysis_budget)
+
     def _expire(self, room=False, reservation=RESERVATION, keep=None):
         now = self.wall(); protected = {id(r) for r in (self.capture, self.analysis, keep) if r is not None}
+        rows = [r for r in self.rows if id(r) not in protected and r['id'] not in self.reading]
+        # Other data can also consume the volume's reserve. Evict this store's own
+        # oldest unprotected rows only when that alone can restore it.
+        deficit = self.config['reserve_mib'] * 1024**2 + reservation - self.disk_usage(self.store.path).free if room else 0
+        sizes = {id(r): self.store.footprint(r) for r in rows} if deficit > 0 else {}
+        if sum(sizes.values()) < deficit: deficit = 0
         changed = False
-        for row in list(self.rows):
-            if id(row) in protected: continue
+        for row in rows:
             expired = now - row['created_at'] >= self.config['retention_minutes'] * 60
-            full = room and (len(self.rows) >= self.config['max_segments'] or self.store.usage() + reservation + self.analysis_budget > self.config['max_storage_mib'] * 1024**2)
+            full = room and (len(self.rows) >= self.config['max_segments'] or deficit > 0 or
+                             self._committed() + reservation > self.config['max_storage_mib'] * 1024**2)
             if expired or full:
                 if row['state'] in ('queued', 'analyzing'): self.counters['dropped'] += 1
                 self.counters['expired'] += 1
+                deficit -= sizes.get(id(row), 0)
                 self.store.remove(row)
                 changed = True
         if changed: self.store.save()
 
     def _space(self):
         return (self.disk_usage(self.store.path).free >= self.config['reserve_mib'] * 1024**2 + RESERVATION and
-                self.store.usage() + RESERVATION + self.analysis_budget <= self.config['max_storage_mib'] * 1024**2 and
+                self._committed() + RESERVATION <= self.config['max_storage_mib'] * 1024**2 and
                 len(self.rows) < self.config['max_segments'])
 
     def _launch(self):
@@ -333,7 +358,8 @@ class Recorder:
         self.capture_began = self.clock()
         try:
             self.process = self.process_factory([sys.executable, '-m', 'edge.segment_worker', str(directory), str(self.config['segment_seconds'])],
-                cwd=ROOT, stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                cwd=ROOT, stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                env={**os.environ, 'DVR_SEGMENT_PARENT_PID': str(os.getpid())})
             self.process.stdin.write(json.dumps(self.sources[self.config['source']]).encode() + b'\n')
             self.process.stdin.flush()  # Remains open as the cross-platform parent-lifetime lease.
             self.state = 'recording'
@@ -351,12 +377,15 @@ class Recorder:
         try:
             self.metrics = read_json(directory / 'progress.json', 4096)
         except (OSError, ValueError): pass
-        if self.disk_usage(self.store.path).free < self.config['reserve_mib'] * 1024**2:
-            self._discard('STORAGE_PRESSURE'); self.state = 'disk_pressure'; self.store.save(); return
-        if self.clock() - self.capture_began > self.config['segment_seconds'] + 20:
-            self._connection_failed('CAPTURE_TIMEOUT'); return
-        if self.process.poll() is None: return
-        code = self.process.returncode
+        # A worker that already exited finished writing; after a supervisor stall,
+        # judge its segment on integrity, not on the deadline or later free space.
+        code = self.process.poll()
+        if code is None:
+            if self.disk_usage(self.store.path).free < self.config['reserve_mib'] * 1024**2:
+                self._discard('STORAGE_PRESSURE'); self.state = 'disk_pressure'; self.store.save()
+            elif self.clock() - self.capture_began > self.config['segment_seconds'] + 20:
+                self._connection_failed('CAPTURE_TIMEOUT')
+            return
         self._kill_capture()
         if code:
             self._connection_failed('CONNECTION_OR_ENCODER_FAILED'); return
@@ -369,6 +398,7 @@ class Recorder:
             self.capture.update(sha256=result['sha256'], timing_sha256=digest(directory / 'complete.json'))
             self.store.verify(self.capture)
             if result['bytes'] != (directory / 'source.webm').stat().st_size: raise ValueError('Changed segment')
+            sync_directory(directory)  # The worker's renames are durable before the row is committed.
             self.capture.update(state='queued', ended_at=result['ended_at'], frames=result['frames'],
                 first_frame_at=result['started_at'] + result['receive_offsets_seconds'][0],
                 capture_seconds=result['capture_wall_seconds'], missed_sample_slots=result['missed_sample_slots'],
@@ -395,7 +425,7 @@ class Recorder:
                     raise OSError('No room to retain result')
                 path, _ = self.jobs.artifact(job['id'], 'result')
                 review = read_json(path, REVIEW_BYTES); self.store.bind_review(review, row)
-                atomic_json(directory / 'review.json', review)
+                atomic_json(directory / 'review.json', review); sync_directory(directory)
                 row.update(review_sha256=digest(directory / 'review.json'))
                 self.store.verify(row, True)
                 row.update(state='completed', error=None, analysis_seconds=job['elapsed_seconds'],
@@ -445,15 +475,35 @@ class Recorder:
         while not self.closed.wait(.25):
             try: self.tick()
             except Exception:
-                with self.lock:
-                    self.active = False; self.failed = True; self.state = 'failed'; self.error = 'STORAGE_OR_WORKER_FAILED'
-                    self._kill_capture()
-                    if self.analysis:
-                        self.jobs.cancel(self.analysis['job_id'])
-                    else:
-                        self.jobs.release(self)
-                # Preserve uncertain artifacts. Restart validates them without recording.
+                job = None
+                try:
+                    with self.lock:
+                        self.active = False; self.failed = True; self.state = 'failed'; self.error = 'STORAGE_OR_WORKER_FAILED'
+                        job = self.analysis and self.analysis.get('job_id')
+                        with contextlib.suppress(Exception):
+                            if job: self.jobs.cancel(job)
+                        self._kill_capture()
+                finally:
+                    # Preserve uncertain artifacts. Restart validates them without recording.
+                    self._release_failed(job)
                 return
+
+    def _release_failed(self, job):
+        # Jobs stays claimed until the cancelled worker is terminal, then manual
+        # analysis is available again without a restart.
+        while job and not self.closed.is_set():
+            try:
+                if self.jobs.snapshot(job)['state'] in ('completed', 'failed', 'cancelled'): break
+            except Exception:
+                break
+            self.closed.wait(.1)
+        with self.lock:
+            if self.closed.is_set() and job: return  # close() finishes the analysis hand-off.
+            if self.analysis:
+                # In memory only, as restart recovery would; storage may be failing.
+                self.analysis.update(state='queued', error='ANALYSIS_INTERRUPTED')
+                self.analysis = None; self.analysis_budget = 0
+            self.jobs.release(self)
 
     def status(self):
         with self.lock:
@@ -480,6 +530,22 @@ class Recorder:
                 return directory / name, mime
             except (OSError, ValueError, KeyError, TypeError):
                 raise FeedError('INTEGRITY_FAILED', 'Recording and result verification failed. Preserve local files for inspection.', 409) from None
+
+    @contextlib.contextmanager
+    def open_artifact(self, identifier, kind):
+        """Verify and open under the lock, then let the caller stream without it.
+        Retention skips the row until the stream closes, on either OS."""
+        with self.lock:
+            path, mime = self.artifact(identifier, kind)
+            stream = path.open('rb')
+            self.reading[identifier] = self.reading.get(identifier, 0) + 1
+        try:
+            yield stream, mime
+        finally:
+            stream.close()
+            with self.lock:
+                self.reading[identifier] -= 1
+                if not self.reading[identifier]: del self.reading[identifier]
 
     def close(self):
         self.closed.set()

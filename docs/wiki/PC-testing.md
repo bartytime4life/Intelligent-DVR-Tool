@@ -181,7 +181,8 @@ service command or storage setup is required. Choose a dedicated local folder
 outside the extracted app so a future kit can use it. Its parent must already
 exist, with write/search access. A missing final folder is created only by Start,
 owned by your OS account with mode 0700. Existing folders must already be 0700,
-owner-owned, without symlink components or unrelated files. The launcher never
+owner-owned, not symlinks themselves and without unrelated files (system links above
+them, such as Silverblue's `/home`, are fine). The launcher never
 changes permissions/ownership or deletes questionable files to make them pass.
 
 ~~~bash

@@ -184,8 +184,9 @@ def publish(data, directory):
     ok, encoded = cv2.imencode('.jpg', frame, [cv2.IMWRITE_JPEG_QUALITY, 75])
     if not ok or len(encoded) > LIMITS['frame_bytes']:
         raise ValueError('Preview frame too large')
+    from .fileops import replace
     temporary = directory / 'frame.tmp'
-    temporary.write_bytes(encoded.tobytes()); temporary.replace(directory / 'frame.jpg')
+    temporary.write_bytes(encoded.tobytes()); replace(temporary, directory / 'frame.jpg', best_effort=True)
 
 
 def capture_public(source, directory):

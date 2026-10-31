@@ -7,18 +7,19 @@ import sys
 import time
 
 from .feed_worker import PinnedRelay, configure_capture, relay_url
+from .fileops import replace, sync_directory
 from .local_feeds import LIMITS
 
 SEGMENT_BYTES = 32 * 1024**2
 FPS = 10
 
 
-def atomic_json(path, value):
+def atomic_json(path, value, best_effort=False):
     temporary = path.with_suffix('.tmp')
     with temporary.open('w', encoding='utf-8') as stream:
         json.dump(value, stream, allow_nan=False)
         stream.flush(); os.fsync(stream.fileno())
-    temporary.replace(path)
+    return replace(temporary, path, best_effort=best_effort)
 
 
 def resources():
@@ -115,7 +116,7 @@ def record(url, directory, seconds, *, capture_factory=None, clock=time.monotoni
                 raise ValueError('Segment bound exceeded')
             if now - last_progress >= .5:
                 atomic_json(directory / 'progress.json', {'frames': len(offsets), 'decoded_frames': decoded,
-                    'elapsed_seconds': round(elapsed, 3), 'missed_sample_slots': missed, **resources()})
+                    'elapsed_seconds': round(elapsed, 3), 'missed_sample_slots': missed, **resources()}, best_effort=True)
                 last_progress = now
         writer.release(); writer = None
         if not 16 <= temporary.stat().st_size <= SEGMENT_BYTES:
@@ -124,11 +125,12 @@ def record(url, directory, seconds, *, capture_factory=None, clock=time.monotoni
         with temporary.open('r+b') as stream:
             os.fsync(stream.fileno())
             sha = hashlib.file_digest(stream, 'sha256').hexdigest()
-        temporary.replace(directory / 'source.webm')
+        replace(temporary, directory / 'source.webm')
         atomic_json(directory / 'complete.json', {'sha256': sha, 'bytes': (directory / 'source.webm').stat().st_size,
             'frames': len(offsets), 'decoded_frames': decoded, 'fps': FPS, 'width': size[0], 'height': size[1],
             'started_at': started, 'ended_at': started + offsets[-1], 'finalized_at': wall(), 'receive_offsets_seconds': offsets,
             'missed_sample_slots': missed, 'capture_wall_seconds': round(clock() - began, 3), **resources()})
+        sync_directory(directory)  # Both renames reach disk before the parent sees exit 0.
     finally:
         cap.release()
         if writer is not None:
@@ -152,6 +154,12 @@ def main(directory, seconds):
 
 if __name__ == '__main__':
     try:
-        main(sys.argv[1], sys.argv[2])
+        if sys.platform == 'linux':
+            # Spawned only from the recorder's long-lived supervisor thread, whose
+            # exit (close/failure) already kills capture; prctl follows that thread.
+            from .supervision import _owned_child
+            _owned_child(int(os.environ['DVR_SEGMENT_PARENT_PID']), main, sys.argv[1], sys.argv[2])
+        else:
+            main(sys.argv[1], sys.argv[2])
     except BaseException:
         sys.exit(1)  # Never expose native exceptions, addresses or credentials.

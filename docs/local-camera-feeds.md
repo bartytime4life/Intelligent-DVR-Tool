@@ -78,13 +78,13 @@ webcams but cannot bridge LAN DVR channels through this local service.
 | Source network | Exact owner-configured RFC1918 IPv4 and port. A local TCP relay pins upstream; RTSP redirects are refused before native decoding |
 | Credentials | Private worker stdin, not argv, browser JSON/storage, temporary files or logs; dedicated video-only viewer account recommended |
 | Decoder | OpenCV FFmpeg CPU, one decoder thread, RTSP/TCP + video only; 8-second open and 5-second read timeout |
-| Resources | 2 GiB address-space/process-memory limit per worker on Linux/Windows; Linux also caps CPU time at 300 seconds and disables core dumps |
+| Resources | 2 GiB address-space/process-memory limit per worker on Linux/Windows; Linux also caps summed CPU time at 1,860 seconds (two threads for the full 15-minute session) and disables core dumps |
 | Output | One latest JPEG, maximum 512 KiB, maximum 960 pixels on longest edge, at most 4 emitted frames/s. Full stream decoding is still required |
 | Input | Reject decoded frames above 2,073,600 pixels; native allocations are additionally memory bounded |
 | Lifetime | 12 seconds to first frame, 8 seconds without a new frame, 15-second client lease, 15-minute maximum preview |
 | Browser | Sequential frame requests, one retained object URL per channel; hide or leave Monitor to disconnect; webcam tracks stop immediately |
 | Failure | Drop last image and show an actionable error. No stale image is presented as a current feed. Explicit retry required |
-| Shutdown | Kill/reap workers and remove temporary frames. Abrupt OS/process death may leave temporary frames for OS cleanup |
+| Shutdown | Kill/reap workers and remove temporary frames. If the service dies, its private worker pipe closes and the worker exits on Linux and Windows; Linux also arms a parent-death kill. Abrupt death may leave temporary frames for OS cleanup |
 
 RTSP without TLS sends media on the LAN and may use Basic authentication. Use a
 trusted isolated LAN and a viewer-only account. The relay deliberately leaves

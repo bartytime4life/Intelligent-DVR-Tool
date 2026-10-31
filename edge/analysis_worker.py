@@ -6,7 +6,13 @@ import sys
 import threading
 import time
 
+from .fileops import replace
+
 MEMORY_BYTES = 4 * 1024**3
+# RLIMIT_CPU sums every thread. The parent enforces the 300 s wall deadline; this
+# backstop allows two inference plus two decoder threads for all of it.
+THREADS, WALL_SECONDS = 2, 300
+CPU_SECONDS = 2 * THREADS * WALL_SECONDS + 60
 
 
 def watch_parent_pipe():
@@ -33,14 +39,15 @@ def watch_parent_pipe():
     threading.Thread(target=watch, daemon=True).start()
 
 
-def constrain():
+def constrain(memory_bytes=None, cpu_seconds=None):
     # Applied before importing native inference libraries. CPU is deliberately the
     # first service backend; CUDA's virtual address space needs a separate policy.
+    memory_bytes, cpu_seconds = memory_bytes or MEMORY_BYTES, cpu_seconds or CPU_SECONDS
     if sys.platform == 'linux':
         import resource
-        resource.setrlimit(resource.RLIMIT_AS, (MEMORY_BYTES, MEMORY_BYTES))
+        resource.setrlimit(resource.RLIMIT_AS, (memory_bytes, memory_bytes))
         resource.setrlimit(resource.RLIMIT_FSIZE, (34 * 1024**2, 34 * 1024**2))
-        resource.setrlimit(resource.RLIMIT_CPU, (300, 301))
+        resource.setrlimit(resource.RLIMIT_CPU, (cpu_seconds, cpu_seconds + 1))
         resource.setrlimit(resource.RLIMIT_CORE, (0, 0))
         return None
     if sys.platform == 'win32':
@@ -66,7 +73,7 @@ def constrain():
         handle = kernel.CreateJobObjectW(None, None)
         limits = Extended()
         limits.basic.flags = 0x100 | 0x2000  # process memory + kill on job close
-        limits.process_memory = MEMORY_BYTES
+        limits.process_memory = memory_bytes
         if not handle or not kernel.SetInformationJobObject(handle, 9, ctypes.byref(limits), ctypes.sizeof(limits)) or not kernel.AssignProcessToJobObject(handle, kernel.GetCurrentProcess()):
             raise RuntimeError('Cannot enforce worker memory limit')
         return handle  # Keep the handle open until process exit.
@@ -92,7 +99,7 @@ def run(directory):
         last = now
         temporary = directory / 'progress.tmp'
         temporary.write_text(json.dumps(fields), encoding='utf-8')
-        temporary.replace(directory / 'progress.json')
+        replace(temporary, directory / 'progress.json', best_effort=True)  # The parent polls this file.
     main(args, progress=progress, local_capture=True)
     return handle
 

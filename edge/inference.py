@@ -19,8 +19,13 @@ CUDA_OPTIONS = {'device_id': 0, 'use_tf32': 0, 'gpu_mem_limit': 1024**3,
 
 
 class OpenCVCpu:
-    def __init__(self, model, cv2, threads):
-        self.net = cv2.dnn.readNetFromONNX(str(model))
+    def __init__(self, model, cv2, np, threads, model_sha256=None):
+        # Parse verified bytes, not a path: OpenCV's narrow-path reader misreads
+        # non-ASCII Windows profile/%TEMP% paths, and one read binds hash to graph.
+        data = Path(model).read_bytes()
+        if model_sha256 is not None and hashlib.sha256(data).hexdigest() != model_sha256:
+            raise ValueError('The model changed after hash verification')
+        self.net = cv2.dnn.readNetFromONNX(np.frombuffer(data, dtype=np.uint8))
         self.net.setPreferableBackend(cv2.dnn.DNN_BACKEND_OPENCV)
         self.net.setPreferableTarget(cv2.dnn.DNN_TARGET_CPU)
         self.runtime = {'backend': 'OpenCV CPU', 'backend_id': 'opencv-cpu',
@@ -104,9 +109,9 @@ class OnnxRuntimeCuda:
         self.session = None
 
 
-def create_backend(name, model, profile, cv2, np, threads):
+def create_backend(name, model, profile, cv2, np, threads, model_sha256=None):
     if name == 'opencv-cpu':
-        return OpenCVCpu(model, cv2, threads)
+        return OpenCVCpu(model, cv2, np, threads, model_sha256)
     if name == 'onnxruntime-cuda':
         if profile != YOLOX_PROFILE:
             raise ValueError('CUDA backend supports only the hash-bound '+YOLOX_PROFILE+' profile')

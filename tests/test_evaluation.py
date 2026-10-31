@@ -8,7 +8,7 @@ import tempfile
 import unittest
 
 from edge.evaluation import (evaluate, digest, canonical_hash, iou, match_frame,
-                             read_json, timing_distribution)
+                             read_json, relative_file, timing_distribution)
 from evaluation_fixtures import make_fixture, write_json
 
 
@@ -226,8 +226,12 @@ class EvaluationTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             read_json(self.root/'linked')
         (self.root/'parent').symlink_to(self.root, target_is_directory=True)
+        # A link beneath a configured folder cannot redirect a relative input...
         with self.assertRaises(ValueError):
-            read_json(self.root/'parent'/'labels.json')
+            relative_file(self.root, 'parent/labels.json')
+        # ...but an explicitly named file's own folder is resolved once, like Silverblue /home.
+        self.assertEqual(read_json(self.root/'parent'/'labels.json'), read_json(self.root/'labels.json'))
+        self.assertEqual(relative_file(self.root/'parent', 'labels.json'), (self.root/'labels.json').resolve())
         for content in ('{"a":1,"a":2}', '{"a":NaN}', '{"a":Infinity}', '{"a":1e999}'):
             (self.root/'bad.json').write_text(content)
             with self.assertRaises(ValueError):

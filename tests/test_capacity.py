@@ -171,6 +171,16 @@ class CapacitySimulationTest(unittest.TestCase):
         self.assertEqual(result['modeled_offered_samples_per_second'], 200)
         self.assertEqual(result['qualification']['concurrent_camera_capacity'], 'unqualified')
 
+    def test_worker_equivalents_and_overload_are_exact_on_multiples(self):
+        # Binary floats made 3 x 1 fps x 700 ms / 1000 / .7 round up to 4 workers.
+        for cameras, fps, ms, workers in ((3, 1, 700, 3), (7, .1, 7000, 7), (10, 2, 35, 1), (3, 1, 701, 4), (1, .3, 7000, 3)):
+            with self.subTest(cameras=cameras, fps=fps, ms=ms):
+                result = simulate(cameras=cameras, sample_fps=fps, service_ms=ms, workers=1, duration_seconds=1)
+                self.assertEqual(result['worker_equivalents_at_70_percent_utilization'], workers)
+        # Offered work exactly equal to idealized capacity is not overload (3 x .1 floats to 0.30000000000000004).
+        self.assertFalse(simulate(cameras=3, sample_fps=.1, service_ms=10000, workers=3, duration_seconds=10)['modeled_overload'])
+        self.assertTrue(simulate(cameras=3, sample_fps=.1, service_ms=10001, workers=3, duration_seconds=10)['modeled_overload'])
+
     def test_target_is_minimum_not_a_hard_maximum(self):
         self.assertEqual(simulate(cameras=125, service_ms=10)['cameras_served'], 125)
 

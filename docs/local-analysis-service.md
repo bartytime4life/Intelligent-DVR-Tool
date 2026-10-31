@@ -14,7 +14,7 @@ requirements. Obtain and verify your own supported model as described in
 by the service. The example catalog is `edge/local-analysis.example.json`: place
 the pinned YOLOX model at `edge/models/yolox-s.onnx`, or create your own catalog.
 Model paths, labels and rule paths must be relative to the catalog directory,
-without `..`, absolute paths or symlinks. Each model has an explicit SHA-256,
+without `..`, absolute paths or symlinks inside that directory. Each model has an explicit SHA-256,
 profile and labels; rules use the existing rule JSON contract. Review zone
 rectangles, labels, thresholds, dwell and max-gap before analysis. Add up to 16
 models and 16 rule sets. Only compatible model/rule labels can start a job.
@@ -63,14 +63,14 @@ encoded bytes must never inherit another recording's boxes.
 
 | Boundary | Enforced behavior |
 | --- | --- |
-| Access | Exact IPv4 loopback Host; same-origin browser requests; per-service random token for job/result/source APIs; no CORS or uploads |
-| Paths | Direct children of one explicit recording folder; opaque IDs; no client paths or commands; regular files and no symlink components |
+| Access | Exact IPv4 loopback Host; same-origin browser requests; per-service random token for job/result/source APIs; on Linux, API sockets must belong to the service's OS account (Windows: trust other local accounts); no CORS or uploads |
+| Paths | Direct children of one explicit recording folder; opaque IDs; no client paths or commands; regular files; configured folders are resolved once (system links above them, such as Silverblue's `/home`, are accepted) and no symlink is followed at or beneath them |
 | Catalog | First 1,000 directory entries considered; at most 200 supported recordings listed; refresh explicitly after changing files |
 | Inputs | Nonempty MP4/MOV, WebM/MKV or AVI container header; 512 MiB recording/model; 64 KiB labels/rules; models hash checked before execution |
 | Jobs | One active job, no pending queue, five-minute wall deadline including preparation; cancel wins publication races |
-| CPU | Two OpenCV/native worker threads requested; 6,000 decoded frames; sample every five; 4 GiB Linux virtual-address or Windows process-commit limit; Linux CPU-time/file-size caps |
+| CPU | Two OpenCV inference and two FFmpeg decoder threads requested; 6,000 decoded frames; sample every five; 4 GiB Linux virtual-address or Windows process-commit limit; Linux file-size cap and a summed CPU-time backstop (1,260 s: four threads for the full wall deadline) |
 | Results | Existing 1,000-observation, 100,000-detection, 32 MiB review contract; browser validates full contract before attaching exact source |
-| HTTP | 2 KiB JSON controls; optional explicit same-computer binary import up to 64 MiB; one request at a time, five-second socket timeout, 30-second import loop deadline; chunked output |
+| HTTP | 2 KiB JSON controls; optional explicit same-computer binary import up to 64 MiB; at most 16 concurrent connections (extra ones are closed), five-second socket timeout, 30-second import loop deadline; chunked output; downloads stream outside service locks |
 | Retention | Default: one private temporary recording/result snapshot until the next explicit job or graceful shutdown. Opt-in Linux storage retains the last job across service restarts; model/config snapshots are removed after processing |
 
 The retained result can be reopened with **Open results again**. Reloading the

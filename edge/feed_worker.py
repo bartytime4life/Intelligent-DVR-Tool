@@ -9,7 +9,11 @@ import threading
 import time
 from urllib.parse import quote
 
+from .fileops import replace
 from .local_feeds import LIMITS
+
+# RLIMIT_CPU sums threads: one decoder plus relay I/O for a full preview session.
+CPU_SECONDS = 2 * LIMITS['session_seconds'] + 60
 
 
 def relay_messages(reader, writer):
@@ -134,7 +138,7 @@ def capture(url, directory, *, seconds=900):
             if not ok or len(encoded) > LIMITS['frame_bytes']:
                 raise ValueError('Frame limit')
             temporary = directory / 'frame.tmp'
-            temporary.write_bytes(encoded.tobytes()); temporary.replace(directory / 'frame.jpg')
+            temporary.write_bytes(encoded.tobytes()); replace(temporary, directory / 'frame.jpg', best_effort=True)
     finally:
         cap.release()
 
@@ -142,8 +146,7 @@ def capture(url, directory, *, seconds=900):
 def configure_capture():
     """Shared bounded native RTSP configuration for previews and segment capture."""
     from . import analysis_worker
-    analysis_worker.MEMORY_BYTES = LIMITS['memory_bytes']
-    handle = analysis_worker.constrain()
+    handle = analysis_worker.constrain(LIMITS['memory_bytes'], CPU_SECONDS)
     os.environ.update(OMP_NUM_THREADS='1', OPENBLAS_NUM_THREADS='1', MKL_NUM_THREADS='1',
         OPENCV_IO_MAX_IMAGE_PIXELS=str(LIMITS['input_pixels']), OPENCV_IO_MAX_IMAGE_WIDTH='4096', OPENCV_IO_MAX_IMAGE_HEIGHT='4096',
         OPENCV_VIDEOIO_PRIORITY_LIST='FFMPEG',
@@ -160,7 +163,11 @@ def relay_url(data, relay):
 
 def main(directory):
     handle = configure_capture()
-    data = json.loads(sys.stdin.buffer.read(8192))
+    # As in segment_worker, stdin stays open for the worker's lifetime: EOF ends
+    # an orphaned preview on both OSes, even while a native decoder is blocked.
+    data = json.loads(sys.stdin.buffer.readline(8192))
+    from .analysis_worker import watch_parent_pipe
+    watch_parent_pipe()
     if data.get('kind') in ('public-jpeg', 'public-mjpeg'):
         from .public_feed import capture_public
         capture_public(data, Path(directory))
@@ -175,6 +182,10 @@ def main(directory):
 
 if __name__ == '__main__':
     try:
-        main(sys.argv[1])
+        if sys.platform == 'linux':
+            from .supervision import _owned_child
+            _owned_child(int(os.environ['DVR_FEED_PARENT_PID']), main, sys.argv[1])
+        else:
+            main(sys.argv[1])
     except BaseException:
         sys.exit(1)  # Native details and credentials never reach app logs.

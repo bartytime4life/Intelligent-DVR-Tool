@@ -10,7 +10,8 @@ import shutil
 import stat
 import sys
 
-from .evaluation import read_json
+from .evaluation import anchor, read_json
+from .fileops import replace
 
 VIDEO_BYTES = 512 * 1024**2
 REVIEW_BYTES = 32 * 1024**2
@@ -85,9 +86,10 @@ class ResultStore:
     def __init__(self, directory, *, inspect_only=False):
         if sys.platform != 'linux':
             raise ValueError('Persistent analysis results currently require Linux; omit --state-dir for temporary storage')
-        self.directory = Path(directory).absolute()
+        # OS links above the store are resolved once; the store and its contents are never links.
+        self.directory = anchor(directory)
         self.fd = None
-        if any(p.is_symlink() for p in (self.directory, *self.directory.parents)):
+        if self.directory.is_symlink():
             raise ValueError('Result-store paths cannot contain symlinks')
         if inspect_only and not self.directory.exists():
             if not self.directory.parent.is_dir() or not os.access(self.directory.parent, os.W_OK | os.X_OK):
@@ -159,7 +161,7 @@ class ResultStore:
         fd = os.open(temporary, os.O_CREAT | os.O_EXCL | os.O_WRONLY | os.O_NOFOLLOW, 0o600)
         with os.fdopen(fd, 'wb') as stream:
             stream.write(data); stream.flush(); os.fsync(stream.fileno())
-        temporary.replace(self.directory/'state.json')
+        replace(temporary, self.directory/'state.json')
         self._sync_directory()
 
     def _prune(self, keep=None):

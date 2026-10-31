@@ -1,12 +1,18 @@
 """Bounded, explicit same-computer recording imports. No network clients here."""
+import contextlib
 import hashlib
+import itertools
 import os
 from pathlib import Path
 import re
 import shutil
 import stat
+import sys
 import tempfile
 import time
+
+from .evaluation import anchor
+from .fileops import open_regular
 
 MAX_IMPORT_BYTES = 64 * 1024**2
 MAX_INBOX_BYTES = 512 * 1024**2
@@ -35,21 +41,50 @@ def usage(folder):
     return count, size
 
 
+@contextlib.contextmanager
+def folder_lock(folder):
+    """OS-released exclusive lock: a crashed or killed import never blocks later ones."""
+    fd = os.open(folder / '.dvr-import.lock', os.O_CREAT | os.O_RDWR | getattr(os, 'O_NOFOLLOW', 0), 0o600)
+    try:
+        if not stat.S_ISREG(os.fstat(fd).st_mode):
+            raise ImportError('The recording import lock is not a regular file. Inspect the recording folder.')
+        try:
+            if sys.platform == 'win32':
+                import msvcrt
+                if os.fstat(fd).st_size == 0:
+                    os.write(fd, b'0')
+                os.lseek(fd, 0, os.SEEK_SET)
+                msvcrt.locking(fd, msvcrt.LK_NBLCK, 1)
+            else:
+                import fcntl
+                fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except OSError:
+            raise ImportError('Another import owns this recording folder. Retry after it finishes.') from None
+        try:
+            yield
+        finally:
+            if sys.platform == 'win32':
+                os.lseek(fd, 0, os.SEEK_SET); msvcrt.locking(fd, msvcrt.LK_UNLCK, 1)
+    finally:
+        os.close(fd)
+
+
+def reclaim_parts(folder):
+    """With the lock held, any partial file is a crashed import's; drop it so it no longer fills the inbox."""
+    with os.scandir(folder) as entries:
+        for entry in itertools.islice(entries, 1000):
+            if entry.name.startswith('.dvr-import-') and entry.name.endswith('.part') and entry.is_file(follow_symlinks=False):
+                os.unlink(entry.path)
+
+
 def import_recording(folder, stream, length, mime, expected_hash, *, clock=time.monotonic):
     """Serialize imports even across service processes sharing a recording folder."""
-    folder = Path(folder).absolute()
-    if not folder.is_dir() or any(p.is_symlink() for p in (folder, *folder.parents)):
+    folder = anchor(folder)
+    if not folder.is_dir() or folder.is_symlink():
         raise ImportError('Use a regular local recording folder without links.')
-    lock = folder / '.dvr-import.lock'
-    try:
-        fd = os.open(lock, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
-    except FileExistsError:
-        raise ImportError('Another import owns this recording folder. Retry after it finishes. After a crash, stop all services and inspect .dvr-import.lock before removing it.') from None
-    try:
-        os.close(fd)
+    with folder_lock(folder):
+        reclaim_parts(folder)
         return _import_recording(folder, stream, length, mime, expected_hash, clock=clock)
-    finally:
-        lock.unlink()
 
 
 def _import_recording(folder, stream, length, mime, expected_hash, *, clock):
@@ -64,7 +99,11 @@ def _import_recording(folder, stream, length, mime, expected_hash, *, clock):
         info = destination.lstat()
         if not stat.S_ISREG(info.st_mode) or info.st_size != length:
             raise ImportError('An existing import conflicts with this file. Inspect the recording folder.')
-        with destination.open('rb') as existing:
+        try:
+            existing = open_regular(destination)
+        except ValueError:
+            raise ImportError('An existing import conflicts with this file. Inspect the recording folder.') from None
+        with existing:
             if hashlib.file_digest(existing, 'sha256').hexdigest() != expected_hash:
                 raise ImportError('An existing import changed. Inspect the recording folder.')
         return destination, True
