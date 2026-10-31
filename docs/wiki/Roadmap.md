@@ -27,6 +27,22 @@ The [facility reliability guide](https://github.com/bartytime4life/Intelligent-D
 
 No finish dates or hardware guarantees are implied. Use [pilot scope](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/pilot-scope.md) for decisions and the [performance guide](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/performance-100-cameras.md) for budgets.
 
+## Review follow-up — October 30, 2026
+
+The [full review](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/review-2026-10-30.md) fixed 61 verified defects on `main`. Its
+missed opportunities became four pull requests that are open, not shipped:
+
+| PR | Deliverable | Acceptance before relying on it |
+| --- | --- | --- |
+| [#47](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/47) | Faster review: local stills, keyboard review, filters, CSV, bulk dismiss, explicit LAN send | Reviewer walkthrough on a real recording queue; physical webcam hot-plug |
+| [#48](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/48) | Zones drawn on camera stills; analyzer-ready rule export | A still from each physical camera at the analyzed resolution; exported rules exercised in a recorded analysis |
+| [#49](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/49) | Pixel-density distances, coverage/overlap metrics, camera drag/rotate, installer sheet | Site survey and lens/sensor data; estimates stay planning aids |
+| [#50](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/50) | Failure causes, diagnostic log, model reuse, timing-drift and eviction status, streaming hashing, hash-pinned installs | Windows CI install with pinned hashes; sustained one-camera soak with the new status fields |
+
+Next engineering steps after these: wait on worker exit instead of polling,
+design a recycled long-lived analysis worker, and decide whether rule timing
+should move from constant frame rate to measured receive times.
+
 ## Recognition deployment path — October 29, 2026
 
 The owner prioritized real deployment of AI-assisted scene, person and object

@@ -1,5 +1,9 @@
 # Verification index
 
+[Review fixes, October 30](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/review-fixes-2026-10-30/README.md): PR #45/#46 on
+`main`, with local Node/Python/browser runs and green Linux/Windows CI; synthetic
+fixtures only, not physical-device or capacity acceptance.
+
 [Recording coverage, October 30](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/media-coverage-2026-10-30/README.md):
 strict decode/inventory checks, explicit early/corrupt failure and unverified
 coverage; generated-media evidence, with physical-camera acceptance separate.
