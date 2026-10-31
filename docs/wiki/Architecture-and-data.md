@@ -59,6 +59,7 @@ not calibrated camera feeds. The browser performs no neural-network inference.
 | Use my location | Browser location service after a click | Review the suggestion; no continuous tracking |
 | Load interface font | Bundled with the app | No external request |
 | Send observations to Events from a matched recording or LAN segment | Small JPEG stills in this browser's IndexedDB | Drawn from the verified local recording; removed with their observations; never uploaded |
+| Use a still for zones | A re-encoded JPEG per rule plan in this browser's IndexedDB | Captured only on an explicit click; never uploaded; remove it with Remove still |
 | Choose a webcam | The device id in this browser's localStorage | Remembered for the next connection only; no frames stored |
 
 Local analysis does not make every optional browser asset/provider offline. Default local paths are `/geo/search` and `/geo/overpass`; the operator must configure their fixed upstream services. The Sites Worker does not implement them. Same-origin routing does not certify downstream egress, and failure never silently switches to a public provider. See [service contracts](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Facility-setup-reliability#local-and-offline-delivery), [SECURITY.md](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/SECURITY.md) and the provider disclosures.

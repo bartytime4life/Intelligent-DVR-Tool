@@ -5,9 +5,9 @@ import LocalAnalysis from './LocalAnalysis.jsx';
 import LanRecorder from './LanRecorder.jsx';
 import RecognitionReport from './RecognitionReport.jsx';
 import { coverageLabel } from './media-coverage.mjs';
-import { saveObservationStills } from './local-images.mjs';
+import { saveObservationStills, grabFrame } from './local-images.mjs';
 
-export default function RecognitionReview({ onImport, active = true, clip, onClip, reviews = [], evidence = null, onRecorderStatus }) {
+export default function RecognitionReview({ onImport, active = true, clip, onClip, reviews = [], evidence = null, onRecorderStatus, onZoneStill }) {
   const [run, setRun] = useState(null), [index, setIndex] = useState(0);
   const [source, setSource] = useState(null), [media, setMedia] = useState({});
   const [threshold, setThreshold] = useState(0.5), [status, setStatus] = useState(''), [error, setError] = useState('');
@@ -144,6 +144,9 @@ export default function RecognitionReview({ onImport, active = true, clip, onCli
             <label>Sample {index+1} of {run.trace.frames.length}<input aria-label="Analyzed sample" type="range" min="0" max={run.trace.frames.length-1} value={index} onChange={e => seek(Number(e.target.value))} /></label>
             <button className="button" disabled={index === run.trace.frames.length-1} onClick={() => seek(index+1)}>Next sample</button>
           </div>
+          {onZoneStill && source && <button className="text-button recognition-zone-still" disabled={!media.ready || media.seeking} onClick={async () => {
+            try { onZoneStill(await grabFrame(video.current), `${run.receipt.camera} · +${(media.seconds ?? 0).toFixed(2)}s`); } catch (err) { setError(err.message); }
+          }}>Use this frame for zones</button>}
         </div>
         <aside className="recognition-scene">
           <p className="eyebrow">SAMPLED SCENE · +{frame.seconds.toFixed(3)}s</p>

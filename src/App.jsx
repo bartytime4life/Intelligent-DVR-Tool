@@ -6,7 +6,8 @@ const RecognitionReview = lazy(() => import("./RecognitionReview.jsx"));
 import { mergeRecognitionEvents } from './recognition.mjs';
 import { workspaceFromHash, readWorkspace, writeWorkspace, preserveUnreadable, reviewExport, parseReviewExport } from './workspace-state.mjs';
 import { backdropDismiss } from './dialog-dismiss.mjs';
-import { getImage, pruneImages } from './local-images.mjs';
+import { getImage, putImage, deleteImage, pruneImages, imageFileFrame } from './local-images.mjs';
+import { ANALYZER_CLASSES, DEFAULT_MAX_GAP, analyzerRules, analyzerFilename } from './zone-rules.mjs';
 import { filterEvents, queueChoices, nextPending, queueCSV, dismissPending, restorePending } from './review-queue.mjs';
 import { DEFAULT_SETUP, parseSetup } from "./resources.mjs";
 import {
@@ -148,7 +149,13 @@ function Modal({ title, close, children, wide = false }) {
     </dialog>
   );
 }
-function project(w, h) {
+// With a camera still, rules map to the full frame exactly (normalized like edge/rules.py);
+// without one, the planning grid keeps its virtual 3:2 image.
+function project(w, h, aspect) {
+  if (aspect) {
+    const iw = Math.min(w, h * aspect), ih = iw / aspect;
+    return { iw, ih, ox: (w - iw) / 2, oy: (h - ih) / 2 };
+  }
   const scale = Math.max(w / 1536, h / 1024),
     iw = 1536 * scale,
     ih = 1024 * scale;
@@ -159,6 +166,7 @@ function Overlay({
   edit = false,
   onRect,
   pixelScale = 2,
+  aspect = 0,
 }) {
   const ref = useRef(),
     start = useRef();
@@ -172,7 +180,7 @@ function Overlay({
       el.height = h * pixelScale;
       ctx.scale(pixelScale, pixelScale);
       ctx.clearRect(0, 0, w, h);
-      const { iw, ih, ox, oy } = project(w, h);
+      const { iw, ih, ox, oy } = project(w, h, aspect);
       if (rule?.enabled || edit) {
         const [x, y, rw, rh] = rule.rect;
         ctx.strokeStyle = "#ffbc3c";
@@ -188,10 +196,10 @@ function Overlay({
     const o = new ResizeObserver(draw);
     o.observe(el);
     return () => o.disconnect();
-  }, [rule, edit, pixelScale]);
+  }, [rule, edit, pixelScale, aspect]);
   function point(e) {
     const r = e.currentTarget.getBoundingClientRect(),
-      { iw, ih, ox, oy } = project(r.width, r.height);
+      { iw, ih, ox, oy } = project(r.width, r.height, aspect);
     return [
       Math.max(0, Math.min(1, (e.clientX - r.left - ox) / iw)),
       Math.max(0, Math.min(1, (e.clientY - r.top - oy) / ih)),
@@ -307,6 +315,8 @@ export function App() {
   const [evidence, setEvidence] = useState(null);
   const [sourceFilter, setSourceFilter] = useState("all"), [recordingFilter, setRecordingFilter] = useState("all"), [sort, setSort] = useState("newest");
   const [bulkUndo, setBulkUndo] = useState(null), [stillVersion, setStillVersion] = useState(0), [recorderStatus, setRecorderStatus] = useState(null);
+  // A captured camera still waits for an explicit "Use for Plan N"; the saved still is per plan.
+  const [stillOffer, setStillOffer] = useState(null), [zoneStill, setZoneStill] = useState(null), [zoneStillVersion, setZoneStillVersion] = useState(0);
   const [capturePending, setCapturePending] = useState(false);
   useEffect(() => {
     if (!capturedClip && !capturePending) return;
@@ -417,6 +427,43 @@ export function App() {
     if (!mayLeave("Zones")) return;
     setSelected(id);
     setTab("Zones");
+  }
+  useEffect(() => {
+    if (tab !== "Zones") return;
+    let live = true, made = "";
+    getImage("zone-stills", `plan-${selected}`).then((blob) => {
+      if (!live) return;
+      if (!blob) { setZoneStill(null); return; }
+      made = URL.createObjectURL(blob);
+      const image = new Image();
+      image.onload = () => { if (live) setZoneStill({ url: made, width: image.naturalWidth, height: image.naturalHeight }); };
+      image.onerror = () => { if (live) setZoneStill(null); };
+      image.src = made;
+    });
+    return () => { live = false; if (made) URL.revokeObjectURL(made); };
+  }, [tab, selected, zoneStillVersion]);
+  useEffect(() => () => { if (stillOffer?.url) URL.revokeObjectURL(stillOffer.url); }, [stillOffer]);
+  function offerZoneStill(frame, source) {
+    setStillOffer({ ...frame, source, url: URL.createObjectURL(frame.blob) });
+    setTab("Zones");
+  }
+  async function useOfferedStill() {
+    if (!(await putImage("zone-stills", `plan-${selected}`, stillOffer.blob))) { setToast("This browser could not store the still. Zones still work on the planning grid."); return; }
+    setStillOffer(null); setZoneStillVersion((v) => v + 1);
+    setToast(`Still saved for Plan ${selected}. Draw the zone on the image; rectangles use full-frame coordinates.`);
+  }
+  async function removeZoneStill() {
+    await deleteImage("zone-stills", `plan-${selected}`);
+    setZoneStillVersion((v) => v + 1);
+  }
+  async function chooseStillFile(e) {
+    const file = e.target.files?.[0]; e.target.value = "";
+    if (!file) return;
+    try { offerZoneStill(await imageFileFrame(file), file.name); } catch (err) { setToast(err.message); }
+  }
+  function exportAnalyzerRules() {
+    try { const value = analyzerRules(draft); download(value, analyzerFilename(draft)); setError(""); setToast("Analyzer rules downloaded. List the file in the local app's analysis configuration to use it."); }
+    catch (err) { setError(err.message); }
   }
   // Every way into Zones (navigation, links, Back/Forward) edits the saved rule for the selected plan.
   useEffect(() => {
@@ -576,12 +623,12 @@ export function App() {
           {(eventsRecovery || rulesRecovery) && <button className="text-button" onClick={() => { eventsRecovery?.dismiss(); rulesRecovery?.dismiss(); }}>Dismiss</button>}
         </div>}
         {recognitionOpened && <div hidden={tab !== "Recognition"}><WorkspaceBoundary name="Recognition"><Suspense fallback={<div className="content-page"><h1>Opening recognition review…</h1></div>}>
-          <RecognitionReview active={tab === "Recognition" && !pageHidden} onImport={addObservations} clip={capturedClip} onClip={setCapturedClip} reviews={events} evidence={evidence} onRecorderStatus={setRecorderStatus} />
+          <RecognitionReview active={tab === "Recognition" && !pageHidden} onImport={addObservations} clip={capturedClip} onClip={setCapturedClip} reviews={events} evidence={evidence} onRecorderStatus={setRecorderStatus} onZoneStill={offerZoneStill} />
         </Suspense></WorkspaceBoundary></div>}
         {tab === "Facility" && <WorkspaceBoundary name="Facility"><Suspense fallback={<div className="content-page"><h1>Opening facility builder…</h1></div>}><FacilityBuilder onPreviewCount={setLiveCount} onDirtyChange={(dirty) => { facilityDirty.current = dirty; }} /></Suspense></WorkspaceBoundary>}
         {tab === "System" && <WorkspaceBoundary name="System"><Suspense fallback={<div className="content-page"><h1>Opening machine setup…</h1></div>}><SystemSetup setup={resources}
           onApply={setup => setResourceState(s => ({ ...s, setup, error: "" }))} storageError={resourceState.error} download={download} /></Suspense></WorkspaceBoundary>}
-        {tab === "Monitor" && <WorkspaceBoundary name="Monitor"><LiveMonitor visibleTiles={resources.browser.visibleTiles} onCount={setLiveCount} pageHidden={pageHidden} clip={capturedClip} onClip={setCapturedClip} capturePending={capturePending} onCaptureBusy={setCapturePending} onReviewClip={() => setTab('Recognition')} queue={
+        {tab === "Monitor" && <WorkspaceBoundary name="Monitor"><LiveMonitor onZoneStill={offerZoneStill} visibleTiles={resources.browser.visibleTiles} onCount={setLiveCount} pageHidden={pageHidden} clip={capturedClip} onClip={setCapturedClip} capturePending={capturePending} onCaptureBusy={setCapturePending} onReviewClip={() => setTab('Recognition')} queue={
               <aside className="review-queue">
                 <div className="queue-heading">
                   <h2>
@@ -748,7 +795,7 @@ export function App() {
                 <p className="eyebrow">EXPLICIT RULES · HUMAN REVIEW</p>
                 <h1>Define what needs attention</h1>
                 <p>
-                  Saved rule plans are retained here. They are not attached to connected feeds; live analysis is not running.
+                  Draw each rule on a still from its camera, then export it for the local analyzer. Rules are not attached to live feeds; live analysis is not running.
                 </p>
               </div>
               <select
@@ -758,26 +805,40 @@ export function App() {
               >
                 {cameras.map((c) => (
                   <option value={c.id} key={c.id}>
-                    Plan {c.id} · {c.name}
+                    Plan {c.id} · {ruleFor(rules, c.id).planName || c.name}
                   </option>
                 ))}
               </select>
             </div>
+            {stillOffer && (
+              <div className="zone-still-offer" role="status">
+                <img src={stillOffer.url} alt={`Captured still from ${stillOffer.source}`} />
+                <div><strong>New camera still</strong><span>{stillOffer.source} · {stillOffer.width}×{stillOffer.height} · stays in this browser</span></div>
+                <button className="button amber" onClick={useOfferedStill}>Use for Plan {selected}</button>
+                <button className="text-button" onClick={() => setStillOffer(null)}>Discard</button>
+              </div>
+            )}
             <div className="zone-layout">
               <div>
-                <div className="zone-editor">
-                  <div className="zone-planning-grid" />
+                <div className="zone-editor" style={zoneStill ? { aspectRatio: `${zoneStill.width} / ${zoneStill.height}` } : undefined}>
+                  {zoneStill ? <img className="zone-still" src={zoneStill.url} alt={`Camera still for Plan ${selected}`} /> : <div className="zone-planning-grid" />}
                   <Overlay
                     rule={draft}
                     edit
                     pixelScale={resources.browser.overlayScale}
+                    aspect={zoneStill ? zoneStill.width / zoneStill.height : 0}
                     onRect={(rect) => setDraft((r) => ({ ...r, rect }))}
                   />
-                  <span className="sample-badge">RULE PLAN · NO CAMERA IMAGE</span>
+                  <span className="sample-badge">{zoneStill ? `CAMERA STILL · ${zoneStill.width}×${zoneStill.height}` : "RULE PLAN · NO CAMERA IMAGE"}</span>
+                </div>
+                <div className="zone-still-actions">
+                  <label className="text-button">Choose image file<input type="file" accept="image/jpeg,image/png,image/webp" aria-label="Choose a camera still image" onChange={chooseStillFile} /></label>
+                  {zoneStill && <button className="text-button" onClick={removeZoneStill}>Remove still</button>}
+                  <span className="hint">Or use <strong>Use for zones</strong> on a Monitor preview or a Recognition frame.</span>
                 </div>
                 <p className="hint">
                   <Info size={16} />
-                  Define normalized coordinates on this planning grid, or use the keyboard controls below.
+                  {zoneStill ? "Rectangles use full-frame coordinates of this still, the same convention the analyzer uses. Keyboard controls are below." : "Define normalized coordinates on this planning grid, or use the keyboard controls below."}
                 </p>
                 <div className="geometry-fields">
                   {["Left", "Top", "Width", "Height"].map((label, i) => (
@@ -804,6 +865,15 @@ export function App() {
               <form className="rule-form" onSubmit={saveRule}>
                 <h2>Review rule</h2>
                 <label>
+                  Camera name for this plan
+                  <input
+                    maxLength="40"
+                    placeholder={cameras.find((c) => c.id === draft.camera)?.name}
+                    value={draft.planName || ""}
+                    onChange={(e) => setDraft((r) => ({ ...r, planName: e.target.value || undefined }))}
+                  />
+                </label>
+                <label>
                   Zone name
                   <input
                     maxLength="60"
@@ -821,8 +891,8 @@ export function App() {
                       setDraft((r) => ({ ...r, label: e.target.value }))
                     }
                   >
-                    <option value="person">Person</option>
-                    <option value="object">Object</option>
+                    {!ANALYZER_CLASSES.includes(draft.label) && <option value={draft.label}>{draft.label} (legacy; choose a model class to export)</option>}
+                    {ANALYZER_CLASSES.map((c) => <option key={c} value={c}>{c}</option>)}
                   </select>
                 </label>
                 <label>
@@ -850,6 +920,17 @@ export function App() {
                     }
                   />
                 </label>
+                <label>
+                  Allowed gap between sightings (seconds)
+                  <input
+                    type="number"
+                    min="0.1"
+                    max="60"
+                    step="0.1"
+                    value={draft.maxGap ?? DEFAULT_MAX_GAP}
+                    onChange={(e) => setDraft((r) => ({ ...r, maxGap: +e.target.value }))}
+                  />
+                </label>
                 <label className="checkbox-label">
                   <input
                     type="checkbox"
@@ -861,9 +942,7 @@ export function App() {
                   Enable review rule
                 </label>
                 <p className="hint">
-                  A score is a model output, not a probability of danger.
-                  “Object” is a sample category; real models need explicit
-                  supported labels.
+                  A score is a model output, not a probability of danger. Classes are the bundled COCO model's labels; other models need matching labels. A longer gap lets brief missed detections continue one dwell run.
                 </p>
                 {error && (
                   <p className="error" role="alert">
@@ -874,6 +953,11 @@ export function App() {
                   Save review rule
                   <Check />
                 </button>
+                <button className="button" type="button" onClick={exportAnalyzerRules}>
+                  <DownloadSimple />
+                  Export analyzer rules
+                </button>
+                <p className="hint">Exports the rule as shown as a file the local analyzer accepts. Add the file to the analysis configuration on this computer to use it.</p>
                 <button
                   className="text-button"
                   type="button"
@@ -885,7 +969,7 @@ export function App() {
                   }
                 >
                   <DownloadSimple />
-                  Export browser rules
+                  Back up browser rules (not an analyzer file)
                 </button>
               </form>
             </div>
