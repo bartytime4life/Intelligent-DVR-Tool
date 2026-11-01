@@ -25,6 +25,17 @@ test('layer preferences are validated and survive storage failures', () => {
   assert.equal(readBasemapPreference(broken).id, 'grid');
 });
 
+test('blocked browser storage falls back to Grid instead of throwing', () => {
+  const descriptor = Object.getOwnPropertyDescriptor(globalThis, 'localStorage');
+  Object.defineProperty(globalThis, 'localStorage', { configurable: true, get() { throw Object.assign(Error('blocked'), { name: 'SecurityError' }); } });
+  try {
+    assert.deepEqual(readBasemapPreference(), { id: 'grid', fade: 0.85 });
+    assert.doesNotThrow(() => writeBasemapPreference({ id: 'aerial', fade: 0.55 }));
+  } finally {
+    if (descriptor) Object.defineProperty(globalThis, 'localStorage', descriptor); else delete globalThis.localStorage;
+  }
+});
+
 test('aerial coverage is limited to the contiguous United States box', () => {
   assert.ok(inAerialCoverage([-98, 38.5]));
   assert.ok(inAerialCoverage([-122.27, 37.8]));

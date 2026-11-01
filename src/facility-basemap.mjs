@@ -18,19 +18,24 @@ export const BASEMAPS = [
 export const basemap = id => BASEMAPS.find(b => b.id === id) || BASEMAPS[0];
 const FADES = [0.4, 0.55, 0.7, 0.85, 1];
 export const DEFAULT_FADE = 0.85;
-export function readBasemapPreference(storage = globalThis.localStorage) {
+// Reading window.localStorage itself throws when the browser blocks site storage, so it is
+// resolved inside each guard; without storage the layer falls back to Grid and is not remembered.
+const storageOf = storage => storage === undefined ? globalThis.localStorage : storage;
+export function readBasemapPreference(storage) {
   let id = 'grid', fade = DEFAULT_FADE;
   try {
-    id = basemap(storage?.getItem(BASEMAP_KEY)).id;
-    const stored = Number(storage?.getItem(BASEMAP_FADE_KEY));
+    const store = storageOf(storage);
+    id = basemap(store?.getItem(BASEMAP_KEY)).id;
+    const stored = Number(store?.getItem(BASEMAP_FADE_KEY));
     if (FADES.includes(stored)) fade = stored;
   } catch {}
   return { id, fade };
 }
-export function writeBasemapPreference({ id, fade }, storage = globalThis.localStorage) {
+export function writeBasemapPreference({ id, fade }, storage) {
   try {
-    storage?.setItem(BASEMAP_KEY, basemap(id).id);
-    if (FADES.includes(fade)) storage?.setItem(BASEMAP_FADE_KEY, String(fade));
+    const store = storageOf(storage);
+    store?.setItem(BASEMAP_KEY, basemap(id).id);
+    if (FADES.includes(fade)) store?.setItem(BASEMAP_FADE_KEY, String(fade));
   } catch {}
 }
 export const fadeChoices = () => [...FADES];
