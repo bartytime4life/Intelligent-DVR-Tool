@@ -1,0 +1,124 @@
+{
+  "schema": "intelligent-dvr.current-documentation-media.v1",
+  "source": {
+    "captured_at_utc": "2026-11-01",
+    "repository": "bartytime4life/Intelligent-DVR-Tool",
+    "source_commit": "9719eda31887ac5991a487f2107a9b31a93b14e3",
+    "workflow_run": "https://github.com/bartytime4life/Intelligent-DVR-Tool/actions/runs/41263964836",
+    "browser_job": "124722763832",
+    "capture_method": "Headless Chromium at 1440x1000 and 390x844; offline controlled fixture, no real camera, no trained inference",
+    "schematic_method": "Original authored SVG illustrations with conceptual geometry; not captured interface/screens or operational data"
+  },
+  "assets": [
+    {
+      "path": "docs/media/current/data-boundary.svg",
+      "bytes": 4041,
+      "git_blob_sha1": "a61a5b151effc05e4533439aaeefbad379befd57",
+      "kind": "original-schematic-svg",
+      "width": 1440,
+      "height": 515,
+      "description": "Diagram of browser, local service, review and export boundaries",
+      "realCameraFootage": false
+    },
+    {
+      "path": "docs/media/current/facility-desktop.jpg",
+      "bytes": 54290,
+      "git_blob_sha1": "228c230d3a40816aab7bd4e0c90345279b3c3978",
+      "kind": "actual-browser-screenshot",
+      "width": 1440,
+      "height": 1000,
+      "description": "Facility Studio empty plan, desktop browser",
+      "realCameraFootage": false
+    },
+    {
+      "path": "docs/media/current/facility-mobile.jpg",
+      "bytes": 17793,
+      "git_blob_sha1": "6559479bb0797c8f83b155154c758bfe194ad343",
+      "kind": "actual-browser-screenshot",
+      "width": 390,
+      "height": 844,
+      "description": "Facility Studio empty plan, 390px browser",
+      "realCameraFootage": false
+    },
+    {
+      "path": "docs/media/current/facility-science.svg",
+      "bytes": 6291,
+      "git_blob_sha1": "e5d49a3c1f76e6719b0a32ef1b2a0a2cd74b5bb1",
+      "kind": "original-schematic-svg",
+      "width": 1440,
+      "height": 610,
+      "description": "Illustrated image-to-ground-plane calibration and holdout markers",
+      "realCameraFootage": false
+    },
+    {
+      "path": "docs/media/current/monitor-desktop.jpg",
+      "bytes": 44832,
+      "git_blob_sha1": "98dfdcd856e0384b67c9167265a43cdc8090fc70",
+      "kind": "actual-browser-screenshot",
+      "width": 1440,
+      "height": 1000,
+      "description": "Monitor, no sources connected, desktop browser",
+      "realCameraFootage": false
+    },
+    {
+      "path": "docs/media/current/monitor-mobile.jpg",
+      "bytes": 19667,
+      "git_blob_sha1": "7d21f1f2ab84b7799c5f317197d24616a1796948",
+      "kind": "actual-browser-screenshot",
+      "width": 390,
+      "height": 844,
+      "description": "Monitor, no sources connected, 390px browser",
+      "realCameraFootage": false
+    },
+    {
+      "path": "docs/media/current/overview.svg",
+      "bytes": 4843,
+      "git_blob_sha1": "446d1045cea18f300914b8e50f017783cb8339f5",
+      "kind": "original-schematic-svg",
+      "width": 1440,
+      "height": 620,
+      "description": "Original concept illustration of core workspace boundaries",
+      "realCameraFootage": false
+    },
+    {
+      "path": "docs/media/current/scale-gates.svg",
+      "bytes": 5625,
+      "git_blob_sha1": "60947e5a0b56b3c0f8c41d136cdcb1a57c63d60a",
+      "kind": "original-schematic-svg",
+      "width": 1440,
+      "height": 435,
+      "description": "Unqualified staged 1-to-100-plus-camera acceptance plan",
+      "realCameraFootage": false
+    },
+    {
+      "path": "docs/media/current/system-mobile.jpg",
+      "bytes": 17976,
+      "git_blob_sha1": "2ebf47e9ba4a803db0918379d3a16c9591733f26",
+      "kind": "actual-browser-screenshot",
+      "width": 390,
+      "height": 844,
+      "description": "System workspace capacity planner, 390px browser",
+      "realCameraFootage": false
+    },
+    {
+      "path": "docs/media/current/system-planning.svg",
+      "bytes": 4440,
+      "git_blob_sha1": "fbb01f9c41314e506c413e1bd25aade8e17d0615",
+      "kind": "original-schematic-svg",
+      "width": 1440,
+      "height": 515,
+      "description": "Illustrated ingest, storage, analysis and performance validation plan",
+      "realCameraFootage": false
+    },
+    {
+      "path": "docs/media/current/workflow.svg",
+      "bytes": 5634,
+      "git_blob_sha1": "6dc3c894b19806c7b9e682dee7f7de5cd365695d",
+      "kind": "original-schematic-svg",
+      "width": 1440,
+      "height": 435,
+      "description": "Operator-controlled camera-to-review workflow",
+      "realCameraFootage": false
+    }
+  ]
+}
