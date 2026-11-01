@@ -15,13 +15,17 @@ function freezeElement(element, width, height, source) {
   const canvas = document.createElement('canvas');
   canvas.width = Math.max(1, Math.round(width * factor));
   canvas.height = Math.max(1, Math.round(height * factor));
-  const context = canvas.getContext('2d', { willReadFrequently: true });
+  // One explicit opaque black backing makes transparent input pixels agree with
+  // both our reported luma values and the frozen image shown/exported to the user.
+  const context = canvas.getContext('2d', { alpha: false, willReadFrequently: true });
   if (!context) throw Error('This browser cannot read the local image canvas.');
+  context.fillStyle = '#000000';
+  context.fillRect(0, 0, canvas.width, canvas.height);
   context.drawImage(element, 0, 0, canvas.width, canvas.height);
   // SecurityError on cross-origin canvas is intentional: never bypass browser image-origin policy.
   return {
     image: context.getImageData(0, 0, canvas.width, canvas.height),
-    preview: canvas.toDataURL('image/jpeg', .88),
+    preview: canvas.toDataURL('image/png'),
     source: sourceLabel(source),
     capturedAt: new Date().toISOString(),
     sampledWidth: canvas.width,
@@ -159,6 +163,7 @@ export default function FacilityImageLab({ capture, connected = false, sourceNam
       sampledPixels: [selected.sampledWidth, selected.sampledHeight],
       frame: frames.a === selected ? 'A' : frames.b === selected ? 'B' : 'selected',
       region, metrics, difference, rulerPixels,
+      processing: { background: 'opaque-black', exportFormat: 'image/png', downsampleMaxSide: MAX_SIDE },
       caveat: 'Local downsampled 8-bit sRGB channel-weighted image metrics. Edge detail and pixel changes do not establish focus, identity, physical dimension, surveillance detection quality or motion.'
     };
     const url = URL.createObjectURL(new Blob([JSON.stringify(report, null, 2)], {type:'application/json'}));
@@ -230,7 +235,7 @@ export default function FacilityImageLab({ capture, connected = false, sourceNam
           <strong>{difference.meanAbsoluteDifference.toFixed(1)}/255</strong> mean absolute luma change · <strong>{pct(difference.changedPercent)}</strong> of ROI pixels changed by ≥{difference.threshold}/255
         </> : <>Different sampled dimensions; pixel-aligned comparison is unavailable.</>}</p>}
         <div className="facility-lab-actions">
-          <a href={selected.preview} download={'facility-frame-' + (slot.toUpperCase()) + '.jpg'}>Save frozen frame</a>
+          <a href={selected.preview} download={'facility-frame-' + (slot.toUpperCase()) + '.png'}>Save frozen frame</a>
           <button type="button" onClick={exportData}>Export metrics JSON</button>
           <button type="button" onClick={() => {setFrames({a:null,b:null}); setRegion(FULL_FRAME); setRuler(null); setError('');}}>Clear frames</button>
         </div>

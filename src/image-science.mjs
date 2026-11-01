@@ -23,9 +23,12 @@ function check(image) {
   }
 }
 
-// sRGB channel-weighted luma proxy: not linear-light photometry.
+// Channel-weighted 8-bit sRGB luma proxy, not linear-light photometry.
+// Treat raw RGBA the same way as the UI's explicitly black-composited canvas.
+// Alpha differences must not disappear from A/B comparisons.
 function luma(data, offset) {
-  return Math.round(0.2126 * data[offset] + 0.7152 * data[offset + 1] + 0.0722 * data[offset + 2]);
+  const alpha = data[offset + 3] / 255;
+  return Math.round((0.2126 * data[offset] + 0.7152 * data[offset + 1] + 0.0722 * data[offset + 2]) * alpha);
 }
 
 export function analyzeImage(image, region = FULL_FRAME) {

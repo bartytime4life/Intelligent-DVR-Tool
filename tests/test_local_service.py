@@ -119,9 +119,20 @@ class ServiceTest(unittest.TestCase):
         self.assertIsNotNone(children[0].poll())
     def test_deadline_kills_hung_process(self):
         process = FakeProcess()
-        service = self.service(wall_seconds=.1, process_factory=lambda *a, **k: process)
+        spawned = threading.Event()
+
+        def spawn(*args, **kwargs):
+            # Exercise a timeout while a worker exists, not while a loaded
+            # Windows CI machine is still copying the test model to disk.
+            # Simulate the already-expired deadline immediately after spawn.
+            service.wall_seconds = 0
+            spawned.set()
+            return process
+
+        service = self.service(wall_seconds=300, process_factory=spawn)
         self.start(service)
         self.assertEqual(self.finish(service)['error']['code'], 'TIME_LIMIT')
+        self.assertTrue(spawned.is_set(), 'Timeout must reach a launched process')
         self.assertTrue(process.killed)
     def test_unpinned_changed_model_is_not_executed(self):
         service = self.service(process_factory=lambda *a, **k: self.fail('must not start'))

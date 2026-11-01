@@ -43,3 +43,19 @@ test('image diagnostics: pixel ruler reports image pixels, not fake metres', () 
   assert.equal(pixelRuler({x:0,y:0},{x:.3,y:.4},100,100),50);
   assert.equal(pixelRuler(null,{x:1,y:1},100,100),null);
 });
+
+test('image diagnostics: RGBA alpha is composited over black for luma and frame differences', () => {
+  const rgba = (r,g,b,a) => ({width:4,height:4,
+    data:Uint8ClampedArray.from(Array.from({length:16},()=>[r,g,b,a]).flat())});
+  const transparentWhite = rgba(255,255,255,0);
+  const halfWhite = rgba(255,255,255,128);
+  const opaqueWhite = rgba(255,255,255,255);
+  assert.equal(analyzeImage(transparentWhite).mean,0);
+  assert.equal(analyzeImage(halfWhite).mean,128);
+  assert.equal(analyzeImage(halfWhite).shadowPercent,0);
+  assert.equal(analyzeImage(halfWhite).highlightPercent,0);
+  assert.equal(analyzeImage(opaqueWhite).mean,255);
+  assert.equal(compareImages(transparentWhite,opaqueWhite).changedPercent,100);
+  assert.equal(compareImages(halfWhite,opaqueWhite).changedPercent,100);
+  assert.equal(compareImages(halfWhite,halfWhite).meanAbsoluteDifference,0);
+});

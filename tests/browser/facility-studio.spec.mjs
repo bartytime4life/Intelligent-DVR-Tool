@@ -66,3 +66,44 @@ test('image laboratory imports only on request, reports ROI and compares two loc
   await expect(page.getByText(/No frame selected/)).toBeVisible();
   expect(errors).toEqual([]);
 });
+
+test('transparent local PNGs are composited before analysis and lossless frame export',async({page})=>{
+  await openStudio(page);
+  const errors=[];page.on('pageerror',e=>errors.push(e.message));
+  await page.getByRole('button',{name:'Cameras',exact:true}).click();
+  await page.locator('.facility-image-lab summary').click();
+  const picture = async alpha => page.evaluate(value => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 16; canvas.height = 16;
+    const context = canvas.getContext('2d');
+    context.fillStyle = 'rgba(255,255,255,' + value + ')';
+    context.fillRect(0,0,16,16);
+    return canvas.toDataURL('image/png').split(',')[1];
+  }, alpha);
+  const half=await picture(0.5);
+  await page.getByLabel('Open image for diagnostics').setInputFiles({
+    name:'transparent.png',mimeType:'image/png',buffer:Buffer.from(half,'base64')
+  });
+  const mean = page.locator('.facility-lab-metrics > div').first().locator('strong');
+  await expect(mean).toContainText('128.0');
+  await expect(page.locator('.facility-lab-metrics')).toContainText('0.0%');
+  const frozen=await page.locator('.facility-lab-image-stage img').evaluate(async img=>{
+    const bitmap=await createImageBitmap(img);
+    const canvas=document.createElement('canvas');canvas.width=bitmap.width;canvas.height=bitmap.height;
+    const context=canvas.getContext('2d');context.drawImage(bitmap,0,0);
+    const sample=Array.from(context.getImageData(0,0,1,1).data);
+    bitmap.close();
+    return {sample,format:img.src.slice(0,22)};
+  });
+  expect(frozen.format).toBe('data:image/png;base64,');
+  expect(frozen.sample).toEqual([128,128,128,255]);
+  await page.getByRole('button',{name:/Frame B/}).click();
+  const opaque=await picture(1);
+  await page.getByLabel('Open image for diagnostics').setInputFiles({
+    name:'opaque.png',mimeType:'image/png',buffer:Buffer.from(opaque,'base64')
+  });
+  await expect(page.getByText(/mean absolute luma change/)).toBeVisible();
+  const comparison=await page.locator('.facility-lab-result').last().innerText();
+  expect(comparison).toContain('100.0%');
+  expect(errors).toEqual([]);
+});

@@ -14,13 +14,13 @@ The Facility Studio is a **map-first planning workspace**. Its top task bar jump
 6. Switch to **Pixel ruler** and drag a line. The line reads the number of pixels in the **downsampled** image, never metres or feet. A/B comparison requires identical sampled pixel dimensions.
 7. **Save frozen frame** or **Export metrics JSON** explicitly if the operator wishes to retain the work. Exports contain the image or measurements respectively; they do not create a signed chain-of-custody record.
 
-The browser samples no more than 720 pixels on the longest image side and computes statistics on local decoded RGBA pixels. A frame may be reduced relative to the original camera resolution, so image analysis cannot establish native pixel density or calibrated optical performance. A cross-origin source without browser permission to read its pixels fails safely instead of bypassing origin restrictions.
+The browser samples no more than 720 pixels on the longest image side. It draws incoming transparent pixels onto an **explicit opaque black background** before both computing statistics and generating the frozen image, so the analyzed and displayed colors agree. Frozen images export as **lossless PNG** rather than lossy JPEG. The metrics JSON records the black backing and image format. A frame may be reduced relative to the original camera resolution, so image analysis cannot establish native pixel density or calibrated optical performance. A cross-origin source without browser permission to read its pixels fails safely instead of bypassing origin restrictions.
 
 ## Metrics and proper interpretation
 
 | Metric | Method | Important limits |
 | --- | --- | --- |
-| Mean luma, 0–255 | Mean of 8-bit channel-weighted sRGB brightness, 0.2126R + 0.7152G + 0.0722B | Approximate displayed luma, not linear luminance or lux |
+| Mean luma, 0–255 | Mean of 8-bit channel-weighted sRGB brightness (0.2126R + 0.7152G + 0.0722B), composited over black for transparency | Approximate displayed luma, not linear luminance or lux |
 | P05–P95 | Exact 5th/95th percentiles of selected image pixels | A histogram spread, not a camera dynamic-range measurement |
 | Shadow/highlight clipping | Percent of pixels with luma at most 15 / at least 240 | Sensitive to gamma/exposure, not a proof of recoverable detail |
 | Sobel edge energy | Mean normalized gradient magnitude for interior ROI pixels | Structural detail proxy, **not calibrated focus, blur, resolution or detection accuracy** |
