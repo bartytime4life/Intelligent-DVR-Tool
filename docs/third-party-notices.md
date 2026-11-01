@@ -53,10 +53,19 @@ not assign a license to BARTA's repository.
 - Room sketch includes polygon-clipping 0.15.7 (MIT), splaytree 3.2.3 (MIT)
   and robust-predicates 3.0.3 (Unlicense). Their complete upstream notices are
   in [room-sketch-LICENSE.txt](../public/licenses/room-sketch-LICENSE.txt).
-- The optional online street map uses OpenStreetMap data and tiles. Visible
+- The optional Streets map layer uses OpenStreetMap data and tiles. Visible
   attribution is supplied when enabled. Data and hosted tile-service terms are
   separate from the renderer license; see https://www.openstreetmap.org/copyright
   and https://operations.osmfoundation.org/policies/tiles/.
+- The optional Aerial map layer displays USGS The National Map orthoimagery
+  (`USGSImageryOnly` tiles) and USDA Farm Service Agency NAIP imagery served by
+  the USGS `USGSNAIPImagery` image service. These U.S. Government works are in the
+  public domain; while the layer is shown the map displays the acknowledgment
+  USGS requests ("Map services and data available from U.S. Geological Survey,
+  National Geospatial Program") and credits USDA NAIP. See
+  https://www.usgs.gov/faqs/what-are-terms-uselicensing-map-services-and-data-national-map
+  and https://www.usgs.gov/information-policies-and-instructions/copyrights-and-credits.
+  No imagery is bundled or cached to disk.
 
 The editable sample facility is fictional. No person identity, trained association model or real camera recording is bundled here. Historical OSM exterior extracts are included only in the regression fixtures described below.
 

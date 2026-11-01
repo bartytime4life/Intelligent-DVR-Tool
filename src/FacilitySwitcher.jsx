@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {Buildings, Plus, Copy, DownloadSimple, UploadSimple, MapPin, Sparkle, FolderOpen, Trash} from '@phosphor-icons/react';
+import {Buildings, Plus, Copy, DownloadSimple, UploadSimple, MapTrifold, Sparkle, FolderOpen, Trash} from '@phosphor-icons/react';
 import './facility-library.css';
 
 export default function FacilitySwitcher({facilities=[],activeId,onSwitch,onCreate,onDuplicate,onExportAll,onImport,onSample,onRemove,onExportActive,disabled=false,savedState}) {
@@ -49,12 +49,12 @@ export default function FacilitySwitcher({facilities=[],activeId,onSwitch,onCrea
   </section>;
 }
 
-export function FacilityEmptyState({onBuild,onImport,onLocate,disabled=false}) {
+export function FacilityEmptyState({onFindSite,onBuild,onImport,disabled=false,ready=true}) {
   return <div className="facility-empty-state"><section className="facility-empty-card" aria-label="Start a blank facility">
     <div className="facility-empty-mark" aria-hidden="true"><Buildings size={31}/><span/></div>
-    <p className="facility-empty-eyebrow">A CLEAN START</p><h2>Your facility starts here</h2><p>Pick a building shape and adjust its size, or open a saved facility.</p>
-    <div className="facility-empty-actions"><button type="button" className="facility-primary" disabled={disabled} onClick={onBuild}><Buildings aria-hidden="true"/>Add first building</button><button type="button" className="facility-secondary" disabled={disabled} onClick={onImport}><FolderOpen aria-hidden="true"/>Import saved facility</button></div>
-    <button type="button" className="facility-empty-location" disabled={disabled} onClick={onLocate}><MapPin aria-hidden="true"/>Set site location</button>
-    <small>No buildings, cameras or example layouts are added automatically.</small>
+    <p className="facility-empty-eyebrow">A CLEAN START</p><h2>Your facility starts here</h2><p>Find your site on a real map and trace its buildings, pick a building shape, or open a saved facility.</p>
+    <button type="button" className="facility-primary facility-empty-find" disabled={disabled || !ready} onClick={onFindSite}><MapTrifold aria-hidden="true"/>Find my site on the map</button>
+    <div className="facility-empty-actions"><button type="button" className="facility-secondary" disabled={disabled} onClick={onBuild}><Buildings aria-hidden="true"/>Add first building</button><button type="button" className="facility-secondary" disabled={disabled} onClick={onImport}><FolderOpen aria-hidden="true"/>Import saved facility</button></div>
+    <small>Finding your site shows map pictures from USGS (U.S. aerial photos) or OpenStreetMap for the area you view. Your plan stays in this browser. No buildings, cameras or example layouts are added automatically.</small>
   </section></div>;
 }

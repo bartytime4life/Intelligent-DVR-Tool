@@ -7,7 +7,7 @@ const button=(page,name)=>page.getByRole('button',{name,exact:true});
 async function open(page) {
   await page.route('**/*',route=>new URL(route.request().url()).hostname==='127.0.0.1'?route.continue():route.abort());
   await page.goto('/#facility');
-  await expect(page.getByLabel('Online street map',{exact:false})).toBeEnabled();
+  await expect(page.getByRole('button',{name:'Grid',exact:true})).toBeEnabled();
 }
 async function placeOnMap(page, fraction, modifiers=[]) {
   const canvas=page.locator('.facility-map canvas').first();

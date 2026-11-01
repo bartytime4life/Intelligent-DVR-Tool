@@ -276,7 +276,7 @@ test('selecting a zone on the map preserves a pending shape draft',async({page})
   plan.zones=[createFacilityZone([[-135,-15],[-105,-15],[-105,15],[-135,15],[-135,-15]],{name:'Navigation zone'})];
   await page.addInitScript(({key,plan})=>localStorage.setItem(key,JSON.stringify(plan)),{key:legacyKey,plan});
   await openBlank(page);
-  await expect(page.getByRole('checkbox',{name:/^Online street map/})).toBeEnabled();
+  await expect(page.getByRole('button',{name:'Grid',exact:true})).toBeEnabled();
   await page.getByRole('button',{name:'2D',exact:true}).click();
   const clickZone=async()=>{
     // View changes and centering animate for up to 400 ms.

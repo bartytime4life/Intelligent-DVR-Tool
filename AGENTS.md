@@ -196,3 +196,13 @@ visual handbook, actual revision-bound screenshots and polished workflow imagery
 in the existing navy/teal/amber language. Label conceptual art, generated fixture
 results, planning estimates and dated evidence. Preserve historic receipts and
 private runtime data; publish only reviewed public assets.
+
+Owner real-map decision (2026-11-01): the site builder must offer the real map so
+a site can be mocked up with little effort. Provide a Map layer switch in every
+facility task — Grid (default, no requests), Streets (OpenStreetMap) and Aerial
+(public-domain USGS tiles plus one NAIP site photo, contiguous U.S.) — remembered
+per browser once chosen. "Find my site on the map" enables a real layer, address/
+location/pin choices preview on the map before Save site, and buildings render
+translucent over imagery for tracing. Imagery is a tracing guide, not a survey or
+live view; do not add Google/Esri imagery without a license for this use. See
+docs/facility-builder.md#real-map-layer.
