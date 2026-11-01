@@ -7,8 +7,11 @@
 *No visual in these guides should be interpreted as authentication, camera permission or verified physical evidence.*
 
 This prototype is for human-reviewed observations. It does not control cameras,
-locks, accounts or enforcement. There is no face identification, access decision,
+locks, accounts or enforcement. There is no automatic identification, access decision,
 network scanning, automatic containment, background capture or cloud inference.
+Optional [person enrollment](docs/person-enrollment.md) (off unless started with
+`--allow-face-enrollment` and the pinned face models) keeps consent-based face
+templates in private local files that the browser never receives, and is deletable.
 
 Do not commit private recordings, receipts, model weights, API keys or camera
 credentials. Local input files and models should be trusted and processed in a

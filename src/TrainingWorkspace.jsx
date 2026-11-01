@@ -1,10 +1,11 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { ArrowClockwise, Camera, CheckCircle, Pause, Target, WarningCircle, X } from '@phosphor-icons/react';
+import { ArrowClockwise, Camera, CheckCircle, Pause, Target, Trash, UserFocus, WarningCircle, X } from '@phosphor-icons/react';
 import { webcamController, WEBCAM_KEY } from './live-feeds.mjs';
 import { createClipRecorder } from './clip-capture.mjs';
 import { activeJob, analysisRequest, importRecording, localAnalysisOrigin, openJobResult } from './local-analysis.mjs';
 import { TRAINING_SCRIPT, scriptTimeline, scriptSeconds, labelFrames, evaluate, recommendThreshold, frameMoments,
-  readHistory, appendHistory, readDefaultRules, writeDefaultRules, percent, plural, SENSITIVITY } from './training.mjs';
+  readHistory, appendHistory, readDefaultRules, writeDefaultRules, percent, plural, SENSITIVITY,
+  ENROLL_SCRIPT, BASELINE_SCRIPT, CONSENT_TEXT, baselineText } from './training.mjs';
 import './training.css';
 
 const STEPS = [['camera', 'Camera check'], ['record', 'Guided recording'], ['analyze', 'Analysis'], ['results', 'Results'], ['done', 'Saved']];
@@ -21,7 +22,14 @@ export default function TrainingWorkspace({ onOpenRecognition }) {
   const [clip, setClip] = useState(null);
   const [outcome, setOutcome] = useState(null);
   const [saved, setSaved] = useState(null);
+  const [people, setPeople] = useState([]), [personFlow, setPersonFlow] = useState(null);
   const local = localAnalysisOrigin(globalThis.location);
+
+  async function loadPeople(value) {
+    if (!value?.people?.enabled) { setPeople([]); return; }
+    try { setPeople((await (await analysisRequest('/people', { token: value.token })).json()).people); }
+    catch { setPeople([]); }
+  }
 
   async function connect() {
     if (!local) { setService({ state: 'unavailable', message: 'Open the local Intelligent DVR app on this computer to train. On a Mac, double-click Start-Mac.command.' }); return; }
@@ -34,9 +42,13 @@ export default function TrainingWorkspace({ onOpenRecognition }) {
       const problems = [!value.ready && 'Analysis dependencies are missing; run the installer, then restart the app.',
         !value.recording_import?.enabled && 'Recording import is off; restart the app with recording import enabled.'].filter(Boolean);
       setService({ state: problems.length ? 'blocked' : 'ready', message: problems.join(' '), ...value });
+      loadPeople(value);
     } catch (error) { setService({ state: 'unavailable', message: error.message }); }
   }
   useEffect(() => { connect(); }, []);
+
+  if (personFlow) return <PersonSession service={service} flow={personFlow}
+    onExit={() => { setPersonFlow(null); loadPeople(service); }} onChanged={() => loadPeople(service)} />;
 
   const last = history.at(-1);
   const inUse = service.rules?.find(r => r.id === readDefaultRules(store()));
@@ -62,7 +74,19 @@ export default function TrainingWorkspace({ onOpenRecognition }) {
         <ServiceStatus service={service} onRetry={connect} />
         <button className="button amber" disabled={service.state !== 'ready'} onClick={() => { setClip(null); setOutcome(null); setSaved(null); setStep('camera'); }}>Start session</button>
       </section>
+      {service.people?.enabled && <section className="training-choice" aria-label="Enroll a person">
+        <UserFocus size={30} />
+        <h2>Enroll a person</h2>
+        <p>Set a baseline so Recognition can suggest “possible match” for someone who agrees. About one minute; the face template stays on this computer and can be deleted.</p>
+        <button className="button amber" disabled={service.state !== 'ready'} onClick={() => setPersonFlow({ kind: 'enroll' })}>Enroll a person</button>
+      </section>}
     </div>
+    {service.people?.enabled && <section className="training-people" aria-label="Enrolled people">
+      <h2>Enrolled people</h2>
+      {people.length ? <ul>{people.map(p => <PersonRow key={p.id} person={p} service={service} disabled={service.state !== 'ready'}
+        onCheck={() => setPersonFlow({ kind: 'baseline', person: p })} onDeleted={() => loadPeople(service)} />)}</ul>
+        : <p>No one is enrolled. Enrollment needs the person’s agreement and about one minute in front of the camera.</p>}
+    </section>}
     {history.length > 0 && <section className="training-history" aria-label="Past sessions">
       <h2>Past sessions</h2>
       <ol>{history.slice(-5).reverse().map(entry => <li key={entry.at}>
@@ -109,7 +133,8 @@ function ServiceStatus({ service, onRetry }) {
 }
 
 // Camera check and recording share one stream; leaving either step stops the camera.
-function CaptureSteps({ step, onStep, onClip }) {
+function CaptureSteps({ step, onStep, onClip, script = TRAINING_SCRIPT, guide = 'frame', startLabel = 'Start guided recording',
+  aim = 'Point the camera at the area you want to protect. The full room view matters more than your face.' }) {
   const [camera, setCamera] = useState({ state: 'disconnected', message: 'Connect the camera to begin.' });
   const [light, setLight] = useState('');
   const video = useRef(null), controller = useRef(null);
@@ -135,19 +160,19 @@ function CaptureSteps({ step, onStep, onClip }) {
     <div className="training-stage">
       <video ref={video} autoPlay muted playsInline aria-label="Camera preview" />
       {!live && <div className="training-stage-empty"><Camera size={42} /><p>{camera.message}</p></div>}
-      {step === 'camera' && live && <div className="training-frame-guide" aria-hidden="true" />}
-      {step === 'record' && live && <ScriptRunner stream={camera.stream} onCancel={() => onStep('camera')} onClip={onClip} />}
+      {live && <div className={guide === 'face' ? 'training-face-guide' : step === 'camera' ? 'training-frame-guide' : ''} aria-hidden="true" />}
+      {step === 'record' && live && <ScriptRunner script={script} stream={camera.stream} onCancel={() => onStep('camera')} onClip={onClip} />}
     </div>
     {step === 'camera' && <aside className="training-checklist">
       <h2>Camera check</h2>
       <ol>
         <li className={live ? 'complete' : ''}>Connect the camera. Your browser asks for permission; the microphone stays off.</li>
-        <li className={live && light === 'ok' ? 'complete' : ''}>{light === 'dark' ? 'It looks dark. Turn on a light or open blinds.' : light === 'bright' ? 'It looks very bright. Avoid pointing at a window.' : 'Lighting looks usable.'}</li>
-        <li>Point the camera at the area you want to protect. The full room view matters more than your face.</li>
-        <li>For the next 54 seconds you will follow prompts on this screen. Keep this window in front.</li>
+        <li className={live && light === 'ok' ? 'complete' : ''}>{!live || !light ? 'Lighting is checked once the camera is on.' : light === 'dark' ? 'It looks dark. Turn on a light or open blinds.' : light === 'bright' ? 'It looks very bright. Avoid pointing at a window.' : 'Lighting looks usable.'}</li>
+        <li>{aim}</li>
+        <li>For the next {scriptSeconds(script)} seconds you will follow prompts on this screen. Keep this window in front.</li>
       </ol>
       <div className="training-actions">
-        {live ? <button className="button amber" onClick={() => onStep('record')}>Start guided recording</button>
+        {live ? <button className="button amber" onClick={() => onStep('record')}>{startLabel}</button>
           : <button className="button amber" disabled={camera.state === 'connecting'} onClick={() => controller.current.connect(store().getItem(WEBCAM_KEY) || '')}>Connect camera</button>}
         {live && <button className="text-button" onClick={() => controller.current.stop()}>Disconnect</button>}
       </div>
@@ -155,9 +180,9 @@ function CaptureSteps({ step, onStep, onClip }) {
   </section>;
 }
 
-function ScriptRunner({ stream, onCancel, onClip }) {
-  const timeline = useMemo(() => scriptTimeline(), []);
-  const total = scriptSeconds();
+function ScriptRunner({ script, stream, onCancel, onClip }) {
+  const timeline = useMemo(() => scriptTimeline(script), [script]);
+  const total = scriptSeconds(script);
   const [phase, setPhase] = useState({ kind: 'countdown', value: 3 });
   const [elapsed, setElapsed] = useState(0);
   const [error, setError] = useState('');
@@ -177,7 +202,7 @@ function ScriptRunner({ stream, onCancel, onClip }) {
       if (!running.current) return;
       active.current += (now - last.current) / 1000; last.current = now;
       setElapsed(active.current);
-      if (active.current >= total) { running.current = false; setPhase({ kind: 'finishing' }); recorder.current.stop('Training script complete'); }
+      if (active.current >= total) { running.current = false; setPhase({ kind: 'finishing' }); recorder.current.stop('Script complete'); }
     }, 250);
     const visibility = () => {
       if (document.visibilityState === 'hidden' && running.current) {
@@ -329,5 +354,106 @@ function Moments({ source, moments, threshold }) {
       {stills[m.wall] ? <img src={stills[m.wall]} alt="" /> : <span className="training-still-placeholder" />}
       <strong>{m.kind === 'false-alarm' ? 'False alarm' : 'Missed'}</strong>
       <span>{clock(m.wall)} · score {m.score.toFixed(2)}</span></li>)}</ul>
+  </section>;
+}
+
+function PersonRow({ person, service, disabled, onCheck, onDeleted }) {
+  const [confirming, setConfirming] = useState(false), [error, setError] = useState('');
+  async function remove() {
+    setError('');
+    try { await analysisRequest(`/people/${person.id}/delete`, { token: service.token, method: 'POST', body: {} }); onDeleted(); }
+    catch (e) { setError(e.message); }
+  }
+  return <li>
+    <div><strong>{person.name}</strong><span>Enrolled {new Date(person.created).toLocaleDateString()} · {plural(person.views, 'face view')}</span>
+      <span>{baselineText(person.baseline)}</span></div>
+    <div className="training-actions">
+      {confirming ? <>
+        <button className="button amber" onClick={remove}><Trash size={16} /> Delete {person.name}’s face template</button>
+        <button className="text-button" onClick={() => setConfirming(false)}>Cancel</button>
+      </> : <>
+        <button className="button" disabled={disabled} onClick={onCheck}>Check baseline</button>
+        <button className="text-button" onClick={() => setConfirming(true)}>Delete</button>
+      </>}
+    </div>
+    {error && <p role="alert">{error}</p>}
+  </li>;
+}
+
+// Enrollment: consent, a 20 s face capture, then an optional 12 s baseline check.
+// A baseline check alone (from the people list) skips the first two.
+function PersonSession({ service, flow, onExit, onChanged }) {
+  const enrolling = flow.kind === 'enroll';
+  const [stage, setStage] = useState(enrolling ? 'consent' : 'baseline');
+  const [capture, setCapture] = useState('camera');
+  const [name, setName] = useState(''), [agreed, setAgreed] = useState(false);
+  const [person, setPerson] = useState(flow.person || null);
+  const [status, setStatus] = useState(null), [error, setError] = useState('');
+  const steps = enrolling ? [['consent', 'Consent'], ['enroll', 'Face capture'], ['baseline', 'Baseline check'], ['done', 'Done']]
+    : [['baseline', 'Baseline check'], ['done', 'Done']];
+  async function importClip(clip) {
+    const file = new File([clip.blob], clip.name, { type: clip.blob.type });
+    return (await importRecording(file, service.token)).recording.id;
+  }
+  async function finishEnroll(clip) {
+    setStatus({ busy: true, text: 'Building the face template on this computer…' }); setError('');
+    try {
+      const recording = await importClip(clip);
+      const result = await (await analysisRequest('/people', { token: service.token, method: 'POST',
+        body: { name: name.trim(), consent: { confirmed: true, statement: service.people.statement }, recording } })).json();
+      setPerson(result.person); onChanged();
+      setStatus({ text: `${result.person.name} is enrolled with ${plural(result.person.views, 'clear face view')}.` });
+      setStage('baseline'); setCapture('intro');
+    } catch (e) { setStatus(null); setError(e.message); setCapture('camera'); }
+  }
+  async function finishBaseline(clip) {
+    setStatus({ busy: true, text: 'Checking how well the template recognizes this person…' }); setError('');
+    try {
+      const recording = await importClip(clip);
+      const result = await (await analysisRequest(`/people/${person.id}/verify`, { token: service.token, method: 'POST', body: { recording } })).json();
+      setPerson(result.person); onChanged();
+      setStatus({ text: baselineText(result.baseline), tip: result.tip, baseline: result.baseline }); setStage('done');
+    } catch (e) { setStatus(null); setError(e.message); setCapture('camera'); }
+  }
+  const current = steps.findIndex(s => s[0] === stage);
+  return <section className="content-page training-page" aria-label="Person enrollment">
+    <div className="training-session-head">
+      <div><p className="eyebrow">{enrolling ? 'ENROLL A PERSON' : 'BASELINE CHECK'}</p><h1>{person ? person.name : 'Enroll a person'}</h1></div>
+      <button className="text-button" onClick={onExit}><X size={16} /> Exit</button>
+    </div>
+    <ol className="training-steps">{steps.map(([id, label], i) => <li key={id} aria-current={stage === id ? 'step' : undefined}
+      className={current > i ? 'complete' : ''}><b>{i + 1}</b>{label}</li>)}</ol>
+    {error && <div className="training-problem" role="alert"><WarningCircle size={18} /><p>{error}</p></div>}
+    {stage === 'consent' && <section className="training-panel training-consent">
+      <h2>Consent</h2>
+      <label>Person’s name<input aria-label="Person’s name" value={name} maxLength={60} onChange={e => setName(e.target.value)} autoComplete="off" /></label>
+      <p>{CONSENT_TEXT}</p>
+      <p className="training-note">Matches are suggestions for a person to confirm, not proof of identity. Laws in some places (for example Illinois BIPA, Texas CUBI and the GDPR) require written consent and a retention policy for face data; that responsibility stays with the operator.</p>
+      <label className="training-check"><input type="checkbox" aria-label={`${name.trim() || 'This person'} is here and agrees to enrollment`} checked={agreed} onChange={e => setAgreed(e.target.checked)} />
+        {name.trim() || 'This person'} is here and agrees to enrollment.</label>
+      <div className="training-actions"><button className="button amber" disabled={!name.trim() || !agreed}
+        onClick={() => { setStage('enroll'); setCapture('camera'); }}>Continue to face capture</button></div>
+    </section>}
+    {stage === 'enroll' && !status?.busy && <CaptureSteps step={capture} onStep={setCapture} onClip={finishEnroll}
+      script={ENROLL_SCRIPT} guide="face" startLabel="Start face capture"
+      aim={`Only ${name.trim()} should be in view. Sit close enough that the face fills the oval, with light in front.`} />}
+    {stage === 'baseline' && capture === 'intro' && <section className="training-panel training-done">
+      <CheckCircle size={40} /><h2>{status?.text}</h2>
+      <p>A 12-second baseline check shows how well the DVR recognizes {person.name} in everyday views, and adds the views it matches.</p>
+      <div className="training-actions">
+        <button className="button amber" onClick={() => { setStatus(null); setCapture('camera'); }}>Run the baseline check</button>
+        <button className="text-button" onClick={onExit}>Skip for now</button>
+      </div>
+    </section>}
+    {stage === 'baseline' && capture !== 'intro' && !status?.busy && <CaptureSteps step={capture} onStep={setCapture} onClip={finishBaseline}
+      script={BASELINE_SCRIPT} guide="frame" startLabel="Start baseline check"
+      aim={`Point the camera where it usually watches. Only ${person.name} should be in view.`} />}
+    {status?.busy && <section className="training-panel training-analyze"><h2>{status.text}</h2><progress aria-label="Processing" /></section>}
+    {stage === 'done' && status && <section className="training-panel training-done">
+      <CheckCircle size={40} /><h2>{status.text}</h2>
+      {status.tip && <p>{status.tip}</p>}
+      <p>{status.baseline?.other ? `${plural(status.baseline.other, 'view')} matched someone else; check that only ${person.name} was in view.` : 'Run another check any time from Train to measure and refine the template.'}</p>
+      <div className="training-actions"><button className="button amber" onClick={onExit}>Back to Train</button></div>
+    </section>}
   </section>;
 }

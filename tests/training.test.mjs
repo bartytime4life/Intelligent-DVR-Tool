@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { TRAINING_SCRIPT, scriptTimeline, scriptSeconds, labelFrames, countObservations, evaluate, recommendThreshold,
-  frameMoments, plural, readHistory, appendHistory, readDefaultRules, writeDefaultRules, HISTORY_KEY, percent } from '../src/training.mjs';
+  frameMoments, plural, readHistory, ENROLL_SCRIPT, BASELINE_SCRIPT, CONSENT_TEXT, baselineText, appendHistory, readDefaultRules, writeDefaultRules, HISTORY_KEY, percent } from '../src/training.mjs';
 
 const frame = (seconds, ...scores) => ({ seconds, detections: scores.map(score => ({ label: 'person', score, box: [0, 0, .5, .5] })) });
 function memory(fail = false) {
@@ -78,6 +78,14 @@ test('history keeps the last 50 valid sessions and reports storage failures', ()
   assert.equal(readHistory(storage).at(-1).at, 't54');
   storage.setItem(HISTORY_KEY, '{broken'); assert.deepEqual(readHistory(storage), []);
   assert.match(appendHistory(memory(true), { at: 'x', kind: 'detection', threshold: .5, detectionRate: 1, falseAlarms: 0 }).error, /could not be saved/);
+});
+
+test('enrollment and baseline scripts are short and describe the baseline plainly', () => {
+  assert.equal(scriptSeconds(ENROLL_SCRIPT), 20); assert.equal(scriptSeconds(BASELINE_SCRIPT), 12);
+  assert.equal(baselineText(null), 'No baseline check yet');
+  assert.equal(baselineText({ usable: 20, matched: 18, rate: .9 }), 'Recognized in 18 of 20 face views (90%)');
+  assert.equal(baselineText({ usable: 0, matched: 0, rate: null }), 'Last check found no clear face views');
+  assert.match(CONSENT_TEXT, /never uploaded/);
 });
 
 test('the default rule set id is validated before use', () => {

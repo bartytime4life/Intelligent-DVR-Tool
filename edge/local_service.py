@@ -7,6 +7,7 @@ import importlib.util
 import ipaddress
 import itertools
 import json
+import math
 import os
 from pathlib import Path
 import re
@@ -30,6 +31,8 @@ from .local_feeds import Feeds, FeedError, load_sources, shared_config
 from .result_store import ResultStore, VIDEO_BYTES, REVIEW_BYTES as RESULT_BYTES, EXTENSIONS
 from .recording_import import import_recording, ImportError as RecordingImportError, MAX_IMPORT_BYTES, MIMES as IMPORT_MIMES
 from .enhancement import PROFILE as ENHANCEMENT_PROFILE, validate_trace as validate_enhancement
+from .faces import DETECTOR as FACE_DETECTOR, RECOGNIZER as FACE_RECOGNIZER, EMBEDDING, verify_model
+from .people import PeopleStore, CONSENT_STATEMENT, PEOPLE_LIMIT, valid_name, now as utc_now
 from .media_coverage import validate as validate_coverage
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -41,6 +44,21 @@ TERMINAL = {'completed', 'failed', 'cancelled'}
 TRAINED_LIMIT = 50
 TRAINED_NAME = re.compile(r'(trained-[a-f0-9]{12})\.rules\.json')
 TRAINING_KEYS = {'name', 'label', 'threshold', 'dwell', 'max_gap', 'rect'}
+# Consent-based enrollment: a bounded worker per request, at least five distinct clear views.
+FACE_SECONDS, FACE_MIN_VIEWS = 120, 5
+FACE_TIPS = {'none': 'No face was found in many frames: face the camera.',
+             'several': 'More than one face was in view: only the person enrolling should be visible.',
+             'small': 'The face was small: move closer.', 'unclear': 'The face was unclear: face the camera directly.',
+             'edge': 'The face was cut off: stay inside the oval.', 'dark': 'It was too dark: add light in front of the face.',
+             'bright': 'It was too bright: avoid a window behind the person.',
+             'blurry': 'Frames were blurry: hold still for a moment at each prompt.'}
+
+
+def face_tip(reasons):
+    """The most common rejection reason as one fixed sentence."""
+    counts = {k: reasons.get(k) for k in FACE_TIPS} if isinstance(reasons, dict) else {}
+    counts = {k: v for k, v in counts.items() if isinstance(v, int) and not isinstance(v, bool) and v > 0}
+    return FACE_TIPS[max(counts, key=counts.get)] if counts else ''
 # Fixed types: mimetypes reads Windows registry overrides (e.g. .js as text/plain),
 # which nosniff then turns into a blank module-script UI.
 TYPES = {'.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8',
@@ -118,9 +136,16 @@ def video_header(header):
 
 def load_catalog(config):
     data = read_json(config, 64 * 1024)
-    if not isinstance(data, dict) or set(data) != {'models', 'rules'}:
+    if not isinstance(data, dict) or not {'models', 'rules'} <= set(data) <= {'models', 'rules', 'faces'}:
         raise ValueError('Configure models and rules arrays')
     result = {}
+    if 'faces' in data:
+        # Optional: the pinned face detector and recognizer for consent-based enrollment.
+        faces = data['faces']
+        if not isinstance(faces, dict) or set(faces) != {'detector', 'recognizer'}:
+            raise ValueError('Configure faces with detector and recognizer paths')
+        result['faces'] = {key: verify_model(regular(relative_file(config.parent, faces[key]), MODEL_BYTES), spec)
+                           for key, spec in (('detector', FACE_DETECTOR), ('recognizer', FACE_RECOGNIZER))}
     for kind in ('models', 'rules'):
         entries = data[kind]
         if not isinstance(entries, list) or not 1 <= len(entries) <= 16:
@@ -181,7 +206,7 @@ def load_trained(directory):
 
 class Jobs:
     def __init__(self, recordings, catalog, *, wall_seconds=300, process_factory=subprocess.Popen, state_dir=None, allow_import=False,
-                 training_dir=None):
+                 training_dir=None, people_dir=None, face_runner=None):
         # Resolved once (OS links above it are fine); the folder and its entries are not links.
         recordings = anchor(recordings)
         if not recordings.is_dir() or recordings.is_symlink():
@@ -191,6 +216,11 @@ class Jobs:
         self.training_dir = training_dir
         if training_dir is not None:
             catalog['rules'].update(load_trained(training_dir))
+        if people_dir is not None and 'faces' not in catalog:
+            raise ValueError('Face enrollment needs the pinned face detector and recognizer in the catalog')
+        self.people = PeopleStore(people_dir, {'detector': FACE_DETECTOR['sha256'], 'recognizer': FACE_RECOGNIZER['sha256']}) \
+            if people_dir is not None else None
+        self.face_runner, self.face_busy = face_runner or self.run_face_worker, False
         self.wall_seconds = min(300, max(.1, wall_seconds))
         self.process_factory = process_factory
         self.lock = threading.RLock()
@@ -239,6 +269,7 @@ class Jobs:
                     'recorder_active': self.owner is not None,
                     'recording_import': {'enabled': self.allow_import, 'max_bytes': MAX_IMPORT_BYTES},
                     'training': {'enabled': self.training_dir is not None, 'limit': TRAINED_LIMIT},
+                    'people': {'enabled': self.people is not None, 'statement': CONSENT_STATEMENT, 'limit': PEOPLE_LIMIT},
                     'retention': 'private-local-last-job' if self.store else 'temporary-until-service-exit',
                     'ready': all(importlib.util.find_spec(x) is not None for x in ('cv2', 'numpy', 'av'))}
 
@@ -294,6 +325,106 @@ class Jobs:
             self.catalog['rules'][entry_id] = item
             self.diagnostics.event('TRAINING_RULES_SAVED')
             return {'rule': self.rule_choice(item), 'created': True}
+
+    def require_people(self):
+        if self.people is None:
+            raise JobError('PEOPLE_DISABLED', 'Restart the local app with --allow-face-enrollment and the pinned face models to enroll people.', 403)
+        return self.people
+
+    def people_list(self):
+        store = self.require_people()
+        return {'people': [store.summary(r) for r in store.records()], 'statement': CONSENT_STATEMENT, 'limit': PEOPLE_LIMIT}
+
+    def run_face_worker(self, payload):
+        with tempfile.TemporaryDirectory(prefix='intelligent-dvr-face-') as temp:
+            directory = Path(temp)
+            os.chmod(directory, 0o700)
+            (directory / 'args.json').write_text(json.dumps(payload), encoding='utf-8')
+            try:
+                subprocess.run([sys.executable, '-m', 'edge.face_worker', str(directory)], cwd=ROOT, stdin=subprocess.DEVNULL,
+                               stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=FACE_SECONDS, check=False)
+            except subprocess.TimeoutExpired:
+                return {'error': 'FACE_TIMEOUT'}
+            try:
+                return read_json(directory / 'result.json', 4 * 1024**2)
+            except (OSError, ValueError):
+                return {'error': 'FACE_FAILED'}
+
+    def face_job(self, recording, payload):
+        """Run the bounded face worker on one listed recording; no overlap with analysis or imports."""
+        with self.lock:
+            if self.closed or self.owner is not None or self.importing or self.face_busy or (self.job and self.job['state'] not in TERMINAL):
+                raise JobError('BUSY', 'Wait for the current analysis, import or enrollment to finish, then retry.', 409)
+            if not isinstance(recording, str) or recording not in self.choices:
+                self.available()
+            if not isinstance(recording, str) or recording not in self.choices:
+                raise JobError('SELECTION', 'Choose a listed recording.')
+            path, sig = self.choices[recording]
+            if signature(path.stat()) != sig:
+                raise JobError('INPUT_CHANGED', 'The recording changed. Refresh the choices and retry.', 409)
+            self.face_busy = True
+        try:
+            result = self.face_runner({**payload, 'video': str(path), 'detector': str(self.catalog['faces']['detector']),
+                                       'recognizer': str(self.catalog['faces']['recognizer'])})
+        finally:
+            with self.lock:
+                self.face_busy = False
+        if not isinstance(result, dict) or 'error' in result:
+            code = result.get('error') if isinstance(result, dict) else None
+            message = {'VIDEO_OPEN_FAILED': 'The recording could not be opened. Record again.',
+                       'MODEL_LOAD_FAILED': 'The face models could not be loaded. Check the catalog files.',
+                       'FACE_TIMEOUT': 'Face processing took too long. Record a shorter clip.'}.get(code, 'Face processing failed. Record again.')
+            raise JobError(code if code in ('VIDEO_OPEN_FAILED', 'MODEL_LOAD_FAILED', 'FACE_TIMEOUT') else 'FACE_FAILED', message, 422)
+        vectors = result.get('embeddings')
+        if (not isinstance(vectors, list) or len(vectors) > 40 or not all(isinstance(v, list) and len(v) == EMBEDDING and
+                all(isinstance(x, float) and math.isfinite(x) for x in v) for v in vectors)):
+            raise JobError('FACE_FAILED', 'Face processing returned an invalid result. Record again.', 422)
+        return result
+
+    def people_enroll(self, body):
+        store = self.require_people()
+        if (not isinstance(body, dict) or set(body) != {'name', 'consent', 'recording'} or not valid_name(body['name'])
+                or body['consent'] != {'confirmed': True, 'statement': CONSENT_STATEMENT}):
+            raise JobError('CONSENT', 'Enter the person’s name and confirm that they agree before enrolling.')
+        result = self.face_job(body['recording'], {'mode': 'enroll'})
+        if len(result['embeddings']) < FACE_MIN_VIEWS:
+            raise JobError('FACE_QUALITY', f'Only {len(result["embeddings"])} clear face views were found; {FACE_MIN_VIEWS} are needed. '
+                           f'{face_tip(result.get("reasons"))} Nothing was saved.', 422)
+        try:
+            record = store.create(body['name'], result['embeddings'])
+        except OverflowError:
+            raise JobError('PEOPLE_FULL', f'{PEOPLE_LIMIT} people are enrolled. Delete someone before adding another.', 409) from None
+        self.diagnostics.event('PERSON_ENROLLED')
+        return {'person': store.summary(record), 'checked': result['checked'], 'usable': result['usable']}
+
+    def people_verify(self, person_id, body):
+        store = self.require_people()
+        if not isinstance(body, dict) or set(body) != {'recording'} or not isinstance(body['recording'], str):
+            raise JobError('SELECTION', 'Choose a recording to check.')
+        try:
+            record = store.get(person_id)
+        except (KeyError, OSError, ValueError):
+            raise JobError('NOT_FOUND', 'This person is no longer enrolled.', 404) from None
+        people = [{'id': r['id'], 'embeddings': r['embeddings']} for r in store.records()]
+        result = self.face_job(body['recording'], {'mode': 'verify', 'people': people, 'target': person_id})
+        usable, matched = result['usable'], result['matched']
+        record['baseline'] = {'at': utc_now(), 'checked': result['checked'], 'usable': usable, 'matched': matched,
+                              'other': result['other'], 'rate': round(matched / usable, 4) if usable else None}
+        if result['embeddings']:
+            record['embeddings'] = result['embeddings']
+        store.write(record)
+        return {'person': store.summary(record), 'baseline': record['baseline'], 'tip': face_tip(result.get('reasons')) if not usable else ''}
+
+    def people_delete(self, person_id, body):
+        store = self.require_people()
+        if body != {}:
+            raise JobError('BODY', 'Delete takes an empty object.')
+        try:
+            store.delete(person_id)
+        except (KeyError, OSError):
+            raise JobError('NOT_FOUND', 'This person is no longer enrolled.', 404) from None
+        self.diagnostics.event('PERSON_DELETED')
+        return {'deleted': person_id}
 
     def receive_recording(self, stream, length, mime, expected_hash):
         with self.lock:
@@ -744,6 +875,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._json({'token': self.server.token, **feeds.available()})
         if self.command == 'GET' and path == '/api/analysis/session':
             return self._json({'token': jobs.token, **jobs.available()})
+        if self.command == 'GET' and path == '/api/analysis/people':
+            return self._json(jobs.people_list())
         if self.command == 'POST' and path == '/api/analysis/recordings':
             # Authentication and same-origin checks above run before reading bytes.
             lengths = self.headers.get_all('Content-Length') or []
@@ -779,6 +912,11 @@ class Handler(BaseHTTPRequestHandler):
                 return self._json(jobs.start(body), 202)
             if path == '/api/analysis/training/rules':
                 return self._json(jobs.save_training_rules(body), 201)
+            if path == '/api/analysis/people':
+                return self._json(jobs.people_enroll(body), 201)
+            match = re.fullmatch('/api/analysis/people/([a-f0-9]{16})/(verify|delete)', path)
+            if match:
+                return self._json(jobs.people_verify(match[1], body) if match[2] == 'verify' else jobs.people_delete(match[1], body))
             if path == '/api/recorder/start':
                 return self._json(recorder.start(body), 202)
             if path == '/api/recorder/stop':
@@ -842,6 +980,7 @@ def main(argv=None):
     parser.add_argument('--state-dir', type=Path, help='Opt-in Linux private last-job storage; no automatic analysis or resume')
     parser.add_argument('--allow-recording-import', action='store_true', help='Allow explicit same-origin video imports up to 64 MiB; stored locally until manually moved or deleted')
     parser.add_argument('--allow-training', action='store_true', help='Allow guided training to save tuned rule sets in the catalog folder\'s trained/ folder; never overwrites')
+    parser.add_argument('--allow-face-enrollment', action='store_true', help='Allow consent-based face templates in the catalog folder\'s people/ folder; needs the pinned face models')
     parser.add_argument('--feeds-config', type=Path, help='Trusted LAN RTSP channels; see edge/local-feeds.example.json')
     parser.add_argument('--recorder-config', type=Path, help='Opt-in one-camera segment recorder; never starts automatically')
     parser.add_argument('--port', type=int, default=4173)
@@ -855,6 +994,8 @@ def main(argv=None):
         parser.error('--allow-recording-import requires recording analysis configuration')
     if args.allow_training and not args.config:
         parser.error('--allow-training requires recording analysis configuration')
+    if args.allow_face_enrollment and not args.config:
+        parser.error('--allow-face-enrollment requires recording analysis configuration')
     if args.recorder_config and (not args.config or not args.feeds_config):
         parser.error('--recorder-config requires recording analysis and feeds configuration')
     if not args.config and not args.feeds_config:
@@ -868,7 +1009,8 @@ def main(argv=None):
     try:
         if args.config:
             jobs = Jobs(args.recordings, load_catalog(args.config.absolute()), state_dir=args.state_dir, allow_import=args.allow_recording_import,
-                        training_dir=args.config.absolute().parent / 'trained' if args.allow_training else None)
+                        training_dir=args.config.absolute().parent / 'trained' if args.allow_training else None,
+                        people_dir=args.config.absolute().parent / 'people' if args.allow_face_enrollment else None)
             diagnostics = jobs.diagnostics
         if args.feeds_config:
             feeds = Feeds(load_sources(args.feeds_config.absolute()), diagnostics=diagnostics)
@@ -882,7 +1024,8 @@ def main(argv=None):
             recorder = Recorder(config, feeds.sources, jobs, jobs.recordings / '.lan-recorder', diagnostics=diagnostics)
         with LocalServer(args.port, jobs, ROOT / 'dist/client', feeds, recorder) as server:
             diagnostics.event('SERVICE_START', analysis=jobs is not None, feeds=feeds is not None, recorder=recorder is not None,
-                              imports=args.allow_recording_import, training=args.allow_training)
+                              imports=args.allow_recording_import, training=args.allow_training,
+                              people=args.allow_face_enrollment)
             print(f'Local Intelligent DVR: {server.origin}/ — explicit connections and jobs only; Ctrl+C stops.', flush=True)
             if args.open_browser:
                 import webbrowser

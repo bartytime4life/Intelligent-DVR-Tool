@@ -83,3 +83,18 @@
   .training-segment-results li { display: block; }
   .training-segment-results span { display: block; text-align: left; margin-top: 4px; }
 }
+.training-home { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+.training-face-guide { position: absolute; left: 50%; top: 50%; width: 34%; aspect-ratio: 3 / 4; transform: translate(-50%, -54%); border: 3px dashed rgba(88, 220, 205, .7); border-radius: 50%; pointer-events: none; }
+.training-people { border: 1px solid #2c4652; border-radius: 12px; padding: 22px; background: #0f1d27; margin-bottom: 20px; }
+.training-people ul { list-style: none; margin: 0; padding: 0; }
+.training-people li { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; padding: 14px 0; border-top: 1px solid #1f3340; }
+.training-people li > div:first-child { display: grid; gap: 4px; }
+.training-people li span { color: #9fadb8; font-size: 13px; }
+.training-people .training-actions { margin-top: 0; }
+.training-people p { color: #b4c1cb; }
+.training-consent { max-width: 760px; }
+.training-consent label { display: grid; gap: 8px; color: #c4d6df; font-size: 13px; margin: 12px 0; }
+.training-consent input:not([type]) { padding: 11px; border: 1px solid #3d5662; border-radius: 6px; background: #101d27; color: #e0ebef; max-width: 420px; }
+.training-consent p { color: #b4c1cb; line-height: 1.6; }
+.training-check { display: flex !important; align-items: center; gap: 10px !important; font-size: 14px !important; color: #e7edf4 !important; }
+.training-check input { width: 18px; height: 18px; accent-color: var(--amber); }
