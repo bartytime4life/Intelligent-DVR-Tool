@@ -589,7 +589,7 @@ label. Inside the active building it belongs to the current level; elsewhere it 
       {helpOpen && <section id="facility-shortcuts" className="facility-workbench-help" role="region" aria-label="Facility keyboard and map help">
         <div><strong>Work faster in Facility Studio</strong><button type="button" onClick={() => setHelpOpen(false)} aria-label="Close facility help"><X size={17}/></button></div>
         <p><kbd>1</kbd>–<kbd>7</kbd> switches tasks, <kbd>?</kbd> toggles this help, and <kbd>Esc</kbd> cancels drawing. Ctrl/⌘+Z undoes committed edits.</p>
-        <p>Use <strong>Focus map</strong> to maximize the canvas, then <strong>Show panels</strong> to edit and save. Camera drag/aim previews are unsaved until Save camera. Alt+Arrow nudges a selected camera 0.5 m; [ and ] rotate it 5°.</p>
+        <p>Use <strong>Focus map</strong> to maximize the canvas and stop hidden camera previews, then <strong>Show panels</strong> to edit, save and explicitly reconnect. Camera drag/aim previews are unsaved until Save camera. Alt+Arrow nudges a selected camera 0.5 m; [ and ] rotate it 5°.</p>
         <p>Camera coverage, distances and handoffs are planning estimates. Real video sampling is opt-in under a selected camera's Image diagnostics.</p>
       </section>}
       {!plan.buildings.length && !plan.cameras.length && !plan.labels.length && !plan.zones?.length && !plan.route.length && tool==='select' && step===0 && <FacilityEmptyState disabled={navigationDirty} onDraw={()=>{go(1);if(ready)startTool('building');}} onImport={onOpenImport} onLocate={()=>{go(0);input.current?.closest('section')?.querySelector('[aria-label="Facility name"]')?.focus();}}/>}
@@ -714,7 +714,7 @@ pect its modeled view.", "Draw a route and review proposed camera transitions.",
         {selected.kind === 'camera' && draft?.id === selected.id && <>
           <div className="facility-camera-actions"><button className="facility-secondary" disabled={!ready} onClick={()=>api.current?.centerCamera(selected.id)}><Crosshair/>Center camera</button><button className="facility-secondary" disabled={!ready} onClick={()=>startTool('aim-camera')}>Aim on map</button><button className="facility-secondary" disabled={!ready} onClick={()=>startTool('move-camera')}>Move on map</button></div>
           <p className="facility-caption facility-manipulate-help">Drag the selected camera or its round heading handle on the map. With the map or a button focused, Alt+Arrow nudges 0.5 m and [ or ] rotates 5°. These change the preview only; Save camera commits.</p>
-          <FacilityCameraPreview onCount={onPreviewCount} key={selected.id} camera={preview.cameras.find(c=>c.id===selected.id)} onCenter={()=>api.current?.centerCamera(selected.id)} onAim={()=>startTool('aim-camera')}/>
+          <FacilityCameraPreview onCount={onPreviewCount} suspended={mapFocus} key={selected.id} camera={preview.cameras.find(c=>c.id===selected.id)} onCenter={()=>api.current?.centerCamera(selected.id)} onAim={()=>startTool('aim-camera')}/>
         </>}
         {selected.kind === "camera" && draft?.id === selected.id ? <form noValidate className="facility-camera-form" onSubmit={saveSelected}>
           <Field label="Camera name" type="text" value={draft.name} onChange={(v) => change("name", v)} />

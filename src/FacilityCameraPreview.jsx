@@ -5,7 +5,7 @@ import { configuredFacilitySources, facilityPreviewController, plannedViewAngles
 import './facility-camera-preview.css';
 import FacilityImageLab from './FacilityImageLab.jsx';
 
-export default function FacilityCameraPreview({ camera, onCenter, onAim, onCount }) {
+export default function FacilityCameraPreview({ camera, onCenter, onAim, onCount, suspended = false }) {
   const [preview, setPreview] = useState({ state: 'disconnected', message: 'Connect a source to compare its image with this camera plan.' });
   const [kind, setKind] = useState('webcam'), [devices, setDevices] = useState([]), [device, setDevice] = useState('');
   const [catalog, setCatalog] = useState(null), [source, setSource] = useState('');
@@ -19,6 +19,7 @@ export default function FacilityCameraPreview({ camera, onCenter, onAim, onCount
   const active = ['connecting', 'live', 'interrupted'].includes(preview.state);
   const sources = configuredFacilitySources(catalog);
   useEffect(() => {onCount?.(preview.state === 'live' ? 1 : 0); return () => onCount?.(0);}, [preview.state, onCount]);
+  useEffect(() => { if (suspended) { lookup.current++; setLoading(false); void controller.current.stop('Preview stopped while the map is focused. Reconnect explicitly after reopening the inspector.'); } }, [suspended]);
   useEffect(() => {
     alive.current = true;
     const hidden = () => { if (document.hidden) { lookup.current++; setLoading(false); void controller.current.stop('Preview stopped while this page was hidden.'); } };
@@ -59,7 +60,7 @@ export default function FacilityCameraPreview({ camera, onCenter, onAim, onCount
     finally { if (alive.current && ticket === lookup.current) setLoading(false); }
   }
   async function connect() {
-    setError('');
+    setError(''); setObserved(null);
     if (document.hidden) { setError('Return to this page before connecting.'); return; }
     try {
       if (kind === 'webcam') await controller.current.connectWebcam(device, devices.find(d => d.deviceId === device)?.label || 'Browser default webcam');
