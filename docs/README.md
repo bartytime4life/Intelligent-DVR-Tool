@@ -1,5 +1,7 @@
 # Explore Intelligent DVR
 
+[Whole-workspace UI/navigation audit](workspace-ux-audit-2026-10-31.md) examines all seven workspaces, confirmed unsaved-draft and deep-link defects, desktop/mobile regressions and follow-up usability gates.
+
 The [October 30 full review](review-2026-10-30.md) lists the defects fixed on
 `main` and the four follow-up pull requests merged on October 31.
 
