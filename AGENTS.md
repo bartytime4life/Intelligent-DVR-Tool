@@ -128,3 +128,10 @@ observations reach Events only through an explicit per-segment Send to Events;
 never queue them automatically. Keep edge/inference.py, journal.py,
 supervision.py, scheduler.py and profiling.py byte-identical while the
 durable-overload evidence pins their hashes.
+
+Owner rule-gap decision (2026-10-31): a presence run continues across sampled
+frames without a qualifying detection while matches stay within the rule's
+max_gap, so brief occlusion or motion blur does not emit a second observation.
+Webcam testing split two real visits into five observations under the previous
+reset-on-any-miss behavior. A gap longer than max_gap still starts a new run.
+Rule-engine hashes changed; re-analyze traces before evaluating them.

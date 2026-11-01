@@ -6,7 +6,7 @@
   "model_sha256": "1509018e1104ec84ed6a6b03ac933956b77c402f3889ada753db806ea9918b88",
   "labels_sha256": "3ee03641b29d38d58531f7045d7ffe4bd32af682e96aa81de81e672c5ce93166",
   "inference_profile": "yolov8-raw-640",
-  "rules_sha256": "dba029ebc66d546789d00d4a219878b27957990233e858633bbe1bbbcb4bb4d7",
+  "rules_sha256": "a24e7412b095240117bec62677ecce028cc541a8c3b86b5320d09b45261f1f2e",
   "rules": [
     {
       "name": "fixture zone",
@@ -19,11 +19,11 @@
       ],
       "threshold": 0.7,
       "dwell": 0,
-      "max_gap": 2
+      "max_gap": 1
     }
   ],
   "run_id": "03e1b4e50430695f74d45b5662ffb3ed98694f59697e8aef78f930756b94e1b4",
-  "rule_engine_sha256": "1c4105a69c36fb1ff8a2ae6fe35c2f1ed9f3b3c94821850a32384ae9eafbf391",
+  "rule_engine_sha256": "b6614c4a3a36e726beadbf5d444fbf8b78c5d40a844bc4ac77b468b6ea2a74fb",
   "camera": "synthetic-camera",
   "frames_read": 4,
   "fps_metadata": 1,
@@ -129,7 +129,7 @@
   ],
   "events": [
     {
-      "id": "4eeaed2dd797b958d4f69c4f6b11d7d2",
+      "id": "4cb9484255eb1acc06bb69ffc62f3f1a",
       "camera": "synthetic-camera",
       "label": "person",
       "score": 0.9,
@@ -139,7 +139,7 @@
       "review_required": true
     },
     {
-      "id": "fdba1a2c0b40b70cf76da5dbd9907b47",
+      "id": "6c8ae31776dc4f099f2db70b4ffbcfbe",
       "camera": "synthetic-camera",
       "label": "person",
       "score": 0.9,
