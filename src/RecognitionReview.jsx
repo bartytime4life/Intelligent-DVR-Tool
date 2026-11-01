@@ -64,10 +64,17 @@ export default function RecognitionReview({ onImport, active = true, clip, onCli
     if (!evidence) return;
     const i = run && run.receipt.source_sha256 === evidence.sha && run.receipt.model_sha256 === evidence.model
       ? run.receipt.events.findIndex(e => e.id === evidence.sourceId) : -1;
-    if (i < 0) { setStatus(`That observation (${evidence.time}) belongs to recording ${evidence.sha.slice(0, 12)}…. Open its results and original recording here to inspect the frame.`); return; }
+    if (i < 0) {
+      setStatus(`That observation (${evidence.time}) belongs to recording ${evidence.sha.slice(0, 12)}…. Open its results and original recording here to inspect the frame.`);
+      return;
+    }
+    // A user may follow an Event before loading its matching run. Revisit the
+    // pending deep link when the receipt or exact-source recording arrives.
     seek(run.eventFrames[i]);
-    setStatus(`Showing the sampled frame for the observation at ${evidence.time}.`);
-  }, [evidence]);
+    setStatus(source
+      ? `Showing the source-matched sampled frame for the observation at ${evidence.time}.`
+      : `The matching results contain the observation at ${evidence.time}. Match its original recording to verify the sampled frame.`);
+  }, [evidence, run, source]);
   // Keep a small still per observation from the verified recording, then hand the observations to Events.
   async function sendToEvents() {
     const sent = run, from = source;
