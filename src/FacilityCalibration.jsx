@@ -39,7 +39,7 @@ export default function FacilityCalibration({frame,camera,facilityName,origin,ma
   const signature=JSON.stringify(rows);
   const fit=solution?.signature===signature&&solution?.sourceHash===sampleHash?solution.data:null;
   const limit=Number(tolerance);
-  const accepted=!!fit?.holdout&&fit.checkInsideHull&&confirmed&&Number.isFinite(limit)&&limit>0&&limit<=25&&fit.holdout.max<=limit;
+  const accepted=!!fit?.holdout&&fit.checkInsideHull&&confirmed&&Number.isFinite(limit)&&limit>0&&limit<=25&&fit.holdout.max<=limit&&fit.fit.max<=limit;
   const distance=accepted&&ruler.start&&ruler.end?calibratedGroundDistance(fit,ruler.start,ruler.end):null;
   function setValue(id,field,value){setRows(list=>list.map(p=>p.id===id?{...p,[field]:value}:p));}
   function mark(id,[x,y]){setRows(list=>list.map(p=>p.id===id?{...p,u:(x*100).toFixed(2),v:(y*100).toFixed(2)}:p));}
@@ -136,7 +136,7 @@ export default function FacilityCalibration({frame,camera,facilityName,origin,ma
             aria-label="Maximum acceptable check error metres" onChange={e=>setTolerance(e.target.value)}/></label>
         <p className="facility-calibration-note">{accepted?
           'Operator-declared measured references meet the chosen tolerance. This is NOT survey or optics certification.':
-          'Ground ruler locked until a measured, withheld check point meets the operator threshold.'}</p>
+          'Ground ruler locked until both fitting and withheld-check maxima meet the chosen threshold, using independently measured markers.'}</p>
         <div className="facility-calibration-actions"><button type="button" disabled={!accepted}
           onClick={()=>{setRulerMode(true);setTarget('');setRuler({start:null,end:null});}}>Measure within reference boundary</button>
           <button type="button" onClick={exportCalibration}>Export calibration JSON</button></div>

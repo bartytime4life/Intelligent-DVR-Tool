@@ -161,3 +161,18 @@ test('a chosen ground reference accepts an explicit local map pick, without acti
   await expect(page.getByLabel('Reference 1 North metres')).not.toHaveValue('');
   expect(errors).toEqual([]);
 });
+
+test('image reference numbering follows full row positions even when earlier markers are blank',async({page})=>{
+  await openStudio(page);
+  await page.getByRole('button',{name:'Cameras',exact:true}).click();
+  await page.locator('.facility-image-lab summary').click();
+  const picture=await image(page,false);
+  await page.getByLabel('Open image for diagnostics').setInputFiles({
+    name:'marker-numbers.png',mimeType:'image/png',buffer:Buffer.from(picture,'base64')
+  });
+  await page.locator('.facility-calibration summary').click();
+  await page.getByLabel('Reference 5 Image X %').fill('50');
+  await page.getByLabel('Reference 5 Image Y %').fill('50');
+  await expect(page.locator('.facility-calibration-marker')).toHaveCount(1);
+  await expect(page.locator('.facility-calibration-marker')).toHaveText('5');
+});
