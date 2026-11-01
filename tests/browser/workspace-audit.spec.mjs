@@ -46,7 +46,7 @@ for(const [form,width,height] of [['desktop',1440,1000],['mobile',390,844]]) {
     const errors=[];page.on('pageerror',e=>errors.push(e.message));
     for(const [label,heading] of views) {
       await auditView(page,label,heading,form,
-        (form==='desktop'&&['Monitor','Facility'].includes(label))||(form==='mobile'&&label==='System'));
+        ['Monitor','Facility'].includes(label)||(form==='mobile'&&label==='System'));
     }
     await page.goBack();
     await expect(page).toHaveURL(/#system$/);
@@ -154,4 +154,24 @@ test('Browser Back respects the active dirty editor instead of jumping to Facili
   await page.goBack();
   await expect(page).toHaveURL(/#system$/);
   await expect(setting).toHaveValue(String(current+2));
+});
+
+test('mobile first-run camera choice and Facility contextual task navigation stay reachable',async({page})=>{
+  await offline(page);
+  await page.setViewportSize({width:390,height:844});
+  await page.goto('/#monitor');
+  const welcome=page.getByRole('region',{name:'Start camera monitoring'});
+  await expect(welcome).toBeVisible();
+  await welcome.getByRole('button',{name:/Local DVR \/ IP camera/}).click();
+  await expect(page.getByRole('dialog',{name:'Connect a camera source'})).toContainText('Choose an RTSP channel');
+  await page.keyboard.press('Escape');
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  await nav(page,'Facility').click();
+  const tasks=page.getByRole('combobox',{name:'Jump to facility task'});
+  await expect(tasks).toBeVisible();
+  await tasks.selectOption('3');
+  await expect(page.locator('.facility-task-progress')).toContainText('STEP 4 / 7');
+  await expect(page.getByRole('heading',{name:'Aim this camera'})).toBeVisible();
+  const width=await page.evaluate(()=>document.documentElement.scrollWidth - innerWidth);
+  expect(width).toBeLessThanOrEqual(1);
 });
