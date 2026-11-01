@@ -3,6 +3,7 @@ from email.message import Message
 import hashlib
 import http.client
 import importlib.util
+import io
 import json
 import os
 from pathlib import Path
@@ -56,6 +57,69 @@ class ServiceTest(unittest.TestCase):
         service.thread.join(timeout=20)
         self.assertFalse(service.thread.is_alive())
         return service.snapshot()
+    def training_error(self, service, body):
+        with self.assertRaises(JobError) as raised: service.save_training_rules(body)
+        return raised.exception
+    def test_training_rules_are_off_unless_enabled(self):
+        service = self.service()
+        self.assertEqual(service.available()['training'], {'enabled': False, 'limit': 50})
+        error = self.training_error(service, {'name': 'Tuned', 'label': 'person', 'threshold': .6})
+        self.assertEqual((error.code, error.status), ('TRAINING_DISABLED', 403))
+    def test_training_saves_a_validated_rule_set_once_and_lists_it_after_restart(self):
+        trained = self.root / 'trained'
+        service = self.service(training_dir=trained)
+        saved = service.save_training_rules({'name': ' Person tuned ', 'label': 'person', 'threshold': .6})
+        self.assertTrue(saved['created'])
+        self.assertEqual(saved['rule']['name'], 'Person tuned'); self.assertEqual(saved['rule']['models'], ['model'])
+        self.assertIn('person ≥ 0.6; 1s in Person tuned', saved['rule']['summary'])
+        files = list(trained.iterdir())
+        self.assertEqual([f.name for f in files], [saved['rule']['id'] + '.rules.json'])
+        self.assertEqual(json.loads(files[0].read_text()), [{'name': 'Person tuned', 'label': 'person', 'rect': [0, 0, 1, 1],
+                                                             'dwell': 1, 'threshold': .6, 'max_gap': 2}])
+        if os.name == 'posix':
+            self.assertEqual(files[0].stat().st_mode & 0o777, 0o600); self.assertEqual(trained.stat().st_mode & 0o777, 0o700)
+        self.assertIn(saved['rule']['id'], [r['id'] for r in service.available()['rules']])
+        again = service.save_training_rules({'name': 'Person tuned', 'label': 'person', 'threshold': .6})
+        self.assertEqual((again['created'], again['rule']['id']), (False, saved['rule']['id']))
+        self.assertEqual(len(list(trained.iterdir())), 1)
+        restarted = self.service(training_dir=trained)
+        self.assertIn(saved['rule']['id'], restarted.catalog['rules'])
+        self.assertEqual(restarted.catalog['rules'][saved['rule']['id']]['name'], 'Person tuned')
+    def test_training_rejects_unknown_fields_classes_and_out_of_range_values(self):
+        service = self.service(training_dir=self.root / 'trained')
+        base = {'name': 'Tuned', 'label': 'person', 'threshold': .6}
+        for body in ({**base, 'path': '/etc/x'}, {**base, 'label': 'car'}, {**base, 'threshold': True},
+                     {**base, 'threshold': 1.5}, {**base, 'threshold': '0.6'}, {**base, 'max_gap': 0},
+                     {**base, 'rect': [.5, .5, .8, .8]}, {**base, 'name': ''}, {**base, 'name': 'a\nb'},
+                     {'label': 'person', 'threshold': .6}, [base]):
+            with self.subTest(body=body):
+                self.assertEqual(self.training_error(service, body).code, 'TRAINING_RULE')
+        self.assertFalse((self.root / 'trained').exists())
+    def test_training_never_overwrites_and_stops_at_the_limit(self):
+        trained = self.root / 'trained'; trained.mkdir()
+        rule = {'name': 'Tuned', 'label': 'person', 'rect': [0, 0, 1, 1], 'dwell': 1, 'threshold': .6, 'max_gap': 2}
+        name = 'trained-' + hashlib.sha256((json.dumps([rule], indent=2) + '\n').encode()).hexdigest()[:12] + '.rules.json'
+        (trained / name).write_text('not json')  # Damaged: skipped at startup, still never replaced.
+        service = self.service(training_dir=trained)
+        self.assertFalse(any(k.startswith('trained-') for k in service.catalog['rules']))
+        self.assertEqual(self.training_error(service, {'name': 'Tuned', 'label': 'person', 'threshold': .6}).code, 'TRAINING_CONFLICT')
+        self.assertEqual((trained / name).read_text(), 'not json')
+        for i in range(50):
+            service.save_training_rules({'name': f'Tuned {i}', 'label': 'person', 'threshold': .3 + i / 100})
+        error = self.training_error(service, {'name': 'One more', 'label': 'person', 'threshold': .9})
+        self.assertEqual((error.code, error.status), ('TRAINING_FULL', 409))
+        self.assertEqual(len(self.service(training_dir=trained).catalog['rules']), 51)  # Configured set plus 50 trained.
+    def test_training_route_requires_the_session_token(self):
+        service = self.service(training_dir=self.root / 'trained')
+        body = json.dumps({'name': 'Tuned', 'label': 'person', 'threshold': .6}).encode()
+        results = []
+        for token in ('wrong', 'secret'):
+            h = self.handler('/api/analysis/training/rules', **{'Content-Type': 'application/json',
+                             'Content-Length': str(len(body)), 'X-DVR-Token': token})
+            h.command = 'POST'; h.rfile = io.BytesIO(body); h.server.jobs = service
+            h._json = lambda value, status=200: results.append((status, value['error']['code'] if 'error' in value else value['created']))
+            h.do_POST()
+        self.assertEqual(results, [(403, 'SESSION'), (201, True)])
     def test_paths_and_config_ids_cannot_escape(self):
         value = json.loads(self.config.read_text()); value['models'][0]['path'] = '../outside.onnx'
         self.config.write_text(json.dumps(value))

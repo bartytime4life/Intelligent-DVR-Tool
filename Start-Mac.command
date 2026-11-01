@@ -20,4 +20,4 @@ fi
 [ -f local-feeds.json ] || (umask 077; printf '{"sources": []}\n' > local-feeds.json)
 exec .venv/bin/python -m edge.local_service --feeds-config local-feeds.json \
   --recordings local-analysis/recordings --config local-analysis/catalog.json \
-  --allow-recording-import --port 4180 --open-browser
+  --allow-recording-import --allow-training --port 4180 --open-browser

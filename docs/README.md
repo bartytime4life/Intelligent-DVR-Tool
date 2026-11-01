@@ -22,6 +22,7 @@ Documentation should help operators **see the tool, know the next action, and di
 | Install and open the local app | [PC test kit](pc-testing.md) | [Five-minute guide](getting-started.md) |
 | Connect a webcam or DVR/IP camera | [Camera-source guide](local-camera-feeds.md) | [Record and review](recording-workflow.md) |
 | Analyze an approved recording | [Local analysis service](local-analysis-service.md) | [Recognition](recording-recognition.md), [human review](recording-workflow.md) |
+| Tune detection for my camera | [Guided training](training.md) | [Local analysis service](local-analysis-service.md) |
 | Record one configured LAN source | [LAN recorder](lan-recording.md) | [Report gaps and recovery](field-acceptance.md) |
 | Build a facility from maps or shapes | [Facility editor](facility-builder.md) | [Maps/shapes](map-measurements-and-shapes.md), [saved facilities](saved-facilities.md) |
 | Inspect real image pixels | [Image diagnostics](facility-image-diagnostics.md) | [Planar calibration](facility-calibration.md) |

@@ -24,7 +24,9 @@ presence observations only. Review or replace those rules for your use case.
 
 Start with `--analysis --allow-recording-import` on Linux, or
 `-Analysis -AllowRecordingImport` on Windows. Custom catalogs remain supported.
-Model/rules stay off the browser write API. The original CPU limits and explicit
+Models and configured rules stay off the browser write API; the one exception is
+[guided training](training.md), which with `--allow-training` may add new tuned
+rule sets and never overwrites a file. The original CPU limits and explicit
 separate CUDA CLI path remain in force.
 
 ## Use the complete path

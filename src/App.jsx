@@ -3,6 +3,7 @@ const FacilityBuilder = lazy(() => import("./FacilityBuilder.jsx").then(m => ({d
 const SystemSetup = lazy(() => import("./SystemSetup.jsx"));
 import LiveMonitor from "./LiveMonitor.jsx";
 const RecognitionReview = lazy(() => import("./RecognitionReview.jsx"));
+const TrainingWorkspace = lazy(() => import("./TrainingWorkspace.jsx"));
 import { mergeRecognitionEvents } from './recognition.mjs';
 import { workspaceFromHash, readWorkspace, writeWorkspace, preserveUnreadable, reviewExport, parseReviewExport } from './workspace-state.mjs';
 import { backdropDismiss } from './dialog-dismiss.mjs';
@@ -33,6 +34,7 @@ import {
   WarningCircle,
   SlidersHorizontal,
   Cpu,
+  Target,
 } from "@phosphor-icons/react";
 import {
   cameras,
@@ -593,7 +595,7 @@ export function App() {
         </div>
         <div className="wordmark">Intelligent DVR</div>
         <span className="header-divider" />
-        <span className="pilot-label">{tab === "Recognition" ? "Recording recognition" : tab === "Facility" ? "Guided facility builder" : "Local camera workspace"}</span>
+        <span className="pilot-label">{tab === "Recognition" ? "Recording recognition" : tab === "Train" ? "Guided training" : tab === "Facility" ? "Guided facility builder" : "Local camera workspace"}</span>
         <button className="workspace-select" onClick={() => setTab("Settings")} aria-label="Open workspace settings">
           Local workspace
           <GearSix size={14} />
@@ -615,6 +617,7 @@ export function App() {
         {[
           [Monitor, "Monitor"],
           [Eye, "Recognition"],
+          [Target, "Train"],
           [Buildings, "Facility"],
           [ListBullets, "Events"],
           [Selection, "Zones"],
@@ -656,6 +659,7 @@ export function App() {
         {recognitionOpened && <div hidden={tab !== "Recognition"}><WorkspaceBoundary name="Recognition"><Suspense fallback={<div className="content-page"><h1>Opening recognition review…</h1></div>}>
           <RecognitionReview active={tab === "Recognition" && !pageHidden} onImport={addObservations} clip={capturedClip} onClip={setCapturedClip} reviews={events} evidence={evidence} onRecorderStatus={setRecorderStatus} onZoneStill={offerZoneStill} />
         </Suspense></WorkspaceBoundary></div>}
+        {tab === "Train" && <WorkspaceBoundary name="Train"><Suspense fallback={<div className="content-page"><h1>Opening training…</h1></div>}><TrainingWorkspace onOpenRecognition={() => setTab("Recognition")} /></Suspense></WorkspaceBoundary>}
         {tab === "Facility" && <WorkspaceBoundary name="Facility"><Suspense fallback={<div className="content-page"><h1>Opening facility builder…</h1></div>}><FacilityBuilder onPreviewCount={setLiveCount} onDirtyChange={(dirty) => { facilityDirty.current = dirty; }} /></Suspense></WorkspaceBoundary>}
         {tab === "System" && <WorkspaceBoundary name="System"><Suspense fallback={<div className="content-page"><h1>Opening machine setup…</h1></div>}><SystemSetup setup={resources}
           onApply={setup => setResourceState(s => ({ ...s, setup, error: "" }))}

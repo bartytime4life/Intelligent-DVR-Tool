@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { activeJob, analysisRequest, localAnalysisOrigin, openJobResult, importRecording, refused } from './local-analysis.mjs';
 import { downloadBlob } from './clip-capture.mjs';
 import { loopbackAddress } from './live-feeds.mjs';
+import { readDefaultRules } from './training.mjs';
 
 export default function LocalAnalysis({ onResult, onBusy, clip, onClip, recorderBusy = false, currentRun = null }) {
   const [catalog, setCatalog] = useState(null), [job, setJob] = useState(null);
@@ -41,7 +42,10 @@ export default function LocalAnalysis({ onResult, onBusy, clip, onClip, recorder
       token.current = value.token; setCatalog(value); setConnected(true); setJob(value.job);
       setRecording(previous => value.recordings.some(r => r.id === previous) ? previous : '');
       setModel(previous => value.models.some(m => m.id === previous) ? previous : value.models[0]?.id || '');
-      setRules(previous => value.rules.some(r => r.id === previous) ? previous : value.rules[0]?.id || '');
+      // A rule set saved by guided training is preselected; an explicit choice on this page still wins.
+      const trained = (() => { try { return readDefaultRules(globalThis.localStorage); } catch { return ''; } })();
+      setRules(previous => value.rules.some(r => r.id === previous) ? previous
+        : value.rules.find(r => r.id === trained)?.id || value.rules[0]?.id || '');
       setMessage(value.ready ? 'Choose a recording, model and rules. Analysis starts only when you press Analyze recording.' : 'Analysis or recording-validation dependencies are missing. Run the current installer or install the optional edge requirements, then reconnect.');
     } catch (err) { if (ticket === version.current) { setError(err.message); setMessage(''); } }
     finally { if (ticket === version.current) setWorking(false); }

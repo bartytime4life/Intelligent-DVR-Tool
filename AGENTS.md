@@ -135,3 +135,15 @@ max_gap, so brief occlusion or motion blur does not emit a second observation.
 Webcam testing split two real visits into five observations under the previous
 reset-on-any-miss behavior. A gap longer than max_gap still starts a new run.
 Rule-engine hashes changed; re-analyze traces before evaluating them.
+
+Owner training decision (2026-11-01): training must be easy for a novice without
+navigation confusion. Each session either improves overall recognition or sets a
+baseline for an individual. Guided detection training lives in the Train
+workspace: one page with a camera check, an on-screen scripted recording that
+pauses while the window is hidden, automatic local import and analysis, plain-
+language per-prompt results and a recommended threshold. Applying it saves a new
+rule set through the narrow --allow-training write path (fixed fields, exclusive
+create, at most 50). Results describe the session, never qualification. Person
+enrollment follows separately: consent-based face templates kept on this computer,
+deletable, and shown only as "possible match" suggestions for human review; this
+supersedes the earlier "no face identification" statement once implemented.

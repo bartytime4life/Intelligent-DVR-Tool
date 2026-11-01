@@ -90,7 +90,7 @@ test('dialogs dismiss only for presses that start and end on the backdrop', () =
   assert.equal(closed, 1);
 });
 test('every workspace has a bookmark while skip links remain local anchors', () => {
-  for(const name of ['Monitor','Recognition','Facility','Events','Zones','System','Settings']) assert.equal(workspaceFromHash(`#${name.toLowerCase()}`), name);
+  for(const name of ['Monitor','Recognition','Train','Facility','Events','Zones','System','Settings']) assert.equal(workspaceFromHash(`#${name.toLowerCase()}`), name);
   assert.equal(workspaceFromHash('#workspace'), null);
   assert.equal(workspaceFromHash('#untrusted'), null);
 });
