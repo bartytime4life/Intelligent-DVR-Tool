@@ -36,10 +36,12 @@ class Rule:
 
 
 class RuleEngine:
-    """Emit once for each continuous run of a class in a zone.
+    """Emit once for each run of a class in a zone.
 
-    Different objects of the same class may contribute to a run. Never describe
-    dwell as the persistence of the same person or object.
+    A run continues while matches are at most max_gap seconds apart, so brief
+    misses (occlusion, motion blur) do not start a new run. Different objects of
+    the same class may contribute to a run. Never describe dwell as the
+    persistence of the same person or object.
     """
     def __init__(self, rules, camera='offline-camera', run_id=''):
         if not isinstance(camera, str) or not 1 <= len(camera) <= 80:
@@ -72,8 +74,7 @@ class RuleEngine:
                        and x <= d['box'][0]+d['box'][2]/2 <= x+w
                        and y <= d['box'][1]+d['box'][3]/2 <= y+h]
             if not matches:
-                self.states.pop(rule.name, None)
-                continue
+                continue  # The next match decides whether the gap ended the run.
             state = self.states.get(rule.name)
             if state is None or seconds-state['last'] > rule.max_gap:
                 state = {'start': seconds, 'last': seconds, 'emitted': False}

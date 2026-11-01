@@ -3,16 +3,16 @@
   "manifest_sha256": "c299621164cbf13c882af3c9256dfb5b8948df3ee976d07f7512c55cf301ac19",
   "decisions": [
     {
-      "trace_sha256": "6766735a32d9e0edcd83c51f44f08394cacfd731da858f718c0e305986879c1a",
-      "event_id": "4eeaed2dd797b958d4f69c4f6b11d7d2",
+      "trace_sha256": "1a32d74275820e6e0075b3a364dfda940b1ffff6c101a1bf20c57cace2901bcb",
+      "event_id": "4cb9484255eb1acc06bb69ffc62f3f1a",
       "verdict": "confirmed",
       "reviewer": "synthetic-fixture-reviewer",
       "rationale": "Supplied synthetic decision, not an actual human scene review.",
       "reviewed_at": "2026-10-27T00:00:00Z"
     },
     {
-      "trace_sha256": "6766735a32d9e0edcd83c51f44f08394cacfd731da858f718c0e305986879c1a",
-      "event_id": "fdba1a2c0b40b70cf76da5dbd9907b47",
+      "trace_sha256": "1a32d74275820e6e0075b3a364dfda940b1ffff6c101a1bf20c57cace2901bcb",
+      "event_id": "6c8ae31776dc4f099f2db70b4ffbcfbe",
       "verdict": "false_alert",
       "reviewer": "synthetic-fixture-reviewer",
       "rationale": "Supplied synthetic decision, not an actual human scene review.",

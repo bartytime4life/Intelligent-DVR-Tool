@@ -22,7 +22,7 @@ def make_fixture(root):
     model_hash = hashlib.sha256(b'synthetic fixture; no trained detector').hexdigest()
     source_hash = digest(root/'source.synthetic.txt')
     rules = [{'name': 'fixture zone', 'label': 'person', 'rect': [0, 0, 1, 1],
-              'threshold': .7, 'dwell': 0, 'max_gap': 2}]
+              'threshold': .7, 'dwell': 0, 'max_gap': 1}]
     person = {'label': 'person', 'score': .9, 'box': [.1, .1, .2, .2]}
     car = {'label': 'car', 'score': .8, 'box': [.6, .6, .2, .2]}
     run_id = hashlib.sha256((source_hash+model_hash).encode()).hexdigest()

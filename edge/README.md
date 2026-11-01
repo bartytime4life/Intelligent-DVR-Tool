@@ -190,10 +190,13 @@ category is not a real detector class.
 ## What rules mean
 
 An observation qualifies when its box center is inside a configured rectangle,
-its exact label matches and its score meets the threshold. Dwell requires
-continuous class presence at sampled frames, resetting on an absent frame or a
-gap longer than `max_gap`. It does **not** prove that the same object or person
-remained there. There is no identity tracking or learned anomaly model.
+its exact label matches and its score meets the threshold. A run continues
+while qualifying observations are at most `max_gap` seconds apart; sampled
+frames without one inside that gap (brief occlusion, motion blur) neither end
+the run nor emit a second observation. A longer gap starts a new run and
+resets dwell, which is measured from the run's first qualifying frame. It does
+**not** prove that the same object or person remained there. There is no
+identity tracking or learned anomaly model.
 
 The default stride is five decoded frames. The tool rejects sampling intervals
 longer than a rule's `max_gap`. Timestamps use frame index / declared frame rate;
