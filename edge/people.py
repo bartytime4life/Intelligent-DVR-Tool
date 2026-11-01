@@ -11,6 +11,8 @@ from pathlib import Path
 import re
 import secrets
 
+from .faces import DUPLICATE, MAX_TEMPLATES
+
 SCHEMA = 'intelligent-dvr.person-template.v1'
 CONSENT_STATEMENT = 'local-face-template-v1'
 PEOPLE_LIMIT = 50
@@ -19,6 +21,13 @@ PERSON_ID = re.compile(r'[a-f0-9]{16}')
 
 def now():
     return datetime.now(timezone.utc).isoformat(timespec='seconds')
+
+
+def append_view(templates, vector, limit=MAX_TEMPLATES):
+    """Add one confirmed view unless it repeats a kept one; the oldest views give way when full."""
+    if any(sum(a * b for a, b in zip(kept, vector)) >= DUPLICATE for kept in templates):
+        return list(templates), False
+    return (list(templates) + [list(vector)])[-limit:], True
 
 
 def valid_name(value):

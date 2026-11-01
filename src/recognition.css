@@ -97,3 +97,16 @@
 .lan-segment-tools { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .75rem; margin-top: 1rem; }
 .lan-new-badge { font-size: 12px; padding: .2rem .6rem; border-radius: 999px; background: #3a3020; color: #ffd68e; }
 .lan-segment.unhandled { box-shadow: inset 3px 0 0 #f5b94e; padding-left: .75rem; }
+.recognition-people { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px 18px; align-items: center; margin: 16px 0; padding: 16px 18px; border: 1px solid #5a4a26; border-radius: 10px; background: #1b1a14; }
+.recognition-people p { margin: 4px 0 0; color: #c9c2ad; font-size: 13px; line-height: 1.5; }
+.recognition-people > p, .recognition-people-frames { grid-column: 1 / -1; }
+.recognition-people-frames { display: flex; flex-wrap: wrap; gap: 6px 14px; }
+.recognition-people-frames [aria-current] { color: var(--amber); }
+.recognition-box-labels .possible { background: var(--amber); color: #201a0d; font-weight: 600; }
+.recognition-box-labels .possible.confirmed { background: #58dccd; color: #07131f; }
+.recognition-matches { margin-top: 16px; padding-top: 12px; border-top: 1px solid #253747; }
+.recognition-matches > div { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; margin: 8px 0; }
+.recognition-matches > div > span:last-child { display: flex; gap: 8px; align-items: center; }
+.recognition-matches p { color: #9fadb8; font-size: 12px; }
+.recognition-confirmed { color: #58dccd; font-weight: 600; }
+@media (max-width: 600px) { .recognition-people { grid-template-columns: minmax(0, 1fr); } }

@@ -32,7 +32,7 @@ from .result_store import ResultStore, VIDEO_BYTES, REVIEW_BYTES as RESULT_BYTES
 from .recording_import import import_recording, ImportError as RecordingImportError, MAX_IMPORT_BYTES, MIMES as IMPORT_MIMES
 from .enhancement import PROFILE as ENHANCEMENT_PROFILE, validate_trace as validate_enhancement
 from .faces import DETECTOR as FACE_DETECTOR, RECOGNIZER as FACE_RECOGNIZER, EMBEDDING, verify_model
-from .people import PeopleStore, CONSENT_STATEMENT, PEOPLE_LIMIT, valid_name, now as utc_now
+from .people import PeopleStore, CONSENT_STATEMENT, PEOPLE_LIMIT, append_view, valid_name, now as utc_now
 from .media_coverage import validate as validate_coverage
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -46,6 +46,8 @@ TRAINED_NAME = re.compile(r'(trained-[a-f0-9]{12})\.rules\.json')
 TRAINING_KEYS = {'name', 'label', 'threshold', 'dwell', 'max_gap', 'rect'}
 # Consent-based enrollment: a bounded worker per request, at least five distinct clear views.
 FACE_SECONDS, FACE_MIN_VIEWS = 120, 5
+# Match suggestions look inside person boxes scoring at least this much, within these bounds.
+IDENTIFY_SCORE, IDENTIFY_BOXES, IDENTIFY_FRAMES = 0.3, 10, 1200
 FACE_TIPS = {'none': 'No face was found in many frames: face the camera.',
              'several': 'More than one face was in view: only the person enrolling should be visible.',
              'small': 'The face was small: move closer.', 'unclear': 'The face was unclear: face the camera directly.',
@@ -221,6 +223,7 @@ class Jobs:
         self.people = PeopleStore(people_dir, {'detector': FACE_DETECTOR['sha256'], 'recognizer': FACE_RECOGNIZER['sha256']}) \
             if people_dir is not None else None
         self.face_runner, self.face_busy = face_runner or self.run_face_worker, False
+        self.suggestions = None  # Last match suggestions: {'job', 'views': {(frame, box): {person, embedding}}}
         self.wall_seconds = min(300, max(.1, wall_seconds))
         self.process_factory = process_factory
         self.lock = threading.RLock()
@@ -350,18 +353,19 @@ class Jobs:
             except (OSError, ValueError):
                 return {'error': 'FACE_FAILED'}
 
-    def face_job(self, recording, payload):
-        """Run the bounded face worker on one listed recording; no overlap with analysis or imports."""
+    def face_job(self, recording, payload, *, path=None):
+        """Run the bounded face worker on a listed recording (or a job's own source); no overlap with analysis or imports."""
         with self.lock:
             if self.closed or self.owner is not None or self.importing or self.face_busy or (self.job and self.job['state'] not in TERMINAL):
                 raise JobError('BUSY', 'Wait for the current analysis, import or enrollment to finish, then retry.', 409)
-            if not isinstance(recording, str) or recording not in self.choices:
-                self.available()
-            if not isinstance(recording, str) or recording not in self.choices:
-                raise JobError('SELECTION', 'Choose a listed recording.')
-            path, sig = self.choices[recording]
-            if signature(path.stat()) != sig:
-                raise JobError('INPUT_CHANGED', 'The recording changed. Refresh the choices and retry.', 409)
+            if path is None:
+                if not isinstance(recording, str) or recording not in self.choices:
+                    self.available()
+                if not isinstance(recording, str) or recording not in self.choices:
+                    raise JobError('SELECTION', 'Choose a listed recording.')
+                path, sig = self.choices[recording]
+                if signature(path.stat()) != sig:
+                    raise JobError('INPUT_CHANGED', 'The recording changed. Refresh the choices and retry.', 409)
             self.face_busy = True
         try:
             result = self.face_runner({**payload, 'video': str(path), 'detector': str(self.catalog['faces']['detector']),
@@ -375,6 +379,8 @@ class Jobs:
                        'MODEL_LOAD_FAILED': 'The face models could not be loaded. Check the catalog files.',
                        'FACE_TIMEOUT': 'Face processing took too long. Record a shorter clip.'}.get(code, 'Face processing failed. Record again.')
             raise JobError(code if code in ('VIDEO_OPEN_FAILED', 'MODEL_LOAD_FAILED', 'FACE_TIMEOUT') else 'FACE_FAILED', message, 422)
+        if payload['mode'] == 'identify':
+            return result
         vectors = result.get('embeddings')
         if (not isinstance(vectors, list) or len(vectors) > 40 or not all(isinstance(v, list) and len(v) == EMBEDDING and
                 all(isinstance(x, float) and math.isfinite(x) for x in v) for v in vectors)):
@@ -415,6 +421,67 @@ class Jobs:
         store.write(record)
         return {'person': store.summary(record), 'baseline': record['baseline'], 'tip': face_tip(result.get('reasons')) if not usable else ''}
 
+    def people_identify(self, body):
+        """Suggest enrolled people for faces inside a completed job's person boxes."""
+        store = self.require_people()
+        if not isinstance(body, dict) or set(body) != {'job'} or not isinstance(body['job'], str) or not re.fullmatch('[a-f0-9]{32}', body['job']):
+            raise JobError('SELECTION', 'Choose a completed analysis.')
+        records = store.records()
+        if not records:
+            raise JobError('NO_PEOPLE', 'Enroll someone in Train before checking for matches.', 409)
+        with self.lock:
+            result_path, _ = self.artifact(body['job'], 'result')
+            source, _ = self.artifact(body['job'], 'source')
+            review = read_json(result_path, RESULT_BYTES)
+        frames = []
+        for frame in review['trace']['frames']:
+            boxes = [[i, d['box']] for i, d in enumerate(frame['detections']) if d.get('label') == 'person' and d.get('score', 0) >= IDENTIFY_SCORE]
+            if boxes:
+                frames.append({'frame_index': frame['frame_index'], 'boxes': boxes[:IDENTIFY_BOXES]})
+        frames = frames[:IDENTIFY_FRAMES]
+        if not frames:
+            return {'job': body['job'], 'frames': 0, 'faces': 0, 'suggestions': []}
+        names = {r['id']: r['name'] for r in records}
+        result = self.face_job(None, {'mode': 'identify', 'frames': frames,
+                                      'people': [{'id': r['id'], 'embeddings': r['embeddings']} for r in records]}, path=source)
+        requested = {(f['frame_index'], index): box for f in frames for index, box in f['boxes']}
+        matches = result.get('matches')
+        if not isinstance(result.get('faces'), int) or not isinstance(matches, list) or len(matches) > 500 or not all(
+                isinstance(m, dict) and (m.get('frame_index'), m.get('box_index')) in requested and m.get('person') in names
+                and isinstance(m.get('similarity'), float) and -1 <= m['similarity'] <= 1 and isinstance(m.get('embedding'), list)
+                and len(m['embedding']) == EMBEDDING and all(isinstance(x, float) and math.isfinite(x) for x in m['embedding'])
+                for m in matches):
+            raise JobError('FACE_FAILED', 'Face processing returned an invalid result. Check again.', 422)
+        views = {(m['frame_index'], m['box_index']): {'person': m['person'], 'embedding': m['embedding']} for m in matches}
+        with self.lock:
+            self.suggestions = {'job': body['job'], 'views': views}  # Embeddings stay here; the browser gets names.
+        return {'job': body['job'], 'frames': len(frames), 'faces': result['faces'], 'suggestions': [
+            {'frame_index': m['frame_index'], 'box_index': m['box_index'], 'box': requested[(m['frame_index'], m['box_index'])],
+             'person': m['person'], 'name': names[m['person']], 'similarity': m['similarity']} for m in matches]}
+
+    def people_confirm(self, person_id, body):
+        """A reviewer confirmed a suggestion: that face view joins the person's template."""
+        store = self.require_people()
+        if (not isinstance(body, dict) or set(body) != {'job', 'frame_index', 'box_index'} or not isinstance(body['job'], str)
+                or not all(isinstance(body[k], int) and not isinstance(body[k], bool) for k in ('frame_index', 'box_index'))):
+            raise JobError('SELECTION', 'Choose a suggested match.')
+        key = (body['frame_index'], body['box_index'])
+        with self.lock:
+            suggestions = self.suggestions or {}
+            view = suggestions['views'].get(key) if suggestions.get('job') == body['job'] else None
+            if not view:
+                raise JobError('NOT_FOUND', 'Check for enrolled people again, then confirm.', 404)
+            if view['person'] != person_id:
+                raise JobError('SELECTION', 'This suggestion is for someone else.')
+            try:
+                record = store.get(person_id)
+            except (KeyError, OSError, ValueError):
+                raise JobError('NOT_FOUND', 'This person is no longer enrolled.', 404) from None
+            record['embeddings'], added = append_view(record['embeddings'], view['embedding'])
+            store.write(record)
+            suggestions['views'].pop(key)
+        return {'person': store.summary(record), 'added': added}
+
     def people_delete(self, person_id, body):
         store = self.require_people()
         if body != {}:
@@ -423,6 +490,9 @@ class Jobs:
             store.delete(person_id)
         except (KeyError, OSError):
             raise JobError('NOT_FOUND', 'This person is no longer enrolled.', 404) from None
+        with self.lock:
+            if self.suggestions:  # Their pending suggestions go too.
+                self.suggestions['views'] = {k: v for k, v in self.suggestions['views'].items() if v['person'] != person_id}
         self.diagnostics.event('PERSON_DELETED')
         return {'deleted': person_id}
 
@@ -505,6 +575,8 @@ class Jobs:
                 raise JobError('BUSY', 'A recording is already processing. Wait or cancel it first.', 409)
             if self.importing:
                 raise JobError('BUSY', 'Wait for the recording import to finish, then refresh the choices.', 409)
+            if self.face_busy:
+                raise JobError('BUSY', 'Wait for face processing to finish, then retry.', 409)
             if (not isinstance(request, dict) or set(request) not in
                     ({'recording', 'model', 'rules'}, {'recording', 'model', 'rules', 'compare_enhancement'})
                     or any(not isinstance(v, str) for v in request.values())
@@ -539,6 +611,7 @@ class Jobs:
                 directory = Path(self.directory.name)
             self.cancel_event = threading.Event()
             self.job = job
+            self.suggestions = None  # They refer to the previous job's frames.
             self.managed = owner is not None
             self.thread = threading.Thread(target=self._run, args=(directory, source, sig, model, rules, expected_sha, camera,
                                            model_cache if owner is not None else None), daemon=True)
@@ -914,9 +987,12 @@ class Handler(BaseHTTPRequestHandler):
                 return self._json(jobs.save_training_rules(body), 201)
             if path == '/api/analysis/people':
                 return self._json(jobs.people_enroll(body), 201)
-            match = re.fullmatch('/api/analysis/people/([a-f0-9]{16})/(verify|delete)', path)
+            if path == '/api/analysis/people/identify':
+                return self._json(jobs.people_identify(body))
+            match = re.fullmatch('/api/analysis/people/([a-f0-9]{16})/(verify|confirm|delete)', path)
             if match:
-                return self._json(jobs.people_verify(match[1], body) if match[2] == 'verify' else jobs.people_delete(match[1], body))
+                action = {'verify': jobs.people_verify, 'confirm': jobs.people_confirm, 'delete': jobs.people_delete}[match[2]]
+                return self._json(action(match[1], body))
             if path == '/api/recorder/start':
                 return self._json(recorder.start(body), 202)
             if path == '/api/recorder/stop':

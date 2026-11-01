@@ -75,6 +75,15 @@ class StoreTest(unittest.TestCase):
         other = dict(record, id='1' * 16, models={'detector': 'x', 'recognizer': 'y'})
         (self.root / 'people' / ('1' * 16 + '.json')).write_text(json.dumps(other))
         self.assertEqual([r['id'] for r in self.store.records()], [record['id']])
+    def test_confirmed_views_skip_duplicates_and_keep_the_newest_forty(self):
+        from edge.people import append_view
+        first = [1.0] + [0.0] * 127
+        self.assertEqual(append_view([first], first), ([first], False))
+        kept, added = append_view([first], [0.0, 1.0] + [0.0] * 126)
+        self.assertTrue(added); self.assertEqual(len(kept), 2)
+        full = [[float(i == j) for j in range(128)] for i in range(40)]
+        kept, added = append_view(full, [.5] * 128)
+        self.assertTrue(added); self.assertEqual(len(kept), 40); self.assertEqual(kept[-1], [.5] * 128)
     def test_the_store_has_a_limit(self):
         for i in range(PEOPLE_LIMIT): self.store.create(f'P{i}', [[.1] * faces.EMBEDDING] * 5)
         with self.assertRaises(OverflowError): self.store.create('One more', [[.1] * faces.EMBEDDING] * 5)
@@ -153,6 +162,55 @@ class ServiceTest(unittest.TestCase):
                 self.assertEqual(self.error(lambda: self.enroll(service)).code, code)
         self.assertEqual(service.people_list()['people'], [])
         self.assertFalse(service.face_busy)
+    def identify_fixture(self, service):
+        review = {'trace': {'frames': [
+            {'frame_index': 0, 'detections': [{'label': 'person', 'score': .9, 'box': [.1, .1, .3, .6]},
+                                              {'label': 'chair', 'score': .9, 'box': [.5, .5, .2, .2]}]},
+            {'frame_index': 5, 'detections': [{'label': 'person', 'score': .2, 'box': [.2, .1, .1, .1]}]},
+            {'frame_index': 10, 'detections': [{'label': 'person', 'score': .6, 'box': [.4, .2, .2, .5]}]}]}}
+        (self.root / 'review.json').write_text(json.dumps(review))
+        source = self.root / 'recordings' / 'clip.webm'
+        service.artifact = lambda job, kind: (self.root / 'review.json', 'application/json') if kind == 'result' else (source, 'video/webm')
+    def test_suggestions_use_person_boxes_keep_embeddings_in_the_service_and_confirm_once(self):
+        service = self.service(); job = 'a' * 32
+        self.assertEqual(self.error(lambda: service.people_identify({'job': job})).code, 'NO_PEOPLE')
+        self.results = [{'checked': 20, 'usable': 12, 'reasons': {}, 'embeddings': [[1.0] + [0.0] * 127] * 6}]
+        person = self.enroll(service)['person']['id']
+        self.identify_fixture(service)
+        view = [0.0, 1.0] + [0.0] * 126
+        self.results = [{'faces': 2, 'matches': [{'frame_index': 10, 'box_index': 0, 'person': person, 'similarity': .61, 'embedding': view}]}]
+        found = service.people_identify({'job': job})
+        self.assertEqual(self.calls[-1]['frames'], [{'frame_index': 0, 'boxes': [[0, [.1, .1, .3, .6]]]},
+                                                    {'frame_index': 10, 'boxes': [[0, [.4, .2, .2, .5]]]}])
+        self.assertEqual(found['suggestions'], [{'frame_index': 10, 'box_index': 0, 'box': [.4, .2, .2, .5], 'person': person,
+                                                 'name': 'Andy', 'similarity': .61}])
+        self.assertNotIn('embedding', json.dumps(found))
+        body = {'job': job, 'frame_index': 10, 'box_index': 0}
+        self.assertEqual(self.error(lambda: service.people_confirm(person, {**body, 'job': 'b' * 32})).code, 'NOT_FOUND')
+        self.assertEqual(self.error(lambda: service.people_confirm('f' * 16, body)).code, 'SELECTION')
+        confirmed = service.people_confirm(person, body)
+        self.assertEqual((confirmed['added'], confirmed['person']['views']), (True, 7))  # The worker de-duplicates enrollment.
+        self.assertEqual(self.error(lambda: service.people_confirm(person, body)).code, 'NOT_FOUND')  # Each suggestion confirms once.
+    def test_invalid_suggestions_are_rejected_and_deleting_a_person_drops_theirs(self):
+        service = self.service(); job = 'a' * 32
+        self.results = [{'checked': 20, 'usable': 12, 'reasons': {}, 'embeddings': [[.1] * faces.EMBEDDING] * 6}]
+        person = self.enroll(service)['person']['id']
+        self.identify_fixture(service)
+        good = {'frame_index': 10, 'box_index': 0, 'person': person, 'similarity': .6, 'embedding': [.1] * faces.EMBEDDING}
+        for bad in ({**good, 'box_index': 3}, {**good, 'frame_index': 5}, {**good, 'person': 'f' * 16},
+                    {**good, 'embedding': [.1] * 3}, {**good, 'similarity': 2.0}):
+            with self.subTest(bad=bad):
+                self.results = [{'faces': 1, 'matches': [bad]}]
+                self.assertEqual(self.error(lambda: service.people_identify({'job': job})).code, 'FACE_FAILED')
+        self.results = [{'faces': 1, 'matches': [good]}]
+        service.people_identify({'job': job})
+        service.people_delete(person, {})
+        self.assertEqual(service.suggestions['views'], {})
+        self.assertEqual(self.error(lambda: service.people_identify({'job': 'not-a-job'})).code, 'SELECTION')
+    def test_analysis_waits_for_face_processing(self):
+        service = self.service(); service.face_busy = True
+        error = self.error(lambda: service.start({'recording': self.recording, 'model': 'model', 'rules': 'rules'}))
+        self.assertEqual((error.code, str(error)), ('BUSY', 'Wait for face processing to finish, then retry.'))
     def test_face_jobs_wait_for_imports_and_unknown_recordings_are_refused(self):
         service = self.service()
         service.importing = True

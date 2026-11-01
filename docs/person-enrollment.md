@@ -66,13 +66,32 @@ view matches a person when its best cosine similarity to their template reaches
 SFace’s published 0.363 and beats the next person by 0.05. Otherwise there is no
 suggestion.
 
+## Possible matches in Recognition
+
+After a local analysis opens in Recognition, **Check for enrolled people** runs the
+same bounded worker on that job's own recording. It looks only inside person boxes
+scoring at least 0.30 (up to 10 per frame and 1,200 sampled frames), takes the
+largest clear face in each box and compares it with every template. A box gets
+**Possible: name** only when the match clears the threshold and the margin above.
+
+- **Confirm** adds that face view to the person's template, so later suggestions
+  improve. Near-duplicates are skipped and the 40 newest views are kept.
+- **Not this person** hides the suggestion in this page; nothing is saved.
+- A jump list leads to every frame with a suggestion.
+
+The browser receives frame and box numbers, names and similarity only. Face
+embeddings for pending suggestions stay in the local service's memory for that one
+job and are dropped when another analysis starts, the person is deleted or the
+service stops. Suggestions are available for results from this computer's own
+jobs, not for imported result files or LAN-recorder segments.
+
 ## Storage and deletion
 
 | Item | Where |
 | --- | --- |
 | Templates | `people/<id>.json` beside the catalog: name, consent record, model hashes, up to 40 embeddings, last baseline. File 0600, folder 0700. |
 | Clips | The recordings folder, like any import. Delete them there when no longer needed. |
-| Browser | Names, view counts and baselines only; never embeddings. |
+| Browser | Names, view counts, baselines and suggestions only; never embeddings. |
 
 **Delete** in the people list overwrites the template file, then removes it.
 Filesystems and backups may still hold old copies; manage those with your
@@ -80,6 +99,7 @@ retention policy. Up to 50 people.
 
 ## Limits
 
-Matching suggestions in Recognition are not part of this release. Results
-describe your sessions and camera only: no accuracy, demographic-fairness or
-anti-spoofing qualification. Photos or screens showing a face can match.
+Results describe your sessions and camera only: no accuracy, demographic-fairness
+or anti-spoofing qualification. Photos or screens showing a face can match, and a
+missing suggestion does not mean the person was absent. Suggestions are never
+sent to Events or exported automatically.

@@ -12,6 +12,8 @@ network scanning, automatic containment, background capture or cloud inference.
 Optional [person enrollment](docs/person-enrollment.md) (off unless started with
 `--allow-face-enrollment` and the pinned face models) keeps consent-based face
 templates in private local files that the browser never receives, and is deletable.
+Its "possible match" suggestions in Recognition are for a reviewer to confirm or
+dismiss; confirming adds that view to the template.
 
 Do not commit private recordings, receipts, model weights, API keys or camera
 credentials. Local input files and models should be trusted and processed in a
