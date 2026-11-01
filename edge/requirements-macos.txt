@@ -1,0 +1,10 @@
+# Tested Apple silicon / Python 3.12 runtime, macOS 14 or newer.
+# Official PyPI wheel SHA-256 values retrieved 2026-11-01.
+# Keep Linux/Windows qualification pins separate; no unverified source builds.
+opencv-python-headless==4.14.0.94 \
+    --hash=sha256:bc7db37dc234f7bb3190a158fd9dd750357246fc7d8adb23698843ef721a993b
+numpy==2.5.4 \
+    --hash=sha256:b11e8fda06a7d69f15ebf542660b74466c2e51094800c1fb794f47ad4faeef17 \
+    --hash=sha256:9cb18a327b49c5c337f972b03682f6a49855525faaf3c0d3e9c96cd0fd8880a8
+av==19.0.2 \
+    --hash=sha256:b0dff6dfcc6ff9944fbbff15bc4ee2d90a2c1695d493bdea96e86f48823e9feb

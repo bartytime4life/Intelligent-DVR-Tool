@@ -24,6 +24,13 @@ SOURCE = {'id': 'dock', 'name': 'Authorized test camera', 'host': '192.168.1.50'
           'path': '/video', 'username': 'viewer', 'password': 'fixture-private'}
 
 
+class RecorderPlatformTest(unittest.TestCase):
+    def test_mac_storage_remains_explicitly_unsupported(self):
+        with tempfile.TemporaryDirectory() as temp,patch('edge.lan_recorder.sys.platform','darwin'):
+            with self.assertRaisesRegex(ValueError,'supports Linux and Windows'):
+                Store(Path(temp)/'store')
+
+
 class Process:
     def __init__(self, code=None):
         self.returncode = code; self.stdin = io.BytesIO(); self.killed = False
@@ -52,6 +59,7 @@ def synthetic_segment(directory, seconds=5, fail_at=None):
     return cap
 
 
+@unittest.skipUnless(sys.platform in ('linux', 'win32'), 'LAN recorder storage is implemented on Linux/Windows only')
 class RecorderTest(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory(); self.root = build(Path(self.temp.name))
@@ -572,7 +580,8 @@ class RecorderTest(unittest.TestCase):
         self.assertEqual(self.jobs.snapshot()['id'], manual['id'])
 
 
-@unittest.skipUnless(os.getenv('DVR_TEST_SOCKETS') == '1', 'Requires controlled loopback sockets')
+@unittest.skipUnless(sys.platform in ('linux', 'win32') and os.getenv('DVR_TEST_SOCKETS') == '1',
+                     'Requires Linux/Windows recorder storage and controlled loopback sockets')
 class RtspRecorderTest(unittest.TestCase):
     def test_actual_rtsp_relay_segment_worker_http_analysis_and_restart(self):
         import http.client

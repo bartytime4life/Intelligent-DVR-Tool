@@ -1,0 +1,39 @@
+name: Mac source install
+on: [push, pull_request, workflow_dispatch]
+permissions:
+  contents: read
+jobs:
+  apple-silicon:
+    runs-on: macos-14
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install the same pinned runtime as the Mac entry point
+        run: bash Install-Mac.command
+      - name: Test-only ONNX fixture generator
+        run: .venv/bin/python -m pip install onnx==1.23.2
+      - run: npm test
+        env:
+          DVR_TEST_SOCKETS: '1'
+      - run: npm run test:sites
+      - run: .venv/bin/python -m unittest discover -s tests -p 'test_*.py'
+        env:
+          DVR_TEST_SOCKETS: '1'
+      - name: Fresh source with spaces, repeat install, real analysis, duplicate start and restart
+        run: .venv/bin/python scripts/smoke-mac-install.py --evidence evidence/mac-install
+      - run: python scripts/check-docs.py
+      - run: python scripts/build-wiki.py --check
+      - name: Mac entry point syntax
+        run: bash -n Start-Mac.command Install-Mac.command Check-Mac.command
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mac-install-evidence
+          path: evidence/mac-install/
+          retention-days: 30

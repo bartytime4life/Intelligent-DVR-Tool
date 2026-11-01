@@ -181,3 +181,11 @@ heights and elevations editable and preserve windows in saved facility plans.
 Owner stair-workflow preference (2026-11-01): click the start landing on the
 active floor, choose the destination level, and drag or rotate the whole stair
 around that start. Keep exact sizing, explicit floor openings and one-step Undo.
+
+Owner Mac-update preference (2026-11-01): reconcile working local setup with the
+repository so future installs and updates preserve models, recordings, settings,
+tuned rules, enrollment templates and browser work. Keep private runtime data out
+of Git; document folder backups and browser exports separately. Maintain repeatable
+Mac Install / Check / Start and regression checks for data preservation, model
+verification, stale builds and duplicate launches. Do not promote synthetic setup
+checks into camera, recognition-quality or capacity claims.

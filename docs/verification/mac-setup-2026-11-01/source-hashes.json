@@ -1,0 +1,28 @@
+{
+  "base_commit": "e073f281b04c2b2118a254b8ee60b5449b6ae958",
+  "changed_setup_sha256": {
+    "Start-Mac.command": "00de0d203f5d6e7dd0a7b0a1b2a0f56ae023094d3c275deb6316a1d75a740a27",
+    "Install-Mac.command": "8071a540f896a77320aa7f91e97ad8fd3d004dceb0e8ceeab26edd59083932e0",
+    "Check-Mac.command": "afc3c77951cde089c97e89789a8adac0f337d19d9b48f7888060211a1194529b",
+    "edge/mac_setup.py": "af186b7b7fc309411d03b54fee5e5d0ff9da21ebe4f8aec7ead86ccbfee19075",
+    "edge/pc_setup.py": "2896bfaf604f03da81e2b8412aa72a808aaf63c3605c97074b5a8a87564fe0f3",
+    "edge/prepare_analysis.py": "46d75d4cc72ae73522d3730f1a53bd76685fae5688c06053ee73dae0ceebc35c",
+    "edge/requirements-macos.txt": "fae1abec30df9bc3cd5ddff56730add2982303d4de9da129dd655c5465910577",
+    "scripts/smoke-mac-install.py": "caa0c4113771398e10137c6a83fcffb929055f0d15274131897be338e9559401",
+    "tests/test_mac_setup.py": "949ba9cac42f173fb162411db23c6e9177ad381fa5d37df8cc414c6570d48d2c",
+    "tests/test_pc_setup.py": "e875fcf9274ae48964030ccdce04191ad9bebc148727a07eb9257c963550fb71",
+    "tests/test_prepare_analysis.py": "80fff258c8c9422ccf44f9db8806bf5e735678dfbf84b1617c4a63788d038aff",
+    "tests/test_lan_recorder.py": "1fe4ba5000ec834b730e2e02f2acf876bfc0642fe3e2fe318bd818e1a85e02d2",
+    "tests/test_resources.py": "c7b9dabf99d158dddbf673c0f9c3125c6db42bf0ce878ded844a05d729a9f7b5",
+    ".github/workflows/mac-install.yml": "6d28a537b1e99b69a8f775336a9dad5e65ca29482c5bd4850e879c37294dad28"
+  },
+  "unchanged_baseline_sha256": {
+    "edge/inference.py": "7e95beb9e25dd67ac5d8d977ec6c466874371d12d112119a85a619124687b2f1",
+    "edge/journal.py": "70f7a3419d05d76380ea32ad5de20ee440bc17256e25baf0f2289a86e46a495a",
+    "edge/supervision.py": "03f334d5fa072e5f3ad02bd90536fd2c00fc97ebfaa54ca1ef1c10b64b80a9cf",
+    "edge/scheduler.py": "8639b46d3ba2e1a14efaa7ff647f412e6be437685ec7be5717a00983835b9019",
+    "edge/profiling.py": "f7c0a3e4b831d7f996840aec51a73e3fe68e06627cdce854716c576068f80f91",
+    "edge/local_service.py": "3a7728ee250bb63636a4775f1fff0ea90f1104a98337029017e074624e89c3b5",
+    "src/RecognitionReview.jsx": "efd082fb33e3414f1ceef937d75b84a28f487ec296e75e05163c10f28d69ed2f"
+  }
+}

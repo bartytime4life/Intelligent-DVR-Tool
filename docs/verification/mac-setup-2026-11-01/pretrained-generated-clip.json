@@ -1,0 +1,48 @@
+{
+  "scope": "Generated blank clip; runtime compatibility only, no camera or recognition accuracy test",
+  "state": "completed",
+  "frames_read": 30,
+  "frames_analyzed": 6,
+  "source_hash_matched": true,
+  "coverage": {
+    "schema": "intelligent-dvr.media-coverage.v1",
+    "source_sha256": "49c64535a07ad0eb043e3a78206982689febce9da646179d3805e98b66757115",
+    "status": "inventory-matched",
+    "termination": "source-end",
+    "analysis_frames": 30,
+    "validated_frames": 30,
+    "declared_frames": 30,
+    "declared_duration_seconds": 3.0,
+    "decoded_duration_seconds": 3.0,
+    "duration_tolerance_seconds": 0.050001000000000004,
+    "anchor": "frames+duration",
+    "validator_version": "19.0.2"
+  },
+  "face_models": "loaded; finite 128-value synthetic output",
+  "face_worker": {
+    "checked": 6,
+    "usable": 0,
+    "reasons": {
+      "none": 6,
+      "several": 0,
+      "small": 0,
+      "unclear": 0,
+      "edge": 0,
+      "dark": 0,
+      "bright": 0,
+      "blurry": 0
+    }
+  },
+  "runtime": {
+    "python": "3.12.15",
+    "machine": "arm64",
+    "opencv": "4.14.0",
+    "numpy": "2.5.4",
+    "pyav": "19.0.2"
+  },
+  "model_sha256": {
+    "yolox-s.onnx": "c5c2d13e59ae883e6af3b45daea64af4833a4951c92d116ec270d9ddbe998063",
+    "faces/face_detection_yunet_2023mar.onnx": "8f2383e4dd3cfbb4553ea8718107fc0423210dc964f9f4280604804ed2552fa4",
+    "faces/face_recognition_sface_2021dec.onnx": "0ba9fbfa01b5270c96627c4ef784da859931e02f04419c829e83484087c34e79"
+  }
+}

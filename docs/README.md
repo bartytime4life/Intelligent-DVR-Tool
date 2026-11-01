@@ -20,7 +20,7 @@ Documentation should help operators **see the tool, know the next action, and di
 | I want to… | Start with… | Then… |
 | --- | --- | --- |
 | Install and open the local app | [PC test kit](pc-testing.md) | [Five-minute guide](getting-started.md) |
-| Start from an Apple silicon Mac checkout | [macOS source setup](local-analysis-service.md#start-the-local-application) | [Local analysis limits](local-analysis-service.md#limits-and-recovery) |
+| Install or update an Apple silicon Mac checkout | [Mac Install / Check / Start](setup-macos.md) | [Local analysis limits](local-analysis-service.md#limits-and-recovery) |
 | Connect a webcam or DVR/IP camera | [Camera-source guide](local-camera-feeds.md) | [Record and review](recording-workflow.md) |
 | Analyze an approved recording | [Local analysis service](local-analysis-service.md) | [Recognition](recording-recognition.md), [human review](recording-workflow.md) |
 | Tune detection for my camera | [Guided training](training.md) | [Local analysis service](local-analysis-service.md) |

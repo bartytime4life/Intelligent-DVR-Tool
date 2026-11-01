@@ -6,6 +6,11 @@
 
 *All historical logs, measurements, source hashes and qualification limits below remain unchanged.*
 
+[Mac setup, November 1](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/mac-setup-2026-11-01/README.md): pinned source installation,
+verified model preparation, private-data preservation, readiness, duplicate launch
+and generated-video analysis/restart checks. Local Mac software evidence;
+physical-device, accuracy and capacity qualification remain separate.
+
 [Stair placement, November 1](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/facility-stairs-2026-11-01/README.md): local
 map and touch controls, fixed start landing, and directed v6 floor connections.
 

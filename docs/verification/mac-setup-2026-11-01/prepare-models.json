@@ -1,0 +1,9 @@
+{
+  "state": "passed",
+  "models_verified": 3,
+  "portable_catalog_validated": true,
+  "private_file_modes": "0600",
+  "camera_connections": 0,
+  "inference_jobs": 0,
+  "existing_installation_unchanged": true
+}
