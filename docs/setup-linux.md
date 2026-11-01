@@ -1,5 +1,11 @@
 # Run on Linux
 
+[Visual atlas](visual-atlas.md) · [PC acceptance](field-acceptance.md) · [Image provenance](media/current/README.md)
+
+![Machine planning separated from verifiable Linux install and runtime actions.](media/current/system-planning.svg)
+
+*The diagram does not install dependencies, change resource quotas or start recording.*
+
 [Hardware and storage](hardware-guide.md) · [GPU plan](gpu-planning.md) · [Resource limits](resource-controls.md) · [Windows](setup-windows.md)
 
 Reference target: **Ubuntu 24.04 LTS x86-64**, Node.js **22**, Python **3.12**, a WebGL-capable desktop browser. Canonical lists standard security maintenance for Ubuntu 24.04 through May 2029 [L1]. A desktop is convenient for review; a future recorder service can be headless, but no such service is installed by these instructions.

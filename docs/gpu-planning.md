@@ -1,5 +1,11 @@
 # GPU selection, VRAM and acceleration
 
+[Visual atlas](visual-atlas.md) · [PC acceptance](field-acceptance.md) · [Image provenance](media/current/README.md)
+
+![Explicit CPU/optional GPU planning and reproducible qualification lanes.](media/current/system-planning.svg)
+
+*The local CPU service does not silently become GPU accelerated when a profile changes.*
+
 [Hardware](hardware-guide.md) · [Linux](setup-linux.md) · [Windows](setup-windows.md) · [Resource controls](resource-controls.md)
 
 **If you already own an RTX 5080, use it for the first qualification work.** Buying a larger GPU before measuring decode, inference and memory use could spend money on the wrong bottleneck. This recommendation is an engineering judgment, not a measured performance ranking.

@@ -1,5 +1,11 @@
 # Practical Linux and Windows hardware
 
+[Visual atlas](visual-atlas.md) · [PC acceptance](field-acceptance.md) · [Image provenance](media/current/README.md)
+
+![Storage, decoded-frame budgets and hardware choices become real only after measurement.](media/current/system-planning.svg)
+
+*No published capacity estimate is a guarantee for a different PC.*
+
 [Start locally](getting-started.md) · [Linux](setup-linux.md) · [Windows](setup-windows.md) · [GPUs](gpu-planning.md) · [Resource controls](resource-controls.md)
 
 This is an engineering sizing proposal, checked against manufacturer documentation on **October 27, 2026**. It is not a benchmark, purchase order or 100-camera qualification. The app's **System** workspace makes the assumptions editable and exports local limits; it does not provision hardware or storage.
