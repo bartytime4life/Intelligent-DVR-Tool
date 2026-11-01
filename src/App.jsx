@@ -372,7 +372,11 @@ export function App() {
     const changed = () => {
       const next = workspaceFromHash(window.location.hash);
       if (!next) return; // Preserve the skip-to-workspace anchor.
-      if (!mayLeave(next)) { window.history.pushState(null, "", "#facility"); return; }
+      if (!mayLeave(next)) {
+        // Return to whichever editor owns the pending draft, not always Facility.
+        window.history.pushState(null, "", `#${tabRef.current.toLowerCase()}`);
+        return;
+      }
       if (next === "Recognition") setRecognitionOpened(true);
       updateTab(next);
     };

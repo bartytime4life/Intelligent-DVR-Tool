@@ -135,3 +135,23 @@ test('deferred Events deep link resolves when matching recording results arrive'
   await expect(page.locator('.recognition-observations')).toContainText('Rule observations');
   await expect(page.getByRole('button',{name:'Previous sample'})).toBeDisabled();
 });
+
+test('Browser Back respects the active dirty editor instead of jumping to Facility',async({page})=>{
+  await offline(page);
+  await page.goto('/#monitor');
+  await nav(page,'Zones').click();
+  await page.getByLabel('Zone name',{exact:true}).fill('Back navigation draft');
+  page.once('dialog',dialog=>dialog.dismiss());
+  await page.goBack();
+  await expect(page).toHaveURL(/#zones$/);
+  await expect(page.getByLabel('Zone name',{exact:true})).toHaveValue('Back navigation draft');
+  page.once('dialog',dialog=>dialog.accept());
+  await nav(page,'System').click();
+  const setting=page.getByLabel('Planned cameras');
+  const current=Number(await setting.inputValue());
+  await setting.fill(String(current+2));
+  page.once('dialog',dialog=>dialog.dismiss());
+  await page.goBack();
+  await expect(page).toHaveURL(/#system$/);
+  await expect(setting).toHaveValue(String(current+2));
+});
