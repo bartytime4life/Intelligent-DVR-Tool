@@ -19,14 +19,17 @@ function ConstructionGuide() {
     <p className="facility-caption"><a href="https://codes.iccsafe.org/s/IBC2024P1/chapter-12-interior-environment/IBC2024P1-Ch12-Sec1208.2" target="_blank" rel="noreferrer">IBC reference</a> · <a href="https://www.access-board.gov/ada/guides/chapter-4-accessible-routes/" target="_blank" rel="noreferrer">ADA routes</a> · <a href="https://www.access-board.gov/ada/guides/chapter-4-entrances-doors-and-gates/" target="_blank" rel="noreferrer">ADA doors</a> · <a href="https://steelconstruction.info/topics/cost-of-structural-steelwork/cost-planning-industrial-buildings" target="_blank" rel="noreferrer">SCI examples</a></p>
   </details>;
 }
-function OpenMapStarter({ plan, commit, onPreview, onArea, disabled, drawnArea, onDrawArea, onCancelArea, ready, units = 'metric' }) {
+// loadSignal: each increase opens this panel and loads drafts for the current area (the one-click path).
+// toggle: {id, serial} from a click on a draft outline on the map.
+function OpenMapStarter({ plan, commit, onPreview, onArea, disabled, drawnArea, onDrawArea, onCancelArea, ready, units = 'metric', loadSignal = 0, toggle }) {
   const [open, setOpen] = useState(false), [east, setEast] = useState(0), [north, setNorth] = useState(0), [width, setWidth] = useState(
   250), [depth, setDepth] = useState(250), [result, setResult] = useState(null), [checked, setChecked] = useState([]), [
   busy, setBusy] = useState(false), [message, setMessage] = useState(""), [mode, setMode] = useState("append"), [paste, setPaste] = useState(
   "");
   const [areaMode,setAreaMode]=useState('rectangle'),[vertices,setVertices]=useState('-125,-125\n125,-125\n125,125\n-125,125');
   useEffect(()=>{if(drawnArea){setAreaMode('polygon');setVertices(drawnArea.slice(0,-1).map(p=>p.join(',')).join('\n'));}},[drawnArea]);
-  const controller = useRef(), generation = useRef(0), lastQuery = useRef(0), callbacks = useRef();
+  const controller = useRef(), generation = useRef(0), lastQuery = useRef(0), callbacks = useRef(), panel = useRef();
+  const handledLoad = useRef(loadSignal), pendingLoad = useRef(false), revealResult = useRef(false), status = useRef();
   callbacks.current = { onPreview, onArea };
   const [endpoint,setEndpoint] = useState(OSM_SERVERS[0]);
   const fileGeneration = useRef(0);
@@ -45,7 +48,7 @@ function OpenMapStarter({ plan, commit, onPreview, onArea, disabled, drawnArea, 
   useEffect(()=>{const next=plan.origin.join(",");if(next!==priorOrigin.current){priorOrigin.current=next;setOpen(true);}},[plan.origin]);
   const chosen = useMemo(() => result?.buildings.filter((b) => checked.includes(b.id)) || [], [result, checked]);
   useEffect(() => {
-    callbacks.current.onPreview(open ? chosen : [], mode === 'new');
+    callbacks.current.onPreview(open ? chosen : [], mode === 'new', open ? (result?.buildings || []).map(b => ({id: b.id, footprint: b.footprint, included: checked.includes(b.id)})) : []);
   }, [chosen, open, mode]);
   useEffect(()=>{if(!open)onCancelArea();},[open]);
   useEffect(() => {
@@ -60,11 +63,24 @@ function OpenMapStarter({ plan, commit, onPreview, onArea, disabled, drawnArea, 
     setChecked([]);
     setMessage("");
   }, [plan, east, north, width, depth, endpoint, open, areaMode, vertices]);
+  // Runs after the reset above, so a load requested while the panel was closed is not cancelled by opening it.
+  useEffect(() => {
+    if (loadSignal === handledLoad.current) return;
+    handledLoad.current = loadSignal;
+    revealResult.current = true;
+    panel.current?.scrollIntoView({block: 'nearest', behavior: 'smooth'});
+    if (open) load(); else { pendingLoad.current = true; setOpen(true); }
+  }, [loadSignal]);
+  useEffect(() => { if (open && pendingLoad.current) { pendingLoad.current = false; load(); } }, [open]);
+  useEffect(() => {
+    if (!toggle || !result?.buildings.some(b => b.id === toggle.id)) return;
+    setChecked(ids => ids.includes(toggle.id) ? ids.filter(id => id !== toggle.id) : [...ids, toggle.id]);
+  }, [toggle]);
   useEffect(() => () => {
     generation.current++;
     fileGeneration.current++;
     controller.current?.abort();
-    callbacks.current.onPreview([]);
+    callbacks.current.onPreview([], false, []);
     callbacks.current.onArea(null);
   }, []);
   function accept(data) {
@@ -74,9 +90,9 @@ function OpenMapStarter({ plan, commit, onPreview, onArea, disabled, drawnArea, 
     next.buildings = next.buildings.filter((b) => mode === 'new' || (!existing.has(b.id) && !existingWays.has(b.source.id)));
     setResult(next);
     setChecked(next.buildings.map((b) => b.id));
-    setMessage(next.buildings.length ? `${next.buildings.length} draft shells. Review before adding. ${next.skipped} uns\
+    setMessage(next.buildings.length ? `${next.buildings.length} draft shells. Click outlines on the map or use the list to choose which to keep, then add them. ${next.skipped} uns\
 upported features skipped.` : `No new supported footprints found. ${next.skipped} complex or invalid features skipped. T\
-ry a smaller nearby area or draw a shape.`);
+race the buildings on the map, try a smaller nearby area or draw a shape.`);
   }
   function reviewText(text) {
     generation.current++;
@@ -112,9 +128,12 @@ ry a smaller nearby area or draw a shape.`);
     } finally {
       clearTimeout(timer);
       if (token === generation.current) setBusy(false);
+      // After a one-click request, bring the outcome and its "Use selected" button into view.
+      if (token === generation.current && revealResult.current) requestAnimationFrame(() => status.current?.scrollIntoView({block: 'start', behavior: 'smooth'}));
+      revealResult.current = false;
     }
   }
-  return <details className="facility-starter" open={open} onToggle={(e) => {
+  return <details ref={panel} className="facility-starter" open={open} onToggle={(e) => {
     if (e.target === e.currentTarget) setOpen(e.currentTarget.open);
   }}><summary>Draft buildings from OpenStreetMap</summary>
     <ol className="facility-starter-progress" aria-label="Building draft steps"><li>1. Save location</li><li>2. Confirm area</li><li>3. Review outlines</li><li>4. Apply selected</li></ol>
@@ -137,7 +156,7 @@ ry a smaller nearby area or draw a shape.`);
     setMessage("Request cancelled.");
   }}>Cancel map request</button>}
     {!bounds && <p className="facility-caption" role="alert">Use a simple closed area with bounds {formatDistance(20, units)}–{formatDistance(500, units)} per side within {formatDistance(1800, units)} of the saved origin; at most 50 corners. Courtyard or crossing outlines must be valid.</p>}
-    <p role="status" className="facility-caption">{message}</p>
+    <p role="status" className="facility-caption" ref={status}>{message}</p>
     {result && <><details><summary>Why some features were skipped</summary><ul className="facility-caption">{Object.entries(result.reasons).map(([reason,count])=><li key={reason}>{count}: {reason}</li>)}</ul></details><div className="facility-import-list">{result.buildings.map((b) => <label className="facility-draft-choice" key={b.
   id}><input type="checkbox" aria-label={`Include ${b.name}`} checked={checked.includes(b.id)} onChange={(e) => setChecked((ids) => e.target.checked ? [...ids,
   b.id] : ids.filter((id) => id !== b.id))} /><span><strong>{b.name}</strong><MeasurementSummary ring={b.footprint} holes={b.holes} units={units} /><small>Height: {formatDistance(b.

@@ -243,9 +243,24 @@ mocked up with little effort. The flow is:
    outside the contiguous U.S.) and focuses the address search.
 2. Choosing an address, **Use my location** or **Pick site on map** moves the map
    to that place and shows a pin. Nothing is saved until **Save site**.
-3. **Trace a building** opens the Buildings task in drawing mode. Plan buildings
-   are drawn translucent over map pictures so roof edges stay visible; adjust
-   corners and dimensions afterwards, or draft mapped outlines from OpenStreetMap.
+3. After **Save site**, the "Next: outline your buildings" card offers:
+   - **Find mapped buildings** — one click opens the OpenStreetMap draft panel and
+     loads volunteer-mapped outlines for its search area (250 m × 250 m around the
+     site by default). The map switches to a top-down view framing the drafts. Each
+     draft starts included; click an outline on the map (or its checkbox) to exclude
+     it — excluded drafts stay visible as dashed amber outlines so they can be clicked
+     back in. **Use N selected buildings** adds them as one undoable edit. Only the
+     search area's coordinates are sent, to the building service selected in the panel.
+   - **Trace a building** opens the Buildings task in drawing mode for anything
+     unmapped or out of date.
+
+   Plan buildings are drawn translucent over map pictures so roof edges stay
+   visible; adjust corners and dimensions afterwards. Mapped heights and floors are
+   often placeholders (shown in the draft list) and need checking.
+
+Public Overpass services can be slow or unavailable: during 2026-11-01 testing both
+public endpoints timed out (30 s) from the browser. The panel then reports the
+timeout and the user can pick another service, open an offline extract or trace.
 
 | Layer | Source and requests | Limits |
 | --- | --- | --- |

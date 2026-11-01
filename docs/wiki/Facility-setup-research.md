@@ -24,6 +24,10 @@ for manual tracing — OpenStreetMap streets worldwide and public-domain USGS/NA
 aerial imagery for the contiguous U.S. — with **Find my site on the map**, a map
 preview of the suggested site and translucent buildings over imagery. This is
 display for human tracing only; imagery-assisted (automatic) outlines remain queued.
+The follow-up adds one-click **Find mapped buildings** after Save site: open
+OpenStreetMap footprints for the area around the site are drafted on the map,
+included or excluded by clicking, and added as one undoable edit (step 3 of the
+recommended experience, using the OSM adapter rather than a preprocessed release).
 
 ## Recommended experience
 
