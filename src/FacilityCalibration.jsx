@@ -97,10 +97,10 @@ export default function FacilityCalibration({frame,camera,facilityName,origin,ma
         onPointerUp={e=>{setDrag('');if(e.currentTarget.hasPointerCapture(e.pointerId))e.currentTarget.releasePointerCapture(e.pointerId);}}
         onPointerCancel={()=>setDrag('')}>
         <img alt="Frozen frame with optional operator-selected reference markers" src={frame.preview} draggable="false"/>
-        {rows.filter(p=>valid(p.u)&&valid(p.v)).map((p,i)=><button key={p.id} type="button" data-cal-ref={p.id}
+        {rows.map((p,i)=>valid(p.u)&&valid(p.v) ? <button key={p.id} type="button" data-cal-ref={p.id}
           className={'facility-calibration-marker'+(p.id===target?' selected':'')}
           style={{left:p.u+'%',top:p.v+'%'}} title={'Drag point '+(i+1)}
-          aria-label={'Drag image reference '+(i+1)} onClick={()=>setTarget(p.id)}>{i+1}</button>)}
+          aria-label={'Drag image reference '+(i+1)} onClick={()=>setTarget(p.id)}>{i+1}</button> : null)}
       </div>
       <p className="facility-calibration-note">{rulerMode&&accepted
         ? 'Click the image twice to measure a line on the calibrated plane.'

@@ -50,3 +50,21 @@ test('calibration: holdout outside fitting hull is flagged, never automatically 
   assert.equal(result.checkInsideHull,false);
   assert.ok(result.holdout.rmse<1e-8);
 });
+
+test('calibration: projective horizon inside fitting hull is rejected even when corner residuals fit',()=>{
+ const horizon=[1,0,0,0,1,0,1,0,-.4];
+ const markers=[[.1,.1],[.9,.1],[.9,.9],[.1,.9]].map(([x,y])=>{
+   const [east,north]=projectGround(horizon,[x,y]);
+   return {role:'fit',image:{x,y},ground:{x:east,y:north}};
+ });
+ const [east,north]=projectGround(horizon,[.3,.3]);
+ assert.throws(()=>fitPlanarCalibration([...markers,
+   {role:'check',image:{x:.3,y:.3},ground:{x:east,y:north}}]),
+   /projective horizon|ill-conditioned|singular/i);
+});
+test('calibration: a copied fitted point cannot masquerade as an independent check',()=>{
+ const check={...fit[0],role:'check'};
+ assert.throws(()=>fitPlanarCalibration([...fit,check]),/Independent check markers/);
+ const check1=holdout([.5,.5]);
+ assert.throws(()=>fitPlanarCalibration([...fit,check1,{...check1}]),/Independent check markers/);
+});

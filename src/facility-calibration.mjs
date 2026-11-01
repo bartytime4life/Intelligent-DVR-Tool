@@ -89,6 +89,17 @@ export function fitPlanarCalibration(references) {
   const all=references.map(pair),fit=all.filter(p=>p.role==='fit'),checks=all.filter(p=>p.role==='check');
   if(fit.length<4)throw new RangeError('At least four fitting references are required.');
   const src=fit.map(p=>p.image),dst=fit.map(p=>p.ground);
+  // A withheld check must be a genuinely different observed marker, not a
+  // recycled fitting point (or the same check entered twice).
+  const reviewed=[];
+  for(const check of checks) {
+    if([...fit,...reviewed].some(reference=>
+      distance(reference.image,check.image)<1e-5 ||
+      distance(reference.ground,check.ground)<0.01)) {
+      throw new RangeError('Independent check markers must be distinct from fitting and other check markers.');
+    }
+    reviewed.push(check);
+  }
   for(const list of [src,dst])for(let i=0;i<list.length;i++)for(let j=0;j<i;j++)
     if(distance(list[i],list[j])<1e-7)throw new RangeError('Two fitting references coincide.');
   const bbox=list=>Math.max(...list.map(p=>p[0]))-Math.min(...list.map(p=>p[0]));
@@ -106,6 +117,16 @@ export function fitPlanarCalibration(references) {
   let matrix=multiply(nd.inverse,multiply(normal,ns.forward));
   if(!matrix.every(finite)||Math.abs(matrix[8])<EPS)throw new RangeError('The normalized transform is unbounded.');
   matrix=matrix.map(v=>v/matrix[8]);
+  // The projective denominator is affine in image x/y. Its extrema on a
+  // convex reference hull occur at vertices. A zero between the extrema
+  // puts an invisible projective horizon inside the measured working area.
+  const boundary=hull(src);
+  const denominators=boundary.map(([x,y])=>matrix[6]*x+matrix[7]*y+matrix[8]);
+  const minD=Math.min(...denominators),maxD=Math.max(...denominators);
+  const boundD=Math.max(Math.abs(minD),Math.abs(maxD),1);
+  if((minD<=0&&maxD>=0)||Math.min(Math.abs(minD),Math.abs(maxD))<boundD*1e-7) {
+    throw new RangeError('A projective horizon enters or approaches the reference area.');
+  }
   const evaluate=points=>points.map(p=>{
     const predicted=projectGround(matrix,p.image);
     if(!predicted)throw new RangeError('A reference projects to infinity.');
@@ -117,7 +138,7 @@ export function fitPlanarCalibration(references) {
     max:Math.max(...errors),mean:errors.reduce((s,e)=>s+e,0)/errors.length
   }:null;
   // No model-validation claim follows from fitting-point error alone.
-  const fittingHull=hull(src);
+  const fittingHull=boundary;
   const checkInsideHull=checks.length>0 && checks.every(p=>insideReferenceHull(p.image,fittingHull));
   return {matrix,fit:summary(fitErrors),holdout:summary(checkErrors),
     fittingHull,fittingCount:fit.length,checkCount:checks.length,checkInsideHull,

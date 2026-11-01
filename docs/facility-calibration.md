@@ -23,7 +23,7 @@ The solver uses a normalized, Householder-QR planar homography (eight degrees of
 
 | Area | Behavior |
 | --- | --- |
-| Geometry | Requires 4–24 points, at least four fits, no duplicate/near-coincident fits, adequate width and height of both planes, stable finite homography and in-bounds image/ground coordinates |
+| Geometry | Requires 4–24 points, at least four fits, no duplicate/near-coincident fitting or check markers, adequate width and height of both planes, no projective horizon through the fitted region, stable finite homography and in-bounds image/ground coordinates |
 | Validation | Fit and independent held-out error reported separately; a check outside the fitting hull cannot authorize measurement |
 | Ruler | Only on the selected plane, only inside the fitted reference hull, only after user declaration and explicit residual tolerance |
 | Bounds | Image coordinates are fractions of the downsampled frame; facility coordinates are local east/north metres within ±2 km |
