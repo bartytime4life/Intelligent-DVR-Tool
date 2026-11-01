@@ -24,7 +24,7 @@ test('calibration: additional fit points and noisy holdout errors stay visible i
  assert.ok(result.fit.rmse<1e-8);assert.ok(result.holdout.rmse>.25);assert.equal(result.verified,false);
 });
 test('calibration: degenerate or coincident references are refused',()=>{
- assert.throws(()=>fitPlanarCalibration(fit.slice(0,3)),/four fitting/);
+ assert.throws(()=>fitPlanarCalibration(fit.slice(0,3)),/(4 to 24|four fitting)/);
  assert.throws(()=>fitPlanarCalibration([...fit.slice(0,3),fit[0]]),/coincide/);
  const straight=[[.1,.1],[.3,.3],[.5,.5],[.7,.7]].map(([x,y])=>({role:'fit',image:{x,y},ground:{x:x*10,y:y*10}}));
  assert.throws(()=>fitPlanarCalibration(straight),/(non-collinear|degenerate|ill-conditioned)/);
