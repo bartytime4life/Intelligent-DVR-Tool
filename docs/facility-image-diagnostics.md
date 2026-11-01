@@ -2,7 +2,7 @@
 
 [Facility builder](facility-builder.md) · [Getting started](getting-started.md) · [Security boundary](../SECURITY.md)
 
-The Facility Studio is a **map-first planning workspace**. Its top task bar jumps between Site, Buildings, Floors, Cameras, Coverage, Handoffs and Zones. **Focus map** expands the editing canvas, stopping any hidden preview; **Show panels** returns to the inventory and properties without deleting unsaved edits. Reconnect the source explicitly if needed. Help is accessible from its toolbar or the `?` shortcut. Keys `1`–`7` switch tasks outside text inputs and dialogs. `Esc` cancels drawing. On a selected camera, Alt+Arrow nudges by 0.5 m; `[`/`]` rotates in 5° steps. **Save camera** still commits the pending draft; changes are not silently saved.
+The Facility Studio is a **map-first planning workspace**. The compact **Current task** selector and seven guided steps in the left rail navigate Site, Buildings, Floors, Cameras, Coverage, Handoffs and Zones without repeating seven buttons across the top toolbar. **Focus map** expands the editing canvas, stopping any hidden preview; **Show panels** returns to the inventory and properties without deleting unsaved edits. Reconnect the source explicitly if needed. Help is accessible from its toolbar or the `?` shortcut. Keys `1`–`7` switch tasks outside text inputs and dialogs. `Esc` cancels drawing. On a selected camera, Alt+Arrow nudges by 0.5 m; `[`/`]` rotates in 5° steps. **Save camera** still commits the pending draft; changes are not silently saved.
 
 ## Inspect an actual captured image
 

@@ -563,11 +563,16 @@ label. Inside the active building it belongs to the current level; elsewhere it 
   return <MeasurementUnits.Provider value={units}><section className={`facility-workspace${mapFocus ? ' is-map-focused' : ''}`} aria-label="Guided facility builder">
     <header className="facility-workbench" aria-label="Facility Studio toolbar">
       <div className="facility-workbench-identity"><strong>FACILITY STUDIO</strong><span title={plan.name}>{plan.name} · {plan.buildings.length} buildings · {plan.cameras.length} cameras</span></div>
-      <nav className="facility-workbench-tasks" aria-label="Jump to facility task">
-        {['Site', 'Buildings', 'Floors', 'Cameras', 'Coverage', 'Handoffs', 'Zones'].map((name, index) => <button key={name}
-          type="button" aria-current={step === index ? 'step' : undefined} onClick={() => {setMapFocus(false);go(index);}}
-          title={`Step ${index + 1}: ${STEPS[index][0]} (shortcut ${index + 1})`}>{name}</button>)}
-      </nav>
+      <div className="facility-workbench-tasks">
+        <span className="facility-task-progress" aria-label={`Step ${step + 1} of ${STEPS.length}`}>STEP {step + 1} / {STEPS.length}</span>
+        <label className="facility-task-jump">Current task
+          <select aria-label="Jump to facility task" value={step}
+            onChange={e => {setMapFocus(false);go(Number(e.target.value));}}>
+            {STEPS.map(([name],index)=><option key={name} value={index}>{index + 1}. {name}</option>)}
+          </select>
+        </label>
+        <span className="facility-task-context" title={STEPS[step][1]}>{STEPS[step][1]}</span>
+      </div>
       <div className="facility-workbench-actions">
         {navigationDirty && <span className="facility-workbench-unsaved" role="status">Unsaved work</span>}
         <button type="button" className="facility-focus-button" aria-pressed={mapFocus}

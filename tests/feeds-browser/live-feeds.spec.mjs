@@ -23,7 +23,10 @@ test('monitor starts empty without stock images, synthetic events or camera acti
   const requests=[];page.on('request',r=>requests.push(r.url()));
   await page.goto('/');
   await expect(page.getByRole('heading',{name:'Your cameras belong here'})).toBeVisible();
-  await expect(page.locator('.empty-feed')).toHaveCount(4);
+  await expect(page.getByRole('region',{name:'Start camera monitoring'})).toBeVisible();
+  await expect(page.locator('.empty-feed')).toHaveCount(0);
+  await expect(page.getByRole('button',{name:'Connect source',exact:true})).toHaveCount(1);
+  await expect(page.getByRole('group',{name:'Camera source shortcuts'}).getByRole('button')).toHaveCount(3);
   await expect(page.locator('.camera-wall img,.camera-wall video')).toHaveCount(0);
   expect(await page.evaluate(()=>JSON.parse(localStorage.getItem('dvr.events.v1')))).toEqual([]);
   expect(requests.filter(u=>/loading-dock|front-entrance|warehouse-aisle|sales-floor|parking-lot|\/api\/feeds\/connect/.test(u))).toEqual([]);
@@ -94,4 +97,46 @@ test('hiding the page releases webcam tracks and does not reconnect automaticall
   await page.evaluate(()=>{Object.defineProperty(document,'hidden',{configurable:true,value:false});document.dispatchEvent(new Event('visibilitychange'));});
   await expect(page.getByLabel('Webcam video')).toHaveCount(0);
   await expect(page.getByText('Preview stopped while the page was hidden.',{exact:false})).toBeVisible();
+});
+
+test('onboarding source paths reuse explicit setup without opening a camera by themselves',async({page})=>{
+  await page.goto('/');
+  const start=page.getByRole('region',{name:'Start camera monitoring'});
+  const dialog=page.getByRole('dialog',{name:'Connect a camera source'});
+  await start.getByRole('button',{name:/Computer webcam/}).click();
+  await expect(dialog).toContainText('Use a built-in or USB webcam');
+  await dialog.getByRole('button',{name:'Close connection setup'}).click();
+  await expect(dialog).toHaveCount(0);
+  await start.getByRole('button',{name:/Local DVR \/ IP camera/}).click();
+  await expect(dialog).toContainText('Choose an RTSP channel');
+  await dialog.getByRole('button',{name:'Close connection setup'}).click();
+  await start.getByRole('button',{name:/Approved public webcam/}).click();
+  await expect(dialog).toContainText('Choose an approved public webcam');
+  await page.keyboard.press('Escape');
+  await expect(dialog).toHaveCount(0);
+  await expect(page.locator('.camera-wall img,.camera-wall video')).toHaveCount(0);
+  await expect(page.locator('.live-tile')).toHaveCount(0);
+});
+
+test('after connecting from first-run choice, focus returns to a reachable toolbar control',async({page})=>{
+  await page.goto('/');
+  await page.getByRole('region',{name:'Start camera monitoring'}).getByRole('button',{name:/Computer webcam/}).click();
+  await page.getByRole('button',{name:'Connect webcam',exact:true}).click();
+  await page.getByRole('button',{name:'View camera wall'}).click();
+  await expect(page.locator('.monitor-welcome')).toHaveCount(0);
+  await expect(page.getByRole('button',{name:'Connect source',exact:true})).toBeFocused();
+});
+
+test('a stopped webcam preview can be removed to restore uncluttered first-run wall',async({page})=>{
+  await page.goto('/');
+  await page.getByRole('button',{name:'Connect source',exact:true}).click();
+  await page.getByRole('button',{name:'Connect webcam',exact:true}).click();
+  await page.getByRole('button',{name:'View camera wall'}).click();
+  await expect(page.getByLabel('Webcam video')).toBeVisible();
+  await page.locator('.live-tile').getByRole('button',{name:'Disconnect',exact:true}).click();
+  await expect(page.locator('.live-tile')).toHaveCount(1);
+  await page.locator('.live-tile').getByRole('button',{name:'Remove',exact:true}).click();
+  await expect(page.getByRole('region',{name:'Start camera monitoring'})).toBeVisible();
+  await expect(page.locator('.live-tile')).toHaveCount(0);
+  await expect(page.locator('.camera-wall img,.camera-wall video')).toHaveCount(0);
 });
