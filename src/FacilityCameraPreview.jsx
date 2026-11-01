@@ -11,6 +11,7 @@ export default function FacilityCameraPreview({ camera, onCenter, onAim, onCount
   const [catalog, setCatalog] = useState(null), [source, setSource] = useState('');
   const [error, setError] = useState(''), [loading, setLoading] = useState(false), [overlay, setOverlay] = useState(true);
   const [aspect, setAspect] = useState(16 / 9);
+  const [observed, setObserved] = useState(null);
   const video = useRef(), networkImage = useRef(), alive = useRef(true), lookup = useRef(0), controller = useRef(null);
   if (!controller.current) controller.current = facilityPreviewController({ media: navigator.mediaDevices,
     onState: state => { if (alive.current) setPreview(state); } });
@@ -27,7 +28,7 @@ export default function FacilityCameraPreview({ camera, onCenter, onAim, onCount
       document.removeEventListener('visibilitychange', hidden); window.removeEventListener('pagehide', leave); };
   }, []);
   useEffect(() => {
-    lookup.current++; setLoading(false); setError(''); setAspect(16 / 9);
+    lookup.current++; setLoading(false); setError(''); setAspect(16 / 9); setObserved(null);
     void controller.current.stop('Connect a source to compare its image with this camera plan.');
   }, [camera?.id]);
   useEffect(() => {
@@ -68,7 +69,12 @@ export default function FacilityCameraPreview({ camera, onCenter, onAim, onCount
       }
     } catch (err) { setError(err.message); }
   }
-  function dimensions(width, height) { if (width > 0 && height > 0) setAspect(width / height); }
+  function dimensions(width, height) {
+    if (width > 0 && height > 0) {
+      setAspect(width / height);
+      setObserved(previous => previous?.width === width && previous?.height === height ? previous : {width, height});
+    }
+  }
   function captureFrame() {
     if (preview.state !== 'live') throw Error('Connect and receive a camera frame before freezing it.');
     const element = preview.stream ? video.current : networkImage.current;
@@ -93,6 +99,13 @@ export default function FacilityCameraPreview({ camera, onCenter, onAim, onCount
       <span className="facility-preview-mode">{preview.state === 'live' ? 'SOURCE RECEIVING' : 'PLANNING GUIDE'} · UNCALIBRATED</span>
     </div>
     <p className="facility-preview-binding">{preview.sourceName ? <><strong>{preview.sourceName}</strong> → {camera?.name}</> : <>Assign a real source to <strong>{camera?.name || 'this planned camera'}</strong>.</>}</p>
+    {preview.state === 'live' && observed && <div className="facility-preview-resolution" role="status"><strong>Decoded preview: {observed.width} × {observed.height} px</strong>
+      <small>{Number.isInteger(camera?.pixelsWide) ? (camera.pixelsWide === observed.width
+        ? 'Horizontal preview width matches the entered plan value; optics and image quality are still unverified.'
+        : `Planned width: ${camera.pixelsWide} px. Verify whether this source is a lower-resolution substream before using planning DORI estimates.`)
+        : 'Enter horizontal resolution in the camera plan to compare it with this preview.'}</small>
+      <small>A preview may be resized by the decoder; this is not a measurement of the camera sensor.</small>
+    </div>}
     <div className="facility-preview-actions"><button type="button" onClick={onCenter} disabled={!onCenter}><Crosshair/>Center on map</button><button type="button" onClick={onAim} disabled={!onAim}><Compass/>Aim on map</button></div>
     <label className="facility-preview-source">Preview source<select aria-label="Facility preview source type" value={kind} disabled={active} onChange={e => {lookup.current++;setLoading(false);setKind(e.target.value);setError('');}}><option value="webcam">This computer’s webcam</option><option value="dvr">Configured local DVR</option></select></label>
     {kind === 'webcam' ? <label className="facility-preview-source">Webcam<select aria-label="Facility webcam" value={device} disabled={active} onChange={e => setDevice(e.target.value)}><option value="">Browser default</option>{devices.filter(d => d.deviceId).map((d, i) => <option key={d.deviceId} value={d.deviceId}>{d.label || `Webcam ${i + 1}`}</option>)}</select></label> : <label className="facility-preview-source">DVR channel<select aria-label="Facility DVR channel" value={source} disabled={active} onChange={e => setSource(e.target.value)}><option value="">Load channels, then select…</option>{sources.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}</select></label>}
