@@ -1121,20 +1121,6 @@
   font-size: 10px;
   padding: 0;
 }
-.basemap-choice {
-  flex-wrap: wrap;
-  margin: 0 0 22px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid #284553;
-  font-size: 12px;
-}
-.basemap-choice small {
-  display: block;
-  width: 100%;
-  font-size: 10px;
-  color: #8daabd;
-  padding-left: 22px;
-}
 .facility-workspace .maplibregl-ctrl-attrib {
   background: #0c2633e8;
   color: #b0cbd8;
@@ -1374,3 +1360,31 @@
 
 .building-map-key{flex-wrap:wrap;max-width:calc(100% - 70px)}
 .building-map-key strong{font-weight:600;color:#a3f4e9;font-variant-numeric:tabular-nums}
+
+/* Real map layer: switch, disclosure, notices, suggested-site pin and next-step guidance. */
+.facility-layer-switch{display:flex;border:1px solid #3a5968;border-radius:7px;overflow:hidden;background:#102b39ed;min-height:38px}
+.facility-layer-switch button{display:inline-flex;align-items:center;gap:5px;border:0;background:none;color:#b8ced9;padding:0 11px;font-size:11px;cursor:pointer}
+.facility-layer-switch button+button{border-left:1px solid #35515e}
+.facility-layer-switch button[aria-pressed=true]{background:#35e0e3;color:#062933;font-weight:650}
+.facility-layer-switch button:disabled{opacity:.5;cursor:not-allowed}
+.facility-layer-switch button:focus-visible{outline:2px solid #68e1dc;outline-offset:-2px}
+.facility-local-dot.is-online{background:#ffbc3c;box-shadow:0 0 0 3px #ffbc3c2e}
+.facility-layer-notice{position:absolute;left:18px;bottom:46px;z-index:3;display:flex;align-items:center;gap:9px;max-width:min(470px,calc(100% - 100px));padding:8px 10px 8px 12px;border:1px solid #806044;border-radius:8px;background:#2a2421f2;color:#ffe2c7;font-size:11px;line-height:1.45;box-shadow:0 8px 24px #020d14a0}
+.facility-layer-notice svg{flex:none;color:#ffbc3c}
+.facility-layer-notice button{flex:none;border:1px solid #a87d4f;border-radius:6px;background:#3a2e24;color:#ffe9cf;padding:6px 10px;font-size:11px;cursor:pointer}
+.facility-layer-choice{margin:0 0 20px;padding:0 0 16px;border:0;border-bottom:1px solid #284553}
+.facility-layer-choice legend{padding:0;margin-bottom:8px;color:#d8e9f0;font-size:12px;font-weight:600}
+.facility-layer-choice div{display:grid;gap:6px}
+.facility-layer-choice label{display:flex;align-items:center;gap:8px;font-size:12px;color:#c9dce5}
+.facility-layer-choice input{accent-color:#35e0e3;width:15px;height:15px;margin:0}
+.facility-layer-choice small{display:block;margin-top:9px;font-size:10px;line-height:1.55;color:#8daabd}
+.facility-next-callout{display:flex;gap:11px;margin:4px 0 18px;padding:13px;border:1px solid #2f6b70;border-radius:9px;background:#0f2e37}
+.facility-next-callout>svg{flex:none;color:#35e0e3;margin-top:1px}
+.facility-next-callout strong{display:block;font-size:12px;color:#eaf7fa;margin-bottom:4px}
+.facility-next-callout p{margin:0 0 10px;font-size:11px;line-height:1.55;color:#a9c4cf}
+.facility-next-callout button{display:inline-flex;align-items:center;gap:7px}
+.facility-site-preview{display:block;width:22px;height:22px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:#35e0e3;border:2px solid #052a33;box-shadow:0 0 0 6px #35e0e340,0 4px 12px #020d14aa;margin-bottom:6px}
+.facility-site-preview::after{content:"";position:absolute;left:6px;top:6px;width:6px;height:6px;border-radius:50%;background:#052a33}
+@media(prefers-reduced-motion:no-preference){.facility-site-preview{animation:facility-pin-pulse 1.8s ease-out infinite}}
+@keyframes facility-pin-pulse{0%{box-shadow:0 0 0 0 #35e0e366,0 4px 12px #020d14aa}100%{box-shadow:0 0 0 14px #35e0e300,0 4px 12px #020d14aa}}
+@media(max-width:620px){.facility-layer-strength{display:none}.facility-layer-switch button{padding:0 8px;font-size:10px}.facility-layer-notice{left:12px;right:12px;max-width:none;bottom:40px}}

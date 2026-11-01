@@ -1,10 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { GEOCODERS, searchPlaces } from './facility-services.mjs';
 
-export function AddressSearch({ onChoose }) {
+// focusSignal: each increase opens the search and focuses the address field.
+export function AddressSearch({ onChoose, focusSignal = 0, initiallyOpen = false }) {
   const [query,setQuery] = useState(''), [provider,setProvider] = useState('public');
   const [results,setResults] = useState([]), [message,setMessage] = useState(''), [busy,setBusy] = useState(false);
-  const request = useRef(), generation = useRef(0), resultHeading = useRef();
+  const request = useRef(), generation = useRef(0), resultHeading = useRef(), details = useRef(), field = useRef(), startOpen = useRef(initiallyOpen), handledFocus = useRef(focusSignal);
+  // Only a request made while this search is shown moves focus; remounting with an old signal does not.
+  useEffect(() => { if (focusSignal === handledFocus.current) return; handledFocus.current = focusSignal; details.current.open = true; field.current?.focus(); }, [focusSignal]);
   function invalidate() { generation.current++; request.current?.abort(); setBusy(false); setResults([]); setMessage(''); }
   useEffect(()=>()=>{ generation.current++; request.current?.abort(); },[]);
   async function search(e) {
@@ -20,11 +23,11 @@ export function AddressSearch({ onChoose }) {
     } catch(e) { if(token===generation.current) setMessage(e.name==='TimeoutError' ? 'Address service timed out. Use coordinates or try later.' : e.name==='TypeError' ? 'Could not reach the address service. Use coordinates, GPS, or try a local service.' : e.message); }
     finally { if(token===generation.current) setBusy(false); }
   }
-  return <details className="facility-starter" onToggle={e=>{if(e.target===e.currentTarget && !e.currentTarget.open)invalidate();}}><summary>Find an address or place</summary>
+  return <details ref={details} open={startOpen.current} className="facility-starter" onToggle={e=>{if(e.target===e.currentTarget && !e.currentTarget.open)invalidate();}}><summary>Find an address or place</summary>
     <form onSubmit={search}>
       <label className="facility-field"><span>Address search provider</span><select aria-label="Address search provider" value={provider} onChange={e=>{invalidate();setProvider(e.target.value);}}>{GEOCODERS.map(p=><option key={p.id} value={p.id}>{p.label}</option>)}</select></label>
       <p className="facility-caption">Search sends only the submitted text to {provider==='public' ? 'photon.komoot.io (public demo; availability varies)' : `this site’s ${GEOCODERS.find(p=>p.id===provider).url} service (operator must configure it)`}. No device position, camera plan or recordings are sent. Nothing is sent while typing. Avoid private addresses on public services.</p>
-      <label className="facility-field"><span>Address or place name</span><input type="search" aria-label="Address or place name" autoComplete="off" minLength={3} maxLength={180} required value={query} onChange={e=>{invalidate();setQuery(e.target.value);}} /></label>
+      <label className="facility-field"><span>Address or place name</span><input ref={field} type="search" aria-label="Address or place name" placeholder="e.g. 1200 Main St, Springfield" autoComplete="off" minLength={3} maxLength={180} required value={query} onChange={e=>{invalidate();setQuery(e.target.value);}} /></label>
       <button className="facility-primary" disabled={busy || query.trim().length<3}>Search address</button>
       {busy && <button className="facility-secondary" type="button" onClick={()=>{invalidate();setMessage('Search cancelled.');}}>Cancel address search</button>}
     </form>

@@ -12,6 +12,7 @@ import {createStairMap} from "./facility-stair-map.mjs";
 import {createWindowMap} from "./facility-window-map.mjs";
 import {createDoorwayMap} from "./facility-doorway-map.mjs";
 import { doriArcs } from "./facility-dori.mjs";
+import { basemap, inAerialCoverage, sitePhotoRequest, loadSitePhoto, photoFailure } from "./facility-basemap.mjs";
 import "./facility-map-geometry.css";
 setWorkerUrl(workerUrl);
 const fc = (features) => ({ type: "FeatureCollection", features });
@@ -166,6 +167,55 @@ function createFacilityMap(container, callbacks, initialPlan, options = {}) {
 2029" } }] }
   });
   let attribution = new AttributionControl({ compact: false }), hasOsm = false;
+  let basemapId = "grid", basemapFade = 0.85, sitePin = null;
+  // The last site photo stays loaded (hidden) while another layer is shown, so returning to Aerial is instant.
+  const photo = { key: null, request: null, controller: null, objectUrl: null, status: null };
+  function reportPhoto(status) {
+    photo.status = status;
+    callbacks.onBasemapStatus?.(status);
+  }
+  function removePhotoLayer() {
+    if (map.getLayer("site-photo")) map.removeLayer("site-photo");
+    if (map.getSource("site-photo")) map.removeSource("site-photo");
+    if (photo.objectUrl) URL.revokeObjectURL(photo.objectUrl);
+    photo.objectUrl = null;
+  }
+  function loadPhoto(request) {
+    photo.controller?.abort();
+    photo.controller = null;
+    photo.status = null;
+    photo.key = request?.key || null;
+    photo.request = request;
+    removePhotoLayer();
+    if (!request) return;
+    const controller = new AbortController();
+    photo.controller = controller;
+    reportPhoto({ photo: "loading" });
+    loadSitePhoto(request, controller.signal).then((blob) => {
+      if (photo.controller !== controller) return;
+      photo.controller = null;
+      photo.objectUrl = URL.createObjectURL(blob);
+      map.addSource("site-photo", { type: "image", url: photo.objectUrl, coordinates: request.coordinates });
+      map.addLayer({ id: "site-photo", type: "raster", source: "site-photo", layout: { visibility: basemapId === "aerial" ? "visible" : "none" },
+        paint: { "raster-opacity": basemapFade, "raster-fade-duration": 0 } }, "grid");
+      reportPhoto({ photo: "ready", metresPerPixel: request.metresPerPixel });
+    }, (e) => {
+      if (photo.controller !== controller) return;
+      photo.controller = null;
+      reportPhoto({ photo: "error", message: photoFailure(e) });
+    });
+  }
+  function toolDone() { callbacks.onToolDone(); applyBasemapStyle(); }
+  // Over map pictures the plan is drawn lighter so roofs and paving stay visible for tracing.
+  function applyBasemapStyle() {
+    if (!ready) return;
+    const external = basemapId !== "grid";
+    map.setPaintProperty("grid", "line-color", external ? "#d9f2f6" : "#36505c");
+    map.setPaintProperty("grid", "line-opacity", external ? 0.16 : 0.26);
+    map.setPaintProperty("buildings", "fill-extrusion-opacity", !external ? 0.96 : view === "2d" || OVERHEAD_TOOLS.includes(tool) ? 0.42 : 0.74);
+    map.setPaintProperty("building-edge", "line-width", external ? 2 : 1.3);
+    map.setPaintProperty("building-edge", "line-color", external ? "#8ff3f5" : "#72bec7");
+  }
   map.addControl(attribution, "bottom-right");
   const osmCredit = '© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap contributors</a> · ODbL';
   map.addControl(new NavigationControl({ visualizePitch: true }), "bottom-right");
@@ -199,7 +249,20 @@ select", markers = [];
   map.on("move", scheduleLabels);
   map.on("resize", scheduleLabels);
   map.on("rotate", () => callbacks.onBearing?.((map.getBearing() + 360) % 360));
-  map.on("error", (e) => callbacks.onError(e.error?.message || "Map rendering error."));
+  // Map picture failures (offline, provider down, outside coverage) never block plan editing.
+  let tileErrorShown = false;
+  map.on("error", (e) => {
+    if (e.sourceId === "basemap-tiles") {
+      if (!tileErrorShown) callbacks.onBasemapStatus?.({ tiles: "error" });
+      tileErrorShown = true;
+      return;
+    }
+    if (e.sourceId === "site-photo") {
+      reportPhoto({ photo: "error", message: "The aerial photo could not be displayed. Coarser aerial pictures are still shown." });
+      return;
+    }
+    callbacks.onError(e.error?.message || "Map rendering error.");
+  });
   map.on("webglcontextlost", () => callbacks.onError("3D graphics were interrupted. Save or export the plan, then reload\
  to recover."));
   map.on("load", () => {
@@ -310,7 +373,7 @@ e-stroke-width": 2 } });
         draw.clear();
         draw.setMode("static");
         tool = "select";
-        callbacks.onToolDone();
+        toolDone();
         update(current, selected, view, floor, displayOptions);
         map.getCanvas().style.cursor = "";
         requestAnimationFrame(() => {
@@ -362,29 +425,29 @@ e-stroke-width": 2 } });
       placingBuilding = null;
       tool = "select";
       renderBuildingPreview();
-      callbacks.onToolDone();
+      toolDone();
       map.getCanvas().style.cursor = "";
       return;
     }
     if (tool === 'site-pin') {
-      callbacks.onPin([e.lngLat.lng,e.lngLat.lat]); tool='select';callbacks.onToolDone();map.getCanvas().style.cursor='';return;
+      callbacks.onPin([e.lngLat.lng,e.lngLat.lat]); tool='select';toolDone();map.getCanvas().style.cursor='';return;
     }
     if (tool === "calibration-ground") {
       callbacks.onCalibrationGround?.(fromLngLat([e.lngLat.lng,e.lngLat.lat],current.origin));
-      tool="select";callbacks.onToolDone();map.getCanvas().style.cursor="";return;
+      tool="select";toolDone();map.getCanvas().style.cursor="";return;
     }
     if (tool === "aim-camera" || tool === "move-camera") {
       const point = fromLngLat([e.lngLat.lng, e.lngLat.lat], current.origin);
       if (tool === "aim-camera") callbacks.onAim?.(point); else callbacks.onMoveCamera?.(point);
       tool = "select";
-      callbacks.onToolDone();
+      toolDone();
       map.getCanvas().style.cursor = "";
       return;
     }
     if (tool === "camera" || tool === "label") {
       callbacks.onPlace(tool, fromLngLat([e.lngLat.lng, e.lngLat.lat], current.origin));
       tool = "select";
-      callbacks.onToolDone();
+      toolDone();
       map.getCanvas().style.cursor = "";
       return;
     }
@@ -492,6 +555,7 @@ e-stroke-width": 2 } });
     if (modeChanged || apertureModeChanged) {
       map.easeTo({ pitch: displayOptions.apertureEditing && mode==="floors" ? 0 : viewPitch(mode, tool), duration: 350 });
     }
+    applyBasemapStyle();
     const o = plan.origin, grid = [];
     for (let n = -300; n <= 300; n += 20) {
       grid.push(feat("LineString", [toLngLat([n, -300], o), toLngLat([n, 300], o)]));
@@ -685,23 +749,53 @@ e-stroke-width": 2 } });
       if (pointItem) map.easeTo({center: toLngLat([pointItem.x,pointItem.y],current.origin), pitch: navigationPitch(), duration: 350});
       else if (shape) frameOutline(shape);
     },
-    setBasemap(enabled) {
+    // Grid requests nothing. Streets and Aerial add one raster layer under the plan; Aerial
+    // also loads one sharper site photo around `photoCenter` (the saved or suggested origin).
+    setBasemap(id, { fade = 0.85, photoCenter = current.origin } = {}) {
       if (!ready) return;
-      if (enabled && !map.getSource("street-tiles")) {
-        map.addSource("street-tiles", {
-          type: "raster",
-          tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],
-          tileSize: 256,
-          maxzoom: 19,
-          attribution: '\xA9 <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetM\
-ap</a> contributors'
-        });
-        map.addLayer({ id: "street-basemap", type: "raster", source: "street-tiles", paint: { "raster-opacity": 0.55, "r\
-aster-saturation": -1, "raster-brightness-max": 0.55 } }, "grid");
-      } else if (!enabled && map.getSource("street-tiles")) {
-        map.removeLayer("street-basemap");
-        map.removeSource("street-tiles");
+      const next = basemap(id);
+      if (next.id !== basemapId) {
+        if (map.getLayer("basemap")) map.removeLayer("basemap");
+        if (map.getSource("basemap-tiles")) map.removeSource("basemap-tiles");
+        basemapId = next.id;
+        tileErrorShown = false;
+        if (next.external) {
+          map.addSource("basemap-tiles", { type: "raster", tiles: next.tiles, tileSize: 256, maxzoom: next.maxzoom, attribution: next.attribution });
+          map.addLayer({ id: "basemap", type: "raster", source: "basemap-tiles", paint: next.id === "streets" ?
+            { "raster-saturation": -0.2, "raster-brightness-max": 0.9 } : {} }, map.getLayer("site-photo") ? "site-photo" : "grid");
+        }
       }
+      if (map.getLayer("basemap")) map.setPaintProperty("basemap", "raster-opacity", fade);
+      if (map.getLayer("site-photo")) map.setPaintProperty("site-photo", "raster-opacity", fade);
+      basemapFade = fade;
+      if (next.id === "aerial") {
+        const wanted = inAerialCoverage(photoCenter) ? sitePhotoRequest(photoCenter) : null;
+        if (!wanted) {
+          loadPhoto(null);
+          callbacks.onBasemapStatus?.({ photo: "outside" });
+        } else if (wanted.key !== photo.key) loadPhoto(wanted);
+        else if (photo.status) callbacks.onBasemapStatus?.(photo.status);
+      } else if (next.id === "grid") loadPhoto(null); // Grid keeps nothing from map services.
+      if (map.getLayer("site-photo")) map.setLayoutProperty("site-photo", "visibility", next.id === "aerial" ? "visible" : "none");
+      applyBasemapStyle();
+    },
+    retrySitePhoto() {
+      const request = photo.request;
+      photo.key = null;
+      if (request) loadPhoto(request);
+    },
+    // A suggested origin that is not saved yet: show a pin and move the view there.
+    previewSite(lngLat) {
+      if (!ready) return;
+      sitePin?.remove();
+      sitePin = null;
+      if (!lngLat) return;
+      const el = document.createElement("span");
+      el.className = "facility-site-preview";
+      el.title = "Suggested site location \u00b7 not saved";
+      el.setAttribute("aria-hidden", "true");
+      sitePin = new Marker({ element: el, anchor: "bottom" }).setLngLat(lngLat).addTo(map);
+      map.easeTo({ center: lngLat, zoom: Math.max(map.getZoom(), 17.6), duration: 600 });
     },
     setTrack(point) {
       if (ready) map.getSource("track").setData(fc(point ? [feat("Point", toLngLat(point, current.origin))] : []));
@@ -710,6 +804,11 @@ aster-saturation": -1, "raster-brightness-max": 0.55 } }, "grid");
       if (ready) map.getSource("blind-spots").setData(fc((rings || []).map(ring => polygon(ring, current.origin))));
     },
     destroy() {
+      const pending = photo.controller;
+      photo.controller = null;
+      pending?.abort();
+      if (photo.objectUrl) URL.revokeObjectURL(photo.objectUrl);
+      sitePin?.remove();
       doorMap.destroy();windowMap.destroy();stairMap.destroy();
       drag?.cancel();
       handle?.remove();

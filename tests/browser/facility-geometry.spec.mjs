@@ -32,7 +32,7 @@ test('keyboard polygon editing excludes bbox-only shells and invalidates stale d
   expect(await saved(page)).toEqual(before);
 });
 test('pointer area and site pin suggest changes without saving the plan',async({page})=>{
-  await setup(page);await expect(page.getByRole('checkbox',{name:/^Online street map/})).toBeEnabled();
+  await setup(page);await expect(page.getByRole('button',{name:'Grid',exact:true})).toBeEnabled();
   await page.getByRole('button',{name:'Save site',exact:true}).click();const before=await saved(page);
   await page.getByText('Draft buildings from OpenStreetMap',{exact:true}).click();await page.getByRole('button',{name:'Draw search area',exact:true}).click();
   const canvas=page.locator('.facility-map canvas');const rect=await canvas.boundingBox();

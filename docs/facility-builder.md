@@ -223,14 +223,51 @@ editable local state, not an authoritative audit trail. They have no multi-user
 authentication, encrypted-at-rest database, server retention or signed provenance.
 Do not put camera credentials or recordings in a facility JSON file.
 
-The default map uses only local geometry and a 20-meter grid. An optional online
-street basemap requests only the visible viewport from OpenStreetMap after the
-user enables it. The choice is not persisted. The map displays OSM attribution;
-there is no tile-prefetch, bulk-download or offline-download feature. See the
+The default map uses only local geometry and a 20-meter grid. The **Map layer**
+switch on the map (available in every task) adds a real map under the plan so a
+site can be traced instead of drawn from memory; see [Real map layer](#real-map-layer).
+Nothing is requested until the user chooses Streets or Aerial (or **Find my site
+on the map**), and the choice is then remembered in this browser only. There is
+no tile-prefetch, bulk-download or offline-download feature. See the
 [OSMF tile policy](https://operations.osmfoundation.org/policies/tiles/).
 Private/offline deployments should supply independently licensed, self-hosted
 tiles, imagery, fonts and other assets; no public tile service SLA is assumed.
 The workspace font is bundled locally; it makes no external request.
+
+## Real map layer
+
+Owner request (2026-11-01): the site builder needs the real map so a site can be
+mocked up with little effort. The flow is:
+
+1. On a blank facility, **Find my site on the map** turns on Aerial (Streets
+   outside the contiguous U.S.) and focuses the address search.
+2. Choosing an address, **Use my location** or **Pick site on map** moves the map
+   to that place and shows a pin. Nothing is saved until **Save site**.
+3. **Trace a building** opens the Buildings task in drawing mode. Plan buildings
+   are drawn translucent over map pictures so roof edges stay visible; adjust
+   corners and dimensions afterwards, or draft mapped outlines from OpenStreetMap.
+
+| Layer | Source and requests | Limits |
+| --- | --- | --- |
+| Grid (default) | None | Local 20 m grid only. |
+| Streets | `tile.openstreetmap.org` tiles for the area being viewed; ODbL data, OSMF tile policy | Worldwide. Building outlines appear only where volunteers have mapped them. Light interactive use only; no SLA. |
+| Aerial | USGS The National Map `USGSImageryOnly` cached tiles (`basemap.nationalmap.gov`, zoom ≤ 16, about 2 m per pixel) plus one 800 m × 800 m NAIP site photo at about 0.6 m per pixel from `imagery.nationalmap.gov` `exportImage` | Contiguous United States only; outside it the photo is not requested and the map offers Streets. Public-domain USGS/USDA imagery. The photo is rendered on request (6–45 s observed on 2026-11-01); a 60 s timeout, 6 MB limit and Retry apply. Capture dates vary by state and are not shown. |
+
+Requests are made by the browser, so the provider sees the viewer's IP address and
+the area being viewed. Plans, cameras, recordings and credentials are never sent.
+Only the layer name and a picture-strength setting are stored (`localStorage`
+keys `dvr.facility.basemap` and `dvr.facility.basemapFade`); the site photo is
+kept in memory for the session and is not part of saved plans or exports.
+Failed pictures show a non-blocking notice; editing, saving and export keep
+working on the local grid.
+
+Map pictures are a tracing guide, not a survey. Roofs include overhangs, tall
+buildings lean in aerial photos and orthoimagery can be offset by several meters;
+verify dimensions on site. Imagery is not a live view and does not establish
+interior rooms, entrances, camera positions or coverage. Google and Esri imagery
+are not used: their terms require separate licensing for this use (see
+[setup research](easy-facility-setup.md)). Private/offline deployments can still
+supply independently licensed, self-hosted tiles.
 
 ## Bounds and capacity
 

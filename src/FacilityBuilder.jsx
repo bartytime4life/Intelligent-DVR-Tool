@@ -22,6 +22,7 @@ import {
   MagnifyingGlass,
   WarningCircle,
   Printer,
+  MapTrifold,
   X
 } from "@phosphor-icons/react";
 import "maplibre-gl/dist/maplibre-gl.css";
@@ -46,6 +47,7 @@ import { createFacilityMap } from "./facility-map.mjs";
 import { OpenMapStarter, MeasurementSummary, ConstructionGuide } from './FacilityStarter.jsx';
 import { draftFacility } from './facility-starter.mjs';
 import { AddressSearch } from "./AddressSearch.jsx";
+import { BASEMAPS, basemap, readBasemapPreference, writeBasemapPreference, fadeChoices, inAerialCoverage } from "./facility-basemap.mjs";
 import LineDimensions from './LineDimensions.jsx';
 import ShapeDimensions from './ShapeDimensions.jsx';
 import FloorGeometry,{PointListEntry} from './FloorGeometry.jsx';
@@ -116,6 +118,10 @@ function FacilityEditor({onPreviewCount,initialPlan,facilityControls,onPersist,o
   const [pickedOrigin,setPickedOrigin]=useState(null), [drawnArea,setDrawnArea]=useState(null);
   const [sketchOpen,setSketchOpen]=useState(false);
   const [wallRoomId,setWallRoomId]=useState(null);
+  // Real map layer (remembered in this browser), its load status, and an unsaved suggested origin.
+  const [mapLayer, setMapLayer] = useState(readBasemapPreference), [layerStatus, setLayerStatus] = useState({});
+  const [sitePreview, setSitePreview] = useState(null), [emptyDismissed, setEmptyDismissed] = useState(false), [addressFocus, setAddressFocus] = useState(0);
+  const layer = basemap(mapLayer.id);
   const [pasteOpen, setPasteOpen] = useState(false);
   const [blindZone, setBlindZone] = useState(''), [dragging, setDragging] = useState('');
   const [mapDrafts, setMapDrafts] = useState([]), [searchArea, setSearchArea] = useState(null);
@@ -130,7 +136,7 @@ function FacilityEditor({onPreviewCount,initialPlan,facilityControls,onPersist,o
   ), [status, setStatus] = useState(initial.current.status), [ready, setReady] = useState(false), [
     mapError,
     setMapError
-  ] = useState(""), [streets, setStreets] = useState(false), [search, setSearch] = useState(""), [
+  ] = useState(""), [search, setSearch] = useState(""), [
     page,
     setPage
   ] = useState(0), [history, setHistory] = useState([]), [future, setFuture] = useState([]), [playing, setPlaying] = useState(false), [seconds, setSeconds] = useState(
@@ -480,10 +486,11 @@ function FacilityEditor({onPreviewCount,initialPlan,facilityControls,onPersist,o
       if(token) setCalibrationMapPick(previous=>({token,point,serial:(previous?.serial||0)+1}));
     }, onAim:aimCamera, onMoveCamera:moveCamera, onCameraDrag:(kind,active)=>setDragging(active ? kind : ''), onPin: p=>setPickedOrigin(p), onDraw, onPlace: place, onSelect: selectOnMap, onToolDone: () => {
     setTool("select");
-  }, onReady: () => setReady(true), onError: setMapError };
+  }, onReady: () => setReady(true), onError: setMapError,
+    onBasemapStatus: next => setLayerStatus(previous => ({...previous, ...next})) };
   useEffect(() => {
     try {
-      api.current = createFacilityMap(mapEl.current, Object.fromEntries(["onPlaceStair","onChangeStair","onPlaceWindow","onChangeWindow","onPlaceDoorway","onMoveDoorway","onDoorwayError","onBuildingPosition", "onBearing", "onAim", "onMoveCamera", "onCameraDrag", "onPin", "onDraw", "onPlace", "onSelect", "onCalibrationGround", "onToolDone", "onReady", "onError"].map((k) => [k, (...args) => latest.current[k](...args)])), plan, {fans: fans.current});
+      api.current = createFacilityMap(mapEl.current, Object.fromEntries(["onPlaceStair","onChangeStair","onPlaceWindow","onChangeWindow","onPlaceDoorway","onMoveDoorway","onDoorwayError","onBuildingPosition", "onBearing", "onAim", "onMoveCamera", "onCameraDrag", "onPin", "onDraw", "onPlace", "onSelect", "onCalibrationGround", "onToolDone", "onReady", "onError", "onBasemapStatus"].map((k) => [k, (...args) => latest.current[k](...args)])), plan, {fans: fans.current});
     } catch (e) {
       setMapError("3D graphics are unavailable here. You can still edit numeric properties and export the plan. " + e.message);
     }
@@ -529,6 +536,21 @@ function FacilityEditor({onPreviewCount,initialPlan,facilityControls,onPersist,o
     return zone ? zoneCoverage(zone.footprint, enabledFans(preview, fans.current(wallObstacles(preview))), {blindSpots:true}).blindSpots : null;
   }, [step, preview, blindZone]);
   useEffect(() => api.current?.setBlindSpots(blindSpots), [blindSpots, ready]);
+  const photoCenter = sitePreview || plan.origin;
+  useEffect(() => { if (ready) api.current?.setBasemap(mapLayer.id, {fade: mapLayer.fade, photoCenter}); }, [ready, mapLayer.id, mapLayer.fade, photoCenter[0], photoCenter[1]]);
+  useEffect(() => { if (ready) api.current?.previewSite(sitePreview); }, [ready, sitePreview?.[0], sitePreview?.[1]]);
+  function chooseLayer(id, fade = mapLayer.fade) {
+    const next = {id: basemap(id).id, fade};
+    if (next.id !== mapLayer.id) setLayerStatus({});
+    setMapLayer(next);
+    writeBasemapPreference(next);
+  }
+  function findSiteOnMap() {
+    setEmptyDismissed(true);
+    go(0);
+    if (!layer.external) chooseLayer(inAerialCoverage(plan.origin) ? 'aerial' : 'streets');
+    setAddressFocus(n => n + 1);
+  }
   useEffect(() => api.current?.setArea(searchArea), [searchArea, ready]);
   useEffect(() => api.current?.setTrack(step === 5 ? position : null), [step, seconds, plan, ready]);
   useEffect(() => {
@@ -711,7 +733,7 @@ function FacilityEditor({onPreviewCount,initialPlan,facilityControls,onPersist,o
   }
   const cameras = plan.cameras.filter((c) => (c.name + " " + c.id).toLowerCase().includes(search.toLowerCase()));
   useEffect(() => setPage((p) => Math.min(p, Math.max(0, Math.ceil(cameras.length / 6) - 1))), [cameras.length]);
-  const toolText = {stair:"Click the center of the start landing on this floor.",window:"Click a highlighted outside wall. Drag the center to move the window, or drag either end to resize.", doorway:"Click a highlighted shared room wall to place a doorway. Then drag its handle and Save doorway.", "position-building":`Click or tap to position the outline. Hold Shift to snap to whole ${units === 'imperial' ? 'feet' : 'meters'}.`, "calibration-ground":"Select the measured ground marker that corresponds to the current frame reference. Verify its surveyed coordinates before accepting.", opening:"Trace the open area on this floor. The same opening becomes the ceiling void below.", "floor-path":"Click a route through solid floor. Double-click to finish; openings cannot be crossed.", "aim-camera":"Click the point you want this camera to face, then Save camera.", "move-camera":"Click the new mounting position, then Save camera.", zone:"Trace the zone boundary. Click its first corner to finish.", "site-pin":"Click the map to suggest a site location, then review and Save site.", "search-area":"Click the area corners, then its first corner to finish. Review or edit the vertices before loading.", building: "Click each corner, then click the first corner to finish.", room: "Trace a room inside t\
+  const toolText = {stair:"Click the center of the start landing on this floor.",window:"Click a highlighted outside wall. Drag the center to move the window, or drag either end to resize.", doorway:"Click a highlighted shared room wall to place a doorway. Then drag its handle and Save doorway.", "position-building":`Click or tap to position the outline. Hold Shift to snap to whole ${units === 'imperial' ? 'feet' : 'meters'}.`, "calibration-ground":"Select the measured ground marker that corresponds to the current frame reference. Verify its surveyed coordinates before accepting.", opening:"Trace the open area on this floor. The same opening becomes the ceiling void below.", "floor-path":"Click a route through solid floor. Double-click to finish; openings cannot be crossed.", "aim-camera":"Click the point you want this camera to face, then Save camera.", "move-camera":"Click the new mounting position, then Save camera.", zone:"Trace the zone boundary. Click its first corner to finish.", "site-pin":"Click the map to suggest a site location, then review and Save site.", "search-area":"Click the area corners, then its first corner to finish. Review or edit the vertices before loading.", building: layer.external ? "Click each roof corner on the map, then click the first corner to finish. Zoom in for accuracy: roofs include overhangs and photos can sit a few meters off." : "Click each corner, then click the first corner to finish.", room: "Trace a room inside t\
 he selected building. Click its first corner to finish.", route: "Click route points. Double-click the last point to fin\
 ish.", camera: "Click the map to place a camera. Adjust its height and view next.", label: "Click the map to position a \
 label. Inside the active building it belongs to the current level; elsewhere it is a ground label." };
@@ -770,20 +792,33 @@ label. Inside the active building it belongs to the current level; elsewhere it 
         <div><strong>Work faster in Facility Studio</strong><button type="button" onClick={() => setHelpOpen(false)} aria-label="Close facility help"><X size={17}/></button></div>
         <p><kbd>1</kbd>–<kbd>7</kbd> switches tasks, <kbd>?</kbd> toggles this help, and <kbd>Esc</kbd> cancels drawing. Ctrl/⌘+Z undoes committed edits.</p>
         <p>Use <strong>Focus map</strong> to maximize the canvas and stop hidden camera previews, then <strong>Show panels</strong> to edit, save and explicitly reconnect. Camera drag/aim previews are unsaved until Save camera. Alt+Arrow nudges a selected camera 0.5 m; [ and ] rotate it 5°.</p>
+        <p><strong>Map layer</strong>: Grid requests nothing. Streets and Aerial load pictures of the area you view so you can trace your real site; they are a drawing guide, not a survey.</p>
         <p>Camera coverage, distances and handoffs are planning estimates. Real video sampling is opt-in under a selected camera's Image diagnostics.</p>
       </section>}
-      {!plan.buildings.length && !plan.cameras.length && !plan.labels.length && !plan.zones?.length && !plan.route.length && tool==='select' && step===0 && <FacilityEmptyState disabled={navigationDirty} onBuild={()=>{go(1);requestAnimationFrame(()=>{properties.current?.querySelector('.building-shapes button')?.focus({preventScroll:true});properties.current?.scrollIntoView({block:'nearest'});});}} onImport={onOpenImport} onLocate={()=>{go(0);input.current?.closest('section')?.querySelector('[aria-label="Facility name"]')?.focus();}}/>}
+      {!emptyDismissed && !plan.buildings.length && !plan.cameras.length && !plan.labels.length && !plan.zones?.length && !plan.route.length && tool==='select' && step===0 && <FacilityEmptyState disabled={navigationDirty} ready={ready} onFindSite={findSiteOnMap} onBuild={()=>{go(1);requestAnimationFrame(()=>{properties.current?.querySelector('.building-shapes button')?.focus({preventScroll:true});properties.current?.scrollIntoView({block:'nearest'});});}} onImport={onOpenImport} />}
       <div className="facility-map" ref={mapEl} role="group" aria-label="Facility map. Use arrow keys to pan; use the add-with-coordinates, rectangle and point-list controls to place items without drawing." />
       <div className="facility-view-controls" role="group" aria-label="Map view">{[["2d", "2D"], ["3d", "3D"], ["floors", "Floors"]].
   map(([id, title]) => <button key={id} aria-pressed={view === id} onClick={() => setView(id)}>{title}</button>)}<button className="facility-fit" title="Center facility" aria-label="Center facility" onClick={() => api.
   current?.center()}><Crosshair size={18} /></button><button title="Reset map view" aria-label="Reset map view" onClick={() => api.current?.reset()}><ArrowCounterClockwise size={18}/></button></div>
       <div className="facility-map-tools">
         <button className="facility-compass" aria-label="Point map north" title="Point map north" onClick={() => api.current?.north()}><span style={{transform:`rotate(${-mapBearing}deg)`}}>↑</span><b>N</b><small>{Math.round((mapBearing+360)%360)}°</small></button>
+        <div className="facility-layer-switch" role="group" aria-label="Map layer">{BASEMAPS.map(option => <button key={option.id} type="button" aria-pressed={layer.id === option.id} disabled={!ready} title={option.disclosure} onClick={() => chooseLayer(option.id)}>{option.id !== 'grid' && <MapTrifold size={15} aria-hidden="true"/>}{option.label}</button>)}</div>
+        {layer.external && <select className="facility-layer-strength" aria-label="Map picture strength" value={mapLayer.fade} onChange={e => chooseLayer(layer.id, Number(e.target.value))}>{fadeChoices().map(v => <option key={v} value={v}>Map {Math.round(v * 100)}%</option>)}</select>}
         <label><input type="checkbox" checked={measurements} onChange={e=>setMeasurements(e.target.checked)}/>Dimensions</label>
         <select aria-label="Measurement units" disabled={linePending} value={units} onChange={e=>setUnits(e.target.value)}><option value="metric">Meters · m / m²</option><option value="imperial">Feet · ft / ft²</option></select>
       </div>
-      <div className="facility-map-context"><span className="facility-local-dot" />{plan.name}<small>{streets ? "Online \
-street map \xB7 OpenStreetMap" : `Local grid · ${formatDistance(20,units)} spacing · no external tiles`}</small></div>
+      <div className="facility-map-context"><span className={`facility-local-dot${layer.external ? ' is-online' : ''}`} />{plan.name}<small>{layer.id === 'grid' ? `Local grid · ${formatDistance(20,units)} spacing · no map pictures requested` :
+        layer.id === 'streets' ? 'Streets · OpenStreetMap · requested for the area you view' :
+        layerStatus.photo === 'loading' ? 'Aerial · USGS · loading a sharper site photo…' :
+        layerStatus.photo === 'ready' ? `Aerial · USGS NAIP site photo ≈ ${formatDistance(layerStatus.metresPerPixel, units)} per pixel · photo dates vary; not a live view` :
+        'Aerial · USGS The National Map · requested for the area you view'}</small></div>
+      {layer.external && (layerStatus.photo === 'outside' || layerStatus.photo === 'error' || layerStatus.tiles === 'error') && <div className="facility-layer-notice" role="status">
+        <WarningCircle size={17} aria-hidden="true"/><span>{layerStatus.photo === 'outside' && layer.id === 'aerial' ? 'Aerial photos cover the contiguous United States. Streets works worldwide.' :
+          layerStatus.photo === 'error' && layer.id === 'aerial' ? layerStatus.message : 'Some map pictures could not load. Your plan is unaffected; check the connection or switch layers.'}</span>
+        {layer.id === 'aerial' && layerStatus.photo === 'outside' && <button type="button" onClick={() => chooseLayer('streets')}>Use Streets</button>}
+        {layer.id === 'aerial' && layerStatus.photo === 'error' && <button type="button" onClick={() => api.current?.retrySitePhoto()}>Retry photo</button>}
+        {layerStatus.tiles === 'error' && !(layer.id === 'aerial' && layerStatus.photo) && <button type="button" onClick={() => chooseLayer('grid')}>Use Grid</button>}
+      </div>}
       {!!mapDrafts.length && <div className="facility-draft-banner" role="status">{draftPreviewError ? `Draft preview unavailable: ${draftPreviewError}` : `Preview: ${mapDrafts.length} building drafts · review before saving`}</div>}
       {mapError && <div className="facility-map-error" role="alert"><WarningCircle /><span>{mapError}</span><button aria-label="Dismiss graphics message" onClick={() => setMapError(
     ""
@@ -830,13 +865,15 @@ c origin for your facility; dimensions use the local map grid.", "Start with a s
 rooms, stairs, openings and pathways on each level.", "Adjust the camera\u2019s position and viewing volume.", "Select a camera to ins\
 pect its modeled view.", "Draw a route and review proposed camera transitions.", "Mark restricted areas and define expected objects for review."][step]}</p></header>
       <div className="facility-property-body">
-      {step === 0 && <label className="facility-checkbox basemap-choice"><input type="checkbox" checked={streets} disabled={!ready} onChange={(e) => {
-    setStreets(e.target.checked);
-    api.current?.setBasemap(e.target.checked);
-  }} />Online street map<small>Sends the visible map area to OpenStreetMap. No offline tile download.</small></label>}
-      {step === 0 && <SiteForm onDirtyChange={setSiteDirty} pickedOrigin={pickedOrigin} onPin={()=>startTool("site-pin")} ready={ready} plan={plan} commit={commit} center={() => api.current?.center()} />}
+      {step === 0 && <fieldset className="facility-layer-choice"><legend>Map layer</legend>
+        <div>{BASEMAPS.map(option => <label key={option.id}><input type="radio" name="facility-map-layer" value={option.id} checked={layer.id === option.id} disabled={!ready} onChange={() => chooseLayer(option.id)}/>{option.title}</label>)}</div>
+        <small>{layer.disclosure}{layer.external ? ' Plans, cameras and recordings are never sent. This choice is remembered in this browser.' : ' Choose Streets or Aerial to see and trace your real site.'}</small></fieldset>}
+      {step === 0 && <SiteForm onDirtyChange={setSiteDirty} onPreview={setSitePreview} addressFocus={addressFocus} pickedOrigin={pickedOrigin} onPin={()=>startTool("site-pin")} ready={ready} plan={plan} commit={commit} center={() => api.current?.center()} />}
+      {step === 0 && !plan.buildings.length && <div className="facility-next-callout"><MapTrifold size={20} aria-hidden="true"/><div><strong>Next: outline your buildings</strong>
+        <p>{layer.external ? 'Trace each roof on the map, or draft mapped outlines from OpenStreetMap below. You can adjust every corner and dimension afterwards.' : 'Draw on the grid or pick a common shape. Turn on Streets or Aerial to trace your real site instead.'}</p>
+        <button type="button" className="facility-primary" disabled={!ready || navigationDirty} onClick={() => {go(1);setShapeOpen(false);startTool('building');}}><Polygon aria-hidden="true"/>Trace a building</button></div></div>}
       {step === 0 && <OpenMapStarter units={units} drawnArea={drawnArea} onDrawArea={()=>startTool("search-area")} onCancelArea={()=>{api.current?.setTool("select");setTool("select");}} ready={ready} plan={plan} commit={commit} onPreview={(buildings,replace) => {setMapDrafts(buildings);setReplaceDrafts(!!replace);}} onArea={setSearchArea} disabled={dirty} />}
-      {step === 0 && <div className="facility-section-note"><MapPin/><p>Start with an empty local grid. Set a site location or add your first building. Imported files and examples open as separate facilities.</p></div>}
+      {step === 0 && <div className="facility-section-note"><MapPin/><p>Find your site, then trace buildings over the real map. Map pictures are a drawing guide, not a survey: verify dimensions on site. Imported files and examples open as separate facilities.</p></div>}
       {step === 1 && <>
         <BuildingShapePicker open={shapeOpen} onOpen={open=>{setShapeOpen(open);if(open)setView('2d');}} buildings={plan.buildings} near={selected.kind === 'building' ? selectedItem : undefined} units={units} onUnits={setUnits}
           onDirtyChange={setShapePending} onPreview={setShapePreview} onPick={pickBuildingPosition} add={addBuilding}
@@ -1032,7 +1069,7 @@ function CoverageMetrics({ metrics, blindZone, onBlindZone, blindSpots, dirty, u
     <p className="facility-caption">Grid sample of up to {MAX_COVERAGE_CELLS.toLocaleString('en-US')} cells per zone, and about every {formatDistance(.5, units)} along the route, tested against the drawn ground fans of {metrics.cameras} included {metrics.cameras === 1 ? 'camera' : 'cameras'}. {dirty ? 'Includes the unsaved camera preview. ' : ''}Indoor and level zones are not estimated because coverage is ground-plane only. Planning estimate; verify on site.</p>
   </section>;
 }
-function SiteForm({ plan, commit, center, pickedOrigin, onPin, ready, onDirtyChange }) {
+function SiteForm({ plan, commit, center, pickedOrigin, onPin, ready, onDirtyChange, onPreview, addressFocus }) {
   const [name, setName] = useState(plan.name), [lng, setLng] = useState(plan.origin[0]), [lat, setLat] = useState(plan.origin[1]);
   const [locating, setLocating] = useState(false), [locationNote, setLocationNote] = useState("");
   const mapped = plan.buildings.some(b => b.source), [keep, setKeep] = useState(mapped), [formError, setFormError] = useState("");
@@ -1040,11 +1077,12 @@ function SiteForm({ plan, commit, center, pickedOrigin, onPin, ready, onDirtyCha
   const locationRequest = useRef(0);
   const changed=name!==plan.name || lng!==plan.origin[0] || lat!==plan.origin[1];
   useEffect(()=>{onDirtyChange(changed);return()=>onDirtyChange(false);},[changed,onDirtyChange]);
-  useEffect(() => () => { locationRequest.current++; }, []);
+  useEffect(() => () => { locationRequest.current++; onPreview(null); }, []);
   useEffect(()=>{
     if(!pickedOrigin)return;
     locationRequest.current++;setLocating(false);setLng(+pickedOrigin[0].toFixed(7));setLat(+pickedOrigin[1].toFixed(7));
     setLocationNote('Map pin suggestion. Review coordinates, then Save site.');
+    onPreview([...pickedOrigin]);
   },[pickedOrigin]);
   function locate() {
     if (locating) return;
@@ -1064,6 +1102,7 @@ function SiteForm({ plan, commit, center, pickedOrigin, onPin, ready, onDirtyCha
       }
       setLng(Number(coords.longitude.toFixed(7)));
       setLat(Number(coords.latitude.toFixed(7)));
+      onPreview([Number(coords.longitude.toFixed(7)), Number(coords.latitude.toFixed(7))]);
       const accuracy = Number.isFinite(coords.accuracy) ? ` Reported accuracy: ±${Math.ceil(coords.accuracy)} m.` : "";
       setLocationNote("Suggested device position only." + accuracy + " Confirm this is your facility before saving.");
     }, (error) => {
@@ -1080,8 +1119,9 @@ function SiteForm({ plan, commit, center, pickedOrigin, onPin, ready, onDirtyCha
     setLat(plan.origin[1]);
     setKeep(plan.buildings.some(b => b.source));
     setFormError("");
+    onPreview(null);
   }, [plan]);
-  return <><button type="button" className="facility-secondary" disabled={!ready} onClick={onPin}>Pick site on map</button><AddressSearch onChoose={p=>{locationRequest.current++;setLocating(false);setLng(+p.origin[0].toFixed(7));setLat(+p.origin[1].toFixed(7));setLocationNote('Suggested: '+p.label+'. Review before saving. Existing plan positions remain unchanged until Save site.');}} /><form onSubmit={(e) => {
+  return <><button type="button" className="facility-secondary" disabled={!ready} onClick={onPin}>Pick site on map</button><AddressSearch focusSignal={addressFocus} initiallyOpen={!hasGeometry} onChoose={p=>{locationRequest.current++;setLocating(false);setLng(+p.origin[0].toFixed(7));setLat(+p.origin[1].toFixed(7));onPreview([+p.origin[0].toFixed(7),+p.origin[1].toFixed(7)]);setLocationNote('Suggested: '+p.label+'. The map shows this place; check the pin, then Save site. Existing plan positions remain unchanged until then.');}} /><form onSubmit={(e) => {
     e.preventDefault();
     const moved = lng !== plan.origin[0] || lat !== plan.origin[1];
     let next = { ...plan, name, origin: [lng, lat] };
@@ -1096,7 +1136,7 @@ function SiteForm({ plan, commit, center, pickedOrigin, onPin, ready, onDirtyCha
   {locationNote && <p className="facility-caption" role="status">{locationNote}</p>}
   <Field label="Facility name" type="text" value={name} onChange={setName} /><Field label="Latitude" value={lat} min={-80} max={80} onChange={setLat} /><Field label="Longitude" value={lng} min={-180} max={180} onChange={setLng} />
   {!!hasGeometry && <label className="facility-checkbox"><input type="checkbox" checked={keep} onChange={e=>setKeep(e.target.checked)} />Keep buildings at their map positions<small>{mapped ? 'On by default because this plan has map-sourced buildings.' : 'Off by default for hand-drawn plans.'}</small></label>}
-  <p className="facility-caption">Building and camera positions are meters east and north of this origin. {hasGeometry && keep ? 'Saving a new origin re-centres the local grid; buildings, cameras, zones and routes keep their map positions and dimensions.' : 'Changing the origin moves the whole plan geographically.'} This is a local planning coordinate system, not a surveyed model.</p>{formError && <p className="error" role="alert">{formError}</p>}<button className="facility-primary" type="submit" disabled={locating}>Save site<Check /></button>{changed && <button type="button" className="facility-secondary" onClick={()=>{setName(plan.name);setLng(plan.origin[0]);setLat(plan.origin[1]);setLocationNote('');setFormError('');}}>Discard site edits</button>}</form></>;
+  <p className="facility-caption">Building and camera positions are meters east and north of this origin. {hasGeometry && keep ? 'Saving a new origin re-centres the local grid; buildings, cameras, zones and routes keep their map positions and dimensions.' : 'Changing the origin moves the whole plan geographically.'} This is a local planning coordinate system, not a surveyed model.</p>{formError && <p className="error" role="alert">{formError}</p>}<button className="facility-primary" type="submit" disabled={locating}>Save site<Check /></button>{changed && <button type="button" className="facility-secondary" onClick={()=>{setName(plan.name);setLng(plan.origin[0]);setLat(plan.origin[1]);setLocationNote('');setFormError('');onPreview(null);}}>Discard site edits</button>}</form></>;
 }
 function PlanPasteDialog({ close, onImport }) {
   const ref = useRef();

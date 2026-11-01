@@ -46,7 +46,7 @@ test('submitted address search is keyboard accessible and does not send text whi
 
 test('real pinned shells review, select, append, edit and undo without changing camera plans',async({page},info)=>{
   const requests=await setup(page);
-  await expect(page.getByRole('checkbox',{name:/^Online street map/})).toBeEnabled();
+  await expect(page.getByRole('button',{name:'Grid',exact:true})).toBeEnabled();
   const start=Date.now();
   await saveOrigin(page);
   const before=await saved(page);
