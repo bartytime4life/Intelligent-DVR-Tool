@@ -43,11 +43,13 @@ export default function FacilityImageLab({ capture, connected = false, sourceNam
   const [clip, setClip] = useState(null);
   useEffect(() => () => {if (clip?.url) URL.revokeObjectURL(clip.url);}, [clip?.url]);
   const [region, setRegion] = useState(FULL_FRAME);
+  const [dragRegion, setDragRegion] = useState(null);
   const [ruler, setRuler] = useState(null);
   const [tool, setTool] = useState('region');
   const [busy, setBusy] = useState(false), [error, setError] = useState('');
   // Never present Frame A's pixels as Frame B when the selected comparison slot is empty.
   const selected = frames[slot];
+  const shownRegion = dragRegion || region;
   const metrics = useMemo(() => selected ? analyzeImage(selected.image, region) : null, [selected, region]);
   const difference = useMemo(() => frames.a && frames.b ? compareImages(frames.a.image, frames.b.image, region) : null, [frames, region]);
   const rulerPixels = selected && ruler ? pixelRuler(ruler.from, ruler.to, selected.image.width, selected.image.height) : null;
@@ -55,6 +57,7 @@ export default function FacilityImageLab({ capture, connected = false, sourceNam
   function putFrame(frame) {
     setFrames(previous => ({ ...previous, [slot]: frame }));
     setRegion(FULL_FRAME);
+    setDragRegion(null);
     setRuler(null);
     setError('');
   }
@@ -117,18 +120,22 @@ export default function FacilityImageLab({ capture, connected = false, sourceNam
     pointer.current = start;
     event.currentTarget.setPointerCapture(event.pointerId);
     if (tool === 'ruler') setRuler({ from: start, to: start });
-    else setRegion({ x: start.x, y: start.y, width: .001, height: .001 });
+    else setDragRegion({ x: start.x, y: start.y, width: .001, height: .001 });
   }
   function movePointer(event) {
     if (!pointer.current) return;
     const at = pointAt(event), from = pointer.current;
     if (tool === 'ruler') setRuler({ from, to: at });
-    else setRegion({ x: Math.min(from.x, at.x), y: Math.min(from.y, at.y), width: Math.max(.001, Math.abs(from.x - at.x)), height: Math.max(.001, Math.abs(from.y - at.y)) });
+    else setDragRegion({ x: Math.min(from.x, at.x), y: Math.min(from.y, at.y), width: Math.max(.001, Math.abs(from.x - at.x)), height: Math.max(.001, Math.abs(from.y - at.y)) });
   }
   function stopPointer(event) {
     if (!pointer.current) return;
     const from = pointer.current, at = pointAt(event);
-    if (tool === 'region' && Math.hypot((from.x - at.x) * 100, (from.y - at.y) * 100) < 1) setRegion(FULL_FRAME);
+    if (tool === 'region') {
+      const next = { x: Math.min(from.x, at.x), y: Math.min(from.y, at.y), width: Math.abs(from.x - at.x), height: Math.abs(from.y - at.y) };
+      setRegion(Math.hypot(next.width * 100, next.height * 100) < 1 ? FULL_FRAME : next);
+      setDragRegion(null);
+    }
     pointer.current = null;
     if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
   }
@@ -194,10 +201,10 @@ export default function FacilityImageLab({ capture, connected = false, sourceNam
         </div>
         <div className="facility-lab-image-stage" style={{ aspectRatio: selected.sampledWidth + '/' + selected.sampledHeight }}
           onPointerDown={startPointer} onPointerMove={movePointer} onPointerUp={stopPointer}
-          onPointerCancel={() => { pointer.current = null; }}
+          onPointerCancel={() => { pointer.current = null; setDragRegion(null); }}
           role="img" aria-label="Frozen local image. Drag to draw a region or pixel ruler. Numeric region fields are available below.">
           <img alt={'Frozen inspection frame from ' + selected.source} src={selected.preview} draggable="false"/>
-          {region !== FULL_FRAME && <div className="facility-lab-roi" style={{left:pct(region.x*100),top:pct(region.y*100),width:pct(region.width*100),height:pct(region.height*100)}} aria-hidden="true"/>}
+          {shownRegion !== FULL_FRAME && <div className="facility-lab-roi" style={{left:pct(shownRegion.x*100),top:pct(shownRegion.y*100),width:pct(shownRegion.width*100),height:pct(shownRegion.height*100)}} aria-hidden="true"/>}
           {ruler && <svg className="facility-lab-ruler" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><line x1={ruler.from.x * 100} y1={ruler.from.y * 100} x2={ruler.to.x * 100} y2={ruler.to.y * 100}/></svg>}
         </div>
         <fieldset className="facility-lab-region-fields"><legend>Analysis region (% of image)</legend>
