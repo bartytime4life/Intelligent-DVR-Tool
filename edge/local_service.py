@@ -549,10 +549,10 @@ class LocalServer(ThreadingHTTPServer):
     # other API calls. At most HANDLERS run at once; extra connections are closed
     # unanswered. Jobs, Feeds and Recorder lock their own state; file transfers
     # stream after those locks are released. Shutdown does not wait for slow readers.
-    # Linux TIME_WAIT sockets must not prevent a normal stop/restart. An active
-    # listener still owns its exact loopback address. Windows reuse has different
-    # semantics and remains disabled.
-    allow_reuse_address = sys.platform == 'linux'
+    # Linux and macOS TIME_WAIT sockets must not prevent a normal stop/restart. An
+    # active listener still owns its exact loopback address (sharing it would need
+    # SO_REUSEPORT). Windows reuse has different semantics and remains disabled.
+    allow_reuse_address = sys.platform in ('linux', 'darwin')
     block_on_close = False
     HANDLERS = 16
     def __init__(self, port, jobs, static_root, feeds=None, recorder=None):
