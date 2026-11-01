@@ -240,7 +240,7 @@ export default function FacilityImageLab({ capture, connected = false, sourceNam
           <button type="button" onClick={exportData}>Export metrics JSON</button>
           <button type="button" onClick={() => {setFrames({a:null,b:null}); setRegion(FULL_FRAME); setRuler(null); setError('');}}>Clear frames</button>
         </div>
-        <FacilityCalibration frame={selected} camera={camera} facilityName={facilityName}
+        <FacilityCalibration frame={selected} slot={slot} camera={camera} facilityName={facilityName}
           origin={origin} mapPick={mapPick} onRequestMapPoint={onRequestMapPoint}/>
         <p className="facility-lab-note">Luma uses channel-weighted 8-bit sRGB, not a light meter. Sobel edge energy is a detail proxy—not optical focus. Two-frame differences also respond to camera movement, compression, and lighting; they do not prove person/object motion. Sampling is downscaled to 720 px on the longest side, with no physical calibration.</p>
       </> : <p className="facility-lab-empty">No frame selected. Choose Frame A or B, freeze a preview, sample a local video, or open a PNG/JPEG/WebP from this computer.</p>}

@@ -191,6 +191,11 @@ function FacilityEditor({onPreviewCount,initialPlan,facilityControls,onPersist,o
     }
   }
   function select(id, kind) {
+    if (tool === 'calibration-ground') {
+      mapCalibrationRequest.current=null;
+      setTool('select');
+      api.current?.setTool('select');
+    }
     if (editingDirty) {
       setError("Save or discard your preview before selecting another item.");
       return false;
