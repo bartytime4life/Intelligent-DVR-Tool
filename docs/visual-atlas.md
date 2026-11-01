@@ -6,14 +6,16 @@
 
 **One workspace, distinct responsibilities.** These pages combine **real interface screenshots from a controlled Chromium run** with **original schematic diagrams**. A screenshot proves only what that software revision rendered in its test environment; no image here is evidence of an actual camera, real facility, person-tracking result, optical calibration or 100-camera acceptance.
 
-## The current application: desktop
+The five screenshots below document **PR #61 source `9719eda`**, captured November 1 UTC (October 31 Central), before Train and enrolled-person suggestions were added. The `media/current/` path names this visual collection; it does not mean the images are regenerated on each release. [Current capability register](product-status.md).
+
+## Tested application captures: desktop
 
 | Monitor: start with intentional source choices | Facility Studio: design the site on a map |
 | --- | --- |
 | ![Desktop Monitor in Chromium shows a no-camera start screen with source buttons for webcam, LAN DVR and approved public webcam.](media/current/monitor-desktop.jpg) | ![Desktop Facility Studio shows a map-first workspace, local facility inventory, current-task selector, and properties panel.](media/current/facility-desktop.jpg) |
 | **Connect a real source only on request.** Live previews do not run AI. [Camera setup](local-camera-feeds.md) | **Plan before measuring.** Buildings and camera footprints are models until validated in the field. [Facility editor](facility-builder.md) |
 
-## The current application: mobile
+## Tested application captures: mobile
 
 | Monitor | Facility Studio | System planner |
 | --- | --- | --- |
@@ -35,6 +37,16 @@
 | Export | Save reports, rules, reviews and recordings explicitly | Browser exports are unsigned/editable by default |
 
 [Recording-to-review guide](recording-workflow.md) · [Recognition guide](recording-recognition.md) · [Review provenance](recording-coverage.md).
+
+## Added after these captures: Train and possible matches
+
+| Choose this task | Follow the guide | What the result means |
+| --- | --- | --- |
+| Tune detection for one camera | [Train: guided recording, analysis and threshold choice](training.md) | A session-specific rule setting, not retrained model weights or a quality benchmark |
+| Set a baseline for a consenting person | [Enrollment: consent, local capture and baseline check](person-enrollment.md) | A deletable local face template, not proof of identity |
+| Review an enrolled-person suggestion | [Recognition: Check for enrolled people](person-enrollment.md#possible-matches-in-recognition) | **Possible: name** needs human review; Confirm can update the template, while Not this person hides the suggestion |
+
+These features are documented from merged source through PR #68. No screenshot in this collection depicts their operation. Suggestions never go to Events or exports automatically; person templates and clips have separate deletion steps in the enrollment guide.
 
 ## The science: image diagnostics and ground-plane estimation
 

@@ -105,15 +105,28 @@ behavior/anomaly classification, identity, within-camera tracking and cross-came
 association are not implemented by it.** Scores are model outputs, not calibrated
 probabilities or findings of fact.
 
-A `partial` run remains prominently partial. Even `completed` means only that
-the analyzer stopped without hitting its explicit limits: OpenCV read failure is
-not distinguishable from EOF here. Constant-frame-rate timing and browser seek
-behavior need qualification for the intended codec. Unsupported/unmatched frames
-hide boxes. Ground-truth labels, representative quality, live recording durability,
-operator acceptance and the 100-camera target remain separate gates.
+A `partial` run remains prominently partial. New analysis uses a bounded strict
+decode/inventory check before reporting `completed` coverage; a failed OpenCV read
+alone cannot establish EOF. Legacy results retain **recording coverage unverified**,
+and local-job completion is separate from the result's coverage state. See
+[recording coverage](recording-coverage.md) for partial/error outcomes and limits.
+Constant-frame-rate timing and browser seek behavior still need qualification for
+the intended codec. Unsupported/unmatched frames hide boxes. Ground-truth labels,
+representative quality, live recording durability, operator acceptance and the
+100-camera target remain separate gates.
 
 [Dated local evidence](verification/recognition-2026-10-29/README.md) separates
 actual model execution from synthetic contract/browser checks.
+
+## Optional enrolled-person suggestions
+
+With [consent-based enrollment](person-enrollment.md) enabled and a result from
+this computer's own analysis job open, **Check for enrolled people** separately
+checks faces inside the analyzer's person boxes. **Possible: name** is a suggestion,
+not a verified identity. **Confirm** may add that view to the local template;
+**Not this person** hides the suggestion in this page. Neither action qualifies
+identity accuracy, and suggestions never reach Events or exports automatically.
+Imported result files and LAN-recorder segments do not offer this check.
 
 
 ## Review continuity and recovery

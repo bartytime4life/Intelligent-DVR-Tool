@@ -8,7 +8,7 @@
 
 ![Current Monitor's source chooser in a controlled desktop Chromium run, with no connected camera or synthetic footage.](https://raw.githubusercontent.com/bartytime4life/Intelligent-DVR-Tool/main/docs/media/current/monitor-desktop.jpg)
 
-*Captured from the real software in an offline test, not from a surveillance installation. [Source provenance](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/media/current/README.md).*
+*Captured at PR #61 source `9719eda`, before Train and enrolled-person suggestions. This is real software in an offline test, not a surveillance installation. [Source provenance](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/media/current/README.md).*
 
 ## Install, check and start
 
@@ -16,6 +16,8 @@ Use the [PC test kit](https://github.com/bartytime4life/Intelligent-DVR-Tool/wik
 or use the same launch scripts from a source checkout. Install finishes without
 starting a service. Check validates the software setup. Start opens the local
 application at http://127.0.0.1:4173 with all cameras disconnected.
+
+For an Apple silicon Mac source checkout, follow the [macOS setup](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/local-analysis-service.md#start-the-local-application). That launcher uses http://127.0.0.1:4180 by default; its prerequisites and worker limits differ from the Linux/Windows kit.
 
 Running `npm run dev` alone only serves the browser preview. It does **not** start the local DVR preview, recorder or analysis service; use the PC launcher for those features.
 
@@ -30,6 +32,8 @@ records remain available without invented imagery.
 | Webcam clip | Record webcam clip → Stop recording → Open clip in Recognition | Opt-in bounded clip ready for a separately authorized local import and analysis job |
 | Local DVR | Configure local-feeds.json, restart, load/select a channel and connect | Bounded RTSP/TCP preview; actionable connection errors |
 | Recognition | Configure an approved recordings folder/model/rules; connect and explicitly analyze | Progress, cancellation and source-matched results using the existing analyzer |
+| Train: detection tuning | Follow the [guided session](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Guided-training) and compare thresholds | Saves a new rule set only when training writes are enabled and you apply it; does not retrain the detector |
+| Train: person enrollment | Enable [enrollment](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Person-enrollment), obtain consent and capture the guided baseline | A deletable face template stays in the local service; Recognition can explicitly request possible matches for local jobs |
 | Events | Send a verified observation for review; add a note, confirm/dismiss and export | Decisions remain through workspace switches; no new simulated events |
 | Zones | Use a still from a Monitor preview, a Recognition frame or an image file, draw the zone and **Export analyzer rules** | A rule file the local analyzer accepts, in full-frame coordinates of that camera's image; no live inference implied |
 | Facility | Choose a task from **Current task** or the left guided steps; add a shape or import reviewed footprints, edit cameras and Undo | Estimated coverage and explicitly simulated route rehearsal |
@@ -46,9 +50,11 @@ separate testing.
 
 Use Export reviews, Back up browser rules and Export plan. Browser localStorage
 belongs to the exact origin and browser profile; it is not a backup or shared
-audit system. Keep http://127.0.0.1:4173 stable across updates. Export before
+audit system. Keep your chosen origin stable across updates (PC kit default http://127.0.0.1:4173; Mac source launcher http://127.0.0.1:4180). Export before
 changing the browser profile, port or installation. Keep credentials and footage
 out of exported planning/review metadata.
+
+Training rules and person templates live beside the local service catalog, while session clips remain in the recordings folder. Deleting a person template does not delete those clips. See [training storage](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Guided-training#what-is-saved-where) and [enrollment deletion](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Person-enrollment#storage-and-deletion).
 
 Facility import validates before replacement, and Undo restores the previous
 edit. The [facility guide](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Facility-planning) documents bounds and source fields.

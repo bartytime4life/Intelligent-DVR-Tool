@@ -4,7 +4,7 @@
 
 This page is a dated visual tour of the software **and its earlier prototype**. The newest images below are genuine interface captures from a headless browser test that connected **no real cameras**. Older sample scenes are preserved in the historical section with their original fictional/animated status.
 
-## Today's interface: map, monitor and system
+## PR #61 interface captures: map, monitor and system
 
 ![Original illustrative overview of the current DVR application: schematic geometry and camera-review boundaries.](media/current/overview.svg)
 
@@ -18,7 +18,9 @@ This page is a dated visual tour of the software **and its earlier prototype**. 
 | ![Monitor first-run source selector at 390px](media/current/monitor-mobile.jpg) | ![Facility editor on 390px mobile test viewport](media/current/facility-mobile.jpg) | ![System capacity planner at 390px; values are defaults, not measured hardware](media/current/system-mobile.jpg) |
 | No automatic stream. | Long forms still require real touch testing. | Planner, not a host performance probe. |
 
-*Current screenshots: [Chromium job 41263964836](https://github.com/bartytime4life/Intelligent-DVR-Tool/actions/runs/41263964836), source `9719eda`; 1440×1000 and 390×844 viewports. Full [source and file manifest](media/current/manifest.json). The successful 92 browser scenarios use controlled fixtures, not on-site acceptance.*
+*Dated screenshots: [Chromium job 41263964836](https://github.com/bartytime4life/Intelligent-DVR-Tool/actions/runs/41263964836), source `9719eda`; 1440×1000 and 390×844 viewports. Full [source and file manifest](media/current/manifest.json). The successful 92 browser scenarios describe that revision and use controlled fixtures, not on-site acceptance.*
+
+Later merged features are not pictured here: [guided training](training.md), [consent-based enrollment and possible matches](person-enrollment.md), and [macOS source setup](local-analysis-service.md#start-the-local-application). See [product status](product-status.md) for their implementation and qualification boundaries.
 
 ## The human-controlled recording journey
 

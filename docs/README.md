@@ -8,18 +8,19 @@ Documentation should help operators **see the tool, know the next action, and di
 
 ## Take the visual tour
 
-| The current Monitor | The current Facility Studio |
+| Monitor at PR #61 | Facility Studio at PR #61 |
 | --- | --- |
 | ![Monitor desktop start screen with distinct webcam, LAN DVR and approved public source choices.](media/current/monitor-desktop.jpg) | ![Facility Studio with editable plan, compact task navigation, map and properties.](media/current/facility-desktop.jpg) |
 | [Connect sources](local-camera-feeds.md) · [Capture a clip](recording-workflow.md) | [Facility builder](facility-builder.md) · [Image diagnostics](facility-image-diagnostics.md) |
 
-**Also see:** [All current desktop/mobile screenshots and illustrations](visual-atlas.md) · [Media source and integrity manifest](media/current/README.md) · [Historic prototype tour](visual-tour.md#historical-prototype-captures).
+**Also see:** [Dated desktop/mobile screenshots and illustrations](visual-atlas.md) · [Media source and integrity manifest](media/current/README.md) · [Historic prototype tour](visual-tour.md#historical-prototype-captures). The five captures predate Train and enrolled-person suggestions; those newer features have separate guides below.
 
 ## Start your journey
 
 | I want to… | Start with… | Then… |
 | --- | --- | --- |
 | Install and open the local app | [PC test kit](pc-testing.md) | [Five-minute guide](getting-started.md) |
+| Start from an Apple silicon Mac checkout | [macOS source setup](local-analysis-service.md#start-the-local-application) | [Local analysis limits](local-analysis-service.md#limits-and-recovery) |
 | Connect a webcam or DVR/IP camera | [Camera-source guide](local-camera-feeds.md) | [Record and review](recording-workflow.md) |
 | Analyze an approved recording | [Local analysis service](local-analysis-service.md) | [Recognition](recording-recognition.md), [human review](recording-workflow.md) |
 | Tune detection for my camera | [Guided training](training.md) | [Local analysis service](local-analysis-service.md) |
@@ -44,7 +45,7 @@ Documentation should help operators **see the tool, know the next action, and di
 
 ## What has actually been demonstrated?
 
-A merged [October 31 UI and navigation update](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/61) passed **14/14 reported CI checks**. Its controlled [Chromium workflow run](https://github.com/bartytime4life/Intelligent-DVR-Tool/actions/runs/41263964836) passed 92 scenarios and rendered the current desktop/mobile gallery. Browser tests are not a user study. The connected webcam/DVR bridge, CPU inference and one-channel recording still need representative field endurance, quality and recovery evidence before a production claim.
+A merged [October 31 UI and navigation update](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/61) passed **14/14 reported CI checks**. Its controlled [Chromium workflow run](https://github.com/bartytime4life/Intelligent-DVR-Tool/actions/runs/41263964836) passed 92 scenarios and rendered the dated desktop/mobile gallery. Those counts belong to that revision. The [product-status baseline](product-status.md) records later merged features and the successful workflows for `3e07446` through PR #68. Browser tests are not a user study. The connected webcam/DVR bridge, CPU inference and one-channel recording still need representative field endurance, quality and recovery evidence before a production claim.
 
 The historic October 27 baseline, earlier model tests and synthetic 100-source scheduler observations retain their original revisions, numbers and limitations in the [verification index](verification/README.md). They are not recalculated or represented as current-device acceptance.
 

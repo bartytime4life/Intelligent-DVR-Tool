@@ -6,6 +6,8 @@
 
 The [current visual atlas](../visual-atlas.md) and [current media manifest](current/manifest.json) contain **five current tested-browser screenshots** and **six original illustrated SVG guides**. Current screenshot sources are tied to a named green Chromium job; all artwork is clearly labeled as a schematic, not live camera footage. The old animated screenshots below retain their exact October 27 source revision, test claims and asset hashes.
 
+The five captures are fixed at PR #61 source `9719eda`; `current/` is a collection name, not a latest-release guarantee. They predate Train and enrolled-person suggestions. [Capture revision boundary](current/README.md) · [Later software status](../product-status.md).
+
 ## Historical demonstration captures
 
 All interface pixels come from actual browser screenshots. No UI mockup or generated product screenshot is substituted for the running program. Generated camera artwork already belongs to the prototype and remains marked SAMPLE.

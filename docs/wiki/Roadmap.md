@@ -15,7 +15,8 @@ The minimum capacity goal is **100 simultaneously active cameras**. The current 
 | Review | Wall, queue, notes, history, rules and exports | Accessibility/mobile/long-session acceptance; durable authenticated records |
 | Facility | Buildings/floors/rooms/labels, cameras, estimates and rehearsal | Site measurements, optical calibration and qualified visibility |
 | Easy setup | Submitted address search, GPS/numeric/map-pin origin, rectangular or custom polygon area, selectable services, offline-file review, OSM relations with courtyards, raised bases and independent parts, seven shapes | Live-provider/installed local-service and real-site qualification; overlapping-part decomposition; novice-user study |
-| Detection | Offline ONNX adapter; prior YOLOX-S compatibility probes | Independent labels, precision/recall, false alerts and held-out scenes |
+| Detection | Offline ONNX adapter; prior YOLOX-S compatibility probes; [guided threshold tuning](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Guided-training) | Independent labels, precision/recall, false alerts and held-out scenes separate from tuning sessions |
+| Enrolled-person suggestions | [Consent-gated local templates and explicit possible matches](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Person-enrollment) | Representative consented evaluation, false matches/misses, spoofing and deletion checks; no identity/access-decision claim |
 | Performance | Bounded scheduler, budgets, synthetic overload model | Sustained decode/inference/end-to-end rates on intended hardware |
 | 100-camera operation | Owner requirement and staged acceptance design | Ingest/recording/worker implementation and simultaneous-source qualification |
 
@@ -27,7 +28,7 @@ The [facility reliability guide](https://github.com/bartytime4life/Intelligent-D
 2. **Build representative evaluation.** Use approved recordings with independent labels and reviewed alert coverage. Separate tuning/final scenes. The synthetic corpus checks arithmetic only.
 3. **Measure the intended host.** Instrument decode, preprocessing, inference, postprocessing, rules and delivery. Report p50/p95/p99, resource use and sustained duration.
 4. **Qualify acceleration and workers.** Preserve profile semantics, compare outputs and labeled quality, test fairness, stale work, failures and per-camera ordering. The scheduler currently creates no workers.
-5. **Implement local ingest and recording.** Admit sources explicitly, protect credentials, handle reconnects and disk/retention budgets. Distinguish recording gaps from analytics drops.
+5. **Qualify and extend local ingest and recording.** The [single-channel pilot](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/lan-recording.md) already implements explicit admission, reconnects and bounded retention. Measure its continuity/recovery, then implement multi-source ingest while preserving the distinction between recording gaps and analytics drops.
 6. **Scale 1 → 5 → 25 → 50 → 100+ sources.** Test disconnects, overload, low light, motion, worker loss, disk pressure, UI load and recovery. Record each camera's delivered service and recording continuity.
 7. **Complete operational acceptance.** Add durable records where required; finish authentication, retention, accessibility and long-session checks before operational reliance.
 

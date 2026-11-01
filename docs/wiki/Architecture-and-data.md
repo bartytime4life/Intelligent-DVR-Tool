@@ -38,6 +38,8 @@ not calibrated camera feeds. The browser performs no neural-network inference.
 | LAN recording | `edge/lan_recorder.py`, `edge/segment_worker.py`, `src/LanRecorder.jsx` | Explicit one-source segment capture, bounded retention and existing CPU job dispatch; no discovery or automatic startup |
 | Workspace | `src/App.jsx`, `src/data.mjs` | Review, rules, local video preview, explicit receipt import |
 | Recording recognition | `src/RecognitionReview.jsx`, `src/recognition.mjs` | Explicit review bundle, original-file hash matching, paused sampled detections/counts and Event handoff; connects to the optional same-origin local job API |
+| Guided training | `src/TrainingWorkspace.jsx`, `src/training.mjs`, `edge/local_service.py` | Scripted webcam session, local analysis and opt-in rule-threshold saving; no detector retraining |
+| Person enrollment and suggestions | `edge/people.py`, `edge/faces.py`, `edge/face_worker.py`, `src/RecognitionReview.jsx` | Consent-gated local face templates and explicit possible matches for human review; no verified identity or automatic decision |
 | Facility model | `src/facility.mjs` | Bounded plan validation, local-meter projection, estimated visibility and rehearsal |
 | Facility renderer | `src/FacilityBuilder.jsx`, `src/facility-map.mjs` | Guided controls, MapLibre and selected-camera Three.js volume |
 | Map starter | `src/FacilityStarter.jsx`, `src/facility-starter.mjs` | Common shapes, dimensions, reviewed simple ways/supported outer-only relations and source records |
@@ -55,6 +57,9 @@ not calibrated camera feeds. The browser performs no neural-network inference.
 | Preview a local video | Local browser object URL | Preview is not analysis; no upload is implemented |
 | Open recognition results + matching recording | Transient browser memory and local object URL | SHA-256 match before attachment; metadata and video never uploaded; selected observations can be explicitly imported into localStorage |
 | Start local analysis job | One explicit local folder, frozen input snapshots and same-computer HTTP result transfer; optional Linux private last-job recovery | Token/Host/origin checks; opt-in bounded same-computer recording import, no cloud inference; [restart storage](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/local-analysis-service.md#optional-linux-restart-recovery) is not continuous recording or a durable human-review database |
+| Apply guided training | New rule file under `trained/` beside the catalog; default selection/history in browser storage | Explicit apply and training-write permission; detector weights are unchanged; [storage](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Guided-training#what-is-saved-where) |
+| Enroll or check a consenting person | Private `people/` templates beside the catalog; clips stay in the recordings folder | Face models and processing stay local; deleting a template does not delete clips; [deletion](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Person-enrollment#storage-and-deletion) |
+| Check for enrolled people in Recognition | Pending embeddings in service memory for one local job; browser receives names, boxes and similarity only | Confirm may add a template view; Not this person hides the suggestion; no automatic Events/export handoff; [limits](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Person-enrollment#possible-matches-in-recognition) |
 | Run analyzer | Explicit local output files | No camera capture or model download |
 | Import receipt/plan | Browser memory/localStorage after validation | Bounds and declared fields are checked |
 | Export reviews/rules/plan | Explicit browser download | User-controlled file copies |

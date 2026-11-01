@@ -6,6 +6,8 @@
 - [Field acceptance](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Field-acceptance)
 - [Camera sources](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Camera-sources)
 - [Recording workflow](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Recording-workflow)
+- [Guided training](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Guided-training)
+- [Person enrollment](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Person-enrollment)
 - [Image diagnostics](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Image-diagnostics)
 - [Planar calibration](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Planar-calibration)
 - [Visual tour](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-tour)

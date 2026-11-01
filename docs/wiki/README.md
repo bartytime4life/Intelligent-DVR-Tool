@@ -9,6 +9,8 @@ python3 scripts/build-wiki.py --check
 
 Edit canonical guides, then regenerate; do not hand-edit generated page copies. The generator rewrites links for the wiki and uses repository-hosted media. It performs no network writes. CI checks mirror drift and documentation integrity.
 
+The source set includes 24 canonical pages plus sidebar/footer, including [guided training](../training.md) and [person enrollment](../person-enrollment.md). The five PR #61 screenshots retain their exact capture revision and predate those features. Updating these mirrors does not update the published Wiki.
+
 Publish the generated pages listed in `scripts/build-wiki.py` through the GitHub Wiki editor or its separate `.wiki.git` repository. The current set includes Product-status, Facility-setup-reliability and a stable Evidence-and-validation index, alongside the machine-setup guides. `_Sidebar.md` and `_Footer.md` are GitHub's special navigation pages. Preserve unrelated existing wiki pages. A repository merge does not automatically publish wiki edits.
 
 - [Published wiki](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki)
