@@ -17,6 +17,13 @@ The direct CLI adapter is bounded by frame/event/image counts, not a hard
 inference deadline or sandbox. The optional local job service adds worker memory
 and wall-time bounds as described below. Never expose it as an unauthenticated upload service.
 
+With `--allow-training`, the job service accepts one more same-origin, token-bound
+write: a [guided training](docs/training.md) rule set of fixed fields (name, a class
+the configured models detect, threshold, dwell, max gap and an in-frame rectangle),
+validated by the analyzer's rule engine and written with exclusive creation under
+`trained/` beside the catalog (private permissions, at most 50 files). Models and
+configured rule files remain read-only to the browser.
+
 The browser imports bounded JSON metadata (1 MB, 1,000 events) and renders it as
 React text. There is no HTML injection or URL-based media fetch from a receipt.
 Receipt-only imports do not borrow sample imagery. Recognition can attach the

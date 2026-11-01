@@ -26,6 +26,20 @@ test('size overflow discards the entire clip and explicit recording can retry',(
   f.capture.start(f.stream);f.timer();f.recorder().finish();assert.equal(f.clips.length,1);
   assert.equal(f.clips[0].reason,'60-second stop requested');
 });
+test('paused time counts toward neither the 60-second limit nor the clip length',()=>{
+  let clock=0,recorder;const delays=[],states=[],clips=[],track={readyState:'live',enabled:true,addEventListener(){},removeEventListener(){}};
+  class Recorder{static isTypeSupported(){return true;}constructor(stream,opts){recorder=this;this.mimeType=opts.mimeType;this.state='inactive';}
+    start(){this.state='recording';}pause(){this.state='paused';}resume(){this.state='recording';}stop(){this.state='inactive';this.ondataavailable({data:new Blob(['v'])});this.onstop();}}
+  const capture=createClipRecorder({Recorder,Stream:class{},onState:s=>states.push(s.state),onClip:c=>clips.push(c),
+    now:()=>clock,later:(fn,ms)=>{delays.push(ms);return delays.length;},cancel:()=>{}});
+  capture.start({getVideoTracks:()=>[track]});
+  clock=10000;assert.equal(capture.pause(),true);assert.equal(capture.pause(),false);
+  clock=25000;assert.equal(capture.resume(),true);assert.equal(capture.resume(),false);
+  assert.deepEqual(delays,[60000,50000]);
+  clock=30000;capture.stop();
+  assert.equal(clips[0].elapsed,15);assert.deepEqual(states,['recording','paused','recording','stopping','ready']);
+  assert.equal(recorder.state,'inactive');
+});
 test('missing camera and recorder errors never publish successful clips',()=>{
   const f=fixture();assert.throws(()=>f.capture.start(null),/Connect a webcam/);
   f.capture.start(f.stream);f.recorder().onerror();f.recorder().finish();assert.equal(f.clips.length,0);

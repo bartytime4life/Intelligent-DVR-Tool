@@ -49,8 +49,13 @@ this environment uses the unpinned version ranges. Put a catalog, its labels,
 rules and the verified model in `local-analysis/` (ignored by Git) with an empty
 `local-analysis/recordings/` folder, then double-click `Start-Mac.command`. It
 rebuilds the interface when the source is newer than the last build and opens
-`http://127.0.0.1:4180/` with recording import enabled. Without `.venv` or
+`http://127.0.0.1:4180/` with recording import and training enabled. Without `.venv` or
 `local-analysis/catalog.json` it serves the interface only.
+
+`--allow-training` (Linux `--allow-training`, Windows `-AllowTraining`) lets
+[guided training](training.md) save tuned rule sets in `trained/` beside the
+catalog. Saved sets load at startup and appear with the configured ones; files are
+created exclusively, never overwritten, and limited to 50.
 
 The equivalent direct command, after `npm run build`, using the Python environment
 with the edge dependencies installed, is:

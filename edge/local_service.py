@@ -37,6 +37,10 @@ MODEL_BYTES = VIDEO_BYTES
 LIMITS = {'video_bytes': VIDEO_BYTES, 'wall_seconds': 300, 'max_frames': 6000,
           'stride': 5, 'threads': 2, 'active_jobs': 1, 'memory_bytes': 4 * 1024**3}
 TERMINAL = {'completed', 'failed', 'cancelled'}
+# Guided training may add tuned rule sets; nothing else from the browser writes rules or models.
+TRAINED_LIMIT = 50
+TRAINED_NAME = re.compile(r'(trained-[a-f0-9]{12})\.rules\.json')
+TRAINING_KEYS = {'name', 'label', 'threshold', 'dwell', 'max_gap', 'rect'}
 # Fixed types: mimetypes reads Windows registry overrides (e.g. .js as text/plain),
 # which nosniff then turns into a blank module-script UI.
 TYPES = {'.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8',
@@ -139,26 +143,54 @@ def load_catalog(config):
                 validate_binding(entry['profile'], sha, labels)
                 item['classes'] = labels
             else:
-                rules = read_json(item['path'], 64 * 1024)
-                item['sha256'] = hashlib.sha256(item['path'].read_bytes()).hexdigest()
-                if not isinstance(rules, list) or not 1 <= len(rules) <= 100:
-                    raise ValueError('Use 1–100 rules')
-                parsed = [Rule(**rule) for rule in rules]
-                RuleEngine(parsed)
-                item['classes'] = sorted({rule.label for rule in parsed})
-                item['summary'] = [f'{r.label} ≥ {r.threshold:g}; {r.dwell:g}s in {r.name}' for r in parsed]
+                item = rules_item(item)
             result[kind][entry['id']] = item
     return result
 
 
+def rules_item(item):
+    """Validate a rule-set file with the analyzer's own rule engine and describe it."""
+    rules = read_json(item['path'], 64 * 1024)
+    item['sha256'] = hashlib.sha256(item['path'].read_bytes()).hexdigest()
+    if not isinstance(rules, list) or not 1 <= len(rules) <= 100:
+        raise ValueError('Use 1–100 rules')
+    parsed = [Rule(**rule) for rule in rules]
+    RuleEngine(parsed)
+    item['classes'] = sorted({rule.label for rule in parsed})
+    item['summary'] = [f'{r.label} ≥ {r.threshold:g}; {r.dwell:g}s in {r.name}' for r in parsed]
+    return item
+
+
+def load_trained(directory):
+    """Rule sets saved by guided training: <catalog folder>/trained, regular files only."""
+    entries = {}
+    if not directory.is_dir() or directory.is_symlink():
+        return entries
+    for path in sorted(directory.iterdir())[:1000]:
+        match = TRAINED_NAME.fullmatch(path.name)
+        if not match or len(entries) == TRAINED_LIMIT:
+            continue
+        try:
+            item = rules_item({'id': match[1], 'path': regular(path, 64 * 1024)})
+            item['name'] = read_json(path, 64 * 1024)[0]['name'][:80]
+        except (OSError, ValueError, TypeError, KeyError, IndexError):
+            continue  # A damaged file stays on disk for the owner to inspect; it is never offered.
+        entries[match[1]] = item
+    return entries
+
+
 class Jobs:
-    def __init__(self, recordings, catalog, *, wall_seconds=300, process_factory=subprocess.Popen, state_dir=None, allow_import=False):
+    def __init__(self, recordings, catalog, *, wall_seconds=300, process_factory=subprocess.Popen, state_dir=None, allow_import=False,
+                 training_dir=None):
         # Resolved once (OS links above it are fine); the folder and its entries are not links.
         recordings = anchor(recordings)
         if not recordings.is_dir() or recordings.is_symlink():
             raise ValueError('Select a regular local recordings directory without symlinks')
         self.recordings, self.catalog = recordings, catalog
         self.allow_import = allow_import
+        self.training_dir = training_dir
+        if training_dir is not None:
+            catalog['rules'].update(load_trained(training_dir))
         self.wall_seconds = min(300, max(.1, wall_seconds))
         self.process_factory = process_factory
         self.lock = threading.RLock()
@@ -199,17 +231,69 @@ class Jobs:
                         break
             self.choices = choices
             models = [{k: item[k] for k in ('id', 'name', 'profile')} for item in self.catalog['models'].values()]
-            rules = [{**{k: item[k] for k in ('id', 'name', 'summary')},
-                      'models': [m['id'] for m in self.catalog['models'].values() if set(item['classes']) <= set(m['classes'])]}
-                     for item in self.catalog['rules'].values()]
+            rules = [self.rule_choice(item) for item in self.catalog['rules'].values()]
             return {'recordings': [{'id': key, 'name': p.name, 'bytes': sig[2]} for key, (p, sig) in choices.items()],
                     'models': models, 'rules': rules, 'limits': LIMITS,
                     'enhancement_comparisons': [ENHANCEMENT_PROFILE],
                     'backend': 'opencv-cpu', 'job': None if self.managed else self.snapshot(),
                     'recorder_active': self.owner is not None,
                     'recording_import': {'enabled': self.allow_import, 'max_bytes': MAX_IMPORT_BYTES},
+                    'training': {'enabled': self.training_dir is not None, 'limit': TRAINED_LIMIT},
                     'retention': 'private-local-last-job' if self.store else 'temporary-until-service-exit',
                     'ready': all(importlib.util.find_spec(x) is not None for x in ('cv2', 'numpy', 'av'))}
+
+    def rule_choice(self, item):
+        return {**{k: item[k] for k in ('id', 'name', 'summary')},
+                'models': [m['id'] for m in self.catalog['models'].values() if set(item['classes']) <= set(m['classes'])]}
+
+    def save_training_rules(self, body):
+        """Save one tuned rule as a new rule set. Fixed fields only; files are never overwritten."""
+        def number(value):
+            return isinstance(value, (int, float)) and not isinstance(value, bool)
+        with self.lock:
+            if self.training_dir is None:
+                raise JobError('TRAINING_DISABLED', 'Restart the local app with --allow-training to save trained settings.', 403)
+            if (not isinstance(body, dict) or not {'name', 'label', 'threshold'} <= set(body) <= TRAINING_KEYS
+                    or not isinstance(body['name'], str) or not 1 <= len(body['name'].strip()) <= 60
+                    or not body['name'].isprintable() or not isinstance(body['label'], str)
+                    or not all(number(body[k]) for k in ('threshold', 'dwell', 'max_gap') if k in body)
+                    or ('rect' in body and (not isinstance(body['rect'], list) or len(body['rect']) != 4
+                                            or not all(number(v) for v in body['rect'])))):
+                raise JobError('TRAINING_RULE', 'Send a rule name, a detected class and numeric settings.')
+            if not any(body['label'] in model['classes'] for model in self.catalog['models'].values()):
+                raise JobError('TRAINING_RULE', 'Choose a class that a configured model detects.')
+            rule = {'name': body['name'].strip(), 'label': body['label'], 'rect': list(body.get('rect', [0, 0, 1, 1])),
+                    'dwell': body.get('dwell', 1), 'threshold': body['threshold'], 'max_gap': body.get('max_gap', 2)}
+            try:
+                RuleEngine([Rule(**{**rule, 'rect': tuple(rule['rect'])})])
+            except (TypeError, ValueError):
+                raise JobError('TRAINING_RULE', 'Use a threshold of 0.1–1, a dwell of 0–3600 s and a gap of up to 60 s inside the frame.') from None
+            data = (json.dumps([rule], indent=2) + '\n').encode()
+            entry_id = 'trained-' + hashlib.sha256(data).hexdigest()[:12]
+            if entry_id in self.catalog['rules']:
+                return {'rule': self.rule_choice(self.catalog['rules'][entry_id]), 'created': False}
+            if sum(key.startswith('trained-') for key in self.catalog['rules']) >= TRAINED_LIMIT:
+                raise JobError('TRAINING_FULL', f'{TRAINED_LIMIT} trained rule sets are saved. Move older files out of the trained folder, then restart the local app.', 409)
+            directory = self.training_dir
+            try:
+                if directory.is_symlink():
+                    raise OSError('symlink')
+                directory.mkdir(mode=0o700, exist_ok=True)
+                path = directory / f'{entry_id}.rules.json'
+                # O_EXCL: an existing file is never replaced, even one this service did not list.
+                fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, 'O_NOFOLLOW', 0), 0o600)
+                with os.fdopen(fd, 'wb') as stream:
+                    stream.write(data)
+                    stream.flush()
+                    os.fsync(stream.fileno())
+                item = rules_item({'id': entry_id, 'name': rule['name'], 'path': regular(path, 64 * 1024)})
+            except FileExistsError:
+                raise JobError('TRAINING_CONFLICT', 'A different file already uses this trained rule name. Inspect the trained folder, then restart the local app.', 409) from None
+            except (OSError, ValueError):
+                raise JobError('TRAINING_WRITE', 'The trained setting could not be saved. Check free space and folder permissions.', 500) from None
+            self.catalog['rules'][entry_id] = item
+            self.diagnostics.event('TRAINING_RULES_SAVED')
+            return {'rule': self.rule_choice(item), 'created': True}
 
     def receive_recording(self, stream, length, mime, expected_hash):
         with self.lock:
@@ -693,6 +777,8 @@ class Handler(BaseHTTPRequestHandler):
                 return self._json(feeds.disconnect(match[1]))
             if path == '/api/analysis/jobs':
                 return self._json(jobs.start(body), 202)
+            if path == '/api/analysis/training/rules':
+                return self._json(jobs.save_training_rules(body), 201)
             if path == '/api/recorder/start':
                 return self._json(recorder.start(body), 202)
             if path == '/api/recorder/stop':
@@ -755,6 +841,7 @@ def main(argv=None):
     parser.add_argument('--config', type=Path, help='Local model/rule allowlist; see edge/local-analysis.example.json')
     parser.add_argument('--state-dir', type=Path, help='Opt-in Linux private last-job storage; no automatic analysis or resume')
     parser.add_argument('--allow-recording-import', action='store_true', help='Allow explicit same-origin video imports up to 64 MiB; stored locally until manually moved or deleted')
+    parser.add_argument('--allow-training', action='store_true', help='Allow guided training to save tuned rule sets in the catalog folder\'s trained/ folder; never overwrites')
     parser.add_argument('--feeds-config', type=Path, help='Trusted LAN RTSP channels; see edge/local-feeds.example.json')
     parser.add_argument('--recorder-config', type=Path, help='Opt-in one-camera segment recorder; never starts automatically')
     parser.add_argument('--port', type=int, default=4173)
@@ -766,6 +853,8 @@ def main(argv=None):
         parser.error('--state-dir requires recording analysis configuration')
     if args.allow_recording_import and not args.config:
         parser.error('--allow-recording-import requires recording analysis configuration')
+    if args.allow_training and not args.config:
+        parser.error('--allow-training requires recording analysis configuration')
     if args.recorder_config and (not args.config or not args.feeds_config):
         parser.error('--recorder-config requires recording analysis and feeds configuration')
     if not args.config and not args.feeds_config:
@@ -778,7 +867,8 @@ def main(argv=None):
     diagnostics = Diagnostics()
     try:
         if args.config:
-            jobs = Jobs(args.recordings, load_catalog(args.config.absolute()), state_dir=args.state_dir, allow_import=args.allow_recording_import)
+            jobs = Jobs(args.recordings, load_catalog(args.config.absolute()), state_dir=args.state_dir, allow_import=args.allow_recording_import,
+                        training_dir=args.config.absolute().parent / 'trained' if args.allow_training else None)
             diagnostics = jobs.diagnostics
         if args.feeds_config:
             feeds = Feeds(load_sources(args.feeds_config.absolute()), diagnostics=diagnostics)
@@ -792,7 +882,7 @@ def main(argv=None):
             recorder = Recorder(config, feeds.sources, jobs, jobs.recordings / '.lan-recorder', diagnostics=diagnostics)
         with LocalServer(args.port, jobs, ROOT / 'dist/client', feeds, recorder) as server:
             diagnostics.event('SERVICE_START', analysis=jobs is not None, feeds=feeds is not None, recorder=recorder is not None,
-                              imports=args.allow_recording_import)
+                              imports=args.allow_recording_import, training=args.allow_training)
             print(f'Local Intelligent DVR: {server.origin}/ — explicit connections and jobs only; Ctrl+C stops.', flush=True)
             if args.open_browser:
                 import webbrowser

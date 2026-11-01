@@ -8,6 +8,7 @@ const nav = (page,label) => page.getByRole('navigation',{name:'Main navigation'}
 const views = [
   ['Monitor',/^Monitor/],
   ['Recognition',/^Recognition$/],
+  ['Train',/^Train$/],
   ['Facility',/^Locate your facility$/],
   ['Events',/^Event history$/],
   ['Zones',/^Define what needs attention$/],
@@ -37,7 +38,7 @@ async function auditView(page,label,heading,form,emit=false) {
 }
 
 for(const [form,width,height] of [['desktop',1440,1000],['mobile',390,844]]) {
-  test('seven-workspace '+form+' navigation, visible headings, overflow and screenshots',async({page})=>{
+  test('every-workspace '+form+' navigation, visible headings, overflow and screenshots',async({page})=>{
     test.setTimeout(120000);
     await offline(page);
     await mkdir('qa-local/workspace-audit',{recursive:true});
