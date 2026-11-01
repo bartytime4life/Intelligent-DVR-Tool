@@ -107,3 +107,74 @@ test('transparent local PNGs are composited before analysis and lossless frame e
   expect(comparison).toContain('100.0%');
   expect(errors).toEqual([]);
 });
+
+test('calibrated map ruler requires withheld check and independent measured reference declaration',async({page})=>{
+  await openStudio(page);
+  const errors=[];page.on('pageerror',err=>errors.push(err.message));
+  await page.getByRole('button',{name:'Cameras',exact:true}).click();
+  await page.locator('.facility-image-lab summary').click();
+  const picture=await image(page,false);
+  await page.getByLabel('Open image for diagnostics').setInputFiles({name:'ground.png',mimeType:'image/png',buffer:Buffer.from(picture,'base64')});
+  const cal=page.locator('.facility-calibration');
+  await cal.locator('summary').click();
+  await expect(cal.getByText(/Four|4 fit points/i).first()).toBeVisible();
+  const points=[[10,10,1,1],[90,10,9,1],[90,90,9,9],[10,90,1,9],[50,50,5,5]];
+  for(let i=0;i<points.length;i++){
+    const number=i+1,[u,v,e,n]=points[i];
+    await page.getByLabel('Reference '+number+' Image X %').fill(String(u));
+    await page.getByLabel('Reference '+number+' Image Y %').fill(String(v));
+    await page.getByLabel('Reference '+number+' East metres').fill(String(e));
+    await page.getByLabel('Reference '+number+' North metres').fill(String(n));
+  }
+  await cal.getByRole('button',{name:'Compute planar transform'}).click();
+  await expect(cal).toContainText('Independent check (1)');
+  await expect(cal.getByRole('button',{name:'Measure within reference boundary'})).toBeDisabled();
+  await cal.locator('.facility-calibration-declaration input').check();
+  await expect(cal.getByRole('button',{name:'Measure within reference boundary'})).toBeEnabled();
+  await page.getByLabel('Ground ruler Start X').fill('25');
+  await page.getByLabel('Ground ruler Start Y').fill('25');
+  await page.getByLabel('Ground ruler End X').fill('75');
+  await page.getByLabel('Ground ruler End Y').fill('25');
+  await expect(cal).toContainText('Plane-only estimated distance: 5.00 m');
+  await page.getByLabel('Ground ruler End X').fill('99');
+  await expect(cal).toContainText('Extrapolation is refused');
+  await page.getByLabel('Reference 1 East metres').fill('2');
+  await expect(cal.getByRole('button',{name:'Measure within reference boundary'})).toHaveCount(0);
+  expect(errors).toEqual([]);
+});
+
+test('a chosen ground reference accepts an explicit local map pick, without activating recording',async({page})=>{
+  await openStudio(page);
+  const errors=[];page.on('pageerror',err=>errors.push(err.message));
+  await page.getByRole('button',{name:'Cameras',exact:true}).click();
+  // The map's WebGL readiness is independent from rendering the React toolbar.
+  await expect(page.getByRole('button',{name:'Place camera'})).toBeEnabled();
+  await page.locator('.facility-image-lab summary').click();
+  const picture=await image(page,false);
+  await page.getByLabel('Open image for diagnostics').setInputFiles({name:'map-ref.png',mimeType:'image/png',buffer:Buffer.from(picture,'base64')});
+  const cal=page.locator('.facility-calibration');await cal.locator('summary').click();
+  await cal.locator('.facility-calibration-ref').first().getByRole('button',{name:'Pick on map'}).click();
+  await expect(page.locator('.facility-draw-hint')).toContainText('Select the measured ground marker');
+  await expect(page.getByRole('button',{name:'2D',exact:true})).toHaveAttribute('aria-pressed','true');
+  const box=await page.locator('.facility-map').boundingBox();
+  await page.mouse.click(box.x+box.width*.5,box.y+box.height*.5);
+  await expect(page.locator('.facility-draw-hint')).toHaveCount(0);
+  await expect(page.getByLabel('Reference 1 East metres')).not.toHaveValue('');
+  await expect(page.getByLabel('Reference 1 North metres')).not.toHaveValue('');
+  expect(errors).toEqual([]);
+});
+
+test('image reference numbering follows full row positions even when earlier markers are blank',async({page})=>{
+  await openStudio(page);
+  await page.getByRole('button',{name:'Cameras',exact:true}).click();
+  await page.locator('.facility-image-lab summary').click();
+  const picture=await image(page,false);
+  await page.getByLabel('Open image for diagnostics').setInputFiles({
+    name:'marker-numbers.png',mimeType:'image/png',buffer:Buffer.from(picture,'base64')
+  });
+  await page.locator('.facility-calibration summary').click();
+  await page.getByLabel('Reference 5 Image X %').fill('50');
+  await page.getByLabel('Reference 5 Image Y %').fill('50');
+  await expect(page.locator('.facility-calibration-marker')).toHaveCount(1);
+  await expect(page.locator('.facility-calibration-marker')).toHaveText('5');
+});
