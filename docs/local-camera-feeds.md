@@ -4,6 +4,8 @@ Monitor starts empty. There are no generated camera photographs, simulated
 playback controls or new sample events. Existing reviewed sample records remain
 readable as legacy samples without invented evidence.
 
+The first-run camera wall has **one source-selection area** with distinct choices for a computer webcam, local DVR/IP camera and authorized public webcam. You can also use the persistent **Connect source** toolbar button. Empty slots no longer pretend to be cameras or repeat the same action. After connection, the wall shows only the actually selected source previews, not synthetic placeholders. Clicking a source category opens setup but does not request permission or connect by itself.
+
 Connect a built-in/USB webcam or a configured RTSP channel explicitly. Previews
 are video-only: preview alone does not record, run detection or track people.
 Monitor now offers an explicit **Record webcam clip** action for the connected
