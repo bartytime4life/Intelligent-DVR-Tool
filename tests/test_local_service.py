@@ -369,6 +369,20 @@ class ServiceTest(unittest.TestCase):
                 with self.subTest(family=family), socket.socket(family, socket.SOCK_STREAM) as client:
                     client.connect(address); accepted, peer = listener.accept()
                     with accepted: self.assertEqual(peer_uid(peer, port), os.getuid())
+    @unittest.skipUnless(os.getenv('DVR_TEST_SOCKETS') == '1' and sys.platform in ('linux', 'darwin'),
+                         'Set DVR_TEST_SOCKETS=1 on a Linux or macOS host allowing loopback')
+    def test_restart_on_the_same_port_survives_time_wait_but_a_live_listener_keeps_it(self):
+        service = self.service()
+        server = LocalServer(0, service, self.root); port = server.server_port
+        thread = threading.Thread(target=server.serve_forever, daemon=True); thread.start()
+        try:
+            conn = http.client.HTTPConnection('127.0.0.1', port, timeout=3)
+            try: conn.request('GET', '/api/analysis/session'); self.assertEqual(conn.getresponse().status, 200)
+            finally: conn.close()
+            with self.assertRaises(OSError): LocalServer(port, service, self.root)  # A live listener keeps its port.
+        finally:
+            server.shutdown(); server.server_close(); thread.join()
+        LocalServer(port, service, self.root).server_close()  # The served connection is still in TIME_WAIT.
     @unittest.skipUnless(os.getenv('DVR_TEST_SOCKETS') == '1', 'Set DVR_TEST_SOCKETS=1 on a host allowing loopback')
     def test_idle_connections_do_not_stall_api_calls_and_handlers_are_bounded(self):
         import socket
