@@ -40,8 +40,9 @@ records remain available without invented imagery.
 | System | Review the machine plan and apply 1/2/4 visible-tile limits | Selected live feed stays visible within the chosen limit |
 
 See [camera setup](local-camera-feeds.md), [recording analysis](local-analysis-service.md),
-[Linux](setup-linux.md) and [Windows](setup-windows.md). Previews do not record or
-run live AI/tracking. Actual device compatibility and detection quality require
+[Linux](setup-linux.md) and [Windows](setup-windows.md). Previews do not record.
+[Live AI](live-detection.md) with short-lived tracks runs only after **Start AI**
+on a tile. Actual device compatibility, detection and tracking quality require
 separate testing.
 
 ![Schematic of data boundaries: temporary browser preview, local analysis service, human review and explicit export.](media/current/data-boundary.svg)

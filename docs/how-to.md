@@ -52,8 +52,10 @@ tell the difference. A fresh install connects no source automatically.
 
 For a first test, use the computer webcam. No microphone is requested. Local DVR
 channels need a reviewed private source configuration; public sources need
-provider permission and attribution. A preview does not run live AI.
-[Webcam and DVR setup](local-camera-feeds.md) · [Public webcams](public-webcams.md).
+provider permission and attribution. A preview runs live AI only after you press
+**Start AI** on its tile: boxes, numbered tracks and rule observations appear on
+the tile, and you choose which observations to send to Events.
+[Webcam and DVR setup](local-camera-feeds.md) · [Public webcams](public-webcams.md) · [Live AI](live-detection.md).
 
 ## 3. Analyze a clip
 

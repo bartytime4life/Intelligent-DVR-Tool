@@ -21,6 +21,7 @@
 
 - [Camera sources](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Camera-sources)
 - [Public webcams](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Public-webcams)
+- [Live AI and tracking](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Live-AI-and-tracking)
 - [Recording workflow](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Recording-workflow)
 - [Local analysis service](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Local-analysis-service)
 - [Recognition details](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Recognition-details)

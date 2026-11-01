@@ -14,6 +14,7 @@ import time
 import platform
 from contextlib import ExitStack
 from .rules import Rule, RuleEngine
+from .tracking import Tracker, zones_from_rules
 from .evaluation import (TRACE_SCHEMA, MAX_FRAMES, MAX_DETECTIONS, canonical_hash,
                          local_file)
 from .model_profiles import (DEFAULT_PROFILE, YOLOX_PROFILE, PROFILES, prepare,
@@ -157,6 +158,8 @@ def main(argv=None, progress=None, local_capture=False):
     source_hash=digest(args.video)
     run_id=hashlib.sha256((source_hash+model_hash).encode()).hexdigest()
     engine=RuleEngine(rules,args.camera,run_id)
+    # Short-lived within-camera track IDs; rule observations stay class presence.
+    tracker=Tracker(zones=zones_from_rules(rules))
     if local_capture:
         # Service worker: FFmpeg only, and decoder threads under the same cap as
         # inference so the summed CPU-time limit holds (older builds lack the property).
@@ -220,6 +223,9 @@ def main(argv=None, progress=None, local_capture=False):
                 del enhanced, candidate_blob
             latencies.append(elapsed)
             processed+=1;events.extend(engine.update(index/fps,detections))
+            for detection,track in zip(detections,tracker.update(index/fps,detections,int(frame.shape[1]),int(frame.shape[0]))):
+                if track is not None:
+                    detection['track']=track
             report(phase='analyzing', frames_read=frames, frames_analyzed=processed)
             if retain_frames:
                 detection_count += len(detections) + (len(comparison['detections']) if comparison else 0)
@@ -251,6 +257,9 @@ def main(argv=None, progress=None, local_capture=False):
                             if not (p == args.model and args.backend == 'opencv-cpu')):
         raise Failure('INPUT_CHANGED', 'An input changed during analysis; no review result was written')
     ordered=sorted(latencies)
+    tracking=tracker.finish()
+    from .model_profiles import ASSETS
+    tracking['tracker_sha256']=digest(ASSETS/'tracking.py')
     receipt={'schema':'intelligent-dvr.receipt.v1','mode':'offline-model',
              'state':'partial' if partial else 'completed','events':events,
              'model_sha256':model_hash,'source_sha256':source_hash,'camera':args.camera,
@@ -261,7 +270,8 @@ def main(argv=None, progress=None, local_capture=False):
              'media_coverage':coverage,
              'timing':{'scope':'local inference and postprocessing only; not end-to-end camera latency',
                        'p50_ms':statistics.median(ordered),'p95_ms':ordered[math.ceil(.95*len(ordered))-1]},
-             'limitations':['No identity tracking: dwell is continuous class presence, not the same object.',
+             'tracking':{k:tracking[k] for k in ('schema','method','tracker_sha256','classes','tracks_dropped')},
+             'limitations':['Rule dwell is continuous class presence, not the same object; track IDs are short-lived continuity estimates, not identities.',
                             'Frame timing assumes a constant-frame-rate recording; verify variable-rate sources.',
                             'No camera compatibility or production detection quality has been qualified.']}
     documents = [(args.output, receipt)]
@@ -273,7 +283,6 @@ def main(argv=None, progress=None, local_capture=False):
                                       'max_frames': args.max_frames,
                                       'scope': 'Analyzer thread and decoded-frame limits only; no OS/GPU quota or worker pool.'}
     if retain_frames:
-        from .model_profiles import ASSETS
         trace = {'schema':TRACE_SCHEMA,'origin':'offline-analyzer','state':receipt['state'],
                  'source_sha256':source_hash,'model_sha256':model_hash,
                  'labels_sha256':digest(args.labels),'inference_profile':args.profile,
@@ -284,6 +293,7 @@ def main(argv=None, progress=None, local_capture=False):
                  'runtime':dict(runtime),
                  'timing_scope':receipt['timing']['scope'],'human_review_required':True}
         trace['media_coverage'] = coverage
+        trace['tracking'] = tracking
         if enhancement:
             trace['enhancement_comparison'] = enhancement
         if policy_hash is not None:
@@ -295,8 +305,8 @@ def main(argv=None, progress=None, local_capture=False):
                 'schema':'intelligent-dvr.recognition-review.v1',
                 'receipt':receipt, 'trace':trace,
                 'limitations':[
-                    'Detected classes and rule-based presence only; no identity or learned scene understanding.',
-                    'Counts are per sampled frame, not unique people or objects.',
+                    'Detected classes, short-lived within-camera tracks and rule-based presence; no identity or learned scene understanding.',
+                    'Frame counts are per sampled frame; track counts are continuity estimates, not unique people or objects.',
                     'Metadata is unsigned; source hash matching does not authenticate detections.',
                 ],
             }))

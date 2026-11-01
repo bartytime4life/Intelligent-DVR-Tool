@@ -26,6 +26,7 @@ PAGES = {
     'docs/troubleshooting.md': 'Troubleshooting',
     'docs/local-camera-feeds.md': 'Camera-sources',
     'docs/public-webcams.md': 'Public-webcams',
+    'docs/live-detection.md': 'Live-AI-and-tracking',
     'docs/recording-workflow.md': 'Recording-workflow',
     'docs/local-analysis-service.md': 'Local-analysis-service',
     'docs/recording-recognition.md': 'Recognition-details',
@@ -74,7 +75,7 @@ PAGES = {
 GROUPS = {
     'Start here': ['Home', 'Visual-handbook', 'Guide-index', 'Getting-started', 'Visual-atlas', 'Product-status'],
     'Install and recover': ['Mac-setup', 'PC-testing', 'Linux-setup', 'Windows-setup', 'Troubleshooting'],
-    'Connect, analyze, review': ['Camera-sources', 'Public-webcams', 'Recording-workflow', 'Local-analysis-service', 'Recognition-details', 'Recording-coverage', 'LAN-recording', 'Review-and-events', 'Zones'],
+    'Connect, analyze, review': ['Camera-sources', 'Public-webcams', 'Live-AI-and-tracking', 'Recording-workflow', 'Local-analysis-service', 'Recognition-details', 'Recording-coverage', 'LAN-recording', 'Review-and-events', 'Zones'],
     'Train': ['Guided-training', 'Person-enrollment', 'Enhancement-comparison'],
     'Plan the facility': ['Facility-planning', 'Saved-facilities', 'Maps-and-shapes', 'Facility-setup-reliability', 'Local-map-services', 'Facility-study-kit', 'Image-diagnostics', 'Planar-calibration'],
     'Plan and qualify the machine': ['Resource-controls', 'Hardware-guide', 'GPU-planning', '100-camera-plan', 'Field-acceptance', 'Offline-evaluation', 'Offline-qualification', 'Pilot-scope'],

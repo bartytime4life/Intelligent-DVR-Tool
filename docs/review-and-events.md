@@ -19,7 +19,10 @@ frame position. A box or score is an observation to investigate, not a verdict.
 1. Inspect the relevant sampled scene in **Recognition**. Compare the box with
    the original image and the configured class, region, threshold and dwell rule.
 2. Use **Send observations to Events** deliberately. A LAN segment also requires
-   its own explicit send action; it is not queued automatically.
+   its own explicit send action; it is not queued automatically. A
+   [live AI](live-detection.md) observation is sent one at a time from its Monitor
+   tile, with the analyzed still; there is no recording behind it, so Events labels
+   it **Live AI** and shows no Open in Recognition button.
 3. In **Events**, use filters to focus the queue, open an observation, make the
    appropriate confirm/dismiss decision and add a note explaining the evidence.
 4. Use **Undo** when correcting a decision. The review state stays through

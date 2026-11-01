@@ -119,8 +119,12 @@ fixture is test-only; the production configuration rejects loopback endpoints.
 
 No physical DVR or webcam was available to this execution session. Compatibility
 with your particular DVR, H.264/H.265 channel settings, sustained latency, recording,
-live inference, tracking and the 100-camera requirement still need device/hardware
-qualification. No camera footage is uploaded for testing.
+live-inference and tracking quality, and the 100-camera requirement still need
+device/hardware qualification. No camera footage is uploaded for testing.
+
+**Live AI (November 1, 2026):** a receiving tile offers **Start AI**, which runs
+the local detector and tracker on the frames that tile shows. See
+[live AI and tracking](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Live-AI-and-tracking) for limits and boundaries.
 
 Primary API references: [browser media permission and secure contexts](https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia),
 [OpenCV video capture timeout properties](https://docs.opencv.org/4.x/d4/d15/group__videoio__flags__base.html),

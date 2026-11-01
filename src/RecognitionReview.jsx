@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { parseRecognition, frameSummary, canShowBoxes, matchRecording, MAX_REVIEW_BYTES } from './recognition.mjs';
+import { parseRecognition, frameSummary, canShowBoxes, matchRecording, trackRows, boxLabel, MAX_REVIEW_BYTES } from './recognition.mjs';
 import './recognition.css';
 import LocalAnalysis from './LocalAnalysis.jsx';
 import LanRecorder from './LanRecorder.jsx';
@@ -189,7 +189,7 @@ export default function RecognitionReview({ onImport, active = true, clip, onCli
               {boxesVisible && <div className="recognition-box-labels" aria-hidden="true">{displayed.map((d, i) => {
                 const m = boxMatch(d), state = m && matches.decided[matchKey(m)];
                 return <span key={i} className={m ? `possible ${state || ''}` : undefined} style={{left:`${d.box[0]*100}%`, top:`${d.box[1]*100}%`}}>
-                  {m ? `${state === 'confirmed' ? 'Confirmed' : 'Possible'}: ${m.name} ${m.similarity.toFixed(2)}` : `${d.label} ${d.score.toFixed(2)}`}</span>;
+                  {m ? `${state === 'confirmed' ? 'Confirmed' : 'Possible'}: ${m.name} ${m.similarity.toFixed(2)}` : boxLabel(d)}</span>;
               })}</div>}
             </> : <p>Match the original recording to view this scene.</p>}
           </div>
@@ -209,9 +209,9 @@ export default function RecognitionReview({ onImport, active = true, clip, onCli
           <label className="recognition-threshold">Display score ≥ {threshold.toFixed(2)}<input type="range" aria-label="Display score threshold" min="0.1" max="1" step="0.05" value={threshold} onChange={e => setThreshold(Number(e.target.value))} /></label>
           <p>This filter changes the display only. Recorded rules and observations stay unchanged.</p>
           {summary.counts.length ? <ul className="recognition-counts">{summary.counts.map(([label, n]) => <li key={label}><span>{label}</span><strong>{n}</strong></li>)}</ul> : <p>No detections meet this display threshold. This does not establish an empty scene.</p>}
-          <p>Counts apply to this frame. They are not unique people, identities or tracked objects.</p>
+          <p>Counts apply to this frame. They are not unique people or identities.{run.tracking ? ' A # number marks a short-lived track: the same box followed across samples.' : ''}</p>
           {summary.detections.length > 200 && <p>Showing the first 200 boxes and scores. Counts include all {summary.detections.length} detections above the display threshold.</p>}
-          <div className="recognition-detections">{displayed.map((d, i) => <div key={i}><span>{d.label}</span><span>score {d.score.toFixed(2)}</span></div>)}</div>
+          <div className="recognition-detections">{displayed.map((d, i) => <div key={i}><span>{d.label}{Number.isInteger(d.track) ? ` #${d.track}` : ''}</span><span>score {d.score.toFixed(2)}</span></div>)}</div>
           {frameMatches.length > 0 && <div className="recognition-matches" aria-label="Possible matches in this frame">
             <h3>Possible matches</h3>
             {frameMatches.map(m => {
@@ -234,14 +234,31 @@ export default function RecognitionReview({ onImport, active = true, clip, onCli
           <div className="recognition-event-list">{run.receipt.events.map((e, i) => <button key={e.id} className="recognition-event" onClick={() => {setDetectionInput('original'); seek(run.eventFrames[i]);}}><span>+{e.seconds.toFixed(2)}s · {e.rule}</span><span>score {e.score.toFixed(2)} · View frame</span></button>)}</div>
         </> : <p>No configured rules emitted an observation in the analyzed portion. Inspect detections and rule settings before drawing conclusions.</p>}
       </div>
+      {run.tracking && <TrackSummary run={run} onSeek={i => { setDetectionInput('original'); seek(i); }} />}
       <RecognitionReport run={run} threshold={threshold} reviews={reviews} source={source} onSeek={seek} />
       <details className="recognition-provenance"><summary>Provenance and limits</summary>
         <p>Source SHA-256: <code>{run.receipt.source_sha256}</code></p>
         <p>Model SHA-256: <code>{run.receipt.model_sha256}</code></p>
         <p>{coverageLabel(run.receipt)}. Inventory checks do not authenticate the recording or establish continuous camera visibility.</p>
         <p>Profile: {run.receipt.inference_profile}. Timing assumes constant frame rate ({run.receipt.fps_metadata.toFixed(3)} FPS).</p>
-        <p>A matching recording fingerprint proves file correspondence, not authenticity or recognition accuracy. These results are unsigned. No live camera, identity tracking, learned scene interpretation or 100-camera acceptance is established.</p>
+        <p>A matching recording fingerprint proves file correspondence, not authenticity or recognition accuracy. These results are unsigned. Track numbers are short-lived continuity estimates within this recording, not identities. No live camera, identity tracking, learned scene interpretation or 100-camera acceptance is established.</p>
+        {run.tracking && <p>Tracker: {run.tracking.method} · {run.tracking.tracks.length} tracks{run.tracking.tracks_dropped ? ` · ${run.tracking.tracks_dropped} not retained` : ''}.</p>}
       </details>
     </>}
+  </section>;
+}
+
+function TrackSummary({ run, onSeek }) {
+  const rows = trackRows(run.tracking, run.trace.frames), classes = Object.entries(run.tracking.classes || {});
+  return <section className="recognition-tracks" aria-label="Tracked people and objects">
+    <h2>Tracks <small>{run.tracking.tracks.length}</small></h2>
+    <p>Each track follows one box across sampled frames. It is not an identity: tracks can switch where objects cross, and someone who leaves and returns starts a new track.</p>
+    {classes.length ? <ul className="recognition-counts">{classes.map(([label, c]) => <li key={label}><span>{label}</span><strong>{c.tracks}</strong><small>longest {c.longest_duration_seconds.toFixed(1)} s · median {c.median_duration_seconds.toFixed(1)} s</small></li>)}</ul>
+      : <p>No track was confirmed. A track needs a confident box in two consecutive samples.</p>}
+    {rows.length > 0 && <div className="recognition-track-list">{rows.map(t => <button key={t.id} className="recognition-event" disabled={t.frame === null} onClick={() => onSeek(t.frame)}>
+      <span>#{t.id} {t.label} · +{t.first_seconds.toFixed(1)}s → +{t.last_seconds.toFixed(1)}s · {t.duration_seconds.toFixed(1)} s</span>
+      <span>{Object.entries(t.zones).filter(([, z]) => z.seconds > 0).map(([name, z]) => `${z.seconds.toFixed(1)} s in ${name}`).join(' · ') || `${t.hits} samples`} · View</span>
+    </button>)}</div>}
+    {run.tracking.tracks.length > rows.length && <p className="hint">Showing the {rows.length} longest of {run.tracking.tracks.length} tracks.</p>}
   </section>;
 }

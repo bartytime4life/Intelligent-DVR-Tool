@@ -28,6 +28,7 @@ from .fileops import open_regular
 from .model_profiles import validate_binding
 from .rules import Rule, RuleEngine
 from .local_feeds import Feeds, FeedError, load_sources, shared_config
+from .live_analysis import Live, LiveError, LIMITS as LIVE_LIMITS
 from .result_store import ResultStore, VIDEO_BYTES, REVIEW_BYTES as RESULT_BYTES, EXTENSIONS
 from .recording_import import import_recording, ImportError as RecordingImportError, MAX_IMPORT_BYTES, MIMES as IMPORT_MIMES
 from .enhancement import PROFILE as ENHANCEMENT_PROFILE, validate_trace as validate_enhancement
@@ -852,9 +853,9 @@ class LocalServer(ThreadingHTTPServer):
     allow_reuse_address = sys.platform in ('linux', 'darwin')
     block_on_close = False
     HANDLERS = 16
-    def __init__(self, port, jobs, static_root, feeds=None, recorder=None):
+    def __init__(self, port, jobs, static_root, feeds=None, recorder=None, live=None):
         self.jobs, self.static_root, self.feeds = jobs, Path(static_root).resolve(), feeds
-        self.recorder = recorder
+        self.recorder, self.live = recorder, live
         self.token = jobs.token if jobs else secrets.token_urlsafe(32)
         self.slots = threading.BoundedSemaphore(self.HANDLERS)
         super().__init__(('127.0.0.1', port), Handler)
@@ -947,6 +948,9 @@ class Handler(BaseHTTPRequestHandler):
         self._guard(token=api and path not in ('/api/analysis/session', '/api/feeds/session'), account=api)
         jobs, feeds = self.server.jobs, self.server.feeds
         recorder = getattr(self.server, 'recorder', None)
+        live = getattr(self.server, 'live', None)
+        if path.startswith('/api/live/') and live is None:
+            raise JobError('LIVE_DISABLED', 'Live AI needs the local analysis service with a model and rule catalog. Start the app with Start-Mac.command or the PC launcher.', 503)
         if path.startswith('/api/recorder/') and recorder is None:
             raise JobError('RECORDER_DISABLED', 'LAN recording is not configured. Enable it in the local launcher with a reviewed recorder configuration.', 503)
         if path.startswith('/api/analysis/') and jobs is None:
@@ -956,7 +960,7 @@ class Handler(BaseHTTPRequestHandler):
         if self.command == 'GET' and path == '/api/feeds/session':
             return self._json({'token': self.server.token, **feeds.available()})
         if self.command == 'GET' and path == '/api/analysis/session':
-            return self._json({'token': jobs.token, **jobs.available()})
+            return self._json({'token': jobs.token, **jobs.available(), 'live': live.available() if live else {'enabled': False}})
         if self.command == 'GET' and path == '/api/analysis/people':
             return self._json(jobs.people_list())
         if self.command == 'POST' and path == '/api/analysis/recordings':
@@ -972,6 +976,17 @@ class Handler(BaseHTTPRequestHandler):
             finally:
                 self._drain(body)
             return self._json(result, 201)
+        match = re.fullmatch('/api/live/([a-f0-9]{32})/frame', path)
+        if self.command == 'POST' and match:
+            # One bounded JPEG; authentication and same-origin checks above ran first.
+            lengths = self.headers.get_all('Content-Length') or []
+            if (self.headers.get('Transfer-Encoding') or len(lengths) != 1 or not (lengths[0].isascii() and lengths[0].isdigit())
+                    or not 0 < int(lengths[0]) <= LIVE_LIMITS['frame_bytes'] or self.headers.get_all('Content-Type') != ['image/jpeg']):
+                raise JobError('BODY', 'Send one JPEG frame up to 1 MiB with one Content-Length.')
+            data = self.rfile.read(int(lengths[0]))
+            if len(data) != int(lengths[0]):
+                raise JobError('BODY', 'The frame upload was incomplete.')
+            return self._json(live.frame(match[1], data))
         if self.command == 'POST':
             if self.headers.get('Transfer-Encoding') or self.headers.get_all('Content-Length') is None or len(self.headers.get_all('Content-Length')) != 1:
                 raise JobError('BODY', 'Use a bounded JSON request.')
@@ -987,6 +1002,13 @@ class Handler(BaseHTTPRequestHandler):
                 raise JobError('BODY', 'Invalid JSON request.') from None
             if path == '/api/feeds/connect':
                 return self._json(feeds.connect(body), 202)
+            if path == '/api/live/start':
+                return self._json(live.start(body), 201)
+            match = re.fullmatch('/api/live/([a-f0-9]{32})/stop', path)
+            if match:
+                if body != {}:
+                    raise JobError('BODY', 'Stop takes an empty object.')
+                return self._json(live.stop(match[1]))
             match = re.fullmatch('/api/feeds/([a-f0-9]{32})/disconnect', path)
             if match:
                 return self._json(feeds.disconnect(match[1]))
@@ -1020,6 +1042,9 @@ class Handler(BaseHTTPRequestHandler):
                 # row while it streams, without blocking supervision on a slow reader.
                 with recorder.open_artifact(match[1], match[2]) as (stream, mime):
                     return self._file(stream, mime)
+            match = re.fullmatch('/api/live/([a-f0-9]{32})', path)
+            if match:
+                return self._json(live.status(match[1]))
             match = re.fullmatch('/api/feeds/([a-f0-9]{32})(/frame)?', path)
             if match:
                 if match[2]:
@@ -1048,7 +1073,7 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         try:
             self._dispatch()
-        except (JobError, FeedError) as exc:
+        except (JobError, FeedError, LiveError) as exc:
             self._json({'error': {'code': exc.code, 'message': str(exc)}}, exc.status)
         except (BrokenPipeError, ConnectionResetError, TimeoutError):
             pass
@@ -1089,7 +1114,7 @@ def main(argv=None):
         parser.error('port must be 1024–65535')
     if not (ROOT / 'dist/client/index.html').is_file():
         parser.error('Build the local app first with npm run build')
-    jobs = feeds = recorder = None
+    jobs = feeds = recorder = live = None
     diagnostics = Diagnostics()
     try:
         if args.config:
@@ -1097,6 +1122,8 @@ def main(argv=None):
                         training_dir=args.config.absolute().parent / 'trained' if args.allow_training else None,
                         people_dir=args.config.absolute().parent / 'people' if args.allow_face_enrollment else None)
             diagnostics = jobs.diagnostics
+            # Live AI reuses the reviewed catalog; it runs only after Start AI on a Monitor tile.
+            live = Live(jobs.catalog, diagnostics=diagnostics)
         if args.feeds_config:
             feeds = Feeds(load_sources(args.feeds_config.absolute()), diagnostics=diagnostics)
             if shared_config(args.feeds_config):
@@ -1107,7 +1134,7 @@ def main(argv=None):
             from .lan_recorder import Recorder, validate_config
             config = validate_config(args.recorder_config.absolute(), feeds.sources)
             recorder = Recorder(config, feeds.sources, jobs, jobs.recordings / '.lan-recorder', diagnostics=diagnostics)
-        with LocalServer(args.port, jobs, ROOT / 'dist/client', feeds, recorder) as server:
+        with LocalServer(args.port, jobs, ROOT / 'dist/client', feeds, recorder, live) as server:
             diagnostics.event('SERVICE_START', analysis=jobs is not None, feeds=feeds is not None, recorder=recorder is not None,
                               imports=args.allow_recording_import, training=args.allow_training,
                               people=args.allow_face_enrollment)
@@ -1128,6 +1155,8 @@ def main(argv=None):
     finally:
         if recorder:
             recorder.close()
+        if live:
+            live.close()
         diagnostics.event('SERVICE_STOP')  # Before the result store releases its owner lock.
         if jobs:
             jobs.close()

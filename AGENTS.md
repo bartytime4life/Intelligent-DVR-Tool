@@ -206,3 +206,13 @@ location/pin choices preview on the map before Save site, and buildings render
 translucent over imagery for tracing. Imagery is a tracing guide, not a survey or
 live view; do not add Google/Esri imagery without a license for this use. See
 docs/facility-builder.md#real-map-layer.
+
+Owner real-AI decision (2026-11-01): the app must have real AI and analysis, not
+only offline plumbing. Monitor tiles offer explicit **Start AI**: the pinned local
+YOLOX-S detector with a frame-difference motion gate, ByteTrack-style short-lived
+tracks and the existing rule engine, at most two cameras, one frame in flight,
+15-minute sessions, nothing recorded. Live observations reach Events only through
+per-observation Send to Events with the analyzed still (mode live-model, no
+recording). Recording traces add the same tracks. Track numbers are continuity
+estimates, never identities; tracking quality (MOTA/IDF1/HOTA), physical cameras
+and capacity remain unqualified. See docs/live-detection.md for sources.

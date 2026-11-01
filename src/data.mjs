@@ -155,7 +155,7 @@ export function restoreSnapshot(key, value, fallback) {
             e.score < 0 ||
             e.score > 1 ||
             !["pending", "confirmed", "dismissed"].includes(e.status) ||
-            !["sample", "offline-model"].includes(e.mode),
+            !["sample", "offline-model", "live-model"].includes(e.mode),
         )
       )
         return fallback;
@@ -172,6 +172,20 @@ export function restoreSnapshot(key, value, fallback) {
                   typeof e.provenance[k] === "string" &&
                   /^[a-f0-9]{64}$/i.test(e.provenance[k]),
               )),
+        )
+      )
+        return fallback;
+      // Live AI observations have a still in this browser and a session, but no source recording.
+      if (
+        value.some(
+          (e) =>
+            e.mode === "live-model" &&
+            (!e.provenance || e.provenance.state !== "live" || e.camera !== null ||
+              typeof e.cameraName !== "string" || !e.cameraName || e.cameraName.length > 80 ||
+              typeof e.provenance.model_sha256 !== "string" || !/^[a-f0-9]{64}$/.test(e.provenance.model_sha256) ||
+              typeof e.provenance.session !== "string" || !/^[a-f0-9]{32}$/.test(e.provenance.session) ||
+              typeof e.provenance.captured_at !== "string" || e.provenance.captured_at.length > 40 ||
+              !Number.isFinite(Date.parse(e.provenance.captured_at)) || "source_sha256" in e.provenance),
         )
       )
         return fallback;
