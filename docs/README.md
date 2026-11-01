@@ -11,7 +11,9 @@ For experimental paired original/sharpened detection checks, see
 
 Start with [PC installation and live-device testing](pc-testing.md), then follow the [field-acceptance runbook](field-acceptance.md) to collect physical-device evidence without confusing CI checks with real camera qualification.
 
-[Facility Studio image diagnostics](facility-image-diagnostics.md) covers opt-in frame capture, ROI histograms, edge/detail proxies, pixel measurement and A/B comparisons. Values are local, downsampled image diagnostics—not optical calibration or recognition accuracy.
+[Facility Studio image diagnostics](facility-image-diagnostics.md) covers opt-in frame capture, ROI histograms, edge/detail proxies, pixel measurement and A/B comparisons.
+
+[Ground-plane camera calibration](facility-calibration.md) adds explicit image-to-map reference markers, independent check residuals and a restricted plane-only ruler. It remains unqualified on actual cameras. Values are local, downsampled image diagnostics—not optical calibration or recognition accuracy.
 
 [One-camera LAN recording](lan-recording.md) connects finalized RTSP segments to
 the existing local recognition and review workflow.
