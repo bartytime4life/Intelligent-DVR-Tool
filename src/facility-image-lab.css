@@ -36,3 +36,9 @@
 .facility-lab-result strong{color:#fff4cf}
 .facility-image-lab button:focus-visible,.facility-image-lab a:focus-visible,.facility-image-lab input:focus-visible,.facility-image-lab summary:focus-visible{outline:2px solid #80ece2;outline-offset:2px}
 @media(max-width:420px){.facility-lab-region-fields{grid-template-columns:repeat(2,minmax(0,1fr))}.facility-lab-metrics strong{font-size:15px}}
+.facility-lab-video{padding:10px;border:1px solid #3c6773;border-radius:9px;background:#08212d;margin:12px 0}
+.facility-lab-video p{margin:0 0 8px;font-size:11px;overflow-wrap:anywhere;color:#d1e8ec}
+.facility-lab-video video{display:block;width:100%;max-height:220px;object-fit:contain;background:#020e14;border-radius:6px}
+.facility-lab-video small{font-size:10px;color:#a5c4d0;line-height:1.6}
+.facility-image-lab>summary:after{content:'▾';color:#9be7de;font-size:13px}
+.facility-image-lab[open]>summary:after{transform:rotate(180deg)}

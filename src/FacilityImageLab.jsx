@@ -1,8 +1,9 @@
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { analyzeImage, compareImages, pixelRuler, FULL_FRAME } from './image-science.mjs';
 import './facility-image-lab.css';
 
 const MAX_FILE = 12 * 1024 * 1024;
+const MAX_VIDEO = 128 * 1024 * 1024;
 const MAX_SIDE = 720;
 const clamp = (value, low = 0, high = 1) => Math.min(high, Math.max(low, Number.isFinite(value) ? value : low));
 const pct = value => value.toFixed(1) + '%';
@@ -36,9 +37,11 @@ function pointAt(event) {
 }
 
 export default function FacilityImageLab({ capture, connected = false, sourceName = '' }) {
-  const fileInput = useRef(null), pointer = useRef(null);
+  const fileInput = useRef(null), videoInput = useRef(null), clipVideo = useRef(null), pointer = useRef(null);
   const [slot, setSlot] = useState('a');
   const [frames, setFrames] = useState({ a: null, b: null });
+  const [clip, setClip] = useState(null);
+  useEffect(() => () => {if (clip?.url) URL.revokeObjectURL(clip.url);}, [clip?.url]);
   const [region, setRegion] = useState(FULL_FRAME);
   const [ruler, setRuler] = useState(null);
   const [tool, setTool] = useState('region');
@@ -82,6 +85,30 @@ export default function FacilityImageLab({ capture, connected = false, sourceNam
     } finally {
       bitmap?.close();
       setBusy(false);
+    }
+  }
+  function importVideo(event) {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    if (!file) return;
+    if (!['video/webm', 'video/mp4'].includes(file.type) || file.size === 0 || file.size > MAX_VIDEO) {
+      setError('Choose a local WebM or MP4 file no larger than 128 MiB.');
+      return;
+    }
+    setClip({url: URL.createObjectURL(file), name: file.name.slice(0, 80)});
+    setError('');
+  }
+  function freezeVideo() {
+    const element = clipVideo.current;
+    if (!clip || !element || element.readyState < 2 || element.seeking) {
+      setError('Pause or seek the video, then allow the selected frame to finish decoding.');
+      return;
+    }
+    try {
+      putFrame(freezeElement(element, element.videoWidth, element.videoHeight,
+        clip.name + ' @ ' + element.currentTime.toFixed(2) + ' s'));
+    } catch (err) {
+      setError(err.name === 'SecurityError' ? 'This video frame cannot be read by the browser.' : err.message);
     }
   }
   function startPointer(event) {
@@ -136,7 +163,7 @@ export default function FacilityImageLab({ capture, connected = false, sourceNam
   return <details className="facility-image-lab" aria-label="Image diagnostics laboratory">
     <summary><span><strong>Image diagnostics</strong><small>Pixel science · capture, compare, inspect</small></span><span className="facility-lab-chip">LOCAL ONLY</span></summary>
     <div className="facility-lab-content">
-      <p className="facility-lab-note">Freeze a connected preview or open a local image. Everything stays in this browser session; no image is uploaded, saved in the plan, or used for recognition.</p>
+      <p className="facility-lab-note">Freeze a connected preview, sample a user-chosen local video frame, or open a still image. Everything stays on this computer; nothing is uploaded, saved in the plan, or used for recognition.</p>
       <div className="facility-lab-controls" role="group" aria-label="Choose diagnostics frame">
         <button type="button" aria-pressed={slot === 'a'} onClick={() => setSlot('a')}>Frame A {frames.a ? '●' : '○'}</button>
         <button type="button" aria-pressed={slot === 'b'} onClick={() => setSlot('b')}>Frame B {frames.b ? '●' : '○'}</button>
@@ -145,7 +172,18 @@ export default function FacilityImageLab({ capture, connected = false, sourceNam
         <button type="button" disabled={!connected || busy} onClick={freezeCurrent}>Freeze live frame into {slot.toUpperCase()}</button>
         <button type="button" disabled={busy} onClick={() => fileInput.current?.click()}>Open local image</button>
         <input ref={fileInput} aria-label="Open image for diagnostics" className="facility-lab-file" type="file" accept="image/png,image/jpeg,image/webp" onChange={importFile}/>
+        <button type="button" onClick={() => videoInput.current?.click()}>Open local video</button>
+        <input ref={videoInput} aria-label="Open video for diagnostics" className="facility-lab-file" type="file" accept="video/webm,video/mp4" onChange={importVideo}/>
       </div>
+      {clip && <div className="facility-lab-video">
+        <p><strong>Local video:</strong> {clip.name}</p>
+        <video ref={clipVideo} src={clip.url} controls preload="metadata" playsInline muted
+          aria-label="Local video for frame sampling"
+          onError={() => setError('This browser cannot decode the selected video/codec. Try a supported WebM or MP4 copy.')}/>
+        <div className="facility-lab-actions"><button type="button" onClick={freezeVideo}>Freeze video frame into {slot.toUpperCase()}</button>
+          <button type="button" onClick={() => setClip(null)}>Close local video</button></div>
+        <small>Scrub or pause to choose a frame. No background analysis, tracking or upload occurs.</small>
+      </div>}
       {error && <p className="error" role="alert">{error}</p>}
       {selected ? <>
         <p className="facility-lab-source"><strong>{selected.source}</strong> · {selected.sampledWidth} × {selected.sampledHeight} analyzed pixels · {selected.capturedAt}</p>
@@ -190,7 +228,7 @@ export default function FacilityImageLab({ capture, connected = false, sourceNam
           <button type="button" onClick={() => {setFrames({a:null,b:null}); setRegion(FULL_FRAME); setRuler(null); setError('');}}>Clear frames</button>
         </div>
         <p className="facility-lab-note">Luma uses channel-weighted 8-bit sRGB, not a light meter. Sobel edge energy is a detail proxy—not optical focus. Two-frame differences also respond to camera movement, compression, and lighting; they do not prove person/object motion. Sampling is downscaled to 720 px on the longest side, with no physical calibration.</p>
-      </> : <p className="facility-lab-empty">No frame selected. Choose Frame A or B, then freeze the preview or open a PNG, JPEG or WebP from this computer.</p>}
+      </> : <p className="facility-lab-empty">No frame selected. Choose Frame A or B, freeze a preview, sample a local video, or open a PNG/JPEG/WebP from this computer.</p>}
     </div>
   </details>;
 }

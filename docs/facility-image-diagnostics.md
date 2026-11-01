@@ -8,10 +8,11 @@ The Facility Studio is a **map-first planning workspace**. Its top task bar jump
 
 1. Enter **Cameras**, select a planned camera and expand **Image diagnostics** inside its source inspector.
 2. Explicitly connect an approved browser webcam or local RTSP preview, then click **Freeze live frame into A**. Alternatively, **Open local image** (PNG, JPEG or WebP, maximum 12 MiB and 24 megapixels). No camera is activated by opening the laboratory.
-3. Select **Frame B** to freeze another moment or choose a second image. A and B stay **only in browser memory** until the panel is unmounted, cleared or the page is left. Neither frame is uploaded, used for AI inference, saved in facility plans, nor automatically added to Events.
-4. Draw a rectangular **region of interest (ROI)** across a frozen frame, or edit its left/top/width/height as numeric percentages using the keyboard. Use **Full frame** to reset.
-5. Switch to **Pixel ruler** and drag a line. The line reads the number of pixels in the **downsampled** image, never metres or feet. A/B comparison requires identical sampled pixel dimensions.
-6. **Save frozen frame** or **Export metrics JSON** explicitly if the operator wishes to retain the work. Exports contain the image or measurements respectively; they do not create a signed chain-of-custody record.
+3. For an approved recording, click **Open local video** (MP4 or WebM, maximum 128 MiB), scrub or pause the browser player to the desired time, and press **Freeze video frame into A/B**. Playback stays local; codec support depends on the browser. No automated frame scan, tracking or inference starts.
+4. Select **Frame B** to freeze another moment or choose a second image. A and B stay **only in browser memory** until the panel is unmounted, cleared or the page is left. Neither frame is uploaded, used for AI inference, saved in facility plans, nor automatically added to Events.
+5. Draw a rectangular **region of interest (ROI)** across a frozen frame, or edit its left/top/width/height as numeric percentages using the keyboard. Use **Full frame** to reset.
+6. Switch to **Pixel ruler** and drag a line. The line reads the number of pixels in the **downsampled** image, never metres or feet. A/B comparison requires identical sampled pixel dimensions.
+7. **Save frozen frame** or **Export metrics JSON** explicitly if the operator wishes to retain the work. Exports contain the image or measurements respectively; they do not create a signed chain-of-custody record.
 
 The browser samples no more than 720 pixels on the longest image side and computes statistics on local decoded RGBA pixels. A frame may be reduced relative to the original camera resolution, so image analysis cannot establish native pixel density or calibrated optical performance. A cross-origin source without browser permission to read its pixels fails safely instead of bypassing origin restrictions.
 
