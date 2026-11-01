@@ -126,6 +126,8 @@ function FacilityEditor({onPreviewCount,initialPlan,facilityControls,onPersist,o
   const [blindZone, setBlindZone] = useState(''), [dragging, setDragging] = useState('');
   const [mapDrafts, setMapDrafts] = useState([]), [searchArea, setSearchArea] = useState(null);
   const [replaceDrafts, setReplaceDrafts] = useState(false);
+  // Mapped-building drafts under review (all of them, included or not), plus one-click load and map-click toggles.
+  const [draftCandidates, setDraftCandidates] = useState([]), [draftLoad, setDraftLoad] = useState(0), [draftToggle, setDraftToggle] = useState(null);
   const [draftPreviewError, setDraftPreviewError] = useState('');
   const [plan, setPlan] = useState(initial.current.plan), [step, setStep] = useState(0), [selected, setSelected] = useState(
     { kind: "camera", id: "" }
@@ -487,10 +489,11 @@ function FacilityEditor({onPreviewCount,initialPlan,facilityControls,onPersist,o
     }, onAim:aimCamera, onMoveCamera:moveCamera, onCameraDrag:(kind,active)=>setDragging(active ? kind : ''), onPin: p=>setPickedOrigin(p), onDraw, onPlace: place, onSelect: selectOnMap, onToolDone: () => {
     setTool("select");
   }, onReady: () => setReady(true), onError: setMapError,
-    onBasemapStatus: next => setLayerStatus(previous => ({...previous, ...next})) };
+    onBasemapStatus: next => setLayerStatus(previous => ({...previous, ...next})),
+    onDraftToggle: id => setDraftToggle(previous => ({id, serial: (previous?.serial || 0) + 1})) };
   useEffect(() => {
     try {
-      api.current = createFacilityMap(mapEl.current, Object.fromEntries(["onPlaceStair","onChangeStair","onPlaceWindow","onChangeWindow","onPlaceDoorway","onMoveDoorway","onDoorwayError","onBuildingPosition", "onBearing", "onAim", "onMoveCamera", "onCameraDrag", "onPin", "onDraw", "onPlace", "onSelect", "onCalibrationGround", "onToolDone", "onReady", "onError", "onBasemapStatus"].map((k) => [k, (...args) => latest.current[k](...args)])), plan, {fans: fans.current});
+      api.current = createFacilityMap(mapEl.current, Object.fromEntries(["onPlaceStair","onChangeStair","onPlaceWindow","onChangeWindow","onPlaceDoorway","onMoveDoorway","onDoorwayError","onBuildingPosition", "onBearing", "onAim", "onMoveCamera", "onCameraDrag", "onPin", "onDraw", "onPlace", "onSelect", "onCalibrationGround", "onToolDone", "onReady", "onError", "onBasemapStatus", "onDraftToggle"].map((k) => [k, (...args) => latest.current[k](...args)])), plan, {fans: fans.current});
     } catch (e) {
       setMapError("3D graphics are unavailable here. You can still edit numeric properties and export the plan. " + e.message);
     }
@@ -539,6 +542,10 @@ function FacilityEditor({onPreviewCount,initialPlan,facilityControls,onPersist,o
   const photoCenter = sitePreview || plan.origin;
   useEffect(() => { if (ready) api.current?.setBasemap(mapLayer.id, {fade: mapLayer.fade, photoCenter}); }, [ready, mapLayer.id, mapLayer.fade, photoCenter[0], photoCenter[1]]);
   useEffect(() => { if (ready) api.current?.previewSite(sitePreview); }, [ready, sitePreview?.[0], sitePreview?.[1]]);
+  useEffect(() => { if (ready) api.current?.setDraftCandidates(draftCandidates); }, [ready, draftCandidates]);
+  // The start card covers the map, so it steps aside once a site is suggested or saved by any route.
+  const openedOrigin = useRef(plan.origin.join(','));
+  useEffect(() => { if (plan.origin.join(',') !== openedOrigin.current) setEmptyDismissed(true); }, [plan.origin]);
   function chooseLayer(id, fade = mapLayer.fade) {
     const next = {id: basemap(id).id, fade};
     if (next.id !== mapLayer.id) setLayerStatus({});
@@ -795,7 +802,7 @@ label. Inside the active building it belongs to the current level; elsewhere it 
         <p><strong>Map layer</strong>: Grid requests nothing. Streets and Aerial load pictures of the area you view so you can trace your real site; they are a drawing guide, not a survey.</p>
         <p>Camera coverage, distances and handoffs are planning estimates. Real video sampling is opt-in under a selected camera's Image diagnostics.</p>
       </section>}
-      {!emptyDismissed && !plan.buildings.length && !plan.cameras.length && !plan.labels.length && !plan.zones?.length && !plan.route.length && tool==='select' && step===0 && <FacilityEmptyState disabled={navigationDirty} ready={ready} onFindSite={findSiteOnMap} onBuild={()=>{go(1);requestAnimationFrame(()=>{properties.current?.querySelector('.building-shapes button')?.focus({preventScroll:true});properties.current?.scrollIntoView({block:'nearest'});});}} onImport={onOpenImport} />}
+      {!emptyDismissed && !sitePreview && !draftCandidates.length && !plan.buildings.length && !plan.cameras.length && !plan.labels.length && !plan.zones?.length && !plan.route.length && tool==='select' && step===0 && <FacilityEmptyState disabled={navigationDirty} ready={ready} onFindSite={findSiteOnMap} onBuild={()=>{go(1);requestAnimationFrame(()=>{properties.current?.querySelector('.building-shapes button')?.focus({preventScroll:true});properties.current?.scrollIntoView({block:'nearest'});});}} onImport={onOpenImport} />}
       <div className="facility-map" ref={mapEl} role="group" aria-label="Facility map. Use arrow keys to pan; use the add-with-coordinates, rectangle and point-list controls to place items without drawing." />
       <div className="facility-view-controls" role="group" aria-label="Map view">{[["2d", "2D"], ["3d", "3D"], ["floors", "Floors"]].
   map(([id, title]) => <button key={id} aria-pressed={view === id} onClick={() => setView(id)}>{title}</button>)}<button className="facility-fit" title="Center facility" aria-label="Center facility" onClick={() => api.
@@ -819,7 +826,7 @@ label. Inside the active building it belongs to the current level; elsewhere it 
         {layer.id === 'aerial' && layerStatus.photo === 'error' && <button type="button" onClick={() => api.current?.retrySitePhoto()}>Retry photo</button>}
         {layerStatus.tiles === 'error' && !(layer.id === 'aerial' && layerStatus.photo) && <button type="button" onClick={() => chooseLayer('grid')}>Use Grid</button>}
       </div>}
-      {!!mapDrafts.length && <div className="facility-draft-banner" role="status">{draftPreviewError ? `Draft preview unavailable: ${draftPreviewError}` : `Preview: ${mapDrafts.length} building drafts · review before saving`}</div>}
+      {!!mapDrafts.length && <div className="facility-draft-banner" role="status">{draftPreviewError ? `Draft preview unavailable: ${draftPreviewError}` : `Preview: ${mapDrafts.length} of ${draftCandidates.length || mapDrafts.length} mapped buildings selected · click an outline to include or exclude it, then add them`}</div>}
       {mapError && <div className="facility-map-error" role="alert"><WarningCircle /><span>{mapError}</span><button aria-label="Dismiss graphics message" onClick={() => setMapError(
     ""
   )}><X /></button></div>}
@@ -869,10 +876,12 @@ pect its modeled view.", "Draw a route and review proposed camera transitions.",
         <div>{BASEMAPS.map(option => <label key={option.id}><input type="radio" name="facility-map-layer" value={option.id} checked={layer.id === option.id} disabled={!ready} onChange={() => chooseLayer(option.id)}/>{option.title}</label>)}</div>
         <small>{layer.disclosure}{layer.external ? ' Plans, cameras and recordings are never sent. This choice is remembered in this browser.' : ' Choose Streets or Aerial to see and trace your real site.'}</small></fieldset>}
       {step === 0 && <SiteForm onDirtyChange={setSiteDirty} onPreview={setSitePreview} addressFocus={addressFocus} pickedOrigin={pickedOrigin} onPin={()=>startTool("site-pin")} ready={ready} plan={plan} commit={commit} center={() => api.current?.center()} />}
-      {step === 0 && !plan.buildings.length && <div className="facility-next-callout"><MapTrifold size={20} aria-hidden="true"/><div><strong>Next: outline your buildings</strong>
-        <p>{layer.external ? 'Trace each roof on the map, or draft mapped outlines from OpenStreetMap below. You can adjust every corner and dimension afterwards.' : 'Draw on the grid or pick a common shape. Turn on Streets or Aerial to trace your real site instead.'}</p>
-        <button type="button" className="facility-primary" disabled={!ready || navigationDirty} onClick={() => {go(1);setShapeOpen(false);startTool('building');}}><Polygon aria-hidden="true"/>Trace a building</button></div></div>}
-      {step === 0 && <OpenMapStarter units={units} drawnArea={drawnArea} onDrawArea={()=>startTool("search-area")} onCancelArea={()=>{api.current?.setTool("select");setTool("select");}} ready={ready} plan={plan} commit={commit} onPreview={(buildings,replace) => {setMapDrafts(buildings);setReplaceDrafts(!!replace);}} onArea={setSearchArea} disabled={dirty} />}
+      {step === 0 && !plan.buildings.length && !draftCandidates.length && <div className="facility-next-callout"><MapTrifold size={20} aria-hidden="true"/><div><strong>Next: outline your buildings</strong>
+        <p>Start from buildings already mapped around your site, then keep the ones that are yours. Or trace each roof yourself{layer.external ? '' : ' (turn on Streets or Aerial to see your real site)'}. You can adjust every corner and dimension afterwards.</p>
+        <div className="facility-next-actions"><button type="button" className="facility-primary" disabled={!ready || navigationDirty} onClick={() => {setView('2d');setDraftLoad(n => n + 1);}}><Buildings aria-hidden="true"/>Find mapped buildings</button>
+        <button type="button" className="facility-secondary" disabled={!ready || navigationDirty} onClick={() => {go(1);setShapeOpen(false);startTool('building');}}><Polygon aria-hidden="true"/>Trace a building</button></div>
+        <small>Finding sends only the search area outlined on the map to the OpenStreetMap building service chosen below. Outlines are volunteer-mapped and may be missing or out of date.</small></div></div>}
+      {step === 0 && <OpenMapStarter units={units} drawnArea={drawnArea} onDrawArea={()=>startTool("search-area")} onCancelArea={()=>{api.current?.setTool("select");setTool("select");}} ready={ready} plan={plan} commit={commit} onPreview={(buildings,replace,candidates=[]) => {setMapDrafts(buildings);setReplaceDrafts(!!replace);setDraftCandidates(candidates);}} onArea={setSearchArea} disabled={dirty} loadSignal={draftLoad} toggle={draftToggle} />}
       {step === 0 && <div className="facility-section-note"><MapPin/><p>Find your site, then trace buildings over the real map. Map pictures are a drawing guide, not a survey: verify dimensions on site. Imported files and examples open as separate facilities.</p></div>}
       {step === 1 && <>
         <BuildingShapePicker open={shapeOpen} onOpen={open=>{setShapeOpen(open);if(open)setView('2d');}} buildings={plan.buildings} near={selected.kind === 'building' ? selectedItem : undefined} units={units} onUnits={setUnits}

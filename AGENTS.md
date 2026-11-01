@@ -206,3 +206,10 @@ location/pin choices preview on the map before Save site, and buildings render
 translucent over imagery for tracing. Imagery is a tracing guide, not a survey or
 live view; do not add Google/Esri imagery without a license for this use. See
 docs/facility-builder.md#real-map-layer.
+
+Owner one-click outline decision (2026-11-01): after Save site, offer "Find mapped
+buildings" so open OpenStreetMap footprints around the site are drafted in one
+click, reviewed on the map (click an outline to include or exclude it; excluded
+drafts stay visible) and added as one undoable edit. Lookups stay user-triggered
+and send only the search area to the selected service; tracing remains the
+fallback when mapping is missing or a public service is unavailable.
