@@ -75,14 +75,16 @@ export default function RecognitionReview({ onImport, active = true, clip, onCli
     } catch (err) { if (ticket === generation.current) setMatches({ error: err.message, items: [], decided: {} }); }
   }
   async function decide(item, verdict) {
-    const key = matchKey(item);
-    if (verdict === 'dismissed') { setMatches(m => ({ ...m, decided: { ...m.decided, [key]: 'dismissed' }, note: '' })); return; }
+    const key = matchKey(item), ticket = generation.current;
+    if (verdict === 'dismissed') { setMatches(m => m && ({ ...m, decided: { ...m.decided, [key]: 'dismissed' }, note: '' })); return; }
     try {
       const r = await (await analysisRequest(`/people/${item.person}/confirm`, { token: local.token, method: 'POST',
         body: { job: local.job, frame_index: item.frame_index, box_index: item.box_index } })).json();
-      setMatches(m => ({ ...m, decided: { ...m.decided, [key]: 'confirmed' },
+      // Another review opened meanwhile: its suggestions may reuse this frame/box key.
+      if (ticket !== generation.current) return;
+      setMatches(m => m && ({ ...m, decided: { ...m.decided, [key]: 'confirmed' },
         note: r.added ? `Added this view to ${item.name}’s template.` : `${item.name}’s template already has a view like this one.` }));
-    } catch (err) { setMatches(m => ({ ...m, note: err.message })); }
+    } catch (err) { if (ticket === generation.current) setMatches(m => m && ({ ...m, note: err.message })); }
   }
   const visibleMatches = (matches?.items || []).filter(m => matches.decided[matchKey(m)] !== 'dismissed');
   const frameMatches = frame ? visibleMatches.filter(m => m.frame_index === frame.frame_index) : [];

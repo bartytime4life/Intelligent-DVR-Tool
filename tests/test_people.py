@@ -207,6 +207,26 @@ class ServiceTest(unittest.TestCase):
         service.people_delete(person, {})
         self.assertEqual(service.suggestions['views'], {})
         self.assertEqual(self.error(lambda: service.people_identify({'job': 'not-a-job'})).code, 'SELECTION')
+    def test_deleting_a_person_during_face_work_is_never_undone(self):
+        service = self.service(); job = 'a' * 32
+        self.results = [{'checked': 20, 'usable': 12, 'reasons': {}, 'embeddings': [[.1] * faces.EMBEDDING] * 6}]
+        person = self.enroll(service)['person']['id']
+        self.identify_fixture(service)
+        def deleting(result):
+            def runner(payload):
+                self.calls.append(payload); service.people_delete(person, {}); return result
+            return runner
+        service.face_runner = deleting({'faces': 1, 'matches': [{'frame_index': 10, 'box_index': 0, 'person': person,
+                                                                 'similarity': .6, 'embedding': [.1] * faces.EMBEDDING}]})
+        found = service.people_identify({'job': job})
+        self.assertEqual((found['suggestions'], service.suggestions['views']), ([], {}))
+        self.results = [{'checked': 20, 'usable': 12, 'reasons': {}, 'embeddings': [[.1] * faces.EMBEDDING] * 6}]
+        service.face_runner = lambda payload: self.results.pop(0)
+        person = self.enroll(service)['person']['id']
+        service.face_runner = deleting({'checked': 9, 'usable': 9, 'matched': 9, 'other': 0, 'reasons': {}, 'embeddings': [[.1] * faces.EMBEDDING] * 7})
+        self.assertEqual(self.error(lambda: service.people_verify(person, {'recording': self.recording})).code, 'NOT_FOUND')
+        self.assertEqual(service.people_list()['people'], [])
+        self.assertFalse((self.root / 'people' / f'{person}.json').exists())
     def test_analysis_waits_for_face_processing(self):
         service = self.service(); service.face_busy = True
         error = self.error(lambda: service.start({'recording': self.recording, 'model': 'model', 'rules': 'rules'}))

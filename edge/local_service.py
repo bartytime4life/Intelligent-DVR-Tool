@@ -414,11 +414,17 @@ class Jobs:
         people = [{'id': r['id'], 'embeddings': r['embeddings']} for r in store.records()]
         result = self.face_job(body['recording'], {'mode': 'verify', 'people': people, 'target': person_id})
         usable, matched = result['usable'], result['matched']
-        record['baseline'] = {'at': utc_now(), 'checked': result['checked'], 'usable': usable, 'matched': matched,
-                              'other': result['other'], 'rate': round(matched / usable, 4) if usable else None}
-        if result['embeddings']:
-            record['embeddings'] = result['embeddings']
-        store.write(record)
+        with self.lock:
+            # Re-read under the deletion lock: a person deleted during the check is never written back.
+            try:
+                record = store.get(person_id)
+            except (KeyError, OSError, ValueError):
+                raise JobError('NOT_FOUND', 'This person was deleted during the check; nothing was saved.', 404) from None
+            record['baseline'] = {'at': utc_now(), 'checked': result['checked'], 'usable': usable, 'matched': matched,
+                                  'other': result['other'], 'rate': round(matched / usable, 4) if usable else None}
+            if result['embeddings']:
+                record['embeddings'] = result['embeddings']
+            store.write(record)
         return {'person': store.summary(record), 'baseline': record['baseline'], 'tip': face_tip(result.get('reasons')) if not usable else ''}
 
     def people_identify(self, body):
@@ -452,12 +458,15 @@ class Jobs:
                 and len(m['embedding']) == EMBEDDING and all(isinstance(x, float) and math.isfinite(x) for x in m['embedding'])
                 for m in matches):
             raise JobError('FACE_FAILED', 'Face processing returned an invalid result. Check again.', 422)
-        views = {(m['frame_index'], m['box_index']): {'person': m['person'], 'embedding': m['embedding']} for m in matches}
         with self.lock:
+            # Deletion holds this lock too: anyone deleted while the worker ran gets no suggestions back.
+            current = {r['id']: r['name'] for r in store.records()}
+            matches = [m for m in matches if m['person'] in current]
+            views = {(m['frame_index'], m['box_index']): {'person': m['person'], 'embedding': m['embedding']} for m in matches}
             self.suggestions = {'job': body['job'], 'views': views}  # Embeddings stay here; the browser gets names.
         return {'job': body['job'], 'frames': len(frames), 'faces': result['faces'], 'suggestions': [
             {'frame_index': m['frame_index'], 'box_index': m['box_index'], 'box': requested[(m['frame_index'], m['box_index'])],
-             'person': m['person'], 'name': names[m['person']], 'similarity': m['similarity']} for m in matches]}
+             'person': m['person'], 'name': current[m['person']], 'similarity': m['similarity']} for m in matches]}
 
     def people_confirm(self, person_id, body):
         """A reviewer confirmed a suggestion: that face view joins the person's template."""
@@ -486,11 +495,11 @@ class Jobs:
         store = self.require_people()
         if body != {}:
             raise JobError('BODY', 'Delete takes an empty object.')
-        try:
-            store.delete(person_id)
-        except (KeyError, OSError):
-            raise JobError('NOT_FOUND', 'This person is no longer enrolled.', 404) from None
-        with self.lock:
+        with self.lock:  # Shared with identify, verify and confirm, so none can restore what this removes.
+            try:
+                store.delete(person_id)
+            except (KeyError, OSError):
+                raise JobError('NOT_FOUND', 'This person is no longer enrolled.', 404) from None
             if self.suggestions:  # Their pending suggestions go too.
                 self.suggestions['views'] = {k: v for k, v in self.suggestions['views'].items() if v['person'] != person_id}
         self.diagnostics.event('PERSON_DELETED')
