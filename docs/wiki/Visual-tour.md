@@ -1,77 +1,77 @@
 # A workspace you can see through
 
-[Home](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Home) · [Try it](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Getting-started) · [Test evidence](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Evidence-and-validation)
+[Home](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Home) · [Current visual atlas](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-atlas) · [Media provenance](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/media/current/README.md) · [Product status](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Product-status)
 
-These visuals are captured from the actual React program. All camera scenes are generated artwork; detection overlays and sample playback are simulated. The facility is fictional. These demonstrations establish interface behavior, not operational surveillance or recognition quality.
+This page is a dated visual tour of the software **and its earlier prototype**. The newest images below are genuine interface captures from a headless browser test that connected **no real cameras**. Older sample scenes are preserved in the historical section with their original fictional/animated status.
 
-![Edited walkthrough of five actual prototype screens.](https://raw.githubusercontent.com/bartytime4life/Intelligent-DVR-Tool/main/docs/media/workspace-tour.gif)
+## Today's interface: map, monitor and system
 
-## Still-image tour
+![Original illustrative overview of the current DVR application: schematic geometry and camera-review boundaries.](https://raw.githubusercontent.com/bartytime4life/Intelligent-DVR-Tool/main/docs/media/current/overview.svg)
 
-Use the stills below to inspect the interface without looping motion. Every animation has a static alternative. GitHub's image renderer does not provide a project-controlled reduced-motion or pause switch for GIFs.
+| Monitor · connect only on request | Facility Studio · map-first planning |
+| --- | --- |
+| ![Current Monitor desktop interface with the real-source chooser and no camera streams](https://raw.githubusercontent.com/bartytime4life/Intelligent-DVR-Tool/main/docs/media/current/monitor-desktop.jpg) | ![Current Facility Studio desktop interface with task selector, local plan and camera workspace](https://raw.githubusercontent.com/bartytime4life/Intelligent-DVR-Tool/main/docs/media/current/facility-desktop.jpg) |
+| **Three intentional source choices** (webcam, configured LAN RTSP, permitted public). Preview alone is not recording or AI. [Camera setup](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Camera-sources). | **Compact task chooser, one saved-site inventory, geometry tools and camera inspector.** Field optics and visibility are not certified. [Facility guide](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Facility-planning). |
 
-## 1. Observe the scene
+| Monitor · mobile | Facility Studio · mobile | System · mobile |
+| --- | --- | --- |
+| ![Monitor first-run source selector at 390px](https://raw.githubusercontent.com/bartytime4life/Intelligent-DVR-Tool/main/docs/media/current/monitor-mobile.jpg) | ![Facility editor on 390px mobile test viewport](https://raw.githubusercontent.com/bartytime4life/Intelligent-DVR-Tool/main/docs/media/current/facility-mobile.jpg) | ![System capacity planner at 390px; values are defaults, not measured hardware](https://raw.githubusercontent.com/bartytime4life/Intelligent-DVR-Tool/main/docs/media/current/system-mobile.jpg) |
+| No automatic stream. | Long forms still require real touch testing. | Planner, not a host performance probe. |
 
-![Four-view wall with compact review queue and five source selectors. Generated scenes are marked SAMPLE.](https://raw.githubusercontent.com/bartytime4life/Intelligent-DVR-Tool/main/docs/media/monitor.webp)
+*Current screenshots: [Chromium job 41263964836](https://github.com/bartytime4life/Intelligent-DVR-Tool/actions/runs/41263964836), source `9719eda`; 1440×1000 and 390×844 viewports. Full [source and file manifest](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/media/current/manifest.json). The successful 92 browser scenarios use controlled fixtures, not on-site acceptance.*
 
-The central 2×2 wall keeps the images dominant. The right queue surfaces observations needing review; the bottom strip changes the selected source. Individual tiles can expand or hide their overlays. Scrubbers demonstrate the interaction over still artwork; they do not replay a camera recording.
+## The human-controlled recording journey
 
-**Try:** open Monitor, expand Loading Dock, close it, toggle its overlay and select Parking Lot. Imported recording observations remain separate from sample imagery.
+![Schematic of user-approved source, local capture, bounded analysis, source-matched human review and explicit exports.](https://raw.githubusercontent.com/bartytime4life/Intelligent-DVR-Tool/main/docs/media/current/workflow.svg)
 
-## 2. Review the evidence
+**Connect, record, analyze, review, export.** Each stage is an explicit operator action. The local single-camera recorder is separate from the Monitor preview wall. A review observation is metadata, and its SHA-256 proves file correspondence, not image authenticity or the model's accuracy. [Full workflow](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Recording-workflow).
 
-![Review dialog showing a simulated scene, configured rule, score, note and confirm/dismiss controls.](https://raw.githubusercontent.com/bartytime4life/Intelligent-DVR-Tool/main/docs/media/review.webp)
+## Image science without invented certainty
 
-Review brings the observation, rule, score and decision into one dialog. A score of 0.87 on this sample is fixture content, not measured accuracy or risk. A confirmation records a review decision; it triggers no external action.
+![Original schematic of four fitted sample points and an independent check point on a measured ground plane.](https://raw.githubusercontent.com/bartytime4life/Intelligent-DVR-Tool/main/docs/media/current/facility-science.svg)
 
-**Verified in this sweep:** a note was entered on the synthetic Loading Dock observation, confirmation reduced the queue from two to one, and the resulting history entry showed Confirmed.
+Image diagnostics expose luma, histograms, clipping proxies, Sobel edge energy and A/B differences. The experimental planar ruler requires a measured common plane, at least four fitting markers and a withheld check inside the reference hull. It is not a 3D tracker, identity system or verified optical survey. [Image lab](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Image-diagnostics) · [Planar method](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Planar-calibration).
 
-![History showing the confirmed synthetic observation and another awaiting review.](https://raw.githubusercontent.com/bartytime4life/Intelligent-DVR-Tool/main/docs/media/history.webp)
+## Historical prototype captures
 
-Decisions save in this browser. They have no multi-user access controls or tamper-evident audit guarantee. Export before clearing site data.
+The images and GIFs below were taken in the **October 27, 2026 prototype**. They used **generated camera scene artwork, simulated observations and fictional buildings**. They are **not a current Monitor start screen, real live camera recording, or recognition benchmark**. Their unchanged [original provenance and hashes](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/media/README.md) allow readers to understand the development history.
 
-## 3. Make the rule explicit
+### Archived workspace loop
 
-![Zone editor with generated scene, rectangular zone and editable geometry and rule controls.](https://raw.githubusercontent.com/bartytime4life/Intelligent-DVR-Tool/main/docs/media/zones.webp)
+![Edited animated tour of five historic browser screens with fictional camera scenes and sample observations.](https://raw.githubusercontent.com/bartytime4life/Intelligent-DVR-Tool/main/docs/media/workspace-tour.gif)
 
-Define the region, label, dwell time and score threshold. Numeric geometry controls accompany pointer drawing. “Object” is a sample category; actual detector classes must match the selected model's supported labels.
+*Animation may loop; static alternatives are shown below. There is no project-controlled pause or reduced-motion behavior for GitHub's GIF renderer.*
 
-**Try:** adjust Width (%), save the rule and use Try simulated event. Browser-rule export is distinct from the edge CLI's rule format; see the [edge guide](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/edge/README.md).
+### Historic Monitor / review / history
 
-## 4. Build the facility
+| Simulated camera wall | Human review dialog | Review history |
+| --- | --- | --- |
+| ![Archived old Monitor with generated SAMPLE camera scenes.](https://raw.githubusercontent.com/bartytime4life/Intelligent-DVR-Tool/main/docs/media/monitor.webp) | ![Archived synthetic event review dialog with a fixture score and note.](https://raw.githubusercontent.com/bartytime4life/Intelligent-DVR-Tool/main/docs/media/review.webp) | ![Archived historical queue with fictional decisions.](https://raw.githubusercontent.com/bartytime4life/Intelligent-DVR-Tool/main/docs/media/history.webp) |
 
-![Fictional facility in the 3D planner, with buildings, cameras, estimated coverage and guided workflow.](https://raw.githubusercontent.com/bartytime4life/Intelligent-DVR-Tool/main/docs/media/facility.webp)
+In this older experiment, sample scores and playback controls were interface fixtures. The present Monitor starts empty and connects only to operator-approved sources. For real evidence, compare the selected recording with its original and retain human review. [Recognition workflow](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/recording-recognition.md).
 
-Set a location, draw buildings, name floors and rooms, place cameras, inspect estimated ground visibility and rehearse a route. The map starts with a local grid; online street tiles are optional.
+### Historic Zones, facility shapes and OSM starter
 
-![Actual L-wing, U-wing and round building additions, shown as an edited animation.](https://raw.githubusercontent.com/bartytime4life/Intelligent-DVR-Tool/main/docs/media/building-shapes.gif)
+| Zone rules | Fictional facility | OSM draft review |
+| --- | --- | --- |
+| ![Older Zones editor on generated scene, with a rectangular rule region](https://raw.githubusercontent.com/bartytime4life/Intelligent-DVR-Tool/main/docs/media/zones.webp) | ![Earlier 3D facility with estimated sector cones and fictional structures](https://raw.githubusercontent.com/bartytime4life/Intelligent-DVR-Tool/main/docs/media/facility.webp) | ![Earlier OSM review panel; public provider availability not established](https://raw.githubusercontent.com/bartytime4life/Intelligent-DVR-Tool/main/docs/media/map-starter.webp) |
 
-*Three added-shape states, edited into a loop. [Static U-wing](https://raw.githubusercontent.com/bartytime4life/Intelligent-DVR-Tool/main/docs/media/shape-u.webp). Dimensions are editable planning inputs, not inferred measurements. Each demonstration addition was undone.*
+![Historical animation of L-wing, U-wing and rounded building additions in an earlier Facility editor.](https://raw.githubusercontent.com/bartytime4life/Intelligent-DVR-Tool/main/docs/media/building-shapes.gif)
 
-Seven shapes are available. Rotation and metric/imperial inputs help with starter layouts. Measurement references explain the examples' basis; they do not certify a structure. [Full facility guide](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Facility-planning).
+*Static [U-shaped example](https://raw.githubusercontent.com/bartytime4life/Intelligent-DVR-Tool/main/docs/media/shape-u.webp). These were plan-edit demonstrations, not surveyed architecture.*
 
-## 5. Begin with open map data
+### Simulated route and handoff
 
-![OSM draft panel with bounded area fields, provider disclosure, offline import and source attribution.](https://raw.githubusercontent.com/bartytime4life/Intelligent-DVR-Tool/main/docs/media/map-starter.webp)
+![Older simulation scrubbing a fictional route through planned camera coverage and gaps; there is no person tracking or physical detection.](https://raw.githubusercontent.com/bartytime4life/Intelligent-DVR-Tool/main/docs/media/facility-rehearsal.gif)
 
-The current starter offers submitted address search, GPS/numeric origin, selectable public/local Overpass services and offline JSON file/paste review. It supports complete simple ways and selected outer-only relations, preserving provider, way/relation ID, ODbL license and height/floor basis. Review precedes explicit additive/replacement apply. The image above captures an earlier panel; its [media provenance](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/media/README.md) is unchanged.
+*Static [route state](https://raw.githubusercontent.com/bartytime4life/Intelligent-DVR-Tool/main/docs/media/route-15.webp). The animation accelerates 31 simulated samples of a planned route and does not establish continuous coverage, detection or camera identity association.*
 
-The original capture sweep inspected the panel and ran adapter tests. It did **not** establish live provider availability, completeness of a real facility, GPS accuracy, interior reconstruction or building-code compliance. Supported outer-only relations, then v2 courtyards, raised bases and independent parts, were added later; overlapping parts and invalid/incomplete geometry remain excluded. [Current evidence](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Facility-setup-reliability) · [Dimensions and source limits](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Maps-and-shapes).
+## Read before deployment
 
-## 6. Rehearse the handoff
+![Schematic of browser, local service, review and explicit export boundaries.](https://raw.githubusercontent.com/bartytime4life/Intelligent-DVR-Tool/main/docs/media/current/data-boundary.svg)
 
-![Actual timeline states showing a planned route crossing camera coverage and gaps.](https://raw.githubusercontent.com/bartytime4life/Intelligent-DVR-Tool/main/docs/media/facility-rehearsal.gif)
-
-*[Still at approximately 15 seconds](https://raw.githubusercontent.com/bartytime4life/Intelligent-DVR-Tool/main/docs/media/route-15.webp). The 31 captures sample the slider across the fictional 30-second route, with time compressed for display.*
-
-The marker follows a planned route. Coverage changes create proposals for review; the UI labels blind spots and simulated links. No actual movement, identity verification or camera association is being measured.
-
-The model excludes floor/roof slabs, doors, windows, furniture, terrain, lens distortion, illumination and recognition quality. Colored coverage estimates ground-plane geometry. It does not establish detection or identification range.
-
-## Beyond the pictures
-
-The offline analyzer, annotation evaluator and synthetic capacity model run separately from the browser. The browser does not open camera streams or perform detector inference. Read the [architecture](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Architecture-and-data) and [verification index](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Evidence-and-validation) before interpreting a demonstration as a deployment result.
+The present software can run bounded local video tasks, but real webcam/DVR compatibility, optical calibration, recognition quality, sustained recording, native performance and 100+ camera operation require **separate device and operator acceptance**. [Field runbook](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Field-acceptance) · [Evidence index](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Evidence-and-validation) · [Architecture](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Architecture-and-data) · [Project terms](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/SECURITY.md).
 
 ---
 
-[Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/visual-tour.md) · Documentation refresh: October 29, 2026.
+[Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/visual-tour.md) · Generated from the checked documentation source; historical and schematic images are labeled.

@@ -7,9 +7,11 @@ overlapping parts, live/installed services, field accuracy and novice acceptance
 remain open. [Local delivery](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/facility-local-delivery.md) · [Study kit](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/facility-novice-study.md).
 
 
-[Visual tour](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-tour) · [Getting started](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Getting-started) · [Verification index](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Evidence-and-validation)
+[Current visual atlas](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-atlas) · [Getting started](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Getting-started) · [Verification index](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Evidence-and-validation)
 
-![Actual fictional sample facility in the 3D planner. Coverage is estimated.](https://raw.githubusercontent.com/bartytime4life/Intelligent-DVR-Tool/main/docs/media/facility.webp)
+![Actual desktop Facility Studio with map-first controls, an editable facility, left-step navigation and a compact current-task selector. The map is a controlled software fixture, not a real surveyed site.](https://raw.githubusercontent.com/bartytime4life/Intelligent-DVR-Tool/main/docs/media/current/facility-desktop.jpg)
+
+*The screenshot above is from the current tested React program with a blank plan. The [older fictional sample facility](https://raw.githubusercontent.com/bartytime4life/Intelligent-DVR-Tool/main/docs/media/facility.webp) is preserved in the [historical tour](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-tour#historical-prototype-captures); it is not the current UI.*
 
 The **Facility** navigation item opens a browser-local, subscription-free planning
 editor. Direct entry is `/#facility`. The existing camera wall and event review
@@ -21,6 +23,8 @@ named sites, or explicitly open an example under **Backup & examples**. Existing
 saves reopen the last active site. See [saved facilities and backups](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/saved-facilities.md).
 
 ## Workflow
+
+Use **Current task** at the top or the seven detailed steps in the left rail. Press **1–7** outside inputs for quick task navigation, **?** for Help, and **Focus map / Show panels** when you need more space. Save or discard any in-progress edit before changing tasks. [Keyboard and measurement details](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Image-diagnostics).
 
 1. Set the facility name and geographic origin. Coordinates are longitude then
    latitude; local geometry is meters east/north of that origin.
@@ -153,6 +157,12 @@ The 100-camera automated case exercises **metadata validation and synthetic rout
 evaluation only**. It does not establish recording throughput, detector throughput,
 video decoding capacity, target-host latency or live 100-camera operation.
 
+## Inspect video pixels and the calibrated ground plane
+
+![Schematic of image reference markers mapped to a single measured ground plane, with a withheld check marker.](https://raw.githubusercontent.com/bartytime4life/Intelligent-DVR-Tool/main/docs/media/current/facility-science.svg)
+
+After placing cameras, **Image diagnostics** can freeze an operator-selected preview or locally opened recording frame, compare two frames and report image statistics. **Ground-plane calibration** fits user-marked correspondences and requires withheld checks and an operator-selected threshold before offering a plane-only ruler. These **experimental estimates** are not lens calibration, verified physical measurements, depth reconstruction or identity tracking. [Image science guide](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Image-diagnostics) · [Ground-plane guide](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Planar-calibration).
+
 ## Dependencies
 
 - MapLibre GL JS 6.9.0 — BSD-3-Clause; package and lockfile pinned.
@@ -198,4 +208,4 @@ proposals. Address search is implemented, with external availability unqualified
 
 ---
 
-[Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/facility-builder.md) · Documentation refresh: October 29, 2026.
+[Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/facility-builder.md) · Generated from the checked documentation source; historical and schematic images are labeled.
