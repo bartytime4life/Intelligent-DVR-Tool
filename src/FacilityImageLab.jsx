@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { analyzeImage, compareImages, pixelRuler, FULL_FRAME } from './image-science.mjs';
 import './facility-image-lab.css';
+import FacilityCalibration from './FacilityCalibration.jsx';
 
 const MAX_FILE = 12 * 1024 * 1024;
 const MAX_VIDEO = 128 * 1024 * 1024;
@@ -40,7 +41,7 @@ function pointAt(event) {
   return { x: clamp((event.clientX - bounds.left) / bounds.width), y: clamp((event.clientY - bounds.top) / bounds.height) };
 }
 
-export default function FacilityImageLab({ capture, connected = false, sourceName = '' }) {
+export default function FacilityImageLab({ capture, connected = false, sourceName = '', camera, facilityName, origin, mapPick, onRequestMapPoint }) {
   const fileInput = useRef(null), videoInput = useRef(null), clipVideo = useRef(null), pointer = useRef(null);
   const [slot, setSlot] = useState('a');
   const [frames, setFrames] = useState({ a: null, b: null });
@@ -239,6 +240,8 @@ export default function FacilityImageLab({ capture, connected = false, sourceNam
           <button type="button" onClick={exportData}>Export metrics JSON</button>
           <button type="button" onClick={() => {setFrames({a:null,b:null}); setRegion(FULL_FRAME); setRuler(null); setError('');}}>Clear frames</button>
         </div>
+        <FacilityCalibration frame={selected} camera={camera} facilityName={facilityName}
+          origin={origin} mapPick={mapPick} onRequestMapPoint={onRequestMapPoint}/>
         <p className="facility-lab-note">Luma uses channel-weighted 8-bit sRGB, not a light meter. Sobel edge energy is a detail proxy—not optical focus. Two-frame differences also respond to camera movement, compression, and lighting; they do not prove person/object motion. Sampling is downscaled to 720 px on the longest side, with no physical calibration.</p>
       </> : <p className="facility-lab-empty">No frame selected. Choose Frame A or B, freeze a preview, sample a local video, or open a PNG/JPEG/WebP from this computer.</p>}
     </div>

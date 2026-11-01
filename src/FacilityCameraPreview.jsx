@@ -5,7 +5,7 @@ import { configuredFacilitySources, facilityPreviewController, plannedViewAngles
 import './facility-camera-preview.css';
 import FacilityImageLab from './FacilityImageLab.jsx';
 
-export default function FacilityCameraPreview({ camera, onCenter, onAim, onCount, suspended = false }) {
+export default function FacilityCameraPreview({ camera, onCenter, onAim, onCount, suspended = false, facilityName, origin, mapPick, onRequestMapPoint }) {
   const [preview, setPreview] = useState({ state: 'disconnected', message: 'Connect a source to compare its image with this camera plan.' });
   const [kind, setKind] = useState('webcam'), [devices, setDevices] = useState([]), [device, setDevice] = useState('');
   const [catalog, setCatalog] = useState(null), [source, setSource] = useState('');
@@ -116,7 +116,9 @@ export default function FacilityCameraPreview({ camera, onCenter, onAim, onCount
     {error && <p className="error" role="alert">{error}</p>}
     {kind === 'dvr' && catalog && !catalog.ready && <p className="facility-caption">The local preview service is not ready. Check its Python/OpenCV installation and reload channels.</p>}
     {kind === 'dvr' && !local && <p className="facility-caption">DVR channels are available in the installed app at 127.0.0.1.</p>}
-    <FacilityImageLab connected={preview.state === 'live' && !!(preview.stream || preview.image)} capture={captureFrame} sourceName={preview.sourceName} />
+    <FacilityImageLab connected={preview.state === 'live' && !!(preview.stream || preview.image)}
+      capture={captureFrame} sourceName={preview.sourceName} camera={camera}
+      facilityName={facilityName} origin={origin} mapPick={mapPick} onRequestMapPoint={onRequestMapPoint} />
     <p className="facility-preview-note">The guide uses planned angles, not measurements from the image. Verify the source, lens and orientation on site. Center and Aim adjust the map plan; they do not move a physical camera. Audio, continuous recording and live AI are off. The opt-in image laboratory freezes only the current visible frame in browser memory. Preview stops when you leave or change cameras.</p>
   </section>;
 }

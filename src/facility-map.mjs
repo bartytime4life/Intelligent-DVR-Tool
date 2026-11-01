@@ -318,6 +318,10 @@ e-stroke-width": 2 } });
     if (tool === 'site-pin') {
       callbacks.onPin([e.lngLat.lng,e.lngLat.lat]); tool='select';callbacks.onToolDone();map.getCanvas().style.cursor='';return;
     }
+    if (tool === "calibration-ground") {
+      callbacks.onCalibrationGround?.(fromLngLat([e.lngLat.lng,e.lngLat.lat],current.origin));
+      tool="select";callbacks.onToolDone();map.getCanvas().style.cursor="";return;
+    }
     if (tool === "aim-camera" || tool === "move-camera") {
       const point = fromLngLat([e.lngLat.lng, e.lngLat.lat], current.origin);
       if (tool === "aim-camera") callbacks.onAim?.(point); else callbacks.onMoveCamera?.(point);

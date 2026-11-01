@@ -100,6 +100,8 @@ function FacilityEditor({onPreviewCount,initialPlan,facilityControls,onPersist,o
   const [siteDirty,setSiteDirty]=useState(false),[shapePending,setShapePending]=useState(false),[linePending,setLinePending]=useState(false);
   const [zoneDirty, setZoneDirty] = useState(false), [stairDirty,setStairDirty]=useState(false);
   const [mapFocus, setMapFocus] = useState(false), [helpOpen, setHelpOpen] = useState(false);
+  const [calibrationMapPick,setCalibrationMapPick]=useState(null);
+  const mapCalibrationRequest=useRef(null);
   const [measurements, setMeasurements] = useState(true), [units, setUnits] = useState(()=>{try{return localStorage.getItem("dvr.facility.units")==="imperial"?"imperial":"metric";}catch{return "metric";}}), [mapBearing, setMapBearing] = useState(-27);
   const [pickedOrigin,setPickedOrigin]=useState(null), [drawnArea,setDrawnArea]=useState(null);
   const [pasteOpen, setPasteOpen] = useState(false);
@@ -336,12 +338,22 @@ function FacilityEditor({onPreviewCount,initialPlan,facilityControls,onPersist,o
     setError('');
     return true;
   }
-  latest.current = { undo, redo, go, cameraKey, onBearing:setMapBearing, onAim:aimCamera, onMoveCamera:moveCamera, onCameraDrag:(kind,active)=>setDragging(active ? kind : ''), onPin: p=>setPickedOrigin(p), onDraw, onPlace: place, onSelect: selectOnMap, onToolDone: () => {
+  function requestCalibrationMapPoint(token) {
+    if(!ready || navigationDirty) { setError('Finish or discard pending changes before selecting a ground reference.'); return; }
+    mapCalibrationRequest.current=token;
+    setTool('calibration-ground');setView('2d');setError('');
+    api.current?.setTool('calibration-ground');
+  }
+  latest.current = { undo, redo, go, cameraKey, onBearing:setMapBearing,
+    onCalibrationGround: point=>{
+      const token=mapCalibrationRequest.current;mapCalibrationRequest.current=null;
+      if(token) setCalibrationMapPick(previous=>({token,point,serial:(previous?.serial||0)+1}));
+    }, onAim:aimCamera, onMoveCamera:moveCamera, onCameraDrag:(kind,active)=>setDragging(active ? kind : ''), onPin: p=>setPickedOrigin(p), onDraw, onPlace: place, onSelect: selectOnMap, onToolDone: () => {
     setTool("select");
   }, onReady: () => setReady(true), onError: setMapError };
   useEffect(() => {
     try {
-      api.current = createFacilityMap(mapEl.current, Object.fromEntries(["onBearing", "onAim", "onMoveCamera", "onCameraDrag", "onPin", "onDraw", "onPlace", "onSelect", "onToolDone", "onReady", "onError"].map((k) => [k, (...args) => latest.current[k](...args)])), plan, {fans: fans.current});
+      api.current = createFacilityMap(mapEl.current, Object.fromEntries(["onBearing", "onAim", "onMoveCamera", "onCameraDrag", "onPin", "onDraw", "onPlace", "onSelect", "onCalibrationGround", "onToolDone", "onReady", "onError"].map((k) => [k, (...args) => latest.current[k](...args)])), plan, {fans: fans.current});
     } catch (e) {
       setMapError("3D graphics are unavailable here. You can still edit numeric properties and export the plan. " + e.message);
     }
@@ -409,6 +421,7 @@ function FacilityEditor({onPreviewCount,initialPlan,facilityControls,onPersist,o
     return () => document.removeEventListener("keydown", stop);
   }, []);
   function go(n) {
+    mapCalibrationRequest.current=null;
     if (editingDirty) {
       setError("Save or discard your preview before changing steps.");
       return;
@@ -536,7 +549,7 @@ function FacilityEditor({onPreviewCount,initialPlan,facilityControls,onPersist,o
   }
   const cameras = plan.cameras.filter((c) => (c.name + " " + c.id).toLowerCase().includes(search.toLowerCase()));
   useEffect(() => setPage((p) => Math.min(p, Math.max(0, Math.ceil(cameras.length / 6) - 1))), [cameras.length]);
-  const toolText = { opening:"Trace the open area on this floor. The same opening becomes the ceiling void below.", "floor-path":"Click a route through solid floor. Double-click to finish; openings cannot be crossed.", "aim-camera":"Click the point you want this camera to face, then Save camera.", "move-camera":"Click the new mounting position, then Save camera.", zone:"Trace the zone boundary. Click its first corner to finish.", "site-pin":"Click the map to suggest a site location, then review and Save site.", "search-area":"Click the area corners, then its first corner to finish. Review or edit the vertices before loading.", building: "Click each corner, then click the first corner to finish.", room: "Trace a room inside t\
+  const toolText = { "calibration-ground":"Select the measured ground marker that corresponds to the current frame reference. Verify its surveyed coordinates before accepting.", opening:"Trace the open area on this floor. The same opening becomes the ceiling void below.", "floor-path":"Click a route through solid floor. Double-click to finish; openings cannot be crossed.", "aim-camera":"Click the point you want this camera to face, then Save camera.", "move-camera":"Click the new mounting position, then Save camera.", zone:"Trace the zone boundary. Click its first corner to finish.", "site-pin":"Click the map to suggest a site location, then review and Save site.", "search-area":"Click the area corners, then its first corner to finish. Review or edit the vertices before loading.", building: "Click each corner, then click the first corner to finish.", room: "Trace a room inside t\
 he selected building. Click its first corner to finish.", route: "Click route points. Double-click the last point to fin\
 ish.", camera: "Click the map to place a camera. Adjust its height and view next.", label: "Click the map to position a \
 label. Inside the active building it belongs to the current level; elsewhere it is a ground label." };
@@ -714,7 +727,11 @@ pect its modeled view.", "Draw a route and review proposed camera transitions.",
         {selected.kind === 'camera' && draft?.id === selected.id && <>
           <div className="facility-camera-actions"><button className="facility-secondary" disabled={!ready} onClick={()=>api.current?.centerCamera(selected.id)}><Crosshair/>Center camera</button><button className="facility-secondary" disabled={!ready} onClick={()=>startTool('aim-camera')}>Aim on map</button><button className="facility-secondary" disabled={!ready} onClick={()=>startTool('move-camera')}>Move on map</button></div>
           <p className="facility-caption facility-manipulate-help">Drag the selected camera or its round heading handle on the map. With the map or a button focused, Alt+Arrow nudges 0.5 m and [ or ] rotates 5°. These change the preview only; Save camera commits.</p>
-          <FacilityCameraPreview onCount={onPreviewCount} suspended={mapFocus} key={selected.id} camera={preview.cameras.find(c=>c.id===selected.id)} onCenter={()=>api.current?.centerCamera(selected.id)} onAim={()=>startTool('aim-camera')}/>
+          <FacilityCameraPreview onCount={onPreviewCount} suspended={mapFocus} key={selected.id}
+             camera={preview.cameras.find(c=>c.id===selected.id)}
+             facilityName={plan.name} origin={plan.origin} mapPick={calibrationMapPick}
+             onRequestMapPoint={requestCalibrationMapPoint}
+             onCenter={()=>api.current?.centerCamera(selected.id)} onAim={()=>startTool('aim-camera')}/>
         </>}
         {selected.kind === "camera" && draft?.id === selected.id ? <form noValidate className="facility-camera-form" onSubmit={saveSelected}>
           <Field label="Camera name" type="text" value={draft.name} onChange={(v) => change("name", v)} />
