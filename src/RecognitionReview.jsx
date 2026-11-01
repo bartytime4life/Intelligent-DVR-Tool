@@ -6,6 +6,10 @@ import LanRecorder from './LanRecorder.jsx';
 import RecognitionReport from './RecognitionReport.jsx';
 import { coverageLabel } from './media-coverage.mjs';
 import { saveObservationStills, grabFrame } from './local-images.mjs';
+import { analysisRequest } from './local-analysis.mjs';
+
+const sameBox = (a, b) => a.length === 4 && a.every((v, i) => v === b[i]);
+const matchKey = m => `${m.frame_index}:${m.box_index}`;
 
 export default function RecognitionReview({ onImport, active = true, clip, onClip, reviews = [], evidence = null, onRecorderStatus, onZoneStill }) {
   const [run, setRun] = useState(null), [index, setIndex] = useState(0);
@@ -15,6 +19,8 @@ export default function RecognitionReview({ onImport, active = true, clip, onCli
   const [recorderBusy, setRecorderBusy] = useState(false);
   const [detectionInput, setDetectionInput] = useState('original');
   const [sending, setSending] = useState(false);
+  // Suggestions exist only for results from this computer's own analysis jobs with enrollment on.
+  const [local, setLocal] = useState(null), [matches, setMatches] = useState(null);
   const video = useRef(), generation = useRef(0), sourceGeneration = useRef(0);
   useEffect(() => () => { generation.current++; sourceGeneration.current++; }, []);
   useEffect(() => () => { if (source) URL.revokeObjectURL(source.url); }, [source]);
@@ -36,7 +42,8 @@ export default function RecognitionReview({ onImport, active = true, clip, onCli
       if (file.size > MAX_REVIEW_BYTES) throw Error('Recognition results exceed 32 MiB. Split the recording before analysis.');
       const parsed = parseRecognition(JSON.parse(await file.text()));
       if (ticket !== generation.current) return;
-      setRun(parsed); setDetectionInput('original'); setSource(null); setMedia({}); setIndex(0); setStatus('Results loaded. Choose the original recording to verify and view the detections.');
+      setRun(parsed); setDetectionInput('original'); setSource(null); setMedia({}); setIndex(0); setLocal(null); setMatches(null);
+      setStatus('Results loaded. Choose the original recording to verify and view the detections.');
     } catch (err) { if (ticket === generation.current) { setError(err.message); setStatus(''); } }
   }
   async function loadVideo(event) {
@@ -53,12 +60,35 @@ export default function RecognitionReview({ onImport, active = true, clip, onCli
       if (ticket === generation.current && sourceTicket === sourceGeneration.current) { setError(err.message); setStatus(''); }
     }
   }
-  function openLocalResult({ bundle, file, name }) {
+  function openLocalResult({ bundle, file, name, local: origin = null }) {
     generation.current++; sourceGeneration.current++;
     setRun(bundle); setDetectionInput('original'); setIndex(0); setSource({ url: URL.createObjectURL(file), name });
-    setMedia({}); setError('');
+    setMedia({}); setError(''); setLocal(origin?.people?.enabled ? origin : null); setMatches(null);
     setStatus('Recording fingerprint matched. Analysis is ready for human review.');
   }
+  async function checkPeople() {
+    const ticket = generation.current;
+    setMatches({ busy: true, items: [], decided: {} });
+    try {
+      const r = await (await analysisRequest('/people/identify', { token: local.token, method: 'POST', body: { job: local.job } })).json();
+      if (ticket === generation.current) setMatches({ items: r.suggestions, frames: r.frames, faces: r.faces, decided: {} });
+    } catch (err) { if (ticket === generation.current) setMatches({ error: err.message, items: [], decided: {} }); }
+  }
+  async function decide(item, verdict) {
+    const key = matchKey(item), ticket = generation.current;
+    if (verdict === 'dismissed') { setMatches(m => m && ({ ...m, decided: { ...m.decided, [key]: 'dismissed' }, note: '' })); return; }
+    try {
+      const r = await (await analysisRequest(`/people/${item.person}/confirm`, { token: local.token, method: 'POST',
+        body: { job: local.job, frame_index: item.frame_index, box_index: item.box_index } })).json();
+      // Another review opened meanwhile: its suggestions may reuse this frame/box key.
+      if (ticket !== generation.current) return;
+      setMatches(m => m && ({ ...m, decided: { ...m.decided, [key]: 'confirmed' },
+        note: r.added ? `Added this view to ${item.name}’s template.` : `${item.name}’s template already has a view like this one.` }));
+    } catch (err) { if (ticket === generation.current) setMatches(m => m && ({ ...m, note: err.message })); }
+  }
+  const visibleMatches = (matches?.items || []).filter(m => matches.decided[matchKey(m)] !== 'dismissed');
+  const frameMatches = frame ? visibleMatches.filter(m => m.frame_index === frame.frame_index) : [];
+  const boxMatch = d => frameMatches.find(m => sameBox(m.box, d.box));
   // An Events observation opens its frame only in the run with the same source and model fingerprints.
   useEffect(() => {
     if (!evidence) return;
@@ -123,6 +153,20 @@ export default function RecognitionReview({ onImport, active = true, clip, onCli
         <span className={run.receipt.state === 'partial' ? 'recognition-error' : ''}>{coverageLabel(run.receipt)}</span>
         <span>{source ? 'Result loaded · recording fingerprint matched' : 'Recording not matched'}</span>
       </div>
+      {local && <section className="recognition-people" aria-label="Enrolled people">
+        <div><strong>Enrolled people</strong>
+          <p>Look for people enrolled in Train inside this analysis’s person boxes. Suggestions are not identification: confirm only someone you recognize yourself.</p></div>
+        <button className="button" disabled={matches?.busy} onClick={checkPeople}>{matches?.busy ? 'Checking faces…' : matches ? 'Check again' : 'Check for enrolled people'}</button>
+        {matches?.error && <p className="recognition-error" role="alert">{matches.error}</p>}
+        {matches && !matches.busy && !matches.error && <p role="status">{visibleMatches.length
+          ? `${visibleMatches.length} possible match${visibleMatches.length === 1 ? '' : 'es'} in ${new Set(visibleMatches.map(m => m.frame_index)).size} sampled frames · ${matches.faces} clear faces checked.`
+          : `No possible matches among ${matches.faces} clear faces in ${matches.frames} sampled frames with people.`}</p>}
+        {visibleMatches.length > 0 && <div className="recognition-people-frames">{[...new Map(visibleMatches.map(m => [m.frame_index, m])).values()].slice(0, 40).map(m => {
+          const i = run.trace.frames.findIndex(f => f.frame_index === m.frame_index);
+          return <button key={m.frame_index} className="text-button" aria-current={i === index || undefined} onClick={() => seek(i)}>+{run.trace.frames[i].seconds.toFixed(1)}s · {m.name}</button>;
+        })}</div>}
+        {matches?.note && <p role="status">{matches.note}</p>}
+      </section>}
       {run.enhancement && <div className="recording-import" aria-label="Sharpening comparison">
         <label>Detection input <select aria-label="Detection input" value={detectionInput} onChange={e => setDetectionInput(e.target.value)}>
           <option value="original">Original</option><option value="sharpened">Mild sharpening (experimental)</option>
@@ -142,7 +186,11 @@ export default function RecognitionReview({ onImport, active = true, clip, onCli
               {boxesVisible && <svg viewBox="0 0 1000 1000" preserveAspectRatio="none" className="recognition-boxes" aria-label="Detections on verified sampled frame">
                 {displayed.map((d, i) => <rect key={i} x={d.box[0]*1000} y={d.box[1]*1000} width={d.box[2]*1000} height={d.box[3]*1000}><title>{d.label} · score {d.score.toFixed(2)}</title></rect>)}
               </svg>}
-              {boxesVisible && <div className="recognition-box-labels" aria-hidden="true">{displayed.map((d, i) => <span key={i} style={{left:`${d.box[0]*100}%`, top:`${d.box[1]*100}%`}}>{d.label} {d.score.toFixed(2)}</span>)}</div>}
+              {boxesVisible && <div className="recognition-box-labels" aria-hidden="true">{displayed.map((d, i) => {
+                const m = boxMatch(d), state = m && matches.decided[matchKey(m)];
+                return <span key={i} className={m ? `possible ${state || ''}` : undefined} style={{left:`${d.box[0]*100}%`, top:`${d.box[1]*100}%`}}>
+                  {m ? `${state === 'confirmed' ? 'Confirmed' : 'Possible'}: ${m.name} ${m.similarity.toFixed(2)}` : `${d.label} ${d.score.toFixed(2)}`}</span>;
+              })}</div>}
             </> : <p>Match the original recording to view this scene.</p>}
           </div>
           <p className="recognition-caption">{run.enhancement && `Original footage · ${detectionInput === 'sharpened' ? 'sharpened-input' : 'original-input'} detections. `}{source ? boxesVisible ? 'Boxes correspond to this paused, sampled frame.' : 'Boxes hidden. Select a sample to pause on its analyzed frame.' : 'No recording attached. Results alone are unverified metadata.'}</p>
@@ -164,6 +212,17 @@ export default function RecognitionReview({ onImport, active = true, clip, onCli
           <p>Counts apply to this frame. They are not unique people, identities or tracked objects.</p>
           {summary.detections.length > 200 && <p>Showing the first 200 boxes and scores. Counts include all {summary.detections.length} detections above the display threshold.</p>}
           <div className="recognition-detections">{displayed.map((d, i) => <div key={i}><span>{d.label}</span><span>score {d.score.toFixed(2)}</span></div>)}</div>
+          {frameMatches.length > 0 && <div className="recognition-matches" aria-label="Possible matches in this frame">
+            <h3>Possible matches</h3>
+            {frameMatches.map(m => {
+              const state = matches.decided[matchKey(m)];
+              return <div key={matchKey(m)}><span><strong>{m.name}</strong> · similarity {m.similarity.toFixed(2)}</span>
+                {state === 'confirmed' ? <span className="recognition-confirmed">Confirmed</span> : <span>
+                  <button className="button" onClick={() => decide(m, 'confirmed')}>Confirm</button>
+                  <button className="text-button" onClick={() => decide(m, 'dismissed')}>Not this person</button></span>}</div>;
+            })}
+            <p>Confirming adds this face view to the person’s template, so later suggestions improve.</p>
+          </div>}
         </aside>
       </div>
       <div className="recognition-observations">

@@ -155,3 +155,8 @@ worker; templates are private files beside the catalog, never sent to the browse
 deletable, at most 50 people. A baseline check reports recognized views and
 refines the template. Matches are suggestions for human review only, never
 identification or access decisions. Off unless --allow-face-enrollment.
+Possible-match suggestions (2026-11-01): Recognition offers "Check for enrolled
+people" on results from this computer's own jobs. The face worker looks only inside
+the analyzer's person boxes; the browser gets names, boxes and similarity, never
+embeddings. Confirm adds that view to the template; "Not this person" only hides it.
+Suggestions never reach Events or exports automatically.

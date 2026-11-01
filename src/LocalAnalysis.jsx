@@ -120,7 +120,8 @@ export default function LocalAnalysis({ onResult, onBusy, clip, onClip, recorder
     setOpening(true); setError(''); setMessage('Opening results and verifying the recording fingerprint…');
     openJobResult(job, token.current, controller.current?.signal).then(value => {
       if (disposed || ticket !== version.current) return;
-      resultHandler.current(value);
+      // The job id lets Recognition ask this service for enrolled-people suggestions on these frames.
+      resultHandler.current({ ...value, local: { job: job.id, token: token.current, people: catalog?.people || null } });
       setMessage('Analysis opened. Recording fingerprint matched; review the sampled detections below.');
     }).catch(err => {
       if (!disposed && ticket === version.current) setError(`${err.message} Your previous review has been preserved. Use Open results again to retry.`);
