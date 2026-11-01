@@ -638,6 +638,15 @@ class Handler(BaseHTTPRequestHandler):
     def _dispatch(self):
         path = urlsplit(self.path).path
         api = path.startswith('/api/')
+        if (self.command == 'GET' and not api and self.client_address[0] == '127.0.0.1'
+                and self.headers.get_all('Host') == [f'localhost:{self.server.server_port}']):
+            # A localhost bookmark reaches the exact origin, which alone holds the session,
+            # camera permission and same-origin checks. The API never answers on localhost.
+            self.send_response(307)
+            self.send_header('Location', self.server.origin + '/')
+            self.send_header('Content-Length', '0')
+            self.send_header('Cache-Control', 'no-store')
+            return self.end_headers()
         self._guard(token=api and path not in ('/api/analysis/session', '/api/feeds/session'), account=api)
         jobs, feeds = self.server.jobs, self.server.feeds
         recorder = getattr(self.server, 'recorder', None)

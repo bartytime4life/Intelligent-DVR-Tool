@@ -41,6 +41,17 @@ Windows PowerShell:
   -AnalysisConfig "$PWD\edge\local-analysis.example.json"
 ```
 
+macOS (Apple silicon source checkout): install Python 3.12 and Node 22 (for
+example `brew install python@3.12 node@22`), then create the environment with
+`python3.12 -m venv .venv && .venv/bin/pip install -r edge/requirements.txt`.
+The pinned hash-checked installer covers only Linux x86-64 and Windows amd64, so
+this environment uses the unpinned version ranges. Put a catalog, its labels,
+rules and the verified model in `local-analysis/` (ignored by Git) with an empty
+`local-analysis/recordings/` folder, then double-click `Start-Mac.command`. It
+rebuilds the interface when the source is newer than the last build and opens
+`http://127.0.0.1:4180/` with recording import enabled. Without `.venv` or
+`local-analysis/catalog.json` it serves the interface only.
+
 The equivalent direct command, after `npm run build`, using the Python environment
 with the edge dependencies installed, is:
 
@@ -75,12 +86,12 @@ labeled unverified instead of being retroactively validated.
 
 | Boundary | Enforced behavior |
 | --- | --- |
-| Access | Exact IPv4 loopback Host; same-origin browser requests; per-service random token for job/result/source APIs; on Linux, API sockets must belong to the service's OS account (Windows: trust other local accounts); no CORS or uploads |
+| Access | Exact IPv4 loopback Host; same-origin browser requests; per-service random token for job/result/source APIs; on Linux, API sockets must belong to the service's OS account (Windows and macOS: trust other local accounts); a `localhost` page load is redirected to the exact `127.0.0.1` origin and the API never answers on `localhost`; no CORS or uploads |
 | Paths | Direct children of one explicit recording folder; opaque IDs; no client paths or commands; regular files; configured folders are resolved once (system links above them, such as Silverblue's `/home`, are accepted) and no symlink is followed at or beneath them |
 | Catalog | First 1,000 directory entries considered; at most 200 supported recordings listed; refresh explicitly after changing files |
 | Inputs | Nonempty MP4/MOV, WebM/MKV or AVI container header; 512 MiB recording/model; 64 KiB labels/rules; models hash checked before execution |
 | Jobs | One active job, no pending queue, five-minute wall deadline including preparation; cancel wins publication races |
-| CPU | Two OpenCV inference and two FFmpeg decoder threads requested; 6,000 decoded frames; sample every five; 4 GiB Linux virtual-address or Windows process-commit limit; Linux file-size cap and a summed CPU-time backstop (1,260 s: four threads for the full wall deadline) |
+| CPU | Two OpenCV inference and two FFmpeg decoder threads requested; 6,000 decoded frames; sample every five; 4 GiB Linux virtual-address or Windows process-commit limit (macOS refuses address-space limits, so its worker has **no memory cap**); Linux and macOS file-size cap and a summed CPU-time backstop (1,260 s: four threads for the full wall deadline) |
 | Results | Existing 1,000-observation, 100,000-detection, 32 MiB review contract; browser validates full contract before attaching exact source |
 | HTTP | 2 KiB JSON controls; optional explicit same-computer binary import up to 64 MiB; at most 16 concurrent connections (extra ones are closed), five-second socket timeout, 30-second import loop deadline; chunked output; downloads stream outside service locks |
 | Retention | Default: one private temporary recording/result snapshot until the next explicit job or graceful shutdown. Opt-in Linux storage retains the last job across service restarts; model/config snapshots are removed after processing |
