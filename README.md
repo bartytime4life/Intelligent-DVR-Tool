@@ -19,10 +19,11 @@ A local-first camera-analysis and facility-planning project from BARTA AI Soluti
 | What you want to do | Follow |
 | --- | --- |
 | Install and test the actual local PC app on Linux or Windows | [Prebuilt PC kit: Install / Check / Start](docs/pc-testing.md) |
+| Run the local app from an Apple silicon Mac source checkout | [macOS source setup](docs/local-analysis-service.md#start-the-local-application) |
 | Qualify a webcam, DVR, recording, recognition and recovery on real hardware | [Field acceptance runbook](docs/field-acceptance.md) |
 | Develop the browser-only interface | [Source-only Vite preview](#run-the-source-only-ui-preview) |
 
-## Inside the current interface
+## Inside the tested interface — PR #61 captures
 
 | Monitor — explicitly connected camera sources | Facility Studio — map-first editing |
 | --- | --- |
@@ -31,7 +32,9 @@ A local-first camera-analysis and facility-planning project from BARTA AI Soluti
 
 The screenshots above come from a successful **controlled, camera-free Chromium run** at the exact tested revision; they are not live surveillance evidence. [Screenshot provenance](docs/media/current/README.md) · [Full desktop/mobile gallery](docs/visual-atlas.md).
 
-**Current software proof:** [PR #61](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/61) passed **14/14 reported CI checks** and its [browser run](https://github.com/bartytime4life/Intelligent-DVR-Tool/actions/runs/41263964836) passed **92 controlled scenarios** (65 application/Facility, 12 analysis, 13 feeds and 2 recorder). These results do not establish real-camera endurance or recognition accuracy.
+**Screenshot revision evidence:** [PR #61](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/61) passed **14/14 reported CI checks** and its [browser run](https://github.com/bartytime4life/Intelligent-DVR-Tool/actions/runs/41263964836) passed **92 controlled scenarios** (65 application/Facility, 12 analysis, 13 feeds and 2 recorder). These counts describe that revision, not every later feature. The images predate Train and enrolled-person suggestions; see [product status](docs/product-status.md) for the November 1 baseline through PR #68. These results do not establish real-camera endurance or recognition accuracy.
+
+**Train and review:** [Guided training](docs/training.md) tunes a detection threshold for one camera session; it does not retrain the detector. Optional [person enrollment](docs/person-enrollment.md) keeps consenting people's templates on this computer. Recognition can explicitly check a local job for **Possible: name** suggestions. A reviewer confirms or dismisses them; they are not verified identities or access decisions.
 
 **Acceptance boundary:** browser webcam and local RTSP previews, opt-in webcam clips, one LAN recording source and bounded local recording analysis are implemented. Physical-device endurance, independent detection accuracy, continuous multi-camera recording and 100-camera capacity **remain unqualified**. [Product status](docs/product-status.md) · [Verification](docs/verification/README.md).
 
@@ -158,7 +161,7 @@ Connection count, recording continuity, analysis cadence and visible browser til
 | I want to… | Read |
 | --- | --- |
 | Check implemented, simulated and pending scope | [Product status](docs/product-status.md) |
-| See what the program does now | [Visual atlas with current screenshots](docs/visual-atlas.md) |
+| Explore the interface and its capture revisions | [Visual atlas with dated screenshots](docs/visual-atlas.md) |
 | Inspect the historic interface exhibit | [Dated visual tour](docs/visual-tour.md) |
 | Try the prototype and preserve my work | [Getting started](docs/getting-started.md) |
 | Qualify a real webcam, DVR, recording and AI review | [Field-acceptance runbook](docs/field-acceptance.md) |
@@ -166,6 +169,8 @@ Connection count, recording continuity, analysis cadence and visible browser til
 | Use maps, dimensions and common shapes | [Map starter](docs/map-measurements-and-shapes.md) |
 | Understand evidence, storage and trust boundaries | [Architecture](docs/architecture.md) |
 | Analyze an approved recording locally | [Edge CLI](edge/README.md) |
+| Tune a detection threshold for my camera | [Guided training](docs/training.md) |
+| Enroll a consenting person and review possible matches | [Person enrollment](docs/person-enrollment.md) |
 | Evaluate quality and false alerts | [Offline evaluation](docs/offline-evaluation.md) |
 | Reproduce the published checks | [Verification index](docs/verification/README.md) |
 | Understand implementation priorities | [Roadmap](docs/roadmap.md) |

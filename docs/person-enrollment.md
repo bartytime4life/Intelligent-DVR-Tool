@@ -74,8 +74,9 @@ scoring at least 0.30 (up to 10 per frame and 1,200 sampled frames), takes the
 largest clear face in each box and compares it with every template. A box gets
 **Possible: name** only when the match clears the threshold and the margin above.
 
-- **Confirm** adds that face view to the person's template, so later suggestions
-  improve. Near-duplicates are skipped and the 40 newest views are kept.
+- **Confirm** adds that face view to the person's template, which can change later
+  suggestions; an accuracy improvement is not guaranteed. Near-duplicates are
+  skipped and the 40 newest views are kept.
 - **Not this person** hides the suggestion in this page; nothing is saved.
 - A jump list leads to every frame with a suggestion.
 

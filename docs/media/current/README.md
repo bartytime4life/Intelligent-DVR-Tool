@@ -1,8 +1,10 @@
-# Current documentation visuals
+# Documentation visual collection — PR #61 captures
 
 [Visual atlas](../../visual-atlas.md) · [Source documentation](../../README.md) · [Historical media](../README.md)
 
 These are **current-software browser captures and original explanatory diagrams**, not artificial live-camera images. The screenshots were recorded by the [successful Chromium job](https://github.com/bartytime4life/Intelligent-DVR-Tool/actions/runs/41263964836) using source commit `9719eda31887ac5991a487f2107a9b31a93b14e3`, with no live camera, network provider, or pretrained detector. The app used a blank camera wall and a blank facility; System fields were browser planning defaults.
+
+**Revision boundary:** `current/` is the collection's original directory name, not a promise of latest-main screenshots. Captured November 1 UTC (October 31 Central), these five images predate the Train workspace and enrolled-person suggestions. Their pixels and manifest hashes are retained unchanged. Read the [capability register](../../product-status.md) for later merged behavior; do not apply the capture job's test counts to that later source.
 
 ## Tested interface captures
 

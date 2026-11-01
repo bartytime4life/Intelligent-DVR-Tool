@@ -18,6 +18,8 @@ PAGES = {
     'docs/field-acceptance.md': 'Field-acceptance',
     'docs/local-camera-feeds.md': 'Camera-sources',
     'docs/recording-workflow.md': 'Recording-workflow',
+    'docs/training.md': 'Guided-training',
+    'docs/person-enrollment.md': 'Person-enrollment',
     'docs/facility-image-diagnostics.md': 'Image-diagnostics',
     'docs/facility-calibration.md': 'Planar-calibration',
     'docs/visual-tour.md': 'Visual-tour',
