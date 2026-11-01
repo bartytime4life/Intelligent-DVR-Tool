@@ -43,7 +43,8 @@ export default function FacilityImageLab({ capture, connected = false, sourceNam
   const [ruler, setRuler] = useState(null);
   const [tool, setTool] = useState('region');
   const [busy, setBusy] = useState(false), [error, setError] = useState('');
-  const selected = frames[slot] || frames.a || frames.b;
+  // Never present Frame A's pixels as Frame B when the selected comparison slot is empty.
+  const selected = frames[slot];
   const metrics = useMemo(() => selected ? analyzeImage(selected.image, region) : null, [selected, region]);
   const difference = useMemo(() => frames.a && frames.b ? compareImages(frames.a.image, frames.b.image, region) : null, [frames, region]);
   const rulerPixels = selected && ruler ? pixelRuler(ruler.from, ruler.to, selected.image.width, selected.image.height) : null;
