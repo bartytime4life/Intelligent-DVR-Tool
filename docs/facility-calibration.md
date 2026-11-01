@@ -1,6 +1,10 @@
 # Calibrate a camera image to a measured ground plane
 
-[Facility Studio](facility-image-diagnostics.md) · [Field-acceptance runbook](field-acceptance.md) · [Security boundary](../SECURITY.md)
+[Facility Studio](facility-image-diagnostics.md) · [Field-acceptance runbook](field-acceptance.md) · [Visual atlas](visual-atlas.md) · [Security boundary](../SECURITY.md)
+
+![Schematic showing sampled camera image points 1-4 and independent check C mapped to a single measured ground plane.](media/current/facility-science.svg)
+
+*The points are illustrative labels, not an observed survey, measured error estimate or genuine-camera result. Use at least four well-spaced references and a separate withheld marker in a real test.*
 
 ## Purpose and evidence boundary
 
@@ -33,6 +37,6 @@ The solver uses a normalized, Householder-QR planar homography (eight degrees of
 
 ## Verification gates
 
-The \`tests/facility-calibration.test.mjs\` suite uses known synthetic perspective transforms, noisy held-out references, singular/collinear/duplicate points, bounds and extrapolation refusals. Facility Playwright tests cover reference entry, withheld checks, plane-only measurement and map-coordinate selection. Source/CI tests cannot qualify physical marker accuracy.
+The `tests/facility-calibration.test.mjs` suite uses known synthetic perspective transforms, noisy held-out references, singular/collinear/duplicate points, bounds and extrapolation refusals. Facility Playwright tests cover reference entry, withheld checks, plane-only measurement and map-coordinate selection. Source/CI tests cannot qualify physical marker accuracy.
 
 For field acceptance, use five or more measured, visible markers on a permitted real camera, record camera model/lens/codec/focus, original source frame and coordinate measurement method, and reserve one or more markers for withheld checks. Compare estimated distances against separately measured dimensions and report p50/p95/max error, not just the fitted residual. Repeat after moving or changing the camera or stream resolution. Do not claim field calibration before this evidence exists.

@@ -1,10 +1,18 @@
 # Motion with provenance
 
+## Current software UI and new static illustrations
+
+![Current Monitor and Facility have a verified screenshot archive that is distinct from this historical animation set.](current/overview.svg)
+
+The [current visual atlas](../visual-atlas.md) and [current media manifest](current/manifest.json) contain **five current tested-browser screenshots** and **six original illustrated SVG guides**. Current screenshot sources are tied to a named green Chromium job; all artwork is clearly labeled as a schematic, not live camera footage. The old animated screenshots below retain their exact October 27 source revision, test claims and asset hashes.
+
+## Historical demonstration captures
+
 All interface pixels come from actual browser screenshots. No UI mockup or generated product screenshot is substituted for the running program. Generated camera artwork already belongs to the prototype and remains marked SAMPLE.
 
 | Asset | What it shows | Editing | Static alternative |
 | --- | --- | --- | --- |
-| [Workspace tour](workspace-tour.gif) | Monitor, review dialog, confirmed event history, Zones, Facility | Five screenshot states at 2.3 seconds each, looping; captions added | [Visual tour](../visual-tour.md#still-image-tour) |
+| [Workspace tour](workspace-tour.gif) | Monitor, review dialog, confirmed event history, Zones, Facility | Five screenshot states at 2.3 seconds each, looping; captions added | [Historical visual tour](../visual-tour.md#historical-prototype-captures) |
 | [Facility rehearsal](facility-rehearsal.gif) | Actual slider states across a fictional 30-second route | 31 screenshots at approximately one simulated-second intervals; time compressed and looping | [Route state](route-15.webp) |
 | [Building shapes](building-shapes.gif) | Actual L-wing, U-wing and round additions | Three screenshot states at 2.4 seconds each, looping | [U wing](shape-u.webp) |
 | [Cover](cover.webp) | Actual complete monitor screenshot with editorial heading | Resized and framed; no interface content altered | [Unframed monitor](monitor.webp) |
