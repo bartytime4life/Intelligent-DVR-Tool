@@ -117,8 +117,10 @@ export function fitPlanarCalibration(references) {
     max:Math.max(...errors),mean:errors.reduce((s,e)=>s+e,0)/errors.length
   }:null;
   // No model-validation claim follows from fitting-point error alone.
+  const fittingHull=hull(src);
+  const checkInsideHull=checks.length>0 && checks.every(p=>insideReferenceHull(p.image,fittingHull));
   return {matrix,fit:summary(fitErrors),holdout:summary(checkErrors),
-    fittingHull:hull(src),fittingCount:fit.length,checkCount:checks.length,
+    fittingHull,fittingCount:fit.length,checkCount:checks.length,checkInsideHull,
     verified:false, method:'normalized-householder-dlt-v1'};
 }
 export function calibratedGroundDistance(calibration,from,to) {

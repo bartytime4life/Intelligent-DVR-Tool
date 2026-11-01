@@ -34,7 +34,7 @@ export default function FacilityCalibration({frame,camera,facilityName,origin,ma
   const signature=JSON.stringify(rows);
   const fit=solution?.signature===signature&&solution?.sourceHash===sampleHash?solution.data:null;
   const limit=Number(tolerance);
-  const accepted=!!fit?.holdout&&confirmed&&Number.isFinite(limit)&&limit>0&&limit<=25&&fit.holdout.max<=limit;
+  const accepted=!!fit?.holdout&&fit.checkInsideHull&&confirmed&&Number.isFinite(limit)&&limit>0&&limit<=25&&fit.holdout.max<=limit;
   const distance=accepted&&ruler.start&&ruler.end?calibratedGroundDistance(fit,ruler.start,ruler.end):null;
   function setValue(id,field,value){setRows(list=>list.map(p=>p.id===id?{...p,[field]:value}:p));}
   function mark(id,[x,y]){setRows(list=>list.map(p=>p.id===id?{...p,u:(x*100).toFixed(2),v:(y*100).toFixed(2)}:p));}
@@ -120,7 +120,8 @@ export default function FacilityCalibration({frame,camera,facilityName,origin,ma
         <h4>Calibration residuals — not field accuracy</h4>
         <p>Fit ({fit.fittingCount}): RMSE {fit.fit.rmse.toFixed(3)} m · max {fit.fit.max.toFixed(3)} m.</p>
         {fit.holdout?<p>Independent check ({fit.holdout.count}): RMSE <strong>{fit.holdout.rmse.toFixed(3)} m</strong>;
-          maximum <strong>{fit.holdout.max.toFixed(3)} m</strong>.</p>
+          maximum <strong>{fit.holdout.max.toFixed(3)} m</strong>.
+          {fit.checkInsideHull?' All check points lie inside the reference hull.':' Some check points are outside the fitting boundary; measured distances remain locked.'}</p>
           :<p>No withheld check point. Ground distances cannot be enabled.</p>}
         <label className="facility-calibration-declaration"><input type="checkbox" checked={confirmed}
           onChange={e=>setConfirmed(e.target.checked)}/>

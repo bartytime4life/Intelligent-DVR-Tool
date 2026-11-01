@@ -43,3 +43,10 @@ test('calibration: reference bounds and holdouts are validated',()=>{
  assert.throws(()=>fitPlanarCalibration([...fit,{role:'check',image:{x:2,y:0},ground:{x:0,y:0}}]),/out of bounds/);
  assert.throws(()=>fitPlanarCalibration([...fit,{role:'check',image:{x:.5,y:.5},ground:{x:Infinity,y:0}}]),/out of bounds/);
 });
+
+test('calibration: holdout outside fitting hull is flagged, never automatically accepted',()=>{
+  const outside=holdout([.99,.99]);
+  const result=fitPlanarCalibration([...fit,outside]);
+  assert.equal(result.checkInsideHull,false);
+  assert.ok(result.holdout.rmse<1e-8);
+});
