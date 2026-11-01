@@ -95,13 +95,13 @@ def check():
             continue
         raw = destination.read_bytes()
         current_total += len(raw)
-        sha = hashlib.sha1(f'blob {len(raw)}\\0'.encode('utf-8') + raw).hexdigest()
+        sha = hashlib.sha1(f'blob {len(raw)}\0'.encode('utf-8') + raw).hexdigest()
         if len(raw) != entry.get('bytes') or sha != entry.get('git_blob_sha1'):
             errors.append(f'Current media integrity mismatch: {rel}')
         if entry.get('realCameraFootage') is not False:
             errors.append(f'Current documentation image may not claim real camera footage: {rel}')
         if destination.suffix == '.jpg':
-            if not (raw.startswith(b'\\xff\\xd8') and raw.endswith(b'\\xff\\xd9')):
+            if not (raw.startswith(b'\xff\xd8') and raw.endswith(b'\xff\xd9')):
                 errors.append(f'Not a bounded JPEG screenshot: {rel}')
             if entry.get('kind') != 'actual-browser-screenshot':
                 errors.append(f'Unexpected screenshot type: {rel}')
