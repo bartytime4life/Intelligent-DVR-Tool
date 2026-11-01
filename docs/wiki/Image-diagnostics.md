@@ -1,8 +1,10 @@
 # Facility Studio: image diagnostics and capture comparison
 
-[Facility builder](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Facility-planning) · [Getting started](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Getting-started) · [Visual atlas](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-atlas) · [Security boundary](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/SECURITY.md)
+[Guide index](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Guide-index) · [Visual handbook](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-handbook) · [Screenshot atlas](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-atlas) · [Troubleshooting](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Troubleshooting)
 
-![Illustration of independent image-to-plane markers; a schematic explanation, not actual optical calibration.](https://raw.githubusercontent.com/bartytime4life/Intelligent-DVR-Tool/main/docs/media/current/facility-science.svg)
+![Workflow diagram for facility image diagnostics.](https://raw.githubusercontent.com/wiki/bartytime4life/Intelligent-DVR-Tool/docs/media/guide/science.svg)
+
+**Quick path:** Choose an explicit local frame → freeze it → inspect pixels or compare A/B. Ground-plane measurement needs a separate calibration.
 
 The illustration distinguishes image sampling from optional measured-reference calibration. **Luma/edge metrics are image diagnostics; a ground-plane distance requires separately measured reference points and independent validation.**
 
@@ -42,4 +44,4 @@ Images are opened explicitly and read in the local browser. Frame data remain in
 
 ---
 
-[Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/facility-image-diagnostics.md) · Generated from the checked documentation source; historical and schematic images are labeled.
+[Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/facility-image-diagnostics.md) · Generated companion; dated evidence, examples and illustrations retain their labels.

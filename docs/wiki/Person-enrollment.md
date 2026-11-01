@@ -1,6 +1,10 @@
 # Person enrollment
 
-[Home](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Home) · [Guided training](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Guided-training) · [Security](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/SECURITY.md)
+[Guide index](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Guide-index) · [Visual handbook](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-handbook) · [Screenshot atlas](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-atlas) · [Troubleshooting](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Troubleshooting)
+
+![Workflow diagram for person enrollment.](https://raw.githubusercontent.com/wiki/bartytime4life/Intelligent-DVR-Tool/docs/media/guide/enrollment.svg)
+
+**Quick path:** Train → Enroll a person → record explicit consent → capture a baseline → optionally check it → review possible matches by hand.
 
 **Train → Enroll a person** sets a baseline for one consenting person: a face
 template kept on this computer so the DVR can later suggest “possible match:
@@ -112,4 +116,4 @@ sent to Events or exported automatically.
 
 ---
 
-[Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/person-enrollment.md) · Generated from the checked documentation source; historical and schematic images are labeled.
+[Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/person-enrollment.md) · Generated companion; dated evidence, examples and illustrations retain their labels.

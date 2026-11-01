@@ -13,12 +13,17 @@ The minimum capacity goal is **100 simultaneously active cameras**. The current 
 | Lane | Exists now | Next evidence required |
 | --- | --- | --- |
 | Review | Wall, queue, notes, history, rules and exports | Accessibility/mobile/long-session acceptance; durable authenticated records |
-| Facility | Buildings/floors/rooms/labels, cameras, estimates and rehearsal | Site measurements, optical calibration and qualified visibility |
+| Facility | Visual buildings, room sketching/wall edits, doorways/windows/stairs, cameras, estimates and rehearsal | Site measurements, optical calibration and qualified visibility |
 | Easy setup | Submitted address search, GPS/numeric/map-pin origin, rectangular or custom polygon area, selectable services, offline-file review, OSM relations with courtyards, raised bases and independent parts, seven shapes | Live-provider/installed local-service and real-site qualification; overlapping-part decomposition; novice-user study |
 | Detection | Offline ONNX adapter; prior YOLOX-S compatibility probes; [guided threshold tuning](training.md) | Independent labels, precision/recall, false alerts and held-out scenes separate from tuning sessions |
 | Enrolled-person suggestions | [Consent-gated local templates and explicit possible matches](person-enrollment.md) | Representative consented evaluation, false matches/misses, spoofing and deletion checks; no identity/access-decision claim |
+| Delivery | Linux/Windows PC kit and Mac Install/Check/Start with preservation checks | Physical host, codec, camera and recovery acceptance on each intended platform |
 | Performance | Bounded scheduler, budgets, synthetic overload model | Sustained decode/inference/end-to-end rates on intended hardware |
 | 100-camera operation | Owner requirement and staged acceptance design | Ingest/recording/worker implementation and simultaneous-source qualification |
+
+## Delivered November 1, 2026
+
+The merged baseline through [PR #71](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/71) includes guided detection tuning, consent-based enrollment and possible matches, approachable building/interior editing, and repeatable Mac installation and update preservation. See the [capability register](product-status.md), [visual handbook](how-to.md) and [Mac guide](setup-macos.md). The next gate is representative operator/device acceptance; these deliveries do not establish accuracy or 100-camera throughput.
 
 ## Priorities and acceptance
 

@@ -1,14 +1,14 @@
 # Your first five minutes
 
-[Home](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Home) · [Visual walkthrough](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-atlas) · [Install for PC testing](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/PC-testing) · [Field acceptance](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Field-acceptance) · [Product status](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Product-status)
+[Home](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Home) · [Visual handbook](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-handbook) · [Screenshot atlas](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-atlas) · [Install for PC testing](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/PC-testing) · [Field acceptance](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Field-acceptance) · [Product status](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Product-status)
 
-![Schematic of five user-controlled steps from approved source to an exported human review.](https://raw.githubusercontent.com/bartytime4life/Intelligent-DVR-Tool/main/docs/media/current/workflow.svg)
+![Schematic of five user-controlled steps from approved source to an exported human review.](https://raw.githubusercontent.com/wiki/bartytime4life/Intelligent-DVR-Tool/docs/media/guide/recording.svg)
 
 **Start with one task, not every control.** A fresh Monitor looks like the tested screenshot below: no video is connected until you explicitly choose a source and complete its permission/setup step.
 
-![Current Monitor's source chooser in a controlled desktop Chromium run, with no connected camera or synthetic footage.](https://raw.githubusercontent.com/bartytime4life/Intelligent-DVR-Tool/main/docs/media/current/monitor-desktop.jpg)
+![Current Monitor's source chooser in a controlled desktop Chromium run, with no connected camera or synthetic footage.](https://raw.githubusercontent.com/wiki/bartytime4life/Intelligent-DVR-Tool/docs/media/guide/monitor.jpg)
 
-*Captured at PR #61 source `9719eda`, before Train and enrolled-person suggestions. This is real software in an offline test, not a surveillance installation. [Source provenance](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/media/current/README.md).*
+*Captured from merged source `2566d845` in a clean local browser session. No camera was connected. [Source provenance](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-provenance).*
 
 ## Install, check and start
 
@@ -17,9 +17,9 @@ or use the same launch scripts from a source checkout. Install finishes without
 starting a service. Check validates the software setup. Start opens the local
 application at http://127.0.0.1:4173 with all cameras disconnected.
 
-For an Apple silicon Mac source checkout, follow the [macOS setup](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/local-analysis-service.md#start-the-local-application). That launcher uses http://127.0.0.1:4180 by default; its prerequisites and worker limits differ from the Linux/Windows kit.
+For an Apple silicon Mac source checkout, follow the [Mac Install / Check / Start](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Mac-setup). That launcher uses http://127.0.0.1:4180 by default; its prerequisites and worker limits differ from the Linux/Windows kit.
 
-Running `npm run dev` alone only serves the browser preview. It does **not** start the local DVR preview, recorder or analysis service; use the PC launcher for those features.
+Running `npm run dev` alone only serves the browser preview. It does **not** start the local DVR preview, recorder or analysis service; use the matching Mac or PC launcher for those features.
 
 A fresh Monitor has no stock photos or fake events. Existing historical review
 records remain available without invented imagery.
@@ -39,16 +39,16 @@ records remain available without invented imagery.
 | Facility | Choose a task from **Current task** or the left guided steps; add a shape or import reviewed footprints, edit cameras and Undo | Estimated coverage and explicitly simulated route rehearsal |
 | System | Review the machine plan and apply 1/2/4 visible-tile limits | Selected live feed stays visible within the chosen limit |
 
-See [camera setup](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Camera-sources), [recording analysis](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/local-analysis-service.md),
+See [camera setup](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Camera-sources), [recording analysis](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Local-analysis-service),
 [Linux](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Linux-setup) and [Windows](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Windows-setup). Previews do not record or
 run live AI/tracking. Actual device compatibility and detection quality require
 separate testing.
 
-![Schematic of data boundaries: temporary browser preview, local analysis service, human review and explicit export.](https://raw.githubusercontent.com/bartytime4life/Intelligent-DVR-Tool/main/docs/media/current/data-boundary.svg)
+![Schematic of data boundaries: temporary browser preview, local analysis service, human review and explicit export.](https://raw.githubusercontent.com/wiki/bartytime4life/Intelligent-DVR-Tool/docs/media/current/data-boundary.svg)
 
 ## Preserve your work
 
-Use Export reviews, Back up browser rules and Export plan. Browser localStorage
+Use **Export reviews**, **Back up browser rules**, **Export plan** and **Export all facilities**. See the [update checklist](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Mac-setup#preserve-data-when-updating). Browser localStorage
 belongs to the exact origin and browser profile; it is not a backup or shared
 audit system. Keep your chosen origin stable across updates (PC kit default http://127.0.0.1:4173; Mac source launcher http://127.0.0.1:4180). Export before
 changing the browser profile, port or installation. Keep credentials and footage
@@ -74,7 +74,7 @@ assumptions. See [map drafting](https://github.com/bartytime4life/Intelligent-DV
 
 ## Troubleshooting
 
-Run the [readiness check](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/PC-testing) first. Use the [field-acceptance runbook](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Field-acceptance) when recording physical webcam, DVR and recovery results. It reports missing dependencies,
+Run the matching [Mac](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Mac-setup) or [PC readiness check](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/PC-testing) first. See [symptom-by-symptom troubleshooting](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Troubleshooting). Use the [field-acceptance runbook](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Field-acceptance) when recording physical webcam, DVR and recovery results. It reports missing dependencies,
 config problems, native codec failures and occupied ports without probing devices.
 Browser camera permissions, DVR credentials/channel paths and physical network
 access still need testing on the actual PC. Facility requires working WebGL.
@@ -83,4 +83,4 @@ show earlier generated scenes and are not the current startup experience.
 
 ---
 
-[Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/getting-started.md) · Generated from the checked documentation source; historical and schematic images are labeled.
+[Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/getting-started.md) · Generated companion; dated evidence, examples and illustrations retain their labels.

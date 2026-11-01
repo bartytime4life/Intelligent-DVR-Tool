@@ -6,6 +6,8 @@ These are **current-software browser captures and original explanatory diagrams*
 
 **Revision boundary:** `current/` is the collection's original directory name, not a promise of latest-main screenshots. Captured November 1 UTC (October 31 Central), these five images predate the Train workspace and enrolled-person suggestions. Their pixels and manifest hashes are retained unchanged. Read the [capability register](../../product-status.md) for later merged behavior; do not apply the capture job's test counts to that later source.
 
+The later [November 1 guide collection](../guide/README.md) captures merged source `2566d845`, including Train and the expanded facility tools. This PR #61 collection remains unchanged historical evidence.
+
 ## Tested interface captures
 
 | Surface | Desktop | Mobile (390 px) |

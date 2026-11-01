@@ -1,10 +1,10 @@
 # Approved public internet webcams
 
-[Current visual atlas](visual-atlas.md)
+[Guide index](README.md) · [Visual handbook](how-to.md) · [Screenshot atlas](visual-atlas.md) · [Troubleshooting](troubleshooting.md)
 
-![Current Monitor's explicit source selection; no public camera is connected in this capture.](media/current/monitor-desktop.jpg)
+![Workflow diagram for public webcams.](media/guide/sources.svg)
 
-*The screenshot is a controlled app test, not verified public imagery.*
+**Quick path:** Obtain provider permission → configure an approved HTTPS source and attribution → choose it explicitly in Monitor → inspect age and source type.
 
 Monitor supports explicitly connected, owner-approved **direct HTTPS JPEG
 snapshots** and **length-delimited MJPEG streams**. This is a local preview

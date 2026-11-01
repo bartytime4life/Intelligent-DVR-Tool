@@ -1,10 +1,10 @@
 # GPU selection, VRAM and acceleration
 
-[Visual atlas](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-atlas) · [PC acceptance](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Field-acceptance) · [Image provenance](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/media/current/README.md)
+[Guide index](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Guide-index) · [Visual handbook](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-handbook) · [Screenshot atlas](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-atlas) · [Troubleshooting](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Troubleshooting)
 
-![Explicit CPU/optional GPU planning and reproducible qualification lanes.](https://raw.githubusercontent.com/bartytime4life/Intelligent-DVR-Tool/main/docs/media/current/system-planning.svg)
+![Workflow diagram for gpu planning.](https://raw.githubusercontent.com/wiki/bartytime4life/Intelligent-DVR-Tool/docs/media/guide/system.svg)
 
-*The local CPU service does not silently become GPU accelerated when a profile changes.*
+**Quick path:** Keep the CPU path working → choose an explicit acceleration candidate → compare outputs and resource use on approved recordings.
 
 [Hardware](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Hardware-guide) · [Linux](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Linux-setup) · [Windows](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Windows-setup) · [Resource controls](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Resource-controls)
 
@@ -12,12 +12,12 @@
 
 The analyzer defaults to **OpenCV CPU**. The explicit optional
 `--backend onnxruntime-cuda` route is limited to the pinned YOLOX-S profile and
-separate qualified runtime; see the [operator commands](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/edge/README.md#optional-explicit-cuda-backend)
+separate qualified runtime; see the [operator commands](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Edge-CLI#optional-explicit-cuda-backend)
 and [backend verification](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/cuda-2026-10-28/README.md). System's GPU
 presets remain planning controls: they install no drivers, allocate no GPU
 memory and switch no inference backend. Hardware inventory alone does not prove acceleration.
 
-![Actual GPU and RAM planning controls in System. The values are editable planning assumptions, not measurements.](https://raw.githubusercontent.com/bartytime4life/Intelligent-DVR-Tool/main/docs/media/gpu-setup.webp)
+![Actual GPU and RAM planning controls in System. The values are editable planning assumptions, not measurements.](https://raw.githubusercontent.com/wiki/bartytime4life/Intelligent-DVR-Tool/docs/media/gpu-setup.webp)
 
 ## Candidate comparison
 
@@ -93,4 +93,4 @@ No GPU purchase, accelerated backend or 100-camera operating claim is made by th
 
 ---
 
-[Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/gpu-planning.md) · Generated from the checked documentation source; historical and schematic images are labeled.
+[Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/gpu-planning.md) · Generated companion; dated evidence, examples and illustrations retain their labels.

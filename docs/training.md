@@ -1,6 +1,10 @@
 # Guided training
 
-[Home](../README.md) · [Local analysis service](local-analysis-service.md) · [Recording workflow](recording-workflow.md)
+[Guide index](README.md) · [Visual handbook](how-to.md) · [Screenshot atlas](visual-atlas.md) · [Troubleshooting](troubleshooting.md)
+
+![Workflow diagram for training.](media/guide/training.svg)
+
+**Quick path:** Train → Start session → check camera → follow prompts → compare thresholds → apply a new rule or keep the current setting.
 
 **Train** turns detection tuning into one guided page. A session records about a
 minute from this computer's webcam while on-screen prompts tell the person what to
@@ -16,7 +20,7 @@ operational qualification.
 
 1. Start the local app with recording import and training enabled:
    - macOS: double-click `Start-Mac.command` (see the
-     [macOS setup](local-analysis-service.md#start-the-local-application)).
+     [Mac setup](setup-macos.md)).
    - Linux: `bash scripts/run-linux.sh --analysis --allow-recording-import --allow-training`
      with the recordings folder and catalog from the [analysis guide](local-analysis-service.md).
    - Windows: `.\scripts\Start-IntelligentDvr.ps1 -Analysis -AllowRecordingImport -AllowTraining`

@@ -1,10 +1,10 @@
 # Camera clip → recognition → reviewed report
 
-[Current visual atlas](visual-atlas.md) · [Product status](product-status.md) · [Visual provenance](media/current/README.md)
+[Guide index](README.md) · [Visual handbook](how-to.md) · [Screenshot atlas](visual-atlas.md) · [Troubleshooting](troubleshooting.md)
 
-![Operator-controlled connection, capture, local analysis, review and export.](media/current/workflow.svg)
+![Workflow diagram for recording workflow.](media/guide/recording.svg)
 
-*The schematic is not a recorded sequence or deployed real-time inference.*
+**Quick path:** Capture or import → Analyze recording → inspect the matched source → review in Events → save the report and exact result/recording pair.
 
 This workflow joins explicit browser-webcam capture, bounded local file import,
 the existing native CPU analyzer, source-matched inspection, human decisions and
@@ -15,14 +15,14 @@ operation remain separate work.
 
 ## Prepare once
 
-Use the [PC installer and model preparation](pc-testing.md). The prepared model
+Use [Mac Install / Check / Start and model preparation](setup-macos.md), or the [Linux/Windows PC installer](pc-testing.md). The prepared model
 must match the pinned OpenCV Zoo YOLOX-S artifact: 35,858,002 bytes, SHA-256
 `c5c2d13e59ae883e6af3b45daea64af4833a4951c92d116ec270d9ddbe998063`.
 Setup uses existing local weights; it never downloads or silently substitutes a
 model. The labels cover 80 classes, but the starter rule emits whole-frame person
 presence observations only. Review or replace those rules for your use case.
 
-Start with `--analysis --allow-recording-import` on Linux, or
+On Mac, **Start-Mac.command** enables configured local analysis, imports, training and enrollment. On Linux start with `--analysis --allow-recording-import`, or
 `-Analysis -AllowRecordingImport` on Windows. Custom catalogs remain supported.
 Models and configured rules stay off the browser write API; the one exception is
 [guided training](training.md), which with `--allow-training` may add new tuned
@@ -44,6 +44,10 @@ separate CUDA CLI path remain in force.
 6. Download the printable report, report JSON or observation CSV. **Save recognition
    results** and **Save analyzed recording** retain the exact pair for later
    reopening. The printable HTML works offline and can be printed to PDF.
+
+![Actual report and export controls for the generated example clip.](media/guide/recognition-report.jpg)
+
+*Six sampled detections above come from a constant-output test model on generated video; they are not six observed people.*
 
 ## What the report means
 

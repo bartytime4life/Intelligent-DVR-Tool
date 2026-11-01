@@ -1,10 +1,10 @@
 # Local webcam and DVR previews
 
-[Current image gallery](visual-atlas.md) · [Setup for PC](pc-testing.md) · [Recording and review](recording-workflow.md)
+[Guide index](README.md) · [Visual handbook](how-to.md) · [Screenshot atlas](visual-atlas.md) · [Troubleshooting](troubleshooting.md)
 
-![Current Monitor interface in the controlled browser run: one welcome panel for intentional webcam, LAN DVR and approved public webcam choices.](media/current/monitor-desktop.jpg)
+![Workflow diagram for local camera feeds.](media/guide/sources.svg)
 
-*Actual tested UI, but no camera connected, recorded or analyzed. [Screenshot provenance](media/current/README.md).*
+**Quick path:** Choose one source in Monitor → complete its permission/configuration step → connect explicitly → inspect status → disconnect when finished.
 
 Monitor starts empty. There are no generated camera photographs, simulated
 playback controls or new sample events. Existing reviewed sample records remain

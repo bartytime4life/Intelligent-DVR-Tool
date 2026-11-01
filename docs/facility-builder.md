@@ -7,11 +7,15 @@ overlapping parts, live/installed services, field accuracy and novice acceptance
 remain open. [Local delivery](facility-local-delivery.md) · [Study kit](facility-novice-study.md).
 
 
-[Current visual atlas](visual-atlas.md) · [Getting started](getting-started.md) · [Verification index](verification/README.md)
+[Guide index](README.md) · [Visual handbook](how-to.md#8-build-a-facility) · [Saved facilities](saved-facilities.md) · [Screenshot atlas](visual-atlas.md)
 
-![Actual desktop Facility Studio with map-first controls, an editable facility, left-step navigation and a compact current-task selector. The map is a controlled software fixture, not a real surveyed site.](media/current/facility-desktop.jpg)
+![Site and shell, rooms and openings, then camera planning and backup.](media/guide/facility.svg)
 
-*The screenshot above is from the current tested React program with a blank plan. The [older fictional sample facility](media/facility.webp) is preserved in the [historical tour](visual-tour.md#historical-prototype-captures); it is not the current UI.*
+![Actual Facility Studio building controls with a fictional built-in example, local grid and estimated dimensions.](media/guide/facility.jpg)
+
+*Captured from merged source `2566d845`; the opt-in example is a fictional planning aid. Fresh installs start blank. [Capture provenance](media/guide/README.md).*
+
+**Quick path:** New facility → site and building → floor and rooms → doors/windows/stairs → cameras and estimates → export. The November 1 building and interior tools are merged in [PR #70](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/70).
 
 The **Facility** navigation item opens a browser-local, subscription-free planning
 editor. Direct entry is `/#facility`. The existing camera wall and event review

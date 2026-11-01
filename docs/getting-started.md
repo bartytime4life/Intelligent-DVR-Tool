@@ -1,14 +1,14 @@
 # Your first five minutes
 
-[Home](../README.md) · [Visual walkthrough](visual-atlas.md) · [Install for PC testing](pc-testing.md) · [Field acceptance](field-acceptance.md) · [Product status](product-status.md)
+[Home](../README.md) · [Visual handbook](how-to.md) · [Screenshot atlas](visual-atlas.md) · [Install for PC testing](pc-testing.md) · [Field acceptance](field-acceptance.md) · [Product status](product-status.md)
 
-![Schematic of five user-controlled steps from approved source to an exported human review.](media/current/workflow.svg)
+![Schematic of five user-controlled steps from approved source to an exported human review.](media/guide/recording.svg)
 
 **Start with one task, not every control.** A fresh Monitor looks like the tested screenshot below: no video is connected until you explicitly choose a source and complete its permission/setup step.
 
-![Current Monitor's source chooser in a controlled desktop Chromium run, with no connected camera or synthetic footage.](media/current/monitor-desktop.jpg)
+![Current Monitor's source chooser in a controlled desktop Chromium run, with no connected camera or synthetic footage.](media/guide/monitor.jpg)
 
-*Captured at PR #61 source `9719eda`, before Train and enrolled-person suggestions. This is real software in an offline test, not a surveillance installation. [Source provenance](media/current/README.md).*
+*Captured from merged source `2566d845` in a clean local browser session. No camera was connected. [Source provenance](media/guide/README.md).*
 
 ## Install, check and start
 
@@ -17,9 +17,9 @@ or use the same launch scripts from a source checkout. Install finishes without
 starting a service. Check validates the software setup. Start opens the local
 application at http://127.0.0.1:4173 with all cameras disconnected.
 
-For an Apple silicon Mac source checkout, follow the [macOS setup](local-analysis-service.md#start-the-local-application). That launcher uses http://127.0.0.1:4180 by default; its prerequisites and worker limits differ from the Linux/Windows kit.
+For an Apple silicon Mac source checkout, follow the [Mac Install / Check / Start](setup-macos.md). That launcher uses http://127.0.0.1:4180 by default; its prerequisites and worker limits differ from the Linux/Windows kit.
 
-Running `npm run dev` alone only serves the browser preview. It does **not** start the local DVR preview, recorder or analysis service; use the PC launcher for those features.
+Running `npm run dev` alone only serves the browser preview. It does **not** start the local DVR preview, recorder or analysis service; use the matching Mac or PC launcher for those features.
 
 A fresh Monitor has no stock photos or fake events. Existing historical review
 records remain available without invented imagery.
@@ -48,7 +48,7 @@ separate testing.
 
 ## Preserve your work
 
-Use Export reviews, Back up browser rules and Export plan. Browser localStorage
+Use **Export reviews**, **Back up browser rules**, **Export plan** and **Export all facilities**. See the [update checklist](setup-macos.md#preserve-data-when-updating). Browser localStorage
 belongs to the exact origin and browser profile; it is not a backup or shared
 audit system. Keep your chosen origin stable across updates (PC kit default http://127.0.0.1:4173; Mac source launcher http://127.0.0.1:4180). Export before
 changing the browser profile, port or installation. Keep credentials and footage
@@ -74,7 +74,7 @@ assumptions. See [map drafting](map-measurements-and-shapes.md) and
 
 ## Troubleshooting
 
-Run the [readiness check](pc-testing.md) first. Use the [field-acceptance runbook](field-acceptance.md) when recording physical webcam, DVR and recovery results. It reports missing dependencies,
+Run the matching [Mac](setup-macos.md) or [PC readiness check](pc-testing.md) first. See [symptom-by-symptom troubleshooting](troubleshooting.md). Use the [field-acceptance runbook](field-acceptance.md) when recording physical webcam, DVR and recovery results. It reports missing dependencies,
 config problems, native codec failures and occupied ports without probing devices.
 Browser camera permissions, DVR credentials/channel paths and physical network
 access still need testing on the actual PC. Facility requires working WebGL.

@@ -1,28 +1,28 @@
 # Camera clip → recognition → reviewed report
 
-[Current visual atlas](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-atlas) · [Product status](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Product-status) · [Visual provenance](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/media/current/README.md)
+[Guide index](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Guide-index) · [Visual handbook](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-handbook) · [Screenshot atlas](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-atlas) · [Troubleshooting](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Troubleshooting)
 
-![Operator-controlled connection, capture, local analysis, review and export.](https://raw.githubusercontent.com/bartytime4life/Intelligent-DVR-Tool/main/docs/media/current/workflow.svg)
+![Workflow diagram for recording workflow.](https://raw.githubusercontent.com/wiki/bartytime4life/Intelligent-DVR-Tool/docs/media/guide/recording.svg)
 
-*The schematic is not a recorded sequence or deployed real-time inference.*
+**Quick path:** Capture or import → Analyze recording → inspect the matched source → review in Events → save the report and exact result/recording pair.
 
 This workflow joins explicit browser-webcam capture, bounded local file import,
 the existing native CPU analyzer, source-matched inspection, human decisions and
-portable reporting. The separate [one-camera LAN recorder](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/lan-recording.md) now
+portable reporting. The separate [one-camera LAN recorder](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/LAN-recording) now
 feeds finalized RTSP segments into the same workflow with explicit Start/Stop and
 bounded retention. Gapless recording, identity tracking and sustained 100-camera
 operation remain separate work.
 
 ## Prepare once
 
-Use the [PC installer and model preparation](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/PC-testing). The prepared model
+Use [Mac Install / Check / Start and model preparation](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Mac-setup), or the [Linux/Windows PC installer](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/PC-testing). The prepared model
 must match the pinned OpenCV Zoo YOLOX-S artifact: 35,858,002 bytes, SHA-256
 `c5c2d13e59ae883e6af3b45daea64af4833a4951c92d116ec270d9ddbe998063`.
 Setup uses existing local weights; it never downloads or silently substitutes a
 model. The labels cover 80 classes, but the starter rule emits whole-frame person
 presence observations only. Review or replace those rules for your use case.
 
-Start with `--analysis --allow-recording-import` on Linux, or
+On Mac, **Start-Mac.command** enables configured local analysis, imports, training and enrollment. On Linux start with `--analysis --allow-recording-import`, or
 `-Analysis -AllowRecordingImport` on Windows. Custom catalogs remain supported.
 Models and configured rules stay off the browser write API; the one exception is
 [guided training](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Guided-training), which with `--allow-training` may add new tuned
@@ -44,6 +44,10 @@ separate CUDA CLI path remain in force.
 6. Download the printable report, report JSON or observation CSV. **Save recognition
    results** and **Save analyzed recording** retain the exact pair for later
    reopening. The printable HTML works offline and can be printed to PDF.
+
+![Actual report and export controls for the generated example clip.](https://raw.githubusercontent.com/wiki/bartytime4life/Intelligent-DVR-Tool/docs/media/guide/recognition-report.jpg)
+
+*Six sampled detections above come from a constant-output test model on generated video; they are not six observed people.*
 
 ## What the report means
 
@@ -103,4 +107,4 @@ durable review history need integration before a capacity claim.
 
 ---
 
-[Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/recording-workflow.md) · Generated from the checked documentation source; historical and schematic images are labeled.
+[Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/recording-workflow.md) · Generated companion; dated evidence, examples and illustrations retain their labels.

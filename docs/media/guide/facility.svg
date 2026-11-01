@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="610" viewBox="0 0 1440 610" role="img" aria-labelledby="title desc"><title id="title">Build the space in layers</title><desc id="desc">Plan geometry and camera coverage are estimates until measured. Site and shell: Choose a map origin or local grid; Add a footprint or reviewed draft; Set building size and floors. Interior and openings: Sketch rooms and shared walls; Place doors, windows and stairs; Preview, save, or Undo. Cameras and backup: Place and aim planned cameras; Inspect estimated coverage; Export the named facility plan.</desc>
+<defs><linearGradient id="bg" x2="1" y2="1"><stop stop-color="#0c1a29"/><stop offset="1" stop-color="#101e2b"/></linearGradient></defs>
+<rect width="1440" height="610" rx="24" fill="url(#bg)"/>
+<text x="48" y="49" fill="#79d8d0" font-family="Arial,sans-serif" font-size="16" font-weight="700" letter-spacing="2">FACILITY / A PLAN YOU CAN EDIT</text>
+<text x="48" y="105" fill="#f1f6fc" font-family="Arial,sans-serif" font-size="39" font-weight="700">Build the space in layers</text>
+<text x="48" y="144" fill="#b2c2d3" font-family="Arial,sans-serif" font-size="21">Plan geometry and camera coverage are estimates until measured.</text>
+<rect x="48" y="181" width="432" height="374" rx="19" fill="#142737" stroke="#304859"/>
+<circle cx="85" cy="219" r="18" fill="#77d5cc"/>
+<text x="85" y="225" text-anchor="middle" fill="#10222d" font-family="Arial,sans-serif" font-size="17" font-weight="700">1</text>
+<g transform="translate(264 294)" fill="none" stroke="#77d5cc" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M-67 26L0 -16L67 26L0 66Z M-67 26V-30L0 -68L67 -30V26 M0 -16V-68 M-33 5V-48 M34 5V-48 M-33 5L34 -36"/></g>
+<text x="76" y="400" fill="#f0f5fa" font-family="Arial,sans-serif" font-size="27" font-weight="700">Site and shell</text>
+<text x="76" y="444" fill="#bbcad8" font-family="Arial,sans-serif" font-size="19">Choose a map origin or local grid</text>
+<text x="76" y="475" fill="#bbcad8" font-family="Arial,sans-serif" font-size="19">Add a footprint or reviewed draft</text>
+<text x="76" y="506" fill="#bbcad8" font-family="Arial,sans-serif" font-size="19">Set building size and floors</text>
+<path d="M485 368H499M494 363L499 368L494 373" fill="none" stroke="#73b9b7" stroke-width="2"/>
+<rect x="504" y="181" width="432" height="374" rx="19" fill="#142737" stroke="#304859"/>
+<circle cx="541" cy="219" r="18" fill="#77d5cc"/>
+<text x="541" y="225" text-anchor="middle" fill="#10222d" font-family="Arial,sans-serif" font-size="17" font-weight="700">2</text>
+<g transform="translate(720 294)" fill="none" stroke="#77d5cc" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M-67 26L0 -16L67 26L0 66Z M-67 26V-30L0 -68L67 -30V26 M0 -16V-68 M-33 5V-48 M34 5V-48 M-33 5L34 -36"/></g>
+<text x="532" y="400" fill="#f0f5fa" font-family="Arial,sans-serif" font-size="27" font-weight="700">Interior and openings</text>
+<text x="532" y="444" fill="#bbcad8" font-family="Arial,sans-serif" font-size="19">Sketch rooms and shared walls</text>
+<text x="532" y="475" fill="#bbcad8" font-family="Arial,sans-serif" font-size="19">Place doors, windows and stairs</text>
+<text x="532" y="506" fill="#bbcad8" font-family="Arial,sans-serif" font-size="19">Preview, save, or Undo</text>
+<path d="M941 368H955M950 363L955 368L950 373" fill="none" stroke="#73b9b7" stroke-width="2"/>
+<rect x="960" y="181" width="432" height="374" rx="19" fill="#142737" stroke="#304859"/>
+<circle cx="997" cy="219" r="18" fill="#f5bd53"/>
+<text x="997" y="225" text-anchor="middle" fill="#10222d" font-family="Arial,sans-serif" font-size="17" font-weight="700">3</text>
+<g transform="translate(1176 294)" fill="none" stroke="#f5bd53" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><rect x="-59" y="-29" width="88" height="58" rx="12"/><path d="M29 -18L62 -34V34L29 18"/><circle cx="-15" cy="0" r="16"/></g>
+<text x="988" y="400" fill="#f0f5fa" font-family="Arial,sans-serif" font-size="27" font-weight="700">Cameras and backup</text>
+<text x="988" y="444" fill="#bbcad8" font-family="Arial,sans-serif" font-size="19">Place and aim planned cameras</text>
+<text x="988" y="475" fill="#bbcad8" font-family="Arial,sans-serif" font-size="19">Inspect estimated coverage</text>
+<text x="988" y="506" fill="#bbcad8" font-family="Arial,sans-serif" font-size="19">Export the named facility plan</text>
+<text x="48" y="587" fill="#83a0b4" font-family="Arial,sans-serif" font-size="15">INTELLIGENT DVR / VISUAL GUIDE / Explanatory diagram; no live camera or measured performance implied.</text></svg>

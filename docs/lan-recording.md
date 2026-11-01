@@ -1,10 +1,10 @@
 # One configured LAN camera → segments → recognition
 
-[Current visual atlas](visual-atlas.md) · [Product status](product-status.md) · [Visual provenance](media/current/README.md)
+[Guide index](README.md) · [Visual handbook](how-to.md) · [Screenshot atlas](visual-atlas.md) · [Troubleshooting](troubleshooting.md)
 
-![One configured RTSP source feeding completed local analysis and review.](media/current/workflow.svg)
+![Workflow diagram for lan recording.](media/guide/recording.svg)
 
-*A single-channel pilot is not continuous, gapless multi-camera storage.*
+**Quick path:** Configure one authorized private RTSP channel → connect the recorder → explicitly start → inspect finalized segments → stop and review gaps.
 
 This opt-in pilot records one authorized RTSP channel and feeds finalized segments
 into the existing local CPU analyzer. It reuses the configured-source allowlist,

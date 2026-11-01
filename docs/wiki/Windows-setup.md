@@ -1,10 +1,10 @@
 # Run on Windows
 
-[Visual atlas](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-atlas) · [PC acceptance](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Field-acceptance) · [Image provenance](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/media/current/README.md)
+[Guide index](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Guide-index) · [Visual handbook](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-handbook) · [Screenshot atlas](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-atlas) · [Troubleshooting](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Troubleshooting)
 
-![Machine planning separated from verifiable Windows install and runtime actions.](https://raw.githubusercontent.com/bartytime4life/Intelligent-DVR-Tool/main/docs/media/current/system-planning.svg)
+![Workflow diagram for setup windows.](https://raw.githubusercontent.com/wiki/bartytime4life/Intelligent-DVR-Tool/docs/media/guide/start.svg)
 
-*The diagram does not configure Windows, change permissions or start recording.*
+**Quick path:** Install prerequisites and the isolated PC runtime → prepare local models → run Check → Start the foreground loopback service.
 
 [Hardware and storage](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Hardware-guide) · [GPU plan](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/GPU-planning) · [Resource limits](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Resource-controls) · [Linux](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Linux-setup)
 
@@ -76,7 +76,7 @@ For an explicitly approved recording/model and new output files:
   --trace-output 'R:\ApprovedPilot\trace-001.json'
 ```
 
-Paths are examples; validate the rule and ensure directories exist. The selected pretrained artifact must have the exact profile's verified hash. This example uses the default CPU route; the policy enforces OpenCV threads and decoded-frame count. It does not impose Windows CPU-rate, total-process-memory, disk-bandwidth or GPU-power limits. The [optional CUDA route](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/edge/README.md#optional-explicit-cuda-backend) was qualified only on the recorded Linux owner PC; Windows CUDA remains unqualified.
+Paths are examples; validate the rule and ensure directories exist. The selected pretrained artifact must have the exact profile's verified hash. This example uses the default CPU route; the policy enforces OpenCV threads and decoded-frame count. It does not impose Windows CPU-rate, total-process-memory, disk-bandwidth or GPU-power limits. The [optional CUDA route](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Edge-CLI#optional-explicit-cuda-backend) was qualified only on the recorded Linux owner PC; Windows CUDA remains unqualified.
 
 ## Windows containment boundary
 
@@ -92,4 +92,4 @@ Keep the future recording service and the interactive review UI separate. Qualif
 
 ---
 
-[Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/setup-windows.md) · Generated from the checked documentation source; historical and schematic images are labeled.
+[Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/setup-windows.md) · Generated companion; dated evidence, examples and illustrations retain their labels.

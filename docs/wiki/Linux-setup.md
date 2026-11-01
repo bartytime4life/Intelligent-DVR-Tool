@@ -1,10 +1,10 @@
 # Run on Linux
 
-[Visual atlas](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-atlas) · [PC acceptance](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Field-acceptance) · [Image provenance](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/media/current/README.md)
+[Guide index](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Guide-index) · [Visual handbook](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-handbook) · [Screenshot atlas](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-atlas) · [Troubleshooting](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Troubleshooting)
 
-![Machine planning separated from verifiable Linux install and runtime actions.](https://raw.githubusercontent.com/bartytime4life/Intelligent-DVR-Tool/main/docs/media/current/system-planning.svg)
+![Workflow diagram for setup linux.](https://raw.githubusercontent.com/wiki/bartytime4life/Intelligent-DVR-Tool/docs/media/guide/start.svg)
 
-*The diagram does not install dependencies, change resource quotas or start recording.*
+**Quick path:** Install prerequisites and the isolated PC runtime → prepare local models → run Check → Start the foreground loopback service.
 
 [Hardware and storage](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Hardware-guide) · [GPU plan](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/GPU-planning) · [Resource limits](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Resource-controls) · [Windows](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Windows-setup)
 
@@ -69,7 +69,7 @@ Export **dvr-resource-policy.json** from System to a private local path. Validat
 .venv/bin/python -m edge.resources --policy /private/dvr/dvr-resource-policy.json
 ```
 
-After deliberately obtaining the compatible model and approved recording described in the [edge guide](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/edge/README.md), an example invocation is:
+After deliberately obtaining the compatible model and approved recording described in the [edge guide](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Edge-CLI), an example invocation is:
 
 ```bash
 .venv/bin/python -m edge.analyze \
@@ -92,7 +92,7 @@ These OS controls are not set by System, its policy or the launcher. Do not infe
 
 ## Before relying on the machine
 
-Run the repository checks, then qualify the actual storage/decoder/model workload. Test long writes and concurrent reads, full-disk handling, disk/worker failures, UPS shutdown/recovery, reconnect behavior once ingest exists, time synchronization and retention deletion. Keep recording separate from analytics sample drops. Follow the [100-camera qualification ladder](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/performance-100-cameras.md).
+Run the repository checks, then qualify the actual storage/decoder/model workload. Test long writes and concurrent reads, full-disk handling, disk/worker failures, UPS shutdown/recovery, reconnect behavior once ingest exists, time synchronization and retention deletion. Keep recording separate from analytics sample drops. Follow the [100-camera qualification ladder](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/100-camera-plan).
 
 GPU driver/backend installation and acceleration parity remain deliberate separate work; see [GPU planning](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/GPU-planning). Confirm system sleep/power/reboot policy with the owner before unattended operation; the launcher changes none of it.
 
@@ -104,4 +104,4 @@ GPU driver/backend installation and acceleration parity remain deliberate separa
 
 ---
 
-[Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/setup-linux.md) · Generated from the checked documentation source; historical and schematic images are labeled.
+[Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/setup-linux.md) · Generated companion; dated evidence, examples and illustrations retain their labels.

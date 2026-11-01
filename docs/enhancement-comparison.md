@@ -1,10 +1,10 @@
 # Saved-recording sharpening comparison
 
-[Current visual atlas](visual-atlas.md)
+[Guide index](README.md) · [Visual handbook](how-to.md) · [Screenshot atlas](visual-atlas.md) · [Troubleshooting](troubleshooting.md)
 
-![Saved recording analysis and optional input enhancement lead to the same human-review boundary.](media/current/workflow.svg)
+![Workflow diagram for enhancement comparison.](media/guide/recording.svg)
 
-*Sharpening comparisons are unqualified and are not proof of more accurate detection.*
+**Quick path:** Connect local analysis → select a recording → enable the optional comparison → inspect original and candidate results separately.
 
 Recognition has an **optional, experimental mild-sharpening comparison**. It
 reuses the configured detector on the exact same decoded samples. The original

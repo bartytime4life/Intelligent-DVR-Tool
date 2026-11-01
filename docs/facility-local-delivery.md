@@ -1,10 +1,10 @@
 # Native local map-service delivery
 
-[Current visual atlas](visual-atlas.md) · [Latest product status](product-status.md) · [Screenshot provenance](media/current/README.md)
+[Guide index](README.md) · [Visual handbook](how-to.md) · [Screenshot atlas](visual-atlas.md) · [Troubleshooting](troubleshooting.md)
 
-![Facility map and settings panel in the current tested software.](media/current/facility-desktop.jpg)
+![Workflow diagram for facility local delivery.](media/guide/facility.svg)
 
-*This screenshot does not demonstrate a live Photon/Overpass provider or local-installed geographic service.*
+**Quick path:** Prepare regional services separately → enable the fixed loopback route → review provider choices → test a bounded site request.
 
 This is an opt-in loopback route for a **source checkout** using the Linux/Windows
 launchers and Node.js 22. It uses the existing bounded Vite middleware.

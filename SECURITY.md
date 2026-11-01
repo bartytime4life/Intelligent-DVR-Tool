@@ -1,5 +1,7 @@
 # Security boundaries
 
+[Guide index](docs/README.md) · [Data and storage](docs/architecture.md) · [Safe update checklist](docs/setup-macos.md#preserve-data-when-updating) · [Visual provenance](docs/media/guide/README.md)
+
 [Visual atlas](docs/visual-atlas.md) · [Field acceptance](docs/field-acceptance.md)
 
 ![Browser, local service, human review and export are separate data-trust boundaries.](docs/media/current/data-boundary.svg)

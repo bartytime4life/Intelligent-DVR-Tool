@@ -1,8 +1,10 @@
 # Offline analysis foundation
 
+[Operator handbook](../docs/how-to.md) · [Mac setup](../docs/setup-macos.md) · [PC setup](../docs/pc-testing.md) · [Guide index](../docs/README.md)
+
 [Current visual atlas](../docs/visual-atlas.md)
 
-![The local analyzer is one explicit stage between selected recordings and human review.](../docs/media/current/workflow.svg)
+![The local analyzer is one explicit stage between selected recordings and human review.](../docs/media/guide/recording.svg)
 
 *This diagram does not show real inference or claim live camera performance.*
 

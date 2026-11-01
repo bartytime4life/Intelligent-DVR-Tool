@@ -1,10 +1,10 @@
 # Local recording analysis
 
-[Current visual atlas](visual-atlas.md) · [Product status](product-status.md) · [Visual provenance](media/current/README.md)
+[Guide index](README.md) · [Visual handbook](how-to.md) · [Screenshot atlas](visual-atlas.md) · [Troubleshooting](troubleshooting.md)
 
-![Local source selection, bounded processing and source-matched review.](media/current/workflow.svg)
+![Workflow diagram for local analysis service.](media/guide/start.svg)
 
-*Processing a recording is separate from live Monitor previews; no camera is activated here.*
+**Quick path:** Prepare a compatible model/catalog → start the local service → Connect local analysis → select a recording, model and rules → Analyze recording.
 
 Recognition can select a recording from an explicitly configured folder, start
 CPU analysis, show frame progress, cancel and open the verified result in the same
@@ -91,7 +91,7 @@ labeled unverified instead of being retroactively validated.
 
 | Boundary | Enforced behavior |
 | --- | --- |
-| Access | Exact IPv4 loopback Host; same-origin browser requests; per-service random token for job/result/source APIs; on Linux, API sockets must belong to the service's OS account (Windows and macOS: trust other local accounts); a `localhost` page load is redirected to the exact `127.0.0.1` origin and the API never answers on `localhost`; no CORS or uploads |
+| Access | Exact IPv4 loopback Host; same-origin browser requests; per-service random token for job/result/source APIs; on Linux, API sockets must belong to the service's OS account (Windows and macOS: trust other local accounts); a `localhost` page load is redirected to the exact `127.0.0.1` origin and the API never answers on `localhost`; no CORS; same-computer recording import is bounded and off unless explicitly enabled |
 | Paths | Direct children of one explicit recording folder; opaque IDs; no client paths or commands; regular files; configured folders are resolved once (system links above them, such as Silverblue's `/home`, are accepted) and no symlink is followed at or beneath them |
 | Catalog | First 1,000 directory entries considered; at most 200 supported recordings listed; refresh explicitly after changing files |
 | Inputs | Nonempty MP4/MOV, WebM/MKV or AVI container header; 512 MiB recording/model; 64 KiB labels/rules; models hash checked before execution |

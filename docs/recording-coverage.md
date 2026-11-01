@@ -1,10 +1,10 @@
 # Recording coverage and incomplete decoding
 
-[Current visual atlas](visual-atlas.md) · [Product status](product-status.md) · [Visual provenance](media/current/README.md)
+[Guide index](README.md) · [Visual handbook](how-to.md) · [Screenshot atlas](visual-atlas.md) · [Troubleshooting](troubleshooting.md)
 
-![Recording sampling, coverage checks and the human-observation path.](media/current/workflow.svg)
+![Workflow diagram for recording coverage.](media/guide/recording.svg)
 
-*A decoding report cannot establish uninterrupted physical camera capture.*
+**Quick path:** Analyze the clip → read completed, partial or unverified coverage → inspect the exact source and export the matching pair.
 
 A failed OpenCV `read()` does not distinguish EOF from a decoder error. A
 controlled regression returned seven frames from a generated 30-frame source

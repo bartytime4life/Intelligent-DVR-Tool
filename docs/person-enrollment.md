@@ -1,6 +1,10 @@
 # Person enrollment
 
-[Home](../README.md) · [Guided training](training.md) · [Security](../SECURITY.md)
+[Guide index](README.md) · [Visual handbook](how-to.md) · [Screenshot atlas](visual-atlas.md) · [Troubleshooting](troubleshooting.md)
+
+![Workflow diagram for person enrollment.](media/guide/enrollment.svg)
+
+**Quick path:** Train → Enroll a person → record explicit consent → capture a baseline → optionally check it → review possible matches by hand.
 
 **Train → Enroll a person** sets a baseline for one consenting person: a face
 template kept on this computer so the DVR can later suggest “possible match:

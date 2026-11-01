@@ -1,10 +1,10 @@
 # Saved facilities and portable backups
 
-[Current visual atlas](visual-atlas.md) · [Latest product status](product-status.md) · [Screenshot provenance](media/current/README.md)
+[Guide index](README.md) · [Visual handbook](how-to.md) · [Screenshot atlas](visual-atlas.md) · [Troubleshooting](troubleshooting.md)
 
-![Current Facility Studio's site and task controls, captured with a blank sample plan.](media/current/facility-desktop.jpg)
+![Workflow diagram for saved facilities.](media/guide/preserve.svg)
 
-*The screenshot is an actual UI test; it contains no private site data.*
+**Quick path:** Save each site separately → Export plan for one site → Export all facilities for a collection backup → verify imports before replacing work.
 
 Fresh browser installs open **My facility** as a blank local grid. No example buildings, cameras, routes or fictional site boundary are added. If saved work already exists, the last active facility opens instead.
 

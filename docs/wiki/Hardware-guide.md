@@ -1,16 +1,16 @@
 # Practical Linux and Windows hardware
 
-[Visual atlas](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-atlas) · [PC acceptance](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Field-acceptance) · [Image provenance](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/media/current/README.md)
+[Guide index](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Guide-index) · [Visual handbook](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-handbook) · [Screenshot atlas](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-atlas) · [Troubleshooting](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Troubleshooting)
 
-![Storage, decoded-frame budgets and hardware choices become real only after measurement.](https://raw.githubusercontent.com/bartytime4life/Intelligent-DVR-Tool/main/docs/media/current/system-planning.svg)
+![Workflow diagram for hardware guide.](https://raw.githubusercontent.com/wiki/bartytime4life/Intelligent-DVR-Tool/docs/media/guide/system.svg)
 
-*No published capacity estimate is a guarantee for a different PC.*
+**Quick path:** Enter the actual recording workload → budget storage and power → measure the intended host. Hardware presets are planning candidates.
 
 [Start locally](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Getting-started) · [Linux](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Linux-setup) · [Windows](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Windows-setup) · [GPUs](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/GPU-planning) · [Resource controls](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Resource-controls)
 
 This is an engineering sizing proposal, checked against manufacturer documentation on **October 27, 2026**. It is not a benchmark, purchase order or 100-camera qualification. The app's **System** workspace makes the assumptions editable and exports local limits; it does not provision hardware or storage.
 
-![Actual System workspace; all capacity and power figures are entered assumptions and calculations.](https://raw.githubusercontent.com/bartytime4life/Intelligent-DVR-Tool/main/docs/media/system-setup.webp)
+![Actual System workspace; all capacity and power figures are entered assumptions and calculations.](https://raw.githubusercontent.com/wiki/bartytime4life/Intelligent-DVR-Tool/docs/media/system-setup.webp)
 
 ## Recommended approach
 
@@ -97,4 +97,4 @@ The text above summarizes only the relevant specifications; final part selection
 
 ---
 
-[Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/hardware-guide.md) · Generated from the checked documentation source; historical and schematic images are labeled.
+[Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/hardware-guide.md) · Generated companion; dated evidence, examples and illustrations retain their labels.

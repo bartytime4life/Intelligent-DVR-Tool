@@ -1,5 +1,7 @@
 # Free local detector qualification — 2026-10-26
 
+> **Dated record.** Findings and evidence below retain their stated revision and date. Use the [visual handbook](how-to.md), [current capability register](product-status.md) and [guide index](README.md) for today’s operator path.
+
 ## Decision and current evidence
 
 **Use the exact OpenCV Zoo FP32 YOLOX-S 2022nov artifact for the first offline

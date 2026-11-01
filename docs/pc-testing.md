@@ -1,10 +1,10 @@
 # Install for live PC testing
 
-[Visual atlas](visual-atlas.md) · [PC acceptance](field-acceptance.md) · [Image provenance](media/current/README.md)
+[Guide index](README.md) · [Visual handbook](how-to.md) · [Screenshot atlas](visual-atlas.md) · [Troubleshooting](troubleshooting.md)
 
-![Software readiness precedes operator-approved physical-device qualification.](media/current/system-planning.svg)
+![Workflow diagram for pc testing.](media/guide/start.svg)
 
-*Passing a kit installation/Check is not proof of physical camera function or AI quality.*
+**Quick path:** Extract the PC kit → Install → prepare verified local models → Check → Start. Camera connections and inference remain explicit.
 
 This kit prepares an interactive **single-user local test installation** on
 Ubuntu 24.04 x86-64 or Windows 11 x64. It includes the built interface and local

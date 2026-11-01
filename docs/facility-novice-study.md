@@ -1,10 +1,10 @@
 # Facility novice acceptance study
 
-[Current visual atlas](visual-atlas.md) · [Latest product status](product-status.md) · [Screenshot provenance](media/current/README.md)
+[Guide index](README.md) · [Visual handbook](how-to.md) · [Screenshot atlas](visual-atlas.md) · [Troubleshooting](troubleshooting.md)
 
-![Current Facility Studio used as the proposed starting point for an unaided-user study.](media/current/facility-desktop.jpg)
+![Workflow diagram for facility novice study.](media/guide/facility.svg)
 
-*No novice completion rate or field study is implied by browser automation.*
+**Quick path:** Prepare an approved reference site → record the exact revision → observe unaided tasks. This is a study kit; no participants or success rate are claimed.
 
 Status: **unmeasured**. No recruited participants, field measurements or completed
 sessions are represented by this kit. The original proposal compares:

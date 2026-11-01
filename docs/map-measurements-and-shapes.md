@@ -1,10 +1,10 @@
 # Open-map starter layouts and measurements
 
-[Current visual atlas](visual-atlas.md) · [Latest product status](product-status.md) · [Screenshot provenance](media/current/README.md)
+[Guide index](README.md) · [Visual handbook](how-to.md) · [Screenshot atlas](visual-atlas.md) · [Troubleshooting](troubleshooting.md)
 
-![Illustrated measured image markers paired with a single facility ground plane.](media/current/facility-science.svg)
+![Workflow diagram for map measurements and shapes.](media/guide/facility.svg)
 
-*Map-derived outlines and camera positions are not surveys or verified optical measurements.*
+**Quick path:** Set the site origin → choose a shape or review open-map drafts → verify dimensions → save the editable plan.
 
 October 28 follow-up: [current workflow/geometry](facility-setup-reliability.md)
 adds map pin/custom AOI selection, v2 courtyards/bases and independent parts.

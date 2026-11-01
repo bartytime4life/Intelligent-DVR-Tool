@@ -1,8 +1,10 @@
-# A workspace you can see through
+# Historical visual tour
 
 [Home](../README.md) · [Current visual atlas](visual-atlas.md) · [Media provenance](media/current/README.md) · [Product status](product-status.md)
 
-This page is a dated visual tour of the software **and its earlier prototype**. The newest images below are genuine interface captures from a headless browser test that connected **no real cameras**. Older sample scenes are preserved in the historical section with their original fictional/animated status.
+For the latest walkthrough, including Train and the new facility tools, use the [visual handbook](how-to.md) and [current atlas](visual-atlas.md).
+
+This page is a dated visual tour of the software **and its earlier prototype**. The PR #61 images below are genuine interface captures from a headless browser test that connected **no real cameras**. Older sample scenes are preserved in the historical section with their original fictional/animated status.
 
 ## PR #61 interface captures: map, monitor and system
 
@@ -10,7 +12,7 @@ This page is a dated visual tour of the software **and its earlier prototype**. 
 
 | Monitor · connect only on request | Facility Studio · map-first planning |
 | --- | --- |
-| ![Current Monitor desktop interface with the real-source chooser and no camera streams](media/current/monitor-desktop.jpg) | ![Current Facility Studio desktop interface with task selector, local plan and camera workspace](media/current/facility-desktop.jpg) |
+| ![PR #61 Monitor desktop interface with the real-source chooser and no camera streams](media/current/monitor-desktop.jpg) | ![PR #61 Facility Studio desktop interface with task selector, local plan and camera workspace](media/current/facility-desktop.jpg) |
 | **Three intentional source choices** (webcam, configured LAN RTSP, permitted public). Preview alone is not recording or AI. [Camera setup](local-camera-feeds.md). | **Compact task chooser, one saved-site inventory, geometry tools and camera inspector.** Field optics and visibility are not certified. [Facility guide](facility-builder.md). |
 
 | Monitor · mobile | Facility Studio · mobile | System · mobile |
@@ -20,7 +22,7 @@ This page is a dated visual tour of the software **and its earlier prototype**. 
 
 *Dated screenshots: [Chromium job 41263964836](https://github.com/bartytime4life/Intelligent-DVR-Tool/actions/runs/41263964836), source `9719eda`; 1440×1000 and 390×844 viewports. Full [source and file manifest](media/current/manifest.json). The successful 92 browser scenarios describe that revision and use controlled fixtures, not on-site acceptance.*
 
-Later merged features are not pictured here: [guided training](training.md), [consent-based enrollment and possible matches](person-enrollment.md), and [macOS source setup](local-analysis-service.md#start-the-local-application). See [product status](product-status.md) for their implementation and qualification boundaries.
+Later merged features are not pictured here: [guided training](training.md), [consent-based enrollment and possible matches](person-enrollment.md), and [Mac setup](setup-macos.md). See [product status](product-status.md) for their implementation and qualification boundaries.
 
 ## The human-controlled recording journey
 

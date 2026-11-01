@@ -1,10 +1,10 @@
 # Dependable facility setup: implementation and qualification
 
-[Current visual atlas](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-atlas) · [Latest product status](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Product-status) · [Screenshot provenance](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/media/current/README.md)
+[Guide index](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Guide-index) · [Visual handbook](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-handbook) · [Screenshot atlas](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-atlas) · [Troubleshooting](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Troubleshooting)
 
-![Current Facility Studio map and task interface in a controlled browser fixture.](https://raw.githubusercontent.com/bartytime4life/Intelligent-DVR-Tool/main/docs/media/current/facility-desktop.jpg)
+![Workflow diagram for facility setup reliability.](https://raw.githubusercontent.com/wiki/bartytime4life/Intelligent-DVR-Tool/docs/media/guide/facility.svg)
 
-*Live geographic-provider availability and novice field accuracy remain separate acceptance gates.*
+**Quick path:** Locate and save the site → review a bounded footprint draft → apply deliberately → edit and export. Keep field acceptance separate.
 
 Updated October 28, 2026. This increment advances issue #6 with pointer location,
 custom areas, v2 courtyard/base geometry and an opt-in native local-service route.
@@ -87,7 +87,7 @@ bytes, hashes, provenance and ODbL notice.
 
 ## Local and offline delivery
 
-The [native local-delivery guide](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/facility-local-delivery.md) describes fixed
+The [native local-delivery guide](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Local-map-services) describes fixed
 loopback Photon/Overpass routes for Vite development and preview. Native launchers
 use preview and inherit explicit operator environment settings. Services and
 regional databases must already be installed separately. Sites' Worker remains
@@ -97,7 +97,7 @@ Photon/Overpass or current-site completeness.
 
 ## Human acceptance
 
-Use the [novice study kit](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/facility-novice-study.md) to compare the original three
+Use the [novice study kit](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Facility-study-kit) to compare the original three
 proposed flows with 5–8 novice users. Imagery assistance is unavailable and is never
 silently substituted with address/GPS/offline variants. The kit reports this as a
 blocked comparison. Targets are 80% unaided completion, median attempt duration
@@ -136,4 +136,4 @@ Earlier timings above remain attributed to their original run.
 
 ---
 
-[Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/facility-setup-reliability.md) · Generated from the checked documentation source; historical and schematic images are labeled.
+[Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/facility-setup-reliability.md) · Generated companion; dated evidence, examples and illustrations retain their labels.
