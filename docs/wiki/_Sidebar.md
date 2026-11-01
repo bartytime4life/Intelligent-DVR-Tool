@@ -23,6 +23,7 @@
 - [GPU planning](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/GPU-planning)
 - [Linux setup](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Linux-setup)
 - [Windows setup](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Windows-setup)
+- [Mac setup](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Mac-setup)
 - [Resource controls](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Resource-controls)
 
 [Repository](https://github.com/bartytime4life/Intelligent-DVR-Tool) · [Source documentation](https://github.com/bartytime4life/Intelligent-DVR-Tool/tree/main/docs)

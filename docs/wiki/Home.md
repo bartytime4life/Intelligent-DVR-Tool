@@ -19,7 +19,7 @@ A local-first camera-analysis and facility-planning project from BARTA AI Soluti
 | What you want to do | Follow |
 | --- | --- |
 | Install and test the actual local PC app on Linux or Windows | [Prebuilt PC kit: Install / Check / Start](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/PC-testing) |
-| Run the local app from an Apple silicon Mac source checkout | [macOS source setup](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/local-analysis-service.md#start-the-local-application) |
+| Install, check or update an Apple silicon Mac source checkout | [Mac Install / Check / Start](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Mac-setup) |
 | Qualify a webcam, DVR, recording, recognition and recovery on real hardware | [Field acceptance runbook](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Field-acceptance) |
 | Develop the browser-only interface | [Source-only Vite preview](#run-the-source-only-ui-preview) |
 

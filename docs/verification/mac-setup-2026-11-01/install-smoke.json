@@ -1,0 +1,12 @@
+{
+  "schema": "intelligent-dvr.mac-install-smoke.v1",
+  "fresh_install": "passed",
+  "repeat_install_preserved_private_files": "passed",
+  "readiness": "passed",
+  "duplicate_launch_kept_existing_service": "passed",
+  "rebuild_and_restart": "passed",
+  "generated_recording_analysis": "passed",
+  "frames_analyzed": 6,
+  "camera_connections": 0,
+  "scope": "Synthetic software checks; no physical device, recognition accuracy or capacity qualification"
+}

@@ -35,6 +35,7 @@ PAGES = {
     'docs/gpu-planning.md': 'GPU-planning',
     'docs/setup-linux.md': 'Linux-setup',
     'docs/setup-windows.md': 'Windows-setup',
+    'docs/setup-macos.md': 'Mac-setup',
     'docs/resource-controls.md': 'Resource-controls',
 }
 

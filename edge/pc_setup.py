@@ -16,6 +16,7 @@ import time
 
 ROOT = Path(__file__).resolve().parents[1]
 REQUIREMENTS = 'edge/requirements-qualification.txt'
+MAC_REQUIREMENTS = 'edge/requirements-macos.txt'
 
 
 class SetupError(Exception):
@@ -23,10 +24,18 @@ class SetupError(Exception):
 
 
 def host_check():
-    if sys.platform not in ('linux', 'win32') or platform.machine().lower() not in ('amd64', 'x86_64'):
-        raise SetupError('This PC test kit supports Linux or Windows on x86-64.')
+    machine = platform.machine().lower()
+    if sys.platform == 'darwin':
+        if machine != 'arm64' or int(platform.mac_ver()[0].split('.')[0] or 0) < 14:
+            raise SetupError('Mac source setup requires Apple silicon and macOS 14 or newer.')
+    elif sys.platform not in ('linux', 'win32') or machine not in ('amd64', 'x86_64'):
+        raise SetupError('Use Linux/Windows x86-64, or an Apple silicon Mac source checkout.')
     if sys.version_info[:2] != (3, 12) or sys.maxsize <= 2**32:
         raise SetupError('Install 64-bit Python 3.12 with pip and venv support, then retry.')
+
+
+def requirements_file():
+    return MAC_REQUIREMENTS if sys.platform == 'darwin' else REQUIREMENTS
 
 
 def pins(text):
@@ -127,7 +136,10 @@ def create_settings(root=ROOT):
 
 def install(root=ROOT):
     host_check()
-    if verify_kit(root) == 'source checkout':
+    kind = verify_kit(root)
+    if sys.platform == 'darwin' and kind != 'source checkout':
+        raise SetupError('The prebuilt PC kit is for Linux/Windows. Use a source checkout on Mac.')
+    if kind == 'source checkout':
         node, npm = shutil.which('node'), shutil.which('npm.cmd' if sys.platform == 'win32' else 'npm')
         if not node or not npm:
             raise SetupError('Source installation needs Node.js 22 and npm; the prebuilt PC kit needs only Python 3.12.')
@@ -143,8 +155,8 @@ def install(root=ROOT):
         command([sys.executable, '-m', 'venv', root / '.venv'],
                 'Could not create .venv. Install Python 3.12 venv/pip support and use a writable folder.', root=root)
     python = validate_environment(root)
-    # Every pinned wheel must match a PyPI-published SHA-256 (CPython 3.12, Linux x86-64 / Windows amd64).
-    command([python, '-m', 'pip', 'install', '--only-binary=:all:', '--require-hashes', '-r', REQUIREMENTS],
+    # Every platform uses its own exact, hash-checked PyPI wheels.
+    command([python, '-m', 'pip', 'install', '--only-binary=:all:', '--require-hashes', '-r', requirements_file()],
             'Pinned runtime installation failed. Check network access and rerun; settings are preserved.', root=root)
     command([python, '-m', 'pip', 'check'], 'Python dependencies conflict. Install in a fresh folder.', root=root)
     create_settings(root)
@@ -159,7 +171,7 @@ def native_probe():
         os.environ[key] = '1'
     os.environ['OPENCV_FFMPEG_CAPTURE_OPTIONS'] = 'protocol_whitelist;file'
     versions = {}
-    for package, expected in pins((ROOT / REQUIREMENTS).read_text(encoding='utf-8')).items():
+    for package, expected in pins((ROOT / requirements_file()).read_text(encoding='utf-8')).items():
         actual = importlib.metadata.version(package)
         if actual != expected:
             raise SetupError('Pinned dependency mismatch. Rerun the installer in this folder.')
@@ -192,7 +204,8 @@ def native_probe():
         from .media_coverage import verify
         if verify(Path(path), digest(Path(path)), 3)['status'] != 'inventory-matched':
             raise SetupError('Local recording coverage validation failed. Reinstall the pinned runtime.')
-    return {'packages': versions, 'synthetic_codec': 'passed', 'worker_memory_limit': 'applied'}
+    return {'packages': versions, 'synthetic_codec': 'passed',
+            'worker_memory_limit': 'unavailable_on_macos' if sys.platform == 'darwin' else 'applied'}
 
 
 def built_interface(root=ROOT):
@@ -300,7 +313,7 @@ def check(port=4173, feeds_config=None, recordings=None, config=None, *, root=RO
     if bind:
         def loopback():
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
-                if sys.platform == 'linux':
+                if sys.platform in ('linux', 'darwin'):
                     sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
                 sock.bind(('127.0.0.1', port))
                 sock.listen(1)

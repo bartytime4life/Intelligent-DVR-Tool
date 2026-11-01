@@ -4,6 +4,7 @@ import hashlib
 import io
 import json
 from pathlib import Path
+import platform
 import subprocess
 import tempfile
 import unittest
@@ -86,6 +87,7 @@ class ResourcePolicyTest(unittest.TestCase):
 
 
 class HostSnapshotTest(unittest.TestCase):
+    @unittest.skipUnless(platform.system() in ('Linux', 'Windows'), 'Hardware probe supports Linux/Windows only')
     def test_actual_local_report_omits_identity_and_selected_paths(self):
         with tempfile.TemporaryDirectory() as temp:
             with patch('edge.host.gpu_snapshot') as gpu:
@@ -99,6 +101,7 @@ class HostSnapshotTest(unittest.TestCase):
             for key in ('hostname', 'username', 'serial', 'ip', 'paths'):
                 self.assertNotIn(key, report)
 
+    @unittest.skipUnless(platform.system() in ('Linux', 'Windows'), 'Hardware probe supports Linux/Windows only')
     def test_probe_exclusive_output_preserves_existing_file(self):
         with tempfile.TemporaryDirectory() as temp:
             file = Path(temp) / 'host.json'
@@ -111,7 +114,7 @@ class HostSnapshotTest(unittest.TestCase):
             self.assertEqual(file.read_bytes(), before)
 
     def test_unknown_ram_and_unsupported_platform_are_explicit(self):
-        with patch('edge.host.physical_memory', side_effect=OSError('unavailable')):
+        with patch('edge.host.platform.system', return_value='Linux'), patch('edge.host.physical_memory', side_effect=OSError('unavailable')):
             self.assertIsNone(snapshot()['ram_total_bytes'])
         with patch('edge.host.platform.system', return_value='Darwin'), self.assertRaises(ValueError):
             snapshot()

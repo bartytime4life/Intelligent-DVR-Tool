@@ -18,6 +18,7 @@ def check():
     errors = []
     docs = [ROOT / 'README.md', ROOT / 'SECURITY.md', ROOT / 'docs/README.md',
             ROOT / 'docs/verification/README.md',
+            ROOT / 'docs/verification/mac-setup-2026-11-01/README.md',
             ROOT / 'docs/verification/facility-2026-10-28/README.md',
             ROOT / 'docs/facility-local-delivery.md', ROOT / 'docs/facility-novice-study.md',
             ROOT / 'docs/verification/facility-2026-10-27/README.md',

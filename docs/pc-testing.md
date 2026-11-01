@@ -108,12 +108,13 @@ local-feeds.json. After updating a source checkout, rerun Install to rebuild it.
 ## macOS: source checkout
 
 There is no prebuilt Mac kit. On an Apple silicon Mac, follow the
-[macOS setup in the analysis guide](local-analysis-service.md#start-the-local-application),
-then double-click **Start-Mac.command**. It serves **http://127.0.0.1:4180/**,
-rebuilds the interface after updates and stops when its window closes. Browser
-webcams and recording analysis work; the analysis worker has CPU-time and
-file-size limits but no memory cap on macOS. The one-camera LAN recorder, LAN DVR
-previews, Check and the hardware probe still support Linux and Windows only.
+[Mac Install / Check / Start guide](setup-macos.md), including pinned dependencies,
+verified model preparation and backups before updates. **Install-Mac.command**
+preserves private data; **Check-Mac.command** tests software readiness without
+contacting devices; **Start-Mac.command** serves **http://127.0.0.1:4180/**.
+The worker has CPU-time and file-size limits but no memory cap on macOS.
+Physical camera/DVR compatibility, the one-camera LAN recorder and the hardware
+probe retain their separate platform and field-acceptance boundaries.
 
 ## First real-device test
 

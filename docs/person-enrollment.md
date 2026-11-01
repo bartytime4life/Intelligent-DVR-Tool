@@ -19,6 +19,11 @@ this record is not legal advice. Do not enroll children or anyone who cannot agr
 
 ## Set up
 
+On a fresh Mac checkout, [Mac model preparation](setup-macos.md#prepare-models-once)
+can copy and verify all three selected models and build the catalog together.
+An existing working catalog needs no repeat preparation. The manual option below
+also remains available.
+
 Download the two OpenCV Zoo models (revision `48b10fa505aeb51fbd127fc60a5c660040e823b7`)
 into `faces/` beside the analysis catalog and check their hashes:
 

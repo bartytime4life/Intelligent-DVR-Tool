@@ -255,7 +255,7 @@ class PcSetupTest(unittest.TestCase):
         self.write('.venv/marker')
         self.write('local-feeds.json', b'owner settings')
         calls = []
-        with patch.object(pc, 'host_check'), patch.object(pc, 'validate_environment', return_value=Path('python')), \
+        with patch.object(pc.sys, 'platform', 'linux'), patch.object(pc, 'host_check'), patch.object(pc, 'validate_environment', return_value=Path('python')), \
                 patch.object(pc, 'command', side_effect=lambda args,*a,**k: calls.append(args)), \
                 patch('shutil.which', side_effect=AssertionError('Kit must not need Node')):
             pc.install(self.root)

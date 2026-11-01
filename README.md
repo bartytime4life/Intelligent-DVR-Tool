@@ -19,7 +19,7 @@ A local-first camera-analysis and facility-planning project from BARTA AI Soluti
 | What you want to do | Follow |
 | --- | --- |
 | Install and test the actual local PC app on Linux or Windows | [Prebuilt PC kit: Install / Check / Start](docs/pc-testing.md) |
-| Run the local app from an Apple silicon Mac source checkout | [macOS source setup](docs/local-analysis-service.md#start-the-local-application) |
+| Install, check or update an Apple silicon Mac source checkout | [Mac Install / Check / Start](docs/setup-macos.md) |
 | Qualify a webcam, DVR, recording, recognition and recovery on real hardware | [Field acceptance runbook](docs/field-acceptance.md) |
 | Develop the browser-only interface | [Source-only Vite preview](#run-the-source-only-ui-preview) |
 

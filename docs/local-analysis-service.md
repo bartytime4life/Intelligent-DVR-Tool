@@ -41,16 +41,16 @@ Windows PowerShell:
   -AnalysisConfig "$PWD\edge\local-analysis.example.json"
 ```
 
-macOS (Apple silicon source checkout): install Python 3.12 and Node 22 (for
-example `brew install python@3.12 node@22`), then create the environment with
-`python3.12 -m venv .venv && .venv/bin/pip install -r edge/requirements.txt`.
-The pinned hash-checked installer covers only Linux x86-64 and Windows amd64, so
-this environment uses the unpinned version ranges. Put a catalog, its labels,
-rules and the verified model in `local-analysis/` (ignored by Git) with an empty
-`local-analysis/recordings/` folder, then double-click `Start-Mac.command`. It
-rebuilds the interface when the source is newer than the last build and opens
-`http://127.0.0.1:4180/` with recording import and training enabled. Without `.venv` or
-`local-analysis/catalog.json` it serves the interface only.
+macOS (Apple silicon, macOS 14+ source checkout): follow
+[Mac Install / Check / Start](setup-macos.md). The Mac installer uses its own
+exact, hash-checked Python 3.12 CPU runtime. Preparation copies explicitly
+selected pinned models into a fresh private `local-analysis/`; existing catalogs,
+recordings, tuned rules and templates are preserved on reinstall. Start opens
+`http://127.0.0.1:4180/` with import and training enabled when configured, and
+enrollment when its pinned face models are configured. Missing analysis setup
+serves the interface only; incomplete or invalid setup is reported as an error.
+The [update guide](setup-macos.md#preserve-data-when-updating) covers private data,
+temporary results and browser exports separately.
 
 `--allow-training` (Linux `--allow-training`, Windows `-AllowTraining`) lets
 [guided training](training.md) save tuned rule sets in `trained/` beside the
