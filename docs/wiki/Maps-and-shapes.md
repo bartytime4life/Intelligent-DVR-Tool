@@ -1,16 +1,16 @@
 # Open-map starter layouts and measurements
 
-[Current visual atlas](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-atlas) · [Latest product status](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Product-status) · [Screenshot provenance](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/media/current/README.md)
+[Guide index](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Guide-index) · [Visual handbook](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-handbook) · [Screenshot atlas](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-atlas) · [Troubleshooting](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Troubleshooting)
 
-![Illustrated measured image markers paired with a single facility ground plane.](https://raw.githubusercontent.com/bartytime4life/Intelligent-DVR-Tool/main/docs/media/current/facility-science.svg)
+![Workflow diagram for map measurements and shapes.](https://raw.githubusercontent.com/wiki/bartytime4life/Intelligent-DVR-Tool/docs/media/guide/facility.svg)
 
-*Map-derived outlines and camera positions are not surveys or verified optical measurements.*
+**Quick path:** Set the site origin → choose a shape or review open-map drafts → verify dimensions → save the editable plan.
 
 October 28 follow-up: [current workflow/geometry](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Facility-setup-reliability)
 adds map pin/custom AOI selection, v2 courtyards/bases and independent parts.
 The earlier v1 limitations and evidence below describe the original increment;
 overlapping parts, live/installed services, field accuracy and novice acceptance
-remain open. [Local delivery](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/facility-local-delivery.md) · [Study kit](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/facility-novice-study.md).
+remain open. [Local delivery](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Local-map-services) · [Study kit](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Facility-study-kit).
 
 
 Implemented 2026-10-27 in the existing MapLibre/Three.js editor. No subscription,
@@ -112,4 +112,4 @@ See [facility setup reliability](https://github.com/bartytime4life/Intelligent-D
 
 ---
 
-[Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/map-measurements-and-shapes.md) · Generated from the checked documentation source; historical and schematic images are labeled.
+[Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/map-measurements-and-shapes.md) · Generated companion; dated evidence, examples and illustrations retain their labels.

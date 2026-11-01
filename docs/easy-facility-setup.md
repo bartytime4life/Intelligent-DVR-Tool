@@ -1,5 +1,7 @@
 # Facility setup research and remaining work
 
+> **Dated record.** Findings and evidence below retain their stated revision and date. Use the [visual handbook](how-to.md), [current capability register](product-status.md) and [guide index](README.md) for today’s operator path.
+
 [Current visual atlas](visual-atlas.md) · [Latest product status](product-status.md) · [Screenshot provenance](media/current/README.md)
 
 ![The measured-reference problem is distinct from visual drawing and geometry suggestions.](media/current/facility-science.svg)

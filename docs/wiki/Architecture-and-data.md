@@ -1,12 +1,12 @@
 # Architecture, evidence and data
 
-[Current visual atlas](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-atlas) · [Product status](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Product-status) · [Visual provenance](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/media/current/README.md)
+[Guide index](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Guide-index) · [Visual handbook](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-handbook) · [Screenshot atlas](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-atlas) · [Troubleshooting](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Troubleshooting)
 
-![Distinct browser preview, local service, review workspace and export trust boundaries.](https://raw.githubusercontent.com/bartytime4life/Intelligent-DVR-Tool/main/docs/media/current/data-boundary.svg)
+![Workflow diagram for architecture.](https://raw.githubusercontent.com/wiki/bartytime4life/Intelligent-DVR-Tool/docs/media/guide/preserve.svg)
 
-*No automatic cloud inference; a matching file hash does not authenticate footage.*
+**Quick path:** Browser preview → local service → human review → deliberate export. Follow the storage boundaries below before moving an installation.
 
-[Home](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Home) · [Product status](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Product-status) · [Edge CLI](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/edge/README.md) · [Security boundary](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/SECURITY.md)
+[Home](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Home) · [Product status](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Product-status) · [Edge CLI](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Edge-CLI) · [Security boundary](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Security-boundary)
 
 ## The current pieces
 
@@ -23,9 +23,9 @@ flowchart TD
 Webcam video remains in the browser. DVR previews use the optional same-computer
 service and stop on disconnect, page exit, lease expiry or a processing limit.
 The [feed bridge](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Camera-sources) does not connect to the analyzer or record
-video. The [local job service](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/local-analysis-service.md) separately connects
+video. The [local job service](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Local-analysis-service) separately connects
 Recognition selections to the existing analyzer and opens source-matched results.
-The optional [LAN recorder](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/lan-recording.md) uses the same relay/decoder and
+The optional [LAN recorder](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/LAN-recording) uses the same relay/decoder and
 feeds verified, finalized segments into that job service. It retains matching
 source/results, has explicit Start/Stop and bounded storage, and exposes gaps
 between connections. The scheduler/load model remains separate preparation;
@@ -42,7 +42,7 @@ not calibrated camera feeds. The browser performs no neural-network inference.
 | Person enrollment and suggestions | `edge/people.py`, `edge/faces.py`, `edge/face_worker.py`, `src/RecognitionReview.jsx` | Consent-gated local face templates and explicit possible matches for human review; no verified identity or automatic decision |
 | Facility model | `src/facility.mjs` | Bounded plan validation, local-meter projection, estimated visibility and rehearsal |
 | Facility renderer | `src/FacilityBuilder.jsx`, `src/facility-map.mjs` | Guided controls, MapLibre and selected-camera Three.js volume |
-| Map starter | `src/FacilityStarter.jsx`, `src/facility-starter.mjs` | Common shapes, dimensions, reviewed simple ways/supported outer-only relations and source records |
+| Map starter | `src/FacilityStarter.jsx`, `src/facility-starter.mjs` | Common shapes, dimensions, reviewed simple ways/supported outer and inner relations and source records |
 | Place search and services | `src/AddressSearch.jsx`, `src/facility-services.mjs` | Explicit submitted search, selectable public/local services and bounded responses |
 | Local recording jobs | `edge/local_service.py`, `edge/analysis_worker.py`, `src/LocalAnalysis.jsx` | Loopback selection catalog, one isolated CPU job, bounds, progress/cancel and source-matched result opening |
 | Analyzer | `edge/analyze.py`, `edge/model_profiles.py`, `edge/rules.py` | Explicit recording analysis and profile-bound decoding |
@@ -53,10 +53,10 @@ not calibrated camera feeds. The browser performs no neural-network inference.
 
 | Action | Destination | Distinction |
 | --- | --- | --- |
-| Use sample workspace | Browser memory/localStorage | Generated artwork is not real evidence |
+| Open an example facility | Browser memory/localStorage as a separate named facility | Fictional planning geometry; no camera connects and no generated footage is added |
 | Preview a local video | Local browser object URL | Preview is not analysis; no upload is implemented |
 | Open recognition results + matching recording | Transient browser memory and local object URL | SHA-256 match before attachment; metadata and video never uploaded; selected observations can be explicitly imported into localStorage |
-| Start local analysis job | One explicit local folder, frozen input snapshots and same-computer HTTP result transfer; optional Linux private last-job recovery | Token/Host/origin checks; opt-in bounded same-computer recording import, no cloud inference; [restart storage](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/local-analysis-service.md#optional-linux-restart-recovery) is not continuous recording or a durable human-review database |
+| Start local analysis job | One explicit local folder, frozen input snapshots and same-computer HTTP result transfer; optional Linux private last-job recovery | Token/Host/origin checks; opt-in bounded same-computer recording import, no cloud inference; [restart storage](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Local-analysis-service#optional-linux-restart-recovery) is not continuous recording or a durable human-review database |
 | Apply guided training | New rule file under `trained/` beside the catalog; default selection/history in browser storage | Explicit apply and training-write permission; detector weights are unchanged; [storage](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Guided-training#what-is-saved-where) |
 | Enroll or check a consenting person | Private `people/` templates beside the catalog; clips stay in the recordings folder | Face models and processing stay local; deleting a template does not delete clips; [deletion](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Person-enrollment#storage-and-deletion) |
 | Check for enrolled people in Recognition | Pending embeddings in service memory for one local job; browser receives names, boxes and similarity only | Confirm may add a template view; Not this person hides the suggestion; no automatic Events/export handoff; [limits](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Person-enrollment#possible-matches-in-recognition) |
@@ -73,7 +73,7 @@ not calibrated camera feeds. The browser performs no neural-network inference.
 | Use a still for zones | A re-encoded JPEG per rule plan in this browser's IndexedDB | Captured only on an explicit click; never uploaded; remove it with Remove still |
 | Choose a webcam | The device id in this browser's localStorage | Remembered for the next connection only; no frames stored |
 
-Local analysis does not make every optional browser asset/provider offline. Default local paths are `/geo/search` and `/geo/overpass`; the operator must configure their fixed upstream services. The Sites Worker does not implement them. Same-origin routing does not certify downstream egress, and failure never silently switches to a public provider. See [service contracts](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Facility-setup-reliability#local-and-offline-delivery), [SECURITY.md](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/SECURITY.md) and the provider disclosures.
+Local analysis does not make every optional browser asset/provider offline. Default local paths are `/geo/search` and `/geo/overpass`; the operator must configure their fixed upstream services. The Sites Worker does not implement them. Same-origin routing does not certify downstream egress, and failure never silently switches to a public provider. See [service contracts](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Facility-setup-reliability#local-and-offline-delivery), [SECURITY.md](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Security-boundary) and the provider disclosures.
 
 ## Evidence contracts
 
@@ -117,4 +117,4 @@ System adds explicit setup arithmetic and browser performance preferences. A rea
 
 ---
 
-[Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/architecture.md) · Generated from the checked documentation source; historical and schematic images are labeled.
+[Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/architecture.md) · Generated companion; dated evidence, examples and illustrations retain their labels.

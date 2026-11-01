@@ -1,5 +1,7 @@
 # Intelligent DVR: whole-workspace UI and navigation audit
 
+> **Dated record.** Findings and evidence below retain their stated revision and date. Use the [visual handbook](how-to.md), [current capability register](product-status.md) and [guide index](README.md) for today’s operator path.
+
 [Current visual atlas](visual-atlas.md)
 
 ![Current tested Monitor interface after the source-selection simplification.](media/current/monitor-desktop.jpg)

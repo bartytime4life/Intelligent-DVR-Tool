@@ -1,10 +1,10 @@
 # Performance preparation for at least 100 simultaneous cameras
 
-[Current visual atlas](visual-atlas.md) · [Product status](product-status.md) · [Provenance](media/current/README.md)
+[Guide index](README.md) · [Visual handbook](how-to.md) · [Screenshot atlas](visual-atlas.md) · [Troubleshooting](troubleshooting.md)
 
-![Unqualified progression from one to five, 25, 50 and 100-plus real simultaneous sources.](media/current/scale-gates.svg)
+![Workflow diagram for performance 100 cameras.](media/guide/system.svg)
 
-*The stages are engineering targets, not measured camera throughput.*
+**Quick path:** Specify recording, analysis and visible-tile workloads separately → measure one source → qualify staged loads on the intended host.
 
 [Evidence-led roadmap](roadmap.md) · [Fresh 100-source model results](verification/2026-10-27/README.md#100-source-load-model) · [Architecture](architecture.md)
 

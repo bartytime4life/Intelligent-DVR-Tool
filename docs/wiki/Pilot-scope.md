@@ -1,0 +1,83 @@
+# 100-camera minimum and pilot service scope
+
+[Guide index](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Guide-index) · [Visual handbook](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-handbook) · [Screenshot atlas](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-atlas) · [Troubleshooting](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Troubleshooting)
+
+![Workflow diagram for pilot scope.](https://raw.githubusercontent.com/wiki/bartytime4life/Intelligent-DVR-Tool/docs/media/guide/recording.svg)
+
+**Quick path:** Use the recording-to-review milestone first. Advance live ingest, representative quality and capacity only with separate acceptance evidence.
+
+Owner decision, 2026-10-27: support **at least 100 simultaneously active cameras**.
+Five generated scenes remain sample UI assets. The capacity target is mandatory;
+the current single-recording adapter and offline scheduling tests do not qualify
+live 100-camera operation. See [performance preparation](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/100-camera-plan)
+and the [machine-readable target](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/edge/capacity-target.json).
+
+## Service area
+
+Computer vision, object detection and scene review are a **proposed custom-tool
+and workflow service area**. This repository is the prototype. It does not
+establish production availability, a fixed price, camera support, savings or
+a service commitment on BARTA's public website.
+
+## First useful workflow
+
+An operator reviews a class/zone/duration observation, checks the recording,
+and records a decision. “Out of place” must become a written rule tied to a
+location, object class, time requirement and known failure modes. Nothing in
+this prototype determines identity, intent or whether someone is authorized.
+
+## Scope to agree before connecting cameras
+
+| Item                | Required evidence                                                                     |
+| ------------------- | ------------------------------------------------------------------------------------- |
+| Task                | One recurring inspection/review task and the operator's response                      |
+| Cameras             | Make, model, firmware, protocol, codec, resolution, FPS and permission                |
+| Edge hardware       | CPU/GPU, RAM, thermals, storage and network budget                                    |
+| Targets             | Exact model classes, normal scenes, zones and permitted times                         |
+| Training/evaluation | Approved collection, consistent labels, provenance and held-out recordings            |
+| Timing              | Agreed per-camera analytics cadence and maximum event delay; measured p50/p95/p99 under 100-camera load |
+| Quality             | Per-class precision/recall, missed events and false alerts per camera-hour            |
+| Review              | Named operator role, evidence handling, retention and escalation rules                |
+| Commercial          | Hardware, storage, support and third-party costs; no assumed savings                  |
+
+## Engineering sequence
+
+1. Validate the UI workflow on generated samples and approved local footage.
+2. Qualify a licensed model/export on labeled held-out recordings; record hashes.
+   Start with the [model research and compatibility-only evidence](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Model-qualification-2026-10-26).
+   A synthetic-input pass does not complete this step.
+   The [offline evaluation infrastructure](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Offline-evaluation) supports
+   annotated-frame precision/recall, per-frame timing distributions and explicitly
+   reviewed false alerts per camera-hour. Its committed synthetic fixtures qualify
+   metric arithmetic and evidence links only; representative recordings, quality
+   budgets and owner-hardware measurements remain outstanding.
+3. Implement a credential-protected, allowlisted camera adapter on an edge host.
+   No credentials or RTSP URLs should reach the hosted frontend or repository.
+4. Add bounded capture queues with drop/backpressure reporting, reconnection,
+   per-camera health, storage/retention limits and measured end-to-end latency.
+5. Qualify staged concurrent loads of 1, 5, 25, 50 and at least 100 cameras,
+   including disconnects, low light, occlusion, camera movement, empty scenes,
+   noisy sources, worker failures and resource contention. Measure connection,
+   recording, analytics and browser-view workloads separately and together.
+6. Agree the remaining scope and support before any operational reliance.
+
+## Architecture boundary
+
+The browser is a review workspace. The Python tool operates offline on a local
+recording with an owner-supplied model. Receipts bridge the two through explicit
+metadata import; no network ingest endpoint exists. Sites hosting can serve the
+workspace later; it is not an RTSP capture host or a low-latency inference claim.
+No OpenAI API integration is included. Any later optional cloud scene description
+needs a separate transmission, cost and data-handling decision.
+
+## Known limitations
+
+- Continuous class presence is not same-object tracking or learned anomalies.
+- Imported receipts are unsigned; UI review storage is local and editable.
+- No camera adapter, trained weights, model-quality benchmark or live deployment.
+- Video preview and simulated playback must not be described as AI analysis.
+- Browser zones and edge-rule files use separate explicit schemas.
+
+---
+
+[Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/pilot-scope.md) · Generated companion; dated evidence, examples and illustrations retain their labels.

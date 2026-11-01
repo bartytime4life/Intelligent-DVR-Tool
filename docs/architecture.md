@@ -1,10 +1,10 @@
 # Architecture, evidence and data
 
-[Current visual atlas](visual-atlas.md) · [Product status](product-status.md) · [Visual provenance](media/current/README.md)
+[Guide index](README.md) · [Visual handbook](how-to.md) · [Screenshot atlas](visual-atlas.md) · [Troubleshooting](troubleshooting.md)
 
-![Distinct browser preview, local service, review workspace and export trust boundaries.](media/current/data-boundary.svg)
+![Workflow diagram for architecture.](media/guide/preserve.svg)
 
-*No automatic cloud inference; a matching file hash does not authenticate footage.*
+**Quick path:** Browser preview → local service → human review → deliberate export. Follow the storage boundaries below before moving an installation.
 
 [Home](../README.md) · [Product status](product-status.md) · [Edge CLI](../edge/README.md) · [Security boundary](../SECURITY.md)
 
@@ -42,7 +42,7 @@ not calibrated camera feeds. The browser performs no neural-network inference.
 | Person enrollment and suggestions | `edge/people.py`, `edge/faces.py`, `edge/face_worker.py`, `src/RecognitionReview.jsx` | Consent-gated local face templates and explicit possible matches for human review; no verified identity or automatic decision |
 | Facility model | `src/facility.mjs` | Bounded plan validation, local-meter projection, estimated visibility and rehearsal |
 | Facility renderer | `src/FacilityBuilder.jsx`, `src/facility-map.mjs` | Guided controls, MapLibre and selected-camera Three.js volume |
-| Map starter | `src/FacilityStarter.jsx`, `src/facility-starter.mjs` | Common shapes, dimensions, reviewed simple ways/supported outer-only relations and source records |
+| Map starter | `src/FacilityStarter.jsx`, `src/facility-starter.mjs` | Common shapes, dimensions, reviewed simple ways/supported outer and inner relations and source records |
 | Place search and services | `src/AddressSearch.jsx`, `src/facility-services.mjs` | Explicit submitted search, selectable public/local services and bounded responses |
 | Local recording jobs | `edge/local_service.py`, `edge/analysis_worker.py`, `src/LocalAnalysis.jsx` | Loopback selection catalog, one isolated CPU job, bounds, progress/cancel and source-matched result opening |
 | Analyzer | `edge/analyze.py`, `edge/model_profiles.py`, `edge/rules.py` | Explicit recording analysis and profile-bound decoding |
@@ -53,7 +53,7 @@ not calibrated camera feeds. The browser performs no neural-network inference.
 
 | Action | Destination | Distinction |
 | --- | --- | --- |
-| Use sample workspace | Browser memory/localStorage | Generated artwork is not real evidence |
+| Open an example facility | Browser memory/localStorage as a separate named facility | Fictional planning geometry; no camera connects and no generated footage is added |
 | Preview a local video | Local browser object URL | Preview is not analysis; no upload is implemented |
 | Open recognition results + matching recording | Transient browser memory and local object URL | SHA-256 match before attachment; metadata and video never uploaded; selected observations can be explicitly imported into localStorage |
 | Start local analysis job | One explicit local folder, frozen input snapshots and same-computer HTTP result transfer; optional Linux private last-job recovery | Token/Host/origin checks; opt-in bounded same-computer recording import, no cloud inference; [restart storage](local-analysis-service.md#optional-linux-restart-recovery) is not continuous recording or a durable human-review database |

@@ -16,33 +16,8 @@ ROOT = Path(__file__).resolve().parents[1]
 
 def check():
     errors = []
-    docs = [ROOT / 'README.md', ROOT / 'SECURITY.md', ROOT / 'docs/README.md',
-            ROOT / 'docs/verification/README.md',
-            ROOT / 'docs/verification/mac-setup-2026-11-01/README.md',
-            ROOT / 'docs/verification/facility-2026-10-28/README.md',
-            ROOT / 'docs/facility-local-delivery.md', ROOT / 'docs/facility-novice-study.md',
-            ROOT / 'docs/verification/facility-2026-10-27/README.md',
-            ROOT / 'docs/verification/native-2026-10-28/README.md',
-            ROOT / 'docs/verification/host-2026-10-28/README.md',
-            ROOT / 'docs/verification/cuda-2026-10-28/README.md',
-            ROOT / 'docs/verification/workers-2026-10-28/README.md',
-            ROOT / 'docs/verification/recovery-2026-10-28/README.md',
-            ROOT / 'docs/verification/journal-2026-10-28/README.md',
-            ROOT / 'docs/verification/batching-2026-10-28/README.md',
-            ROOT / 'docs/verification/profiling-2026-10-28/README.md',
-            ROOT / 'docs/verification/durable-overload-2026-10-28/README.md',
-            ROOT / 'docs/performance-100-cameras.md',
-            ROOT / 'edge/README.md', ROOT / 'docs/third-party-notices.md',
-            ROOT / 'docs/offline-qualification.md',
-            *[ROOT / ('docs/' + n + '.md') for n in
-              ('product-status', 'visual-tour', 'getting-started', 'architecture', 'roadmap', 'hardware-guide', 'gpu-planning', 'setup-linux', 'setup-windows', 'resource-controls', 'facility-builder', 'facility-setup-reliability', 'easy-facility-setup', 'map-measurements-and-shapes')],
-            ROOT / 'docs/media/README.md', ROOT / 'docs/wiki/README.md',
-            ROOT / 'docs/verification/2026-10-27/README.md',
-            ROOT / 'docs/verification/hardware-2026-10-27/README.md',
-            *sorted((ROOT / 'docs/wiki').glob('*.md'))]
-    # All active authored guides (not immutable dated verification records).
-    docs.extend(sorted((ROOT / 'docs').glob('*.md')))
-    docs.append(ROOT / 'docs/media/current/README.md')
+    docs = [ROOT / 'README.md', ROOT / 'SECURITY.md', ROOT / 'AGENTS.md',
+            ROOT / 'edge/README.md', ROOT / 'design-qa.md', *sorted((ROOT / 'docs').rglob('*.md'))]
     links = 0
     for file in set(docs):
         if not file.is_file():
@@ -125,6 +100,63 @@ def check():
     if current_total > 350_000:
         errors.append('Current documentation visual assets exceed 350 KiB budget')
 
+    guide = json.loads((ROOT / 'docs/media/guide/manifest.json').read_text(encoding='utf-8'))
+    if guide.get('schema') != 'intelligent-dvr.visual-guide-media.v1':
+        errors.append('Invalid visual guide manifest schema')
+    guide_total, guide_paths, kinds = 0, set(), {}
+    for entry in guide.get('assets', []):
+        rel = entry.get('path', '')
+        path = (ROOT / rel).resolve()
+        if not path.is_relative_to(ROOT / 'docs/media/guide') or not path.is_file() or rel in guide_paths:
+            errors.append(f'Invalid, duplicate or missing guide image: {rel}')
+            continue
+        guide_paths.add(rel)
+        raw = path.read_bytes()
+        guide_total += len(raw)
+        kind = entry.get('kind')
+        kinds[kind] = kinds.get(kind, 0) + 1
+        if len(raw) != entry.get('bytes') or hashlib.sha256(raw).hexdigest() != entry.get('sha256'):
+            errors.append(f'Guide image integrity mismatch: {rel}')
+        if entry.get('realCameraFootage') is not False:
+            errors.append(f'Guide image must not claim actual camera footage: {rel}')
+        if path.suffix == '.jpg':
+            if not (raw.startswith(b'\xff\xd8') and raw.endswith(b'\xff\xd9')):
+                errors.append(f'Invalid guide JPEG: {rel}')
+            if kind not in ('actual-browser-screenshot', 'ai-concept-illustration'):
+                errors.append(f'Unlabeled guide JPEG: {rel}')
+            if kind == 'actual-browser-screenshot' and entry.get('source_commit') != '2566d845fbbc7b9f54f98441009a604f2fa513ce':
+                errors.append(f'Missing capture revision: {rel}')
+            if kind == 'ai-concept-illustration' and entry.get('mode') != 'built-in-imagegen-generate':
+                errors.append(f'Missing generated-art provenance: {rel}')
+        elif path.suffix == '.svg':
+            try:
+                svg = ElementTree.fromstring(raw)
+                if (kind != 'original-schematic-svg' or svg.tag != '{http://www.w3.org/2000/svg}svg'
+                        or not svg.get('viewBox') or svg.find('{http://www.w3.org/2000/svg}title') is None
+                        or svg.find('{http://www.w3.org/2000/svg}desc') is None):
+                    raise ValueError('Missing accessible static SVG metadata')
+                if any(e.tag.rsplit('}', 1)[-1] in ('script', 'foreignObject', 'image', 'use')
+                       or any(k.startswith('on') or k.endswith('}href') or k == 'href' for k in e.attrib)
+                       for e in svg.iter()):
+                    raise ValueError('Active or linked SVG content')
+            except (ElementTree.ParseError, ValueError) as exc:
+                errors.append(f'Unsafe or malformed guide SVG: {rel}: {exc}')
+        else:
+            errors.append(f'Unexpected guide media: {rel}')
+    actual_paths = {p.relative_to(ROOT).as_posix() for p in (ROOT / 'docs/media/guide').iterdir()
+                    if p.suffix in ('.jpg', '.svg')}
+    if guide_paths != actual_paths or kinds != {'actual-browser-screenshot': 12, 'original-schematic-svg': 10, 'ai-concept-illustration': 1}:
+        errors.append('Guide manifest must cover exactly twelve screenshots, ten diagrams and one conceptual hero')
+    if guide_total > 2_000_000:
+        errors.append('Visual guide images exceed the independent 2 MB budget')
+
+    graphics = runpy.run_path(str(ROOT / 'scripts/build-guide-graphics.py'))
+    for name, args in graphics['GUIDES'].items():
+        expected = graphics['build'](name, *args)
+        path = ROOT / 'docs/media/guide' / (name + '.svg')
+        if not path.is_file() or path.read_text(encoding='utf-8') != expected:
+            errors.append(f'Guide graphic generator drift: {name}')
+
     v = ROOT / 'docs/verification/2026-10-27'
     result = json.loads((v / 'summary.json').read_text(encoding="utf-8"))
     for name in ('node', 'sites'):
@@ -205,7 +237,7 @@ def check():
     runpy.run_path(str(ROOT / 'docs/verification/journal-2026-10-28/verify-results.py'))['check']()
     runpy.run_path(str(ROOT / 'docs/verification/batching-2026-10-28/verify-results.py'))['check']()
     runpy.run_path(str(ROOT / 'docs/verification/durable-overload-2026-10-28/verify-results.py'))['check']()
-    print(f'Documentation checks passed: {links} local links, {len(manifest["assets"])} historical media hashes, {len(current["assets"])} current visual blobs, {total:,} historical + {current_total:,} current media bytes, test-count consistency.')
+    print(f'Documentation checks passed: {links} local links, {len(manifest["assets"])} historical media hashes, {len(current["assets"])} current visual blobs, {total:,} historical + {current_total:,} PR61 + {guide_total:,} guide media bytes, test-count consistency.')
 
 
 if __name__ == '__main__':

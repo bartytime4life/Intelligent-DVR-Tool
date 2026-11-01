@@ -1,10 +1,10 @@
 # Calibrate a camera image to a measured ground plane
 
-[Facility Studio](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Image-diagnostics) · [Field-acceptance runbook](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Field-acceptance) · [Visual atlas](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-atlas) · [Security boundary](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/SECURITY.md)
+[Guide index](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Guide-index) · [Visual handbook](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-handbook) · [Screenshot atlas](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-atlas) · [Troubleshooting](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Troubleshooting)
 
-![Schematic showing sampled camera image points 1-4 and independent check C mapped to a single measured ground plane.](https://raw.githubusercontent.com/bartytime4life/Intelligent-DVR-Tool/main/docs/media/current/facility-science.svg)
+![Workflow diagram for facility calibration.](https://raw.githubusercontent.com/wiki/bartytime4life/Intelligent-DVR-Tool/docs/media/guide/science.svg)
 
-*The points are illustrative labels, not an observed survey, measured error estimate or genuine-camera result. Use at least four well-spaced references and a separate withheld marker in a real test.*
+**Quick path:** Freeze a frame → enter measured ground references → withhold independent check markers → inspect error before using the plane ruler.
 
 ## Purpose and evidence boundary
 
@@ -43,4 +43,4 @@ For field acceptance, use five or more measured, visible markers on a permitted 
 
 ---
 
-[Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/facility-calibration.md) · Generated from the checked documentation source; historical and schematic images are labeled.
+[Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/facility-calibration.md) · Generated companion; dated evidence, examples and illustrations retain their labels.

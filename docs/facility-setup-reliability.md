@@ -1,10 +1,10 @@
 # Dependable facility setup: implementation and qualification
 
-[Current visual atlas](visual-atlas.md) · [Latest product status](product-status.md) · [Screenshot provenance](media/current/README.md)
+[Guide index](README.md) · [Visual handbook](how-to.md) · [Screenshot atlas](visual-atlas.md) · [Troubleshooting](troubleshooting.md)
 
-![Current Facility Studio map and task interface in a controlled browser fixture.](media/current/facility-desktop.jpg)
+![Workflow diagram for facility setup reliability.](media/guide/facility.svg)
 
-*Live geographic-provider availability and novice field accuracy remain separate acceptance gates.*
+**Quick path:** Locate and save the site → review a bounded footprint draft → apply deliberately → edit and export. Keep field acceptance separate.
 
 Updated October 28, 2026. This increment advances issue #6 with pointer location,
 custom areas, v2 courtyard/base geometry and an opt-in native local-service route.

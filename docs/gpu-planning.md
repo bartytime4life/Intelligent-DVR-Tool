@@ -1,10 +1,10 @@
 # GPU selection, VRAM and acceleration
 
-[Visual atlas](visual-atlas.md) · [PC acceptance](field-acceptance.md) · [Image provenance](media/current/README.md)
+[Guide index](README.md) · [Visual handbook](how-to.md) · [Screenshot atlas](visual-atlas.md) · [Troubleshooting](troubleshooting.md)
 
-![Explicit CPU/optional GPU planning and reproducible qualification lanes.](media/current/system-planning.svg)
+![Workflow diagram for gpu planning.](media/guide/system.svg)
 
-*The local CPU service does not silently become GPU accelerated when a profile changes.*
+**Quick path:** Keep the CPU path working → choose an explicit acceleration candidate → compare outputs and resource use on approved recordings.
 
 [Hardware](hardware-guide.md) · [Linux](setup-linux.md) · [Windows](setup-windows.md) · [Resource controls](resource-controls.md)
 

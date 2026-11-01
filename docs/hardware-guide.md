@@ -1,10 +1,10 @@
 # Practical Linux and Windows hardware
 
-[Visual atlas](visual-atlas.md) · [PC acceptance](field-acceptance.md) · [Image provenance](media/current/README.md)
+[Guide index](README.md) · [Visual handbook](how-to.md) · [Screenshot atlas](visual-atlas.md) · [Troubleshooting](troubleshooting.md)
 
-![Storage, decoded-frame budgets and hardware choices become real only after measurement.](media/current/system-planning.svg)
+![Workflow diagram for hardware guide.](media/guide/system.svg)
 
-*No published capacity estimate is a guarantee for a different PC.*
+**Quick path:** Enter the actual recording workload → budget storage and power → measure the intended host. Hardware presets are planning candidates.
 
 [Start locally](getting-started.md) · [Linux](setup-linux.md) · [Windows](setup-windows.md) · [GPUs](gpu-planning.md) · [Resource controls](resource-controls.md)
 

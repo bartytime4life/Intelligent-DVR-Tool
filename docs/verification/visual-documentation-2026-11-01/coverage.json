@@ -1,0 +1,317 @@
+{
+  "schema": "intelligent-dvr.documentation-coverage.v1",
+  "date": "2026-11-01",
+  "application_source_commit": "2566d845fbbc7b9f54f98441009a604f2fa513ce",
+  "canonical_top_level_guides": [
+    {
+      "source": "docs/README.md",
+      "wiki_page": "Guide-index",
+      "treatment": "Current guide reconciled; task navigation, procedure and visual references reviewed"
+    },
+    {
+      "source": "docs/architecture.md",
+      "wiki_page": "Architecture-and-data",
+      "treatment": "Current guide reconciled; task navigation, procedure and visual references reviewed"
+    },
+    {
+      "source": "docs/easy-facility-setup.md",
+      "wiki_page": "Facility-setup-research",
+      "treatment": "Dated record retained, current navigation supplied"
+    },
+    {
+      "source": "docs/enhancement-comparison.md",
+      "wiki_page": "Enhancement-comparison",
+      "treatment": "Current guide reconciled; task navigation, procedure and visual references reviewed"
+    },
+    {
+      "source": "docs/experience-review-2026-10-29.md",
+      "wiki_page": "Experience-review-2026-10-29",
+      "treatment": "Dated record retained, current navigation supplied"
+    },
+    {
+      "source": "docs/facility-builder.md",
+      "wiki_page": "Facility-planning",
+      "treatment": "Current guide reconciled; task navigation, procedure and visual references reviewed"
+    },
+    {
+      "source": "docs/facility-calibration.md",
+      "wiki_page": "Planar-calibration",
+      "treatment": "Current guide reconciled; task navigation, procedure and visual references reviewed"
+    },
+    {
+      "source": "docs/facility-image-diagnostics.md",
+      "wiki_page": "Image-diagnostics",
+      "treatment": "Current guide reconciled; task navigation, procedure and visual references reviewed"
+    },
+    {
+      "source": "docs/facility-local-delivery.md",
+      "wiki_page": "Local-map-services",
+      "treatment": "Current guide reconciled; task navigation, procedure and visual references reviewed"
+    },
+    {
+      "source": "docs/facility-novice-study.md",
+      "wiki_page": "Facility-study-kit",
+      "treatment": "Current guide reconciled; task navigation, procedure and visual references reviewed"
+    },
+    {
+      "source": "docs/facility-setup-reliability.md",
+      "wiki_page": "Facility-setup-reliability",
+      "treatment": "Current guide reconciled; task navigation, procedure and visual references reviewed"
+    },
+    {
+      "source": "docs/facility-workspace-upgrades.md",
+      "wiki_page": "Facility-upgrades-2026-10-29",
+      "treatment": "Dated record retained, current navigation supplied"
+    },
+    {
+      "source": "docs/field-acceptance.md",
+      "wiki_page": "Field-acceptance",
+      "treatment": "Current guide reconciled; task navigation, procedure and visual references reviewed"
+    },
+    {
+      "source": "docs/getting-started.md",
+      "wiki_page": "Getting-started",
+      "treatment": "Current guide reconciled; task navigation, procedure and visual references reviewed"
+    },
+    {
+      "source": "docs/gpu-planning.md",
+      "wiki_page": "GPU-planning",
+      "treatment": "Current guide reconciled; task navigation, procedure and visual references reviewed"
+    },
+    {
+      "source": "docs/hardware-guide.md",
+      "wiki_page": "Hardware-guide",
+      "treatment": "Current guide reconciled; task navigation, procedure and visual references reviewed"
+    },
+    {
+      "source": "docs/how-to.md",
+      "wiki_page": "Visual-handbook",
+      "treatment": "Current guide reconciled; task navigation, procedure and visual references reviewed"
+    },
+    {
+      "source": "docs/lan-recording.md",
+      "wiki_page": "LAN-recording",
+      "treatment": "Current guide reconciled; task navigation, procedure and visual references reviewed"
+    },
+    {
+      "source": "docs/local-analysis-service.md",
+      "wiki_page": "Local-analysis-service",
+      "treatment": "Current guide reconciled; task navigation, procedure and visual references reviewed"
+    },
+    {
+      "source": "docs/local-camera-feeds.md",
+      "wiki_page": "Camera-sources",
+      "treatment": "Current guide reconciled; task navigation, procedure and visual references reviewed"
+    },
+    {
+      "source": "docs/map-measurements-and-shapes.md",
+      "wiki_page": "Maps-and-shapes",
+      "treatment": "Current guide reconciled; task navigation, procedure and visual references reviewed"
+    },
+    {
+      "source": "docs/model-qualification-20261026.md",
+      "wiki_page": "Model-qualification-2026-10-26",
+      "treatment": "Dated record retained, current navigation supplied"
+    },
+    {
+      "source": "docs/offline-evaluation.md",
+      "wiki_page": "Offline-evaluation",
+      "treatment": "Current guide reconciled; task navigation, procedure and visual references reviewed"
+    },
+    {
+      "source": "docs/offline-qualification.md",
+      "wiki_page": "Offline-qualification",
+      "treatment": "Current guide reconciled; task navigation, procedure and visual references reviewed"
+    },
+    {
+      "source": "docs/pc-testing.md",
+      "wiki_page": "PC-testing",
+      "treatment": "Current guide reconciled; task navigation, procedure and visual references reviewed"
+    },
+    {
+      "source": "docs/performance-100-cameras.md",
+      "wiki_page": "100-camera-plan",
+      "treatment": "Current guide reconciled; task navigation, procedure and visual references reviewed"
+    },
+    {
+      "source": "docs/person-enrollment.md",
+      "wiki_page": "Person-enrollment",
+      "treatment": "Current guide reconciled; task navigation, procedure and visual references reviewed"
+    },
+    {
+      "source": "docs/pilot-scope.md",
+      "wiki_page": "Pilot-scope",
+      "treatment": "Current guide reconciled; task navigation, procedure and visual references reviewed"
+    },
+    {
+      "source": "docs/product-status.md",
+      "wiki_page": "Product-status",
+      "treatment": "Current guide reconciled; task navigation, procedure and visual references reviewed"
+    },
+    {
+      "source": "docs/project-assessment-2026-10-30.md",
+      "wiki_page": "Assessment-2026-10-30",
+      "treatment": "Dated record retained, current navigation supplied"
+    },
+    {
+      "source": "docs/public-webcams.md",
+      "wiki_page": "Public-webcams",
+      "treatment": "Current guide reconciled; task navigation, procedure and visual references reviewed"
+    },
+    {
+      "source": "docs/recording-coverage.md",
+      "wiki_page": "Recording-coverage",
+      "treatment": "Current guide reconciled; task navigation, procedure and visual references reviewed"
+    },
+    {
+      "source": "docs/recording-recognition.md",
+      "wiki_page": "Recognition-details",
+      "treatment": "Current guide reconciled; task navigation, procedure and visual references reviewed"
+    },
+    {
+      "source": "docs/recording-workflow.md",
+      "wiki_page": "Recording-workflow",
+      "treatment": "Current guide reconciled; task navigation, procedure and visual references reviewed"
+    },
+    {
+      "source": "docs/resource-controls.md",
+      "wiki_page": "Resource-controls",
+      "treatment": "Current guide reconciled; task navigation, procedure and visual references reviewed"
+    },
+    {
+      "source": "docs/review-2026-10-30.md",
+      "wiki_page": "Review-2026-10-30",
+      "treatment": "Dated record retained, current navigation supplied"
+    },
+    {
+      "source": "docs/review-and-events.md",
+      "wiki_page": "Review-and-events",
+      "treatment": "Current guide reconciled; task navigation, procedure and visual references reviewed"
+    },
+    {
+      "source": "docs/roadmap.md",
+      "wiki_page": "Roadmap",
+      "treatment": "Current guide reconciled; task navigation, procedure and visual references reviewed"
+    },
+    {
+      "source": "docs/saved-facilities.md",
+      "wiki_page": "Saved-facilities",
+      "treatment": "Current guide reconciled; task navigation, procedure and visual references reviewed"
+    },
+    {
+      "source": "docs/setup-linux.md",
+      "wiki_page": "Linux-setup",
+      "treatment": "Current guide reconciled; task navigation, procedure and visual references reviewed"
+    },
+    {
+      "source": "docs/setup-macos.md",
+      "wiki_page": "Mac-setup",
+      "treatment": "Current guide reconciled; task navigation, procedure and visual references reviewed"
+    },
+    {
+      "source": "docs/setup-windows.md",
+      "wiki_page": "Windows-setup",
+      "treatment": "Current guide reconciled; task navigation, procedure and visual references reviewed"
+    },
+    {
+      "source": "docs/third-party-notices.md",
+      "wiki_page": "Third-party-notices",
+      "treatment": "Current guide reconciled; task navigation, procedure and visual references reviewed"
+    },
+    {
+      "source": "docs/training.md",
+      "wiki_page": "Guided-training",
+      "treatment": "Current guide reconciled; task navigation, procedure and visual references reviewed"
+    },
+    {
+      "source": "docs/troubleshooting.md",
+      "wiki_page": "Troubleshooting",
+      "treatment": "Current guide reconciled; task navigation, procedure and visual references reviewed"
+    },
+    {
+      "source": "docs/visual-atlas.md",
+      "wiki_page": "Visual-atlas",
+      "treatment": "Current guide reconciled; task navigation, procedure and visual references reviewed"
+    },
+    {
+      "source": "docs/visual-tour.md",
+      "wiki_page": "Visual-tour",
+      "treatment": "Dated record retained, current navigation supplied"
+    },
+    {
+      "source": "docs/workspace-ux-audit-2026-10-31.md",
+      "wiki_page": "Workspace-audit-2026-10-31",
+      "treatment": "Dated record retained, current navigation supplied"
+    },
+    {
+      "source": "docs/zones.md",
+      "wiki_page": "Zones",
+      "treatment": "Current guide reconciled; task navigation, procedure and visual references reviewed"
+    }
+  ],
+  "wiki_sources": {
+    "README.md": "Home",
+    "docs/README.md": "Guide-index",
+    "docs/how-to.md": "Visual-handbook",
+    "docs/getting-started.md": "Getting-started",
+    "docs/visual-atlas.md": "Visual-atlas",
+    "docs/product-status.md": "Product-status",
+    "docs/setup-macos.md": "Mac-setup",
+    "docs/pc-testing.md": "PC-testing",
+    "docs/setup-linux.md": "Linux-setup",
+    "docs/setup-windows.md": "Windows-setup",
+    "docs/troubleshooting.md": "Troubleshooting",
+    "docs/local-camera-feeds.md": "Camera-sources",
+    "docs/public-webcams.md": "Public-webcams",
+    "docs/recording-workflow.md": "Recording-workflow",
+    "docs/local-analysis-service.md": "Local-analysis-service",
+    "docs/recording-recognition.md": "Recognition-details",
+    "docs/recording-coverage.md": "Recording-coverage",
+    "docs/lan-recording.md": "LAN-recording",
+    "docs/review-and-events.md": "Review-and-events",
+    "docs/zones.md": "Zones",
+    "docs/training.md": "Guided-training",
+    "docs/person-enrollment.md": "Person-enrollment",
+    "docs/enhancement-comparison.md": "Enhancement-comparison",
+    "docs/facility-builder.md": "Facility-planning",
+    "docs/saved-facilities.md": "Saved-facilities",
+    "docs/map-measurements-and-shapes.md": "Maps-and-shapes",
+    "docs/facility-setup-reliability.md": "Facility-setup-reliability",
+    "docs/facility-local-delivery.md": "Local-map-services",
+    "docs/facility-novice-study.md": "Facility-study-kit",
+    "docs/facility-image-diagnostics.md": "Image-diagnostics",
+    "docs/facility-calibration.md": "Planar-calibration",
+    "docs/resource-controls.md": "Resource-controls",
+    "docs/hardware-guide.md": "Hardware-guide",
+    "docs/gpu-planning.md": "GPU-planning",
+    "docs/performance-100-cameras.md": "100-camera-plan",
+    "docs/field-acceptance.md": "Field-acceptance",
+    "docs/offline-evaluation.md": "Offline-evaluation",
+    "docs/offline-qualification.md": "Offline-qualification",
+    "docs/pilot-scope.md": "Pilot-scope",
+    "docs/architecture.md": "Architecture-and-data",
+    "edge/README.md": "Edge-CLI",
+    "SECURITY.md": "Security-boundary",
+    "docs/third-party-notices.md": "Third-party-notices",
+    "docs/verification/README.md": "Evidence-and-validation",
+    "docs/roadmap.md": "Roadmap",
+    "docs/media/guide/README.md": "Visual-provenance",
+    "docs/media/current/README.md": "PR61-visual-provenance",
+    "docs/media/README.md": "Historical-visual-provenance",
+    "docs/wiki/README.md": "Wiki-publication",
+    "docs/visual-tour.md": "Visual-tour",
+    "docs/easy-facility-setup.md": "Facility-setup-research",
+    "docs/facility-workspace-upgrades.md": "Facility-upgrades-2026-10-29",
+    "docs/experience-review-2026-10-29.md": "Experience-review-2026-10-29",
+    "docs/review-2026-10-30.md": "Review-2026-10-30",
+    "docs/project-assessment-2026-10-30.md": "Assessment-2026-10-30",
+    "docs/workspace-ux-audit-2026-10-31.md": "Workspace-audit-2026-10-31",
+    "docs/model-qualification-20261026.md": "Model-qualification-2026-10-26"
+  },
+  "generated_navigation_files": [
+    "_Sidebar.md",
+    "_Footer.md"
+  ],
+  "dated_verification_records": "Existing dated verification directories unchanged; only the verification index gains the new record",
+  "visual_collection": "docs/media/guide/manifest.json"
+}

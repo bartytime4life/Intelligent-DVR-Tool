@@ -1,10 +1,10 @@
 # Reproducible offline detection pilot
 
-[Current visual atlas](visual-atlas.md) · [Product status](product-status.md) · [Provenance](media/current/README.md)
+[Guide index](README.md) · [Visual handbook](how-to.md) · [Screenshot atlas](visual-atlas.md) · [Troubleshooting](troubleshooting.md)
 
-![Where independent annotations and human assessment enter the analysis workflow.](media/current/workflow.svg)
+![Workflow diagram for offline evaluation.](media/guide/recording.svg)
 
-*Synthetic validation checks evaluation arithmetic, not accuracy on representative scenes.*
+**Quick path:** Keep independent labels separate from tuning → analyze approved recordings → evaluate detections and observations → inspect misses and false alerts.
 
 New analyzer results bind [recording coverage validation](recording-coverage.md).
 The evaluator checks those declarations and refuses partial/unverified coverage;

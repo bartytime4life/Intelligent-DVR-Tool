@@ -1,5 +1,7 @@
 # Operational assessment — October 30, 2026
 
+> **Dated record.** Findings and evidence below retain their stated revision and date. Use the [visual handbook](how-to.md), [current capability register](product-status.md) and [guide index](README.md) for today’s operator path.
+
 Source baseline: merged PR #37, commit `7bad7329285853be8d71add1d91805dae407d4b2`.
 The new recording-workflow branch starts from the identical Git tree
 `1a52aa2bd3c7d2c38ae200807440c6c3b169d856`. Earlier local workspaces are preserved.

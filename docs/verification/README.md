@@ -1,5 +1,7 @@
 # Verification index
 
+November 1 visual documentation: [handbook, capture provenance and Wiki coverage checks](visual-documentation-2026-11-01/README.md).
+
 [Current visual atlas](../visual-atlas.md)
 
 ![The product's source-matched review process is illustrated separately from dated test records.](../media/current/workflow.svg)

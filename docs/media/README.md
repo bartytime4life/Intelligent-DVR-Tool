@@ -1,5 +1,7 @@
 # Motion with provenance
 
+[Latest guide imagery](guide/README.md) · [Current screenshot atlas](../visual-atlas.md) · [PR #61 collection](current/README.md)
+
 ## Current software UI and new static illustrations
 
 ![Current Monitor and Facility have a verified screenshot archive that is distinct from this historical animation set.](current/overview.svg)

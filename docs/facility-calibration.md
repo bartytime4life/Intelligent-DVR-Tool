@@ -1,10 +1,10 @@
 # Calibrate a camera image to a measured ground plane
 
-[Facility Studio](facility-image-diagnostics.md) · [Field-acceptance runbook](field-acceptance.md) · [Visual atlas](visual-atlas.md) · [Security boundary](../SECURITY.md)
+[Guide index](README.md) · [Visual handbook](how-to.md) · [Screenshot atlas](visual-atlas.md) · [Troubleshooting](troubleshooting.md)
 
-![Schematic showing sampled camera image points 1-4 and independent check C mapped to a single measured ground plane.](media/current/facility-science.svg)
+![Workflow diagram for facility calibration.](media/guide/science.svg)
 
-*The points are illustrative labels, not an observed survey, measured error estimate or genuine-camera result. Use at least four well-spaced references and a separate withheld marker in a real test.*
+**Quick path:** Freeze a frame → enter measured ground references → withhold independent check markers → inspect error before using the plane ruler.
 
 ## Purpose and evidence boundary
 

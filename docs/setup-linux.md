@@ -1,10 +1,10 @@
 # Run on Linux
 
-[Visual atlas](visual-atlas.md) · [PC acceptance](field-acceptance.md) · [Image provenance](media/current/README.md)
+[Guide index](README.md) · [Visual handbook](how-to.md) · [Screenshot atlas](visual-atlas.md) · [Troubleshooting](troubleshooting.md)
 
-![Machine planning separated from verifiable Linux install and runtime actions.](media/current/system-planning.svg)
+![Workflow diagram for setup linux.](media/guide/start.svg)
 
-*The diagram does not install dependencies, change resource quotas or start recording.*
+**Quick path:** Install prerequisites and the isolated PC runtime → prepare local models → run Check → Start the foreground loopback service.
 
 [Hardware and storage](hardware-guide.md) · [GPU plan](gpu-planning.md) · [Resource limits](resource-controls.md) · [Windows](setup-windows.md)
 

@@ -1,5 +1,7 @@
 # Intelligent DVR design QA
 
+> **Historical design record:** this sample-wall comparison predates the explicit real-source interface. Use the [current visual handbook](../how-to.md), [atlas](../visual-atlas.md) and [status](../product-status.md) for the present behavior. Original findings below retain their original scope.
+
 final result: passed
 
 ## Comparison target and browser evidence

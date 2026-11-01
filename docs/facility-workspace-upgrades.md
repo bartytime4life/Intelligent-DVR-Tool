@@ -1,5 +1,7 @@
 # Facility workspace upgrades — 2026-10-29
 
+> **Dated record.** Findings and evidence below retain their stated revision and date. Use the [visual handbook](how-to.md), [current capability register](product-status.md) and [guide index](README.md) for today’s operator path.
+
 [Current visual atlas](visual-atlas.md) · [Latest product status](product-status.md) · [Screenshot provenance](media/current/README.md)
 
 ![Current map-first Facility workspace with a compact task selector.](media/current/facility-desktop.jpg)

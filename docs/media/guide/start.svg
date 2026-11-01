@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="610" viewBox="0 0 1440 610" role="img" aria-labelledby="title desc"><title id="title">Install. Check. Start.</title><desc id="desc">Software setup comes before a camera or an analysis job. Install: Install-Mac / Install-Windows; Linux: --install; Keep existing private settings. Check: Run the readiness check; Resolve failed checks first; No device connections made. Start: Open the printed local address; Keep the terminal running; Connect a source deliberately.</desc>
+<defs><linearGradient id="bg" x2="1" y2="1"><stop stop-color="#0c1a29"/><stop offset="1" stop-color="#101e2b"/></linearGradient></defs>
+<rect width="1440" height="610" rx="24" fill="url(#bg)"/>
+<text x="48" y="49" fill="#79d8d0" font-family="Arial,sans-serif" font-size="16" font-weight="700" letter-spacing="2">START WITH A READY COMPUTER</text>
+<text x="48" y="105" fill="#f1f6fc" font-family="Arial,sans-serif" font-size="39" font-weight="700">Install. Check. Start.</text>
+<text x="48" y="144" fill="#b2c2d3" font-family="Arial,sans-serif" font-size="21">Software setup comes before a camera or an analysis job.</text>
+<rect x="48" y="181" width="432" height="374" rx="19" fill="#142737" stroke="#304859"/>
+<circle cx="85" cy="219" r="18" fill="#77d5cc"/>
+<text x="85" y="225" text-anchor="middle" fill="#10222d" font-family="Arial,sans-serif" font-size="17" font-weight="700">1</text>
+<g transform="translate(264 294)" fill="none" stroke="#77d5cc" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><rect x="-63" y="-46" width="126" height="92" rx="14"/><path d="M-63 -13H63M-63 16H63"/><circle cx="-39" cy="-29" r="3"/><circle cx="-39" cy="2" r="3"/><circle cx="-39" cy="31" r="3"/><path d="M-15 -29H40M-15 2H40M-15 31H40"/></g>
+<text x="76" y="400" fill="#f0f5fa" font-family="Arial,sans-serif" font-size="27" font-weight="700">Install</text>
+<text x="76" y="444" fill="#bbcad8" font-family="Arial,sans-serif" font-size="19">Install-Mac / Install-Windows</text>
+<text x="76" y="475" fill="#bbcad8" font-family="Arial,sans-serif" font-size="19">Linux: --install</text>
+<text x="76" y="506" fill="#bbcad8" font-family="Arial,sans-serif" font-size="19">Keep existing private settings</text>
+<path d="M485 368H499M494 363L499 368L494 373" fill="none" stroke="#73b9b7" stroke-width="2"/>
+<rect x="504" y="181" width="432" height="374" rx="19" fill="#142737" stroke="#304859"/>
+<circle cx="541" cy="219" r="18" fill="#77d5cc"/>
+<text x="541" y="225" text-anchor="middle" fill="#10222d" font-family="Arial,sans-serif" font-size="17" font-weight="700">2</text>
+<g transform="translate(720 294)" fill="none" stroke="#77d5cc" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><circle r="51"/><path d="M-24 0L-5 19L29 -20"/><path d="M-66 43L-46 61M50 -58L70 -42"/></g>
+<text x="532" y="400" fill="#f0f5fa" font-family="Arial,sans-serif" font-size="27" font-weight="700">Check</text>
+<text x="532" y="444" fill="#bbcad8" font-family="Arial,sans-serif" font-size="19">Run the readiness check</text>
+<text x="532" y="475" fill="#bbcad8" font-family="Arial,sans-serif" font-size="19">Resolve failed checks first</text>
+<text x="532" y="506" fill="#bbcad8" font-family="Arial,sans-serif" font-size="19">No device connections made</text>
+<path d="M941 368H955M950 363L955 368L950 373" fill="none" stroke="#73b9b7" stroke-width="2"/>
+<rect x="960" y="181" width="432" height="374" rx="19" fill="#142737" stroke="#304859"/>
+<circle cx="997" cy="219" r="18" fill="#f5bd53"/>
+<text x="997" y="225" text-anchor="middle" fill="#10222d" font-family="Arial,sans-serif" font-size="17" font-weight="700">3</text>
+<g transform="translate(1176 294)" fill="none" stroke="#f5bd53" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><rect x="-71" y="-44" width="142" height="85" rx="12"/><path d="M-22 62H22M0 41V62M-49 10L-22 -6L2 7L39 -20"/><path d="M-49 -23H-18"/></g>
+<text x="988" y="400" fill="#f0f5fa" font-family="Arial,sans-serif" font-size="27" font-weight="700">Start</text>
+<text x="988" y="444" fill="#bbcad8" font-family="Arial,sans-serif" font-size="19">Open the printed local address</text>
+<text x="988" y="475" fill="#bbcad8" font-family="Arial,sans-serif" font-size="19">Keep the terminal running</text>
+<text x="988" y="506" fill="#bbcad8" font-family="Arial,sans-serif" font-size="19">Connect a source deliberately</text>
+<text x="48" y="587" fill="#83a0b4" font-family="Arial,sans-serif" font-size="15">INTELLIGENT DVR / VISUAL GUIDE / Explanatory diagram; no live camera or measured performance implied.</text></svg>

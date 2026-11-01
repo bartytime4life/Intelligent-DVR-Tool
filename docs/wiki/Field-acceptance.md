@@ -1,10 +1,10 @@
 # Field deployment and acceptance runbook
 
-[Current visual atlas](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-atlas) · [Product status](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Product-status) · [Provenance](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/media/current/README.md)
+[Guide index](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Guide-index) · [Visual handbook](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-handbook) · [Screenshot atlas](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-atlas) · [Troubleshooting](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Troubleshooting)
 
-![Evidence-producing acceptance sequence from authorized source to reviewed result.](https://raw.githubusercontent.com/bartytime4life/Intelligent-DVR-Tool/main/docs/media/current/workflow.svg)
+![Workflow diagram for field acceptance.](https://raw.githubusercontent.com/wiki/bartytime4life/Intelligent-DVR-Tool/docs/media/guide/recording.svg)
 
-*Physical measurements must be recorded separately from software/fixture tests.*
+**Quick path:** Check the installation → authorize one source → capture and analyze → review → exercise stop, restart and recovery with recorded evidence.
 
 [Home](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Home) · [PC installation](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/PC-testing) · [Product status](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Product-status) · [Verification evidence](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Evidence-and-validation)
 
@@ -20,7 +20,7 @@ This guide turns the local prototype into a **reproducible, operator-approved PC
 | Local Recognition | Selected recording, pinned compatible model, bounded CPU inference, human-reviewed source-matched reports | Identity recognition, tracking, continuous live inference, independently measured accuracy |
 | Facility and scale preparation | Planned FOV/coverage estimates, offline scheduler/CUDA experiments | Actual person handoffs, surveyed geometry or 100 active live cameras |
 
-The CPU service does **not** silently substitute a GPU backend. Optional CUDA is an explicit offline CLI route with its own qualification record. [Camera limits](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Camera-sources) · [Analysis contract](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/local-analysis-service.md) · [One-camera recorder](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/lan-recording.md).
+The CPU service does **not** silently substitute a GPU backend. Optional CUDA is an explicit offline CLI route with its own qualification record. [Camera limits](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Camera-sources) · [Analysis contract](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Local-analysis-service) · [One-camera recorder](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/LAN-recording).
 
 ## 1. Install a reviewed revision
 
@@ -49,7 +49,7 @@ Start opens `http://127.0.0.1:4173/`. Stop with Ctrl+C. Install/Check must not c
 1. In **Monitor**, explicitly choose **This computer's webcam**, permit camera access and confirm actual moving frames, status, disconnect, and permission/reconnection behavior. No microphone is requested.
 2. Choose **Record webcam clip**, then **Stop recording**; open the retained clip in **Recognition**. Unexported/unimported clips can disappear on reload.
 3. Follow [Prepare recording recognition](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/PC-testing#prepare-recording-recognition) to use a locally held, exact-hash-matched YOLOX-S ONNX model. Enable `--analysis --allow-recording-import` (Windows: `-Analysis -AllowRecordingImport`) using the normal launcher, then **Connect local analysis**.
-4. Import the actual clip or select an approved video file. **Import does not start inference.** Choose the verified model and reviewed rule set; explicitly press **Analyze recording**. Observe progress, cancellation, final status and strict [recording coverage](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/recording-coverage.md).
+4. Import the actual clip or select an approved video file. **Import does not start inference.** Choose the verified model and reviewed rule set; explicitly press **Analyze recording**. Observe progress, cancellation, final status and strict [recording coverage](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Recording-coverage).
 5. Inspect the matching source SHA-256, sampled boxes/classes and human decisions. Explicitly **Send observations to Events** where appropriate; export the printable report, JSON, CSV, recognition bundle and saved analyzed recording. Save the original privately for comparison.
 
 A sampled detection count does **not** mean unique people, a verified identity, tracked movement, continuous occupancy or a calibrated probability. Independent human annotations and false-alert measurements are required before accuracy claims. A source hash proves byte matching, not authenticity.
@@ -61,7 +61,7 @@ A sampled detection count does **not** mean unique people, a verified identity, 
 3. For opt-in recording, copy [`edge/lan-recorder.example.json`](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/edge/lan-recorder.example.json) to `local-recorder.json`. Set its `source` to exactly one configured feed ID. Prepare the analysis model/rules. Launch with `bash scripts/run-linux.sh --analysis --recorder-config local-recorder.json` (Windows: `.\scripts\Start-IntelligentDvr.ps1 -Analysis -RecorderConfig .\local-recorder.json`).
 4. In **Recognition**, choose **Connect LAN recorder**, the model and rules, then **Start recording & analysis**. Check a completed segment with its source hash, review and export the pair, inspect retention/dropped counters and failure `cause`, then **Stop recording & analysis**. Restart must leave recording and analysis **off** until another explicit Start.
 
-The pilot's default 10-second segments reconnect between captures. It is not gapless footage or a multi-camera DVR. The browser's webcam clip action does not record RTSP preview frames. [Recorder bounds and recovery](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/lan-recording.md).
+The pilot's default 10-second segments reconnect between captures. It is not gapless footage or a multi-camera DVR. The browser's webcam clip action does not record RTSP preview frames. [Recorder bounds and recovery](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/LAN-recording).
 
 ## 4. Record evidence and exercise failures
 
@@ -76,7 +76,7 @@ For each case record **PASS / FAIL / BLOCKED / NOT RUN**, UTC time, app commit/`
 | A5 | Explicit recorder Start/Stop, complete reviewed segment, bounded retention and visible gaps | Segment/status/counters, saved analyzed pair |
 | A6 | Abrupt service interruption then restart without autonomous camera/inference restart | Before/after status, failure/recovery notes |
 | A7 | Config privacy, low-disk response, export/restore of browser reviews | Redacted settings and recovery checklist |
-| A8 | Independent annotations on representative, permitted footage with misses and false alerts | [Evaluation report](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/offline-evaluation.md) and review notes |
+| A8 | Independent annotations on representative, permitted footage with misses and false alerts | [Evaluation report](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Offline-evaluation) and review notes |
 
 Treat missing evidence, incomplete media presented as complete, silent source changes, spontaneous camera restart and exposed credentials as **FAIL**. Do not mark tests PASS on the basis of a mocked/virtual feed. Preserve originals; exports and local SQLite/browser data are not immutable independent audit records.
 
@@ -93,11 +93,11 @@ Treat missing evidence, incomplete media presented as complete, silent source ch
 | `RESULT_STORAGE_PRESSURE` / `disk_pressure` | Preserve needed exported segments, then inspect retention and free space |
 | `SERVICE_INTERRUPTED` | Inspect retained state and explicitly approve any retry; nothing resumes automatically |
 
-On Linux, opt-in `--state-dir` retains the last analysis job and writes rotated, private `diagnostics/service.log` with bounded codes/IDs/numbers. It does **not** preserve browser decisions or guarantee power-loss durability; Windows does not support this manual last-job persistence option. The LAN recorder has separate restart behavior on both operating systems. [Service recovery](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/local-analysis-service.md) · [Security](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/SECURITY.md).
+On Linux, opt-in `--state-dir` retains the last analysis job and writes rotated, private `diagnostics/service.log` with bounded codes/IDs/numbers. It does **not** preserve browser decisions or guarantee power-loss durability; Windows does not support this manual last-job persistence option. The LAN recorder has separate restart behavior on both operating systems. [Service recovery](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Local-analysis-service) · [Security](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Security-boundary).
 
 ## 5. Progress from one source toward 100 without claiming success early
 
-Use the [1 → 5 → 25 → 50 → 100 acceptance ladder](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/performance-100-cameras.md) on **real intended cameras and hardware**, with objectives fixed before each run. Measure unique connected sources, preview tiles **separately** from recorded channels, recording gaps, offered/analyzed/replaced/dropped samples, p50/p95 latency, RAM/VRAM, GPU/CPU, network, sustained disk writes, retention and recovery. Include night/day and representative detection/false-alert cases where permitted. Repeat the outage, disk-pressure and restart drills at each approved stage.
+Use the [1 → 5 → 25 → 50 → 100 acceptance ladder](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/100-camera-plan) on **real intended cameras and hardware**, with objectives fixed before each run. Measure unique connected sources, preview tiles **separately** from recorded channels, recording gaps, offered/analyzed/replaced/dropped samples, p50/p95 latency, RAM/VRAM, GPU/CPU, network, sustained disk writes, retention and recovery. Include night/day and representative detection/false-alert cases where permitted. Repeat the outage, disk-pressure and restart drills at each approved stage.
 
 Virtual sources, repeated recordings, synthetic CUDA loads and passing GitHub checks remain engineering tests, **not** physical 100-camera qualification. Do not declare deployment-ready until the exact hardware/driver/codec matrix, prolonged uptime, permission/retention controls, independent labels, failure recovery and evidence receipts pass. [Verification index](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Evidence-and-validation) · [Product status](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Product-status).
 
@@ -105,4 +105,4 @@ Virtual sources, repeated recordings, synthetic CUDA loads and passing GitHub ch
 
 ---
 
-[Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/field-acceptance.md) · Generated from the checked documentation source; historical and schematic images are labeled.
+[Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/field-acceptance.md) · Generated companion; dated evidence, examples and illustrations retain their labels.

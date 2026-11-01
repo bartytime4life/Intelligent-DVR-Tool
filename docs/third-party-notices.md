@@ -1,5 +1,7 @@
 # Third-party components
 
+[Guide index](README.md) · [Visual asset provenance](media/guide/README.md) · [Project terms](../README.md#checks-and-project-terms)
+
 - Phosphor React icons: https://github.com/phosphor-icons/react — MIT.
 - Inter font: https://github.com/rsms/inter — SIL Open Font License 1.1. The Latin
   variable subsets from `@fontsource-variable/inter` 5.3.0 are bundled in

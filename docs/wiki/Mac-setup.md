@@ -1,6 +1,10 @@
 # Mac install, check and update
 
-[Home](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Home) · [Local analysis](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/local-analysis-service.md) · [Training](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Guided-training) · [Person enrollment](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Person-enrollment)
+[Guide index](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Guide-index) · [Visual handbook](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-handbook) · [Screenshot atlas](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-atlas) · [Troubleshooting](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Troubleshooting)
+
+![Workflow diagram for setup macos.](https://raw.githubusercontent.com/wiki/bartytime4life/Intelligent-DVR-Tool/docs/media/guide/start.svg)
+
+**Quick path:** Install → prepare models once → Check → Start on the usual port. Back up private folders and browser exports before updating.
 
 Use a **source checkout on Apple silicon, macOS 14 or newer**, with Python 3.12
 and Node.js 22. There is no prebuilt Mac kit. The Linux/Windows kit keeps its
@@ -34,7 +38,7 @@ to Check. Preparation deliberately refuses an existing `local-analysis/`, includ
 an incomplete folder; preserve and inspect it instead of deleting it to retry.
 
 For a fresh checkout, select the exact verified YOLOX-S model described in the
-[model guide](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/model-qualification-20261026.md). To enable person enrollment too,
+[model guide](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Model-qualification-2026-10-26). To enable person enrollment too,
 select the two pinned YuNet/SFace files from the
 [enrollment setup](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Person-enrollment#set-up). The explicit download links are:
 
@@ -56,7 +60,7 @@ copies the verified 80-class labels, creates an empty recordings folder and a
 whole-frame person-presence rule (threshold 0.5, no dwell), and records model
 provenance. Review this starting rule for your camera before relying on it.
 The pretrained models' upstream licenses apply; see
-[third-party notices](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/third-party-notices.md). No recordings or templates are
+[third-party notices](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Third-party-notices). No recordings or templates are
 included in the repository.
 
 ## Check and start
@@ -143,4 +147,4 @@ hardware probe are separate; they are not enabled by these Mac entry points.
 
 ---
 
-[Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/setup-macos.md) · Generated from the checked documentation source; historical and schematic images are labeled.
+[Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/setup-macos.md) · Generated companion; dated evidence, examples and illustrations retain their labels.

@@ -1,5 +1,7 @@
 # Guided facility builder — design QA
 
+> **Historical design review (October 27).** The original comparison and findings below retain their date. Use the [current visual handbook](docs/how-to.md), [facility guide](docs/facility-builder.md) and [product status](docs/product-status.md) for later changes.
+
 Reviewed 2026-10-27. Scope: desktop planning prototype against the selected first
 concept, plus core browser interactions. This is not live-camera, tracking-model,
 survey-accuracy, complete accessibility or production-capacity qualification.

@@ -1,10 +1,10 @@
 # Local webcam and DVR previews
 
-[Current image gallery](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-atlas) · [Setup for PC](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/PC-testing) · [Recording and review](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Recording-workflow)
+[Guide index](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Guide-index) · [Visual handbook](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-handbook) · [Screenshot atlas](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-atlas) · [Troubleshooting](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Troubleshooting)
 
-![Current Monitor interface in the controlled browser run: one welcome panel for intentional webcam, LAN DVR and approved public webcam choices.](https://raw.githubusercontent.com/bartytime4life/Intelligent-DVR-Tool/main/docs/media/current/monitor-desktop.jpg)
+![Workflow diagram for local camera feeds.](https://raw.githubusercontent.com/wiki/bartytime4life/Intelligent-DVR-Tool/docs/media/guide/sources.svg)
 
-*Actual tested UI, but no camera connected, recorded or analyzed. [Screenshot provenance](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/media/current/README.md).*
+**Quick path:** Choose one source in Monitor → complete its permission/configuration step → connect explicitly → inspect status → disconnect when finished.
 
 Monitor starts empty. There are no generated camera photographs, simulated
 playback controls or new sample events. Existing reviewed sample records remain
@@ -19,10 +19,10 @@ browser webcam. It requests a stop at 60 seconds, keeps at most 64 MiB, and
 passes only video tracks to the recorder. Leaving Monitor, hiding the page or
 disconnecting stops capture. Save the clip or import it into the local analyzer;
 the browser copy is lost on reload/close. These RTSP and public source connections remain previews. The separate
-[one-camera LAN recorder](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/lan-recording.md) records only its explicitly configured
+[one-camera LAN recorder](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/LAN-recording) records only its explicitly configured
 RTSP channel after Start in Recognition.
 See [capture through reporting](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Recording-workflow). The separate
-[Recognition workflow](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/local-analysis-service.md) analyzes selected recordings
+[Recognition workflow](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Local-analysis-service) analyzes selected recordings
 with the existing analyzer and verified review-bundle contract.
 
 ## Webcam
@@ -128,7 +128,7 @@ Primary API references: [browser media permission and secure contexts](https://d
 ## Public internet webcams
 
 The local service also supports owner-approved direct HTTPS JPEG/MJPEG webcams.
-Use **Monitor → Public webcams** and the [public-webcam setup and safety guide](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/public-webcams.md).
+Use **Monitor → Public webcams** and the [public-webcam setup and safety guide](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Public-webcams).
 Public sources share the four-preview cap and expiring leases. They disclose the
 operator's public IP/request to their provider; local recordings and DVR footage
 are not uploaded. No provider is enabled by default.
@@ -136,4 +136,4 @@ are not uploaded. No provider is enabled by default.
 
 ---
 
-[Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/local-camera-feeds.md) · Generated from the checked documentation source; historical and schematic images are labeled.
+[Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/local-camera-feeds.md) · Generated companion; dated evidence, examples and illustrations retain their labels.

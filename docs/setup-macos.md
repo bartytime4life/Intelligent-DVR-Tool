@@ -1,6 +1,10 @@
 # Mac install, check and update
 
-[Home](../README.md) · [Local analysis](local-analysis-service.md) · [Training](training.md) · [Person enrollment](person-enrollment.md)
+[Guide index](README.md) · [Visual handbook](how-to.md) · [Screenshot atlas](visual-atlas.md) · [Troubleshooting](troubleshooting.md)
+
+![Workflow diagram for setup macos.](media/guide/start.svg)
+
+**Quick path:** Install → prepare models once → Check → Start on the usual port. Back up private folders and browser exports before updating.
 
 Use a **source checkout on Apple silicon, macOS 14 or newer**, with Python 3.12
 and Node.js 22. There is no prebuilt Mac kit. The Linux/Windows kit keeps its

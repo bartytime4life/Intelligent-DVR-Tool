@@ -1,10 +1,10 @@
 # Field deployment and acceptance runbook
 
-[Current visual atlas](visual-atlas.md) · [Product status](product-status.md) · [Provenance](media/current/README.md)
+[Guide index](README.md) · [Visual handbook](how-to.md) · [Screenshot atlas](visual-atlas.md) · [Troubleshooting](troubleshooting.md)
 
-![Evidence-producing acceptance sequence from authorized source to reviewed result.](media/current/workflow.svg)
+![Workflow diagram for field acceptance.](media/guide/recording.svg)
 
-*Physical measurements must be recorded separately from software/fixture tests.*
+**Quick path:** Check the installation → authorize one source → capture and analyze → review → exercise stop, restart and recovery with recorded evidence.
 
 [Home](../README.md) · [PC installation](pc-testing.md) · [Product status](product-status.md) · [Verification evidence](verification/README.md)
 

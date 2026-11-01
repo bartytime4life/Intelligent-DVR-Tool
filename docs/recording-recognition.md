@@ -1,10 +1,10 @@
 # Recording recognition pilot
 
-[Current visual atlas](visual-atlas.md) · [Product status](product-status.md) · [Visual provenance](media/current/README.md)
+[Guide index](README.md) · [Visual handbook](how-to.md) · [Screenshot atlas](visual-atlas.md) · [Troubleshooting](troubleshooting.md)
 
-![Explicit recorded-video analysis and human-review path.](media/current/workflow.svg)
+![Workflow diagram for recording recognition.](media/guide/recording.svg)
 
-*This illustration does not show trained inference or a verified person detection.*
+**Quick path:** Load results → match the original recording → inspect sampled frames → send observations deliberately → review and export.
 
 The local application now offers an explicit recording-to-analysis workflow with
 progress, cancellation and automatic source-matched result opening. See

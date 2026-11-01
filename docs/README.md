@@ -1,58 +1,57 @@
-# Explore Intelligent DVR
+# Your guide to Intelligent DVR
 
-[Home](../README.md) · [Visual atlas](visual-atlas.md) · [Install for PC testing](pc-testing.md) · [Current scope](product-status.md) · [Field acceptance](field-acceptance.md)
+[Home](../README.md) · [Visual handbook](how-to.md) · [First session](getting-started.md) · [Troubleshooting](troubleshooting.md) · [Product status](product-status.md)
 
-![Original diagram of the Intelligent DVR workflow, showing its planning and review surfaces without claiming actual camera evidence.](media/current/overview.svg)
+![Conceptual overview of the camera, local recording, human-review computer and facility plan.](media/guide/overview.jpg)
 
-Documentation should help operators **see the tool, know the next action, and distinguish verified software from real-world qualification**. Every current-interface capture has a dated CI provenance record. The visual diagrams explain behavior; they do not demonstrate real cameras, physical accuracy or measured capacity.
+*Concept illustration. Use the [current screenshot atlas](visual-atlas.md) for actual interface captures and their provenance.*
 
-## Take the visual tour
+## Pick the outcome
 
-| Monitor at PR #61 | Facility Studio at PR #61 |
-| --- | --- |
-| ![Monitor desktop start screen with distinct webcam, LAN DVR and approved public source choices.](media/current/monitor-desktop.jpg) | ![Facility Studio with editable plan, compact task navigation, map and properties.](media/current/facility-desktop.jpg) |
-| [Connect sources](local-camera-feeds.md) · [Capture a clip](recording-workflow.md) | [Facility builder](facility-builder.md) · [Image diagnostics](facility-image-diagnostics.md) |
-
-**Also see:** [Dated desktop/mobile screenshots and illustrations](visual-atlas.md) · [Media source and integrity manifest](media/current/README.md) · [Historic prototype tour](visual-tour.md#historical-prototype-captures). The five captures predate Train and enrolled-person suggestions; those newer features have separate guides below.
-
-## Start your journey
-
-| I want to… | Start with… | Then… |
+| I want to… | Start here | Continue with |
 | --- | --- | --- |
-| Install and open the local app | [PC test kit](pc-testing.md) | [Five-minute guide](getting-started.md) |
-| Install or update an Apple silicon Mac checkout | [Mac Install / Check / Start](setup-macos.md) | [Local analysis limits](local-analysis-service.md#limits-and-recovery) |
-| Connect a webcam or DVR/IP camera | [Camera-source guide](local-camera-feeds.md) | [Record and review](recording-workflow.md) |
-| Analyze an approved recording | [Local analysis service](local-analysis-service.md) | [Recognition](recording-recognition.md), [human review](recording-workflow.md) |
-| Tune detection for my camera | [Guided training](training.md) | [Local analysis service](local-analysis-service.md) |
-| Enroll a consenting person | [Person enrollment](person-enrollment.md) | [Security](../SECURITY.md) |
-| Record one configured LAN source | [LAN recorder](lan-recording.md) | [Report gaps and recovery](field-acceptance.md) |
-| Build a facility from maps or shapes | [Facility editor](facility-builder.md) | [Maps/shapes](map-measurements-and-shapes.md), [saved facilities](saved-facilities.md) |
-| Inspect real image pixels | [Image diagnostics](facility-image-diagnostics.md) | [Planar calibration](facility-calibration.md) |
-| Size a Linux/Windows machine | [System controls](resource-controls.md) | [Hardware](hardware-guide.md), [GPU planning](gpu-planning.md) |
-| Check if it is production ready | [Product status](product-status.md) | [Field acceptance](field-acceptance.md), [verification](verification/README.md) |
+| Understand the whole tool | [Visual operator handbook](how-to.md) | [First session](getting-started.md), [screenshots](visual-atlas.md) |
+| Install or update a Mac | [Mac Install / Check / Start](setup-macos.md) | [Local analysis setup](local-analysis-service.md), [troubleshooting](troubleshooting.md) |
+| Install or test a PC | [PC kit](pc-testing.md) | [Linux](setup-linux.md), [Windows](setup-windows.md), [field runbook](field-acceptance.md) |
+| Connect one source | [Webcam and local DVR](local-camera-feeds.md) | [Approved public webcams](public-webcams.md) |
+| Analyze a recording | [Clip-to-report workflow](recording-workflow.md) | [Service configuration](local-analysis-service.md), [Recognition](recording-recognition.md), [coverage](recording-coverage.md) |
+| Make and export review decisions | [Review desk and Events](review-and-events.md) | [Recognition reports](recording-workflow.md), [optional sharpening comparison](enhancement-comparison.md) |
+| Record one LAN camera | [LAN recording](lan-recording.md) | [Field runbook](field-acceptance.md), [coverage](recording-coverage.md) |
+| Tune detection | [Guided training](training.md) | [Source/model setup](local-analysis-service.md) |
+| Enroll a consenting person | [Person enrollment and deletion](person-enrollment.md) | [Storage boundaries](architecture.md), [security](../SECURITY.md) |
+| Define image rules | [Zones on a still](zones.md) | [Recognition details](recording-recognition.md) |
+| Plan buildings and cameras | [Facility builder](facility-builder.md) | [Maps/shapes](map-measurements-and-shapes.md), [saved facilities](saved-facilities.md) |
+| Inspect image science | [Diagnostics](facility-image-diagnostics.md) | [Ground-plane calibration](facility-calibration.md) |
+| Plan hardware and limits | [System control scopes](resource-controls.md) | [Hardware](hardware-guide.md), [GPUs](gpu-planning.md), [100-camera preparation](performance-100-cameras.md) |
+| Validate an operating claim | [Product status](product-status.md) | [Field acceptance](field-acceptance.md), [evaluation](offline-evaluation.md), [evidence checklist](offline-qualification.md) |
 
-![Original schematic of approved camera preview, bounded capture and local analysis, explicit human review and export.](media/current/workflow.svg)
+## Set up a facility
 
-## Learn by subject
+![Site and shell, interior rooms/openings, then planned cameras and an exported backup.](media/guide/facility.svg)
 
-| Subject | Detailed guides |
+[Facility builder](facility-builder.md) covers shapes, placement, floors, room sketching, shared-wall edits, doorways, windows, stairs, camera aim and Undo. [Dependable setup](facility-setup-reliability.md) covers submitted search, reviewed footprints and offline recovery. [Native local map delivery](facility-local-delivery.md) covers operator-hosted map services; [saved facilities](saved-facilities.md) covers named plans and portable backups.
+
+The [novice-study kit](facility-novice-study.md) and [easy-setup research](easy-facility-setup.md) describe study/proposal boundaries; they do not report invented participants, site measurements or user-success rates.
+
+## Engineering and acceptance library
+
+| Area | Guides |
 | --- | --- |
-| **Camera operation** | [Webcam/DVR previews](local-camera-feeds.md), [public webcam permissions](public-webcams.md), [one-camera LAN recording](lan-recording.md), [local analysis](local-analysis-service.md), [source-matched review](recording-recognition.md), [reporting](recording-workflow.md), [coverage integrity](recording-coverage.md) |
-| **Facility design** | [Guided builder](facility-builder.md), [saved sites](saved-facilities.md), [map import and recovery](facility-setup-reliability.md), [local geographic services](facility-local-delivery.md), [shape and dimension controls](map-measurements-and-shapes.md), [science lab](facility-image-diagnostics.md), [calibration](facility-calibration.md) |
-| **Machines and capacity** | [System planner](resource-controls.md), [hardware/drives/power](hardware-guide.md), [GPU planning](gpu-planning.md), [Linux](setup-linux.md), [Windows](setup-windows.md), [100+ source target](performance-100-cameras.md) |
-| **Evidence and intelligence** | [Architecture](architecture.md), [offline evaluation](offline-evaluation.md), [qualification](offline-qualification.md), [sharpening comparison](enhancement-comparison.md), [product status](product-status.md), [pilot boundaries](pilot-scope.md) |
-| **Historical and project records** | [Verification archive](verification/README.md), [October 30 review](review-2026-10-30.md), [October 31 UX audit](workspace-ux-audit-2026-10-31.md), [roadmap](roadmap.md), [historical demo media](media/README.md), [third-party notices](third-party-notices.md) |
+| Data and implementation | [Architecture](architecture.md), [edge CLI](../edge/README.md), [third-party notices](third-party-notices.md), [security](../SECURITY.md) |
+| Evaluation | [Offline evaluation](offline-evaluation.md), [qualification checklist](offline-qualification.md), [dated model qualification](model-qualification-20261026.md), [coverage](recording-coverage.md) |
+| Capacity and rollout | [Pilot scope](pilot-scope.md), [100-camera preparation](performance-100-cameras.md), [roadmap](roadmap.md), [field acceptance](field-acceptance.md) |
+| Evidence | [Verification index](verification/README.md), [product status](product-status.md), [current image provenance](media/guide/README.md), [older image provenance](media/current/README.md) |
 
-## What has actually been demonstrated?
+## Historical decisions and reviews
 
-A merged [October 31 UI and navigation update](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/61) passed **14/14 reported CI checks**. Its controlled [Chromium workflow run](https://github.com/bartytime4life/Intelligent-DVR-Tool/actions/runs/41263964836) passed 92 scenarios and rendered the dated desktop/mobile gallery. Those counts belong to that revision. The [product-status baseline](product-status.md) records later merged features and the successful workflows for `3e07446` through PR #68. Browser tests are not a user study. The connected webcam/DVR bridge, CPU inference and one-channel recording still need representative field endurance, quality and recovery evidence before a production claim.
+These keep their original dates, claims and evidence: [October 29 experience review](experience-review-2026-10-29.md), [facility upgrades](facility-workspace-upgrades.md), [October 30 full review](review-2026-10-30.md), [operational assessment](project-assessment-2026-10-30.md), [October 31 UX audit](workspace-ux-audit-2026-10-31.md), and the [historical visual tour](visual-tour.md). Use current task guides for operating instructions.
 
-The historic October 27 baseline, earlier model tests and synthetic 100-source scheduler observations retain their original revisions, numbers and limitations in the [verification index](verification/README.md). They are not recalculated or represented as current-device acceptance.
+## Read images and claims correctly
 
-![Schematic visualization of capacity gates. Actual 100-camera throughput is not claimed.](media/current/scale-gates.svg)
+- **Application screenshot:** actual UI from a named source revision and controlled fixture session. It is not a real-camera accuracy or endurance test.
+- **Workflow diagram:** an authored explanation of steps or storage boundaries.
+- **Concept illustration:** visual orientation, with no implied deployed system or captured interface.
+- **Planning estimate:** geometry or arithmetic that still needs physical measurements.
+- **Field evidence:** a separately recorded source, environment, workload and result; green CI is not a substitute.
 
-## Key safeguards
-
-Use cameras and recordings only with authorization. No live AI or identity recognition is started by Monitor preview. The interface's native source and model matching supports correspondence, not tamper-evident authentication. Locally stored rules, plans and decisions can be edited or lost; **export backups**. Offline, source-qualified operation remains the design goal. Read [SECURITY.md](../SECURITY.md) and the [field runbook](field-acceptance.md) before relying on the system.
-
-[Repository Wiki](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki) is published separately; the checked source mirrors are in [wiki/](wiki/README.md).
+The published [GitHub Wiki](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki) is generated from these canonical guides. [Wiki publication instructions](wiki/README.md) explain its separate Git history and bundled image assets.

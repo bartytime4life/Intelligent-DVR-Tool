@@ -1,10 +1,10 @@
 # Install for live PC testing
 
-[Visual atlas](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-atlas) · [PC acceptance](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Field-acceptance) · [Image provenance](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/media/current/README.md)
+[Guide index](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Guide-index) · [Visual handbook](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-handbook) · [Screenshot atlas](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-atlas) · [Troubleshooting](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Troubleshooting)
 
-![Software readiness precedes operator-approved physical-device qualification.](https://raw.githubusercontent.com/bartytime4life/Intelligent-DVR-Tool/main/docs/media/current/system-planning.svg)
+![Workflow diagram for pc testing.](https://raw.githubusercontent.com/wiki/bartytime4life/Intelligent-DVR-Tool/docs/media/guide/start.svg)
 
-*Passing a kit installation/Check is not proof of physical camera function or AI quality.*
+**Quick path:** Extract the PC kit → Install → prepare verified local models → Check → Start. Camera connections and inference remain explicit.
 
 This kit prepares an interactive **single-user local test installation** on
 Ubuntu 24.04 x86-64 or Windows 11 x64. It includes the built interface and local
@@ -14,7 +14,7 @@ from an extracted kit without borrowing files from a source checkout. Python,
 trained model weights, camera credentials and recordings
 are not included. This is a portable test folder, not a Windows MSI or automatically started recording service.
 
-After preparing analysis and a LAN source, the optional [one-camera recorder](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/lan-recording.md)
+After preparing analysis and a LAN source, the optional [one-camera recorder](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/LAN-recording)
 uses `--analysis --recorder-config local-recorder.json` on Linux or
 `-Analysis -RecorderConfig .\local-recorder.json` in PowerShell. It stays stopped
 until Start recording & analysis in Recognition. Its segment recovery works on
@@ -314,4 +314,4 @@ model source and license are recorded in
 
 ---
 
-[Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/pc-testing.md) · Generated from the checked documentation source; historical and schematic images are labeled.
+[Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/pc-testing.md) · Generated companion; dated evidence, examples and illustrations retain their labels.

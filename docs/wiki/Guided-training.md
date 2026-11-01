@@ -1,6 +1,10 @@
 # Guided training
 
-[Home](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Home) · [Local analysis service](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/local-analysis-service.md) · [Recording workflow](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Recording-workflow)
+[Guide index](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Guide-index) · [Visual handbook](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-handbook) · [Screenshot atlas](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-atlas) · [Troubleshooting](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Troubleshooting)
+
+![Workflow diagram for training.](https://raw.githubusercontent.com/wiki/bartytime4life/Intelligent-DVR-Tool/docs/media/guide/training.svg)
+
+**Quick path:** Train → Start session → check camera → follow prompts → compare thresholds → apply a new rule or keep the current setting.
 
 **Train** turns detection tuning into one guided page. A session records about a
 minute from this computer's webcam while on-screen prompts tell the person what to
@@ -16,9 +20,9 @@ operational qualification.
 
 1. Start the local app with recording import and training enabled:
    - macOS: double-click `Start-Mac.command` (see the
-     [macOS setup](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/local-analysis-service.md#start-the-local-application)).
+     [Mac setup](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Mac-setup)).
    - Linux: `bash scripts/run-linux.sh --analysis --allow-recording-import --allow-training`
-     with the recordings folder and catalog from the [analysis guide](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/local-analysis-service.md).
+     with the recordings folder and catalog from the [analysis guide](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Local-analysis-service).
    - Windows: `.\scripts\Start-IntelligentDvr.ps1 -Analysis -AllowRecordingImport -AllowTraining`
      with the same folder and catalog.
 2. Open **Train**. When it says *This computer is ready*, press **Start session**.
@@ -75,4 +79,4 @@ To set a baseline for a specific, consenting person, see [person enrollment](htt
 
 ---
 
-[Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/training.md) · Generated from the checked documentation source; historical and schematic images are labeled.
+[Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/training.md) · Generated companion; dated evidence, examples and illustrations retain their labels.

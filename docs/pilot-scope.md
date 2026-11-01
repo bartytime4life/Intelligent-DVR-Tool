@@ -1,10 +1,10 @@
 # 100-camera minimum and pilot service scope
 
-[Current visual atlas](visual-atlas.md) · [Product status](product-status.md) · [Provenance](media/current/README.md)
+[Guide index](README.md) · [Visual handbook](how-to.md) · [Screenshot atlas](visual-atlas.md) · [Troubleshooting](troubleshooting.md)
 
-![Explicit trust boundaries and observable outputs in the current prototype.](media/current/data-boundary.svg)
+![Workflow diagram for pilot scope.](media/guide/recording.svg)
 
-*No live enforcement, automated identity recognition or qualified 100-camera operation.*
+**Quick path:** Use the recording-to-review milestone first. Advance live ingest, representative quality and capacity only with separate acceptance evidence.
 
 Owner decision, 2026-10-27: support **at least 100 simultaneously active cameras**.
 Five generated scenes remain sample UI assets. The capacity target is mandatory;

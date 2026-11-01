@@ -1,8 +1,10 @@
 # Facility Studio: image diagnostics and capture comparison
 
-[Facility builder](facility-builder.md) · [Getting started](getting-started.md) · [Visual atlas](visual-atlas.md) · [Security boundary](../SECURITY.md)
+[Guide index](README.md) · [Visual handbook](how-to.md) · [Screenshot atlas](visual-atlas.md) · [Troubleshooting](troubleshooting.md)
 
-![Illustration of independent image-to-plane markers; a schematic explanation, not actual optical calibration.](media/current/facility-science.svg)
+![Workflow diagram for facility image diagnostics.](media/guide/science.svg)
+
+**Quick path:** Choose an explicit local frame → freeze it → inspect pixels or compare A/B. Ground-plane measurement needs a separate calibration.
 
 The illustration distinguishes image sampling from optional measured-reference calibration. **Luma/edge metrics are image diagnostics; a ground-plane distance requires separately measured reference points and independent validation.**
 

@@ -189,3 +189,10 @@ of Git; document folder backups and browser exports separately. Maintain repeata
 Mac Install / Check / Start and regression checks for data preservation, model
 verification, stale builds and duplicate launches. Do not promote synthetic setup
 checks into camera, recognition-quality or capacity claims.
+
+Owner documentation preference (2026-11-01): keep all operator guides and the
+published GitHub Wiki aligned with the merged capability baseline. Use a clear
+visual handbook, actual revision-bound screenshots and polished workflow imagery
+in the existing navy/teal/amber language. Label conceptual art, generated fixture
+results, planning estimates and dated evidence. Preserve historic receipts and
+private runtime data; publish only reviewed public assets.

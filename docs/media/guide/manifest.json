@@ -1,0 +1,262 @@
+{
+  "schema": "intelligent-dvr.visual-guide-media.v1",
+  "captured_date": "2026-11-01",
+  "timezone": "America/Chicago",
+  "assets": [
+    {
+      "path": "docs/media/guide/enrollment-consent.jpg",
+      "bytes": 86653,
+      "sha256": "c720ac1559396895910b759fd91ba58874eaa1b47c987f674db9c3cb18f77d3c",
+      "realCameraFootage": false,
+      "width": 1280,
+      "height": 720,
+      "kind": "actual-browser-screenshot",
+      "source_commit": "2566d845fbbc7b9f54f98441009a604f2fa513ce",
+      "capture": "Clean isolated local service; 1280x720 default browser viewport; native full page for recognition-setup",
+      "fixture": "Generated flat-color clip/constant-output model for Recognition, Events and Zones; fictional opt-in Facility plan; no private footage"
+    },
+    {
+      "path": "docs/media/guide/enrollment.svg",
+      "bytes": 4634,
+      "sha256": "c5e82168be50ec16e27b723999efe32e15b90e768c2183c3595da48bf61b9454",
+      "realCameraFootage": false,
+      "kind": "original-schematic-svg",
+      "width": 1440,
+      "height": 610,
+      "source": "scripts/build-guide-graphics.py"
+    },
+    {
+      "path": "docs/media/guide/events.jpg",
+      "bytes": 91624,
+      "sha256": "28423adc827f5648595c6834b1fbc4cc09ee43f03a9c237d0bdf6b096569a137",
+      "realCameraFootage": false,
+      "width": 1280,
+      "height": 720,
+      "kind": "actual-browser-screenshot",
+      "source_commit": "2566d845fbbc7b9f54f98441009a604f2fa513ce",
+      "capture": "Clean isolated local service; 1280x720 default browser viewport; native full page for recognition-setup",
+      "fixture": "Generated flat-color clip/constant-output model for Recognition, Events and Zones; fictional opt-in Facility plan; no private footage"
+    },
+    {
+      "path": "docs/media/guide/facility.jpg",
+      "bytes": 147968,
+      "sha256": "f45dce834f4377f35f65226334238c7ee00fcb0d30c7c30fab094b13b5c900ec",
+      "realCameraFootage": false,
+      "width": 1280,
+      "height": 720,
+      "kind": "actual-browser-screenshot",
+      "source_commit": "2566d845fbbc7b9f54f98441009a604f2fa513ce",
+      "capture": "Clean isolated local service; 1280x720 default browser viewport; native full page for recognition-setup",
+      "fixture": "Generated flat-color clip/constant-output model for Recognition, Events and Zones; fictional opt-in Facility plan; no private footage"
+    },
+    {
+      "path": "docs/media/guide/facility.svg",
+      "bytes": 4637,
+      "sha256": "81344a68b8cef5d8cf1c327ca8c7b163510f15ea0ebfcd1355788a3f9fa4b9df",
+      "realCameraFootage": false,
+      "kind": "original-schematic-svg",
+      "width": 1440,
+      "height": 610,
+      "source": "scripts/build-guide-graphics.py"
+    },
+    {
+      "path": "docs/media/guide/monitor.jpg",
+      "bytes": 114118,
+      "sha256": "a85c4478cbd5fef12b93bc1ea073aba983e883bfd12be932edae2bbdd14c6930",
+      "realCameraFootage": false,
+      "width": 1280,
+      "height": 720,
+      "kind": "actual-browser-screenshot",
+      "source_commit": "2566d845fbbc7b9f54f98441009a604f2fa513ce",
+      "capture": "Clean isolated local service; 1280x720 default browser viewport; native full page for recognition-setup",
+      "fixture": "Generated flat-color clip/constant-output model for Recognition, Events and Zones; fictional opt-in Facility plan; no private footage"
+    },
+    {
+      "path": "docs/media/guide/overview.jpg",
+      "bytes": 164880,
+      "sha256": "02219645711e8abd2f0f488075e84dc7c015c427a02377ddfcca320a6b97cdb5",
+      "realCameraFootage": false,
+      "width": 1440,
+      "height": 810,
+      "kind": "ai-concept-illustration",
+      "mode": "built-in-imagegen-generate",
+      "source": "No reference images; final prompt in README.md"
+    },
+    {
+      "path": "docs/media/guide/preserve.svg",
+      "bytes": 4623,
+      "sha256": "44f74dab2cabd42188193ceb327046d146b3333fb457766d14ff4599058e6e97",
+      "realCameraFootage": false,
+      "kind": "original-schematic-svg",
+      "width": 1440,
+      "height": 610,
+      "source": "scripts/build-guide-graphics.py"
+    },
+    {
+      "path": "docs/media/guide/recognition-report.jpg",
+      "bytes": 116724,
+      "sha256": "b01dad5b5fbefda77f32b6d48cbd200977a52a3e83771cd8161410d4d5732183",
+      "realCameraFootage": false,
+      "width": 1280,
+      "height": 720,
+      "kind": "actual-browser-screenshot",
+      "source_commit": "2566d845fbbc7b9f54f98441009a604f2fa513ce",
+      "capture": "Clean isolated local service; 1280x720 default browser viewport; native full page for recognition-setup",
+      "fixture": "Generated flat-color clip/constant-output model for Recognition, Events and Zones; fictional opt-in Facility plan; no private footage"
+    },
+    {
+      "path": "docs/media/guide/recognition-review.jpg",
+      "bytes": 86929,
+      "sha256": "e13b4905aa988963b1b47956eb2f1ebbc0811eebec6fd4ee8f718ac807b6abf9",
+      "realCameraFootage": false,
+      "width": 1280,
+      "height": 720,
+      "kind": "actual-browser-screenshot",
+      "source_commit": "2566d845fbbc7b9f54f98441009a604f2fa513ce",
+      "capture": "Clean isolated local service; 1280x720 default browser viewport; native full page for recognition-setup",
+      "fixture": "Generated flat-color clip/constant-output model for Recognition, Events and Zones; fictional opt-in Facility plan; no private footage"
+    },
+    {
+      "path": "docs/media/guide/recognition-setup.jpg",
+      "bytes": 282665,
+      "sha256": "63413401bd4f6495ece33989355b0496881bddd622714a83593eb787987cfc02",
+      "realCameraFootage": false,
+      "width": 1280,
+      "height": 1801,
+      "kind": "actual-browser-screenshot",
+      "source_commit": "2566d845fbbc7b9f54f98441009a604f2fa513ce",
+      "capture": "Clean isolated local service; 1280x720 default browser viewport; native full page for recognition-setup",
+      "fixture": "Generated flat-color clip/constant-output model for Recognition, Events and Zones; fictional opt-in Facility plan; no private footage"
+    },
+    {
+      "path": "docs/media/guide/recording.svg",
+      "bytes": 4643,
+      "sha256": "6cdb65dd814322887ea1fca4380aca7e2711a1e5b7a97e71ac8faaf1a369728f",
+      "realCameraFootage": false,
+      "kind": "original-schematic-svg",
+      "width": 1440,
+      "height": 610,
+      "source": "scripts/build-guide-graphics.py"
+    },
+    {
+      "path": "docs/media/guide/review-dialog.jpg",
+      "bytes": 77389,
+      "sha256": "6a3003fae367f8e008cefa59120010cbc3eb0fb1c8419aceda9b7d0ab5b539ba",
+      "realCameraFootage": false,
+      "width": 1280,
+      "height": 720,
+      "kind": "actual-browser-screenshot",
+      "source_commit": "2566d845fbbc7b9f54f98441009a604f2fa513ce",
+      "capture": "Clean isolated local service; 1280x720 default browser viewport; native full page for recognition-setup",
+      "fixture": "Generated flat-color clip/constant-output model for Recognition, Events and Zones; fictional opt-in Facility plan; no private footage"
+    },
+    {
+      "path": "docs/media/guide/science.svg",
+      "bytes": 4646,
+      "sha256": "a45bc912b34cc9cccf5c0d585ae9d7febe8cb02b716f3701a6c095d6c65fbc9d",
+      "realCameraFootage": false,
+      "kind": "original-schematic-svg",
+      "width": 1440,
+      "height": 610,
+      "source": "scripts/build-guide-graphics.py"
+    },
+    {
+      "path": "docs/media/guide/sources.svg",
+      "bytes": 4732,
+      "sha256": "29aefdf75e238a3f6d22c3226177ad2eeff45855a21a0b10bda674dd9563af72",
+      "realCameraFootage": false,
+      "kind": "original-schematic-svg",
+      "width": 1440,
+      "height": 610,
+      "source": "scripts/build-guide-graphics.py"
+    },
+    {
+      "path": "docs/media/guide/start.svg",
+      "bytes": 4594,
+      "sha256": "78250d4dc70a8cb48202e68415c5af978ba77613c8622852e52d30b516c40592",
+      "realCameraFootage": false,
+      "kind": "original-schematic-svg",
+      "width": 1440,
+      "height": 610,
+      "source": "scripts/build-guide-graphics.py"
+    },
+    {
+      "path": "docs/media/guide/system.jpg",
+      "bytes": 129208,
+      "sha256": "4f785f175eb6ef802250ec64fde374fb8dbc189d9c92fc0cdcdb48e7e1e80010",
+      "realCameraFootage": false,
+      "width": 1280,
+      "height": 720,
+      "kind": "actual-browser-screenshot",
+      "source_commit": "2566d845fbbc7b9f54f98441009a604f2fa513ce",
+      "capture": "Clean isolated local service; 1280x720 default browser viewport; native full page for recognition-setup",
+      "fixture": "Generated flat-color clip/constant-output model for Recognition, Events and Zones; fictional opt-in Facility plan; no private footage"
+    },
+    {
+      "path": "docs/media/guide/system.svg",
+      "bytes": 4763,
+      "sha256": "c32b56d2cb3c27d61dd4be5966c34b211b2a1463bc355325e55824f013eb2453",
+      "realCameraFootage": false,
+      "kind": "original-schematic-svg",
+      "width": 1440,
+      "height": 610,
+      "source": "scripts/build-guide-graphics.py"
+    },
+    {
+      "path": "docs/media/guide/train.jpg",
+      "bytes": 111929,
+      "sha256": "620a74f9d3c64a6842f43218c97aa767c0ffc630d08b69593c233a5c82571d21",
+      "realCameraFootage": false,
+      "width": 1280,
+      "height": 720,
+      "kind": "actual-browser-screenshot",
+      "source_commit": "2566d845fbbc7b9f54f98441009a604f2fa513ce",
+      "capture": "Clean isolated local service; 1280x720 default browser viewport; native full page for recognition-setup",
+      "fixture": "Generated flat-color clip/constant-output model for Recognition, Events and Zones; fictional opt-in Facility plan; no private footage"
+    },
+    {
+      "path": "docs/media/guide/training-camera-check.jpg",
+      "bytes": 85278,
+      "sha256": "d2f049b6e9e507e2fec4117582056318bca251c0be1922075615cc74dbb872bd",
+      "realCameraFootage": false,
+      "width": 1280,
+      "height": 720,
+      "kind": "actual-browser-screenshot",
+      "source_commit": "2566d845fbbc7b9f54f98441009a604f2fa513ce",
+      "capture": "Clean isolated local service; 1280x720 default browser viewport; native full page for recognition-setup",
+      "fixture": "Generated flat-color clip/constant-output model for Recognition, Events and Zones; fictional opt-in Facility plan; no private footage"
+    },
+    {
+      "path": "docs/media/guide/training.svg",
+      "bytes": 4626,
+      "sha256": "245fd5de409564925c4f30d9561a2a7a18e54414d5811603cda5b2c683b13dc2",
+      "realCameraFootage": false,
+      "kind": "original-schematic-svg",
+      "width": 1440,
+      "height": 610,
+      "source": "scripts/build-guide-graphics.py"
+    },
+    {
+      "path": "docs/media/guide/zones.jpg",
+      "bytes": 84276,
+      "sha256": "6989cf299e092bbb3c6305883cd34972d751d76744adac5df72e7aa639beacce",
+      "realCameraFootage": false,
+      "width": 1280,
+      "height": 720,
+      "kind": "actual-browser-screenshot",
+      "source_commit": "2566d845fbbc7b9f54f98441009a604f2fa513ce",
+      "capture": "Clean isolated local service; 1280x720 default browser viewport; native full page for recognition-setup",
+      "fixture": "Generated flat-color clip/constant-output model for Recognition, Events and Zones; fictional opt-in Facility plan; no private footage"
+    },
+    {
+      "path": "docs/media/guide/zones.svg",
+      "bytes": 4675,
+      "sha256": "64ffb8d9b3279684eac5fa9fa7a487a99634bb1edfd4446fc1d4ccde743720c8",
+      "realCameraFootage": false,
+      "kind": "original-schematic-svg",
+      "width": 1440,
+      "height": 610,
+      "source": "scripts/build-guide-graphics.py"
+    }
+  ]
+}

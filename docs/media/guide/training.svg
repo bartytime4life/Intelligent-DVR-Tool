@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="610" viewBox="0 0 1440 610" role="img" aria-labelledby="title desc"><title id="title">Tune the setting for this view</title><desc id="desc">Guided training adjusts a rule threshold; it does not retrain the model. Check the camera: Train → Start session; Frame the room and check light; Connect camera when ready. Follow the prompts: In view → away → far → hidden; Keep the window in front; Let local analysis finish. Compare and apply: Inspect found / missed moments; Compare threshold settings; Save a new rule or keep current.</desc>
+<defs><linearGradient id="bg" x2="1" y2="1"><stop stop-color="#0c1a29"/><stop offset="1" stop-color="#101e2b"/></linearGradient></defs>
+<rect width="1440" height="610" rx="24" fill="url(#bg)"/>
+<text x="48" y="49" fill="#79d8d0" font-family="Arial,sans-serif" font-size="16" font-weight="700" letter-spacing="2">TRAIN / IMPROVE DETECTION</text>
+<text x="48" y="105" fill="#f1f6fc" font-family="Arial,sans-serif" font-size="39" font-weight="700">Tune the setting for this view</text>
+<text x="48" y="144" fill="#b2c2d3" font-family="Arial,sans-serif" font-size="21">Guided training adjusts a rule threshold; it does not retrain the model.</text>
+<rect x="48" y="181" width="432" height="374" rx="19" fill="#142737" stroke="#304859"/>
+<circle cx="85" cy="219" r="18" fill="#77d5cc"/>
+<text x="85" y="225" text-anchor="middle" fill="#10222d" font-family="Arial,sans-serif" font-size="17" font-weight="700">1</text>
+<g transform="translate(264 294)" fill="none" stroke="#77d5cc" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><rect x="-59" y="-29" width="88" height="58" rx="12"/><path d="M29 -18L62 -34V34L29 18"/><circle cx="-15" cy="0" r="16"/></g>
+<text x="76" y="400" fill="#f0f5fa" font-family="Arial,sans-serif" font-size="27" font-weight="700">Check the camera</text>
+<text x="76" y="444" fill="#bbcad8" font-family="Arial,sans-serif" font-size="19">Train → Start session</text>
+<text x="76" y="475" fill="#bbcad8" font-family="Arial,sans-serif" font-size="19">Frame the room and check light</text>
+<text x="76" y="506" fill="#bbcad8" font-family="Arial,sans-serif" font-size="19">Connect camera when ready</text>
+<path d="M485 368H499M494 363L499 368L494 373" fill="none" stroke="#73b9b7" stroke-width="2"/>
+<rect x="504" y="181" width="432" height="374" rx="19" fill="#142737" stroke="#304859"/>
+<circle cx="541" cy="219" r="18" fill="#77d5cc"/>
+<text x="541" y="225" text-anchor="middle" fill="#10222d" font-family="Arial,sans-serif" font-size="17" font-weight="700">2</text>
+<g transform="translate(720 294)" fill="none" stroke="#77d5cc" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><rect x="-64" y="-45" width="128" height="90" rx="13"/><path d="M-12 -23L25 0L-12 23Z"/><path d="M-43 63H43M-33 57V69M15 57V69"/></g>
+<text x="532" y="400" fill="#f0f5fa" font-family="Arial,sans-serif" font-size="27" font-weight="700">Follow the prompts</text>
+<text x="532" y="444" fill="#bbcad8" font-family="Arial,sans-serif" font-size="19">In view → away → far → hidden</text>
+<text x="532" y="475" fill="#bbcad8" font-family="Arial,sans-serif" font-size="19">Keep the window in front</text>
+<text x="532" y="506" fill="#bbcad8" font-family="Arial,sans-serif" font-size="19">Let local analysis finish</text>
+<path d="M941 368H955M950 363L955 368L950 373" fill="none" stroke="#73b9b7" stroke-width="2"/>
+<rect x="960" y="181" width="432" height="374" rx="19" fill="#142737" stroke="#304859"/>
+<circle cx="997" cy="219" r="18" fill="#f5bd53"/>
+<text x="997" y="225" text-anchor="middle" fill="#10222d" font-family="Arial,sans-serif" font-size="17" font-weight="700">3</text>
+<g transform="translate(1176 294)" fill="none" stroke="#f5bd53" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><circle r="51"/><path d="M-24 0L-5 19L29 -20"/><path d="M-66 43L-46 61M50 -58L70 -42"/></g>
+<text x="988" y="400" fill="#f0f5fa" font-family="Arial,sans-serif" font-size="27" font-weight="700">Compare and apply</text>
+<text x="988" y="444" fill="#bbcad8" font-family="Arial,sans-serif" font-size="19">Inspect found / missed moments</text>
+<text x="988" y="475" fill="#bbcad8" font-family="Arial,sans-serif" font-size="19">Compare threshold settings</text>
+<text x="988" y="506" fill="#bbcad8" font-family="Arial,sans-serif" font-size="19">Save a new rule or keep current</text>
+<text x="48" y="587" fill="#83a0b4" font-family="Arial,sans-serif" font-size="15">INTELLIGENT DVR / VISUAL GUIDE / Explanatory diagram; no live camera or measured performance implied.</text></svg>

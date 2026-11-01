@@ -1,14 +1,14 @@
 # Resource controls: what actually takes effect
 
-[Visual atlas](visual-atlas.md) · [PC acceptance](field-acceptance.md) · [Image provenance](media/current/README.md)
+[Guide index](README.md) · [Visual handbook](how-to.md) · [Screenshot atlas](visual-atlas.md) · [Troubleshooting](troubleshooting.md)
 
-![Ingest, storage, analysis and field-performance planning lanes.](media/current/system-planning.svg)
+![Workflow diagram for resource controls.](media/guide/system.svg)
 
-*The browser's planning values are not OS quotas or native GPU benchmarks.*
+**Quick path:** Enter workload assumptions → Apply workspace limits for browser behavior → Export analyzer policy for supported offline limits → measure actual use.
 
-![Current mobile Chromium screenshot of the System capacity planner. It shows editable defaults, not detected host specifications.](media/current/system-mobile.jpg)
+![Actual System planning workspace with editable defaults, not detected hardware or benchmark results.](media/guide/system.jpg)
 
-*Current interface snapshot from a controlled test at 390 px; [capture receipt](media/current/README.md).*
+*Merged source `2566d845`, clean local browser; [capture provenance](media/guide/README.md).*
 
 [Hardware](hardware-guide.md) · [Linux](setup-linux.md) · [Windows](setup-windows.md) · [GPU planning](gpu-planning.md)
 

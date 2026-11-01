@@ -1,24 +1,29 @@
 # Build the next claim with evidence
 
-[Current visual atlas](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-atlas) · [Product status](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Product-status) · [Provenance](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/media/current/README.md)
+[Current visual atlas](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-atlas) · [Product status](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Product-status) · [Provenance](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/PR61-visual-provenance)
 
-![Acceptance gates toward real source ingest, recording continuity and quality.](https://raw.githubusercontent.com/bartytime4life/Intelligent-DVR-Tool/main/docs/media/current/scale-gates.svg)
+![Acceptance gates toward real source ingest, recording continuity and quality.](https://raw.githubusercontent.com/wiki/bartytime4life/Intelligent-DVR-Tool/docs/media/current/scale-gates.svg)
 
 *The 100+ target remains unqualified; virtual decoders are not physical cameras.*
 
-[Home](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Home) · [Product status](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Product-status) · [Verification](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Evidence-and-validation) · [100-camera plan](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/performance-100-cameras.md)
+[Home](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Home) · [Product status](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Product-status) · [Verification](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Evidence-and-validation) · [100-camera plan](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/100-camera-plan)
 
 The minimum capacity goal is **100 simultaneously active cameras**. The current Monitor starts empty with an explicit real-source chooser; generated camera scenes remain only in the [historical gallery](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-tour#historical-prototype-captures). The [recent UI/navigation fixes](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/59) and [source/Facility simplification](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/61) are merged and browser-tested, but real-camera endurance, accuracy and 100-camera capacity remain unqualified.
 
 | Lane | Exists now | Next evidence required |
 | --- | --- | --- |
 | Review | Wall, queue, notes, history, rules and exports | Accessibility/mobile/long-session acceptance; durable authenticated records |
-| Facility | Buildings/floors/rooms/labels, cameras, estimates and rehearsal | Site measurements, optical calibration and qualified visibility |
+| Facility | Visual buildings, room sketching/wall edits, doorways/windows/stairs, cameras, estimates and rehearsal | Site measurements, optical calibration and qualified visibility |
 | Easy setup | Submitted address search, GPS/numeric/map-pin origin, rectangular or custom polygon area, selectable services, offline-file review, OSM relations with courtyards, raised bases and independent parts, seven shapes | Live-provider/installed local-service and real-site qualification; overlapping-part decomposition; novice-user study |
 | Detection | Offline ONNX adapter; prior YOLOX-S compatibility probes; [guided threshold tuning](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Guided-training) | Independent labels, precision/recall, false alerts and held-out scenes separate from tuning sessions |
 | Enrolled-person suggestions | [Consent-gated local templates and explicit possible matches](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Person-enrollment) | Representative consented evaluation, false matches/misses, spoofing and deletion checks; no identity/access-decision claim |
+| Delivery | Linux/Windows PC kit and Mac Install/Check/Start with preservation checks | Physical host, codec, camera and recovery acceptance on each intended platform |
 | Performance | Bounded scheduler, budgets, synthetic overload model | Sustained decode/inference/end-to-end rates on intended hardware |
 | 100-camera operation | Owner requirement and staged acceptance design | Ingest/recording/worker implementation and simultaneous-source qualification |
+
+## Delivered November 1, 2026
+
+The merged baseline through [PR #71](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/71) includes guided detection tuning, consent-based enrollment and possible matches, approachable building/interior editing, and repeatable Mac installation and update preservation. See the [capability register](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Product-status), [visual handbook](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-handbook) and [Mac guide](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Mac-setup). The next gate is representative operator/device acceptance; these deliveries do not establish accuracy or 100-camera throughput.
 
 ## Priorities and acceptance
 
@@ -28,15 +33,15 @@ The [facility reliability guide](https://github.com/bartytime4life/Intelligent-D
 2. **Build representative evaluation.** Use approved recordings with independent labels and reviewed alert coverage. Separate tuning/final scenes. The synthetic corpus checks arithmetic only.
 3. **Measure the intended host.** Instrument decode, preprocessing, inference, postprocessing, rules and delivery. Report p50/p95/p99, resource use and sustained duration.
 4. **Qualify acceleration and workers.** Preserve profile semantics, compare outputs and labeled quality, test fairness, stale work, failures and per-camera ordering. The scheduler currently creates no workers.
-5. **Qualify and extend local ingest and recording.** The [single-channel pilot](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/lan-recording.md) already implements explicit admission, reconnects and bounded retention. Measure its continuity/recovery, then implement multi-source ingest while preserving the distinction between recording gaps and analytics drops.
+5. **Qualify and extend local ingest and recording.** The [single-channel pilot](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/LAN-recording) already implements explicit admission, reconnects and bounded retention. Measure its continuity/recovery, then implement multi-source ingest while preserving the distinction between recording gaps and analytics drops.
 6. **Scale 1 → 5 → 25 → 50 → 100+ sources.** Test disconnects, overload, low light, motion, worker loss, disk pressure, UI load and recovery. Record each camera's delivered service and recording continuity.
 7. **Complete operational acceptance.** Add durable records where required; finish authentication, retention, accessibility and long-session checks before operational reliance.
 
-No finish dates or hardware guarantees are implied. Use [pilot scope](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/pilot-scope.md) for decisions and the [performance guide](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/performance-100-cameras.md) for budgets.
+No finish dates or hardware guarantees are implied. Use [pilot scope](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Pilot-scope) for decisions and the [performance guide](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/100-camera-plan) for budgets.
 
 ## Review follow-up — October 30, 2026
 
-The [full review](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/review-2026-10-30.md) fixed 61 verified defects on `main`. Its
+The [full review](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Review-2026-10-30) fixed 61 verified defects on `main`. Its
 missed opportunities merged to `main` on October 31 as four pull requests, tested
 with synthetic fixtures and CI only:
 
@@ -54,7 +59,7 @@ should move from constant frame rate to measured receive times.
 ## Recognition deployment path — October 29, 2026
 
 The owner prioritized real deployment of AI-assisted scene, person and object
-recognition. The immediate milestone is the [recording recognition pilot](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/recording-recognition.md):
+recognition. The immediate milestone is the [recording recognition pilot](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Recognition-details):
 actual model output, original-source matching, sampled boxes/counts and human
 review in one workflow. The optional CUDA, worker supervision and outcome journal
 already have implementations and dated checks; those components are not yet a
@@ -85,9 +90,9 @@ Map pin/custom polygon AOI, v2 courtyards/raised bases, independent non-overlapp
 parts and native fixed-loopback delivery are implemented in the
 [facility follow-up](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Facility-setup-reliability). Overlapping-part decomposition,
 installed services/live retrieval, field/device accuracy and the original three-flow
-novice comparison remain open. The [study kit](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/facility-novice-study.md) records
+novice comparison remain open. The [study kit](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Facility-study-kit) records
 imagery assistance as unavailable rather than replacing it with another flow.
 
 ---
 
-[Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/roadmap.md) · Generated from the checked documentation source; historical and schematic images are labeled.
+[Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/roadmap.md) · Generated companion; dated evidence, examples and illustrations retain their labels.

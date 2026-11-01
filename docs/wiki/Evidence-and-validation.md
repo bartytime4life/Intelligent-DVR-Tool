@@ -1,8 +1,10 @@
 # Verification index
 
+November 1 visual documentation: [handbook, capture provenance and Wiki coverage checks](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/visual-documentation-2026-11-01/README.md).
+
 [Current visual atlas](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-atlas)
 
-![The product's source-matched review process is illustrated separately from dated test records.](https://raw.githubusercontent.com/bartytime4life/Intelligent-DVR-Tool/main/docs/media/current/workflow.svg)
+![The product's source-matched review process is illustrated separately from dated test records.](https://raw.githubusercontent.com/wiki/bartytime4life/Intelligent-DVR-Tool/docs/media/current/workflow.svg)
 
 *All historical logs, measurements, source hashes and qualification limits below remain unchanged.*
 
@@ -92,7 +94,7 @@ own CI checks; this index does not automatically certify future source or deploy
 | [Merged facility baseline](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/facility-2026-10-27/README.md) | 46 frontend + 4 packaging per platform; Python 66 Linux / 63 Windows + 3 skips; 6 separate Chromium scenarios | Software and mocked-service browser checks at the recorded merge revision |
 | [Machine setup](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/hardware-2026-10-27/README.md) | Earlier CI: 107 Linux / 104 Windows passes + 3 Windows skips | Retains its original implementation revision, local skips and target-machine limits |
 | [Documentation refresh](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/2026-10-27/README.md) | Earlier CI: 86 passes; separate local run had 8 native skips | Retains historical source/media/simulation provenance |
-| [YOLOX qualification](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/model-qualification-20261026.md) | Historical pretrained synthetic-input and generated-recording probes | Compatibility only; no representative detection-quality result |
+| [YOLOX qualification](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Model-qualification-2026-10-26) | Historical pretrained synthetic-input and generated-recording probes | Compatibility only; no representative detection-quality result |
 
 Local and CI environments can differ. Always retain discovered, passed, failed
 and skipped counts separately. Do not add browser results into a platform total
@@ -112,4 +114,4 @@ deployment and 100-camera operation each need their own acceptance evidence.
 
 ---
 
-[Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/README.md) · Generated from the checked documentation source; historical and schematic images are labeled.
+[Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/README.md) · Generated companion; dated evidence, examples and illustrations retain their labels.

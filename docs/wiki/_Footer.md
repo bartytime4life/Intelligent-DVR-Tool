@@ -1,3 +1,3 @@
-**Pilot evidence boundary:** explicit previews, bounded local recording analysis and a one-channel recorder exist. Physical camera quality, sustained operation and 100+ camera capacity are unqualified.
+**Local pilot:** previews, bounded recording analysis, guided tuning and consent-based possible matches require explicit actions. Physical-device accuracy, sustained operation and 100-camera capacity remain unqualified.
 
-[Visual atlas](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-atlas) · [Test evidence](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Evidence-and-validation) · [Security boundary](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/SECURITY.md)
+[Handbook](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-handbook) · [Troubleshooting](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Troubleshooting) · [Evidence](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Evidence-and-validation) · [Security](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Security-boundary)
