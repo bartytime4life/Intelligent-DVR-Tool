@@ -147,6 +147,8 @@ test('a chosen ground reference accepts an explicit local map pick, without acti
   await openStudio(page);
   const errors=[];page.on('pageerror',err=>errors.push(err.message));
   await page.getByRole('button',{name:'Cameras',exact:true}).click();
+  // The map's WebGL readiness is independent from rendering the React toolbar.
+  await expect(page.getByRole('button',{name:'Place camera'})).toBeEnabled();
   await page.locator('.facility-image-lab summary').click();
   const picture=await image(page,false);
   await page.getByLabel('Open image for diagnostics').setInputFiles({name:'map-ref.png',mimeType:'image/png',buffer:Buffer.from(picture,'base64')});
