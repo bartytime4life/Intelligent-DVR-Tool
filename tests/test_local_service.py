@@ -300,7 +300,7 @@ class ServiceTest(unittest.TestCase):
                 with self.subTest(name=name):
                     h = self.handler('/' + name); h.do_GET(); self.assertEqual(h.responses, [(200, mime)])
         self.assertEqual(content_type(Path('x.AVI')), 'video/x-msvideo')
-    @unittest.skipUnless(sys.platform == 'linux', 'RLIMIT_CPU is the Linux backstop')
+    @unittest.skipUnless(sys.platform in ('linux', 'darwin'), 'RLIMIT_CPU is the Linux/macOS backstop')
     def test_worker_cpu_backstop_covers_every_thread_for_the_whole_wall_deadline(self):
         from edge.local_service import LIMITS
         script = ('import resource, sys; from edge import analysis_worker as a; a.constrain(*map(int, sys.argv[1:])); '
@@ -311,6 +311,17 @@ class ServiceTest(unittest.TestCase):
         # Two inference plus two decoder threads may each run for all 300 wall seconds.
         self.assertGreaterEqual(soft, 2 * LIMITS['threads'] * LIMITS['wall_seconds']); self.assertEqual(hard, soft + 1)
         self.assertEqual(limit(2 * 1024**3, 300), [b'300', b'301'])  # Explicit callers keep their own bound.
+    def test_localhost_page_loads_redirect_to_exact_origin_and_api_stays_refused(self):
+        h = self.handler('/?x'); del h.headers['Host']; h.headers['Host'] = 'localhost:4183'
+        h.send_response = h.responses.append; h.end_headers = lambda: None
+        h.send_header = lambda key, value: h.responses.append((key, value))
+        h.do_GET()
+        self.assertEqual(h.responses, [307, ('Location', 'http://127.0.0.1:4183/'), ('Content-Length', '0'), ('Cache-Control', 'no-store')])
+        for path, command, host in (('/api/analysis/session', 'GET', 'localhost:4183'), ('/', 'POST', 'localhost:4183'),
+                                    ('/', 'GET', 'localhost:9999'), ('/', 'GET', 'example.test:4183')):
+            with self.subTest(path=path, command=command, host=host):
+                h = self.handler(path); del h.headers['Host']; h.headers['Host'] = host; h.command = command
+                h.do_GET(); self.assertEqual(h.responses, [(403, 'HOST')])
     def test_non_ascii_token_is_refused_not_a_server_error(self):
         for token in ('tokén', 'wrong', ''):
             with self.subTest(token=token):

@@ -105,6 +105,16 @@ An incompatible existing .venv is refused and retained. Install in a fresh folde
 instead of deleting an environment you may need. Reinstall preserves
 local-feeds.json. After updating a source checkout, rerun Install to rebuild it.
 
+## macOS: source checkout
+
+There is no prebuilt Mac kit. On an Apple silicon Mac, follow the
+[macOS setup in the analysis guide](local-analysis-service.md#start-the-local-application),
+then double-click **Start-Mac.command**. It serves **http://127.0.0.1:4180/**,
+rebuilds the interface after updates and stops when its window closes. Browser
+webcams and recording analysis work; the analysis worker has CPU-time and
+file-size limits but no memory cap on macOS. The one-camera LAN recorder, LAN DVR
+previews, Check and the hardware probe still support Linux and Windows only.
+
 ## First real-device test
 
 1. **Webcam first:** Monitor → Connect source → This computer's webcam → Connect

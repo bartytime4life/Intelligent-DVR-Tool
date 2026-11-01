@@ -43,9 +43,10 @@ def constrain(memory_bytes=None, cpu_seconds=None):
     # Applied before importing native inference libraries. CPU is deliberately the
     # first service backend; CUDA's virtual address space needs a separate policy.
     memory_bytes, cpu_seconds = memory_bytes or MEMORY_BYTES, cpu_seconds or CPU_SECONDS
-    if sys.platform == 'linux':
+    if sys.platform in ('linux', 'darwin'):
         import resource
-        resource.setrlimit(resource.RLIMIT_AS, (memory_bytes, memory_bytes))
+        if sys.platform == 'linux':  # macOS refuses RLIMIT_AS/RLIMIT_DATA, so its worker has no memory cap.
+            resource.setrlimit(resource.RLIMIT_AS, (memory_bytes, memory_bytes))
         resource.setrlimit(resource.RLIMIT_FSIZE, (34 * 1024**2, 34 * 1024**2))
         resource.setrlimit(resource.RLIMIT_CPU, (cpu_seconds, cpu_seconds + 1))
         resource.setrlimit(resource.RLIMIT_CORE, (0, 0))
@@ -77,12 +78,12 @@ def constrain(memory_bytes=None, cpu_seconds=None):
         if not handle or not kernel.SetInformationJobObject(handle, 9, ctypes.byref(limits), ctypes.sizeof(limits)) or not kernel.AssignProcessToJobObject(handle, kernel.GetCurrentProcess()):
             raise RuntimeError('Cannot enforce worker memory limit')
         return handle  # Keep the handle open until process exit.
-    raise RuntimeError('Bounded analysis service supports Linux and Windows')
+    raise RuntimeError('Bounded analysis service supports Linux, macOS and Windows')
 
 
 def run(directory):
     directory = Path(directory)
-    if sys.platform == 'win32' and os.environ.get('DVR_ANALYSIS_PARENT_PIPE') == '1':
+    if sys.platform != 'linux' and os.environ.get('DVR_ANALYSIS_PARENT_PIPE') == '1':
         watch_parent_pipe()
     handle = constrain()
     os.environ.update(OMP_NUM_THREADS='2', OPENBLAS_NUM_THREADS='2', MKL_NUM_THREADS='2',
