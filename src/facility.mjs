@@ -1,9 +1,14 @@
 import {validateStair, stairFootprint} from './facility-stairs.mjs';
+import {validateDoorways,roomWallPieces,DOORWAY_LIMIT} from './facility-doorways.mjs';
+import {validateWindows,windowWall,windowSegment,WINDOW_LIMIT} from './facility-windows.mjs';
 import {FACILITY_CLASSES, ZONE_TYPES, validateImageRegion} from './facility-zones.mjs';
-const SCHEMA = "intelligent-dvr.facility.v3";
+const SCHEMA = "intelligent-dvr.facility.v6";
+const WINDOW_SCHEMA = "intelligent-dvr.facility.v5";
+const DOOR_SCHEMA = "intelligent-dvr.facility.v4";
+const FLOOR_SCHEMA = "intelligent-dvr.facility.v3";
 const PREVIOUS_SCHEMA = "intelligent-dvr.facility.v2";
 const LEGACY_SCHEMA = "intelligent-dvr.facility.v1";
-const LIMITS = { buildings: 100, cameras: 500, rooms: 500, zones: 500, openings: 500, stairs: 100, paths: 100, labels: 1e3, route: 200, bytes: 2e6 };
+const LIMITS = { buildings: 100, cameras: 500, rooms: 500, doorways: DOORWAY_LIMIT, windows: WINDOW_LIMIT, zones: 500, openings: 500, stairs: 100, paths: 100, labels: 1e3, route: 200, bytes: 2e6 };
 const STEPS = [
   ["Locate site", "Set the site and map origin"],
   ["Buildings", "Draw footprints and set heights"],
@@ -40,6 +45,8 @@ function exampleFacility() {
     ],
     labels: [{ id: "l1", name: "Loading yard", x: 22, y: -25, z: 0 }, { id: "l2", name: "Main gate", x: -20, y: -92, z: 0 }],
     zones: [],
+    doorways: [],
+    windows: [],
     openings: [],
     stairs: [],
     paths: [],
@@ -47,7 +54,7 @@ function exampleFacility() {
   };
 }
 function blankFacility() {
-  return { schema: SCHEMA, name: "My facility", origin: [-98, 38.5], buildings: [], cameras: [], rooms: [], labels: [], zones: [], openings: [], stairs: [], paths: [], route: [] };
+  return { schema: SCHEMA, name: "My facility", origin: [-98, 38.5], buildings: [], cameras: [], rooms: [], doorways: [], windows: [], labels: [], zones: [], openings: [], stairs: [], paths: [], route: [] };
 }
 function uid(prefix) {
   return prefix + "-" + crypto.randomUUID().slice(0, 8);
@@ -144,11 +151,17 @@ function transformBuilding(b, transform) {
   return {...b,footprint:b.footprint.map(transform),...(b.holes ? {holes:b.holes.map(h=>h.map(transform))} : {})};
 }
 function validateFacility(d) {
-  if (!d || ![SCHEMA, PREVIOUS_SCHEMA, LEGACY_SCHEMA].includes(d.schema) || !nameOK(d.name) || !Array.isArray(d.origin) || d.origin.length !== 2 || !finite(d.origin[0],
-  -180, 180) || !finite(d.origin[1], -80, 80)) throw Error("Use a facility v1, v2 or v3 file with a valid name and map origin (lat\
+  if (!d || ![SCHEMA, WINDOW_SCHEMA, DOOR_SCHEMA, FLOOR_SCHEMA, PREVIOUS_SCHEMA, LEGACY_SCHEMA].includes(d.schema) || !nameOK(d.name) || !Array.isArray(d.origin) || d.origin.length !== 2 || !finite(d.origin[0],
+  -180, 180) || !finite(d.origin[1], -80, 80)) throw Error("Use a facility v1–v6 file with a valid name and map origin (lat\
 itude \u221280 to 80).");
   for (const k of ["buildings", "cameras", "rooms", "labels", "route"]) if (!Array.isArray(d[k]) || d[k].length > LIMITS[k])
    throw Error("Too many or invalid " + k + ".");
+  const doorways = d.doorways === undefined ? [] : d.doorways;
+  if (!Array.isArray(doorways) || doorways.length > LIMITS.doorways) throw Error('Use up to 1,000 valid doorways.');
+  if (![SCHEMA,WINDOW_SCHEMA,DOOR_SCHEMA].includes(d.schema) && doorways.length) throw Error('Doorways require facility v4; older formats cannot preserve them.');
+  const windows=d.windows === undefined ? [] : d.windows;
+  if(!Array.isArray(windows) || windows.length>LIMITS.windows)throw Error('Use up to 1,000 valid windows.');
+  if(![SCHEMA,WINDOW_SCHEMA].includes(d.schema) && windows.length)throw Error('Windows require facility v5; older formats cannot preserve them.');
   const zones = d.zones === undefined ? [] : d.zones;
   if (!Array.isArray(zones) || zones.length > LIMITS.zones) throw Error('Use up to 500 valid zones.');
   if (d.schema === LEGACY_SCHEMA && zones.length) throw Error('Zones require facility v2 or newer.');
@@ -158,9 +171,9 @@ itude \u221280 to 80).");
   if (!Array.isArray(stairs) || stairs.length > LIMITS.stairs) throw Error('Use up to 100 valid stairs.');
   const paths = d.paths === undefined ? [] : d.paths;
   if (!Array.isArray(paths) || paths.length > LIMITS.paths) throw Error('Use up to 100 valid floor paths.');
-  if (d.schema !== SCHEMA && (openings.length || stairs.length || paths.length)) throw Error('Floor openings, stairs and paths require facility v3; older formats cannot preserve them.');
+  if (![SCHEMA,WINDOW_SCHEMA,DOOR_SCHEMA,FLOOR_SCHEMA].includes(d.schema) && (openings.length || stairs.length || paths.length)) throw Error('Floor openings, stairs and paths require facility v3; older formats cannot preserve them.');
   const ids = /* @__PURE__ */ new Set();
-  for (const o of [...d.buildings, ...d.cameras, ...d.rooms, ...d.labels, ...zones, ...openings, ...stairs, ...paths]) {
+  for (const o of [...d.buildings, ...d.cameras, ...d.rooms, ...doorways, ...windows, ...d.labels, ...zones, ...openings, ...stairs, ...paths]) {
     if (!o || !idOK(o.id) || ids.has(o.id) || !nameOK(o.name)) throw Error("Every item needs a unique ID and a name of 1\u2013100 c\
 haracters.");
     ids.add(o.id);
@@ -169,7 +182,7 @@ haracters.");
   !finite(b.floors, 1, 40)) throw Error("Buildings need a simple closed footprint, height 1\u2013150 m, and 1\u201340 floors.");
   for (const b of d.buildings) {
     if (b.openFloors !== undefined) {
-      if (d.schema !== SCHEMA) throw Error('Open floors require facility v3; older formats cannot preserve them.');
+      if (![SCHEMA,WINDOW_SCHEMA,DOOR_SCHEMA,FLOOR_SCHEMA].includes(d.schema)) throw Error('Open floors require facility v3; older formats cannot preserve them.');
       if (!Array.isArray(b.openFloors) || b.openFloors.length > b.floors ||
           b.openFloors.some(level=>!Number.isInteger(level) || level < 0 || level >= b.floors) ||
           new Set(b.openFloors).size !== b.openFloors.length)
@@ -221,6 +234,7 @@ ing and reference an existing floor." + check(r, 'room', b));
     const b = d.buildings.find(b => b.id === stair.buildingId);
     let clean;
     try { clean = validateStair(stair,b); } catch (e) { throw Error(e.message + check(stair, 'stair', b)); }
+    if(d.schema!==SCHEMA && clean.toLevel!==clean.fromLevel+1)throw Error('Descending or non-adjacent stair connections require facility v6.');
     const footprint = stairFootprint(clean,b);
     if (!footprint.every(pointOK) || !polygonContains(b.footprint,footprint) || (b.holes || []).some(h=>ringsInteriorOverlap(h,footprint)))
       throw Error('Stair flights and landings must fit inside solid building space, outside courtyards.' + check(stair, 'stair', b));
@@ -270,6 +284,8 @@ ing and reference an existing floor." + check(r, 'room', b));
 ange", "enabled"].map((k) => [k, c[k]])), ...(c.pixelsWide !== undefined ? {pixelsWide:c.pixelsWide} : {}), ...(c.channel ? {channel:c.channel} : {}) })),
     rooms: d.rooms.map((r) => ({ id: r.id, name: r.name, buildingId: r.buildingId, level: r.level, footprint: r.footprint.
     map((p) => [...p]), wallHeight: r.wallHeight })),
+    doorways: validateDoorways(d,doorways),
+    windows: validateWindows(d,windows),
     labels: d.labels.map((l) => ({ id: l.id, name: l.name, x: l.x, y: l.y, z: l.z, ...(l.buildingId !== undefined ? {buildingId:l.buildingId,level:l.level} : {}) })),
     openings: openings.map(o => ({id:o.id,name:o.name,buildingId:o.buildingId,level:o.level,footprint:o.footprint.map(p=>[...p])})),
     stairs: cleanStairs,
@@ -326,10 +342,12 @@ function centroid(p) {
 }
 const rad = (a) => a * Math.PI / 180;
 function wallObstacles(plan) {
-  return [...plan.buildings.flatMap((b) => buildingRings(b).map(polygon=>({polygon, base: b.base || 0, top: b.height}))), ...plan.rooms.map((r) => {
+  return [...plan.buildings.flatMap((b) => buildingRings(b).map(polygon=>({polygon, base: b.base || 0, top: b.height}))), ...plan.rooms.flatMap((r) => {
     const b = plan.buildings.find((b2) => b2.id === r.buildingId);
     const base = (b.base || 0) + r.level * (b.height - (b.base || 0)) / b.floors;
-    return { polygon: r.footprint, base, top: base + r.wallHeight };
+    const doors=(plan.doorways || []).filter(d=>d.roomIds.includes(r.id));
+    if (!doors.length) return [{polygon:r.footprint,base,top:base+r.wallHeight}];
+    return roomWallPieces(r,doors).map(piece=>({polygon:piece.points,base:base+piece.base,top:base+piece.top}));
   })];
 }
 function groundRange(c) {
@@ -457,7 +475,13 @@ export function copyRoomsToNextLevel(plan, buildingId, level) {
   if (next.rooms.length + rooms.length > LIMITS.rooms) throw Error('Copying would exceed the 500-room limit.');
   if (next.rooms.some(r => r.buildingId === buildingId && r.level === level+1)) throw Error('The next level already has rooms. Choose an empty level to avoid overlapping layouts.');
   if (level + 1 === building.floors) next = addBuildingLevel(next, buildingId);
-  return validateFacility({...next, rooms:[...next.rooms,...rooms.map(r => ({...r,id:uid('r'),level:level+1,footprint:r.footprint.map(p=>[...p])}))]});
+  const ids=new Map(rooms.map(r=>[r.id,uid('r')]));
+  const doorways=(next.doorways || []).filter(d=>d.buildingId===buildingId && d.level===level)
+    .map(d=>({...d,id:uid('d'),level:level+1,roomIds:d.roomIds.map(id=>ids.get(id))}));
+  const windows=(next.windows || []).filter(w=>w.buildingId===buildingId && w.level===level).map(w=>({...w,id:uid('w'),level:level+1}));
+  return validateFacility({...next,
+    rooms:[...next.rooms,...rooms.map(r=>({...r,id:ids.get(r.id),level:level+1,footprint:r.footprint.map(p=>[...p])}))],
+    doorways:[...(next.doorways || []),...doorways],windows:[...(next.windows || []),...windows]});
 }
 
 // Floor n is the ceiling above floor n−1. Courtyards cut every slab; openings cut one slab only.
@@ -568,15 +592,15 @@ export function carryBuildingContents(plan, before, motion) {
   const at = (o, p) => { const [x, y] = motion.apply(p); return {...o, x, y}; };
   const mounted = p => pointInPolygon(p, before.footprint) || buildingRings(before).some(r => nearestOnRing(p, r).distance <= MOUNT_CLEARANCE);
   const own = list => (list || []).map(o => o.buildingId === id ? {...o, ...(o.footprint ? {footprint:ring(o.footprint)} : {}), ...(o.points ? {points:ring(o.points)} : {})} : o);
-  return {...plan, rooms:own(plan.rooms), openings:own(plan.openings), paths:own(plan.paths), zones:own(plan.zones),
+  return {...plan, windows:(plan.windows || []).map(w=>w.buildingId===id?at(w,[w.x,w.y]):w), doorways:(plan.doorways || []).map(d=>d.buildingId===id?at(d,[d.x,d.y]):d), rooms:own(plan.rooms), openings:own(plan.openings), paths:own(plan.paths), zones:own(plan.zones),
     stairs:(plan.stairs || []).map(s => s.buildingId === id ? {...at(s, [s.x, s.y]), bearing:turnBearing(s.bearing, deg)} : s),
     cameras:plan.cameras.map(c => mounted([c.x, c.y]) ? {...at(c, [c.x, c.y]), bearing:turnBearing(c.bearing, deg)} : c),
     labels:plan.labels.map(l => l.buildingId === id || !l.buildingId && pointInPolygon([l.x, l.y], before.footprint) ? at(l, [l.x, l.y]) : l)};
 }
 export function levelDependents(plan, buildingId, floors) {
   const on = (list, label) => (list || []).filter(o => o.buildingId === buildingId && o.level >= floors).map(o => `${label} “${o.name}” (Level ${o.level + 1})`);
-  return [...on(plan.rooms, 'room'), ...on(plan.openings, 'opening'), ...on(plan.paths, 'pathway'), ...on(plan.zones, 'zone'), ...on(plan.labels, 'label'),
-    ...(plan.stairs || []).filter(s => s.buildingId === buildingId && s.toLevel >= floors).map(s => `stair “${s.name}” (Levels ${s.fromLevel + 1}–${s.toLevel + 1})`),
+  return [...on(plan.windows,'window'), ...on(plan.doorways,'doorway'), ...on(plan.rooms, 'room'), ...on(plan.openings, 'opening'), ...on(plan.paths, 'pathway'), ...on(plan.zones, 'zone'), ...on(plan.labels, 'label'),
+    ...(plan.stairs || []).filter(s => s.buildingId === buildingId && Math.max(s.fromLevel,s.toLevel) >= floors).map(s => `stair “${s.name}” (Levels ${s.fromLevel + 1}–${s.toLevel + 1})`),
     ...(plan.buildings.find(b => b.id === buildingId)?.openFloors || []).filter(l => l >= floors).map(l => `the open-floor setting on Level ${l + 1}`)];
 }
 // Returns an unvalidated plan with the building draft applied; a move or rotation carries its contents.
@@ -600,7 +624,18 @@ export function reoriginPlan(plan, origin) {
   const [dx, dy] = fromLngLat(plan.origin, origin), p = q => fromLngLat(toLngLat(q, plan.origin), origin).map(v => Math.round(v * 1e6) / 1e6);
   const at = o => { const [x, y] = p([o.x, o.y]); return {...o, x, y}; };
   const ring = o => ({...o, footprint:o.footprint.map(p)});
-  const next = {...plan, origin:[...origin], buildings:plan.buildings.map(b => transformBuilding(b, p)), rooms:plan.rooms.map(ring),
+  const doorways=(plan.doorways || []).map(door=>{
+    const room=plan.rooms.find(r=>r.id===door.roomIds[0]);
+    const edge=room.footprint.slice(1).map((end,i)=>[room.footprint[i],end]).find(([a,b])=>closestOnSegment([door.x,door.y],a,b).distance<1e-6);
+    const [a,b]=edge, length=Math.hypot(b[0]-a[0],b[1]-a[1]);
+    const ends=[-1,1].map(sign=>p([door.x+sign*(b[0]-a[0])/length*door.width/2,door.y+sign*(b[1]-a[1])/length*door.width/2]));
+    return {...at(door),width:Math.hypot(ends[1][0]-ends[0][0],ends[1][1]-ends[0][1])};
+  });
+  const windows=(plan.windows || []).map(window=>{
+    const ends=windowSegment(window,windowWall(plan,window)).map(p);
+    return {...at(window),width:Math.hypot(ends[1][0]-ends[0][0],ends[1][1]-ends[0][1])};
+  });
+  const next = {...plan, windows, doorways, origin:[...origin], buildings:plan.buildings.map(b => transformBuilding(b, p)), rooms:plan.rooms.map(ring),
     openings:(plan.openings || []).map(ring), zones:(plan.zones || []).map(ring), paths:(plan.paths || []).map(o => ({...o, points:o.points.map(p)})),
     stairs:(plan.stairs || []).map(at), cameras:plan.cameras.map(at), labels:plan.labels.map(at), route:plan.route.map(p)};
   const far = [...next.buildings.flatMap(buildingRings).flat(), ...next.rooms.flatMap(r => r.footprint), ...next.zones.flatMap(z => z.footprint), ...next.route,

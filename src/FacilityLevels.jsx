@@ -30,7 +30,7 @@ export default function FacilityLevels({plan, building, floor, onFloor, commit, 
     <div className="facility-level-summary"><span><i className="floor-opening-key"/>{openings.length} floor openings</span><span>{(plan.paths || []).filter(p=>p.buildingId===building.id && p.level===activeFloor).length} pathways</span><span><i className="ceiling-opening-key"/>{ceiling.length} ceiling openings from above</span></div>
     <div className="facility-action-row"><button type="button" className="facility-secondary" disabled={disabled || building.floors>=40 || base+rise*(building.floors+1)>150} onClick={()=>perform(false)}><Plus/>Add top level</button>
       <button type="button" className="facility-secondary" disabled={disabled || !rooms.length} onClick={()=>perform(true)}><Copy/>Copy rooms upstairs</button></div>
-    <p className="facility-caption">Add top level keeps the current floor spacing. Copy rooms adds the next level when needed and requires it to be empty. Stairs, openings and pathways are not copied. Both changes can be undone.</p>
+    <p className="facility-caption">Copy rooms includes the floor’s doorways and exterior windows. It requires an empty room layout above and can add a level at the current floor spacing. Stairs, floor openings and pathways stay independent. Undo restores the previous plan.</p>
     <p className="facility-caption">A floor opening on Level {activeFloor+1} also opens the ceiling of {activeFloor===0 ? 'the space beneath the lowest modeled floor' : `Level ${activeFloor}`}. Openings on other levels remain independent.</p>
     {error && <p className="error" role="alert">{localizeLengths(error,units)}</p>}
   </section>;

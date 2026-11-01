@@ -25,7 +25,7 @@ Applied edits save automatically in this browser. Unsaved editor drafts must be 
 
 Browser saves belong to this browser profile and site address. They are not cloud sync or a permanent filesystem backup. Export JSON before changing devices, clearing browser data or uninstalling a browser. The collection supports up to 30 facilities and 4 MB total, with a 2 MB limit per facility; the browser may have a smaller remaining storage quota.
 
-Existing single-facility saves migrate into the collection once. The legacy saved data remains untouched for recovery. Ordinary supported facility v1/v2/v3 JSON files remain importable; collection backups use `intelligent-dvr.facilities.v1`.
+Existing single-facility saves migrate into the collection once. The legacy saved data remains untouched for recovery. Ordinary supported facility v1–v6 JSON files remain importable; collection backups use `intelligent-dvr.facilities.v1`.
 
 If storage is full, unavailable, corrupted or changed in another tab, the UI reports it and keeps new work in memory. Export a backup before closing. Quota failures offer **Retry saving**. Corrupt stored JSON can be downloaded with **Download stored data** and is not silently overwritten. Concurrent editing is not transactional: use one editing tab per browser collection; detected external changes pause saving.
 

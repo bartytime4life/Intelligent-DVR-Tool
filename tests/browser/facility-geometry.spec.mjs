@@ -14,7 +14,7 @@ async function review(page,data){await page.getByText('Draft buildings from Open
 test('courtyard apply, transform, base edits and Undo preserve the complete advanced plan',async({page})=>{
   await setup(page);await page.getByRole('button',{name:'Save site',exact:true}).click();const before=await saved(page);
   await review(page,extract);await page.getByRole('button',{name:'Use 1 selected buildings',exact:true}).click();
-  const imported=await saved(page);expect(imported.schema).toBe('intelligent-dvr.facility.v3');expect(imported.buildings.at(-1).holes).toHaveLength(1);expect(imported.cameras).toEqual(before.cameras);
+  const imported=await saved(page);expect(imported.schema).toBe('intelligent-dvr.facility.v6');expect(imported.buildings.at(-1).holes).toHaveLength(1);expect(imported.cameras).toEqual(before.cameras);
   await page.getByRole('button',{name:/^2 Buildings/}).click();await page.getByRole('button',{name:/Courtyard test/}).click();
   await page.getByLabel('Shape center east',{exact:true}).fill('100');await page.getByLabel('Building base',{exact:true}).fill('3');await page.getByRole('button',{name:'Save building',exact:true}).click();
   const moved=(await saved(page)).buildings.at(-1);expect(moved.holes[0][0]).toEqual([90,-10]);expect(moved.base).toBe(3);

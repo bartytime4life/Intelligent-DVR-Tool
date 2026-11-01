@@ -18,3 +18,23 @@ test('feet entry converts only changed numbers, stores 0.1 mm and words messages
   assert.equal(localizeLengths('Area 4 m² within 2 km; 2 MB; dimensions 2–1,000 m.','imperial'),'Area 4 m² within 2 km; 2 MB; dimensions 6.56–3280.84 ft.');
   assert.equal(localizeLengths('height 1–150 m','metric'),'height 1–150 m');
 });
+
+import {suggestBuildingOffset,translateShape,nextBuildingName} from '../src/facility-shape-edit.mjs';
+import {ringsOverlap,validPolygon} from '../src/facility.mjs';
+test('suggestions leave space near existing buildings, including beside site limits',()=>{
+  assert.deepEqual(suggestBuildingOffset(shape,[]),[0,0]);
+  const buildings=[translateShape(shape,1990,1980)];
+  const offset=suggestBuildingOffset(shape,buildings), copy=translateShape(shape,...offset);
+  assert.ok(validPolygon(copy.footprint));
+  assert.ok(!ringsOverlap(copy.footprint,buildings[0].footprint));
+  assert.ok(Math.hypot(offset[0]-1990,offset[1]-1980)<30);
+  assert.deepEqual(copy.holes[0][0],[2+offset[0],2+offset[1]]);
+  const full={footprint:[[-2000,-2000],[2000,-2000],[2000,2000],[-2000,2000],[-2000,-2000]]};
+  assert.equal(suggestBuildingOffset(shape,[full]),undefined);
+});
+test('repeated building names stay unique within the plan name limit',()=>{
+  const name='A'.repeat(100), next=nextBuildingName([{name}],name);
+  assert.equal(next.length,100);
+  assert.notEqual(next,name);
+  assert.equal(nextBuildingName([{name:'Building'},{name:'Building 2'}],'Building'),'Building 3');
+});

@@ -160,3 +160,24 @@ people" on results from this computer's own jobs. The face worker looks only ins
 the analyzer's person boxes; the browser gets names, boxes and similarity, never
 embeddings. Confirm adds that view to the template; "Not this person" only hides it.
 Suggestions never reach Events or exports automatically.
+
+Owner building-workflow preference (2026-11-01): make facility creation approachable
+for a first-time planner. Surface visual footprints, clear placement previews and
+quick ways to position or repeat buildings. Keep exact dimension entry and Undo.
+
+Owner indoor-workflow preference (2026-11-01): make indoor planning usable with
+few inputs. Start from the selected floor, preview rooms and halls as they are
+drawn, offer exact dimensions when needed, and preserve existing rooms, stairs,
+floor openings, and Undo. Proposed partitions do not establish actual walls.
+
+Owner doorway-workflow preference (2026-11-01): place doorways by clicking shared
+room walls and drag them along the wall. Keep dimensions editable, previews
+explicit, and saving/Undo dependable through room edits and portable plans.
+
+Owner window-workflow preference (2026-11-01): click an outside wall to place
+a planned window; move and resize it directly on the wall. Keep widths, sill
+heights and elevations editable and preserve windows in saved facility plans.
+
+Owner stair-workflow preference (2026-11-01): click the start landing on the
+active floor, choose the destination level, and drag or rotate the whole stair
+around that start. Keep exact sizing, explicit floor openings and one-step Undo.

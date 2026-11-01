@@ -1,8 +1,8 @@
 import {formatDistance,formatArea} from './facility-measurements.mjs';
 import { polygonArea } from "./facility.mjs";
-import { displayLength, enteredLength, localizeLengths } from "./facility-shape-edit.mjs";
+import { displayLength, enteredLength } from "./facility-shape-edit.mjs";
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { SHAPES, OSM_SERVERS, shapeFootprint, dimensions, searchBounds, parseOsmBuildings, fetchOsmBuildings, draftFacility, clearFootprintCache, polygonAreaSelection, parseAreaVertices } from "./facility-starter.mjs";
+import { OSM_SERVERS, dimensions, searchBounds, parseOsmBuildings, fetchOsmBuildings, draftFacility, clearFootprintCache, polygonAreaSelection, parseAreaVertices } from "./facility-starter.mjs";
 import { FOOTPRINT_SERVICES } from "./facility-services.mjs";
 function Numeric({ label, value, onChange, min, max, step = "any" }) {
   return <label className="facility-field"><span>{label}</span><input type="number" aria-label={label} required value={value} min={min} max={max} step={step} onChange={(e) => onChange(
@@ -11,60 +11,6 @@ function Numeric({ label, value, onChange, min, max, step = "any" }) {
 function MeasurementSummary({ring,holes=[],units='metric'}) {
   const m=dimensions(ring);m.area-=holes.reduce((sum,h)=>sum+polygonArea(h),0);
   return <p className="facility-caption">Approx. enclosing dimensions {formatDistance(m.length,units)} × {formatDistance(m.width,units)}. Footprint {formatArea(m.area,units)}. Exterior perimeter {formatDistance(m.perimeter,units)}. Dimensions follow the footprint’s orientation; verify on site.</p>;
-}
-function ShapeBuilder({ add, disabled, units, onUnits, onDirtyChange }) {
-  const [open, setOpen] = useState(false);
-  const [shape, setShape] = useState("Rectangle"), [localUnit, setLocalUnit] = useState("m"), [w, setW] = useState(32), [d, setD] = useState(
-  40), [wing, setWing] = useState(8), [angle, setAngle] = useState(0), [x, setX] = useState(0), [y, setY] = useState(0),
-  [height, setHeight] = useState(8), [floors, setFloors] = useState(1), [note, setNote] = useState("");
-  const baseline=useRef({shape:'Rectangle',w:32,d:40,wing:8,angle:0,x:0,y:0,height:8,floors:1});
-  const values={shape,w,d,wing,angle,x,y,height,floors};
-  const dirty=Object.keys(values).some(key=>values[key]!==baseline.current[key]);
-  const dirtyCallback=useRef(onDirtyChange);dirtyCallback.current=onDirtyChange;
-  useEffect(()=>{dirtyCallback.current?.(dirty);},[dirty]);
-  useEffect(()=>()=>dirtyCallback.current?.(false),[]);
-  function discardShape(){
-    const saved=baseline.current;
-    setShape(saved.shape);setW(saved.w);setD(saved.d);setWing(saved.wing);setAngle(saved.angle);
-    setX(saved.x);setY(saved.y);setHeight(saved.height);setFloors(saved.floors);setNote('Shape draft discarded.');
-  }
-  const unit=units ? (units==='imperial'?'ft':'m') : localUnit;
-  const setUnit=v=>onUnits?onUnits(v==='ft'?'imperial':'metric'):setLocalUnit(v);
-  const factor = unit === "ft" ? 0.3048 : 1;
-  let ring, error;
-  try {
-    ring = shapeFootprint(shape, w, d, wing, angle, x, y);
-  } catch (e) {
-    error = e.message;
-  }
-  const system = unit === "ft" ? "imperial" : "metric";
-  const distance = (label, value, setter, min, max) => <Numeric label={`${label} (${unit})`} value={value === "" ? "" : displayLength(value,
-  system)} min={Math.floor(min / factor * 1e3) / 1e3} max={Math.ceil(max / factor * 1e3) / 1e3} onChange={(v) => setter(v === "" ? "" : enteredLength(v, value, system))} />;
-  return <details className="facility-starter" open={open} onToggle={(e) => setOpen(e.currentTarget.open)}><summary>Common building shapes</summary><form onSubmit={(e) => {
-    e.preventDefault();
-    if (!ring || disabled) return;
-    if (add({ name: `New ${shape.toLowerCase()} building`, footprint: ring, height, floors })) {
-      baseline.current={...values};
-      setNote("Shape added. Edit and save its properties below.");
-      setOpen(false);
-    }
-  }}>
-    <label className="facility-field"><span>Building shape</span><select aria-label="Building shape" value={shape} onChange={(e) => setShape(
-  e.target.value)}>{SHAPES.map((s) => <option key={s}>{s}</option>)}</select></label>
-    <label className="facility-field"><span>Input units</span><select aria-label="Shape input units" value={unit} onChange={(e) => setUnit(
-  e.target.value)}><option value="m">Meters</option><option value="ft">Feet</option></select></label>
-    <div className="facility-field-pair">{distance("Shape width", w, setW, 2, 1e3)}{distance("Shape depth", d, setD, 2, 1e3)}</div>
-    {["L wing", "T wing", "U wing", "Cross"].includes(shape) && distance("Wing thickness", wing, setWing, 1, 499)}
-    <div className="facility-field-pair">{distance("Shape east", x, setX, -1800, 1800)}{distance("Shape north", y, setY,
-  -1800, 1800)}</div>
-    <Numeric label="Shape rotation (degrees)" value={angle} onChange={setAngle} min={-360} max={360} />
-    <div className="facility-field-pair">{distance("Shape height", height, setHeight, 1, 150)}<Numeric label="Shape floors" value={floors} onChange={setFloors} min={1} max={40} step="1" /></div>
-    {ring ? <MeasurementSummary ring={ring} units={units || (unit==='ft'?'imperial':'metric')}/> : <p role="alert" className="facility-caption">{localizeLengths(error, system)}</p>}
-    <button className="facility-primary" disabled={disabled || !ring}>Add selected shape</button>
-    {dirty && <button type="button" className="facility-link" onClick={discardShape}>Discard shape draft</button>}
-    <p role="status" className="facility-caption">{note}</p>
-    <p className="facility-caption">Starting example: 32 m span × five 8 m bays; 8 m height is editable. Shapes do not infer an existing structure. Round uses 32 segments. U wings have an open recess, not a closed courtyard.</p>
-  </form></details>;
 }
 function ConstructionGuide() {
   return <details className="facility-starter"><summary>Measurement references</summary><p className="facility-caption">Map geometry or a survey sets existing dimensions. These references help review manually drawn spaces; they do not establish code compliance or reveal interior walls.</p>
@@ -230,5 +176,5 @@ export {
   ConstructionGuide,
   MeasurementSummary,
   OpenMapStarter,
-  ShapeBuilder
+  Numeric
 };

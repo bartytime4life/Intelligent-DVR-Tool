@@ -1,0 +1,159 @@
+.room-sketch-launch {border:1px solid #315451;background:#112724;border-radius:8px;padding:12px;margin-bottom:14px}
+.room-sketch-launch h3,.room-layout-tools h3 {font-weight:600;font-size:15px;margin:0;color:#edf7f5}
+.room-sketch-launch p {margin:4px 0 10px;color:#aec7c1;font-size:12px}
+.room-sketch-launch button,.room-building-launch {width:100%}
+.room-sketch-dialog {box-sizing:border-box;width:min(1000px,calc(100vw - 32px));max-width:none;max-height:calc(100dvh - 32px);margin:auto;padding:0;overflow:hidden;background:#141b1d;color:#e2eeeb;border:1px solid #42605c;border-radius:14px;box-shadow:0 20px 90px #0009;color-scheme:dark}
+.room-sketch-dialog[open] {display:flex;flex-direction:column}
+.room-sketch-dialog::backdrop {background:#050a0dc9}
+.room-sketch-dialog * {box-sizing:border-box}
+.room-sketch-dialog button,.room-sketch-dialog input,.room-sketch-dialog select {font:inherit}
+.room-sketch-dialog button {cursor:pointer}
+.room-sketch-dialog button:disabled {opacity:.45;cursor:not-allowed}
+.room-sketch-dialog :focus-visible {outline:2px solid #6be4ca;outline-offset:2px}
+.room-sketch-header {display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:20px 24px 16px;border-bottom:1px solid #30413e;flex:none}
+.room-eyebrow,.room-paper-heading>span:first-child {font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:#81d8c6}
+.room-eyebrow {display:flex;align-items:center;gap:6px;overflow-wrap:anywhere}
+.room-eyebrow svg {flex:none;width:15px;height:15px}
+.room-eyebrow b {color:#5c7e76}
+.room-sketch-header h2 {font-size:24px;letter-spacing:-.04em;margin:5px 0 3px;line-height:1.2}
+.room-sketch-header p,.room-layout-tools,.room-paper-caption,.room-board-tools,.room-map-legend,.room-sketch-footer {font-size:13px}
+.room-sketch-header p {color:#b3c7c2;margin:0}
+.room-sketch-body {display:grid;grid-template-columns:minmax(0,1fr) 235px;gap:20px;padding:20px 24px;overflow:auto;min-height:0}
+.room-board,.room-layout-tools {min-width:0}
+.room-sketch-paper {border:1px solid #344b45;border-radius:8px;background:#101918;overflow:hidden}
+.room-paper-heading,.room-paper-caption,.room-map-legend,.room-board-tools,.room-save-row,.room-stepper,.room-stepper>div,.room-discard,.room-batch>div {display:flex;align-items:center;gap:8px}
+.room-paper-heading,.room-paper-caption {padding:10px 14px;justify-content:space-between;color:#a7beb6}
+.room-paper-heading {border-bottom:1px solid #253c35;font-size:11px}
+.room-drawing {display:block;width:100%;height:clamp(210px,34vh,395px);background:#101918;touch-action:none;user-select:none;cursor:crosshair}
+.room-drawing:focus-visible {outline-offset:-3px}
+.room-drawing path,.room-draw-box,.room-snap-guides line {vector-effect:non-scaling-stroke}
+.room-floor-shell {fill:#1c312b;stroke:#aac5bb;stroke-width:2.2}
+.room-gridline {fill:none;stroke:#415d50;stroke-width:.65}
+.room-existing.room {fill:#414e54;stroke:#a5b3bb;stroke-width:1.4}
+.room-existing.void,.room-existing.stair {fill:url(#sketch-hatch);stroke:#baa2ad;stroke-width:1.4}
+.room-proposed {fill:#3da38a66;stroke:#79ddbc;stroke-width:1.6}
+.room-staged {fill:#26514c;stroke:#6eaaa4;stroke-width:1.6}
+.room-draw-box {fill:transparent;stroke:#f1db9f;stroke-width:1.1;stroke-dasharray:5 5}
+.room-snap-guides {stroke:#f4df9d;stroke-width:1;fill:#fff1b4;pointer-events:none}
+.room-snap-guides line {stroke-dasharray:3 4}
+.room-snap-guides circle {vector-effect:non-scaling-stroke}
+.room-saved-labels text,.room-plan-labels text {fill:#d7e4e0;font-weight:600;pointer-events:none}
+.room-plan-labels text {fill:#e2fff4}
+.room-paper-caption {font-size:12px;align-items:flex-start}
+.room-paper-caption strong {white-space:nowrap;color:#e4ecd9;font-size:11px}
+.room-map-legend {flex-wrap:wrap;gap:6px 15px;padding:8px 14px;border-top:1px solid #2d413b;color:#bbcec7;font-size:11px}
+.room-map-legend span {display:inline-flex;align-items:center;gap:5px}
+.room-map-legend i {height:9px;width:9px;border-radius:2px;border:1px solid #73caa9;background:#32654e}
+.room-map-legend span:nth-child(2) i {background:#414e54;border-color:#a5b3bb}
+.room-map-legend span:nth-child(3) i {border-color:#baa2ad;background:repeating-linear-gradient(45deg,#26303b 0 2px,#9a8192 3px)}
+.room-map-legend span:nth-child(4) i {background:#26514c;border-color:#6eaaa4}
+.room-board-tools {margin-top:8px;flex-wrap:wrap;gap:5px 12px;font-size:12px}
+.room-board-tools label {display:flex;align-items:center;gap:6px;margin-right:auto}
+.room-board-tools input {accent-color:#64d1b3}
+.room-board-tools button,.room-batch>div button,.room-turn {display:inline-flex;align-items:center;gap:5px;background:none;border:0;color:#96e2c8;padding:5px 1px}
+.room-layouts {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;margin:9px 0 14px}
+.room-layouts button {display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;border:1px solid #40524e;border-radius:6px;background:#202928;color:#bdceca;padding:8px 2px;font-size:12px}
+.room-layouts button[aria-pressed=true] {border-color:#78d8b8;background:#1c3930;color:#b9f7dd}
+.room-layouts svg {width:34px;height:22px;fill:currentColor;fill-opacity:.22;stroke:currentColor;stroke-width:.9}
+.room-stepper {justify-content:space-between}
+.room-stepper>div {gap:6px}
+.room-stepper button {display:grid;place-items:center;width:30px;height:30px;border:1px solid #475652;color:#e0efe8;background:#212c29;border-radius:5px}
+.room-stepper output {min-width:19px;text-align:center;font-variant-numeric:tabular-nums}
+.room-turn {margin:5px 0 8px}
+.room-length,.room-sketch-options label {display:grid;gap:4px;font-size:12px;color:#c6d9d0}
+.room-sketch-options label {margin-top:10px}
+.room-length small {color:#a5b9b0}
+.room-layout-tools input,.room-layout-tools select {width:100%;min-width:0;border-radius:5px;background:#101917;border:1px solid #40534b;padding:7px 9px;color:#e9f4ed}
+.room-sketch-options {border-top:1px solid #33423b;margin-top:12px;padding:12px 0}
+.room-sketch-options summary {color:#d0dfd8;cursor:pointer}
+.room-size-pair {display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.room-batch {padding-top:10px;border-top:1px solid #33423b}
+.room-batch>div {justify-content:space-between;flex-wrap:wrap;margin-top:5px;font-size:12px}
+.room-sketch-footer {padding:14px 24px;background:#192220;border-top:1px solid #35473e;flex:none}
+.room-save-row {justify-content:space-between}
+.room-save-row strong,.room-save-row small {display:block}
+.room-save-row strong {font-size:15px}
+.room-save-row small {margin-top:3px;color:#acc2b6}
+.room-sketch-notice {margin:0 0 10px;color:#e7cd99}
+.room-discard {flex-wrap:wrap}
+.room-discard span {margin-right:auto}
+.room-discard-action {border:1px solid #8e6d59;background:#3e3028;color:#f2dac4;border-radius:5px;padding:7px 11px}
+@media(max-width:720px){
+  .room-sketch-dialog {width:calc(100vw - 16px);max-height:calc(100dvh - 16px)}
+  .room-sketch-body {grid-template-columns:minmax(0,1fr);gap:14px;padding:12px}
+  .room-sketch-header,.room-sketch-footer {padding:12px 14px}
+  .room-drawing {height:clamp(145px,26dvh,255px)}
+  .room-sketch-header h2 {font-size:21px}
+  .room-layouts {margin-bottom:9px}
+  .room-layouts button {flex-direction:row}
+  .room-discard span {width:100%}
+}
+fieldset.room-layout-tools {padding:0;margin:0;border:0}
+.room-reference {border-top:1px solid #2c3d37;margin-top:8px;padding-top:5px;font-size:12px;color:#bed2c7}
+.room-reference button,.room-align-instructions button {background:none;border:0;color:#a5dccc;padding:5px 2px;display:inline-flex;align-items:center;gap:6px}
+.room-reference svg {width:16px;height:16px;flex:none}
+.room-ref-title,.room-ref-controls,.room-align-instructions,.room-ref-controls label {display:flex;align-items:center;gap:8px}
+.room-ref-title strong {overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.room-ref-title button {margin-left:auto;white-space:nowrap}
+.room-ref-controls {justify-content:space-between;flex-wrap:wrap}
+.room-ref-controls input {width:78px;accent-color:#71cfaf}
+.room-reference small {display:block;font-size:11px;margin:3px 0}
+.room-reference p {color:#e7cd99;margin:5px 0}
+.room-align-instructions {border:1px solid #60725d;background:#28372c;border-radius:6px;margin-bottom:8px;padding:7px 10px;flex-wrap:wrap;font-size:12px}
+.room-align-instructions>div {margin-right:auto}
+.room-align-instructions small,.room-align-instructions strong {display:block}
+.room-align-instructions small {letter-spacing:.08em;color:#a9d7bd;font-size:9px;margin-bottom:2px}
+.room-landmark circle {fill:#ffe2a1;stroke:#4d3f25;stroke-width:1;vector-effect:non-scaling-stroke}
+.room-landmark text {fill:#242818;font-weight:700}
+
+.room-walls-launch {margin-top:7px}
+.wall-editor-scroll {overflow:auto;min-height:0}
+.wall-controls {padding:16px 24px 0}
+.wall-modes,.wall-presets,.wall-selects,.wall-confirm {display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.wall-modes button,.wall-presets button {display:inline-flex;align-items:center;gap:5px;border:1px solid #40524e;border-radius:6px;background:#202928;color:#ccdfd9;font-size:13px;padding:7px 11px}
+.wall-modes button[aria-pressed=true] {background:#1c3930;border-color:#78d8b8;color:#b9f7dd}
+.wall-selects {margin-top:13px}
+.wall-selects label {display:flex;align-items:center;gap:8px;color:#b9cec5;font-size:12px;min-width:0}
+.wall-selects select {padding:6px 9px;border:1px solid #40534b;border-radius:5px;background:#101917;color:#e9f4ed;max-width:190px}
+.wall-selects label:last-child {margin-left:auto}
+.wall-editor-body {overflow:visible}
+.wall-editor .room-sketch-footer {position:sticky;bottom:0}
+.wall-drawing {height:clamp(200px,33vh,360px);cursor:crosshair}
+.wall-drawing.is-merged {cursor:default}
+.wall-result {stroke-width:1.6;stroke:#96dbcb}
+.wall-part-0 {fill:#315f54;background:#315f54}
+.wall-part-1 {fill:#344f69;background:#344f69;stroke:#a1c6e6}
+.wall-before {fill:none;stroke:#f6c97c;stroke-width:3;stroke-dasharray:5 4}
+.wall-divider {stroke:#f6cd83;stroke-width:2.5;vector-effect:non-scaling-stroke}
+.wall-handle rect {fill:#f6cd83}
+.wall-handle path {fill:none;stroke:#302b21;stroke-width:1.3px}
+.wall-areas,.wall-presets {margin-top:12px}
+.wall-measures>.room-length+.room-length {margin-top:12px}
+.wall-areas h3 {margin-bottom:6px}
+.wall-areas>div {display:flex;align-items:baseline;justify-content:space-between;gap:8px;font-size:12px;padding:8px 0;border-bottom:1px solid #31423b}
+.wall-areas span {overflow-wrap:anywhere}
+.wall-areas strong {white-space:nowrap}
+.wall-chip {display:inline-block;width:9px;height:9px;border:1px solid #a9cfc4;border-radius:2px;margin-right:5px}
+.wall-unavailable {display:grid;place-content:center;justify-items:center;gap:8px;text-align:center;background:#111b18;border:1px solid #344b45;border-radius:6px;min-height:160px;color:#c4d6ce;padding:20px;font-size:13px}
+.wall-confirm {padding:28px}
+.wall-confirm strong {margin-right:auto}
+@media(max-width:720px){
+  .wall-controls {padding:12px 12px 0}
+  .wall-selects {gap:6px 12px}
+  .wall-selects label {display:grid;gap:3px}
+  .wall-selects select {max-width:135px}
+  .wall-modes {gap:5px}
+  .wall-modes button {padding:7px 8px}
+  .wall-drawing {height:clamp(135px,25dvh,210px)}
+}
+.facility-doorways {padding:12px;border:1px solid #38514d;border-radius:8px;background:#11211f;margin-bottom:14px;color:#c8dfd7}
+.facility-doorways h3 {display:flex;align-items:center;gap:7px;font-size:14px;margin:0 0 7px;color:#e1f2ed}
+.facility-doorways p {font-size:12px;margin:5px 0 10px}
+.facility-doorways label {display:grid;gap:5px;margin:9px 0;font-size:12px}
+.facility-doorways input,.facility-doorways select {width:100%;min-width:0;padding:8px;border:1px solid #40534b;border-radius:5px;color:#e8f3ed;background:#101917}
+.facility-doorways summary {cursor:pointer;color:#9bdac7;font-size:12px;margin-top:10px}
+.facility-doorways .doorway-connection {color:#8ae9cf;font-weight:600}
+.facility-doorways [role=alert] {color:#f0cb96}
+.facility-doorway-handle {width:32px;height:32px;padding:0;border-radius:50%;background:#ffd184;color:#162825;border:2px solid #f9e6b3;box-shadow:0 0 0 4px #102426aa;cursor:grab;touch-action:none;font-size:22px;font-weight:700;z-index:4}
+.facility-doorway-handle:active {cursor:grabbing}
+.facility-doorway-handle:focus-visible {outline:3px solid #a1fff0;outline-offset:4px}

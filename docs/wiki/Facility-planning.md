@@ -40,8 +40,96 @@ Use **Current task** at the top or the seven detailed steps in the left rail. Pr
    Map drafts require explicit selection and apply; additive import preserves
    cameras/rooms, while a clean replacement explicitly clears them. Edit name,
    footprint position/dimensions, height and number of floors. Save the building.
-3. Choose a building and floor. Trace rooms within its footprint, name rooms,
-   place labels, and inspect the floor view. Floors divide building height evenly.
+
+   **Quick start.** On a blank plan, choose **Add first building**. Pick the
+   silhouette that matches your site and adjust its width and depth. The dashed
+   outline previews its size and position. Use the suggested space or choose
+   **Pick on map** and click or tap a center point. Hold Shift while clicking
+   to snap to whole meters or feet. **Add selected shape** saves the footprint.
+
+   For repeated buildings, **Copy building outline** places a separate shell
+   nearby with the same dimensions, courtyards, height and floor count. Rooms
+   and cameras stay with the original. To reposition an existing building,
+   choose **Move on map** or **Rotate 90°**, then **Save building**. Escape
+   cancels placement, **Discard preview** drops pending edits, and **Undo edit**
+   restores the previous saved plan.
+3. Choose **Sketch rooms inside** on a building or **Sketch rooms** in Floors &
+   labels. The preview starts with three rooms across the selected floor. Choose
+   one room, a row, or a center hall. Use the whole floor, drag a box, or tap two
+   corners. Edges follow the longest exterior wall and snap to nearby wall
+   coordinates and the unit grid. Turn the layout, change the count or hall
+   width, or open **Dimensions & names** for precise entry in meters or feet.
+   **Keep & draw more** lets you combine several areas; **Add rooms** saves them
+   together. One **Undo edit** restores the previous floor. Each saved room can
+   then be selected, named, and edited separately.
+
+   After saving rooms, open **Edit room walls** in Floors & labels. Select a
+   room, then split it, move its shared wall, or merge it with an adjoining
+   room. Drag the divider, tap a position, or enter a distance in meters or
+   feet. The preview shows each room’s resulting area. Moving a shared wall
+   updates both rooms together. Splitting gives the new room its own name and
+   ID. Merging keeps the selected room’s name and requires matching wall
+   heights. Each save is one Undo step. A wall move requires a straight
+   division, and each resulting room must have one connected outline.
+
+   Choose **Place doorway** to highlight shared room walls. Click a wall to
+   preview an opening, then drag the round handle along it. Arrow keys adjust
+   the handle by a tenth of the selected unit, or a whole unit with Shift.
+   Width, height and distance along the wall are also editable in meters or
+   feet. **Save doorway** commits the preview and **Undo edit** restores it.
+   **Place by room pair** offers the same workflow through numeric controls.
+
+   Doorways represent planned open passages. Shared-wall moves carry attached
+   doorways, splitting reassigns them to the corresponding room, and merging
+   removes a doorway in the removed divider. An edit that cannot keep an
+   opening on a shared wall is rejected with the doorway’s name. Copying rooms
+   upstairs also copies their doorways. Removing a room removes its attached
+   doorways as one undoable edit.
+
+   Choose **Place window** and click an outside wall of the active building.
+   No rooms are required. Courtyard walls are available too. Drag the center to
+   move the pane; drag either end to widen or narrow it with the opposite end
+   fixed. Corners and neighboring windows stop the drag. Arrow keys nudge a map
+   handle by a tenth of the selected unit, or a whole unit with Shift. Escape
+   cancels a map drag. The **Wall elevation** shows the pane above the floor:
+   drag it up or down, or drag the top or sill to change its height. **Window
+   measurements & name** accepts exact values; **Choose a wall by name** works
+   without WebGL. **Save window** commits one undoable edit.
+
+   Windows follow the building when it moves or rotates. Copy rooms upstairs
+   also copies that floor’s windows; an overlap on the destination floor blocks
+   the copy. The floor and 3D views draw glazing, sill and head at the planned
+   dimensions. Camera estimates keep exterior walls opaque: neither glazing
+   transparency nor real visibility is known. New exports use facility v6 and
+   accept ordinary v1–v5 inputs. Windows in a file labeled v4 or earlier, and
+   doorways in v3 or earlier, are rejected to avoid silent geometry loss.
+
+   **Place stairs**: click the center of the start landing, then choose a
+   destination in the map’s **Go to** menu. Drag **Start** to move the flight;
+   drag **Turn** to rotate it around the start. Hold Shift to snap rotation to
+   15°; Escape cancels the current drag. With either handle focused, use the
+   arrow keys to move or turn. **Suggest a position** and **Stair dimensions &
+   position** work without graphics. A one-floor building offers **Add
+   destination level**. Stairs can go up or down. Changing the destination
+   adjusts the riser count to the modeled rise while keeping the start fixed.
+   Red previews need a correction before **Save stair**. The reservation must
+   fit the building, and both landings need solid floor. Cut floor openings
+   separately, including any intermediate floors. Earlier schemas support
+   only stairs going up one level.
+
+   With a floor drawing, choose **Trace a floor plan image** and open a local PNG
+   or JPEG. **Match two landmarks** asks for two points on the image, then the
+   same points on the building. This rotates, scales and positions the image
+   without stretching it. Adjust its opacity and sketch over it. Alignment
+   does not correct perspective or establish survey accuracy. The image stays
+   in memory for this sketch; only room geometry is saved and exported.
+
+   The sketch uses local plan geometry. It avoids courtyards, saved rooms,
+   openings on this floor, and stairs including both landings. A center hall
+   leaves an unassigned strip. Separate pieces become separate rooms; pieces
+   too small or complex to save, or that surround a void, are flagged. Sketch
+   a smaller area along the void to include more space. These are proposed
+   partitions, not inferred walls. Freeform **Draw room** remains available.
 4. Place a camera on the map or add one with coordinates. Set ground-relative
    mounting elevation, direction clockwise from north, downward tilt, horizontal
    and vertical field of view, and maximum viewing range. Optionally add a
@@ -56,8 +144,10 @@ Use **Current task** at the top or the seven detailed steps in the left rail. Pr
 Drawing uses clicks and polygon closure (line routes finish by double-click).
 Escape cancels. Building and camera placement have numeric alternatives; a
 selected camera also accepts Alt+Arrow (0.5 m east/west/north/south) and `[` / `]`
-(5° rotation) when focus is not in a text field. Rooms currently require pointer
-drawing; keyboard room drawing is an accessibility gap.
+(5° rotation) when focus is not in a text field. In Room sketch, focus the floor
+plan and use the arrows to position the cursor (Shift for ten units). Enter sets
+each corner; Escape cancels an unfinished box. Room sketch also works without
+WebGL.
 Undo restores the previous 20 committed edits in the current editor session.
 Facility file imports and the Paste JSON dialog validate the entire input, then
 add separate facilities without replacing saved sites. Export plan saves named
@@ -72,8 +162,9 @@ range is capped by the configured maximum. The horizontal viewing angle determin
 the sector. Building and room wall intersections shorten rays when the modeled
 wall spans the ray's height. The displayed sector samples 49 directions.
 
-This approximation treats wall polygons as opaque and does **not** model floor or
-roof slabs, door openings, windows, furniture, terrain, lens distortion, lighting,
+This approximation includes planned doorway gaps and opaque lintels above their
+entered heights. Exterior glazing stays opaque to this estimate. It excludes floor and roof slabs, furniture, terrain,
+lens distortion, lighting,
 motion blur, or recognition quality. Pixel density is a separate, centre-of-image
 planning estimate (below). A colored footprint is not a claim that a person can be
 detected or identified at that location. The current Three.js volume is an

@@ -15,6 +15,15 @@
 
 **Field-testing guidance (October 31, 2026):** use the [field-acceptance runbook](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Field-acceptance) with the [PC kit](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/PC-testing) to verify real webcam, RTSP, recording, review and interruption behavior. CI, simulated feeds and generated recordings below are not field acceptance.
 
+**Local facility work (November 1, 2026; unpublished):** visual building placement,
+indoor room sketching and shared-wall edits now include click-to-place, draggable
+doorways and exterior windows. Doorways cut planned room walls and affect
+estimated visibility. Windows can be resized on the map and adjusted in elevation;
+glazing remains opaque to the estimator. Both survive floor copying/save/export/Undo.
+Stairs can start on the map and be moved or rotated around the clicked landing.
+Their destination can be above or below; floor cutouts remain separate.
+See the [facility builder guide](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Facility-planning).
+
 October 30 [full review](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/review-2026-10-30.md): 61 verified defects across the
 browser workspaces, facility editor and local service were fixed in PR #45, and
 the Windows launchers' line endings in PR #46. Highlights: unreadable saved data

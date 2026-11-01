@@ -1,4 +1,4 @@
-import { stairDimensions, stairFootprint } from "./facility-stairs.mjs";
+import { stairOnLevel, stairDimensions, stairFootprint } from "./facility-stairs.mjs";
 // Measurements use the plan's local metre coordinates, not survey accuracy.
 const FEET_PER_METRE = 1 / 0.3048;
 const finitePoint = p => Array.isArray(p) && p.length >= 2 && Number.isFinite(p[0]) && Number.isFinite(p[1]);
@@ -65,7 +65,7 @@ export function measurementLabels(plan, selectedId, {units = 'metric', maxLabels
   const limit = Math.max(0, Math.min(64, Number.isFinite(maxLabels) ? Math.floor(maxLabels) : 64));
   if (!limit) return [];
   const onFloor = item => view === '3d' || (view === 'floors' && item.buildingId === floorBuildingId && item.level === floor);
-  const stair = (plan.stairs || []).find(item => item.id === selectedId && (view === '3d' || (view === 'floors' && item.buildingId === floorBuildingId && [item.fromLevel,item.toLevel].includes(floor))));
+  const stair = (plan.stairs || []).find(item => item.id === selectedId && (view === '3d' || (view === 'floors' && item.buildingId === floorBuildingId && stairOnLevel(item,floor))));
   const stairBuilding = stair && plan.buildings.find(building => building.id === stair.buildingId);
   let selected = [...plan.buildings, ...plan.rooms.filter(room => view !== 'floors' || (room.level === floor && (!floorBuildingId || room.buildingId === floorBuildingId))), ...(plan.zones || []).filter(zone => !zone.buildingId || (view === 'floors' && zone.buildingId === floorBuildingId && zone.level === floor)), ...(plan.openings || []).filter(item=>onFloor(item) && !(plan.buildings.find(b=>b.id===item.buildingId)?.openFloors || []).includes(item.level)), ...(stairBuilding ? [{...stair,footprint:stairFootprint(stair,stairBuilding)}] : [])].find(item => item.id === selectedId);
   if (selected && view === 'floors' && selected.id === floorBuildingId && plan.buildings.includes(selected)) {

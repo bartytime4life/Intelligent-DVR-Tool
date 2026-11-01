@@ -1,0 +1,30 @@
+.facility-windows {border-color:#355869;background:#11222b}
+.facility-windows .window-location,.facility-windows summary {color:#a2e6ff}
+.facility-windows .window-location {font-weight:600}
+.window-elevation {padding:9px 10px;margin:10px 0 12px;background:#0c1a23;border:1px solid #324b59;border-radius:6px}
+.window-elevation>div {display:flex;justify-content:space-between;gap:6px;align-items:center;font-size:12px}
+.window-elevation>div>span,.window-elevation>small {color:#adc7d5;font-size:11px}
+.window-elevation svg {width:100%;height:100px;display:block;touch-action:none;user-select:none}
+.elevation-envelope {fill:#21363f;stroke:#46606e;stroke-width:1;stroke-dasharray:4 3}
+.elevation-ground {stroke:#9cb7c0;stroke-width:1.5}
+.elevation-pane {cursor:grab;fill:#33687b;stroke:#a3e9ff;stroke-width:1.7}
+.elevation-pane path {pointer-events:none;stroke-width:1}
+.elevation-pane:active {cursor:grabbing}
+.elevation-edge {cursor:ns-resize}
+.elevation-edge path {stroke:#ffd184;stroke-width:4;stroke-linecap:round;pointer-events:none}
+.window-elevation g:focus-visible {outline:2px solid #ffd184}
+.facility-window-handle {padding:0;display:grid;place-items:center;touch-action:none;user-select:none;cursor:grab;color:#072532;border:2px solid #dff7ff;box-shadow:0 0 0 3px #0e2636bf;z-index:5;line-height:1;font-weight:bold}
+.facility-window-handle.window-move {width:30px;height:30px;border-radius:6px;background:#8fe4ff;font-size:20px}
+.facility-window-handle.window-move:active {cursor:grabbing}
+.facility-window-handle.window-start,.facility-window-handle.window-end {width:19px;height:19px;border-radius:50%;background:#123844;color:#b8f3ff;font-size:10px}
+.window-width-badge {position:absolute;bottom:calc(100% + 9px);padding:4px 7px;white-space:nowrap;color:#dff7ff;background:#102b3b;border:1px solid #6198b0;border-radius:4px;font:600 11px/1.2 system-ui;pointer-events:none}
+.facility-window-handle:focus-visible {outline:3px solid #ffd184;outline-offset:3px}
+@media(pointer:coarse){.facility-window-handle.window-move{width:34px;height:34px}.facility-window-handle.window-start,.facility-window-handle.window-end{width:24px;height:24px}}
+
+.window-move.badge-side .window-width-badge {left:calc(100% + 7px);bottom:50%;transform:translateY(50%)}
+
+.window-map-actions {display:none;position:absolute;z-index:6;bottom:56px;left:12px;right:52px;max-width:390px;align-items:center;justify-content:space-between;gap:6px;padding:7px 9px;background:#102a37f5;border:1px solid #497487;border-radius:7px;box-shadow:0 4px 12px #06121a55}
+.window-map-actions strong {color:#bdeeff;font-size:12px;white-space:nowrap}
+.window-map-actions button {width:auto;margin:0;padding:7px 10px;min-height:34px;font-size:12px}
+.is-map-focused .window-map-actions {display:flex}
+@media(max-width:620px){.window-map-actions{display:flex}}

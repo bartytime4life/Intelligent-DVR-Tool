@@ -83,7 +83,7 @@ const interior = [[3,3],[6,3],[6,8],[3,8],[3,3]];
 test('v3 protects independent slab openings while accepting earlier plans without advanced shapes',()=>{
   const plan=openingPlan(), opening=createFloorOpening(plan,'block',1,interior);
   const withOpening=validateFacility({...plan,openings:[opening]});
-  assert.equal(withOpening.schema,'intelligent-dvr.facility.v3');
+  assert.equal(withOpening.schema,SCHEMA);
   assert.deepEqual(parseFacility(JSON.stringify(withOpening)),withOpening);
   for(const old of ['intelligent-dvr.facility.v1','intelligent-dvr.facility.v2']) {
     assert.throws(()=>validateFacility({...withOpening,schema:old}),/require facility v3/);
@@ -125,7 +125,7 @@ test('opening and camera IDs share a namespace and room copying does not duplica
 test('stairs persist bounded physical parameters and reject invalid floors or courtyard footprint',()=>{
   const p=openingPlan(), stair={id:'stair-a',name:'Stairs',buildingId:'block',fromLevel:0,toLevel:1,x:15,y:15,bearing:0,width:1.2,tread:.28,risers:24,landing:1.2};
   p.stairs=[stair];assert.deepEqual(validateFacility(p).stairs,[stair]);assert.deepEqual(parseFacility(JSON.stringify(p)),p);
-  for(const mutation of [s=>s.fromLevel=-1,s=>s.toLevel=3,s=>s.toLevel=2,s=>s.risers=1000,s=>s.x=29.9,s=>s.width=NaN]){
+  for(const mutation of [s=>s.fromLevel=-1,s=>s.toLevel=3,s=>s.toLevel=0,s=>s.risers=1000,s=>s.x=29.9,s=>s.width=NaN]){
     const q=structuredClone(p);mutation(q.stairs[0]);assert.throws(()=>validateFacility(q));
   }
   const hole=structuredClone(p);hole.buildings[0].holes=[[[14,14],[16,14],[16,16],[14,16],[14,14]]];assert.throws(()=>validateFacility(hole),/Stair flights/);

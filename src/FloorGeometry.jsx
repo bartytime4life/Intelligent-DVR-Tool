@@ -35,8 +35,9 @@ export default function FloorGeometry({plan,building,floor:requestedFloor,select
   const stair=selected.kind==='stair' && (plan.stairs || []).find(s=>s.id===selected.id && s.buildingId===building.id);
   function addOpening(footprint,level,name,removeRoom=false) {
     try {
-      const opening=createFloorOpening(plan,building.id,level,footprint,name);
-      const next={...plan,openings:[...(plan.openings || []),opening],...(removeRoom ? {rooms:plan.rooms.filter(r=>r.id!==room.id)} : {})};
+      const base=removeRoom ? {...plan,rooms:plan.rooms.filter(r=>r.id!==room.id),doorways:(plan.doorways || []).filter(d=>!d.roomIds.includes(room.id))} : plan;
+      const opening=createFloorOpening(base,building.id,level,footprint,name);
+      const next={...base,openings:[...(base.openings || []),opening]};
       if(commit(next,'Floor opening saved; ceiling below updated — Undo available')) {onSelect(opening.id,'opening');setError('');}
     } catch(e){setError(e.message);}
   }
@@ -56,7 +57,7 @@ export default function FloorGeometry({plan,building,floor:requestedFloor,select
     <p className="facility-caption">{open?'This whole level is open air. The floor slab and the ceiling beneath it are removed.':'Cut out an atrium, stairwell or other open area. The same cutout opens the ceiling of the level below.'} Partial cutouts stay saved when toggling the entire floor.</p>
     <div className="facility-action-row"><button className="facility-secondary" disabled={disabled || pending || !ready || open} onClick={()=>onDraw('opening')}><Polygon/>Draw floor opening</button><button className="facility-secondary" disabled={disabled || pending || !ready || open} onClick={()=>onDraw('floor-path')}><Path/>Draw floor pathway</button></div>
     {room && <button className="facility-secondary" disabled={disabled || pending || open} onClick={()=>addOpening(room.footprint,floor,room.name+' opening',true)}>Convert selected room to opening</button>}
-    {stair && <button className="facility-secondary" disabled={disabled || pending || (building.openFloors || []).includes(stair.toLevel)} onClick={()=>addOpening(stairRunFootprint(stair,building),stair.toLevel,stair.name+' upper opening')}>Cut upper floor over stair run</button>}
+    {stair && <button className="facility-secondary" disabled={disabled || pending || (building.openFloors || []).includes(Math.max(stair.fromLevel,stair.toLevel))} onClick={()=>addOpening(stairRunFootprint(stair,building),Math.max(stair.fromLevel,stair.toLevel),stair.name+' upper opening')}>Cut upper floor over stair run</button>}
     <p className="facility-caption">Pathways stay inside solid floor; openings cannot be crossed. Stair cutouts reserve the flight run and keep both landings. Verify headroom and guards on site.</p>
     <PointListEntry label="Pathway points" units={units} disabled={disabled || pending || open} submitLabel={`Add pathway on Level ${floor+1}`} onSubmit={addPath} hint="Points must stay on solid floor inside this building."/>
     <div className="facility-item-list compact">{[...openings.map(o=>({...o,kind:'opening'})),...paths.map(o=>({...o,kind:'path'}))].map(o=><button key={o.id} disabled={disabled || pending} className={selected.id===o.id?'selected':''} onClick={()=>onSelect(o.id,o.kind)}>{o.kind==='opening'?<Polygon/>:<Path/>}<span>{o.name}<small>{o.kind==='opening'?'Open to below':'Floor pathway'}</small></span></button>)}</div>

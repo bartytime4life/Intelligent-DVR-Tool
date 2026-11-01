@@ -1,1 +1,31 @@
 .facility-stairs{border-top:1px solid #31505e;margin-top:22px;padding-top:16px}.facility-stair-heading{display:flex;align-items:center;gap:9px;margin-bottom:13px}.facility-stair-heading>svg{font-size:25px;color:#8ad4ee}.facility-stair-heading h3{font-size:14px;margin:0}.facility-stair-heading p{color:#9cb8c6;font-size:11px;line-height:1.6;margin:4px 0 0}.facility-stair-form{display:flex;flex-direction:column;gap:12px;margin-top:14px}.facility-stair-form .facility-field{margin:0}.facility-stair-form select{width:100%;min-height:38px;color:#e1edf0;background:#102c39;border:1px solid #35515e;border-radius:6px;padding:8px}.facility-stair-summary{border-left:3px solid #73cce6;background:#102d3a;padding:10px;display:flex;flex-direction:column;gap:5px;font-size:11px;line-height:1.6;color:#b7d5e0}.facility-stair-summary strong{color:#e0f7fc;font-weight:600}.facility-stair-warnings{border:1px solid #8d6835;border-radius:6px;padding:10px;font-size:11px;line-height:1.6;color:#f3ce96}.facility-stair-warnings ul{padding-left:17px;margin-bottom:0}.facility-stair-reference{margin-top:15px;border:1px solid #33515e;border-radius:6px;padding:10px;color:#a8c5d3;font-size:11px;line-height:1.7}.facility-stair-reference summary{cursor:pointer;color:#d5e8ef;font-size:12px}.facility-stair-reference a{color:#82dbed}.facility-stairs .facility-link{text-align:left}.facility-stair-form .facility-unsaved{flex-wrap:wrap}.facility-stair-form .facility-field-pair{gap:8px}.facility-stairs input:focus-visible,.facility-stairs button:focus-visible,.facility-stairs select:focus-visible,.facility-stairs summary:focus-visible{outline:2px solid #5fe0e1;outline-offset:3px}
+
+.facility-stairs {margin:12px 0;padding:13px;border:1px solid #375964;border-radius:8px;background:#11272d}
+.facility-stair-heading {margin-bottom:10px}
+.facility-stair-heading>svg,.stair-trip>strong {color:#9aeee2}
+.stair-next-level,.stair-trip,.stair-exact[open] {font-size:12px;color:#bed4da}
+.stair-trip {display:flex;gap:10px;align-items:center}
+.stair-trip .facility-field {flex:1}
+.stair-exact[open]>.facility-field,.stair-exact[open]>.facility-field-pair {margin-top:10px}
+.stair-map-handle {z-index:5;display:grid;place-items:center;width:34px;height:34px;padding:0;border:2px solid #dcfff7;border-radius:8px;color:#062925;background:#7be4d4;box-shadow:0 0 0 3px #0a242dc9;line-height:1;font-size:22px;cursor:grab;user-select:none;touch-action:none}
+.stair-map-handle.stair-rotate {background:#ffd28d;border-color:#fff0d4;color:#30220b;border-radius:50%}
+.stair-map-handle:active {cursor:grabbing}
+.stair-map-handle:focus-visible {outline:3px solid #fff;outline-offset:4px}
+.stair-map-handle span {position:absolute;left:calc(100% + 7px);top:50%;transform:translateY(-50%);background:#092730f5;color:#dbfff5;border:1px solid #578e90;border-radius:4px;padding:3px 6px;white-space:nowrap;font:600 11px/1.25 system-ui;pointer-events:none}
+.stair-rotate span {color:#ffe0ad;border-color:#886c42}
+.stair-map-actions {position:absolute;z-index:6;bottom:54px;left:12px;max-width:calc(100% - 66px);display:flex;flex-wrap:wrap;gap:8px;align-items:center;background:#102936f5;color:#b3d1d7;border:1px solid #487480;box-shadow:0 3px 14px #07161e66;border-radius:8px;padding:7px 9px;font-size:12px}
+.stair-map-actions .stair-destination {display:flex;flex-flow:row;align-items:center;gap:5px;margin:0}
+.stair-map-actions .stair-destination span {margin:0;color:#c6eae3;font-size:12px}
+.stair-map-actions select {max-width:130px;color:#dcf5ef;background:#18383f;border:1px solid #4d747d;border-radius:4px;padding:5px}
+.stair-map-actions button {width:auto;min-height:32px;margin:0;padding:5px 8px}
+.stair-map-actions small {flex-basis:100%;max-width:33em;color:#ffd19a}
+@media(pointer:coarse){.stair-map-handle{width:42px;height:42px}.stair-map-actions button,.stair-map-actions select{min-height:38px}}
+.stair-map-handle.badge-left span {left:auto;right:calc(100% + 7px)}
+.is-editing-stairs .facility-draw-hint {pointer-events:none}
+.is-editing-stairs .facility-draw-hint button {pointer-events:auto}
+@media(max-width:620px) {
+  .is-editing-stairs .facility-map-context,.is-editing-stairs .facility-map-tools,.is-editing-stairs .facility-map-legend {display:none}
+  .is-editing-stairs .facility-floor-picker {top:66px!important;left:12px}
+  .is-editing-stairs .facility-draw-hint {top:auto!important;bottom:35px;right:49px}
+  .is-editing-stairs .stair-map-actions {bottom:35px;gap:5px}
+}
