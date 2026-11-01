@@ -99,6 +99,7 @@ function FacilityEditor({onPreviewCount,initialPlan,facilityControls,onPersist,o
   const initial=useRef({plan:initialPlan,status:'Ready to edit',error:''});
   const [siteDirty,setSiteDirty]=useState(false),[shapePending,setShapePending]=useState(false),[linePending,setLinePending]=useState(false);
   const [zoneDirty, setZoneDirty] = useState(false), [stairDirty,setStairDirty]=useState(false);
+  const [mapFocus, setMapFocus] = useState(false), [helpOpen, setHelpOpen] = useState(false);
   const [measurements, setMeasurements] = useState(true), [units, setUnits] = useState(()=>{try{return localStorage.getItem("dvr.facility.units")==="imperial"?"imperial":"metric";}catch{return "metric";}}), [mapBearing, setMapBearing] = useState(-27);
   const [pickedOrigin,setPickedOrigin]=useState(null), [drawnArea,setDrawnArea]=useState(null);
   const [pasteOpen, setPasteOpen] = useState(false);
@@ -335,7 +336,7 @@ function FacilityEditor({onPreviewCount,initialPlan,facilityControls,onPersist,o
     setError('');
     return true;
   }
-  latest.current = { undo, redo, cameraKey, onBearing:setMapBearing, onAim:aimCamera, onMoveCamera:moveCamera, onCameraDrag:(kind,active)=>setDragging(active ? kind : ''), onPin: p=>setPickedOrigin(p), onDraw, onPlace: place, onSelect: selectOnMap, onToolDone: () => {
+  latest.current = { undo, redo, go, cameraKey, onBearing:setMapBearing, onAim:aimCamera, onMoveCamera:moveCamera, onCameraDrag:(kind,active)=>setDragging(active ? kind : ''), onPin: p=>setPickedOrigin(p), onDraw, onPlace: place, onSelect: selectOnMap, onToolDone: () => {
     setTool("select");
   }, onReady: () => setReady(true), onError: setMapError };
   useEffect(() => {
@@ -388,10 +389,17 @@ function FacilityEditor({onPreviewCount,initialPlan,facilityControls,onPersist,o
       if (e.key === "Escape") {
         api.current?.setTool("select");
         setTool("select");
+        setHelpOpen(false);
       }
       // Ctrl/Cmd+Z undo, Ctrl/Cmd+Shift+Z or Ctrl+Y redo, unless focus is in a text-entry control.
       const t = e.target, key = e.key?.toLowerCase();
       const typing = t?.isContentEditable || ["TEXTAREA", "SELECT"].includes(t?.tagName) || t?.tagName === "INPUT" && !["checkbox", "radio", "button", "submit", "range", "file", "color"].includes(t.type);
+      if (!typing && !t?.closest?.("dialog") && !e.ctrlKey && !e.metaKey && !e.altKey && e.key === '?') {
+        e.preventDefault(); setHelpOpen(open => !open); return;
+      }
+      if (!typing && !t?.closest?.("dialog") && !e.ctrlKey && !e.metaKey && !e.altKey && /^[1-7]$/.test(e.key)) {
+        e.preventDefault(); setMapFocus(false); latest.current.go(Number(e.key) - 1); return;
+      }
       if (!typing && !t?.closest?.("dialog") && latest.current.cameraKey(e)) { e.preventDefault(); return; }
       if (!(e.ctrlKey || e.metaKey) || e.altKey || typing || !["z", "y"].includes(key)) return;
       e.preventDefault();
@@ -534,7 +542,22 @@ ish.", camera: "Click the map to place a camera. Adjust its height and view next
 label. Inside the active building it belongs to the current level; elsewhere it is a ground label." };
   const change = (key, value) => setDraft((d) => ({ ...d, [key]: value }));
   const note = <p className="facility-estimate"><WarningCircle size={17} /><span>Estimated ground visibility · verify on site. Opaque walls only; excludes floor slabs, openings, furniture and lens effects.</span></p>;
-  return <MeasurementUnits.Provider value={units}><section className="facility-workspace" aria-label="Guided facility builder">
+  return <MeasurementUnits.Provider value={units}><section className={`facility-workspace${mapFocus ? ' is-map-focused' : ''}`} aria-label="Guided facility builder">
+    <header className="facility-workbench" aria-label="Facility Studio toolbar">
+      <div className="facility-workbench-identity"><strong>FACILITY STUDIO</strong><span title={plan.name}>{plan.name} · {plan.buildings.length} buildings · {plan.cameras.length} cameras</span></div>
+      <nav className="facility-workbench-tasks" aria-label="Jump to facility task">
+        {['Site', 'Buildings', 'Floors', 'Cameras', 'Coverage', 'Handoffs', 'Zones'].map((name, index) => <button key={name}
+          type="button" aria-current={step === index ? 'step' : undefined} onClick={() => {setMapFocus(false);go(index);}}
+          title={`Step ${index + 1}: ${STEPS[index][0]} (shortcut ${index + 1})`}>{name}</button>)}
+      </nav>
+      <div className="facility-workbench-actions">
+        {navigationDirty && <span className="facility-workbench-unsaved" role="status">Unsaved work</span>}
+        <button type="button" className="facility-focus-button" aria-pressed={mapFocus}
+          aria-label={mapFocus ? 'Show facility panels' : 'Focus facility map'} onClick={() => setMapFocus(focused => !focused)}>
+          {mapFocus ? 'Show panels' : 'Focus map'}</button>
+        <button type="button" aria-expanded={helpOpen} aria-controls="facility-shortcuts" onClick={() => setHelpOpen(open => !open)}>Help</button>
+      </div>
+    </header>
     <aside className="facility-guide">{facilityControls}
       <p className="eyebrow">FACILITY WORKSPACE</p><h1>Design your coverage</h1><p className="facility-intro">Measure the space. Build each level.<br />Place, aim and review your cameras.</p>
       <ol className="facility-steps">{STEPS.map(([title, desc], i) => <li key={title}><button aria-current={step === i ?
@@ -563,6 +586,12 @@ label. Inside the active building it belongs to the current level; elsewhere it 
       <p className="facility-save-state" role="status">{status}</p>
     </aside>
     <div className="facility-stage">
+      {helpOpen && <section id="facility-shortcuts" className="facility-workbench-help" role="region" aria-label="Facility keyboard and map help">
+        <div><strong>Work faster in Facility Studio</strong><button type="button" onClick={() => setHelpOpen(false)} aria-label="Close facility help"><X size={17}/></button></div>
+        <p><kbd>1</kbd>–<kbd>7</kbd> switches tasks, <kbd>?</kbd> toggles this help, and <kbd>Esc</kbd> cancels drawing. Ctrl/⌘+Z undoes committed edits.</p>
+        <p>Use <strong>Focus map</strong> to maximize the canvas and stop hidden camera previews, then <strong>Show panels</strong> to edit, save and explicitly reconnect. Camera drag/aim previews are unsaved until Save camera. Alt+Arrow nudges a selected camera 0.5 m; [ and ] rotate it 5°.</p>
+        <p>Camera coverage, distances and handoffs are planning estimates. Real video sampling is opt-in under a selected camera's Image diagnostics.</p>
+      </section>}
       {!plan.buildings.length && !plan.cameras.length && !plan.labels.length && !plan.zones?.length && !plan.route.length && tool==='select' && step===0 && <FacilityEmptyState disabled={navigationDirty} onDraw={()=>{go(1);if(ready)startTool('building');}} onImport={onOpenImport} onLocate={()=>{go(0);input.current?.closest('section')?.querySelector('[aria-label="Facility name"]')?.focus();}}/>}
       <div className="facility-map" ref={mapEl} role="group" aria-label="Facility map. Use arrow keys to pan; use the add-with-coordinates, rectangle and point-list controls to place items without drawing." />
       <div className="facility-view-controls" role="group" aria-label="Map view">{[["2d", "2D"], ["3d", "3D"], ["floors", "Floors"]].
@@ -685,7 +714,7 @@ pect its modeled view.", "Draw a route and review proposed camera transitions.",
         {selected.kind === 'camera' && draft?.id === selected.id && <>
           <div className="facility-camera-actions"><button className="facility-secondary" disabled={!ready} onClick={()=>api.current?.centerCamera(selected.id)}><Crosshair/>Center camera</button><button className="facility-secondary" disabled={!ready} onClick={()=>startTool('aim-camera')}>Aim on map</button><button className="facility-secondary" disabled={!ready} onClick={()=>startTool('move-camera')}>Move on map</button></div>
           <p className="facility-caption facility-manipulate-help">Drag the selected camera or its round heading handle on the map. With the map or a button focused, Alt+Arrow nudges 0.5 m and [ or ] rotates 5°. These change the preview only; Save camera commits.</p>
-          <FacilityCameraPreview onCount={onPreviewCount} key={selected.id} camera={preview.cameras.find(c=>c.id===selected.id)} onCenter={()=>api.current?.centerCamera(selected.id)} onAim={()=>startTool('aim-camera')}/>
+          <FacilityCameraPreview onCount={onPreviewCount} suspended={mapFocus} key={selected.id} camera={preview.cameras.find(c=>c.id===selected.id)} onCenter={()=>api.current?.centerCamera(selected.id)} onAim={()=>startTool('aim-camera')}/>
         </>}
         {selected.kind === "camera" && draft?.id === selected.id ? <form noValidate className="facility-camera-form" onSubmit={saveSelected}>
           <Field label="Camera name" type="text" value={draft.name} onChange={(v) => change("name", v)} />

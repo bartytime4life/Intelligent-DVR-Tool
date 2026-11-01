@@ -1258,3 +1258,76 @@
 @media(min-width:1650px) {.facility-workspace {grid-template-columns:260px minmax(300px,1fr) 390px;}}
 @media(max-width:900px) {.facility-steps {grid-template-columns:repeat(7,minmax(0,1fr));}.facility-map-tools {top:110px;left:12px;}.facility-floor-picker {top:159px!important;}}
 @media(max-width:620px) {.facility-steps {display:flex;flex-direction:row;overflow-x:auto;gap:4px;}.facility-steps li {flex:0 0 76px;}.facility-file-actions {gap:10px;flex-wrap:wrap;}.facility-map-tools {font-size:10px;gap:5px;top:110px;}.facility-map-tools label {padding:6px;}.facility-map-context {max-width:calc(100% - 24px);}.facility-map-legend {font-size:9px;}.facility-stage {min-height:480px;height:480px;}}
+
+/* Facility Studio: map-first work surface and predictable, accessible controls. */
+.facility-workspace{grid-template-rows:68px minmax(0,1fr);background:#081822}
+.facility-workbench{grid-row:1;grid-column:1/-1;display:flex;align-items:center;gap:14px;padding:9px 16px;border-bottom:1px solid #31515f;background:linear-gradient(115deg,#152f3d,#101f2d 65%,#142c37);min-width:0;z-index:5;box-shadow:0 8px 24px #0002}
+.facility-workbench-identity{display:flex;flex:0 1 240px;min-width:120px;flex-direction:column;gap:3px}
+.facility-workbench-identity strong{letter-spacing:.13em;font-size:11px;color:#8df0e5;white-space:nowrap}
+.facility-workbench-identity span{font-size:11px;color:#b2c9d4;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.facility-workbench-tasks{display:flex;align-items:center;flex:1;min-width:0;overflow-x:auto;scrollbar-width:thin;gap:4px}
+.facility-workbench button{cursor:pointer;flex-shrink:0;min-height:40px;padding:8px 10px;border:1px solid transparent;border-radius:9px;background:transparent;font-size:12px;color:#bed1db;white-space:nowrap;transition:background .15s,border-color .15s}
+.facility-workbench button:hover{background:#264857;color:#f2ffff}
+.facility-workbench button[aria-current=step]{background:#173f46;border-color:#459d9c;color:#a1fff3;font-weight:700}
+.facility-workbench-actions{display:flex;align-items:center;gap:6px;flex-shrink:0}
+.facility-workbench-actions button{border-color:#375766;background:#19333f}
+.facility-workbench-actions .facility-focus-button{border-color:#5b9b98;color:#b7f8ed}
+.facility-workbench-actions .facility-focus-button[aria-pressed=true]{background:#317c7d;color:#061c28;border-color:#73f4df;font-weight:700}
+.facility-workbench-unsaved{font-size:10px;color:#ffd087;font-weight:700;white-space:nowrap}
+.facility-guide,.facility-stage,.facility-properties{grid-row:2}
+.facility-guide{background:linear-gradient(180deg,#102936,#091c29 45%);padding:19px 15px 16px}
+.facility-guide h1{font-size:20px;letter-spacing:-.03em;margin-bottom:7px}
+.facility-intro{line-height:1.55;margin-bottom:17px}
+.facility-steps{margin-bottom:14px}
+.facility-steps button{padding:8px 9px;min-height:50px;border:1px solid transparent;border-radius:10px;cursor:pointer}
+.facility-steps button:hover,.facility-item-list button:hover{background:#1e3b49;border-color:#366171}
+.facility-steps button[aria-current=step]{background:linear-gradient(100deg,#1a484e,#193342);border:1px solid #397b83}
+.facility-steps button strong{font-size:12px}
+.facility-inventory{padding-top:12px}
+.facility-stage{box-shadow:inset 0 0 0 1px #294c5b}
+.facility-properties{background:linear-gradient(180deg,#0e2734,#091a27)}
+.facility-properties header{padding:20px 19px 16px;background:#102a37}
+.facility-properties header h2{font-size:19px}
+.facility-property-body{padding:17px 18px}
+.facility-property-body button,.facility-step-footer button,.facility-file-actions button{cursor:pointer}
+.facility-properties .facility-field input,.facility-properties .facility-field select{border-radius:8px;min-height:40px}
+.facility-primary,.facility-secondary{border-radius:8px;min-height:40px}
+.facility-view-controls{border-radius:10px;background:#102c3aec;box-shadow:0 8px 26px #020d14b0}
+.facility-view-controls button{min-height:42px;cursor:pointer}
+.facility-map-context{border:1px solid #325562;border-radius:9px;background:#0e2736eb}
+.facility-workspace button:focus-visible,.facility-workspace input:focus-visible,.facility-workspace select:focus-visible,.facility-workspace summary:focus-visible{outline:2px solid #8afff0;outline-offset:2px}
+.facility-workbench-help{position:absolute;z-index:12;top:78px;left:50%;transform:translateX(-50%);width:min(460px,calc(100% - 30px));border:1px solid #62a3a5;border-radius:14px;background:#102c3bf5;box-shadow:0 18px 50px #000c;padding:14px 17px;line-height:1.65;color:#d8e9ef}
+.facility-workbench-help>div{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.facility-workbench-help strong{font-size:13px;color:#b5fff3}
+.facility-workbench-help button{border:1px solid #49727a;background:#1b414d;border-radius:7px;color:#edf8fc;min-height:36px;min-width:36px;cursor:pointer}
+.facility-workbench-help p{font-size:12px;margin:8px 0}
+.facility-workbench-help kbd{font:600 11px ui-monospace,monospace;color:#ffe2a2;border:1px solid #59717a;border-radius:4px;padding:2px 5px;background:#1d3e48}
+.facility-workspace.is-map-focused{grid-template-columns:minmax(0,1fr)!important}
+.facility-workspace.is-map-focused .facility-guide,.facility-workspace.is-map-focused .facility-properties{display:none!important}
+.facility-workspace.is-map-focused .facility-stage{grid-row:2;grid-column:1/-1;min-width:0}
+@media(max-width:1200px){.facility-workbench{gap:7px;padding:8px 10px}.facility-workbench-identity{flex-basis:160px}.facility-workbench button{padding:7px 8px;font-size:11px}}
+@media(max-width:900px){
+ .facility-workspace{grid-template-rows:auto auto minmax(450px,1fr)}
+ .facility-workbench{grid-row:1;min-height:62px;flex-wrap:wrap}
+ .facility-workbench-identity{flex:1 1 150px}
+ .facility-workbench-tasks{order:3;flex-basis:100%;width:100%}
+ .facility-guide{grid-row:2;grid-column:1/-1}
+ .facility-stage{grid-row:3;grid-column:1}
+ .facility-properties{grid-row:3;grid-column:2}
+ .facility-workspace.is-map-focused{grid-template-rows:auto minmax(580px,1fr)}
+ .facility-workspace.is-map-focused .facility-stage{grid-row:2}
+}
+@media(max-width:620px){
+ .facility-workspace{display:flex;flex-direction:column}
+ .facility-workbench{position:relative;flex:0 0 auto;gap:5px}
+ .facility-workbench-identity{flex:1 1 120px}
+ .facility-workbench-actions{gap:4px}
+ .facility-workbench-actions button{font-size:11px;min-height:36px}
+ .facility-workbench-unsaved{font-size:9px}
+ .facility-workbench-tasks{overflow:auto;order:3;flex-basis:100%}
+ .facility-workbench-tasks button{min-height:37px}
+ .facility-guide{flex:0 0 auto}
+ .facility-workspace.is-map-focused .facility-stage{height:calc(100dvh - 205px);min-height:460px;flex:1}
+ .facility-workbench-help{top:68px}
+}
+@media(prefers-reduced-motion:reduce){.facility-workbench button{transition:none}}
