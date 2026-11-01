@@ -60,7 +60,12 @@ export default function LiveMonitor({onZoneStill, queue, visibleTiles=4, onCount
     // Return focus to the control that opened the dialog, not to a source-type button inside it.
     if (!setupOpen) return;
     const previous = document.activeElement; dialog.current.showModal();
-    return () => previous?.focus();
+    return () => {
+      // The first-run onboarding button disappears when a source becomes active.
+      // Never restore focus to a detached element after successful connection.
+      const fallback = document.querySelector('.live-heading .button.amber');
+      (previous?.isConnected ? previous : fallback)?.focus();
+    };
   }, [setupOpen]);
   useEffect(() => {
     let disposed = false, timer;

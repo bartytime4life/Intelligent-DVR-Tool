@@ -117,3 +117,12 @@ test('onboarding source paths reuse explicit setup without opening a camera by t
   await expect(page.locator('.camera-wall img,.camera-wall video')).toHaveCount(0);
   await expect(page.locator('.live-tile')).toHaveCount(0);
 });
+
+test('after connecting from first-run choice, focus returns to a reachable toolbar control',async({page})=>{
+  await page.goto('/');
+  await page.getByRole('region',{name:'Start camera monitoring'}).getByRole('button',{name:/Computer webcam/}).click();
+  await page.getByRole('button',{name:'Connect webcam',exact:true}).click();
+  await page.getByRole('button',{name:'View camera wall'}).click();
+  await expect(page.locator('.monitor-welcome')).toHaveCount(0);
+  await expect(page.getByRole('button',{name:'Connect source',exact:true})).toBeFocused();
+});

@@ -191,5 +191,5 @@ test('Facility Studio has one compact task selector plus descriptive sidebar ste
   await expect(page.getByRole('heading',{name:'Aim this camera'})).toBeVisible();
   await page.getByRole('button',{name:/^2 Buildings/}).click();
   await expect(task).toHaveValue('1');
-  await expect(page.getByRole('heading',{name:'Place your buildings'})).toBeVisible();
+  await expect(page.getByRole('heading',{name:'Shape a building'})).toBeVisible();
 });
