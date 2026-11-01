@@ -30,7 +30,7 @@ test('new installs start with one blank facility and no sample map features',asy
   for(const key of ['buildings','cameras','rooms','labels','zones','openings','stairs','paths','route'])expect(plan[key]).toEqual([]);
   await expect(page.locator('.facility-map-label')).toHaveCount(0);
   await expect(page.locator('.facility-dimension-label')).toHaveCount(0);
-  await expect(page.getByRole('button',{name:'Draw first building',exact:true})).toBeVisible();
+  await expect(page.getByRole('button',{name:'Add first building',exact:true})).toBeVisible();
   expect(await page.evaluate(key=>localStorage.getItem(key),legacyKey)).toBeNull();
   await page.screenshot({path:info.outputPath('blank-facility-start.png'),fullPage:true});
   await page.reload();
@@ -196,7 +196,6 @@ test('file reads recheck current drafts before selecting an imported facility',a
 test('custom shape drafts survive collapsed controls and block navigation until applied or discarded',async({page})=>{
   await openBlank(page);
   await page.getByRole('button',{name:/^2 Buildings/}).click();
-  await page.getByText('Common building shapes',{exact:true}).click();
   await page.getByLabel('Shape width (m)',{exact:true}).fill('50');
   await expect(page.getByLabel('Saved facility',{exact:true})).toBeDisabled();
   await expect(page.getByRole('button',{name:'Add selected shape',exact:true})).toBeEnabled();

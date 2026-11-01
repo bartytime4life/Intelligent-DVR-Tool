@@ -1,4 +1,4 @@
-import { buildingArea } from "./facility.mjs";
+import BuildingShapePicker from "./BuildingShapePicker.jsx";
 import React, { useEffect, useMemo, useRef, useState, useContext } from "react";
 import {
   MapPin,
@@ -39,23 +39,31 @@ import {
   routePoint,
   seesPoint,
   wallObstacles,
-  polygonArea,
   pointInPolygon,
   groundRange
 } from "./facility.mjs";
 import { createFacilityMap } from "./facility-map.mjs";
-import { OpenMapStarter, ShapeBuilder, MeasurementSummary, ConstructionGuide } from './FacilityStarter.jsx';
+import { OpenMapStarter, MeasurementSummary, ConstructionGuide } from './FacilityStarter.jsx';
 import { draftFacility } from './facility-starter.mjs';
 import { AddressSearch } from "./AddressSearch.jsx";
 import LineDimensions from './LineDimensions.jsx';
 import ShapeDimensions from './ShapeDimensions.jsx';
 import FloorGeometry,{PointListEntry} from './FloorGeometry.jsx';
-import FacilityStairs from './FacilityStairs.jsx';
-import {unitFactor, displayLength, unitLabel, enteredLength, localizeLengths} from './facility-shape-edit.mjs';
-import {formatDistance,formatArea} from './facility-measurements.mjs';
+import FacilityStairs,{StairDestination} from './FacilityStairs.jsx';
+import {stairAtStart,suggestedStair,stairPlacementIssue} from './facility-stair-placement.mjs';
+import {addBuildingLevel} from './facility.mjs';
+import {unitFactor, displayLength, unitLabel, enteredLength, localizeLengths, nextBuildingName, rotateShape, shapeBounds, suggestBuildingOffset, translateShape} from './facility-shape-edit.mjs';
+import {formatDistance} from './facility-measurements.mjs';
 import {createFloorOpening,createFloorPath,snapToBuilding,solidSpaceProblem,applyBuildingEdit,buildingMotion,fittingRectangle,reoriginPlan,SNAP_TOLERANCE} from './facility.mjs';
 import {backdropDismiss} from './dialog-dismiss.mjs';
 import FacilityLevels from './FacilityLevels.jsx';
+import RoomSketch from './RoomSketch.jsx';
+import RoomWallEditor from './RoomWallEditor.jsx';
+import FacilityDoorways from './FacilityDoorways.jsx';
+import FacilityWindows from './FacilityWindows.jsx';
+import {WINDOW_WIDTH,placeWindow,windowFloorHeight} from './facility-windows.mjs';
+import {DOOR_WIDTH,placeDoorway} from './facility-doorways.mjs';
+import {roomAdditions} from './facility-room-sketch.mjs';
 import FacilityZones from './FacilityZones.jsx';
 import { createFacilityZone } from './facility-zones.mjs';
 import FacilityCameraPreview from './FacilityCameraPreview.jsx';
@@ -67,7 +75,7 @@ const MeasurementUnits = React.createContext("metric");
 import FacilityLibrary,{downloadFacilityData} from './FacilityLibrary.jsx';
 import {facilityFilename} from './facility-library.mjs';
 import {FacilityEmptyState} from './FacilitySwitcher.jsx';
-const keyOf = { building: "buildings", camera: "cameras", room: "rooms", label: "labels", zone: "zones", opening: "openings", stair: "stairs", path: "paths" };
+const keyOf = { building: "buildings", camera: "cameras", room: "rooms", doorway:"doorways", window:"windows", label: "labels", zone: "zones", opening: "openings", stair: "stairs", path: "paths" };
 const round = (n) => Math.round(n * 100) / 100;
 function download(data){downloadFacilityData(data,facilityFilename(data));}
 // Length fields keep the typed text and convert only a changed number; limits round outward so 3.28 ft still means 1 m.
@@ -90,20 +98,24 @@ function Field({ name, label, value, onChange, min, max, step = "any", type = "n
   return <label className="facility-field"><span>{label}{suffix && <small>{length?unitLabel(units):suffix}</small>}</span><input name={name} aria-label={label} type={type} value={type==='number'?text:value ?? ''} required min={lo} max={hi} step={type === 'number' ? step : undefined} maxLength={type === 'text' ? maxLength : undefined} onChange={e=>change(e.target.value)}/></label>;
 }
 // Steps that can select an item kind in place; other kinds open their own step.
-const STEP_KINDS = [[], ["building"], ["building", "room", "label", "opening", "path", "stair"], ["camera"], ["camera"], ["camera"], ["zone"]];
-const HOME_STEP = { building: 1, room: 2, label: 2, opening: 2, path: 2, stair: 2, camera: 3, zone: 6 };
+const STEP_KINDS = [[], ["building"], ["building", "room", "doorway", "window", "label", "opening", "path", "stair"], ["camera"], ["camera"], ["camera"], ["zone"]];
+const HOME_STEP = { building: 1, room: 2, doorway:2, window:2, label: 2, opening: 2, path: 2, stair: 2, camera: 3, zone: 6 };
 const SOLID_KINDS = { room: "Room", opening: "Floor opening", "floor-path": "Floor pathway" };
 // onDirtyChange(true) while leaving would discard unsaved edits, drafts or memory-only facilities.
 function FacilityBuilder({onDirtyChange,...props}){return <FacilityLibrary onDirtyChange={onDirtyChange}>{libraryProps=><FacilityEditor key={libraryProps.facilityId} {...props} {...libraryProps}/>}</FacilityLibrary>;}
 function FacilityEditor({onPreviewCount,initialPlan,facilityControls,onPersist,onDraftChange,onImportFacilities,onOpenImport}) {
   const initial=useRef({plan:initialPlan,status:'Ready to edit',error:''});
   const [siteDirty,setSiteDirty]=useState(false),[shapePending,setShapePending]=useState(false),[linePending,setLinePending]=useState(false);
-  const [zoneDirty, setZoneDirty] = useState(false), [stairDirty,setStairDirty]=useState(false);
+  const [shapeOpen,setShapeOpen] = useState(false), [shapePreview,setShapePreview] = useState(null);
+  const positionPick = useRef(null), newBuildingFocus = useRef(null), properties = useRef(null);
+  const [zoneDirty, setZoneDirty] = useState(false);
   const [mapFocus, setMapFocus] = useState(false), [helpOpen, setHelpOpen] = useState(false);
   const [calibrationMapPick,setCalibrationMapPick]=useState(null);
   const mapCalibrationRequest=useRef(null);
   const [measurements, setMeasurements] = useState(true), [units, setUnits] = useState(()=>{try{return localStorage.getItem("dvr.facility.units")==="imperial"?"imperial":"metric";}catch{return "metric";}}), [mapBearing, setMapBearing] = useState(-27);
   const [pickedOrigin,setPickedOrigin]=useState(null), [drawnArea,setDrawnArea]=useState(null);
+  const [sketchOpen,setSketchOpen]=useState(false);
+  const [wallRoomId,setWallRoomId]=useState(null);
   const [pasteOpen, setPasteOpen] = useState(false);
   const [blindZone, setBlindZone] = useState(''), [dragging, setDragging] = useState('');
   const [mapDrafts, setMapDrafts] = useState([]), [searchArea, setSearchArea] = useState(null);
@@ -128,15 +140,26 @@ function FacilityEditor({onPreviewCount,initialPlan,facilityControls,onPersist,o
   const mapEl = useRef(), api = useRef(), input = useRef(), latest = useRef(), fans = useRef();
   fans.current ||= fanCache();
   const selectedItem = plan[keyOf[selected.kind]]?.find((x) => x.id === selected.id);
-  const propertyDirty = !['zone','stair'].includes(selected.kind) && !!(draft && selectedItem && draft.id === selectedItem.id && JSON.stringify(draft) !== JSON.stringify(selectedItem));
-  const dirty = propertyDirty || zoneDirty || stairDirty || siteDirty;
+  const directPlacement=['window','doorway','stair'].includes(selected.kind);
+  const propertyDirty = selected.kind!=='zone' && !!(draft && draft.id === selected.id && (selectedItem || directPlacement) && JSON.stringify(draft) !== JSON.stringify(selectedItem));
+  const dirty = propertyDirty || zoneDirty ||  siteDirty;
   const editingDirty=dirty || shapePending || linePending;
-  const navigationDirty=editingDirty || mapDrafts.length>0 || tool!=='select';
+  const navigationDirty=sketchOpen || !!wallRoomId || editingDirty || mapDrafts.length>0 || tool!=='select';
   useEffect(()=>{onDraftChange(navigationDirty);return()=>onDraftChange(false);},[navigationDirty,onDraftChange]);
-  useEffect(() => setDraft(selectedItem ? structuredClone(selectedItem) : null), [selectedItem]);
-  useEffect(()=>{if(selectedItem && ['opening','path','stair'].includes(selected.kind)){setFloorBuilding(selectedItem.buildingId);setFloor(selectedItem.level ?? selectedItem.fromLevel);setView('floors');}},[selected.kind,selected.id,selectedItem?.id]);
+  useEffect(() => {
+    if(directPlacement && !selectedItem)return;
+    setDraft(selectedItem ? structuredClone(selectedItem) : null);
+  }, [selectedItem]);
+  useEffect(()=>{if(selectedItem && ['window','doorway','opening','path','stair'].includes(selected.kind)){setFloorBuilding(selectedItem.buildingId);setFloor(selectedItem.level ?? selectedItem.fromLevel);setView('floors');}},[selected.kind,selected.id,selectedItem?.id]);
   const b = plan.buildings.find((x) => x.id === floorBuilding) || plan.buildings[0];
   useEffect(() => { if (b) setFloor(f => Math.min(f, b.floors - 1)); else setFloor(0); }, [b?.id, b?.floors]);
+  const stairEditor=step===2 && selected.kind==='stair' && draft?.id===selected.id && draft.buildingId===b?.id && draft.fromLevel===floor ? draft : null;
+  useEffect(()=>{
+    if(!stairEditor || !window.matchMedia('(min-width:1101px)').matches)return;
+    const body=properties.current?.querySelector('.facility-property-body'),section=body?.querySelector('.facility-stairs');
+    if(section)body.scrollTop+=section.getBoundingClientRect().top-body.getBoundingClientRect().top-12;
+  },[stairEditor?.id]);
+  const stairIssue=useMemo(()=>stairEditor ? stairPlacementIssue(plan,b,stairEditor) : '',[plan,b,stairEditor]);
   const rehearsal = useMemo(() => plan.route.length > 1 ? rehearse(plan) : [], [plan]);
   // Simulated walking time; long routes play back faster so a run takes about a minute.
   const duration = useMemo(() => rehearsalSeconds(plan.route), [plan.route]), playRate = Math.max(1, Math.ceil(duration / 60));
@@ -196,12 +219,14 @@ function FacilityEditor({onPreviewCount,initialPlan,facilityControls,onPersist,o
       setTool('select');
       api.current?.setTool('select');
     }
+    if (positionPick.current) { setError("Finish or cancel map placement before selecting another item."); return false; }
     if (editingDirty) {
       setError("Save or discard your preview before selecting another item.");
       return false;
     }
+    if (step === 1) setShapeOpen(false);
     setSelected({ id, kind });
-    if(["opening","path","stair"].includes(kind)){const item=plan[keyOf[kind]]?.find(x=>x.id===id);if(item){setFloorBuilding(item.buildingId);setFloor(item.level ?? item.fromLevel);setView("floors");}}
+    if(["window","doorway","opening","path","stair"].includes(kind)){const item=plan[keyOf[kind]]?.find(x=>x.id===id);if(item){setFloorBuilding(item.buildingId);setFloor(item.level ?? item.fromLevel);setView("floors");}}
     if(kind === 'building' && id !== floorBuilding) {setFloorBuilding(id);setFloor(0);}
     setError("");
     return true;
@@ -217,7 +242,7 @@ function FacilityEditor({onPreviewCount,initialPlan,facilityControls,onPersist,o
     const here=STEP_KINDS[step].includes(kind);
     // Building envelopes are backdrop context while placing cameras, routes or zones.
     if(!here && step>=3 && kind==='building') return;
-    if (kind === 'zone') {if(!editingDirty){if(!here)setStep(6);selectZone(id);}else setError('Save or discard your preview before selecting another item.');return;}
+    if (kind === 'zone') {if(!editingDirty && !positionPick.current){if(!here)setStep(6);selectZone(id);}else setError('Save or discard your preview before selecting another item.');return;}
     if(!select(id,kind)) return;
     if(kind==='room') { const room=plan.rooms.find(r=>r.id===id); if(room){setFloorBuilding(room.buildingId);setFloor(room.level);setView('floors');}}
     if(!here) setStep(HOME_STEP[kind]);
@@ -257,9 +282,7 @@ function FacilityEditor({onPreviewCount,initialPlan,facilityControls,onPersist,o
     }
     if (kind === "route") return commit({ ...plan, route: ring }, "Route saved");
     if (kind === "building") {
-      const item = { id: uid("b"), name: "New building", footprint: ring.map((p) => p.map(round)), height: 8, floors: 2 };
-      if (!commit({ ...plan, buildings: [...plan.buildings, item] }, "Building saved")) return false;
-      select(item.id, "building");return true;
+      return addBuilding({name:"Building",footprint:ring.map(p=>p.map(round)),height:8,floors:2});
     }
     if (kind === "room" && b) {
       const fit=solidPoints(kind,ring);
@@ -269,6 +292,77 @@ function FacilityEditor({onPreviewCount,initialPlan,facilityControls,onPersist,o
       select(item.id, "room");return true;
     }
     return true;
+  }
+  const sketchBlock = !b ? 'Add a building first.' : b.openFloors?.includes(floor) ? 'Choose a level with a solid floor.' : plan.rooms.length>=LIMITS.rooms ? 'This facility has reached the room limit.' : editingDirty || mapDrafts.length || tool!=='select' ? 'Finish the current edit before sketching.' : '';
+  const roomsHere = plan.rooms.filter(room => room.buildingId === b?.id && room.level === floor);
+  const wallRoom = roomsHere.find(room => room.id === wallRoomId);
+  function openWalls() {
+    const room = roomsHere.find(item => item.id === selected.id) || roomsHere[0];
+    if (!room || navigationDirty || b.openFloors?.includes(floor)) return;
+    setError('');setWallRoomId(room.id);
+  }
+  function closeWalls(id) {
+    setWallRoomId(null);
+    if (id) setSelected({kind:'room',id});
+    requestAnimationFrame(()=>properties.current?.querySelector('.room-walls-launch')?.focus({preventScroll:true}));
+  }
+  function addDoorway(wall,point) {
+    if(editingDirty){setError('Save or discard your preview before placing another doorway.');return false;}
+    try {
+      const rooms=wall.roomIds.map(id=>plan.rooms.find(r=>r.id===id));
+      const width=Math.min(DOOR_WIDTH.initial,Math.hypot(wall.points[1][0]-wall.points[0][0],wall.points[1][1]-wall.points[0][1]));
+      const door=placeDoorway(plan,wall,point,{id:uid('d'),name:nextBuildingName(plan.doorways || [],'Doorway'),width,height:Math.min(2.1,...rooms.map(r=>r.wallHeight))});
+      validateFacility({...plan,doorways:[...(plan.doorways || []),door]});
+      if(tool!=='doorway')newBuildingFocus.current=wall.buildingId;
+      setSelected({kind:'doorway',id:door.id});setDraft(door);setError('');setTool('select');setView('floors');
+      api.current?.setTool('select');return true;
+    }catch(e){setError(e.message);return false;}
+  }
+  function addWindow(wall,point) {
+    if(editingDirty || mapDrafts.length || !['select','window'].includes(tool)){setError('Finish the current edit before placing a window.');return false;}
+    try {
+      const building=plan.buildings.find(b=>b.id===wall.buildingId),rise=windowFloorHeight(building);
+      const width=Math.min(WINDOW_WIDTH.initial,Math.hypot(wall.points[1][0]-wall.points[0][0],wall.points[1][1]-wall.points[0][1]));
+      const sill=Math.min(.9,Math.max(0,rise-.2)/2),height=Math.min(1.2,rise-sill);
+      const item=placeWindow(plan,wall,point,{id:uid('w'),name:nextBuildingName(plan.windows || [],'Window'),width,height,sill});
+      validateFacility({...plan,windows:[...(plan.windows || []),item]});
+      if(tool!=='window')newBuildingFocus.current=wall.buildingId;
+      setSelected({kind:'window',id:item.id});setDraft(item);setTool('select');setView('floors');setError('');
+      api.current?.setTool('select');return true;
+    } catch(e){setError(e.message);return false;}
+  }
+  function addStair(point) {
+    if(editingDirty || mapDrafts.length || !['select','stair'].includes(tool) || plan.stairs.length>=LIMITS.stairs)return;
+    try {
+      const stair=point?stairAtStart(plan,b,floor,point):suggestedStair(plan,b,floor);
+      if(!point)newBuildingFocus.current=b.id;
+      const item={...stair,name:nextBuildingName(plan.stairs,'Straight stair')};
+      setSelected({kind:'stair',id:item.id});setDraft(item);setError('');setView('floors');setTool('select');api.current?.setTool('select');
+    }catch(e){setError(e.message);}
+  }
+  function addStairLevel() {
+    try{commit(addBuildingLevel(plan,b.id),'Destination level added — choose Place stairs to mark the start.');}catch(e){setError(e.message);}
+  }
+  function discardPlacement() {
+    setError('');
+    if(selectedItem)setDraft(structuredClone(selectedItem));
+    else {setDraft(null);setSelected({kind:'building',id:b.id});}
+  }
+  function openSketch() {
+    if (sketchBlock) return;
+    go(2); setMapFocus(false); setSketchOpen(true);
+  }
+  function closeSketch() {
+    setSketchOpen(false);setError('');
+    requestAnimationFrame(()=>properties.current?.querySelector('.room-sketch-launch button')?.focus({preventScroll:true}));
+  }
+  function saveSketch(rooms) {
+    try {
+      const items=roomAdditions(plan,b,floor,rooms,()=>uid('r'));
+      if (commit({...plan,rooms:[...plan.rooms,...items]}, items.length+' room'+(items.length===1?'':'s')+' added — Undo available')) {
+        setSelected({kind:'room',id:items[0].id}); closeSketch();
+      }
+    } catch(e) {setError(e.message);}
   }
   function addRectangularRoom() {
     if (editingDirty) { setError("Save or discard your preview before adding a room."); return; }
@@ -349,7 +443,38 @@ function FacilityEditor({onPreviewCount,initialPlan,facilityControls,onPersist,o
     setTool('calibration-ground');setView('2d');setError('');
     api.current?.setTool('calibration-ground');
   }
-  latest.current = { undo, redo, go, cameraKey, onBearing:setMapBearing,
+  function pickBuildingPosition(preview, apply, button) {
+    if (!ready || tool !== 'select') return;
+    positionPick.current = {preview,apply,button};
+    setView('2d');
+    setError('');
+    setTool('position-building');
+    api.current.setTool('position-building',preview);
+    mapEl.current.querySelector('canvas')?.focus();
+  }
+  function finishPositionPick() {
+    const pick = positionPick.current;
+    positionPick.current = null;
+    if (pick) requestAnimationFrame(() => pick.button?.focus());
+  }
+  function cancelTool() {
+    api.current?.setTool('select');
+    setTool('select');
+    if (positionPick.current) { finishPositionPick(); setError(''); }
+  }
+  latest.current = { cancelTool, onBuildingPosition: point=>{
+    const pick = positionPick.current;
+    if (!pick) return false;
+    const {shape,center} = pick.preview;
+    if (shape.footprint.some(p=>p.some((v,i)=>Math.abs(v + (point[i] - center[i])) > 2000))) {
+      setError('Choose a position that keeps the entire outline inside the local grid.');
+      return false;
+    }
+    pick.apply(point);
+    setError('');
+    finishPositionPick();
+    return true;
+  }, undo, redo, go, cameraKey, onBearing:setMapBearing, onPlaceStair:addStair,onChangeStair:setDraft,onPlaceWindow:addWindow,onChangeWindow:setDraft,onPlaceDoorway:addDoorway,onMoveDoorway:door=>{setDraft(door);setError('');},onDoorwayError:setError,
     onCalibrationGround: point=>{
       const token=mapCalibrationRequest.current;mapCalibrationRequest.current=null;
       if(token) setCalibrationMapPick(previous=>({token,point,serial:(previous?.serial||0)+1}));
@@ -358,7 +483,7 @@ function FacilityEditor({onPreviewCount,initialPlan,facilityControls,onPersist,o
   }, onReady: () => setReady(true), onError: setMapError };
   useEffect(() => {
     try {
-      api.current = createFacilityMap(mapEl.current, Object.fromEntries(["onBearing", "onAim", "onMoveCamera", "onCameraDrag", "onPin", "onDraw", "onPlace", "onSelect", "onCalibrationGround", "onToolDone", "onReady", "onError"].map((k) => [k, (...args) => latest.current[k](...args)])), plan, {fans: fans.current});
+      api.current = createFacilityMap(mapEl.current, Object.fromEntries(["onPlaceStair","onChangeStair","onPlaceWindow","onChangeWindow","onPlaceDoorway","onMoveDoorway","onDoorwayError","onBuildingPosition", "onBearing", "onAim", "onMoveCamera", "onCameraDrag", "onPin", "onDraw", "onPlace", "onSelect", "onCalibrationGround", "onToolDone", "onReady", "onError"].map((k) => [k, (...args) => latest.current[k](...args)])), plan, {fans: fans.current});
     } catch (e) {
       setMapError("3D graphics are unavailable here. You can still edit numeric properties and export the plan. " + e.message);
     }
@@ -371,10 +496,10 @@ function FacilityEditor({onPreviewCount,initialPlan,facilityControls,onPersist,o
     };
   }, []);
   // A building move/rotation carries its contents; other edits replace only the selected item.
-  const edited = (kind, item) => kind === 'building' ? applyBuildingEdit(plan, item) : { ...plan, [keyOf[kind]]: plan[keyOf[kind]].map((x) => x.id === item.id ? item : x) };
+  const edited = (kind, item) => ['window','doorway','stair'].includes(kind) ? {...plan,[keyOf[kind]]:plan[keyOf[kind]].some(d=>d.id===item.id)?plan[keyOf[kind]].map(d=>d.id===item.id?item:d):[...plan[keyOf[kind]],item]} : kind === 'building' ? applyBuildingEdit(plan, item) : { ...plan, [keyOf[kind]]: plan[keyOf[kind]].map((x) => x.id === item.id ? item : x) };
   // Typing settles for 120 ms before the preview is validated and the map rebuilt; Save always uses the live draft.
   const [settledDraft, setSettledDraft] = useState(draft);
-  useEffect(() => { if (settledDraft === draft) return; const timer = setTimeout(() => setSettledDraft(draft), 120); return () => clearTimeout(timer); }, [draft]);
+  useEffect(() => { if (settledDraft === draft) return; if(directPlacement){setSettledDraft(draft);return;} const timer = setTimeout(() => setSettledDraft(draft), 120); return () => clearTimeout(timer); }, [draft,selected.kind]);
   const { plan: preview, error: previewError } = useMemo(() => {
     if (!propertyDirty || !keyOf[selected.kind] || settledDraft?.id !== selected.id) return { plan, error: '' };
     try {
@@ -390,8 +515,13 @@ function FacilityEditor({onPreviewCount,initialPlan,facilityControls,onPersist,o
       try { displayed = draftFacility(preview, mapDrafts, replaceDrafts); } catch(e) { failure = e.message; }
     }
     setDraftPreviewError(failure);
-    api.current?.update(displayed, selected.id, view, floor, {measurements, units, floorBuildingId:b?.id, manipulate});
-  }, [preview, mapDrafts, replaceDrafts, selected.id, view, floor, ready, measurements, units, b?.id, manipulate]);
+    api.current?.update(displayed, selected.id, view, floor, {measurements, units, floorBuildingId:b?.id, apertureEditing:directPlacement && step===2, stairEditor, apertureDragEnabled:!previewError, manipulate});
+    if (ready && newBuildingFocus.current) {
+      api.current?.centerSelection(newBuildingFocus.current);
+      newBuildingFocus.current = null;
+    }
+  }, [preview, previewError, mapDrafts, replaceDrafts, selected.id, view, floor, ready, measurements, units, b?.id, manipulate, stairEditor, directPlacement, step]);
+  useEffect(() => api.current?.setBuildingPreview(step === 1 && shapeOpen ? shapePreview : null), [step,shapeOpen,shapePreview,ready]);
   // Coverage metrics sample the same cached fans the map draws, from the previewed plan.
   const coverage = useMemo(() => step === 4 ? coverageMetrics(preview, fans.current(wallObstacles(preview))) : null, [step, preview]);
   const blindSpots = useMemo(() => {
@@ -403,9 +533,9 @@ function FacilityEditor({onPreviewCount,initialPlan,facilityControls,onPersist,o
   useEffect(() => api.current?.setTrack(step === 5 ? position : null), [step, seconds, plan, ready]);
   useEffect(() => {
     const stop = (e) => {
+      if (e.target?.closest?.("dialog")) return;
       if (e.key === "Escape") {
-        api.current?.setTool("select");
-        setTool("select");
+        latest.current.cancelTool();
         setHelpOpen(false);
       }
       // Ctrl/Cmd+Z undo, Ctrl/Cmd+Shift+Z or Ctrl+Y redo, unless focus is in a text-entry control.
@@ -431,6 +561,9 @@ function FacilityEditor({onPreviewCount,initialPlan,facilityControls,onPersist,o
       setError("Save or discard your preview before changing steps.");
       return;
     }
+    positionPick.current = null;
+    setShapeOpen(n === 1 && !plan.buildings.length);
+    if (n === 1 && !plan.buildings.length) setView('2d');
     setStep(n);
     setError("");
     setTool("select");
@@ -449,13 +582,18 @@ function FacilityEditor({onPreviewCount,initialPlan,facilityControls,onPersist,o
     if (n === 5) setView("3d");
     if (n === 6) { setView("2d"); setSelected({kind:'zone',id:plan.zones?.[0]?.id || ''}); }
   }
+  function switchFloor(level) {
+    if(editingDirty){setError('Save or discard your preview before changing floors.');return;}
+    if(directPlacement && (draft?.level ?? draft?.fromLevel)!==level)setSelected({kind:'building',id:b?.id || ''});
+    setFloor(level);setView('floors');
+  }
   function startTool(kind) {
     if (editingDirty && !["aim-camera", "move-camera"].includes(kind)) {
       setError("Save or discard your preview before drawing.");
       return;
     }
     setError("");
-    if (["room","opening","floor-path"].includes(kind) && !b) {
+    if (["stair","window","doorway","room","opening","floor-path"].includes(kind) && !b) {
       setError("Add a building before drawing floor geometry.");
       return;
     }
@@ -466,12 +604,15 @@ function FacilityEditor({onPreviewCount,initialPlan,facilityControls,onPersist,o
     }
     setTool(kind);
     if (["building", "route", "zone", "search-area", "site-pin", "camera", "aim-camera", "move-camera"].includes(kind) || kind === "label" && view !== "floors") setView("2d");
-    if (["room","opening","floor-path"].includes(kind)) setView("floors");
+    if (["stair","window","doorway","room","opening","floor-path"].includes(kind)) setView("floors");
     api.current?.setTool(kind);
+    if(['window','doorway','stair'].includes(kind) && b){if(directPlacement)setSelected({kind:'building',id:b.id});api.current?.centerSelection(b.id);}
+    if(['window','stair'].includes(kind) && window.matchMedia('(max-width:620px)').matches)mapEl.current?.scrollIntoView({block:'center'});
   }
   function saveSelected(e) {
     e.preventDefault();
     if (!draft) return;
+    if(selected.kind==='stair' && stairIssue){setError(stairIssue);return;}
     let next;
     try { next = edited(selected.kind, draft); } catch (x) { setError(x.message); return; }
     const motion = selected.kind === 'building' && selectedItem && buildingMotion(selectedItem, draft);
@@ -481,7 +622,10 @@ function FacilityEditor({onPreviewCount,initialPlan,facilityControls,onPersist,o
     if (!selectedItem) return;
     const next = { ...plan, [keyOf[selected.kind]]: plan[keyOf[selected.kind]].filter((x) => x.id !== selected.id) };
     if (selected.kind === "camera") next.zones = (plan.zones || []).map(z => { if(z.imageRegion?.cameraId !== selected.id) return z; const copy={...z}; delete copy.imageRegion; return copy; });
+    if(selected.kind==="room")next.doorways=(plan.doorways || []).filter(d=>!d.roomIds.includes(selected.id));
     if (selected.kind === "building") {
+      next.windows=(plan.windows || []).filter(w=>w.buildingId!==selected.id);
+      next.doorways=(plan.doorways || []).filter(d=>d.buildingId!==selected.id);
       next.rooms = plan.rooms.filter((r) => r.buildingId !== selected.id);
       next.zones = (plan.zones || []).filter(z => z.buildingId !== selected.id);
       next.openings=(plan.openings || []).filter(o=>o.buildingId!==selected.id);
@@ -501,6 +645,7 @@ function FacilityEditor({onPreviewCount,initialPlan,facilityControls,onPersist,o
     if (!prev) return;
     let result;try{result=onPersist(prev);}catch(e){setError(e.message);return;}
     setFuture((f) => [...f.slice(-19), plan]);
+    if(directPlacement && !prev[keyOf[selected.kind]]?.some(d=>d.id===selected.id)){setSelected({kind:'building',id:b?.id || ''});setDraft(null);}
     setPlan(prev);
     setHistory((h) => h.slice(0, -1));
     setError("");
@@ -512,6 +657,7 @@ function FacilityEditor({onPreviewCount,initialPlan,facilityControls,onPersist,o
     if (!next) return;
     let result;try{result=onPersist(next);}catch(e){setError(e.message);return;}
     setHistory((h) => [...h.slice(-19), plan]);
+    if(directPlacement && !next[keyOf[selected.kind]]?.some(d=>d.id===selected.id)){setSelected({kind:'building',id:b?.id || ''});setDraft(null);}
     setPlan(next);
     setFuture((f) => f.slice(0, -1));
     setError("");
@@ -527,19 +673,30 @@ function FacilityEditor({onPreviewCount,initialPlan,facilityControls,onPersist,o
   }
   // Optional camera fields are removed, not stored empty, when their input is cleared.
   const optional = (key, value) => setDraft(d => { const next = {...d}; if (String(value ?? '').trim() === '') delete next[key]; else next[key] = value; return next; });
-  function addRectangle() {
-    if (editingDirty) {
-      setError("Save or discard your preview before adding a building.");
-      return;
-    }
-    const item = { id: uid("b"), name: "New building", height: 8, floors: 2, footprint: [
-      [-20, -20],
-      [20, -20],
-      [20, 0],
-      [-20, 0],
-      [-20, -20]
-    ] };
-    if (commit({ ...plan, buildings: [...plan.buildings, item] }, "Rectangle added")) select(item.id, "building");
+  function addBuilding(shell) {
+    const item = {...shell, id:uid("b"), name:nextBuildingName(plan.buildings,shell.name)};
+    if (!commit({...plan,buildings:[...plan.buildings,item]}, item.name + ' added · Undo available')) return false;
+    setSelected({id:item.id,kind:'building'});
+    setFloorBuilding(item.id);
+    setFloor(0);
+    setShapeOpen(false);
+    newBuildingFocus.current = item.id;
+    return true;
+  }
+  function addSpacedBuilding(shell) {
+    const offset = suggestBuildingOffset(shell,plan.buildings,selected.kind === 'building' ? selectedItem : undefined);
+    if (!offset) { setError('No clear space found. Choose a shape and set its position on the map.'); return; }
+    addBuilding(translateShape(shell,...offset));
+  }
+  function copyOutline() {
+    const {name,footprint,holes,height,base,floors,source} = selectedItem;
+    addSpacedBuilding({name:name.slice(0,95) + ' copy',footprint,holes,height,base,floors,source});
+  }
+  function moveBuilding(event) {
+    const {x,y} = shapeBounds(draft);
+    pickBuildingPosition({shape:draft,center:[x,y]}, point=>{
+      setDraft(translateShape(draft,point[0]-x,point[1]-y));
+    },event.currentTarget);
   }
   async function importFile(e) {
     const f = e.target.files[0];
@@ -554,12 +711,12 @@ function FacilityEditor({onPreviewCount,initialPlan,facilityControls,onPersist,o
   }
   const cameras = plan.cameras.filter((c) => (c.name + " " + c.id).toLowerCase().includes(search.toLowerCase()));
   useEffect(() => setPage((p) => Math.min(p, Math.max(0, Math.ceil(cameras.length / 6) - 1))), [cameras.length]);
-  const toolText = { "calibration-ground":"Select the measured ground marker that corresponds to the current frame reference. Verify its surveyed coordinates before accepting.", opening:"Trace the open area on this floor. The same opening becomes the ceiling void below.", "floor-path":"Click a route through solid floor. Double-click to finish; openings cannot be crossed.", "aim-camera":"Click the point you want this camera to face, then Save camera.", "move-camera":"Click the new mounting position, then Save camera.", zone:"Trace the zone boundary. Click its first corner to finish.", "site-pin":"Click the map to suggest a site location, then review and Save site.", "search-area":"Click the area corners, then its first corner to finish. Review or edit the vertices before loading.", building: "Click each corner, then click the first corner to finish.", room: "Trace a room inside t\
+  const toolText = {stair:"Click the center of the start landing on this floor.",window:"Click a highlighted outside wall. Drag the center to move the window, or drag either end to resize.", doorway:"Click a highlighted shared room wall to place a doorway. Then drag its handle and Save doorway.", "position-building":`Click or tap to position the outline. Hold Shift to snap to whole ${units === 'imperial' ? 'feet' : 'meters'}.`, "calibration-ground":"Select the measured ground marker that corresponds to the current frame reference. Verify its surveyed coordinates before accepting.", opening:"Trace the open area on this floor. The same opening becomes the ceiling void below.", "floor-path":"Click a route through solid floor. Double-click to finish; openings cannot be crossed.", "aim-camera":"Click the point you want this camera to face, then Save camera.", "move-camera":"Click the new mounting position, then Save camera.", zone:"Trace the zone boundary. Click its first corner to finish.", "site-pin":"Click the map to suggest a site location, then review and Save site.", "search-area":"Click the area corners, then its first corner to finish. Review or edit the vertices before loading.", building: "Click each corner, then click the first corner to finish.", room: "Trace a room inside t\
 he selected building. Click its first corner to finish.", route: "Click route points. Double-click the last point to fin\
 ish.", camera: "Click the map to place a camera. Adjust its height and view next.", label: "Click the map to position a \
 label. Inside the active building it belongs to the current level; elsewhere it is a ground label." };
   const change = (key, value) => setDraft((d) => ({ ...d, [key]: value }));
-  const note = <p className="facility-estimate"><WarningCircle size={17} /><span>Estimated ground visibility · verify on site. Opaque walls only; excludes floor slabs, openings, furniture and lens effects.</span></p>;
+  const note = <p className="facility-estimate"><WarningCircle size={17} /><span>Estimated ground visibility · verify on site. Includes doorway gaps; exterior glazing is treated as opaque. Excludes floor slabs, floor openings, furniture and lens effects.</span></p>;
   return <MeasurementUnits.Provider value={units}><section className={`facility-workspace${mapFocus ? ' is-map-focused' : ''}`} aria-label="Guided facility builder">
     <header className="facility-workbench" aria-label="Facility Studio toolbar">
       <div className="facility-workbench-identity"><strong>FACILITY STUDIO</strong><span title={plan.name}>{plan.name} · {plan.buildings.length} buildings · {plan.cameras.length} cameras</span></div>
@@ -588,7 +745,7 @@ label. Inside the active building it belongs to the current level; elsewhere it 
       <div className="facility-inventory"><h2>{step === 1 ? "Buildings" : "Camera inventory"} <small>{step === 1 ? plan.
   buildings.length : plan.cameras.length}</small></h2>
         {step === 1 ? <div className="facility-item-list">{plan.buildings.map((o) => <button className={selected.id === o.
-  id ? "selected" : ""} key={o.id} onClick={() => {select(o.id, "building"); api.current?.centerSelection(o.id);}}><Buildings size={17} /><span>{o.name}<small>{formatDistance(o.height,units)} · {o.floors} floors</small></span></button>)}</div> : <>
+  id ? "selected" : ""} key={o.id} onClick={() => {if (select(o.id, "building")) api.current?.centerSelection(o.id);}}><Buildings size={17} /><span>{o.name}<small>{formatDistance(o.height,units)} · {o.floors} floors</small></span></button>)}</div> : <>
           <label className="facility-search"><MagnifyingGlass size={16} /><input aria-label="Find a camera" placeholder="Find a camera…" value={search} onChange={(e) => {
     setSearch(e.target.value);
     setPage(0);
@@ -608,14 +765,14 @@ label. Inside the active building it belongs to the current level; elsewhere it 
   current.click()}><UploadSimple />Import plan</button><button disabled={navigationDirty} onClick={() => setPasteOpen(true)}><UploadSimple />Paste JSON</button><button onClick={undo} disabled={!history.length || navigationDirty} title="Undo (Ctrl/⌘+Z)" aria-keyshortcuts="Control+Z Meta+Z"><ArrowCounterClockwise />Undo edit</button><button onClick={redo} disabled={!future.length || navigationDirty} title="Redo (Ctrl/⌘+Shift+Z or Ctrl+Y)" aria-keyshortcuts="Control+Shift+Z Meta+Shift+Z Control+Y"><ArrowClockwise />Redo edit</button></div>
       <p className="facility-save-state" role="status">{status}</p>
     </aside>
-    <div className="facility-stage">
+    <div className={'facility-stage'+(view==='floors' && (tool==='stair' || stairEditor)?' is-editing-stairs':'')}>
       {helpOpen && <section id="facility-shortcuts" className="facility-workbench-help" role="region" aria-label="Facility keyboard and map help">
         <div><strong>Work faster in Facility Studio</strong><button type="button" onClick={() => setHelpOpen(false)} aria-label="Close facility help"><X size={17}/></button></div>
         <p><kbd>1</kbd>–<kbd>7</kbd> switches tasks, <kbd>?</kbd> toggles this help, and <kbd>Esc</kbd> cancels drawing. Ctrl/⌘+Z undoes committed edits.</p>
         <p>Use <strong>Focus map</strong> to maximize the canvas and stop hidden camera previews, then <strong>Show panels</strong> to edit, save and explicitly reconnect. Camera drag/aim previews are unsaved until Save camera. Alt+Arrow nudges a selected camera 0.5 m; [ and ] rotate it 5°.</p>
         <p>Camera coverage, distances and handoffs are planning estimates. Real video sampling is opt-in under a selected camera's Image diagnostics.</p>
       </section>}
-      {!plan.buildings.length && !plan.cameras.length && !plan.labels.length && !plan.zones?.length && !plan.route.length && tool==='select' && step===0 && <FacilityEmptyState disabled={navigationDirty} onDraw={()=>{go(1);if(ready)startTool('building');}} onImport={onOpenImport} onLocate={()=>{go(0);input.current?.closest('section')?.querySelector('[aria-label="Facility name"]')?.focus();}}/>}
+      {!plan.buildings.length && !plan.cameras.length && !plan.labels.length && !plan.zones?.length && !plan.route.length && tool==='select' && step===0 && <FacilityEmptyState disabled={navigationDirty} onBuild={()=>{go(1);requestAnimationFrame(()=>{properties.current?.querySelector('.building-shapes button')?.focus({preventScroll:true});properties.current?.scrollIntoView({block:'nearest'});});}} onImport={onOpenImport} onLocate={()=>{go(0);input.current?.closest('section')?.querySelector('[aria-label="Facility name"]')?.focus();}}/>}
       <div className="facility-map" ref={mapEl} role="group" aria-label="Facility map. Use arrow keys to pan; use the add-with-coordinates, rectangle and point-list controls to place items without drawing." />
       <div className="facility-view-controls" role="group" aria-label="Map view">{[["2d", "2D"], ["3d", "3D"], ["floors", "Floors"]].
   map(([id, title]) => <button key={id} aria-pressed={view === id} onClick={() => setView(id)}>{title}</button>)}<button className="facility-fit" title="Center facility" aria-label="Center facility" onClick={() => api.
@@ -631,10 +788,18 @@ street map \xB7 OpenStreetMap" : `Local grid · ${formatDistance(20,units)} spac
       {mapError && <div className="facility-map-error" role="alert"><WarningCircle /><span>{mapError}</span><button aria-label="Dismiss graphics message" onClick={() => setMapError(
     ""
   )}><X /></button></div>}
-      {tool !== "select" && <div className="facility-draw-hint" role="status"><Polygon /><span>{toolText[tool]}<small>Escape cancels drawing.</small></span><button onClick={() => {
-    api.current?.setTool("select");
-    setTool("select");
-  }}>Cancel</button></div>}
+      {tool !== "select" && <div className="facility-draw-hint" role="status"><Polygon /><span>{['position-building','stair'].includes(tool) && error ? error : toolText[tool]}<small>Escape cancels drawing.</small></span><button onClick={cancelTool}>Cancel</button></div>}
+      {step===2 && view==='floors' && ready && selected.kind==='window' && draft?.id===selected.id && draft.level===floor && <div className="window-map-actions" role="group" aria-label="Window map actions">
+        <strong>{formatDistance(draft.width,units)} wide</strong>
+        <button type="button" className="facility-secondary" onClick={()=>{setMapFocus(false);requestAnimationFrame(()=>properties.current?.querySelector('.facility-windows')?.scrollIntoView({block:'center'}));}}>Window details</button>
+        {propertyDirty?<button type="submit" form="facility-window-form" aria-label="Save window on map" className="facility-primary" disabled={!!previewError}>Save</button>:<button type="button" className="facility-primary" aria-label="Place another window on map" onClick={()=>startTool('window')}>Add another</button>}
+      </div>}
+      {ready && view==='floors' && stairEditor && <div className="stair-map-actions" role="group" aria-label="Stair map actions">
+        <span>From <strong>L{stairEditor.fromLevel+1}</strong></span><StairDestination onMap building={b} item={stairEditor} onChange={setDraft}/>
+        {propertyDirty ? <><button type="submit" form="facility-stair-form" aria-label="Save stair on map" className="facility-primary" disabled={!!(stairIssue || previewError)}>Save</button>
+          <button type="button" aria-label="Discard stair changes on map" className="facility-secondary" onClick={discardPlacement}><X/></button></> : <button type="button" className="facility-secondary" onClick={()=>startTool('stair')}>Place another</button>}
+        {(stairIssue || previewError) && <small role="status">{stairIssue || previewError}</small>}
+      </div>}
       {dragging && <div className="facility-draw-hint facility-drag-hint" role="status"><VideoCamera /><span>{dragging === 'move' ? 'Moving the selected camera' : 'Aiming the selected camera'}<small>Release to update the unsaved preview. Escape cancels. Save camera commits.</small></span></div>}
       {(step === 2 || view === "floors") && <div className="facility-floor-picker"><Stack size={18} /><select aria-label="Building for floor editing" value={b?.
   id || ""} onChange={(e) => {
@@ -643,12 +808,11 @@ street map \xB7 OpenStreetMap" : `Local grid · ${formatDistance(20,units)} spac
     setFloor(0);
     select(e.target.value, "building");
   }}>{plan.buildings.map((b2) => <option value={b2.id} key={b2.id}>{b2.name}</option>)}</select><select aria-label="Active floor" value={floor} onChange={(e) => {
-    if(editingDirty) {setError("Save or discard your preview before changing floors.");return;}
-    setFloor(+e.target.value);
-    setView("floors");
+    switchFloor(+e.target.value);
   }}>{Array.from({ length: b?.floors || 1 }, (_, i) => <option key={i} value={i}>{i === 0 ? b?.base ? `Lowest modeled floor (${formatDistance(b.base,units)})` : "Ground floor" : "Level " + (i +
   1)}</option>)}</select><button className="facility-secondary" aria-label="Center active building" onClick={()=>b&&api.current?.centerSelection(b.id)}><Crosshair size={17}/></button></div>}
-      <div className="facility-map-legend"><span><i className="coverage-key" />Estimated visibility</span><span><i className="route-key" />Route / object watch</span><span><i className="restricted-key" />Restricted</span><span>Only the selected camera’s 3D volume is shown.</span>{!!blindSpots?.length && <span><i className="blind-spot-key" />Blind spot · estimate</span>}</div>
+      {step === 1 ? <div className="building-map-key">{(shapeOpen && shapePreview || tool === 'position-building') && ready
+        ? <><i/><span>Footprint preview</span>{measurements && shapeOpen && shapePreview && <strong>{formatDistance(shapePreview.width,units)} × {formatDistance(shapePreview.depth,units)}</strong>}</> : 'Building footprints'}</div> : <div className="facility-map-legend"><span><i className="coverage-key" />Estimated visibility</span><span><i className="route-key" />Route / object watch</span><span><i className="restricted-key" />Restricted</span><span>Only the selected camera’s 3D volume is shown.</span>{!!blindSpots?.length && <span><i className="blind-spot-key" />Blind spot · estimate</span>}</div>}
       {step === 5 && <div className="facility-rehearsal"><div className="facility-rehearsal-top"><button aria-label={playing ?
   "Pause rehearsal" : "Play rehearsal"} disabled={plan.route.length < 2} onClick={() => {
     if (seconds >= duration) setSeconds(0);
@@ -659,10 +823,10 @@ street map \xB7 OpenStreetMap" : `Local grid · ${formatDistance(20,units)} spac
   }} /></div><p><strong>Simulated Track P-014</strong><span>{visibleAtPosition.length ? "In estimated view: " + visibleAtPosition.
   join(", ") : "Blind spot \xB7 no camera observation"}</span></p><small>A planned route walked at an assumed {formatDistance(WALK_SPEED, units)}/s ({formatDistance(routeLength(plan.route), units)}), not measured movement or a person identity.</small></div>}
     </div>
-    <aside className="facility-properties">
+    <aside className="facility-properties" ref={properties}>
       <header><p className="eyebrow">STEP {step + 1} OF {STEPS.length}</p><h2>{["Locate your facility", "Shape a building", "Define f\
 loors & labels", "Aim this camera", "Check estimated coverage", "Test camera handoffs", "Zones & object rules"][step]}</h2><p>{["Set a geographi\
-c origin for your facility; dimensions use the local map grid.", "Trace a footprint or choose a common shape, then set its dimensions.", "Add \
+c origin for your facility; dimensions use the local map grid.", "Start with a shape, add a quick rectangle, or trace the corners yourself.", "Add \
 rooms, stairs, openings and pathways on each level.", "Adjust the camera\u2019s position and viewing volume.", "Select a camera to ins\
 pect its modeled view.", "Draw a route and review proposed camera transitions.", "Mark restricted areas and define expected objects for review."][step]}</p></header>
       <div className="facility-property-body">
@@ -672,33 +836,54 @@ pect its modeled view.", "Draw a route and review proposed camera transitions.",
   }} />Online street map<small>Sends the visible map area to OpenStreetMap. No offline tile download.</small></label>}
       {step === 0 && <SiteForm onDirtyChange={setSiteDirty} pickedOrigin={pickedOrigin} onPin={()=>startTool("site-pin")} ready={ready} plan={plan} commit={commit} center={() => api.current?.center()} />}
       {step === 0 && <OpenMapStarter units={units} drawnArea={drawnArea} onDrawArea={()=>startTool("search-area")} onCancelArea={()=>{api.current?.setTool("select");setTool("select");}} ready={ready} plan={plan} commit={commit} onPreview={(buildings,replace) => {setMapDrafts(buildings);setReplaceDrafts(!!replace);}} onArea={setSearchArea} disabled={dirty} />}
-      {step === 0 && <div className="facility-section-note"><MapPin/><p>Start with an empty local grid. Set a site location or draw your first building. Saved facilities stay separate; imported files and examples open as new facilities.</p></div>}
-      {step === 1 && <><div className="facility-action-row"><button className="facility-primary" disabled={!ready} onClick={() => startTool(
-    "building"
-  )}><Polygon />Draw building</button><button className="facility-secondary" onClick={addRectangle}><Plus />Add rectangle</button></div>
-        <ShapeBuilder onDirtyChange={setShapePending} units={units} onUnits={setUnits} disabled={dirty} add={item => {
-          const building = {...item,id:uid('b')};
-          if(commit({...plan,buildings:[...plan.buildings,building]},'Building shape added')) {setSelected({id:building.id,kind:'building'});setFloorBuilding(building.id);setFloor(0);return true;}
-          return false;
-        }}/>
-        <ConstructionGuide />
-        {selected.kind === "building" && draft?.id === selected.id && <form noValidate onSubmit={saveSelected}>
-          <MeasurementSummary ring={draft.footprint} holes={draft.holes} units={units}/><ShapeDimensions shape={draft} onChange={setDraft} units={units}/>
-          {draft.source&&<p className="facility-caption">OpenStreetMap source {draft.source.id}. Original height basis: {draft.source.heightBasis}; original floors: {draft.source.floorsBasis}. Source updated: {draft.source.updated}. Edits below are user supplied and do not update the source map.</p>}
-          <p className="facility-caption">{draft.holes?.length || 0} courtyards. {draft.part ? 'Independent building part.' : ''} Roof height is above ground.</p>
-          <Field label="Building base" suffix="m" value={draft.base || 0} min={0} max={149} onChange={v=>change('base',v)} />
-          <Field label="Building name" type="text" value={draft.name} onChange={(v) => change("name", v)} />
-          <div className="facility-field-pair"><Field label="Building height" suffix="m" value={draft.height} min={1} max={150} onChange={(v) => change(
-    "height",
-    v
-  )} /><Field label="Number of floors" value={draft.floors} min={1} max={40} step="1" onChange={(v) => change(
-    "floors",
-    v
-  )} /></div>
-          <p className="facility-caption">Footprint area: {formatArea(buildingArea(draft),units)}. Courtyards stay open when moving or resizing. Rooms must stay within solid floor space.</p><button className="facility-primary" type="submit">Save building<Check /></button>
+      {step === 0 && <div className="facility-section-note"><MapPin/><p>Start with an empty local grid. Set a site location or add your first building. Imported files and examples open as separate facilities.</p></div>}
+      {step === 1 && <>
+        <BuildingShapePicker open={shapeOpen} onOpen={open=>{setShapeOpen(open);if(open)setView('2d');}} buildings={plan.buildings} near={selected.kind === 'building' ? selectedItem : undefined} units={units} onUnits={setUnits}
+          onDirtyChange={setShapePending} onPreview={setShapePreview} onPick={pickBuildingPosition} add={addBuilding}
+          disabled={dirty || plan.buildings.length >= LIMITS.buildings || !['select','position-building'].includes(tool)}
+          picking={tool==='position-building'} ready={ready}/>
+        {plan.buildings.length >= LIMITS.buildings && <p className="facility-caption">Building limit reached ({LIMITS.buildings}).</p>}
+        <div className="facility-action-row building-shortcuts"><button className="facility-secondary" disabled={navigationDirty || plan.buildings.length >= LIMITS.buildings}
+          onClick={()=>addSpacedBuilding({name:'Building',height:8,floors:2,footprint:[[-20,-10],[20,-10],[20,10],[-20,10],[-20,-10]]})}><Plus/>Add rectangle</button>
+          <button className="facility-secondary" disabled={!ready || navigationDirty || plan.buildings.length >= LIMITS.buildings}
+          onClick={()=>{setShapeOpen(false);startTool('building');}}><Polygon/>Draw building</button></div>
+        {!shapeOpen && selected.kind === 'building' && draft?.id === selected.id && <form noValidate onSubmit={saveSelected}>
+          <fieldset className="building-inspector" disabled={tool !== 'select' || shapePending}>
+          <legend>Selected building</legend>
+          <Field label="Building name" type="text" value={draft.name} onChange={v=>change('name',v)}/>
+          <div className="facility-field-pair"><Field label="Building height" suffix="m" value={draft.height} min={1} max={150} onChange={v=>change('height',v)}/>
+            <Field label="Number of floors" value={draft.floors} min={1} max={40} step="1" onChange={v=>change('floors',v)}/></div>
+          <div className="facility-action-row building-tools">
+            <button type="button" className="facility-secondary" disabled={!ready} onClick={moveBuilding}><MapPin/>Move on map</button>
+            <button type="button" className="facility-secondary" onClick={()=>setDraft(rotateShape(draft,-90))}><ArrowClockwise/>Rotate 90°</button>
+          </div>
+          <button className="facility-primary" type="submit">Save building<Check/></button>
+          <button type="button" className="facility-secondary room-building-launch" disabled={!!sketchBlock} title={sketchBlock || undefined} onClick={openSketch}><Stack/>Sketch rooms inside</button>
+          <ShapeDimensions shape={draft} onChange={setDraft} units={units}/>
+          <MeasurementSummary ring={draft.footprint} holes={draft.holes} units={units}/>
+          {draft.source && <p className="facility-caption">OpenStreetMap {draft.source.id}. Original height basis {draft.source.heightBasis}. Original floor basis {draft.source.floorsBasis}. Updated {draft.source.updated}.</p>}
+          <Field label="Building base" suffix="m" value={draft.base ?? 0} min={0} max={149} onChange={v=>change('base',v)}/>
+          <p className="facility-caption">{draft.holes?.length || 0} courtyards. {draft.part && 'Independent building part. '}Roof height is above ground.</p>
+          <button type="button" className="facility-secondary" disabled={editingDirty || plan.buildings.length >= LIMITS.buildings} onClick={copyOutline}>Copy building outline</button>
+          <p className="facility-caption">Creates a separate shell with the same dimensions and floor count. Rooms and equipment stay with the original.</p>
+          </fieldset>
         </form>}
+        <ConstructionGuide/>
       </>}
-      {step === 2 && <><FacilityLevels units={units} plan={plan} building={b} floor={floor} onFloor={level=>{setFloor(level);setView('floors');}} commit={commit} disabled={editingDirty} onSelect={select}/><div className="facility-action-row"><button className="facility-primary" disabled={!ready || !b} onClick={() => startTool(
+      {step === 2 && <><section className="room-sketch-launch"><h3>Room sketch</h3><p>{sketchBlock || 'Lay out one room, a row, or both sides of a hallway.'}</p>{b ? <button className="facility-primary" disabled={!!sketchBlock} onClick={openSketch}><Stack/>Sketch rooms</button> : <button className="facility-secondary" onClick={()=>go(1)}><Plus/>Add a building</button>}
+        {roomsHere.length>0 && <button className="facility-secondary room-walls-launch" disabled={navigationDirty || b.openFloors?.includes(floor)} onClick={openWalls}><Polygon/>Edit room walls</button>}
+      </section><FacilityDoorways plan={plan} building={b} floor={floor} units={units} ready={ready} placing={tool==='doorway'}
+        door={selected.kind==='doorway' && draft?.id===selected.id ? draft : null} dirty={propertyDirty}
+        disabled={editingDirty && selected.kind!=='doorway'} onStart={()=>startTool('doorway')} onPlace={addDoorway}
+        onChange={setDraft} onSave={saveSelected} onDiscard={discardPlacement} onSelect={select} onRemove={removeSelected}/>
+      <FacilityWindows key={selected.kind==='window'?selected.id:'windows'} plan={plan} building={b} floor={floor} units={units} ready={ready} dirty={propertyDirty}
+        item={selected.kind==='window' && draft?.id===selected.id && draft.level===floor && draft.buildingId===b?.id?draft:null} invalid={selected.kind==='window'?previewError:''}
+        disabled={(editingDirty && selected.kind!=='window') || !!mapDrafts.length || !['select','window'].includes(tool)} placing={tool==='window'}
+        onStart={()=>startTool('window')} onPlace={addWindow} onChange={setDraft} onSave={saveSelected} onDiscard={discardPlacement} onSelect={select} onRemove={removeSelected}/>
+      <FacilityStairs plan={plan} building={b} floor={floor} item={stairEditor} ready={ready} units={units} dirty={!!stairEditor && propertyDirty} issue={stairIssue || (stairEditor && previewError)}
+        disabled={(editingDirty && !stairEditor) || !!mapDrafts.length || !['select','stair'].includes(tool)} placing={tool==='stair'}
+        onStart={()=>startTool('stair')} onSuggest={()=>addStair()} onAddLevel={addStairLevel} onChange={setDraft} onSave={saveSelected} onDiscard={discardPlacement} onSelect={select} onRemove={removeSelected}/>
+      <FacilityLevels units={units} plan={plan} building={b} floor={floor} onFloor={switchFloor} commit={commit} disabled={editingDirty} onSelect={select}/><div className="facility-action-row"><button className="facility-primary" disabled={!ready || !b} onClick={() => startTool(
     "room"
   )}><Polygon />Draw room</button><button className="facility-secondary" disabled={!b || editingDirty} onClick={addRectangularRoom}><Plus />Add rectangular room</button><button className="facility-secondary" disabled={!ready} onClick={() => startTool(
     "label"
@@ -787,7 +972,7 @@ nabled", e.target.checked)} />Include in coverage estimates</label>
         <button type="button" className="facility-secondary facility-installer-button" disabled={navigationDirty || !plan.cameras.length} title={navigationDirty ? 'Save or discard edits first' : undefined} onClick={downloadInstallerSheet}><Printer />Download installer sheet</button>
         <p className="facility-caption">Printable offline page of the saved plan: mounts, angles, lenses and DORI distances. {DORI_NOTE}.</p>
       </>}
-      {step === 2 && <><FloorGeometry pending={linePending} onPendingChange={setLinePending} plan={plan} building={b} floor={floor} selected={selected} draft={draft} onDraft={setDraft} onSelect={select} commit={commit} onDraw={startTool} disabled={dirty} ready={ready} units={units}/><FacilityStairs plan={plan} building={b} floor={floor} selectedId={selected.kind==='stair'?selected.id:''} onSelect={id=>select(id,'stair')} commit={commit} disabled={propertyDirty || zoneDirty || linePending} units={units} onDirtyChange={setStairDirty}/></>}
+      {step === 2 && <><FloorGeometry pending={linePending} onPendingChange={setLinePending} plan={plan} building={b} floor={floor} selected={selected} draft={draft} onDraft={setDraft} onSelect={select} commit={commit} onDraw={startTool} disabled={dirty} ready={ready} units={units}/></>}
       {step === 5 && <><div className="facility-action-row"><button className="facility-primary" disabled={!ready} onClick={() => startTool(
     "route"
   )}><Path />Draw route</button><button className="facility-secondary" disabled={plan.route.length < 2} onClick={() => {
@@ -801,20 +986,27 @@ nabled", e.target.checked)} />Include in coverage estimates</label>
     (d) => ({ ...d, [p.key]: "separate" })
   )}>Keep separate</button></div>{decisions[p.key] && <p>{decisions[p.key] === "link" ? "Linked for this rehearsal." : "\
 Kept as separate tracks."} This does not verify identity.</p>}</div>) : <p className="facility-caption">No camera transitions on this route yet. Draw a route through two estimated camera views.</p>}{note}<p className="facility-caption">Rehearsal decisions last for this session. Real cross-camera tracking needs calibrated cameras, synchronized recordings, qualified detection and association models, and source review.</p></>}
-      {step === 6 && <FacilityZones units={units} plan={plan} selectedId={selected.kind === 'zone' ? selected.id : ''} onSelect={selectZone} onDraw={()=>startTool('zone')} commit={commit} disabled={propertyDirty || stairDirty} ready={ready} building={b} floor={floor} onDirtyChange={setZoneDirty}/>}
-      {selectedItem && step !== 0 && step !== 5 && step !== 6 && !['opening','path','stair'].includes(selected.kind) && <button className="facility-delete" onClick={removeSelected}><Trash />Remove {selected.
+      {step === 6 && <FacilityZones units={units} plan={plan} selectedId={selected.kind === 'zone' ? selected.id : ''} onSelect={selectZone} onDraw={()=>startTool('zone')} commit={commit} disabled={propertyDirty} ready={ready} building={b} floor={floor} onDirtyChange={setZoneDirty}/>}
+      {!(step === 1 && (selected.kind !== 'building' || shapeOpen || shapePending || tool !== 'select')) && selectedItem && step !== 0 && step !== 5 && step !== 6 && !['window','doorway','opening','path','stair'].includes(selected.kind) && <button className="facility-delete" onClick={removeSelected}><Trash />Remove {selected.
   kind}<small>Undo available</small></button>}
       </div>
-      <div className="facility-step-footer">{propertyDirty && <div className="facility-unsaved"><span>Previewing unsaved edits</span><button onClick={() => {
+      <div className="facility-step-footer">{propertyDirty && !directPlacement && <div className="facility-unsaved"><span>Previewing unsaved edits</span><button onClick={() => {
+    if (positionPick.current) cancelTool();
     setDraft(structuredClone(selectedItem));
     setError("");
-  }}>Discard preview</button></div>}{propertyDirty && previewError && <p className="error facility-preview-error" role="status">Preview not shown — the map keeps the saved geometry. {localizeLengths(previewError,units)}</p>}{error && <p className="error" role="alert">{localizeLengths(error,units)}</p>}<div><button className="facility-secondary" disabled={step ===
+  }}>Discard preview</button></div>}{propertyDirty && previewError && <p className="error facility-preview-error" role="status">Preview not shown — the map keeps the saved geometry. {localizeLengths(previewError,units)}</p>}{error && <p className="error" role="alert">{localizeLengths(error,units)}</p>}{step === 1 && shapeOpen ? <div className="building-create-footer">
+        {shapePending
+          ? <button type="reset" form="facility-new-building" className="facility-secondary" disabled={tool !== 'select'}>Discard shape draft</button>
+          : <button type="button" className="facility-secondary" disabled={tool !== 'select'} onClick={()=>setShapeOpen(false)}>Close shapes</button>}
+        <button type="submit" form="facility-new-building" className="facility-primary" disabled={!shapePreview || dirty || tool !== 'select'}><Plus/>Add selected shape</button>
+      </div> : <div><button className="facility-secondary" disabled={step ===
   0} onClick={() => go(step - 1)}><CaretLeft />Back</button>{step < STEPS.length - 1 ? <button className="facility-primary" onClick={() => go(
     step + 1
   )}>Continue<CaretRight /></button> : <button disabled={dirty} className="facility-primary" onClick={() => download(
     plan
-  )}>Export plan<DownloadSimple /></button>}</div></div>
-    </aside><>{pasteOpen && <PlanPasteDialog close={() => setPasteOpen(false)} onImport={text=>onImportFacilities(text)} />}</><input ref={input} hidden type="file" accept=".json,application/json" aria-label="Import facility plan" onChange={importFile} />
+  )}>Export plan<DownloadSimple /></button>}</div>}</div>
+    </aside>{wallRoom && <RoomWallEditor plan={plan} building={b} level={floor} initialRoom={wallRoom} units={units} onUnits={setUnits} onClose={closeWalls} commit={commit}/>}
+    {sketchOpen && b && <RoomSketch plan={plan} building={b} level={floor} units={units} onUnits={setUnits} onSave={saveSketch} error={error} onClose={closeSketch}/>}<>{pasteOpen && <PlanPasteDialog close={() => setPasteOpen(false)} onImport={text=>onImportFacilities(text)} />}</><input ref={input} hidden type="file" accept=".json,application/json" aria-label="Import facility plan" onChange={importFile} />
   </section></MeasurementUnits.Provider>;
 }
 const percent = v => `${(Math.round(v * 1000) / 10).toFixed(1)}%`;

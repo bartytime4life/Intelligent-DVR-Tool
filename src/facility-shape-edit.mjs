@@ -1,3 +1,4 @@
+import {transformBuilding as transform} from "./facility.mjs";
 export const unitFactor = units => units === 'imperial' ? 0.3048 : 1;
 export const unitLabel = units => units === 'imperial' ? 'ft' : 'm';
 // Feet show 3 decimals (0.3 mm) so any entered value survives the 0.1 mm metre storage unchanged.
@@ -21,7 +22,39 @@ export function shapeBounds(shape) {
   const min=[Math.min(...xs),Math.min(...ys)], max=[Math.max(...xs),Math.max(...ys)];
   return {width:max[0]-min[0],depth:max[1]-min[1],x:(min[0]+max[0])/2,y:(min[1]+max[1])/2};
 }
-const transform = (shape, fn) => ({...shape,footprint:shape.footprint.map(fn),...(shape.holes ? {holes:shape.holes.map(r=>r.map(fn))} : {})});
+export function translateShape(shape, dx, dy) {
+  return transform(shape, ([x,y]) => [x + dx, y + dy]);
+}
+
+// Try the requested location, then the nearest clear side of an existing building.
+// Use the outer bounds so suggestions leave even courtyards and recesses clear.
+export function suggestBuildingOffset(shape, buildings, near = buildings.at(-1)) {
+  const box = shapeBounds(shape), neighbors = buildings.map(shapeBounds), gap = 4;
+  const anchor = near ? shapeBounds(near) : box;
+  const preferred = [anchor.x - box.x, anchor.y - box.y];
+  const offsets = [preferred];
+  for (const other of neighbors) {
+    const dx = other.x - box.x, dy = other.y - box.y;
+    const xGap = (box.width + other.width) / 2 + gap, yGap = (box.depth + other.depth) / 2 + gap;
+    offsets.push([dx + xGap, dy], [dx - xGap, dy], [dx, dy + yGap], [dx, dy - yGap]);
+  }
+  return offsets.sort((a,b) => Math.hypot(a[0]-preferred[0],a[1]-preferred[1]) - Math.hypot(b[0]-preferred[0],b[1]-preferred[1])).find(([dx,dy]) => {
+    const x = box.x + dx, y = box.y + dy;
+    return Math.abs(x) + box.width / 2 <= 2000 && Math.abs(y) + box.depth / 2 <= 2000 &&
+      neighbors.every(other => Math.abs(x - other.x) >= (box.width + other.width) / 2 + gap - 1e-8 ||
+        Math.abs(y - other.y) >= (box.depth + other.depth) / 2 + gap - 1e-8);
+  });
+}
+
+export function nextBuildingName(buildings, base) {
+  const names = new Set(buildings.map(b => b.name));
+  let name = base;
+  for (let i = 2; names.has(name); i++) {
+    const suffix = ' ' + i;
+    name = base.slice(0, 100 - suffix.length) + suffix;
+  }
+  return name;
+}
 export function resizeShape(shape, axis, span) {
   if (!Number.isFinite(span) || span <= 0) throw Error('Enter a positive shape dimension.');
   const bounds=shapeBounds(shape), i=axis==='width'?0:1, old=i===0?bounds.width:bounds.depth, center=i===0?bounds.x:bounds.y;

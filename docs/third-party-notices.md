@@ -48,6 +48,9 @@ not assign a license to BARTA's repository.
   https://github.com/JamesLMilner/terra-draw. Compiled source snapshots are in
   `src/vendor/`; both retain full MIT headers. Full notice:
   [terra-draw-LICENSE.txt](../public/licenses/terra-draw-LICENSE.txt).
+- Room sketch includes polygon-clipping 0.15.7 (MIT), splaytree 3.2.3 (MIT)
+  and robust-predicates 3.0.3 (Unlicense). Their complete upstream notices are
+  in [room-sketch-LICENSE.txt](../public/licenses/room-sketch-LICENSE.txt).
 - The optional online street map uses OpenStreetMap data and tiles. Visible
   attribution is supplied when enabled. Data and hosted tile-service terms are
   separate from the renderer license; see https://www.openstreetmap.org/copyright

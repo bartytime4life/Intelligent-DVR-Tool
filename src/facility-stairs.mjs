@@ -1,4 +1,4 @@
-// Planning geometry for one straight flight between adjacent modeled levels.
+// Planning geometry for one straight flight between two modeled levels.
 // Code references are guidance, not proof of local adoption or compliance.
 export const STAIR_REFERENCE = Object.freeze({
   title: '2024 IBC §1011 · general stair guidance',
@@ -19,17 +19,18 @@ const round = value => Number(value.toFixed(8));
 export function validateStair(stair, building) {
   if (!stair || !building || stair.buildingId !== building.id || !validId(stair.id) || !validName(stair.name) ||
       !Number.isInteger(stair.fromLevel) || !Number.isInteger(stair.toLevel) || stair.fromLevel < 0 ||
-      stair.toLevel !== stair.fromLevel + 1 || stair.toLevel >= building.floors ||
+      stair.fromLevel >= building.floors || stair.toLevel < 0 || stair.toLevel === stair.fromLevel || stair.toLevel >= building.floors ||
       !number(stair.x,-2000,2000) || !number(stair.y,-2000,2000) || !number(stair.bearing,0,359.99) ||
       !number(stair.width,.3,30) || !number(stair.tread,.05,2) || !number(stair.landing,.3,10) ||
       !Number.isInteger(stair.risers) || stair.risers < 2 || stair.risers > 100)
-    throw Error('Stairs need adjacent existing levels, a valid position, width 0.3–30 m, tread 0.05–2 m, landing 0.3–10 m and 2–100 risers.');
+    throw Error('Stairs need two different existing levels, a valid position, width 0.3–30 m, tread 0.05–2 m, landing 0.3–10 m and 2–100 risers.');
   return Object.fromEntries(['id','name','buildingId','fromLevel','toLevel','x','y','bearing','width','tread','risers','landing'].map(key=>[key,stair[key]]));
 }
 
 export function stairDimensions(stair, building) {
-  const rise=(building.height-(building.base || 0))/building.floors;
-  const base=(building.base || 0)+stair.fromLevel*rise, riser=rise/stair.risers;
+  const spacing=(building.height-(building.base || 0))/building.floors;
+  const rise=Math.abs(stair.toLevel-stair.fromLevel)*spacing;
+  const base=(building.base || 0)+Math.min(stair.fromLevel,stair.toLevel)*spacing, riser=rise/stair.risers;
   const run=(stair.risers-1)*stair.tread, length=run+2*stair.landing;
   const warnings=[], tolerance=1e-8;
   if(riser>STAIR_REFERENCE.maxRiser+tolerance) warnings.push('Risers exceed the general 7 in maximum. Increase the riser count.');
@@ -46,6 +47,13 @@ function rectangle(stair, start, end) {
   const point=(side,along)=>[round(stair.x+right[0]*side+forward[0]*along),round(stair.y+right[1]*side+forward[1]*along)];
   return [point(-stair.width/2,start),point(stair.width/2,start),point(stair.width/2,end),point(-stair.width/2,end),point(-stair.width/2,start)];
 }
+
+export function stairLandingRings(stair,building) {
+  const half=stairDimensions(stair,building).length/2;
+  const landings=[rectangle(stair,-half,-half+stair.landing),rectangle(stair,half-stair.landing,half)];
+  return stair.toLevel>stair.fromLevel?landings:landings.reverse();
+}
+export const stairOnLevel=(s,level)=>level>=Math.min(s.fromLevel,s.toLevel) && level<=Math.max(s.fromLevel,s.toLevel);
 
 export function stairFootprint(stair, building) {
   const {length}=stairDimensions(stair,building);
@@ -69,19 +77,20 @@ export function stairTreadPolygons(stair, building) {
   return result;
 }
 
-export function defaultStair(building, floor=0, footprintFits) {
+export function defaultStair(building, floor=0, footprintFits, destination) {
   if(!building || building.floors<2) throw Error('Add an upper level before placing stairs.');
-  const level=Math.max(0,Math.min(building.floors-2,Math.floor(floor)));
+  const level=destination===undefined?Math.max(0,Math.min(building.floors-2,Math.floor(floor))):floor;
+  const toLevel=destination ?? level+1;
   const points=building.footprint.slice(0,-1), center=[0,1].map(axis=>points.reduce((sum,p)=>sum+p[axis],0)/points.length);
-  const rise=(building.height-(building.base || 0))/building.floors;
-  const stair={id:'st-'+crypto.randomUUID().slice(0,8),name:'Straight stair',buildingId:building.id,fromLevel:level,toLevel:level+1,
+  const rise=Math.abs(toLevel-level)*(building.height-(building.base || 0))/building.floors;
+  const stair={id:'st-'+crypto.randomUUID().slice(0,8),name:'Straight stair',buildingId:building.id,fromLevel:level,toLevel,
     x:round(center[0]),y:round(center[1]),bearing:0,width:STAIR_REFERENCE.minWidth,tread:STAIR_REFERENCE.minTread,
     risers:Math.max(2,Math.min(100,Math.ceil(rise/STAIR_REFERENCE.maxRiser))),landing:STAIR_REFERENCE.minWidth};
   if(!footprintFits) return stair;
   // The caller supplies the shared geometry checks, avoiding a facility-module cycle.
   const tryPosition=(x,y,bearing)=>{
     const candidate={...stair,x:round(x),y:round(y),bearing:round((bearing+360)%180)};
-    return footprintFits(stairFootprint(candidate,building)) ? candidate : null;
+    return footprintFits(stairFootprint(candidate,building),candidate) ? candidate : null;
   };
   for(const bearing of [0,90]) {
     const candidate=tryPosition(...center,bearing);if(candidate)return candidate;

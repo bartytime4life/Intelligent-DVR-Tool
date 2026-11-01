@@ -6,6 +6,17 @@
 
 *All historical logs, measurements, source hashes and qualification limits below remain unchanged.*
 
+[Stair placement, November 1](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/facility-stairs-2026-11-01/README.md): local
+map and touch controls, fixed start landing, and directed v6 floor connections.
+
+[Exterior windows, November 1](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/facility-windows-2026-11-01/README.md): unpublished
+map placement, touch and pointer resize, elevation editing, and portable v5 plans.
+
+[Shared-wall doorways, November 1](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/facility-doorways-2026-11-01/README.md): local
+unpublished click/drag placement, room-edit persistence, Undo and v4 plans;
+270 unit checks and 15 controlled indoor browser scenarios, with four doorway
+scenarios repeated after the final input guard. Software fixtures only.
+
 **Current interface/regression check (October 31 Central / November 1 UTC):** [PR #61](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/61) merged with **14/14 reported CI checks**; [Chromium run 41263964836](https://github.com/bartytime4life/Intelligent-DVR-Tool/actions/runs/41263964836) passed **65 general/Facility + 12 analysis + 13 feeds + 2 recorder browser scenarios**, capturing 1440px and 390px controlled UI states. [Visual manifest](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/media/current/manifest.json). These are software fixture tests, **not** field-camera recognition quality or 100-camera capacity.
 
 [Review fixes, October 30](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/review-fixes-2026-10-30/README.md): PR #45/#46 on

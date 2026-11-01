@@ -137,9 +137,11 @@ async function openOfficeFloors(page) {
 
 test('stair length entry converts feet to metres and unsaved stair edits protect navigation',async({page})=>{
   await openOfficeFloors(page);
-  await page.getByRole('button',{name:'Add straight stair',exact:true}).click();
+  await page.getByRole('button',{name:'Suggest a position',exact:true}).click();
+  await page.getByRole('button',{name:'Save stair',exact:true}).click();
   const before=await saved(page);
   await page.getByLabel('Measurement units',{exact:true}).selectOption('imperial');
+  await page.getByText('Stair dimensions & position',{exact:true}).click();
   await page.getByLabel('Stair clear width (ft)',{exact:true}).fill('4');
   await page.getByLabel('Active floor',{exact:true}).selectOption('1');
   await expect(page.getByLabel('Active floor',{exact:true})).toHaveValue('0');
@@ -157,7 +159,8 @@ test('stair length entry converts feet to metres and unsaved stair edits protect
 
 test('stair cutout becomes a ceiling opening below and supports exact dimensions with dirty protection',async({page})=>{
   await openOfficeFloors(page);
-  await page.getByRole('button',{name:'Add straight stair',exact:true}).click();
+  await page.getByRole('button',{name:'Suggest a position',exact:true}).click();
+  await page.getByRole('button',{name:'Save stair',exact:true}).click();
   const before=await saved(page);
   await page.getByRole('button',{name:'Cut upper floor over stair run',exact:true}).click();
   let next=await saved(page);
@@ -186,7 +189,8 @@ test('stair cutout becomes a ceiling opening below and supports exact dimensions
 
 test('whole-floor toggle removes only its slab, retains partial openings, and Undo restores it',async({page})=>{
   await openOfficeFloors(page);
-  await page.getByRole('button',{name:'Add straight stair',exact:true}).click();
+  await page.getByRole('button',{name:'Suggest a position',exact:true}).click();
+  await page.getByRole('button',{name:'Save stair',exact:true}).click();
   await page.getByRole('button',{name:'Cut upper floor over stair run',exact:true}).click();
   await expect(page.getByLabel('Active floor',{exact:true})).toHaveValue('1');
   const before=await saved(page);

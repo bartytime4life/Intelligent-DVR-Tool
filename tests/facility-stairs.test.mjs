@@ -46,9 +46,9 @@ test('dimension edits can represent existing stairs while visibly identifying re
   assert.ok(stairDimensions(defaultStair(high),high).warnings.some(w=>w.includes('12 ft')));
 });
 
-test('validation rejects malformed dimensions and non-adjacent or nonexistent levels without arbitrary metadata',()=>{
+test('validation rejects malformed dimensions and identical or nonexistent levels without arbitrary metadata',()=>{
   const s=defaultStair(building);
-  for(const delta of [{risers:1},{risers:101},{risers:2.5},{width:Infinity},{width:true},{tread:''},{landing:-1},{bearing:360},{x:2001},{fromLevel:2,toLevel:3},{fromLevel:0,toLevel:2},{buildingId:'other'}])assert.throws(()=>validateStair({...s,...delta},building));
+  for(const delta of [{risers:1},{risers:101},{risers:2.5},{width:Infinity},{width:true},{tread:''},{landing:-1},{bearing:360},{x:2001},{fromLevel:2,toLevel:3},{fromLevel:1,toLevel:1},{buildingId:'other'}])assert.throws(()=>validateStair({...s,...delta},building));
   assert.deepEqual(validateStair({...s,url:'https://bad.invalid',html:'<script>'},building),s);
   assert.equal(stairTreadPolygons({...s,risers:1e9},building).length,0);
 });
@@ -83,4 +83,49 @@ test('default placement reports a bounded-search failure when the reservation ca
   let attempts=0;
   assert.throws(()=>defaultStair(b,0,footprint=>{attempts++;return polygonContains(b.footprint,footprint);}),/No fitting location/);
   assert.ok(attempts<300);
+});
+
+import {anchorStair,stairAnchors,turnStair,stairDestination,stairAtStart,suggestedStair,stairPlacementIssue,destinationLevels,travelBearing} from '../src/facility-stair-placement.mjs';
+import {stairOnLevel,stairLandingRings} from '../src/facility-stairs.mjs';
+const plan={...blankFacility(),buildings:[building]};
+test('turning and changing direction or destination keep the clicked landing fixed',()=>{
+  const origin=[10,6],s=stairAtStart(plan,building,1,origin);
+  assert.equal(s.toLevel,2);
+  const up=turnStair(s,building,89.5),down=stairDestination(up,building,0);
+  assert.deepEqual(stairAnchors(down,building)[0],origin);
+  assert.deepEqual(stairAnchors(up,building),stairAnchors(down,building));
+  assert.equal(travelBearing(down),89.5);assert.equal(down.bearing,269.5);
+  const moved=anchorStair(down,building,[8,4]);assert.deepEqual(stairAnchors(moved,building)[0],[8,4]);
+  assert.deepEqual(stairLandingRings(down,building)[0],stairTreadPolygons(down,building).at(-1).footprint);
+  assert.equal(stairPlacementIssue(plan,building,moved),'');
+});
+test('a descending two-level reservation uses the full modeled rise and survives export without an implicit opening',()=>{
+  const s=stairDestination(stairAtStart(plan,building,2,[8,4]),building,0),d=stairDimensions(s,building);
+  assert.deepEqual([s.fromLevel,s.toLevel,s.risers],[2,0,36]);assert.ok(Math.abs(d.rise-6.4)<1e-8);assert.equal(d.base,1);
+  assert.ok(d.warnings.some(w=>w.includes('intermediate landing')));assert.deepEqual([0,1,2,3].map(l=>stairOnLevel(s,l)),[true,true,true,false]);
+  const next=validateFacility({...plan,stairs:[s]});assert.deepEqual(validateFacility(JSON.parse(JSON.stringify(next))),next);assert.deepEqual(next.openings,[]);
+  for(const v of [3,4,5])assert.throws(()=>validateFacility({...next,schema:'intelligent-dvr.facility.v'+v}),/require facility v6/);
+  assert.equal(validateFacility({...plan,schema:'intelligent-dvr.facility.v5',stairs:[defaultStair(building)]}).schema,next.schema);
+});
+test('placement excludes voids at either landing but permits an independently cut run and recovery from a bad position',()=>{
+  const s=stairAtStart(plan,building,0,[12,6]),[start,arrival]=stairLandingRings(s,building);
+  const opening=(level,footprint)=>({id:'cut',name:'Cut',buildingId:'b',level,footprint});
+  for(const [level,footprint,word] of [[0,start,'Start'],[1,arrival,'Arrival']]){
+    const p={...plan,openings:[opening(level,footprint)]};assert.match(stairPlacementIssue(p,building,s),new RegExp(word));
+    if(!level)assert.throws(()=>stairAtStart(p,building,0,[12,6]),/solid floor/);
+  }
+  assert.equal(stairPlacementIssue({...plan,openings:[opening(1,stairRunFootprint(s,building))]},building,s),'');
+  const unfitted=anchorStair(s,building,[.01,.01]);assert.match(stairPlacementIssue(plan,building,unfitted),/fit inside/);
+  assert.equal(stairPlacementIssue(plan,building,anchorStair(unfitted,building,[4,4])),'');
+  assert.deepEqual(destinationLevels({...building,openFloors:[1]},0),[2]);
+  assert.throws(()=>stairAtStart(plan,{...building,openFloors:[1]},1,[12,6]),/solid floor/);
+});
+
+
+test('suggesting a position searches beyond a cutout under the default landing',()=>{
+  const center=defaultStair(building,1),cut={id:'cut',name:'Void',buildingId:'b',level:1,footprint:stairLandingRings(center,building)[0]};
+  const p={...plan,openings:[cut]};
+  assert.match(stairPlacementIssue(p,building,center),/Start landing/);
+  const suggestion=suggestedStair(p,building,1);
+  assert.equal(stairPlacementIssue(p,building,suggestion),'');assert.equal(suggestion.fromLevel,1);
 });

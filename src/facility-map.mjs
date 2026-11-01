@@ -4,9 +4,13 @@ import * as THREE from "three";
 import { TerraDraw, TerraDrawPolygonMode, TerraDrawLineStringMode } from "./vendor/terra-draw.mjs";
 import { TerraDrawMapLibreGLAdapter } from "./vendor/terra-maplibre.mjs";
 import { centroid, toLngLat, fromLngLat, coverageFan, wallObstacles, buildingFeature, floorSlabRings, ceilingOpenings } from "./facility.mjs";
-import { stairDimensions, stairFootprint, stairTreadPolygons } from "./facility-stairs.mjs";
+import { stairOnLevel, stairDimensions, stairFootprint, stairTreadPolygons } from "./facility-stairs.mjs";
 import { measurementLabels, lineRibbonSegments, floorRenderPlan, floorElevation, visibleLabelIndices, formatDistance } from "./facility-measurements.mjs";
 import { fanCache } from "./facility-coverage.mjs";
+import { translateShape, unitFactor } from "./facility-shape-edit.mjs";
+import {createStairMap} from "./facility-stair-map.mjs";
+import {createWindowMap} from "./facility-window-map.mjs";
+import {createDoorwayMap} from "./facility-doorway-map.mjs";
 import { doriArcs } from "./facility-dori.mjs";
 import "./facility-map-geometry.css";
 setWorkerUrl(workerUrl);
@@ -15,18 +19,18 @@ const feat = (type, coordinates, properties = {}) => ({ type: "Feature", geometr
 const polygon = (ring, origin, props) => feat("Polygon", [ring.map((p) => toLngLat(p, origin))], props);
 const empty = () => fc([]);
 // Placing labels is overhead too; in the Floors view the active slab is flattened so a click lands where it appears.
-const FLOOR_DRAW_TOOLS = ["room", "opening", "floor-path", "label"];
-const OVERHEAD_TOOLS = ["building", "room", "zone", "opening", "route", "floor-path", "search-area", "site-pin", "camera", "aim-camera", "move-camera", "label"];
+const FLOOR_DRAW_TOOLS = ["stair", "window", "doorway", "room", "opening", "floor-path", "label"];
+const OVERHEAD_TOOLS = ["stair", "window", "doorway", "position-building", "building", "room", "zone", "opening", "route", "floor-path", "search-area", "site-pin", "camera", "aim-camera", "move-camera", "label"];
 const viewPitch = (view, tool) => view === "2d" || OVERHEAD_TOOLS.includes(tool) ? 0 : 52;
 // MapLibre's mercator metre uses a 6,371,008.8 m sphere; plan coordinates use 111,320 m per degree.
 const PLAN_METRE_SCALE = 2 * Math.PI * 6371008.8 / 360 / 111320;
-const PICK_LAYERS = ["cameras", "zones", "openings", "stairs", "stair-steps", "floor-paths", "rooms", "room-areas", "floor-slabs", "ghost-envelope", "buildings"];
-const BACKGROUND_LAYERS = ["floor-slabs", "ghost-envelope", "buildings"];
+const PICK_LAYERS = ["windows","doorways","window-shell","cameras", "zones", "openings", "stairs", "stair-steps", "floor-paths", "rooms", "room-areas", "floor-slabs", "ghost-envelope", "buildings"];
+const BACKGROUND_LAYERS = ["window-shell","floor-slabs", "ghost-envelope", "buildings"];
 const headingTip = c => { const a = c.bearing * Math.PI / 180, l = Math.min(c.range, 12); return [c.x + Math.sin(a) * l, c.y + Math.cos(a) * l]; };
 const cm = v => Math.round(v * 100) / 100;
 function structureBuilding(plan, selected, view, options) {
   if (view === "2d") return undefined;
-  const owner = [...plan.rooms, ...(plan.openings || []), ...(plan.stairs || []), ...(plan.paths || [])].find(item => item.id === selected);
+  const owner = [...plan.rooms, ...(plan.windows || []), ...(plan.doorways || []), ...(plan.openings || []), ...(plan.stairs || []), ...(plan.paths || [])].find(item => item.id === selected);
   const id = view === "floors" ? options.floorBuildingId : plan.buildings.some(b => b.id === selected) ? selected : owner?.buildingId;
   return plan.buildings.find(building => building.id === id);
 }
@@ -43,7 +47,7 @@ function visibleStairs(plan, selected, view, floor, options) {
   const building = structureBuilding(plan, selected, view, options);
   if (!building) return [];
   return (plan.stairs || []).filter(stair => stair.buildingId === building.id &&
-    (view === "3d" || (view === "floors" && (stair.fromLevel === floor || stair.toLevel === floor))));
+    (view === "3d" || (view === "floors" && stairOnLevel(stair,floor))));
 }
 function disposeGroup(group) {
   for (const child of [...group.children]) {
@@ -170,13 +174,18 @@ function createFacilityMap(container, callbacks, initialPlan, options = {}) {
   const volumes = new CameraVolumes(), fans = options.fans || fanCache();
   let draw, ready = false, suppressSelection = false, current = initialPlan, selected = "C-07", view = "3d", floor = 0, tool = "\
 select", markers = [];
+  const windowMap=createWindowMap(map,{onLayout:scheduleLabels,onChange:w=>callbacks.onChangeWindow(w),onError:message=>callbacks.onDoorwayError(message)});
+  const stairMap=createStairMap(map,{requestLabels:scheduleLabels,change:s=>callbacks.onChangeStair(s)});
+  const doorMap=createDoorwayMap(map, {onMoveDoorway:d=>callbacks.onMoveDoorway(d),onError:message=>callbacks.onDoorwayError(message)});
+  let buildingPreview = null, placingBuilding = null;
   let displayOptions = {measurements: true, units: "metric", floorBuildingId: null};
   let labelRecords = [], labelFrame = null, markerKey = "";
   // Direct manipulation of the selected camera: drag state, the rotate handle and markers that follow a drag.
   let fanOf = null, volumeOptions = null, drag = null, handle = null, cameraLabel = null, doriLabels = [];
   function declutterLabels() {
     labelFrame = null;
-    const visible = visibleLabelIndices(labelRecords.map(record => ({priority:record.priority,keep:record.keep,rect:record.element.getBoundingClientRect()})));
+    const visible = visibleLabelIndices([...labelRecords.map(record => ({priority:record.priority,keep:record.keep,rect:record.element.getBoundingClientRect()})),
+      ...[...windowMap.rects(),...stairMap.rects()].map(rect=>({priority:-2,keep:true,rect}))]);
     labelRecords.forEach((record,index) => {
       record.element.style.visibility = visible.has(index) ? "visible" : "hidden";
       record.element.setAttribute("aria-hidden", visible.has(index) ? "false" : "true");
@@ -194,7 +203,7 @@ select", markers = [];
   map.on("webglcontextlost", () => callbacks.onError("3D graphics were interrupted. Save or export the plan, then reload\
  to recover."));
   map.on("load", () => {
-    const sources = ["grid", "site", "buildings", "rooms", "room-areas", "coverage", "cameras", "route", "track", "search-area", "zones", "camera-heading", "floor-slabs", "ghost-envelope", "openings", "stairs", "stair-steps", "stair-heading", "floor-paths", "blind-spots", "dori-arcs"];
+    const sources = ["building-preview", "grid", "site", "buildings", "rooms", "room-areas", "coverage", "cameras", "route", "track", "search-area", "zones", "camera-heading", "floor-slabs", "ghost-envelope", "openings", "stairs", "stair-steps", "stair-heading", "floor-paths", "blind-spots", "dori-arcs"];
     for (const id of sources) map.addSource(id, { type: "geojson", data: empty() });
     map.addLayer({ id: "grid", type: "line", source: "grid", paint: { "line-color": "#36505c", "line-opacity": 0.26, "li\
 ne-width": 0.6 } });
@@ -275,6 +284,8 @@ e-stroke-width": 2 } });
       "circle-stroke-color": "#fff3d1",
       "circle-stroke-width": 2
     } });
+    map.addLayer({id:"building-preview-fill", type:"fill", source:"building-preview", paint:{"fill-color":"#78ece0","fill-opacity":0.22}});
+    map.addLayer({id:"building-preview-edge", type:"line", source:"building-preview", paint:{"line-color":"#99fff0","line-width":2.5,"line-dasharray":[3,2]}});
     draw = new TerraDraw({ adapter: new TerraDrawMapLibreGLAdapter({ map, coordinatePrecision: 8 }), modes: [new TerraDrawPolygonMode(
       { styles: { fillColor: "#35e0e3", fillOpacity: 0.15, outlineColor: "#35e0e3" } }
     ), new TerraDrawLineStringMode({ styles: {
@@ -307,14 +318,54 @@ e-stroke-width": 2 } });
         });
       });
     });
+    doorMap.install();windowMap.install();stairMap.install();
     ready = true;
+    renderBuildingPreview();
     update(current, selected, view, floor, displayOptions);
     callbacks.onBearing?.((map.getBearing() + 360) % 360);
     fitPlan(false);
     callbacks.onReady();
   });
+  function renderBuildingPreview(point) {
+    if (!ready) return;
+    const preview = placingBuilding || buildingPreview;
+    const shape = point && placingBuilding
+      ? translateShape(placingBuilding.shape, point[0] - placingBuilding.center[0], point[1] - placingBuilding.center[1])
+      : preview?.shape;
+    map.getSource("building-preview").setData(fc(shape ? [buildingFeature(shape,current.origin)] : []));
+  }
+  function buildingPoint(event) {
+    const point = fromLngLat([event.lngLat.lng,event.lngLat.lat],current.origin);
+    const increment = event.originalEvent.shiftKey ? unitFactor(displayOptions.units) : 0.01;
+    return point.map(n => +(Math.round(n / increment) * increment).toFixed(4));
+  }
+  // MapLibre otherwise consumes Shift+click for box zoom before the snapped placement.
+  map.on("mousedown", e => { if (placingBuilding && e.originalEvent.shiftKey) e.preventDefault(); });
+  map.on("mousemove", e => { if (placingBuilding) renderBuildingPreview(buildingPoint(e)); else if(tool==='window')windowMap.hover(e.point,fromLngLat([e.lngLat.lng,e.lngLat.lat],current.origin)); });
+  map.on("mouseout", () => { if (placingBuilding) renderBuildingPreview(); else if(tool==='window')windowMap.hover(null); });
   map.on("click", (e) => {
     if (!ready || suppressSelection) return;
+    if(tool==='stair'){callbacks.onPlaceStair(fromLngLat([e.lngLat.lng,e.lngLat.lat],current.origin));return;}
+    if(tool==='window'){
+      const wall=windowMap.pick(e.point);
+      if(!wall){callbacks.onDoorwayError('Choose a highlighted outside wall.');return;}
+      callbacks.onPlaceWindow(wall,fromLngLat([e.lngLat.lng,e.lngLat.lat],current.origin));return;
+    }
+    if (tool === 'doorway') {
+      const wall=doorMap.pick(e.point);
+      if(!wall){callbacks.onDoorwayError('Click a highlighted wall shared by two rooms.');return;}
+      callbacks.onPlaceDoorway(wall,fromLngLat([e.lngLat.lng,e.lngLat.lat],current.origin));return;
+    }
+    if (tool === 'position-building') {
+      const point = buildingPoint(e);
+      if (callbacks.onBuildingPosition(point) === false) return;
+      placingBuilding = null;
+      tool = "select";
+      renderBuildingPreview();
+      callbacks.onToolDone();
+      map.getCanvas().style.cursor = "";
+      return;
+    }
     if (tool === 'site-pin') {
       callbacks.onPin([e.lngLat.lng,e.lngLat.lat]); tool='select';callbacks.onToolDone();map.getCanvas().style.cursor='';return;
     }
@@ -341,7 +392,7 @@ e-stroke-width": 2 } });
     // Building envelopes and slabs are large backdrops; any specific item under the pointer wins.
     const hits = map.queryRenderedFeatures(e.point, { layers: PICK_LAYERS });
     const hit = hits.find(h => !BACKGROUND_LAYERS.includes(h.layer.id)) || hits[0];
-    if (hit) callbacks.onSelect(hit.properties.id, hit.layer.id === "cameras" ? "camera" : hit.layer.id === "zones" ? "zone" : hit.layer.id === "openings" ? "opening" : hit.layer.id === "floor-paths" ? "path" : ["stairs", "stair-steps"].includes(hit.layer.id) ? "stair" : ["rooms", "room-areas"].includes(hit.layer.id) ? "room" : "building");
+    if (hit) callbacks.onSelect(hit.properties.id, hit.layer.id === "windows" ? "window" : hit.layer.id === "doorways" ? "doorway" : hit.layer.id === "cameras" ? "camera" : hit.layer.id === "zones" ? "zone" : hit.layer.id === "openings" ? "opening" : hit.layer.id === "floor-paths" ? "path" : ["stairs", "stair-steps"].includes(hit.layer.id) ? "stair" : ["rooms", "room-areas"].includes(hit.layer.id) ? "room" : "building");
   });
   // Only the selected camera can be dragged, and only while the editor enables manipulation.
   const cameraHit = (point, radius) => ready && !drag && tool === "select" && !!displayOptions.manipulate &&
@@ -426,6 +477,7 @@ e-stroke-width": 2 } });
     return cam;
   }
   function update(plan, selection, mode, level, options = {}) {
+    const apertureModeChanged=displayOptions.apertureEditing!==options.apertureEditing;
     displayOptions = {...displayOptions, ...options};
     const originChanged = current.origin[0] !== plan.origin[0] || current.origin[1] !== plan.origin[1];
     current = plan;
@@ -437,8 +489,8 @@ e-stroke-width": 2 } });
     if (!ready) return;
     scaleControl.setUnit(displayOptions.units === "imperial" ? "imperial" : "metric");
     if (originChanged) map.jumpTo({ center: plan.origin });
-    if (modeChanged) {
-      map.easeTo({ pitch: viewPitch(mode, tool), duration: 350 });
+    if (modeChanged || apertureModeChanged) {
+      map.easeTo({ pitch: displayOptions.apertureEditing && mode==="floors" ? 0 : viewPitch(mode, tool), duration: 350 });
     }
     const o = plan.origin, grid = [];
     for (let n = -300; n <= 300; n += 20) {
@@ -448,12 +500,13 @@ e-stroke-width": 2 } });
     map.getSource("grid").setData(fc(grid));
     map.getSource("site").setData(fc([]));
     const inspectedBuilding = structureBuilding(plan, selected, mode, displayOptions);
-    const floorPresentation = floorRenderPlan(inspectedBuilding,floor,mode,FLOOR_DRAW_TOOLS.includes(tool));
+    const floorPresentation = floorRenderPlan(inspectedBuilding,floor,mode,FLOOR_DRAW_TOOLS.includes(tool) || displayOptions.apertureEditing);
     const floorDrawing = floorPresentation.flattened;
+    const windowed=new Set((plan.windows || []).map(w=>w.buildingId));
     const normalBuildings = plan.buildings.filter(building => building.id !== inspectedBuilding?.id);
     map.getSource("buildings").setData(fc(normalBuildings.map(b => buildingFeature(b,o,{id:b.id,selected:b.id===selected,
-      base:mode==='2d'?0:(b.base || 0), top:mode==='2d'?0:b.height}))));
-    map.getSource("ghost-envelope").setData(fc(inspectedBuilding && !floorDrawing ? [buildingFeature(inspectedBuilding,o,{id: inspectedBuilding.id,base:inspectedBuilding.base || 0,top:inspectedBuilding.height})] : []));
+      base:mode==='2d'?0:mode==='3d' && windowed.has(b.id)?Math.max(b.base || 0,b.height-.08):(b.base || 0), top:mode==='2d'?0:b.height}))));
+    map.getSource("ghost-envelope").setData(fc(inspectedBuilding && !floorDrawing && !(mode==='3d'?windowed.has(inspectedBuilding.id):plan.windows?.some(w=>w.buildingId===inspectedBuilding.id && w.level===floor)) ? [buildingFeature(inspectedBuilding,o,{id: inspectedBuilding.id,base:inspectedBuilding.base || 0,top:inspectedBuilding.height})] : []));
     const slabLevels = floorPresentation.slabLevels;
     map.getSource("floor-slabs").setData(fc(slabLevels.map(level => {
       const feature = floorSlabFeature(plan,inspectedBuilding,level,o,selected,floorDrawing);
@@ -464,7 +517,9 @@ e-stroke-width": 2 } });
       const base = floorElevation(inspectedBuilding,opening.level,floorDrawing);
       return polygon(opening.footprint,o,{id:opening.id,base:base + .025,top:base + .03});
     })));
-    const activeStairs = visibleStairs(plan, selected, mode, floor, displayOptions);
+    const editingStair=mode==='floors' && tool==='select' && floorDrawing && inspectedBuilding && displayOptions.stairEditor?.buildingId===inspectedBuilding.id && displayOptions.stairEditor.fromLevel===floor ? displayOptions.stairEditor : null;
+    stairMap.update({plan,building:inspectedBuilding,item:editingStair,floor,units:displayOptions.units});
+    const activeStairs = visibleStairs(plan, selected, mode, floor, displayOptions).filter(s=>s.id!==editingStair?.id);
     map.getSource("stairs").setData(fc(activeStairs.map(stair => polygon(stairFootprint(stair,inspectedBuilding),o,{id:stair.id}))));
     const detailedStairs = [...activeStairs].sort((a,b)=>Number(b.id===selected)-Number(a.id===selected)).slice(0,24);
     map.getSource("stair-steps").setData(fc(detailedStairs.flatMap(stair => stairTreadPolygons(stair,inspectedBuilding).map(tread => polygon(tread.footprint,o,{id:stair.id,selected:stair.id===selected,base:floorDrawing ? 0 : tread.base,top:floorDrawing ? .04 : tread.top})))));
@@ -481,10 +536,8 @@ e-stroke-width": 2 } });
       return lineRibbonSegments(path.points).map(ring => polygon(ring,o,{id:path.id,selected:path.id===selected,base,top:base+.025}));
     })));
     const activeRooms = plan.rooms.filter(r => r.level === floor && (!displayOptions.floorBuildingId || r.buildingId === displayOptions.floorBuildingId));
-    map.getSource("rooms").setData(fc(mode === "floors" ? activeRooms.flatMap((r) => {
-      const b = plan.buildings.find((b2) => b2.id === r.buildingId), base = floorElevation(b,r.level,floorDrawing);
-      return lineRibbonSegments(r.footprint,.14).map(ring => polygon(ring, o, { id: r.id, base, top: base + (floorDrawing ? .05 : r.wallHeight) }));
-    }) : []));
+    const apertureContext={plan,selected,mode,floor,buildingId:displayOptions.floorBuildingId,flat:floorDrawing,editable:displayOptions.apertureDragEnabled,tool,units:displayOptions.units};
+    doorMap.update(apertureContext);windowMap.update(apertureContext);
     map.getSource("room-areas").setData(fc(mode === "floors" ? activeRooms.map((r) => {
       const base = floorElevation(plan.buildings.find((b2) => b2.id === r.buildingId),r.level,floorDrawing);
       return polygon(r.footprint, o, { id: r.id, base: base + .022, top: base + .026 });
@@ -505,7 +558,7 @@ e-stroke-width": 2 } });
     }), ...plan.labels.filter(l => mode === "floors" ? (l.buildingId ? l.buildingId === displayOptions.floorBuildingId && l.level === floor : floor === 0) : !l.level), ...mode === "floors" ? activeRooms.map((r) => {
       const [x, y] = centroid(r.footprint);
       return { id:r.id, name: r.name, x, y };
-    }) : [], ...activeZones.map(zone => {const [x,y] = centroid(zone.footprint); return {id:zone.id,name: `${zone.enabled === false ? "Disabled · " : ""}${zone.type === "object_watch" ? "Object watch" : "Restricted"} · ${zone.name}`, x, y, zone: true};}), ...activeOpenings.map(opening => {const [x,y] = centroid(opening.footprint); return {id:opening.id,name: `Floor ${opening.level + 1} opening · ${opening.name}`, x, y, opening: true};}), ...activeStairs.map(stair => ({id:stair.id,name: `↑ ${stair.name} · L${stair.fromLevel + 1}–L${stair.toLevel + 1}`,x:stair.x,y:stair.y,stair:true})), ...activePaths.map(path => ({id:path.id,name:`Path · ${path.name}`,x:path.points[0][0],y:path.points[0][1],path:true}))].sort((a,b)=>Number(b.id===selected)-Number(a.id===selected)).slice(0, 80);
+    }) : [], ...activeZones.map(zone => {const [x,y] = centroid(zone.footprint); return {id:zone.id,name: `${zone.enabled === false ? "Disabled · " : ""}${zone.type === "object_watch" ? "Object watch" : "Restricted"} · ${zone.name}`, x, y, zone: true};}), ...activeOpenings.map(opening => {const [x,y] = centroid(opening.footprint); return {id:opening.id,name: `Floor ${opening.level + 1} opening · ${opening.name}`, x, y, opening: true};}), ...activeStairs.map(stair => ({id:stair.id,name: `${stair.toLevel>stair.fromLevel?'↑':'↓'} ${stair.name} · L${stair.fromLevel + 1}–L${stair.toLevel + 1}`,x:stair.x,y:stair.y,stair:true})), ...activePaths.map(path => ({id:path.id,name:`Path · ${path.name}`,x:path.points[0][0],y:path.points[0][1],path:true}))].sort((a,b)=>Number(b.id===selected)-Number(a.id===selected)).slice(0, 80);
     if (inspectedBuilding && mode === "floors" && (inspectedBuilding.openFloors || []).includes(floor)) {
       const [x,y] = centroid(inspectedBuilding.footprint);
       labels.unshift({name:`Level ${floor + 1} · open floor · no slab`,x,y,opening:true,activeFloor:true});
@@ -557,12 +610,20 @@ e-stroke-width": 2 } });
       hasOsm=nextHasOsm;
     }
   }
+  const navigationPitch=()=>displayOptions.apertureEditing && view==='floors'?0:viewPitch(view,tool);
+  function frameOutline(shape) {
+    const points = shape.footprint;
+    const corner = (fn,pad) => toLngLat([0,1].map(axis=>fn(...points.map(p=>p[axis])) + pad),current.origin);
+    map.fitBounds([corner(Math.min,-5),corner(Math.max,5)], {
+      padding:Math.min(60,container.clientWidth / 5), maxZoom:21, pitch:navigationPitch(), duration:350
+    });
+  }
   function fitPlan(animate = true) {
     if (!ready) return;
     const points = [...current.buildings.flatMap((b) => b.footprint), ...current.cameras.map((c) => [c.x, c.y]), ...current.
     labels.map((l) => [l.x, l.y]), ...(current.zones || []).flatMap(zone => zone.footprint), ...current.route];
     if (!points.length) {
-      map.easeTo({ center: current.origin, zoom: 17.4, bearing: 0, pitch: viewPitch(view, tool), duration: animate ? 300 : 0 });
+      map.easeTo({ center: current.origin, zoom: 17.4, bearing: 0, pitch: navigationPitch(), duration: animate ? 300 : 0 });
       return;
     }
     const min = [Math.min(...points.map((p) => p[0])) - 12, Math.min(...points.map((p) => p[1])) - 12], max = [Math.max(
@@ -572,7 +633,7 @@ e-stroke-width": 2 } });
       padding: 28,
       maxZoom: 19.4,
       bearing: 0,
-      pitch: viewPitch(view, tool),
+      pitch: navigationPitch(),
       duration: animate ? 400 : 0
     });
   }
@@ -584,9 +645,24 @@ e-stroke-width": 2 } });
       const ring = bounds ? [[bounds[1],bounds[0]],[bounds[3],bounds[0]],[bounds[3],bounds[2]],[bounds[1],bounds[2]],[bounds[1],bounds[0]]] : null;
       map.getSource('search-area').setData(fc(area?.ring ? [polygon(area.ring,current.origin)] : ring?[feat('Polygon',[ring])]:[]));
     },
-    setTool(next) {
+    setBuildingPreview(preview) {
+      buildingPreview = preview;
+      renderBuildingPreview();
+      if (ready && preview && !placingBuilding) {
+        const visible = map.getBounds();
+        const corners = preview.shape.footprint.map(point=>toLngLat(point,current.origin));
+        if (corners.some(corner=>!visible.contains(corner))) {
+          // Widen the view to include the draft and the landmarks the user was looking at.
+          for (const corner of corners) visible.extend(corner);
+          map.fitBounds(visible,{padding:24,maxZoom:map.getZoom(),pitch:0,duration:350});
+        }
+      }
+    },
+    setTool(next, placement = null) {
       if (!ready) return;
       tool = next;
+      placingBuilding = placement;
+      renderBuildingPreview();
       draw.clear();
       draw.setMode(["building", "room", "zone", "opening", "search-area"].includes(next) ? "polygon" : ["route", "floor-path"].includes(next) ? "linestring" : "static");
       map.getCanvas().style.cursor = next === "select" ? "" : "crosshair";
@@ -597,20 +673,17 @@ e-stroke-width": 2 } });
     reset() { fitPlan(); },
     // Each ease names the view's pitch: easeTo stops any running animation and would
     // otherwise keep a half-finished 2D/3D switch tilted (noted in the October 30 review).
-    north() { if (ready) map.easeTo({bearing: 0, pitch: viewPitch(view, tool), duration: 300}); },
+    north() { if (ready) map.easeTo({bearing: 0, pitch: navigationPitch(), duration: 300}); },
     centerCamera(id = selected) {
       const camera = current.cameras.find(c => c.id === id);
-      if (ready && camera) map.easeTo({center: toLngLat([camera.x,camera.y],current.origin), zoom: Math.max(map.getZoom(),19), pitch: viewPitch(view, tool), duration: 350});
+      if (ready && camera) map.easeTo({center: toLngLat([camera.x,camera.y],current.origin), zoom: Math.max(map.getZoom(),19), pitch: navigationPitch(), duration: 350});
     },
     centerSelection(id = selected) {
-      const pointItem = [...current.cameras,...current.labels,...(current.stairs || [])].find(item => item.id === id);
+      const pointItem = [...(current.windows || []),...(current.doorways || []),...current.cameras,...current.labels,...(current.stairs || [])].find(item => item.id === id);
       const shape = [...current.buildings,...current.rooms,...(current.zones || []),...(current.openings || []),...(current.paths || []).map(path => ({...path,footprint:path.points}))].find(item => item.id === id);
       if (!ready) return;
-      if (pointItem) map.easeTo({center: toLngLat([pointItem.x,pointItem.y],current.origin), pitch: viewPitch(view, tool), duration: 350});
-      else if (shape) {
-        const points = shape.footprint;
-        map.fitBounds([toLngLat([Math.min(...points.map(p=>p[0]))-5,Math.min(...points.map(p=>p[1]))-5],current.origin),toLngLat([Math.max(...points.map(p=>p[0]))+5,Math.max(...points.map(p=>p[1]))+5],current.origin)],{padding: 60,maxZoom:21,pitch: viewPitch(view, tool),duration:350});
-      }
+      if (pointItem) map.easeTo({center: toLngLat([pointItem.x,pointItem.y],current.origin), pitch: navigationPitch(), duration: 350});
+      else if (shape) frameOutline(shape);
     },
     setBasemap(enabled) {
       if (!ready) return;
@@ -637,6 +710,7 @@ aster-saturation": -1, "raster-brightness-max": 0.55 } }, "grid");
       if (ready) map.getSource("blind-spots").setData(fc((rings || []).map(ring => polygon(ring, current.origin))));
     },
     destroy() {
+      doorMap.destroy();windowMap.destroy();stairMap.destroy();
       drag?.cancel();
       handle?.remove();
       if (labelFrame !== null) cancelAnimationFrame(labelFrame);
