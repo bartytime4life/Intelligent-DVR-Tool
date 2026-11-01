@@ -132,6 +132,6 @@ test('deferred Events deep link resolves when matching recording results arrive'
     name:'audit-review.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(bundle))
   });
   await expect(page.locator('.recognition-status')).toContainText('matching results contain the observation');
-  await expect(page.locator('.recognition-observations')).toContainText('fixture-observation', {timeout:1000}).catch(()=>{});
+  await expect(page.locator('.recognition-observations')).toContainText('Rule observations');
   await expect(page.getByRole('button',{name:'Previous sample'})).toBeDisabled();
 });
