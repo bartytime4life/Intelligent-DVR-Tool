@@ -1,5 +1,11 @@
 # Offline qualification and local evidence checklist
 
+[Current visual atlas](visual-atlas.md) · [Product status](product-status.md) · [Provenance](media/current/README.md)
+
+![Input provenance and storage boundaries for offline qualification.](media/current/data-boundary.svg)
+
+*A local evidence collector does not certify inference quality or authenticity.*
+
 This workflow works with explicit local files. It does not depend on a browser,
 an Ollama portal, camera credentials, paid services or access to another machine.
 It does not run inference, inventoried source files, tests or network requests. The collector

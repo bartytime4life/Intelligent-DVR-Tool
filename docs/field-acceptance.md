@@ -1,5 +1,11 @@
 # Field deployment and acceptance runbook
 
+[Current visual atlas](visual-atlas.md) · [Product status](product-status.md) · [Provenance](media/current/README.md)
+
+![Evidence-producing acceptance sequence from authorized source to reviewed result.](media/current/workflow.svg)
+
+*Physical measurements must be recorded separately from software/fixture tests.*
+
 [Home](../README.md) · [PC installation](pc-testing.md) · [Product status](product-status.md) · [Verification evidence](verification/README.md)
 
 This guide turns the local prototype into a **reproducible, operator-approved PC test**. It is not production certification. Keep the exact revision, physical devices, observed behavior and limits with each result. Passing CI or running generated footage does not establish detection accuracy or 100-camera operation.

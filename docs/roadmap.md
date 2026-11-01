@@ -1,8 +1,14 @@
 # Build the next claim with evidence
 
+[Current visual atlas](visual-atlas.md) · [Product status](product-status.md) · [Provenance](media/current/README.md)
+
+![Acceptance gates toward real source ingest, recording continuity and quality.](media/current/scale-gates.svg)
+
+*The 100+ target remains unqualified; virtual decoders are not physical cameras.*
+
 [Home](../README.md) · [Product status](product-status.md) · [Verification](verification/README.md) · [100-camera plan](performance-100-cameras.md)
 
-The minimum capacity goal is **100 simultaneously active cameras**. Five generated scenes are interface fixtures, not the product target.
+The minimum capacity goal is **100 simultaneously active cameras**. The current Monitor starts empty with an explicit real-source chooser; generated camera scenes remain only in the [historical gallery](visual-tour.md#historical-prototype-captures). The [recent UI/navigation fixes](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/59) and [source/Facility simplification](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/61) are merged and browser-tested, but real-camera endurance, accuracy and 100-camera capacity remain unqualified.
 
 | Lane | Exists now | Next evidence required |
 | --- | --- | --- |
