@@ -18,6 +18,8 @@ if [ ! -x .venv/bin/python ] || [ ! -f local-analysis/catalog.json ]; then
   exec npm run preview -- --host 127.0.0.1 --port 4180 --strictPort --open
 fi
 [ -f local-feeds.json ] || (umask 077; printf '{"sources": []}\n' > local-feeds.json)
+# Person enrollment needs the pinned face models listed under "faces" in the catalog.
+FACES=(); grep -q '"faces"' local-analysis/catalog.json && FACES=(--allow-face-enrollment)
 exec .venv/bin/python -m edge.local_service --feeds-config local-feeds.json \
   --recordings local-analysis/recordings --config local-analysis/catalog.json \
-  --allow-recording-import --allow-training --port 4180 --open-browser
+  --allow-recording-import --allow-training "${FACES[@]}" --port 4180 --open-browser

@@ -6,6 +6,7 @@ param(
     [switch]$Analysis,
     [switch]$AllowRecordingImport,
     [switch]$AllowTraining,
+    [switch]$AllowFaceEnrollment,
     [string]$PrepareAnalysis = '',
     [switch]$Feeds,
     [switch]$Facility,
@@ -32,6 +33,7 @@ try {
     if ($Analysis) { $TaskArgs += '--analysis' }
     if ($AllowRecordingImport) { $TaskArgs += '--allow-recording-import' }
     if ($AllowTraining) { $TaskArgs += '--allow-training' }
+    if ($AllowFaceEnrollment) { $TaskArgs += '--allow-face-enrollment' }
     if ($PrepareAnalysis) { $TaskArgs += @('--prepare-analysis', $PrepareAnalysis) }
     if ($Feeds) { $TaskArgs += '--feeds' }
     if ($Facility) { $TaskArgs += '--facility' }

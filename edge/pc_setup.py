@@ -339,6 +339,7 @@ def main(argv=None):
     parser.add_argument('--recorder-config', type=Path, help='Enable one configured LAN recorder in Recognition; never starts capture automatically')
     parser.add_argument('--allow-recording-import', action='store_true', help='Enable explicit same-computer recording imports (64 MiB per file)')
     parser.add_argument('--allow-training', action='store_true', help='Let Train save tuned rule sets beside the analysis catalog (never overwrites)')
+    parser.add_argument('--allow-face-enrollment', action='store_true', help='Let Train enroll consenting people; needs the pinned face models in the catalog')
     parser.add_argument('--facility', action='store_true', help='Source-only Vite preview, preserving opt-in local geo delivery')
     parser.add_argument('--feeds-config', type=Path, default=Path(os.environ.get('DVR_FEEDS_CONFIG') or ROOT / 'local-feeds.json'))
     parser.add_argument('--recordings', type=Path, default=os.environ.get('DVR_RECORDINGS') or None)
@@ -376,6 +377,8 @@ def main(argv=None):
             raise SetupError('--allow-recording-import requires recording analysis configuration.')
         if args.allow_training and (not args.recordings or not args.config):
             raise SetupError('--allow-training requires recording analysis configuration.')
+        if args.allow_face_enrollment and (not args.recordings or not args.config):
+            raise SetupError('--allow-face-enrollment requires recording analysis configuration.')
         if args.recorder_config and (not args.recordings or not args.config or args.install):
             raise SetupError('--recorder-config requires analysis configuration; enable it with Start or Check after installation.')
         if args.report and not args.check:
@@ -429,6 +432,8 @@ def main(argv=None):
             service.append('--allow-recording-import')
         if args.allow_training:
             service.append('--allow-training')
+        if args.allow_face_enrollment:
+            service.append('--allow-face-enrollment')
         if args.recorder_config:
             service += ['--recorder-config', str(args.recorder_config)]
         if state_dir is not None:

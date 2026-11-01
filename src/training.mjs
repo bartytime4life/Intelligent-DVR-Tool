@@ -9,6 +9,22 @@ export const TRAINING_SCRIPT = Object.freeze([
   { id: 'partial', prompt: 'Stand partly hidden', detail: 'Stand behind a chair or door frame so only part of you shows.', seconds: 10, expect: 'present' },
   { id: 'close', prompt: 'Come back and face the camera', detail: 'Return to your usual spot and stay until recording ends.', seconds: 8, expect: 'present' },
 ]);
+// Enrollment needs still, close, slightly varied views of one face.
+export const ENROLL_SCRIPT = Object.freeze([
+  { id: 'look', prompt: 'Look at the camera', detail: 'Keep your face inside the oval and hold still.', seconds: 6 },
+  { id: 'left', prompt: 'Turn your head slightly left', detail: 'A small turn; keep both eyes visible.', seconds: 5 },
+  { id: 'right', prompt: 'Turn your head slightly right', detail: 'A small turn; keep both eyes visible.', seconds: 5 },
+  { id: 'back', prompt: 'Lean back a little', detail: 'Stay inside the oval and hold still.', seconds: 4 },
+]);
+// The baseline check uses everyday views, so it reflects how the camera will see the person.
+export const BASELINE_SCRIPT = Object.freeze([
+  { id: 'natural', prompt: 'Move naturally in view', detail: 'Look around the room as you normally would.', seconds: 6 },
+  { id: 'step', prompt: 'Step back and face the camera', detail: 'Stand where the camera usually sees people.', seconds: 6 },
+]);
+export const CONSENT_TEXT = 'This person agrees that Intelligent DVR may keep a face template on this computer to suggest possible matches for human review. The template can be deleted at any time. Video and templates are never uploaded.';
+export const baselineText = b => !b ? 'No baseline check yet'
+  : b.usable ? `Recognized in ${b.matched} of ${b.usable} face views (${percent(b.rate)})` : 'Last check found no clear face views';
+
 // Frames just after a prompt changes are ambiguous while the person reacts.
 export const TRANSITION_SECONDS = 2;
 // The margin covers lighting changes: a wall portrait scored 0.26 in the evening and 0.43 in daylight.

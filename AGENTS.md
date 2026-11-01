@@ -147,3 +147,11 @@ create, at most 50). Results describe the session, never qualification. Person
 enrollment follows separately: consent-based face templates kept on this computer,
 deletable, and shown only as "possible match" suggestions for human review; this
 supersedes the earlier "no face identification" statement once implemented.
+
+Owner enrollment decision (2026-11-01): Train enrolls consenting people for a
+face baseline. Consent (name plus explicit agreement) comes before any capture;
+pinned OpenCV Zoo YuNet (MIT) and SFace (Apache-2.0) run only in a bounded local
+worker; templates are private files beside the catalog, never sent to the browser,
+deletable, at most 50 people. A baseline check reports recognized views and
+refines the template. Matches are suggestions for human review only, never
+identification or access decisions. Off unless --allow-face-enrollment.

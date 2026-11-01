@@ -70,3 +70,5 @@ One person, one camera and one room per session. The script does not prove what 
 person actually did; skipped transition frames reduce but do not remove mistakes.
 Training tunes a threshold on the pinned detector. It does not retrain the model,
 identify people or qualify detection for other cameras, rooms or lighting.
+
+To set a baseline for a specific, consenting person, see [person enrollment](person-enrollment.md).
