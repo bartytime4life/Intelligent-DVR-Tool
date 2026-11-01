@@ -331,14 +331,36 @@ export function App() {
   const eventsRef = useRef(events);
   eventsRef.current = events;
   // Leaving Facility unmounts the builder, so unsaved drafts and its undo history would be lost silently.
-  const tabRef = useRef(tab), facilityDirty = useRef(false);
+  const tabRef = useRef(tab), facilityDirty = useRef(false), systemDirty = useRef(false), zoneDirty = useRef(false);
   tabRef.current = tab;
+  // Unsaved zone rules are a draft, not the separately persisted analyzer rules.
+  // The history listener was installed on mount; refs ensure it sees fresh values.
+  zoneDirty.current = tab === "Zones" && JSON.stringify(draft) !== JSON.stringify(ruleFor(rules, selected));
   const mayLeave = (next) => {
-    if (tabRef.current !== "Facility" || next === "Facility" || !facilityDirty.current) return true;
-    if (!window.confirm("Leave the facility builder? Unsaved facility edits, drafts and undo history will be discarded.")) return false;
-    facilityDirty.current = false; // popstate and hashchange can both report one Back press.
+    if (tabRef.current === next) return true;
+    const blockers = {
+      Facility: [facilityDirty, "Leave the facility builder? Unsaved facility edits, drafts and undo history will be discarded."],
+      Zones: [zoneDirty, "Leave Zones? Unsaved rule edits will be discarded. Save the review rule before leaving."],
+      System: [systemDirty, "Leave System? Unapplied machine settings will be discarded. Apply the draft before leaving."]
+    };
+    const blocker = blockers[tabRef.current];
+    if (!blocker?.[0].current) return true;
+    if (!window.confirm(blocker[1])) return false;
+    blocker[0].current = false; // Back and hashchange may both observe one navigation.
     return true;
   };
+  useEffect(() => {
+    const warn = event => {
+      if (tabRef.current === "Facility" && facilityDirty.current ||
+          tabRef.current === "Zones" && zoneDirty.current ||
+          tabRef.current === "System" && systemDirty.current) {
+        event.preventDefault();
+        event.returnValue = "";
+      }
+    };
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, []);
   function setTab(next) {
     if (!mayLeave(next)) return;
     if (next === "Recognition") setRecognitionOpened(true);
@@ -424,6 +446,11 @@ export function App() {
     [video],
   );
   function zone(id = selected) {
+    // Switching the plan inside Zones also discards the current edit draft.
+    if (tabRef.current === "Zones" && id !== selected && zoneDirty.current) {
+      if (!window.confirm("Switch zone plans? Unsaved rule edits for this plan will be discarded.")) return;
+      zoneDirty.current = false;
+    }
     if (!mayLeave("Zones")) return;
     setSelected(id);
     setTab("Zones");
@@ -627,7 +654,9 @@ export function App() {
         </Suspense></WorkspaceBoundary></div>}
         {tab === "Facility" && <WorkspaceBoundary name="Facility"><Suspense fallback={<div className="content-page"><h1>Opening facility builder…</h1></div>}><FacilityBuilder onPreviewCount={setLiveCount} onDirtyChange={(dirty) => { facilityDirty.current = dirty; }} /></Suspense></WorkspaceBoundary>}
         {tab === "System" && <WorkspaceBoundary name="System"><Suspense fallback={<div className="content-page"><h1>Opening machine setup…</h1></div>}><SystemSetup setup={resources}
-          onApply={setup => setResourceState(s => ({ ...s, setup, error: "" }))} storageError={resourceState.error} download={download} /></Suspense></WorkspaceBoundary>}
+          onApply={setup => setResourceState(s => ({ ...s, setup, error: "" }))}
+          onDirtyChange={dirty => { systemDirty.current = dirty; }}
+          storageError={resourceState.error} download={download} /></Suspense></WorkspaceBoundary>}
         {tab === "Monitor" && <WorkspaceBoundary name="Monitor"><LiveMonitor onZoneStill={offerZoneStill} visibleTiles={resources.browser.visibleTiles} onCount={setLiveCount} pageHidden={pageHidden} clip={capturedClip} onClip={setCapturedClip} capturePending={capturePending} onCaptureBusy={setCapturePending} onReviewClip={() => setTab('Recognition')} queue={
               <aside className="review-queue">
                 <div className="queue-heading">
@@ -949,6 +978,7 @@ export function App() {
                     {error}
                   </p>
                 )}
+                {zoneDirty.current && <p className="hint" role="status">Unsaved review rule changes. Save before changing screens or camera plans.</p>}
                 <button className="button amber" type="submit">
                   Save review rule
                   <Check />

@@ -12,13 +12,17 @@ function NumberField({ label, value, min, max, step = 1, change }) {
 function Card({ icon: Icon, title, caption, children, className = "" }) {
   return <section className={`system-card ${className}`}><header><Icon size={24} /><div><h2>{title}</h2>{caption && <p>{caption}</p>}</div></header>{children}</section>;
 }
-export default function SystemSetup({ setup, onApply, storageError, download }) {
+export default function SystemSetup({ setup, onApply, onDirtyChange, storageError, download }) {
   const [draft, setDraft] = useState(() => structuredClone(setup));
   const [status, setStatus] = useState("");
   const [fileError, setFileError] = useState("");
   const [snapshot, setSnapshot] = useState(null);
   const [dirty, setDirty] = useState(false);
   const setupFile = useRef(), hostFile = useRef();
+  const dirtyCallback = useRef(onDirtyChange);
+  dirtyCallback.current = onDirtyChange;
+  useEffect(() => { dirtyCallback.current?.(dirty); }, [dirty]);
+  useEffect(() => () => { dirtyCallback.current?.(false); }, []);
   useEffect(() => { setDraft(structuredClone(setup)); setDirty(false); }, [setup]);
   let result, problem = "";
   try { result = calculateSetup(draft); } catch (err) { problem = err.message; }
