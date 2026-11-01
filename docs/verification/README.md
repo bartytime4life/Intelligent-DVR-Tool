@@ -1,5 +1,13 @@
 # Verification index
 
+[Current visual atlas](../visual-atlas.md)
+
+![The product's source-matched review process is illustrated separately from dated test records.](../media/current/workflow.svg)
+
+*All historical logs, measurements, source hashes and qualification limits below remain unchanged.*
+
+**Current interface/regression check (October 31 Central / November 1 UTC):** [PR #61](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/61) merged with **14/14 reported CI checks**; [Chromium run 41263964836](https://github.com/bartytime4life/Intelligent-DVR-Tool/actions/runs/41263964836) passed **65 general/Facility + 12 analysis + 13 feeds + 2 recorder browser scenarios**, capturing 1440px and 390px controlled UI states. [Visual manifest](../media/current/manifest.json). These are software fixture tests, **not** field-camera recognition quality or 100-camera capacity.
+
 [Review fixes, October 30](review-fixes-2026-10-30/README.md): PR #45/#46 on
 `main`, with local Node/Python/browser runs and green Linux/Windows CI, plus the
 follow-up PRs #47–#50 and the PC install kit fix in #52; synthetic fixtures only,
@@ -40,7 +48,7 @@ Local checks and unresolved field/human acceptance are recorded separately.
 
 Reviewed October 28, 2026. [Product status](../product-status.md) · [Home](../../README.md)
 
-## Latest audited application baseline
+## Historical audited application baseline
 
 The merged PR #11 revision is
 [`82c862c68735720b8840461fc624e8dbe148a53a`](https://github.com/bartytime4life/Intelligent-DVR-Tool/commit/82c862c68735720b8840461fc624e8dbe148a53a).
@@ -49,7 +57,7 @@ and **6 separate Chromium facility scenarios**. The
 [baseline record](facility-2026-10-27/README.md) includes exact run/job URLs,
 timestamped excerpts, machine-readable counts and evidence boundaries.
 
-“Latest audited” identifies the revision examined here. Later commits need their
+“Historical audited” identifies the revision examined here. Later commits need their
 own CI checks; this index does not automatically certify future source or deployments.
 
 ## Dated records

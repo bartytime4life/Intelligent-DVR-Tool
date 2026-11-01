@@ -1,5 +1,11 @@
 # Security boundaries
 
+[Visual atlas](docs/visual-atlas.md) · [Field acceptance](docs/field-acceptance.md)
+
+![Browser, local service, human review and export are separate data-trust boundaries.](docs/media/current/data-boundary.svg)
+
+*No visual in these guides should be interpreted as authentication, camera permission or verified physical evidence.*
+
 This prototype is for human-reviewed observations. It does not control cameras,
 locks, accounts or enforcement. There is no face identification, access decision,
 network scanning, automatic containment, background capture or cloud inference.

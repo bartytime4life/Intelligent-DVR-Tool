@@ -1,5 +1,11 @@
 # Intelligent DVR: whole-workspace UI and navigation audit
 
+[Current visual atlas](visual-atlas.md)
+
+![Current tested Monitor interface after the source-selection simplification.](media/current/monitor-desktop.jpg)
+
+*This screenshot shows an empty/opt-in browser interface, not live video or a novice-user study.*
+
 **Audit date:** October 31, 2026 (Central)  
 **Baseline:** `d1bf3e96e49be6130ca851de4c640f5eb8fbf19b` (`main`)  
 **Scope:** the seven primary workspaces, their principal navigation/interaction code, responsive CSS, existing browser regression suite, and read-only GitHub Actions results.
@@ -73,3 +79,7 @@ For broader checks, run `npm test`, `npm run build`, `npm run test:sites`, the n
 2. Inspect captured screenshots at both viewports; record any clipping, low-contrast controls or confusing task hierarchy as separate findings.
 3. Have 5–8 first-time operators complete connection, import, navigation, editing and export tasks on a real PC, recording successful completions, errors, time and abandoned steps.
 4. Validate an actual authorized camera and local recording path separately, and preserve the user's unchanged evidence and configuration.
+
+## Follow-through after this audit
+
+The confirmed draft/history/deferred-link defects were fixed and merged in [PR #59](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/59); the redundant Monitor empty-state controls and duplicate Facility top task bar were simplified in [PR #61](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/61). The latter's [controlled browser run](https://github.com/bartytime4life/Intelligent-DVR-Tool/actions/runs/41263964836) passed 92 scenarios across the app/Facility, analysis, camera feeds and recorder; all 14 reported CI checks passed. The [current visual atlas](visual-atlas.md) contains dated screenshots and the operator guides explain the resulting navigation. Real touch, novice and physical-camera acceptance remain separate tasks.

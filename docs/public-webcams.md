@@ -1,5 +1,11 @@
 # Approved public internet webcams
 
+[Current visual atlas](visual-atlas.md)
+
+![Current Monitor's explicit source selection; no public camera is connected in this capture.](media/current/monitor-desktop.jpg)
+
+*The screenshot is a controlled app test, not verified public imagery.*
+
 Monitor supports explicitly connected, owner-approved **direct HTTPS JPEG
 snapshots** and **length-delimited MJPEG streams**. This is a local preview
 adapter, not a directory of exposed devices. Start with a provider-published
