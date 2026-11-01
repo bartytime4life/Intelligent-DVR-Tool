@@ -6,3 +6,30 @@
 .clip-capture { margin:16px 0; padding:18px 20px; border:1px solid #34564f; border-radius:10px; background:#142528; overflow-wrap:anywhere; }
 .clip-capture p { font-size:13px; color:#b4c1cb; line-height:1.6; margin:8px 0; }
 .clip-capture .review-actions { flex-wrap:wrap; margin-top:12px; }
+
+/* Operator-first empty state: one intentional source choice, no repeated empty camera tiles. */
+.live-monitor .camera-wall.wall-empty{display:block;min-height:0;padding:16px;background:#081b25}
+.monitor-welcome{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;min-height:385px;padding:38px 24px;border:1px solid #355a64;border-radius:15px;background:radial-gradient(ellipse at 48% 4%,#1d454a 0%,transparent 58%),linear-gradient(145deg,#102b36,#0b202b);color:#dceff2;overflow:hidden}
+.monitor-welcome:before{content:'';position:absolute;inset:0;background:linear-gradient(#6be4db0c 1px,transparent 1px),linear-gradient(90deg,#6be4db0c 1px,transparent 1px);background-size:38px 38px;mask-image:linear-gradient(transparent 0%,black 38%,transparent 98%);pointer-events:none}
+.monitor-welcome>*{position:relative}
+.monitor-welcome-icon{display:grid;place-items:center;width:65px;height:65px;margin-bottom:11px;background:#153a40;border:1px solid #5ebdb0;border-radius:18px;color:#86f1dc;box-shadow:0 6px 30px #0005}
+.monitor-welcome .eyebrow{font-size:10px;letter-spacing:.17em;color:#83d9d1;margin:8px 0 5px}
+.monitor-welcome h2{font-size:clamp(19px,2.3vw,27px);letter-spacing:-.03em;margin:6px 0 8px;color:#f0ffff}
+.monitor-welcome>p:not(.eyebrow){max-width:540px;margin:0 auto 22px;font-size:13px;line-height:1.65;color:#b8d0d8}
+.monitor-welcome-paths{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;width:min(100%,680px)}
+.monitor-welcome-paths button{display:flex;flex-direction:column;align-items:start;gap:11px;min-width:0;min-height:101px;padding:14px;border:1px solid #44737c;border-radius:10px;background:#173744e9;color:#cffff8;text-align:left;cursor:pointer;transition:background .15s,border-color .15s}
+.monitor-welcome-paths button:hover{border-color:#83eadb;background:#24535b}
+.monitor-welcome-paths button:disabled{cursor:not-allowed;opacity:.48}
+.monitor-welcome-paths button:focus-visible{outline:2px solid #86f9e9;outline-offset:3px}
+.monitor-welcome-paths button>svg{color:#90e5d8;flex:none}
+.monitor-welcome-paths button span{font-weight:700;font-size:12px;line-height:1.35}
+.monitor-welcome-paths button small{display:block;font-size:10px;line-height:1.5;font-weight:400;color:#b5c9d2;margin-top:4px}
+.monitor-welcome-footnote{display:block;margin-top:18px;color:#91afb9;line-height:1.55;font-size:10px}
+.live-monitor .clip-capture-idle{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;padding:10px 16px;margin:10px 0 15px;background:#10262d;border-color:#2d4d52}
+.clip-capture-idle>div:first-child{flex:1;min-width:180px}
+.clip-capture-idle strong{font-size:12px;color:#cadfe4}
+.clip-capture-idle p{font-size:11px;margin:4px 0;color:#9db8bf}
+.clip-capture-idle .review-actions{margin:0}
+@media(max-width:900px){.monitor-welcome-paths{grid-template-columns:1fr}.monitor-welcome{padding:25px 18px;min-height:0}.monitor-welcome-paths button{min-height:68px;flex-direction:row;align-items:center}.monitor-welcome-paths button span{flex:1}}
+@media(max-width:600px){.live-monitor .camera-wall.wall-empty{padding:8px}.monitor-welcome{border-radius:10px;padding:20px 14px}.monitor-welcome h2{font-size:21px}.monitor-welcome>p:not(.eyebrow){font-size:12px}.monitor-welcome-paths button{min-height:60px;padding:10px 12px}.monitor-welcome-footnote{font-size:9px}}
+@media(prefers-reduced-motion:reduce){.monitor-welcome-paths button{transition:none}}

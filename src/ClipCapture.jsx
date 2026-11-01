@@ -9,9 +9,11 @@ export default function ClipCapture({ stream, clip, onClip, onReview, hidden, ca
   useEffect(() => { alive.current = true; return () => { alive.current = false; capture.current.stop('Left Monitor'); }; }, []);
   useEffect(() => { if (!stream || hidden) capture.current.stop(hidden ? 'Page hidden' : 'Camera disconnected'); }, [stream, hidden]);
   const busy = ['recording', 'stopping'].includes(state.state);
-  return <section className="clip-capture" aria-label="Webcam clip capture">
+  const idle = !stream && !clip && !busy;
+  return <section className={`clip-capture ${idle ? 'clip-capture-idle' : ''}`} aria-label="Webcam clip capture">
     <div><strong>{state.state === 'recording' ? '● Recording webcam clip' : 'Capture a clip for recognition'}</strong>
-      <p>Video only · automatic stop requested at 60s · 64 MiB maximum. Clips stay in memory until you save or import them.</p></div>
+      {idle ? <p>Connect your webcam to enable an optional local clip.</p> :
+        <p>Video only · automatic stop requested at 60s · 64 MiB maximum. Clips stay in memory until you save or import them.</p>}</div>
     <div className="review-actions">
       {busy ? <button className="button amber" disabled={state.state === 'stopping'} onClick={() => capture.current.stop()}>Stop recording</button> :
         <button className="button" disabled={!stream || Boolean(clip) || capturePending} onClick={() => { try { capture.current.start(stream); } catch (error) { setState({ state: 'error', message: error.message }); } }}>Record webcam clip</button>}

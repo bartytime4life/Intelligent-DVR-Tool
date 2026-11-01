@@ -32,7 +32,7 @@ test('Facility Studio focus map and navigation are reversible and keyboard acces
   await expect(page.getByRole('region',{name:'Facility keyboard and map help'})).toBeVisible();
   await page.keyboard.press('Escape');
   await expect(page.getByRole('region',{name:'Facility keyboard and map help'})).toHaveCount(0);
-  await page.getByRole('button',{name:'Cameras',exact:true}).click();
+  await page.getByRole('combobox',{name:'Jump to facility task'}).selectOption('3');
   await expect(page.getByRole('heading',{name:'Aim this camera'})).toBeVisible();
   await page.keyboard.press('5');
   await expect(page.getByRole('heading',{name:'Check estimated coverage'})).toBeVisible();
@@ -46,7 +46,7 @@ test('Facility Studio focus map and navigation are reversible and keyboard acces
 test('image laboratory imports only on request, reports ROI and compares two local frames',async({page})=>{
   await openStudio(page);
   const errors=[];page.on('pageerror',err=>errors.push(err.message));
-  await page.getByRole('button',{name:'Cameras',exact:true}).click();
+  await page.getByRole('combobox',{name:'Jump to facility task'}).selectOption('3');
   await page.locator('.facility-image-lab summary').click();
   await expect(page.getByRole('button',{name:/Freeze live frame into A/})).toBeDisabled();
   const a=await image(page,false);
@@ -70,7 +70,7 @@ test('image laboratory imports only on request, reports ROI and compares two loc
 test('transparent local PNGs are composited before analysis and lossless frame export',async({page})=>{
   await openStudio(page);
   const errors=[];page.on('pageerror',e=>errors.push(e.message));
-  await page.getByRole('button',{name:'Cameras',exact:true}).click();
+  await page.getByRole('combobox',{name:'Jump to facility task'}).selectOption('3');
   await page.locator('.facility-image-lab summary').click();
   const picture = async alpha => page.evaluate(value => {
     const canvas = document.createElement('canvas');
@@ -111,7 +111,7 @@ test('transparent local PNGs are composited before analysis and lossless frame e
 test('calibrated map ruler requires withheld check and independent measured reference declaration',async({page})=>{
   await openStudio(page);
   const errors=[];page.on('pageerror',err=>errors.push(err.message));
-  await page.getByRole('button',{name:'Cameras',exact:true}).click();
+  await page.getByRole('combobox',{name:'Jump to facility task'}).selectOption('3');
   await page.locator('.facility-image-lab summary').click();
   const picture=await image(page,false);
   await page.getByLabel('Open image for diagnostics').setInputFiles({name:'ground.png',mimeType:'image/png',buffer:Buffer.from(picture,'base64')});
@@ -146,7 +146,7 @@ test('calibrated map ruler requires withheld check and independent measured refe
 test('a chosen ground reference accepts an explicit local map pick, without activating recording',async({page})=>{
   await openStudio(page);
   const errors=[];page.on('pageerror',err=>errors.push(err.message));
-  await page.getByRole('button',{name:'Cameras',exact:true}).click();
+  await page.getByRole('combobox',{name:'Jump to facility task'}).selectOption('3');
   // The map's WebGL readiness is independent from rendering the React toolbar.
   await expect(page.getByRole('button',{name:'Place camera'})).toBeEnabled();
   await page.locator('.facility-image-lab summary').click();
@@ -166,7 +166,7 @@ test('a chosen ground reference accepts an explicit local map pick, without acti
 
 test('image reference numbering follows full row positions even when earlier markers are blank',async({page})=>{
   await openStudio(page);
-  await page.getByRole('button',{name:'Cameras',exact:true}).click();
+  await page.getByRole('combobox',{name:'Jump to facility task'}).selectOption('3');
   await page.locator('.facility-image-lab summary').click();
   const picture=await image(page,false);
   await page.getByLabel('Open image for diagnostics').setInputFiles({
@@ -177,4 +177,19 @@ test('image reference numbering follows full row positions even when earlier mar
   await page.getByLabel('Reference 5 Image Y %').fill('50');
   await expect(page.locator('.facility-calibration-marker')).toHaveCount(1);
   await expect(page.locator('.facility-calibration-marker')).toHaveText('5');
+});
+
+test('Facility Studio has one compact task selector plus descriptive sidebar steps',async({page})=>{
+  await openStudio(page);
+  await expect(page.locator('.facility-workbench-tasks button')).toHaveCount(0);
+  const task=page.getByRole('combobox',{name:'Jump to facility task'});
+  await expect(task).toHaveValue('0');
+  await expect(page.locator('.facility-task-progress')).toContainText('STEP 1 / 7');
+  await task.selectOption('3');
+  await expect(task).toHaveValue('3');
+  await expect(page.locator('.facility-task-progress')).toContainText('STEP 4 / 7');
+  await expect(page.getByRole('heading',{name:'Aim this camera'})).toBeVisible();
+  await page.getByRole('button',{name:/^2 Buildings/}).click();
+  await expect(task).toHaveValue('1');
+  await expect(page.getByRole('heading',{name:'Place your buildings'})).toBeVisible();
 });

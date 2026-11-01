@@ -1331,3 +1331,15 @@
  .facility-workbench-help{top:68px}
 }
 @media(prefers-reduced-motion:reduce){.facility-workbench button{transition:none}}
+
+/* Contextual task selector replaces the duplicate seven-button toolbar.
+   The detailed left workflow remains the accessible task navigation. */
+.facility-workbench-tasks{gap:11px;overflow:visible}
+.facility-task-progress{font:700 10px ui-monospace,monospace;letter-spacing:.08em;color:#91e5db;white-space:nowrap;border:1px solid #386b6e;border-radius:7px;padding:7px 8px;background:#173f45}
+.facility-task-jump{display:flex;flex-direction:column;justify-content:center;gap:3px;color:#a7c3d0;min-width:150px;max-width:245px;font-size:10px}
+.facility-task-jump select{display:block;max-width:100%;width:100%;min-height:32px;border:1px solid #426872;border-radius:7px;padding:4px 30px 4px 9px;color:#e7fcfa;background:#183a48;font-size:12px;font-weight:700;cursor:pointer}
+.facility-task-jump select:hover{border-color:#65c3b5}
+.facility-task-jump select:focus-visible{outline:2px solid #86ffed;outline-offset:2px}
+.facility-task-context{min-width:0;max-width:280px;flex:1;font-size:11px;line-height:1.5;color:#9fbcc8;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media(max-width:1200px){.facility-task-context{display:none}.facility-task-jump{max-width:200px}}
+@media(max-width:620px){.facility-workbench-tasks{flex-basis:100%;order:3;gap:8px}.facility-task-jump{flex:1;max-width:none}.facility-workbench-tasks .facility-task-progress{font-size:9px}}

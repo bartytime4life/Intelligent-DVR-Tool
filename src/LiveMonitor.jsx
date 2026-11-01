@@ -164,7 +164,6 @@ export default function LiveMonitor({onZoneStill, queue, visibleTiles=4, onCount
   ];
   const displayed = visibleFeedTiles(tiles, selected, visibleTiles);
   shown.current = new Set(displayed.map(t => t.id));
-  const blanks = Math.max(0, Math.min(4, visibleTiles) - displayed.length);
   return <div className="live-monitor">
     <div className="live-heading"><div><p className="eyebrow">YOUR CAMERAS · LOCAL PREVIEW</p><h1>Monitor <span>{live} receiving</span></h1></div>
       <div className="review-actions"><button className="button" disabled={!active} onClick={() => stopAll()}>Disconnect all</button>
@@ -174,7 +173,25 @@ export default function LiveMonitor({onZoneStill, queue, visibleTiles=4, onCount
     <ClipCapture stream={webcam.stream} hidden={pageHidden} clip={clip} onClip={onClip} onReview={onReviewClip} capturePending={capturePending} onCaptureBusy={onCaptureBusy} />
     {error && !setup && <p className="feed-error" role="alert"><WarningCircle />{error}</p>}
     <div className="monitor-layout">
-      <section className={`camera-wall wall-${Math.min(4, visibleTiles)}`} aria-label="Camera wall">
+      <section className={`camera-wall ${!tiles.length ? 'wall-empty' : `wall-${Math.min(4, Math.max(1, displayed.length))}`}`} aria-label="Camera wall">
+        {!tiles.length && <div className="monitor-welcome" role="region" aria-label="Start camera monitoring">
+          <span className="monitor-welcome-icon"><Camera size={36} weight="duotone" aria-hidden="true"/></span>
+          <p className="eyebrow">REAL SOURCES · EXPLICIT CONTROL</p>
+          <h2>Your cameras belong here</h2>
+          <p>Choose how you want to connect. A preview appears only after you approve the source, and no AI or recording starts automatically.</p>
+          <div className="monitor-welcome-paths" role="group" aria-label="Camera source shortcuts">
+            <button type="button" onClick={() => openSetup('webcam')} disabled={active >= 4}>
+              <Camera size={20} aria-hidden="true"/><span>Computer webcam<small>Built-in or USB camera</small></span>
+            </button>
+            <button type="button" onClick={() => openSetup('dvr')} disabled={active >= 4}>
+              <Plug size={20} aria-hidden="true"/><span>Local DVR / IP camera<small>Configured private LAN source</small></span>
+            </button>
+            <button type="button" onClick={() => openSetup('public')} disabled={active >= 4}>
+              <Globe size={20} aria-hidden="true"/><span>Approved public webcam<small>Permitted HTTPS source</small></span>
+            </button>
+          </div>
+          <small className="monitor-welcome-footnote">No sample feeds · no microphone · no automatic streaming · connect only when ready</small>
+        </div>}
         {displayed.map(t => <article key={t.id} className={`camera-tile live-tile ${selected === t.id ? 'selected' : ''}`} onClick={() => setSelected(t.id)} aria-label={`${t.name} preview`}>
           <div className="live-picture">
             {t.id === 'webcam' && webcam.stream && <video ref={attachVideo} autoPlay muted playsInline aria-label="Webcam video" />}
@@ -191,12 +208,6 @@ export default function LiveMonitor({onZoneStill, queue, visibleTiles=4, onCount
             }}>Use for zones</button>}
             <button className="text-button" onClick={() => t.id === 'webcam' ? controller.current.stop() : disconnect(t.id)}>{t.state === 'connecting' ? 'Cancel' : t.id !== 'webcam' && ['failed','disconnected'].includes(t.state) ? 'Remove' : 'Disconnect'}</button>
             {t.id === 'webcam' && ['failed','disconnected'].includes(t.state) && <button className="text-button" onClick={() => openSetup()}>Reconnect</button>}</div>
-        </article>)}
-        {Array.from({length:blanks}, (_, i) => <article className="camera-tile empty-feed" key={`empty-${i}`}>
-          <div className="empty-feed-number">{String(displayed.length+i+1).padStart(2,'0')} / SOURCE</div>
-          <Camera size={38}/><h3>{!tiles.length && i === 0 ? 'Your cameras belong here' : 'No source connected'}</h3>
-          <p>{!tiles.length && i === 0 ? 'Choose a webcam, local DVR channel or approved public webcam.' : 'This tile will show frames from a source you connect.'}</p>
-          <button className="button" onClick={() => openSetup()} disabled={active >= 4}><Plus/>Connect source</button>
         </article>)}
       </section>{queue}
     </div>
