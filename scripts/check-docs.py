@@ -8,6 +8,7 @@ from pathlib import Path
 import re
 import runpy
 import sys
+from xml.etree import ElementTree
 from urllib.parse import unquote, urlsplit
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -38,6 +39,9 @@ def check():
             ROOT / 'docs/verification/2026-10-27/README.md',
             ROOT / 'docs/verification/hardware-2026-10-27/README.md',
             *sorted((ROOT / 'docs/wiki').glob('*.md'))]
+    # All active authored guides (not immutable dated verification records).
+    docs.extend(sorted((ROOT / 'docs').glob('*.md')))
+    docs.append(ROOT / 'docs/media/current/README.md')
     links = 0
     for file in set(docs):
         if not file.is_file():
@@ -74,6 +78,51 @@ def check():
         total += len(raw)
     if total > 3_000_000:
         errors.append('Published documentation media exceeds the 3 MB budget.')
+
+    # Keep new screenshot/illustration receipts independent from the dated 2026-10-27
+    # media manifest: historical images and hashes must never be silently rewritten.
+    current = json.loads((ROOT / 'docs/media/current/manifest.json').read_text(encoding='utf-8'))
+    if current.get('schema') != 'intelligent-dvr.current-documentation-media.v1':
+        errors.append('Invalid current documentation media manifest schema')
+    if len(current.get('assets', [])) != 11:
+        errors.append('Expected exactly 11 current screenshot/illustration assets')
+    current_total = 0
+    for entry in current.get('assets', []):
+        rel = entry.get('path', '')
+        destination = (ROOT / rel).resolve()
+        if not destination.is_relative_to(ROOT / 'docs/media/current') or not destination.is_file():
+            errors.append(f'Invalid or missing current-media path: {rel}')
+            continue
+        raw = destination.read_bytes()
+        current_total += len(raw)
+        sha = hashlib.sha1(f'blob {len(raw)}\\0'.encode('utf-8') + raw).hexdigest()
+        if len(raw) != entry.get('bytes') or sha != entry.get('git_blob_sha1'):
+            errors.append(f'Current media integrity mismatch: {rel}')
+        if entry.get('realCameraFootage') is not False:
+            errors.append(f'Current documentation image may not claim real camera footage: {rel}')
+        if destination.suffix == '.jpg':
+            if not (raw.startswith(b'\\xff\\xd8') and raw.endswith(b'\\xff\\xd9')):
+                errors.append(f'Not a bounded JPEG screenshot: {rel}')
+            if entry.get('kind') != 'actual-browser-screenshot':
+                errors.append(f'Unexpected screenshot type: {rel}')
+        elif destination.suffix == '.svg':
+            if entry.get('kind') != 'original-schematic-svg':
+                errors.append(f'Unlabeled SVG illustration: {rel}')
+            try:
+                document = ElementTree.fromstring(raw)
+                if document.tag != '{http://www.w3.org/2000/svg}svg' or document.get('viewBox') is None:
+                    raise ValueError('Missing SVG root or viewBox')
+                if any(element.tag.rsplit('}', 1)[-1] in ('script', 'foreignObject', 'image', 'use')
+                       or any(key.startswith('on') for key in element.attrib)
+                       or any(key.endswith('}href') or key == 'href' for key in element.attrib)
+                       for element in document.iter()):
+                    raise ValueError('Script, remote image, href, handler or foreignObject in static illustration')
+            except (ElementTree.ParseError, ValueError) as exc:
+                errors.append(f'Unsafe or malformed SVG: {rel}: {exc}')
+        else:
+            errors.append(f'Unknown current-media extension: {rel}')
+    if current_total > 350_000:
+        errors.append('Current documentation visual assets exceed 350 KiB budget')
 
     v = ROOT / 'docs/verification/2026-10-27'
     result = json.loads((v / 'summary.json').read_text(encoding="utf-8"))
@@ -155,7 +204,7 @@ def check():
     runpy.run_path(str(ROOT / 'docs/verification/journal-2026-10-28/verify-results.py'))['check']()
     runpy.run_path(str(ROOT / 'docs/verification/batching-2026-10-28/verify-results.py'))['check']()
     runpy.run_path(str(ROOT / 'docs/verification/durable-overload-2026-10-28/verify-results.py'))['check']()
-    print(f'Documentation checks passed: {links} local links, {len(manifest["assets"])} media hashes, {total:,} media bytes, test-count consistency.')
+    print(f'Documentation checks passed: {links} local links, {len(manifest["assets"])} historical media hashes, {len(current["assets"])} current visual blobs, {total:,} historical + {current_total:,} current media bytes, test-count consistency.')
 
 
 if __name__ == '__main__':
