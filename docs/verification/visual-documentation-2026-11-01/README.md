@@ -4,7 +4,9 @@
 
 The application source baseline is merged PR #71, `2566d845fbbc7b9f54f98441009a604f2fa513ce`.
 This change updates documentation, public visual assets, documentation tools and
-their publication tests. It changes no application source, native inference,
+their publication tests. The existing browser CI deadline is extended from ten
+to twenty minutes so its full serial suite and later analysis/feed/recorder
+stages can finish. It changes no application source, native inference,
 models, private runtime data, stored plans or enrollment templates.
 
 ## What was reconciled
@@ -36,6 +38,13 @@ The unchanged frontend also built successfully before capture. The new diagrams
 were visually inspected in the browser, and captures were checked against the
 controls pictured. This is documentation validation, not an exhaustive application
 regression run. Existing CI runs the broader application suites for the PR.
+
+The initial GitHub browser runs at documentation head `97dc311b` reached the
+existing ten-minute job deadline after 68 passing scenarios in the PR run, with
+no assertion failures reported. The remaining stages were skipped by cancellation;
+that run is not counted as a successful regression. The deadline correction
+retains every test and a bounded job timeout. Final CI status belongs to the
+exact later PR head, not these local documentation checks.
 
 ## Capture limits
 

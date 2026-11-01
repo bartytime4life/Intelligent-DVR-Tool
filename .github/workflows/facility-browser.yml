@@ -6,7 +6,9 @@ jobs:
   facility-browser:
     # Playwright 1.56.1 cannot install Chromium on the Ubuntu 26.04 latest image.
     runs-on: ubuntu-24.04
-    timeout-minutes: 10
+    # The expanded serial geometry/browser suite can exceed ten minutes before
+    # the analysis/feed/recorder checks start. Keep all stages within one bound.
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
