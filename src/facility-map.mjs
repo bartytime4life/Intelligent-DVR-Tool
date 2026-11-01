@@ -167,7 +167,7 @@ function createFacilityMap(container, callbacks, initialPlan, options = {}) {
 2029" } }] }
   });
   let attribution = new AttributionControl({ compact: false }), hasOsm = false;
-  let basemapId = "grid", basemapFade = 0.85, sitePin = null;
+  let basemapId = "grid", basemapFade = 0.85, sitePin = null, draftCount = 0, draftKey = "";
   // The last site photo stays loaded (hidden) while another layer is shown, so returning to Aerial is instant.
   const photo = { key: null, request: null, controller: null, objectUrl: null, status: null };
   function reportPhoto(status) {
@@ -266,7 +266,7 @@ select", markers = [];
   map.on("webglcontextlost", () => callbacks.onError("3D graphics were interrupted. Save or export the plan, then reload\
  to recover."));
   map.on("load", () => {
-    const sources = ["building-preview", "grid", "site", "buildings", "rooms", "room-areas", "coverage", "cameras", "route", "track", "search-area", "zones", "camera-heading", "floor-slabs", "ghost-envelope", "openings", "stairs", "stair-steps", "stair-heading", "floor-paths", "blind-spots", "dori-arcs"];
+    const sources = ["building-preview", "grid", "site", "buildings", "rooms", "room-areas", "coverage", "cameras", "route", "track", "search-area", "zones", "camera-heading", "floor-slabs", "ghost-envelope", "openings", "stairs", "stair-steps", "stair-heading", "floor-paths", "blind-spots", "dori-arcs", "draft-candidates"];
     for (const id of sources) map.addSource(id, { type: "geojson", data: empty() });
     map.addLayer({ id: "grid", type: "line", source: "grid", paint: { "line-color": "#36505c", "line-opacity": 0.26, "li\
 ne-width": 0.6 } });
@@ -333,6 +333,14 @@ ll-extrusion-base": ["get", "base"], "fill-extrusion-height": ["get", "top"], "f
     }});
     map.addLayer({id: "blind-spots", type: "fill", source: "blind-spots", paint: {"fill-color": "#ff5d73", "fill-opacity": .34}});
     map.addLayer({id: "blind-spots-edge", type: "line", source: "blind-spots", paint: {"line-color": "#ff8a9a", "line-width": .6, "line-opacity": .7}});
+    // Mapped-building drafts under review: included ones also render as buildings; excluded ones stay
+    // visible as dashed outlines. Clicking either toggles it.
+    map.addLayer({id: "draft-candidates", type: "fill", source: "draft-candidates", paint: {
+      "fill-color": ["case", ["get", "included"], "#35e0e3", "#ffbc3c"], "fill-opacity": ["case", ["get", "included"], 0.02, 0.14]}});
+    map.addLayer({id: "draft-candidates-included", type: "line", source: "draft-candidates", filter: ["==", ["get", "included"], true],
+      paint: {"line-color": "#9bfff0", "line-width": 2}});
+    map.addLayer({id: "draft-candidates-excluded", type: "line", source: "draft-candidates", filter: ["==", ["get", "included"], false],
+      paint: {"line-color": "#ffbc3c", "line-width": 2, "line-dasharray": [2, 1.5]}});
     map.addLayer({id: "dori-arcs", type: "line", source: "dori-arcs", paint: {"line-color": ["get", "color"], "line-width": 2, "line-opacity": .9}});
     map.addLayer({id: "camera-heading", type: "line", source: "camera-heading", paint: {"line-color": "#9bfff0", "line-width": 2, "line-dasharray": [2,2]}});
     map.addLayer(volumes);
@@ -452,10 +460,16 @@ e-stroke-width": 2 } });
       return;
     }
     if (tool !== "select") return;
+    const draft = draftCount && map.queryRenderedFeatures(e.point, { layers: ["draft-candidates"] })[0];
+    if (draft) { callbacks.onDraftToggle?.(draft.properties.id); return; }
     // Building envelopes and slabs are large backdrops; any specific item under the pointer wins.
     const hits = map.queryRenderedFeatures(e.point, { layers: PICK_LAYERS });
     const hit = hits.find(h => !BACKGROUND_LAYERS.includes(h.layer.id)) || hits[0];
     if (hit) callbacks.onSelect(hit.properties.id, hit.layer.id === "windows" ? "window" : hit.layer.id === "doorways" ? "doorway" : hit.layer.id === "cameras" ? "camera" : hit.layer.id === "zones" ? "zone" : hit.layer.id === "openings" ? "opening" : hit.layer.id === "floor-paths" ? "path" : ["stairs", "stair-steps"].includes(hit.layer.id) ? "stair" : ["rooms", "room-areas"].includes(hit.layer.id) ? "room" : "building");
+  });
+  map.on("mousemove", (e) => {
+    if (!draftCount || tool !== "select" || drag) return;
+    map.getCanvas().style.cursor = map.queryRenderedFeatures(e.point, { layers: ["draft-candidates"] }).length ? "pointer" : "";
   });
   // Only the selected camera can be dragged, and only while the editor enables manipulation.
   const cameraHit = (point, radius) => ready && !drag && tool === "select" && !!displayOptions.manipulate &&
@@ -799,6 +813,21 @@ e-stroke-width": 2 } });
     },
     setTrack(point) {
       if (ready) map.getSource("track").setData(fc(point ? [feat("Point", toLngLat(point, current.origin))] : []));
+    },
+    // drafts: [{id, footprint, included}] in plan metres. A new set of drafts is framed top-down.
+    setDraftCandidates(drafts = []) {
+      if (!ready) return;
+      map.getSource("draft-candidates").setData(fc(drafts.map(d => polygon(d.footprint, current.origin, { id: d.id, included: !!d.included }))));
+      const key = drafts.map(d => d.id).join("|");
+      draftCount = drafts.length;
+      if (!draftCount) map.getCanvas().style.cursor = tool === "select" ? "" : "crosshair";
+      if (key && key !== draftKey) {
+        const points = drafts.flatMap(d => d.footprint);
+        map.fitBounds([toLngLat([Math.min(...points.map(p => p[0])) - 10, Math.min(...points.map(p => p[1])) - 10], current.origin),
+          toLngLat([Math.max(...points.map(p => p[0])) + 10, Math.max(...points.map(p => p[1])) + 10], current.origin)],
+          { padding: 60, maxZoom: 19.4, bearing: 0, pitch: 0, duration: 500 });
+      }
+      draftKey = key;
     },
     setBlindSpots(rings) {
       if (ready) map.getSource("blind-spots").setData(fc((rings || []).map(ring => polygon(ring, current.origin))));

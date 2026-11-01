@@ -1,5 +1,6 @@
 import {test,expect} from '@playwright/test';
 import {savedPlan} from './facility-test-helpers.mjs';
+import {readFileSync} from 'node:fs';
 
 // A 1×1 PNG stands in for every map picture; no real provider is contacted.
 const png=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGMwSCgAAAHEAQHpOvu6AAAAAElFTkSuQmCC','base64');
@@ -103,4 +104,53 @@ test('returning to Aerial reuses the loaded site photo; Grid discards it',async(
   await page.getByRole('button',{name:'Aerial',exact:true}).click();
   await expect(pill(page)).toContainText('site photo ≈');
   expect(photos()).toBe(2);
+});
+
+test('Find mapped buildings loads drafts in one click; map clicks include or exclude them before adding',async({page},info)=>{
+  const exteriors=JSON.parse(readFileSync(new URL('../fixtures/facility/eppan-exteriors.json',import.meta.url)));
+  const footprintRequests=[];
+  await open(page);
+  // Registered after open()'s catch-all so it takes precedence.
+  await page.route('https://overpass.private.coffee/**',route=>{footprintRequests.push(route.request().postData());return route.fulfill({json:exteriors});});
+  await page.getByLabel('Longitude',{exact:true}).fill('11.2574936');
+  await page.getByLabel('Latitude',{exact:true}).fill('46.45528628');
+  await page.getByRole('button',{name:'Save site',exact:true}).click();
+  expect(footprintRequests).toHaveLength(0); // Saving a site alone never looks up buildings.
+  await page.getByRole('button',{name:'Find mapped buildings',exact:true}).click();
+  await expect(page.getByRole('button',{name:'Use 2 selected buildings',exact:true})).toBeEnabled();
+  expect(footprintRequests).toHaveLength(1);
+  await expect(page.getByRole('button',{name:'2D',exact:true})).toHaveAttribute('aria-pressed','true');
+  const banner=page.locator('.facility-draft-banner');
+  await expect(banner).toContainText('2 of 2 mapped buildings selected');
+  await expect(page.locator('.facility-next-callout')).toHaveCount(0);
+  // Clicking an included draft excludes it; clicking the same spot again includes it again.
+  const label=page.locator('.facility-map-label').filter({hasText:/^Mapped building 105582211$/});
+  await expect(label).toBeVisible();
+  await page.waitForTimeout(600); // the map frames the drafts with a 500 ms ease
+  const box=await label.boundingBox(), spot={x:box.x+box.width/2,y:box.y+box.height/2};
+  await page.mouse.click(spot.x,spot.y);
+  await expect(banner).toContainText('1 of 2 mapped buildings selected');
+  await expect(page.getByRole('checkbox',{name:'Include Mapped building 105582211'})).not.toBeChecked();
+  await page.screenshot({path:info.outputPath('draft-review.png')});
+  await page.mouse.click(spot.x,spot.y);
+  await expect(banner).toContainText('2 of 2 mapped buildings selected');
+  await page.mouse.click(spot.x,spot.y);
+  await page.getByRole('button',{name:'Use 1 selected buildings',exact:true}).click();
+  const plan=await savedPlan(page);
+  expect(plan.buildings.map(b=>b.id)).toEqual(['osm-way-106227181']);
+  await expect(banner).toHaveCount(0);
+  await page.getByRole('button',{name:'Undo edit',exact:true}).click();
+  expect((await savedPlan(page)).buildings).toHaveLength(0);
+});
+
+test('the start card steps aside once a site is suggested or saved without using it',async({page})=>{
+  await open(page);
+  const card=page.getByRole('heading',{name:'Your facility starts here'});
+  await expect(card).toBeVisible();
+  await page.getByLabel('Address or place name',{exact:true}).fill('Recorded municipal campus');
+  await page.getByLabel('Address or place name',{exact:true}).press('Enter');
+  await page.getByRole('button',{name:/Recorded municipal campus \(mock search result\)/}).click();
+  await expect(card).toHaveCount(0);
+  await page.getByRole('button',{name:'Save site',exact:true}).click();
+  await expect(card).toHaveCount(0);
 });

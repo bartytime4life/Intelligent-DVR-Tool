@@ -1388,3 +1388,5 @@
 @media(prefers-reduced-motion:no-preference){.facility-site-preview{animation:facility-pin-pulse 1.8s ease-out infinite}}
 @keyframes facility-pin-pulse{0%{box-shadow:0 0 0 0 #35e0e366,0 4px 12px #020d14aa}100%{box-shadow:0 0 0 14px #35e0e300,0 4px 12px #020d14aa}}
 @media(max-width:620px){.facility-layer-strength{display:none}.facility-layer-switch button{padding:0 8px;font-size:10px}.facility-layer-notice{left:12px;right:12px;max-width:none;bottom:40px}}
+.facility-next-actions{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:9px}
+.facility-next-callout small{display:block;font-size:10px;line-height:1.5;color:#8daabd}
