@@ -50,7 +50,7 @@ def generated():
             resolved = (file.parent / parts.path).resolve().relative_to(ROOT).as_posix()
             if resolved in PAGES:
                 url = BASE + '/wiki/' + PAGES[resolved]
-            elif Path(resolved).suffix in ('.gif', '.webp', '.png', '.jpg'):
+            elif Path(resolved).suffix in ('.gif', '.webp', '.png', '.jpg', '.svg'):
                 url = RAW + resolved
             else:
                 url = BASE + '/blob/main/' + resolved
