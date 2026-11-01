@@ -37,3 +37,4 @@ jobs:
             qa-local/feeds-browser-results.json
             qa-local/recorder-browser-results.json
             test-results/
+            qa-local/workspace-audit/
