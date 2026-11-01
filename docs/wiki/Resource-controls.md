@@ -1,5 +1,15 @@
 # Resource controls: what actually takes effect
 
+[Visual atlas](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-atlas) · [PC acceptance](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Field-acceptance) · [Image provenance](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/media/current/README.md)
+
+![Ingest, storage, analysis and field-performance planning lanes.](https://raw.githubusercontent.com/bartytime4life/Intelligent-DVR-Tool/main/docs/media/current/system-planning.svg)
+
+*The browser's planning values are not OS quotas or native GPU benchmarks.*
+
+![Current mobile Chromium screenshot of the System capacity planner. It shows editable defaults, not detected host specifications.](https://raw.githubusercontent.com/bartytime4life/Intelligent-DVR-Tool/main/docs/media/current/system-mobile.jpg)
+
+*Current interface snapshot from a controlled test at 390 px; [capture receipt](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/media/current/README.md).*
+
 [Hardware](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Hardware-guide) · [Linux](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Linux-setup) · [Windows](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Windows-setup) · [GPU planning](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/GPU-planning)
 
 Open **System** in the main navigation, or use `/#system`. The page combines workload planning and explicit local limits. It has no privileged host-control API.
@@ -79,4 +89,4 @@ The 100-camera requirement remains a workload qualification target. Valid policy
 
 ---
 
-[Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/resource-controls.md) · Documentation refresh: October 29, 2026.
+[Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/resource-controls.md) · Generated from the checked documentation source; historical and schematic images are labeled.
