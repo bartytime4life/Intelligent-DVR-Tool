@@ -1,5 +1,11 @@
 # Camera clip → recognition → reviewed report
 
+[Current visual atlas](visual-atlas.md) · [Product status](product-status.md) · [Visual provenance](media/current/README.md)
+
+![Operator-controlled connection, capture, local analysis, review and export.](media/current/workflow.svg)
+
+*The schematic is not a recorded sequence or deployed real-time inference.*
+
 This workflow joins explicit browser-webcam capture, bounded local file import,
 the existing native CPU analyzer, source-matched inspection, human decisions and
 portable reporting. The separate [one-camera LAN recorder](lan-recording.md) now

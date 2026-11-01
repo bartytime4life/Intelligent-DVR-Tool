@@ -1,5 +1,11 @@
 # One configured LAN camera → segments → recognition
 
+[Current visual atlas](visual-atlas.md) · [Product status](product-status.md) · [Visual provenance](media/current/README.md)
+
+![One configured RTSP source feeding completed local analysis and review.](media/current/workflow.svg)
+
+*A single-channel pilot is not continuous, gapless multi-camera storage.*
+
 This opt-in pilot records one authorized RTSP channel and feeds finalized segments
 into the existing local CPU analyzer. It reuses the configured-source allowlist,
 pinned TCP relay, OpenCV decoder, model/rule catalog, Jobs service and Recognition
