@@ -1,5 +1,11 @@
 # Native local map-service delivery
 
+[Current visual atlas](visual-atlas.md) · [Latest product status](product-status.md) · [Screenshot provenance](media/current/README.md)
+
+![Facility map and settings panel in the current tested software.](media/current/facility-desktop.jpg)
+
+*This screenshot does not demonstrate a live Photon/Overpass provider or local-installed geographic service.*
+
 This is an opt-in loopback route for a **source checkout** using the Linux/Windows
 launchers and Node.js 22. It uses the existing bounded Vite middleware.
 It installs no service, downloads no map database and never enables cameras.

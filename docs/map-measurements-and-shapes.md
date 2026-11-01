@@ -1,5 +1,11 @@
 # Open-map starter layouts and measurements
 
+[Current visual atlas](visual-atlas.md) · [Latest product status](product-status.md) · [Screenshot provenance](media/current/README.md)
+
+![Illustrated measured image markers paired with a single facility ground plane.](media/current/facility-science.svg)
+
+*Map-derived outlines and camera positions are not surveys or verified optical measurements.*
+
 October 28 follow-up: [current workflow/geometry](facility-setup-reliability.md)
 adds map pin/custom AOI selection, v2 courtyards/bases and independent parts.
 The earlier v1 limitations and evidence below describe the original increment;

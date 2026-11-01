@@ -1,5 +1,11 @@
 # Saved facilities and portable backups
 
+[Current visual atlas](visual-atlas.md) · [Latest product status](product-status.md) · [Screenshot provenance](media/current/README.md)
+
+![Current Facility Studio's site and task controls, captured with a blank sample plan.](media/current/facility-desktop.jpg)
+
+*The screenshot is an actual UI test; it contains no private site data.*
+
 Fresh browser installs open **My facility** as a blank local grid. No example buildings, cameras, routes or fictional site boundary are added. If saved work already exists, the last active facility opens instead.
 
 ## Everyday use
