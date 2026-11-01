@@ -3,6 +3,7 @@ import { VideoCamera, Crosshair, Compass, Plugs, Eye, EyeSlash } from '@phosphor
 import { feedRequest, localFeedOrigin } from './live-feeds.mjs';
 import { configuredFacilitySources, facilityPreviewController, plannedViewAngles } from './facility-camera-preview.mjs';
 import './facility-camera-preview.css';
+import FacilityImageLab from './FacilityImageLab.jsx';
 
 export default function FacilityCameraPreview({ camera, onCenter, onAim, onCount }) {
   const [preview, setPreview] = useState({ state: 'disconnected', message: 'Connect a source to compare its image with this camera plan.' });
@@ -10,7 +11,7 @@ export default function FacilityCameraPreview({ camera, onCenter, onAim, onCount
   const [catalog, setCatalog] = useState(null), [source, setSource] = useState('');
   const [error, setError] = useState(''), [loading, setLoading] = useState(false), [overlay, setOverlay] = useState(true);
   const [aspect, setAspect] = useState(16 / 9);
-  const video = useRef(), alive = useRef(true), lookup = useRef(0), controller = useRef(null);
+  const video = useRef(), networkImage = useRef(), alive = useRef(true), lookup = useRef(0), controller = useRef(null);
   if (!controller.current) controller.current = facilityPreviewController({ media: navigator.mediaDevices,
     onState: state => { if (alive.current) setPreview(state); } });
   const angles = plannedViewAngles(camera), local = localFeedOrigin(window.location);
@@ -68,13 +69,21 @@ export default function FacilityCameraPreview({ camera, onCenter, onAim, onCount
     } catch (err) { setError(err.message); }
   }
   function dimensions(width, height) { if (width > 0 && height > 0) setAspect(width / height); }
+  function captureFrame() {
+    if (preview.state !== 'live') throw Error('Connect and receive a camera frame before freezing it.');
+    const element = preview.stream ? video.current : networkImage.current;
+    const width = preview.stream ? element?.videoWidth : element?.naturalWidth;
+    const height = preview.stream ? element?.videoHeight : element?.naturalHeight;
+    if (!element || !width || !height) throw Error('No complete frame is available yet. Wait for the preview to render.');
+    return { element, width, height };
+  }
   const heading = value => `${Math.round(value)}°`;
   return <section className="facility-camera-preview" aria-label="Planned camera and source preview">
     <div className="facility-preview-title"><div><p className="eyebrow">CAMERA ALIGNMENT</p><h3>See what you’re aiming</h3></div>
       <button type="button" className="facility-preview-icon" aria-label={overlay ? 'Hide camera view guide' : 'Show camera view guide'} aria-pressed={overlay} onClick={() => setOverlay(v => !v)}>{overlay ? <Eye /> : <EyeSlash />}</button></div>
     <div className="facility-preview-frame" style={{ aspectRatio: aspect }}>
       {preview.stream && <video ref={video} muted playsInline autoPlay aria-label="Facility webcam preview" onLoadedMetadata={e => dimensions(e.currentTarget.videoWidth, e.currentTarget.videoHeight)} />}
-      {preview.image && <img src={preview.image} alt={`Current preview of ${preview.sourceName}`} onLoad={e => dimensions(e.currentTarget.naturalWidth, e.currentTarget.naturalHeight)} onError={() => { void controller.current.stop('This frame could not be displayed. Reconnect to retry.'); }} />}
+      {preview.image && <img ref={networkImage} src={preview.image} alt={`Current preview of ${preview.sourceName}`} onLoad={e => dimensions(e.currentTarget.naturalWidth, e.currentTarget.naturalHeight)} onError={() => { void controller.current.stop('This frame could not be displayed. Reconnect to retry.'); }} />}
       {!preview.stream && !preview.image && <div className="facility-preview-empty"><VideoCamera size={30}/><strong>{preview.state === 'connecting' ? 'Connecting…' : 'Source preview'}</strong><span>No camera connected</span></div>}
       {overlay && angles && <div className="facility-view-guide" aria-label="Uncalibrated planned field of view guide">
         <div className="facility-view-headings"><span>{heading(angles.left)}</span><strong>{heading(angles.center)} bearing</strong><span>{heading(angles.right)}</span></div>
@@ -93,6 +102,7 @@ export default function FacilityCameraPreview({ camera, onCenter, onAim, onCount
     {error && <p className="error" role="alert">{error}</p>}
     {kind === 'dvr' && catalog && !catalog.ready && <p className="facility-caption">The local preview service is not ready. Check its Python/OpenCV installation and reload channels.</p>}
     {kind === 'dvr' && !local && <p className="facility-caption">DVR channels are available in the installed app at 127.0.0.1.</p>}
-    <p className="facility-preview-note">The guide uses planned angles, not measurements from the image. Verify the source, lens and orientation on site. Center and Aim adjust the map plan; they do not move a physical camera. Audio, recording and live AI are off. Preview stops when you leave or change cameras.</p>
+    <FacilityImageLab connected={preview.state === 'live' && !!(preview.stream || preview.image)} capture={captureFrame} sourceName={preview.sourceName} />
+    <p className="facility-preview-note">The guide uses planned angles, not measurements from the image. Verify the source, lens and orientation on site. Center and Aim adjust the map plan; they do not move a physical camera. Audio, continuous recording and live AI are off. The opt-in image laboratory freezes only the current visible frame in browser memory. Preview stops when you leave or change cameras.</p>
   </section>;
 }

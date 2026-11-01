@@ -8,7 +8,7 @@
 .facility-lab-content{padding:13px}
 .facility-lab-note,.facility-lab-empty{font-size:11px;line-height:1.7;color:#adbfcb}
 .facility-lab-controls,.facility-lab-actions{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
-.facility-lab-controls button,.facility-lab-actions button,.facility-lab-actions a{flex:1 1 auto;min-height:38px;border:1px solid #406271;border-radius:8px;background:#173945;color:#e2f1f5;font:600 11px inherit;padding:8px 10px;cursor:pointer;text-align:center;text-decoration:none}
+.facility-lab-controls button,.facility-lab-actions button,.facility-lab-actions a{flex:1 1 auto;min-height:38px;border:1px solid #406271;border-radius:8px;background:#173945;color:#e2f1f5;font-size:11px;font-weight:600;font-family:inherit;padding:8px 10px;cursor:pointer;text-align:center;text-decoration:none}
 .facility-lab-controls button[aria-pressed=true]{background:#1d5a63;color:#cffffb;border-color:#5ce3d6}
 .facility-lab-actions button:disabled{opacity:.45;cursor:not-allowed}
 .facility-lab-file{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
