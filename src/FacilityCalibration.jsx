@@ -21,16 +21,21 @@ export default function FacilityCalibration({frame,camera,facilityName,origin,ma
   const [confirmed,setConfirmed]=useState(false),[tolerance,setTolerance]=useState('.5');
   const [rulerMode,setRulerMode]=useState(false),[ruler,setRuler]=useState({start:null,end:null});
   const seq=useRef(5);
+  // Ignore a prior map pick when a different camera/frame opens a new panel.
+  const seenMapSerial=useRef(mapPick?.serial||0);
   const sampleHash=useMemo(()=>new Sha256().update(frame.image.data).hex(),[frame]);
   useEffect(()=>{setRows(fresh());seq.current=5;setSolution(null);setTarget('');setDrag('');setError('');
     setConfirmed(false);setNote('');setRulerMode(false);setRuler({start:null,end:null});},[frame]);
   useEffect(()=>{
-    const id=mapPick?.token?.startsWith(sampleHash+':')?mapPick.token.slice(sampleHash.length+1):'';
+    if(!mapPick?.serial || mapPick.serial<=seenMapSerial.current)return;
+    seenMapSerial.current=mapPick.serial;
+    const prefix=(camera?.id||'unbound')+':'+sampleHash+':';
+    const id=mapPick?.token?.startsWith(prefix)?mapPick.token.slice(prefix.length):'';
     if(id&&Array.isArray(mapPick.point)&&mapPick.point.length===2&&mapPick.point.every(Number.isFinite)){
       setRows(list=>list.map(p=>p.id===id?{...p,east:mapPick.point[0].toFixed(3),north:mapPick.point[1].toFixed(3)}:p));
       setNote('Map point supplied. Confirm this corresponds to an independently measured ground marker.');
     }
-  },[mapPick?.serial,sampleHash]);
+  },[mapPick?.serial,sampleHash,camera?.id]);
   const signature=JSON.stringify(rows);
   const fit=solution?.signature===signature&&solution?.sourceHash===sampleHash?solution.data:null;
   const limit=Number(tolerance);
@@ -104,7 +109,7 @@ export default function FacilityCalibration({frame,camera,facilityName,origin,ma
         {rows.map((p,i)=><div className="facility-calibration-ref" key={p.id}>
           <div className="facility-calibration-ref-top"><strong>{i+1}. {p.role==='check'?'Independent check':'Fit point'}</strong>
             <div><button type="button" aria-pressed={target===p.id&&!rulerMode} onClick={()=>{setTarget(p.id);setRulerMode(false);}}>Mark image</button>
-              <button type="button" disabled={!onRequestMapPoint} onClick={()=>{setTarget(p.id);setRulerMode(false);onRequestMapPoint?.(sampleHash+':'+p.id);}}>Pick on map</button>
+              <button type="button" disabled={!onRequestMapPoint} onClick={()=>{setTarget(p.id);setRulerMode(false);onRequestMapPoint?.((camera?.id||'unbound')+':'+sampleHash+':'+p.id);}}>Pick on map</button>
               <button type="button" aria-label={'Remove calibration point '+(i+1)} onClick={()=>{setRows(list=>list.filter(x=>x.id!==p.id));if(target===p.id)setTarget('');}}>×</button></div>
           </div>
           <div className="facility-calibration-fields">{[['u','Image X %',0,100],['v','Image Y %',0,100],['east','East metres',-2000,2000],['north','North metres',-2000,2000]].map(([key,label,min,max])=>
@@ -148,7 +153,7 @@ export default function FacilityCalibration({frame,camera,facilityName,origin,ma
         </fieldset>}
       </section>}
       <p className="facility-calibration-note">The exported calibration is editable metadata, not an authenticated chain of
-        custody. The image hash identifies only the downsampled frozen frame. Lens distortion, elevation, uncertainty
+        custody. The image hash identifies only the downsampled frozen frame. Calibration drafts are not automatically saved; export before switching frames or cameras. Lens distortion, elevation, uncertainty
         outside checked references and the original recording require separate validation.</p>
     </div>
   </details>;
