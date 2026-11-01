@@ -1,5 +1,11 @@
 # Open-map starter layouts and measurements
 
+[Current visual atlas](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-atlas) · [Latest product status](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Product-status) · [Screenshot provenance](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/media/current/README.md)
+
+![Illustrated measured image markers paired with a single facility ground plane.](https://raw.githubusercontent.com/bartytime4life/Intelligent-DVR-Tool/main/docs/media/current/facility-science.svg)
+
+*Map-derived outlines and camera positions are not surveys or verified optical measurements.*
+
 October 28 follow-up: [current workflow/geometry](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Facility-setup-reliability)
 adds map pin/custom AOI selection, v2 courtyards/bases and independent parts.
 The earlier v1 limitations and evidence below describe the original increment;
@@ -106,4 +112,4 @@ See [facility setup reliability](https://github.com/bartytime4life/Intelligent-D
 
 ---
 
-[Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/map-measurements-and-shapes.md) · Documentation refresh: October 29, 2026.
+[Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/map-measurements-and-shapes.md) · Generated from the checked documentation source; historical and schematic images are labeled.

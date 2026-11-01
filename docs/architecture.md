@@ -1,5 +1,11 @@
 # Architecture, evidence and data
 
+[Current visual atlas](visual-atlas.md) · [Product status](product-status.md) · [Visual provenance](media/current/README.md)
+
+![Distinct browser preview, local service, review workspace and export trust boundaries.](media/current/data-boundary.svg)
+
+*No automatic cloud inference; a matching file hash does not authenticate footage.*
+
 [Home](../README.md) · [Product status](product-status.md) · [Edge CLI](../edge/README.md) · [Security boundary](../SECURITY.md)
 
 ## The current pieces

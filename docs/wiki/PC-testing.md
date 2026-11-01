@@ -1,5 +1,11 @@
 # Install for live PC testing
 
+[Visual atlas](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-atlas) · [PC acceptance](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Field-acceptance) · [Image provenance](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/media/current/README.md)
+
+![Software readiness precedes operator-approved physical-device qualification.](https://raw.githubusercontent.com/bartytime4life/Intelligent-DVR-Tool/main/docs/media/current/system-planning.svg)
+
+*Passing a kit installation/Check is not proof of physical camera function or AI quality.*
+
 This kit prepares an interactive **single-user local test installation** on
 Ubuntu 24.04 x86-64 or Windows 11 x64. It includes the built interface and local
 CPU service, including the pinned detector's candidate metadata and label order
@@ -291,10 +297,10 @@ Use `--check --analysis` / `-Check -Analysis` to validate the prepared catalog.
 Explicit `--recordings` and `--config` / `-Recordings` and `-AnalysisConfig`
 continue to support custom configurations. Recovery remains opt-in on Linux;
 add its existing `--state-dir` option when wanted. See
-[capture, analysis, reporting and retention](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/recording-workflow.md). The pinned
+[capture, analysis, reporting and retention](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Recording-workflow). The pinned
 model source and license are recorded in
 [`edge/candidates/opencv-zoo-yolox-s-2022nov.json`](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/edge/candidates/opencv-zoo-yolox-s-2022nov.json).
 
 ---
 
-[Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/pc-testing.md) · Documentation refresh: October 29, 2026.
+[Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/pc-testing.md) · Generated from the checked documentation source; historical and schematic images are labeled.

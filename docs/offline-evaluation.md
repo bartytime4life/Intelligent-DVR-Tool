@@ -1,5 +1,11 @@
 # Reproducible offline detection pilot
 
+[Current visual atlas](visual-atlas.md) · [Product status](product-status.md) · [Provenance](media/current/README.md)
+
+![Where independent annotations and human assessment enter the analysis workflow.](media/current/workflow.svg)
+
+*Synthetic validation checks evaluation arithmetic, not accuracy on representative scenes.*
+
 New analyzer results bind [recording coverage validation](recording-coverage.md).
 The evaluator checks those declarations and refuses partial/unverified coverage;
 historical traces retain explicit null validation metadata instead of being

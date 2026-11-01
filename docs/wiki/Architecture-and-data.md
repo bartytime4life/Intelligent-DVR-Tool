@@ -1,5 +1,11 @@
 # Architecture, evidence and data
 
+[Current visual atlas](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-atlas) · [Product status](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Product-status) · [Visual provenance](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/media/current/README.md)
+
+![Distinct browser preview, local service, review workspace and export trust boundaries.](https://raw.githubusercontent.com/bartytime4life/Intelligent-DVR-Tool/main/docs/media/current/data-boundary.svg)
+
+*No automatic cloud inference; a matching file hash does not authenticate footage.*
+
 [Home](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Home) · [Product status](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Product-status) · [Edge CLI](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/edge/README.md) · [Security boundary](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/SECURITY.md)
 
 ## The current pieces
@@ -16,7 +22,7 @@ flowchart TD
 
 Webcam video remains in the browser. DVR previews use the optional same-computer
 service and stop on disconnect, page exit, lease expiry or a processing limit.
-The [feed bridge](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/local-camera-feeds.md) does not connect to the analyzer or record
+The [feed bridge](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Camera-sources) does not connect to the analyzer or record
 video. The [local job service](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/local-analysis-service.md) separately connects
 Recognition selections to the existing analyzer and opens source-matched results.
 The optional [LAN recorder](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/lan-recording.md) uses the same relay/decoder and
@@ -106,4 +112,4 @@ System adds explicit setup arithmetic and browser performance preferences. A rea
 
 ---
 
-[Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/architecture.md) · Documentation refresh: October 29, 2026.
+[Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/architecture.md) · Generated from the checked documentation source; historical and schematic images are labeled.

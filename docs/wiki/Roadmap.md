@@ -1,8 +1,14 @@
 # Build the next claim with evidence
 
+[Current visual atlas](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-atlas) · [Product status](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Product-status) · [Provenance](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/media/current/README.md)
+
+![Acceptance gates toward real source ingest, recording continuity and quality.](https://raw.githubusercontent.com/bartytime4life/Intelligent-DVR-Tool/main/docs/media/current/scale-gates.svg)
+
+*The 100+ target remains unqualified; virtual decoders are not physical cameras.*
+
 [Home](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Home) · [Product status](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Product-status) · [Verification](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Evidence-and-validation) · [100-camera plan](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/performance-100-cameras.md)
 
-The minimum capacity goal is **100 simultaneously active cameras**. Five generated scenes are interface fixtures, not the product target.
+The minimum capacity goal is **100 simultaneously active cameras**. The current Monitor starts empty with an explicit real-source chooser; generated camera scenes remain only in the [historical gallery](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-tour#historical-prototype-captures). The [recent UI/navigation fixes](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/59) and [source/Facility simplification](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/61) are merged and browser-tested, but real-camera endurance, accuracy and 100-camera capacity remain unqualified.
 
 | Lane | Exists now | Next evidence required |
 | --- | --- | --- |
@@ -83,4 +89,4 @@ imagery assistance as unavailable rather than replacing it with another flow.
 
 ---
 
-[Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/roadmap.md) · Documentation refresh: October 29, 2026.
+[Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/roadmap.md) · Generated from the checked documentation source; historical and schematic images are labeled.

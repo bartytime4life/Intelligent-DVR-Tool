@@ -1,5 +1,11 @@
 # Local recording analysis
 
+[Current visual atlas](visual-atlas.md) · [Product status](product-status.md) · [Visual provenance](media/current/README.md)
+
+![Local source selection, bounded processing and source-matched review.](media/current/workflow.svg)
+
+*Processing a recording is separate from live Monitor previews; no camera is activated here.*
+
 Recognition can select a recording from an explicitly configured folder, start
 CPU analysis, show frame progress, cancel and open the verified result in the same
 application. The service calls the existing `edge.analyze` implementation and the

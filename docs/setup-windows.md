@@ -1,5 +1,11 @@
 # Run on Windows
 
+[Visual atlas](visual-atlas.md) · [PC acceptance](field-acceptance.md) · [Image provenance](media/current/README.md)
+
+![Machine planning separated from verifiable Windows install and runtime actions.](media/current/system-planning.svg)
+
+*The diagram does not configure Windows, change permissions or start recording.*
+
 [Hardware and storage](hardware-guide.md) · [GPU plan](gpu-planning.md) · [Resource limits](resource-controls.md) · [Linux](setup-linux.md)
 
 Reference target: **Windows 11 Pro x86-64**, Node.js **22**, Python **3.12**, PowerShell and a WebGL-capable browser. Use a supported Windows release and qualified motherboard/NIC/HBA/GPU drivers. Microsoft's Windows 11 hardware requirements include UEFI/Secure Boot capability and TPM 2.0 [W1]. An OS license and hardware costs are separate from this project's subscription-free analysis stack.

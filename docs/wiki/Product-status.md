@@ -1,6 +1,10 @@
 # Product status and evidence
 
-**Field-testing guidance (October 31, 2026):** use the [field-acceptance runbook](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/field-acceptance.md) with the [PC kit](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/PC-testing) to verify real webcam, RTSP, recording, review and interruption behavior. CI, simulated feeds and generated recordings below are not field acceptance.
+![Actual desktop Monitor and Facility Studio interface status is documented in the current visual atlas. The illustration shows conceptual system scope only.](https://raw.githubusercontent.com/bartytime4life/Intelligent-DVR-Tool/main/docs/media/current/overview.svg)
+
+**Current merged software snapshot (October 31 Central / November 1 UTC, 2026):** [PR #55](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/55) introduced a map-first Facility Studio and user-triggered local image diagnostics; [#56](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/56) corrected image transparency and Windows deadline-test behavior; [#58](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/58) added experimental plane-only image-to-map calibration; [#59](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/59) repaired unsaved Zones/System edits and deferred review navigation; and [#61](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/61) simplified the real-source Monitor onboarding and Facility task selector. The [latest successful browser run](https://github.com/bartytime4life/Intelligent-DVR-Tool/actions/runs/41263964836) exercised **92 controlled scenarios** and the PR reported **14/14 passing CI checks**. These tests do not certify any physical camera or 100+ source deployment. [Visual atlas](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-atlas) · [Media provenance](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/media/current/README.md).
+
+**Field-testing guidance (October 31, 2026):** use the [field-acceptance runbook](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Field-acceptance) with the [PC kit](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/PC-testing) to verify real webcam, RTSP, recording, review and interruption behavior. CI, simulated feeds and generated recordings below are not field acceptance.
 
 October 30 [full review](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/review-2026-10-30.md): 61 verified defects across the
 browser workspaces, facility editor and local service were fixed in PR #45, and
@@ -38,7 +42,7 @@ See its [separate evidence](https://github.com/bartytime4life/Intelligent-DVR-To
 October 30 recording-workflow baseline: explicit browser-webcam clips, opt-in
 same-computer recording import, pinned local model preparation, and printable
 HTML/JSON/CSV reporting now join preview to human review. See the
-[workflow and storage limits](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/recording-workflow.md). Native local checks include
+[workflow and storage limits](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Recording-workflow). Native local checks include
 the actual pinned pretrained model on generated video; physical-camera accuracy,
 continuous recording/live AI and 100-camera acceptance remain unqualified.
 
@@ -48,7 +52,7 @@ checks do not establish compatibility with a particular physical PC or camera.
 
 The current Monitor starts empty and supports explicit browser webcam and bounded
 local RTSP previews. Generated camera images/default events are removed. See
-[connections, limits and device qualification](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/local-camera-feeds.md).
+[connections, limits and device qualification](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Camera-sources).
 Owner-approved direct HTTPS JPEG/MJPEG public webcams now use the same bounded
 preview lifecycle, with attribution, retrieval age and snapshot labels. See the
 [public-webcam boundary](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/public-webcams.md). External-provider availability and
@@ -86,10 +90,10 @@ saves migrate without deleting the original. See [saved facilities](https://gith
 
 | Capability | Implemented baseline and source | Evidence and next gate |
 | --- | --- | --- |
-| Monitor/review | Wall, queue, notes, history, zones and exports; [workspace source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/src/App.jsx) | Explicit webcam and configured LAN RTSP preview; no stock imagery or automatic camera activation. [Feed guide](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/local-camera-feeds.md). Physical-device compatibility and sustained operation remain unqualified. |
+| Monitor/review | Real-source chooser, explicit webcam/local RTSP/approved public preview, queue, notes, history, zones and exports; [workspace source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/src/App.jsx) | Starts with no camera images; no automatic activation or live AI. [Current screenshot](https://raw.githubusercontent.com/bartytime4life/Intelligent-DVR-Tool/main/docs/media/current/monitor-desktop.jpg) and [feed guide](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Camera-sources). Physical-device compatibility and sustained operation remain unqualified. |
 | Local video and receipts | Explicit video preview and receipt import; [offline CLI](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/edge/README.md) | Preview does not analyze. Imported events do not borrow sample images. |
 | Recording recognition | Explicit local CPU jobs with recording/model/rule selection, progress/cancel and automatic source-matched review; optional CLI bundle import, paused sample overlays, class counts and Event handoff; [guide](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/local-analysis-service.md) | HTTP/native/browser job qualification in the [service record](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/local-analysis-2026-10-29/README.md); earlier CPU/contract checks in the [recognition record](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/recognition-2026-10-29/README.md). Scene counts are sampled detections, not learned scene interpretation, identity or tracking. Live deployment/accuracy remain unqualified. |
-| Facility planning | Buildings/floors/rooms/labels, cameras, seven shapes, coverage estimates, route rehearsal, export and Undo; [guide](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Facility-planning) | Coverage is approximate geometry; handoffs are simulated. Survey/optical qualification remains open. |
+| Facility planning | Map-first task selector, buildings/floors/rooms/labels, camera aim/coverage/rehearsal, local image diagnostics, experimental ground-plane calibration, export and Undo; [guide](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Facility-planning) | Current [interface screenshot](https://raw.githubusercontent.com/bartytime4life/Intelligent-DVR-Tool/main/docs/media/current/facility-desktop.jpg), [pixel limits](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Image-diagnostics) and [calibration constraints](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Planar-calibration). Coverage and distances require real marker/optical qualification; simulated handoffs remain unverified. |
 | Find and draft a site | Submitted Photon search, GPS/numeric origin, map-pin suggestion, rectangular/custom polygon area, selectable services, offline JSON file/paste; [service source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/src/facility-services.mjs) | [Six Chromium scenarios](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/facility-2026-10-27/README.md) use recorded geometry/mocked services. External availability, real GPS and novice completion remain unqualified. |
 | OSM geometry | Facility v2, complete simple ways and supported outer/inner relations, raised bases and independent parts; [adapter](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/src/facility-starter.mjs) | Review and provenance survive apply/export. Courtyards/bases survive edits, rendering and coverage. Overlapping parts/envelopes and invalid/incomplete geometry remain excluded. [Limits](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Facility-setup-reliability). |
 | System controls | Planning arithmetic, applied browser limits, setup/policy exports and host-snapshot import; [control contract](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Resource-controls) | Browser controls and analyzer thread/frame caps have explicit scopes. RAM/VRAM/power/storage estimates are not OS quotas or activated hardware. |
@@ -108,7 +112,7 @@ saves migrate without deleting the original. See [saved facilities](https://gith
 - **Reported local work** needs a matching source revision and receipt before it
   can be described as shipped.
 
-The latest audited baseline has 46 frontend + 4 packaging passes per platform,
+The **historical October 27 audited baseline**, not the latest `main`, has 46 frontend + 4 packaging passes per platform,
 66 Python passes on Linux, and 63 Python passes/3 skips on Windows. Six browser
 scenarios ran separately. See the [exact record](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/facility-2026-10-27/README.md).
 
@@ -136,6 +140,8 @@ The [capacity target](https://github.com/bartytime4life/Intelligent-DVR-Tool/blo
 resolution/source FPS, analysis cadence, delay, retention and hardware/worker
 values. Qualification must distinguish recording, analytics and browser workloads.
 
+The [current visual atlas](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-atlas) distinguishes actual controlled-browser UI from illustrative diagrams and the archived fictional-camera tour. New screenshots are traceable to a named source revision and GitHub Actions job, not to an installed physical camera.
+
 The hosted app and published wiki require their own revision/publication checks.
 A repository merge or green CI run does not establish deployed-version parity.
 No GitHub release was present at the October 28 audit.
@@ -147,4 +153,4 @@ no software license; third-party licenses remain separate. See
 
 ---
 
-[Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/product-status.md) · Documentation refresh: October 29, 2026.
+[Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/product-status.md) · Generated from the checked documentation source; historical and schematic images are labeled.

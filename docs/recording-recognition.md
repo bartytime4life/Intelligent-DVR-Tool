@@ -1,5 +1,11 @@
 # Recording recognition pilot
 
+[Current visual atlas](visual-atlas.md) · [Product status](product-status.md) · [Visual provenance](media/current/README.md)
+
+![Explicit recorded-video analysis and human-review path.](media/current/workflow.svg)
+
+*This illustration does not show trained inference or a verified person detection.*
+
 The local application now offers an explicit recording-to-analysis workflow with
 progress, cancellation and automatic source-matched result opening. See
 [local analysis setup and limits](local-analysis-service.md). The command-line

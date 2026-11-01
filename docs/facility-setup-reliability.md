@@ -1,5 +1,11 @@
 # Dependable facility setup: implementation and qualification
 
+[Current visual atlas](visual-atlas.md) · [Latest product status](product-status.md) · [Screenshot provenance](media/current/README.md)
+
+![Current Facility Studio map and task interface in a controlled browser fixture.](media/current/facility-desktop.jpg)
+
+*Live geographic-provider availability and novice field accuracy remain separate acceptance gates.*
+
 Updated October 28, 2026. This increment advances issue #6 with pointer location,
 custom areas, v2 courtyard/base geometry and an opt-in native local-service route.
 The [qualification record](verification/facility-2026-10-28/README.md) separates

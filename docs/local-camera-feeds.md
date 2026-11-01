@@ -1,5 +1,11 @@
 # Local webcam and DVR previews
 
+[Current image gallery](visual-atlas.md) · [Setup for PC](pc-testing.md) · [Recording and review](recording-workflow.md)
+
+![Current Monitor interface in the controlled browser run: one welcome panel for intentional webcam, LAN DVR and approved public webcam choices.](media/current/monitor-desktop.jpg)
+
+*Actual tested UI, but no camera connected, recorded or analyzed. [Screenshot provenance](media/current/README.md).*
+
 Monitor starts empty. There are no generated camera photographs, simulated
 playback controls or new sample events. Existing reviewed sample records remain
 readable as legacy samples without invented evidence.
@@ -21,8 +27,7 @@ with the existing analyzer and verified review-bundle contract.
 
 ## Webcam
 
-Open the app on HTTPS or localhost, choose **Connect source → This computer’s
-webcam**, optionally refresh/select a device, then press **Connect webcam**.
+Open the app on HTTPS or localhost. Select the **Computer webcam** welcome card or choose **Connect source → This computer’s webcam**, optionally refresh/select a device, then press **Connect webcam**.
 Allow camera permission when the browser asks. No microphone is requested.
 Disconnect closes the media tracks. Denied access, busy/missing devices and
 permission revocation are visible; cancellation also stops a late permission
@@ -120,7 +125,7 @@ qualification. No camera footage is uploaded for testing.
 Primary API references: [browser media permission and secure contexts](https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia),
 [OpenCV video capture timeout properties](https://docs.opencv.org/4.x/d4/d15/group__videoio__flags__base.html),
 [FFmpeg RTSP handling](https://github.com/FFmpeg/FFmpeg/blob/master/libavformat/rtsp.c).
-# Public internet webcams
+## Public internet webcams
 
 The local service also supports owner-approved direct HTTPS JPEG/MJPEG webcams.
 Use **Monitor → Public webcams** and the [public-webcam setup and safety guide](public-webcams.md).

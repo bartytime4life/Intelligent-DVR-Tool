@@ -4,9 +4,13 @@
 
 **See the scene. Plan the space. Review the evidence.**
 
-A local camera-analysis foundation and visual review prototype from BARTA AI Solutions.
+![Original illustrated overview of the Intelligent DVR map, camera and local review operations. The artwork is a schematic and contains no live camera imagery.](docs/media/current/overview.svg)
 
-[Visual tour](docs/visual-tour.md) · [Install for PC testing](docs/pc-testing.md) · [Start here](docs/getting-started.md) · [Product status](docs/product-status.md) · [Wiki](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki) · [Test evidence](docs/verification/README.md)
+A local-first camera-analysis and facility-planning project from BARTA AI Solutions. **Camera access is explicit. Model observations remain subject to human review.**
+
+*Illustration is not an application screenshot or operational evidence. For actual controlled-browser captures, see the [current visual atlas](docs/visual-atlas.md).*
+
+[Current visual atlas](docs/visual-atlas.md) · [Visual tour](docs/visual-tour.md) · [Install for PC testing](docs/pc-testing.md) · [Start here](docs/getting-started.md) · [Product status](docs/product-status.md) · [Wiki](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki) · [Test evidence](docs/verification/README.md)
 
 </div>
 
@@ -18,10 +22,20 @@ A local camera-analysis foundation and visual review prototype from BARTA AI Sol
 | Qualify a webcam, DVR, recording, recognition and recovery on real hardware | [Field acceptance runbook](docs/field-acceptance.md) |
 | Develop the browser-only interface | [Source-only Vite preview](#run-the-source-only-ui-preview) |
 
+## Inside the current interface
+
+| Monitor — explicitly connected camera sources | Facility Studio — map-first editing |
+| --- | --- |
+| ![Real desktop Chromium screenshot of the Monitor start screen with a camera-source chooser and no connected feed.](docs/media/current/monitor-desktop.jpg) | ![Real desktop Chromium screenshot of the Facility Studio with a current-task selector, map, inventory and property inspector.](docs/media/current/facility-desktop.jpg) |
+| [Camera connection guide](docs/local-camera-feeds.md) | [Facility and camera planning](docs/facility-builder.md) |
+
+The screenshots above come from a successful **controlled, camera-free Chromium run** at the exact tested revision; they are not live surveillance evidence. [Screenshot provenance](docs/media/current/README.md) · [Full desktop/mobile gallery](docs/visual-atlas.md).
+
+**Current software proof:** [PR #61](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/61) passed **14/14 reported CI checks** and its [browser run](https://github.com/bartytime4life/Intelligent-DVR-Tool/actions/runs/41263964836) passed **92 controlled scenarios** (65 application/Facility, 12 analysis, 13 feeds and 2 recorder). These results do not establish real-camera endurance or recognition accuracy.
+
 **Acceptance boundary:** browser webcam and local RTSP previews, opt-in webcam clips, one LAN recording source and bounded local recording analysis are implemented. Physical-device endurance, independent detection accuracy, continuous multi-camera recording and 100-camera capacity **remain unqualified**. [Product status](docs/product-status.md) · [Verification](docs/verification/README.md).
 
-**Local previews and recording review.** Monitor starts empty and can explicitly
-connect a browser webcam or a configured local DVR RTSP channel. Camera previews
+**Local previews and recording review.** Monitor starts empty and offers three intentional source paths: this computer's webcam, a configured local DVR RTSP channel, or an approved public HTTPS webcam. A path opens setup but does not activate the camera. Camera previews
 do not run AI. Explicit webcam clip capture now connects Monitor to local recording
 import, analysis, human review and downloadable reports. Recognition provides
 progress, cancellation and source-matched results. [Complete recording workflow](docs/recording-workflow.md).
@@ -50,7 +64,9 @@ screenshots in the [historical tour](docs/visual-tour.md) document previous vers
 | --- | --- | --- |
 | Explicit webcam / local RTSP previews, status, errors and disconnect | Source-matched recording results, human decisions, notes, export and Undo | Editable buildings, rooms and camera plans with estimated coverage |
 
-## Put the space in motion
+## Historical simulated facility rehearsal
+
+This animation records an earlier fictional facility rehearsal. It is **not** a current camera feed, live tracking or physical-site measurement. For the current planning controls, see the [tested Facility screenshot](docs/media/current/facility-desktop.jpg) and [calibration guide](docs/facility-calibration.md).
 
 ![Animated captures of a fictional route rehearsal moving through estimated camera coverage and blind spots. No person tracking or identity association is performed.](docs/media/facility-rehearsal.gif)
 
@@ -61,6 +77,14 @@ screenshots in the [historical tour](docs/visual-tour.md) document previous vers
 - **Refine the plan:** add floors, rooms and labels; place and aim cameras; inspect estimated ground-plane visibility; undo edits and export the plan.
 
 Footprints are approximate map geometry. Unknown heights/floors can be placeholders. Interiors are not inferred, and planning references do not establish code compliance. [Map and shape guide](docs/map-measurements-and-shapes.md) · [Address search and offline recovery](docs/facility-setup-reliability.md).
+
+## Explore image science and measured references
+
+![Original explanatory diagram of image markers matched to a single measured ground plane.](docs/media/current/facility-science.svg)
+
+Facility Studio adds user-requested local frame freezing, image histograms, shadow/highlight and edge-detail proxies, A/B differences and a sampled-pixel ruler. Experimental image-to-map calibration uses explicit reference markers, independent checks and operator-selected error limits. **No real-camera calibration accuracy, 3D position, identity or optical performance is implied.**
+
+[Image diagnostics](docs/facility-image-diagnostics.md) · [Planar calibration](docs/facility-calibration.md) · [Visual guide](docs/visual-atlas.md).
 
 ## Set up a Linux or Windows machine
 
@@ -100,6 +124,8 @@ The [verification index](docs/verification/README.md) keeps the historical Octob
 
 ## From a recording to evidence
 
+![Schematic of operator-approved preview, local recording and analysis, source matching, human review and export.](docs/media/current/workflow.svg)
+
 **New: recording recognition review.** Add `--review-output` to the local analyzer,
 then open **Recognition** to match the original recording by SHA-256, inspect
 sampled person/object boxes and scene counts, and send rule observations to Events.
@@ -121,6 +147,8 @@ The browser does not run the detector. Imported observations never borrow the ge
 
 ## Build toward 100 cameras
 
+![Illustrated qualification gates from one real source to 100-plus. A roadmap, not a throughput benchmark.](docs/media/current/scale-gates.svg)
+
 **At least 100 simultaneously active cameras is the owner's requirement.** The bounded scheduler, fair dispatch, stale/drop accounting and deterministic load model prepare that work. The one-camera RTSP recording pilot is separate from the scheduler; multi-camera recording, integrated continuous inference and distributed workers still need implementation and field qualification.
 
 Connection count, recording continuity, analysis cadence and visible browser tiles are separate workloads. [Scaling plan](docs/performance-100-cameras.md) · [Evidence-led roadmap](docs/roadmap.md).
@@ -130,7 +158,8 @@ Connection count, recording continuity, analysis cadence and visible browser til
 | I want to… | Read |
 | --- | --- |
 | Check implemented, simulated and pending scope | [Product status](docs/product-status.md) |
-| See what the program does | [Visual tour](docs/visual-tour.md) |
+| See what the program does now | [Visual atlas with current screenshots](docs/visual-atlas.md) |
+| Inspect the historic interface exhibit | [Dated visual tour](docs/visual-tour.md) |
 | Try the prototype and preserve my work | [Getting started](docs/getting-started.md) |
 | Qualify a real webcam, DVR, recording and AI review | [Field-acceptance runbook](docs/field-acceptance.md) |
 | Draw buildings and place cameras | [Facility builder](docs/facility-builder.md) |

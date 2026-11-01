@@ -1,5 +1,11 @@
 # Run on Linux
 
+[Visual atlas](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-atlas) · [PC acceptance](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Field-acceptance) · [Image provenance](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/media/current/README.md)
+
+![Machine planning separated from verifiable Linux install and runtime actions.](https://raw.githubusercontent.com/bartytime4life/Intelligent-DVR-Tool/main/docs/media/current/system-planning.svg)
+
+*The diagram does not install dependencies, change resource quotas or start recording.*
+
 [Hardware and storage](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Hardware-guide) · [GPU plan](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/GPU-planning) · [Resource limits](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Resource-controls) · [Windows](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Windows-setup)
 
 Reference target: **Ubuntu 24.04 LTS x86-64**, Node.js **22**, Python **3.12**, a WebGL-capable desktop browser. Canonical lists standard security maintenance for Ubuntu 24.04 through May 2029 [L1]. A desktop is convenient for review; a future recorder service can be headless, but no such service is installed by these instructions.
@@ -98,4 +104,4 @@ GPU driver/backend installation and acceleration parity remain deliberate separa
 
 ---
 
-[Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/setup-linux.md) · Documentation refresh: October 29, 2026.
+[Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/setup-linux.md) · Generated from the checked documentation source; historical and schematic images are labeled.

@@ -1,5 +1,9 @@
 # Product status and evidence
 
+![Actual desktop Monitor and Facility Studio interface status is documented in the current visual atlas. The illustration shows conceptual system scope only.](media/current/overview.svg)
+
+**Current merged software snapshot (October 31 Central / November 1 UTC, 2026):** [PR #55](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/55) introduced a map-first Facility Studio and user-triggered local image diagnostics; [#56](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/56) corrected image transparency and Windows deadline-test behavior; [#58](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/58) added experimental plane-only image-to-map calibration; [#59](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/59) repaired unsaved Zones/System edits and deferred review navigation; and [#61](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/61) simplified the real-source Monitor onboarding and Facility task selector. The [latest successful browser run](https://github.com/bartytime4life/Intelligent-DVR-Tool/actions/runs/41263964836) exercised **92 controlled scenarios** and the PR reported **14/14 passing CI checks**. These tests do not certify any physical camera or 100+ source deployment. [Visual atlas](visual-atlas.md) · [Media provenance](media/current/README.md).
+
 **Field-testing guidance (October 31, 2026):** use the [field-acceptance runbook](field-acceptance.md) with the [PC kit](pc-testing.md) to verify real webcam, RTSP, recording, review and interruption behavior. CI, simulated feeds and generated recordings below are not field acceptance.
 
 October 30 [full review](review-2026-10-30.md): 61 verified defects across the
@@ -86,10 +90,10 @@ saves migrate without deleting the original. See [saved facilities](saved-facili
 
 | Capability | Implemented baseline and source | Evidence and next gate |
 | --- | --- | --- |
-| Monitor/review | Wall, queue, notes, history, zones and exports; [workspace source](../src/App.jsx) | Explicit webcam and configured LAN RTSP preview; no stock imagery or automatic camera activation. [Feed guide](local-camera-feeds.md). Physical-device compatibility and sustained operation remain unqualified. |
+| Monitor/review | Real-source chooser, explicit webcam/local RTSP/approved public preview, queue, notes, history, zones and exports; [workspace source](../src/App.jsx) | Starts with no camera images; no automatic activation or live AI. [Current screenshot](media/current/monitor-desktop.jpg) and [feed guide](local-camera-feeds.md). Physical-device compatibility and sustained operation remain unqualified. |
 | Local video and receipts | Explicit video preview and receipt import; [offline CLI](../edge/README.md) | Preview does not analyze. Imported events do not borrow sample images. |
 | Recording recognition | Explicit local CPU jobs with recording/model/rule selection, progress/cancel and automatic source-matched review; optional CLI bundle import, paused sample overlays, class counts and Event handoff; [guide](local-analysis-service.md) | HTTP/native/browser job qualification in the [service record](verification/local-analysis-2026-10-29/README.md); earlier CPU/contract checks in the [recognition record](verification/recognition-2026-10-29/README.md). Scene counts are sampled detections, not learned scene interpretation, identity or tracking. Live deployment/accuracy remain unqualified. |
-| Facility planning | Buildings/floors/rooms/labels, cameras, seven shapes, coverage estimates, route rehearsal, export and Undo; [guide](facility-builder.md) | Coverage is approximate geometry; handoffs are simulated. Survey/optical qualification remains open. |
+| Facility planning | Map-first task selector, buildings/floors/rooms/labels, camera aim/coverage/rehearsal, local image diagnostics, experimental ground-plane calibration, export and Undo; [guide](facility-builder.md) | Current [interface screenshot](media/current/facility-desktop.jpg), [pixel limits](facility-image-diagnostics.md) and [calibration constraints](facility-calibration.md). Coverage and distances require real marker/optical qualification; simulated handoffs remain unverified. |
 | Find and draft a site | Submitted Photon search, GPS/numeric origin, map-pin suggestion, rectangular/custom polygon area, selectable services, offline JSON file/paste; [service source](../src/facility-services.mjs) | [Six Chromium scenarios](verification/facility-2026-10-27/README.md) use recorded geometry/mocked services. External availability, real GPS and novice completion remain unqualified. |
 | OSM geometry | Facility v2, complete simple ways and supported outer/inner relations, raised bases and independent parts; [adapter](../src/facility-starter.mjs) | Review and provenance survive apply/export. Courtyards/bases survive edits, rendering and coverage. Overlapping parts/envelopes and invalid/incomplete geometry remain excluded. [Limits](facility-setup-reliability.md). |
 | System controls | Planning arithmetic, applied browser limits, setup/policy exports and host-snapshot import; [control contract](resource-controls.md) | Browser controls and analyzer thread/frame caps have explicit scopes. RAM/VRAM/power/storage estimates are not OS quotas or activated hardware. |
@@ -108,7 +112,7 @@ saves migrate without deleting the original. See [saved facilities](saved-facili
 - **Reported local work** needs a matching source revision and receipt before it
   can be described as shipped.
 
-The latest audited baseline has 46 frontend + 4 packaging passes per platform,
+The **historical October 27 audited baseline**, not the latest `main`, has 46 frontend + 4 packaging passes per platform,
 66 Python passes on Linux, and 63 Python passes/3 skips on Windows. Six browser
 scenarios ran separately. See the [exact record](verification/facility-2026-10-27/README.md).
 
@@ -135,6 +139,8 @@ minutes with 5–8 novices have not been measured.
 The [capacity target](../edge/capacity-target.json) still needs accepted codec,
 resolution/source FPS, analysis cadence, delay, retention and hardware/worker
 values. Qualification must distinguish recording, analytics and browser workloads.
+
+The [current visual atlas](visual-atlas.md) distinguishes actual controlled-browser UI from illustrative diagrams and the archived fictional-camera tour. New screenshots are traceable to a named source revision and GitHub Actions job, not to an installed physical camera.
 
 The hosted app and published wiki require their own revision/publication checks.
 A repository merge or green CI run does not establish deployed-version parity.

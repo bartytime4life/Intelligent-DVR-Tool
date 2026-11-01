@@ -7,9 +7,11 @@ overlapping parts, live/installed services, field accuracy and novice acceptance
 remain open. [Local delivery](facility-local-delivery.md) · [Study kit](facility-novice-study.md).
 
 
-[Visual tour](visual-tour.md) · [Getting started](getting-started.md) · [Verification index](verification/README.md)
+[Current visual atlas](visual-atlas.md) · [Getting started](getting-started.md) · [Verification index](verification/README.md)
 
-![Actual fictional sample facility in the 3D planner. Coverage is estimated.](media/facility.webp)
+![Actual desktop Facility Studio with map-first controls, an editable facility, left-step navigation and a compact current-task selector. The map is a controlled software fixture, not a real surveyed site.](media/current/facility-desktop.jpg)
+
+*The screenshot above is from the current tested React program with a blank plan. The [older fictional sample facility](media/facility.webp) is preserved in the [historical tour](visual-tour.md#historical-prototype-captures); it is not the current UI.*
 
 The **Facility** navigation item opens a browser-local, subscription-free planning
 editor. Direct entry is `/#facility`. The existing camera wall and event review
@@ -21,6 +23,8 @@ named sites, or explicitly open an example under **Backup & examples**. Existing
 saves reopen the last active site. See [saved facilities and backups](saved-facilities.md).
 
 ## Workflow
+
+Use **Current task** at the top or the seven detailed steps in the left rail. Press **1–7** outside inputs for quick task navigation, **?** for Help, and **Focus map / Show panels** when you need more space. Save or discard any in-progress edit before changing tasks. [Keyboard and measurement details](facility-image-diagnostics.md).
 
 1. Set the facility name and geographic origin. Coordinates are longitude then
    latitude; local geometry is meters east/north of that origin.
@@ -152,6 +156,12 @@ dependencies load only when Facility is opened.
 The 100-camera automated case exercises **metadata validation and synthetic route
 evaluation only**. It does not establish recording throughput, detector throughput,
 video decoding capacity, target-host latency or live 100-camera operation.
+
+## Inspect video pixels and the calibrated ground plane
+
+![Schematic of image reference markers mapped to a single measured ground plane, with a withheld check marker.](media/current/facility-science.svg)
+
+After placing cameras, **Image diagnostics** can freeze an operator-selected preview or locally opened recording frame, compare two frames and report image statistics. **Ground-plane calibration** fits user-marked correspondences and requires withheld checks and an operator-selected threshold before offering a plane-only ruler. These **experimental estimates** are not lens calibration, verified physical measurements, depth reconstruction or identity tracking. [Image science guide](facility-image-diagnostics.md) · [Ground-plane guide](facility-calibration.md).
 
 ## Dependencies
 

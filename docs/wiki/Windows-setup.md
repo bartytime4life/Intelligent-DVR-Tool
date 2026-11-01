@@ -1,5 +1,11 @@
 # Run on Windows
 
+[Visual atlas](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-atlas) · [PC acceptance](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Field-acceptance) · [Image provenance](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/media/current/README.md)
+
+![Machine planning separated from verifiable Windows install and runtime actions.](https://raw.githubusercontent.com/bartytime4life/Intelligent-DVR-Tool/main/docs/media/current/system-planning.svg)
+
+*The diagram does not configure Windows, change permissions or start recording.*
+
 [Hardware and storage](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Hardware-guide) · [GPU plan](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/GPU-planning) · [Resource limits](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Resource-controls) · [Linux](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Linux-setup)
 
 Reference target: **Windows 11 Pro x86-64**, Node.js **22**, Python **3.12**, PowerShell and a WebGL-capable browser. Use a supported Windows release and qualified motherboard/NIC/HBA/GPU drivers. Microsoft's Windows 11 hardware requirements include UEFI/Secure Boot capability and TPM 2.0 [W1]. An OS license and hardware costs are separate from this project's subscription-free analysis stack.
@@ -86,4 +92,4 @@ Keep the future recording service and the interactive review UI separate. Qualif
 
 ---
 
-[Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/setup-windows.md) · Documentation refresh: October 29, 2026.
+[Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/setup-windows.md) · Generated from the checked documentation source; historical and schematic images are labeled.

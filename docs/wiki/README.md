@@ -1,6 +1,6 @@
 # Wiki source mirrors
 
-The GitHub Wiki has a separate history from this repository. These files are generated from the canonical guides so published pages can be reviewed and reproduced.
+The GitHub Wiki has a separate history from this repository. The source mirrors now include the [Visual atlas](../visual-atlas.md), live camera-source guidance, recording workflow, image science, planar calibration, and field-acceptance documentation. The images in those pages resolve to repository-hosted original SVGs and controlled browser captures. They remain labeled as software tests or schematics, **not** live surveillance imagery. These files are generated from the canonical guides so published pages can be reviewed and reproduced.
 
 ```bash
 python3 scripts/build-wiki.py

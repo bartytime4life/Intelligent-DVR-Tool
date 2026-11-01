@@ -1,37 +1,55 @@
 # Explore Intelligent DVR
 
-[Whole-workspace UI/navigation audit](workspace-ux-audit-2026-10-31.md) examines all seven workspaces, confirmed unsaved-draft and deep-link defects, desktop/mobile regressions and follow-up usability gates. The subsequent Monitor/Facility refinement reduces duplicated controls while keeping explicit camera authorization, the detailed editor and map shortcuts intact.
+[Home](../README.md) · [Visual atlas](visual-atlas.md) · [Install for PC testing](pc-testing.md) · [Current scope](product-status.md) · [Field acceptance](field-acceptance.md)
 
-The [October 30 full review](review-2026-10-30.md) lists the defects fixed on
-`main` and the four follow-up pull requests merged on October 31.
+![Original diagram of the Intelligent DVR workflow, showing its planning and review surfaces without claiming actual camera evidence.](media/current/overview.svg)
 
-[Recording coverage](recording-coverage.md) explains strict decode/inventory
-checks, incomplete-media errors and legacy/unverified result labels.
+Documentation should help operators **see the tool, know the next action, and distinguish verified software from real-world qualification**. Every current-interface capture has a dated CI provenance record. The visual diagrams explain behavior; they do not demonstrate real cameras, physical accuracy or measured capacity.
 
-For experimental paired original/sharpened detection checks, see
-[saved-recording sharpening comparison](enhancement-comparison.md).
+## Take the visual tour
 
-Start with [PC installation and live-device testing](pc-testing.md), then follow the [field-acceptance runbook](field-acceptance.md) to collect physical-device evidence without confusing CI checks with real camera qualification.
-
-[Facility Studio image diagnostics](facility-image-diagnostics.md) covers opt-in frame capture, ROI histograms, edge/detail proxies, pixel measurement and A/B comparisons.
-
-[Ground-plane camera calibration](facility-calibration.md) adds explicit image-to-map reference markers, independent check residuals and a restricted plane-only ruler. It remains unqualified on actual cameras. Values are local, downsampled image diagnostics—not optical calibration or recognition accuracy.
-
-[One-camera LAN recording](lan-recording.md) connects finalized RTSP segments to
-the existing local recognition and review workflow.
-
-[Repository home](../README.md) · [Wiki](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki)
-
-
-| Journey | Guides |
+| The current Monitor | The current Facility Studio |
 | --- | --- |
-| See it | [Visual tour](visual-tour.md), [animation provenance and stills](media/README.md) |
-| Set up a machine | [Hardware / disks / RAM / CPU / PSU](hardware-guide.md), [GPUs](gpu-planning.md), [Linux](setup-linux.md), [Windows](setup-windows.md), [resource controls](resource-controls.md) |
-| Try it | [Getting started](getting-started.md), [field acceptance](field-acceptance.md), [facility builder](facility-builder.md), [saved facilities and backups](saved-facilities.md), [maps and shapes](map-measurements-and-shapes.md), [address search and offline recovery](facility-setup-reliability.md) |
-| Understand it | [Product status](product-status.md), [architecture and data](architecture.md), [pilot scope](pilot-scope.md), [security boundary](../SECURITY.md) |
-| Measure it | [Owner-PC GPU/load/person report](verification/host-2026-10-28/README.md), [Verification index](verification/README.md), [local evidence and qualification checklist](offline-qualification.md), [offline evaluation](offline-evaluation.md), [historical model qualification](model-qualification-20261026.md) |
-| Extend it | [Roadmap](roadmap.md), [100-camera preparation](performance-100-cameras.md), [map-setup research](easy-facility-setup.md) |
-| Check terms | [Third-party notices](third-party-notices.md), [model license text](model-qualification/Apache-2.0-YOLOX.txt) |
+| ![Monitor desktop start screen with distinct webcam, LAN DVR and approved public source choices.](media/current/monitor-desktop.jpg) | ![Facility Studio with editable plan, compact task navigation, map and properties.](media/current/facility-desktop.jpg) |
+| [Connect sources](local-camera-feeds.md) · [Capture a clip](recording-workflow.md) | [Facility builder](facility-builder.md) · [Image diagnostics](facility-image-diagnostics.md) |
 
-The current source and tested behavior take precedence over future-work research. For every capacity or quality number, check whether the evidence describes a browser fixture, synthetic arithmetic, a compatibility probe or an actual deployment measurement.
+**Also see:** [All current desktop/mobile screenshots and illustrations](visual-atlas.md) · [Media source and integrity manifest](media/current/README.md) · [Historic prototype tour](visual-tour.md#historical-prototype-captures).
 
+## Start your journey
+
+| I want to… | Start with… | Then… |
+| --- | --- | --- |
+| Install and open the local app | [PC test kit](pc-testing.md) | [Five-minute guide](getting-started.md) |
+| Connect a webcam or DVR/IP camera | [Camera-source guide](local-camera-feeds.md) | [Record and review](recording-workflow.md) |
+| Analyze an approved recording | [Local analysis service](local-analysis-service.md) | [Recognition](recording-recognition.md), [human review](recording-workflow.md) |
+| Record one configured LAN source | [LAN recorder](lan-recording.md) | [Report gaps and recovery](field-acceptance.md) |
+| Build a facility from maps or shapes | [Facility editor](facility-builder.md) | [Maps/shapes](map-measurements-and-shapes.md), [saved facilities](saved-facilities.md) |
+| Inspect real image pixels | [Image diagnostics](facility-image-diagnostics.md) | [Planar calibration](facility-calibration.md) |
+| Size a Linux/Windows machine | [System controls](resource-controls.md) | [Hardware](hardware-guide.md), [GPU planning](gpu-planning.md) |
+| Check if it is production ready | [Product status](product-status.md) | [Field acceptance](field-acceptance.md), [verification](verification/README.md) |
+
+![Original schematic of approved camera preview, bounded capture and local analysis, explicit human review and export.](media/current/workflow.svg)
+
+## Learn by subject
+
+| Subject | Detailed guides |
+| --- | --- |
+| **Camera operation** | [Webcam/DVR previews](local-camera-feeds.md), [public webcam permissions](public-webcams.md), [one-camera LAN recording](lan-recording.md), [local analysis](local-analysis-service.md), [source-matched review](recording-recognition.md), [reporting](recording-workflow.md), [coverage integrity](recording-coverage.md) |
+| **Facility design** | [Guided builder](facility-builder.md), [saved sites](saved-facilities.md), [map import and recovery](facility-setup-reliability.md), [local geographic services](facility-local-delivery.md), [shape and dimension controls](map-measurements-and-shapes.md), [science lab](facility-image-diagnostics.md), [calibration](facility-calibration.md) |
+| **Machines and capacity** | [System planner](resource-controls.md), [hardware/drives/power](hardware-guide.md), [GPU planning](gpu-planning.md), [Linux](setup-linux.md), [Windows](setup-windows.md), [100+ source target](performance-100-cameras.md) |
+| **Evidence and intelligence** | [Architecture](architecture.md), [offline evaluation](offline-evaluation.md), [qualification](offline-qualification.md), [sharpening comparison](enhancement-comparison.md), [product status](product-status.md), [pilot boundaries](pilot-scope.md) |
+| **Historical and project records** | [Verification archive](verification/README.md), [October 30 review](review-2026-10-30.md), [October 31 UX audit](workspace-ux-audit-2026-10-31.md), [roadmap](roadmap.md), [historical demo media](media/README.md), [third-party notices](third-party-notices.md) |
+
+## What has actually been demonstrated?
+
+A merged [October 31 UI and navigation update](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/61) passed **14/14 reported CI checks**. Its controlled [Chromium workflow run](https://github.com/bartytime4life/Intelligent-DVR-Tool/actions/runs/41263964836) passed 92 scenarios and rendered the current desktop/mobile gallery. Browser tests are not a user study. The connected webcam/DVR bridge, CPU inference and one-channel recording still need representative field endurance, quality and recovery evidence before a production claim.
+
+The historic October 27 baseline, earlier model tests and synthetic 100-source scheduler observations retain their original revisions, numbers and limitations in the [verification index](verification/README.md). They are not recalculated or represented as current-device acceptance.
+
+![Schematic visualization of capacity gates. Actual 100-camera throughput is not claimed.](media/current/scale-gates.svg)
+
+## Key safeguards
+
+Use cameras and recordings only with authorization. No live AI or identity recognition is started by Monitor preview. The interface's native source and model matching supports correspondence, not tamper-evident authentication. Locally stored rules, plans and decisions can be edited or lost; **export backups**. Offline, source-qualified operation remains the design goal. Read [SECURITY.md](../SECURITY.md) and the [field runbook](field-acceptance.md) before relying on the system.
+
+[Repository Wiki](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki) is published separately; the checked source mirrors are in [wiki/](wiki/README.md).

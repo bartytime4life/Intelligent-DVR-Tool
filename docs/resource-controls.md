@@ -1,5 +1,15 @@
 # Resource controls: what actually takes effect
 
+[Visual atlas](visual-atlas.md) · [PC acceptance](field-acceptance.md) · [Image provenance](media/current/README.md)
+
+![Ingest, storage, analysis and field-performance planning lanes.](media/current/system-planning.svg)
+
+*The browser's planning values are not OS quotas or native GPU benchmarks.*
+
+![Current mobile Chromium screenshot of the System capacity planner. It shows editable defaults, not detected host specifications.](media/current/system-mobile.jpg)
+
+*Current interface snapshot from a controlled test at 390 px; [capture receipt](media/current/README.md).*
+
 [Hardware](hardware-guide.md) · [Linux](setup-linux.md) · [Windows](setup-windows.md) · [GPU planning](gpu-planning.md)
 
 Open **System** in the main navigation, or use `/#system`. The page combines workload planning and explicit local limits. It has no privileged host-control API.

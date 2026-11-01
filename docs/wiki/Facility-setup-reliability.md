@@ -1,5 +1,11 @@
 # Dependable facility setup: implementation and qualification
 
+[Current visual atlas](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-atlas) · [Latest product status](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Product-status) · [Screenshot provenance](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/media/current/README.md)
+
+![Current Facility Studio map and task interface in a controlled browser fixture.](https://raw.githubusercontent.com/bartytime4life/Intelligent-DVR-Tool/main/docs/media/current/facility-desktop.jpg)
+
+*Live geographic-provider availability and novice field accuracy remain separate acceptance gates.*
+
 Updated October 28, 2026. This increment advances issue #6 with pointer location,
 custom areas, v2 courtyard/base geometry and an opt-in native local-service route.
 The [qualification record](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/facility-2026-10-28/README.md) separates
@@ -130,4 +136,4 @@ Earlier timings above remain attributed to their original run.
 
 ---
 
-[Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/facility-setup-reliability.md) · Documentation refresh: October 29, 2026.
+[Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/facility-setup-reliability.md) · Generated from the checked documentation source; historical and schematic images are labeled.

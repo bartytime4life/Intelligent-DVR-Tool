@@ -1,5 +1,11 @@
 # Facility workspace upgrades — 2026-10-29
 
+[Current visual atlas](visual-atlas.md) · [Latest product status](product-status.md) · [Screenshot provenance](media/current/README.md)
+
+![Current map-first Facility workspace with a compact task selector.](media/current/facility-desktop.jpg)
+
+*Historical progress entries below retain their original implementation dates.*
+
 The facility workspace now supports visible measurements, reusable building levels, direct camera aiming, explicit source previews, and restricted/object-watch planning.
 
 ## Build and measure

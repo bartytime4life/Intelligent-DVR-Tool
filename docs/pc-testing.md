@@ -1,5 +1,11 @@
 # Install for live PC testing
 
+[Visual atlas](visual-atlas.md) · [PC acceptance](field-acceptance.md) · [Image provenance](media/current/README.md)
+
+![Software readiness precedes operator-approved physical-device qualification.](media/current/system-planning.svg)
+
+*Passing a kit installation/Check is not proof of physical camera function or AI quality.*
+
 This kit prepares an interactive **single-user local test installation** on
 Ubuntu 24.04 x86-64 or Windows 11 x64. It includes the built interface and local
 CPU service, including the pinned detector's candidate metadata and label order

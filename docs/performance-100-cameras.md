@@ -1,5 +1,11 @@
 # Performance preparation for at least 100 simultaneous cameras
 
+[Current visual atlas](visual-atlas.md) · [Product status](product-status.md) · [Provenance](media/current/README.md)
+
+![Unqualified progression from one to five, 25, 50 and 100-plus real simultaneous sources.](media/current/scale-gates.svg)
+
+*The stages are engineering targets, not measured camera throughput.*
+
 [Evidence-led roadmap](roadmap.md) · [Fresh 100-source model results](verification/2026-10-27/README.md#100-source-load-model) · [Architecture](architecture.md)
 
 Owner requirement, 2026-10-27: **at least 100 concurrently active cameras** in a

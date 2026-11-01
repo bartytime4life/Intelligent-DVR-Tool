@@ -1,5 +1,11 @@
 # Facility setup research and remaining work
 
+[Current visual atlas](visual-atlas.md) · [Latest product status](product-status.md) · [Screenshot provenance](media/current/README.md)
+
+![The measured-reference problem is distinct from visual drawing and geometry suggestions.](media/current/facility-science.svg)
+
+*The research below may describe earlier ideas, not implemented product features.*
+
 This page preserves design research requested on 2026-10-27, with sources checked
 on that date. The progress summary below identifies delivered increments; later
 proposals and the usability study remain separate from implemented scope. Use the

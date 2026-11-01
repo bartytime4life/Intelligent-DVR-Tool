@@ -1,5 +1,11 @@
 # Offline analysis foundation
 
+[Current visual atlas](../docs/visual-atlas.md)
+
+![The local analyzer is one explicit stage between selected recordings and human review.](../docs/media/current/workflow.svg)
+
+*This diagram does not show real inference or claim live camera performance.*
+
 New recording analysis checks [decoded source coverage](../docs/recording-coverage.md)
 before completion. Install the current optional requirements, including PyAV;
 unknown completeness stays partial and early/corrupt decoding publishes no result.
