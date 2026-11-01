@@ -211,7 +211,9 @@ export default function LiveMonitor({onZoneStill, queue, visibleTiles=4, onCount
               const picture = e.currentTarget.closest('article')?.querySelector('.live-picture video, .live-picture > img');
               try { if (!picture) throw Error('No frame is shown yet.'); onZoneStill(await grabFrame(picture), t.name); } catch (err) { setError(err.message); }
             }}>Use for zones</button>}
-            <button className="text-button" onClick={() => t.id === 'webcam' ? controller.current.stop() : disconnect(t.id)}>{t.state === 'connecting' ? 'Cancel' : t.id !== 'webcam' && ['failed','disconnected'].includes(t.state) ? 'Remove' : 'Disconnect'}</button>
+            <button className="text-button" onClick={() => t.id === 'webcam'
+              ? controller.current.stop(['failed','disconnected'].includes(t.state) ? 'No webcam connected' : 'Disconnected')
+              : disconnect(t.id)}>{t.state === 'connecting' ? 'Cancel' : ['failed','disconnected'].includes(t.state) ? 'Remove' : 'Disconnect'}</button>
             {t.id === 'webcam' && ['failed','disconnected'].includes(t.state) && <button className="text-button" onClick={() => openSetup()}>Reconnect</button>}</div>
         </article>)}
       </section>{queue}

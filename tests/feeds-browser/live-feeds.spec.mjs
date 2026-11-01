@@ -126,3 +126,17 @@ test('after connecting from first-run choice, focus returns to a reachable toolb
   await expect(page.locator('.monitor-welcome')).toHaveCount(0);
   await expect(page.getByRole('button',{name:'Connect source',exact:true})).toBeFocused();
 });
+
+test('a stopped webcam preview can be removed to restore uncluttered first-run wall',async({page})=>{
+  await page.goto('/');
+  await page.getByRole('button',{name:'Connect source',exact:true}).click();
+  await page.getByRole('button',{name:'Connect webcam',exact:true}).click();
+  await page.getByRole('button',{name:'View camera wall'}).click();
+  await expect(page.getByLabel('Webcam video')).toBeVisible();
+  await page.locator('.live-tile').getByRole('button',{name:'Disconnect',exact:true}).click();
+  await expect(page.locator('.live-tile')).toHaveCount(1);
+  await page.locator('.live-tile').getByRole('button',{name:'Remove',exact:true}).click();
+  await expect(page.getByRole('region',{name:'Start camera monitoring'})).toBeVisible();
+  await expect(page.locator('.live-tile')).toHaveCount(0);
+  await expect(page.locator('.camera-wall img,.camera-wall video')).toHaveCount(0);
+});
