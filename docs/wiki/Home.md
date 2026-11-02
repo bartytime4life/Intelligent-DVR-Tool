@@ -51,7 +51,9 @@ A local-first camera-analysis and facility-planning project from **BARTA AI Solu
 
 [Complete walkthrough](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-handbook#3-analyze-a-clip) · [Review desk](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Review-and-events) · [Recording coverage](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Recording-coverage).
 
-A camera preview does not run live AI. Detection scores are model outputs; sampled counts are not unique people or continuous tracking. Reports remain subject to human review.
+**Live AI:** press **Start AI** on a Monitor tile to run the same local detector on that camera, with numbered short-lived tracks and rule observations you can send to Events. It never starts on its own and keeps no footage. [How live AI and tracking work](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Live-AI-and-tracking).
+
+Detection scores are model outputs. Track numbers follow one box across frames; they are not identities. Reports remain subject to human review.
 
 ## Make the tool fit your view
 

@@ -264,7 +264,7 @@ function EventRow({ event, review, zone }) {
       <div className="event-preview">
         <Still id={event.id} fallback={<Camera size={35} />} />
         <span className="sample-badge">
-          {event.mode === "sample" ? "SAMPLE" : "OFFLINE"}
+          {event.mode === "sample" ? "SAMPLE" : event.mode === "live-model" ? "LIVE" : "OFFLINE"}
         </span>
       </div>
       <div className="event-content">
@@ -397,6 +397,15 @@ export function App() {
       setToast(`${newCount} new observations added. Existing decisions kept. Footage stays local.`);
       return true;
     } catch (err) { setToast(err.message); return false; }
+  }
+  async function addLiveObservation(event, still) {
+    // The still is a live observation's only image evidence: never queue it without one.
+    if (!still || !(await putImage("thumbnails", event.id, still))) {
+      setToast("This browser could not save the observation’s still, so it was not sent. Free browser storage or leave private browsing, then send it again.");
+      return false;
+    }
+    // On refusal (a full queue), the unreferenced still is pruned with the queue's stills.
+    return addObservations([event], false);
   }
   function exportReviews() { download(reviewExport(eventsRef.current), "dvr-reviews.json"); }
   function undoClear() {
@@ -665,7 +674,7 @@ export function App() {
           onApply={setup => setResourceState(s => ({ ...s, setup, error: "" }))}
           onDirtyChange={dirty => { systemDirty.current = dirty; }}
           storageError={resourceState.error} download={download} /></Suspense></WorkspaceBoundary>}
-        {tab === "Monitor" && <WorkspaceBoundary name="Monitor"><LiveMonitor onZoneStill={offerZoneStill} visibleTiles={resources.browser.visibleTiles} onCount={setLiveCount} pageHidden={pageHidden} clip={capturedClip} onClip={setCapturedClip} capturePending={capturePending} onCaptureBusy={setCapturePending} onReviewClip={() => setTab('Recognition')} queue={
+        {tab === "Monitor" && <WorkspaceBoundary name="Monitor"><LiveMonitor onZoneStill={offerZoneStill} visibleTiles={resources.browser.visibleTiles} onCount={setLiveCount} pageHidden={pageHidden} clip={capturedClip} onClip={setCapturedClip} capturePending={capturePending} onCaptureBusy={setCapturePending} onReviewClip={() => setTab('Recognition')} onLiveObservation={addLiveObservation} queue={
               <aside className="review-queue">
                 <div className="queue-heading">
                   <h2>
@@ -702,7 +711,7 @@ export function App() {
                     <div className="empty-state">
                       <Check size={32} />
                       <h3>No observations yet</h3>
-                      <p>Analyze a recording in Recognition to produce observations for review.</p>
+                      <p>Analyze a recording in Recognition, or send a live AI observation from a camera tile.</p>
                       <button
                         className="button"
                         onClick={() => setTab("Events")}
@@ -740,7 +749,8 @@ export function App() {
             </div>
             <div className="review-summary" aria-label="Review queue summary">
               <span><strong>{pending.length}</strong> awaiting review</span>
-              <span>{events.filter(e => e.mode === "offline-model").length} model observations</span>
+              <span>{events.filter(e => e.mode === "offline-model").length} recording observations</span>
+              <span>{events.filter(e => e.mode === "live-model").length} live observations</span>
               <span>{events.filter(e => e.mode === "sample").length} samples</span>
               <span>{events.length} / 1,000 records</span>
             </div>
@@ -766,7 +776,7 @@ export function App() {
                 <option value="dismissed">Dismissed</option>
               </select>
               <select aria-label="Observation source" value={eventMode} onChange={e => setEventMode(e.target.value)}>
-                <option value="all">All kinds</option><option value="offline-model">Model observations</option><option value="sample">Samples</option>
+                <option value="all">All kinds</option><option value="offline-model">Recording observations</option><option value="live-model">Live observations</option><option value="sample">Samples</option>
               </select>
               <select aria-label="Camera or source" value={sourceFilter} onChange={(e) => setSourceFilter(e.target.value)}>
                 <option value="all">All cameras</option>
@@ -806,7 +816,7 @@ export function App() {
                       </small>
                     </span>
                     <span className="mode-tag">
-                      {e.mode === "sample" ? "Sample" : "Offline model"}
+                      {e.mode === "sample" ? "Sample" : e.mode === "live-model" ? "Live AI" : "Offline model"}
                     </span>
                     <span className={`status ${e.status}`}>
                       {e.status === "pending" ? "Awaiting review" : e.status}
@@ -1154,8 +1164,10 @@ export function App() {
             <div>
               <div className="missing-evidence">
                 <Still id={modal.event.id} large fallback={<Camera size={44} />} />
-                <h3>{modal.event.mode === 'sample' ? 'Legacy sample observation' : 'Original footage stays local'}</h3>
-                <p>{modal.event.mode === 'sample' ? 'This retained sample has no real camera evidence. Your previous decision and notes are preserved.' : `Open the source recording at ${modal.event.time} in Recognition to verify this observation.`}</p>
+                <h3>{modal.event.mode === 'sample' ? 'Legacy sample observation' : modal.event.mode === 'live-model' ? 'Live AI observation · still only' : 'Original footage stays local'}</h3>
+                <p>{modal.event.mode === 'sample' ? 'This retained sample has no real camera evidence. Your previous decision and notes are preserved.'
+                  : modal.event.mode === 'live-model' ? 'Live AI saw this on the camera preview. Only the analyzed still above is kept in this browser; no recording exists. Check the scene or your recorder before confirming.'
+                  : `Open the source recording at ${modal.event.time} in Recognition to verify this observation.`}</p>
                 {modal.event.provenance?.source_sha256 && <button className="button" onClick={() => {
                   const e = modal.event;
                   setEvidence({ sourceId: e.sourceId, sha: e.provenance.source_sha256, model: e.provenance.model_sha256, time: e.time, nonce: Date.now() });
@@ -1185,7 +1197,15 @@ export function App() {
                   {modal.event.score.toFixed(2)}{" "}
                   <small>· not a risk probability</small>
                 </dd>
-                {modal.event.provenance && (
+                {modal.event.mode === "live-model" && modal.event.provenance && (
+                  <>
+                    <dt>Live session</dt>
+                    <dd>{new Date(modal.event.provenance.captured_at).toLocaleString()} · unverified metadata</dd>
+                    <dt>Model SHA-256</dt>
+                    <dd className="hash">{modal.event.provenance.model_sha256}</dd>
+                  </>
+                )}
+                {modal.event.mode === "offline-model" && modal.event.provenance && (
                   <>
                     <dt>Imported receipt</dt>
                     <dd>

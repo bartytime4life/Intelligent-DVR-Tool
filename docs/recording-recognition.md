@@ -100,9 +100,11 @@ This catches persistent input changes, not hostile mutation-and-restoration.
 
 Person and other trained-class detection, simple sampled scene inventories,
 configured class-presence/dwell observations, and human inspection of matching
-source frames form one usable offline workflow. **Learned scene interpretation,
-behavior/anomaly classification, identity, within-camera tracking and cross-camera
-association are not implemented by it.** Scores are model outputs, not calibrated
+source frames form one usable offline workflow. Since November 1, 2026, new
+analyses also carry short-lived within-camera [tracks](live-detection.md#in-recognition)
+with per-track zone time. **Learned scene interpretation, behavior/anomaly
+classification, identity and cross-camera association are not implemented**, and
+tracking quality is unqualified. Scores are model outputs, not calibrated
 probabilities or findings of fact.
 
 A `partial` run remains prominently partial. New analysis uses a bounded strict

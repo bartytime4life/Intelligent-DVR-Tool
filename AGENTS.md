@@ -213,3 +213,13 @@ click, reviewed on the map (click an outline to include or exclude it; excluded
 drafts stay visible) and added as one undoable edit. Lookups stay user-triggered
 and send only the search area to the selected service; tracing remains the
 fallback when mapping is missing or a public service is unavailable.
+
+Owner real-AI decision (2026-11-01): the app must have real AI and analysis, not
+only offline plumbing. Monitor tiles offer explicit **Start AI**: the pinned local
+YOLOX-S detector with a frame-difference motion gate, ByteTrack-style short-lived
+tracks and the existing rule engine, at most two cameras, one frame in flight,
+15-minute sessions, nothing recorded. Live observations reach Events only through
+per-observation Send to Events with the analyzed still (mode live-model, no
+recording). Recording traces add the same tracks. Track numbers are continuity
+estimates, never identities; tracking quality (MOTA/IDF1/HOTA), physical cameras
+and capacity remain unqualified. See docs/live-detection.md for sources.

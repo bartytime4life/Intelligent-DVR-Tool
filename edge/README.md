@@ -100,7 +100,10 @@ Replace the original `--labels` argument rather than supplying it twice. This
 enables offline analysis only, not automatic capture or operational acceptance.
 
 Add `--trace-output /private/pilot/trace.json` to retain sampled detections and
-per-frame timing for evaluation. `--threads 1` (default; range 1–8) explicitly
+per-frame timing for evaluation. Every run also links detections into short-lived
+tracks (`edge/tracking.py`, ByteTrack-style; see [live AI and tracking](../docs/live-detection.md)):
+traces mark tracked boxes with `track` and add a `tracking` record, and receipts
+carry a per-class summary. Track numbers are continuity estimates, not identities. `--threads 1` (default; range 1–8) explicitly
 selects OpenCV CPU thread count and, on the optional CUDA route, the ONNX Runtime
 CPU thread-pool limit. It is not a GPU, codec or OS resource quota. Receipt import remains unchanged. Evaluation
 traces are separate metadata files and are not browser receipts. See the

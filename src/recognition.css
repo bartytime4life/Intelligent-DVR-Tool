@@ -110,3 +110,10 @@
 .recognition-matches p { color: #9fadb8; font-size: 12px; }
 .recognition-confirmed { color: #58dccd; font-weight: 600; }
 @media (max-width: 600px) { .recognition-people { grid-template-columns: minmax(0, 1fr); } }
+.recognition-tracks { margin-top: 24px; border: 1px solid #304450; border-radius: 10px; padding: 24px; background: #15212b; }
+.recognition-tracks h2 small { color: #5ae7d2; font-size: 13px; margin-left: 6px; }
+.recognition-tracks > p { color: #a8bdc4; font-size: 13px; line-height: 1.6; max-width: 820px; }
+.recognition-tracks .recognition-counts { max-width: 560px; }
+.recognition-tracks .recognition-counts li { flex-wrap: wrap; }
+.recognition-tracks .recognition-counts small { flex-basis: 100%; color: #8ea3ab; font-size: 11px; }
+.recognition-track-list { display: grid; gap: 6px; max-height: 320px; overflow: auto; margin-top: 10px; }

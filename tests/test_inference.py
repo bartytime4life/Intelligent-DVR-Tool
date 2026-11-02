@@ -66,6 +66,15 @@ class InferenceTest(unittest.TestCase):
             self.assertEqual(trace['events'],receipt['events'])
             self.assertEqual(trace['runtime']['threads'],1)
             self.assertEqual(trace['runtime']['backend'],'OpenCV CPU')
+            # The constant box is one short-lived track from the first sample on (continuity plumbing, not accuracy).
+            self.assertEqual([[d.get('track') for d in f['detections']] for f in trace['frames']],[[1]]*6)
+            tracking=trace['tracking']
+            self.assertEqual(tracking['schema'],'intelligent-dvr.tracks.v1')
+            self.assertEqual([(t['id'],t['label'],t['first_seconds'],t['last_seconds'],t['hits']) for t in tracking['tracks']],
+                             [(1,'person',0,2.5,6)])
+            self.assertAlmostEqual(tracking['tracks'][0]['zones']['fixture']['seconds'],2.5)
+            self.assertEqual(receipt['tracking']['classes'],{'person':{'tracks':1,'median_duration_seconds':2.5,'longest_duration_seconds':2.5}})
+            self.assertEqual(receipt['tracking']['tracker_sha256'],tracking['tracker_sha256'])
             # Independently specified geometry for the constant network output.
             # Perfect fixture scores demonstrate plumbing, never recognition.
             manifest={'schema':MANIFEST_SCHEMA,'data_kind':'synthetic',

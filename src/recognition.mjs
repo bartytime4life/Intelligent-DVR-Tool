@@ -41,7 +41,47 @@ export function parseRecognition(value) {
   require(r.events.every((e, i) => e.camera === r.camera && t.frames[eventFrames[i]] && Math.abs(t.frames[eventFrames[i]].seconds - e.seconds) <= 1e-6), 'Observation refers to an unanalyzed frame or another camera.');
   const enhancement = validateEnhancement(r, t);
   const coverage = validateCoverage(r, t);
-  return { receipt: r, trace: t, events, eventFrames, enhancement, coverage };
+  const tracking = validateTracking(t);
+  return { receipt: r, trace: t, events, eventFrames, enhancement, coverage, tracking };
+}
+
+// Short-lived within-camera tracks (older results have none). Every box's track ID
+// must name a track of the same class that spans that sampled frame.
+export function validateTracking(t) {
+  const value = t?.tracking;
+  if (value === undefined) {
+    require(t.frames.every(f => f.detections.every(d => !('track' in d))), 'Detections refer to tracks the result does not contain.');
+    return null;
+  }
+  require(value?.schema === 'intelligent-dvr.tracks.v1' && text(value.method, 80) && Array.isArray(value.tracks) && value.tracks.length <= 2000, 'Invalid tracking record.');
+  const byId = new Map();
+  for (const track of value.tracks) {
+    require(integer(track?.id, 1, 1e9) && !byId.has(track.id) && text(track.label, 80) && finite(track.first_seconds) && finite(track.last_seconds) &&
+      track.first_seconds >= 0 && track.last_seconds >= track.first_seconds && integer(track.hits, 1, 100000) &&
+      Array.isArray(track.path) && track.path.length <= 64 && track.path.every(p => Array.isArray(p) && p.length === 3 && p.every(finite) && p[1] >= 0 && p[1] <= 1 && p[2] >= 0 && p[2] <= 1) &&
+      track.zones && typeof track.zones === 'object' && Object.values(track.zones).every(z => finite(z?.seconds) && z.seconds >= 0 && finite(z.entered_seconds)),
+      'Invalid track in the tracking record.');
+    byId.set(track.id, track);
+  }
+  for (const frame of t.frames) {
+    const seen = new Set();
+    for (const d of frame.detections) {
+      if (!('track' in d)) continue;
+      const track = byId.get(d.track);
+      require(track && track.label === d.label && !seen.has(d.track) && frame.seconds >= track.first_seconds - 1e-6 && frame.seconds <= track.last_seconds + 1e-6, 'A detection refers to a missing or inconsistent track.');
+      seen.add(d.track);
+    }
+  }
+  return { ...value, byId };
+}
+
+// Tracks for display, longest first, each with the first sampled frame showing it.
+export function trackRows(tracking, frames, limit = 100) {
+  if (!tracking) return [];
+  const first = new Map();
+  frames.forEach((f, i) => { for (const d of f.detections) if (Number.isInteger(d.track) && !first.has(d.track)) first.set(d.track, i); });
+  return [...tracking.tracks].sort((a, b) => b.duration_seconds - a.duration_seconds || a.id - b.id).slice(0, limit)
+    .map(track => ({ ...track, frame: first.get(track.id) ?? null }));
 }
 
 export function mergeRecognitionEvents(existing, added) {
@@ -66,6 +106,8 @@ export function mergeRecognitionEvents(existing, added) {
   require(merged.length <= 1000, 'The review queue would exceed 1,000 events. Export and clear earlier reviews before importing this run.');
   return merged;
 }
+
+export const boxLabel = d => `${d.label}${Number.isInteger(d.track) ? ` #${d.track}` : ''} ${d.score.toFixed(2)}`;
 
 export function frameSummary(frame, threshold = 0.5) {
   require(finite(threshold) && threshold >= 0.1 && threshold <= 1, 'Display threshold must be 0.10–1.00.');

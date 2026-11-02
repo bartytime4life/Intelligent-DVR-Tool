@@ -15,7 +15,8 @@ The minimum capacity goal is **100 simultaneously active cameras**. The current 
 | Review | Wall, queue, notes, history, rules and exports | Accessibility/mobile/long-session acceptance; durable authenticated records |
 | Facility | Visual buildings, room sketching/wall edits, doorways/windows/stairs, cameras, estimates and rehearsal | Site measurements, optical calibration and qualified visibility |
 | Easy setup | Submitted address search, GPS/numeric/map-pin origin, rectangular or custom polygon area, selectable services, offline-file review, OSM relations with courtyards, raised bases and independent parts, seven shapes | Live-provider/installed local-service and real-site qualification; overlapping-part decomposition; novice-user study |
-| Detection | Offline ONNX adapter; prior YOLOX-S compatibility probes; [guided threshold tuning](training.md) | Independent labels, precision/recall, false alerts and held-out scenes separate from tuning sessions |
+| Detection | Offline ONNX adapter; prior YOLOX-S compatibility probes; [guided threshold tuning](training.md); [explicit live AI on Monitor tiles](live-detection.md) | Independent labels, precision/recall, false alerts and held-out scenes separate from tuning sessions |
+| Tracking | [ByteTrack-style short-lived tracks](live-detection.md) in live AI and recording traces, with per-track zone time | Identity-labeled held-out clips with MOTA/IDF1/HOTA and ID switches at the deployed sampling stride |
 | Enrolled-person suggestions | [Consent-gated local templates and explicit possible matches](person-enrollment.md) | Representative consented evaluation, false matches/misses, spoofing and deletion checks; no identity/access-decision claim |
 | Delivery | Linux/Windows PC kit and Mac Install/Check/Start with preservation checks | Physical host, codec, camera and recovery acceptance on each intended platform |
 | Performance | Bounded scheduler, budgets, synthetic overload model | Sustained decode/inference/end-to-end rates on intended hardware |
@@ -70,7 +71,7 @@ complete ingest/recording product.
 | 1 · Recording pilot | Implemented analyzer-to-Recognition handoff; metadata stays separate from footage | Exact-source match, actual person/object model execution, rejection/partial-state/browser checks and operator walkthrough |
 | 2 · Detection quality | Independently labeled, approved day/night/occlusion clips; held-out evaluation and scene-specific rules | Agreed per-class recall/precision and reviewed false alerts; record misses, not just visible successes |
 | 3 · One live source | Explicitly configured local ingest, recording, reconnect, retention and stop controls; connect inference/review | Continuous recording and visible gap/stale/drop accounting under disconnect, restart and disk pressure |
-| 4 · Person/object tracking | Short-lived within-camera track IDs and entry/exit/dwell evaluation | Labeled continuity/ID-switch metrics; no implied real-world identity; separate cross-camera evidence |
+| 4 · Person/object tracking | Implemented November 1: short-lived within-camera track IDs, per-track zone time and live AI on Monitor tiles ([guide](live-detection.md)); entry/exit events and track-triggered rules remain | Labeled continuity/ID-switch metrics; no implied real-world identity; separate cross-camera evidence |
 | 5 · Staged deployment | 1 → 5 → 25 → 50 → 100 simultaneous sources | Accepted source resolution/codec/FPS/cadence, quality, latency, retention, sustained soak and recovery at each stage |
 
 Scene inventories and rule observations come first. Learned scene/behavior

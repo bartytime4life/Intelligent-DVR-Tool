@@ -52,7 +52,9 @@ separate CUDA CLI path remain in force.
 ## What the report means
 
 Counts aggregate detections across sampled frames. Repeated sightings are counted
-repeatedly; they are not unique people or tracked objects. Peak counts are per
+repeatedly; they are not unique people. New analyses also list numbered
+short-lived [tracks](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Live-AI-and-tracking#in-recognition) in Recognition; a track
+follows one box across samples and is not an identity. Peak counts are per
 sample. First/last sightings are sampled timestamps, not entry/exit events.
 The activity bars use at most 100 groups and select each group's busiest sample.
 No continuous occupancy or movement is inferred between samples.

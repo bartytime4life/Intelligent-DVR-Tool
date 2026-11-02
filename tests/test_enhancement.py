@@ -145,7 +145,8 @@ class NativeEnhancementTest(unittest.TestCase):
                 self.assertEqual(c['source_pixels_sha256'],hashlib.sha256(decoded.tobytes()).hexdigest())
                 self.assertEqual(c['enhanced_pixels_sha256'],hashlib.sha256(sharpen(decoded,cv2,np).tobytes()).hexdigest())
                 self.assertNotEqual(c['source_pixels_sha256'],c['enhanced_pixels_sha256'])
-                self.assertEqual(trace['frames'][0]['detections'],c['detections'])  # Constant fixture, not accuracy.
+                # Constant fixture, not accuracy. Track IDs belong to original detections only.
+                self.assertEqual([{k:v for k,v in d.items() if k!='track'} for d in trace['frames'][0]['detections']],c['detections'])
             finally: service.close()
             if state:
                 recovered=Jobs(root/'recordings',load_catalog(root/'config.json'),state_dir=state)

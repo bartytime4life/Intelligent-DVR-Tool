@@ -133,7 +133,11 @@ frames remain local. Webcam permission is requested only on explicit connection,
 and tracks stop on disconnect/hidden page/navigation. See
 [the complete connection and trust limits](docs/local-camera-feeds.md).
 Native decoder code is not a complete malicious-device sandbox. No cloud relay,
-automatic network scan, ONVIF discovery, live inference or recording is enabled.
+automatic network scan, ONVIF discovery or recording is enabled. Live inference
+runs only after **Start AI** on a tile: the page posts bounded JPEG frames to the
+tokened loopback service, one bounded worker per camera (at most two) analyzes and
+discards them, and the session stops with the preview, a 15-second lease or 15
+minutes. See [live AI](docs/live-detection.md).
 
 ## Public webcam previews
 
