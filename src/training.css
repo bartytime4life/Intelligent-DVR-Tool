@@ -98,3 +98,15 @@
 .training-consent p { color: #b4c1cb; line-height: 1.6; }
 .training-check { display: flex !important; align-items: center; gap: 10px !important; font-size: 14px !important; color: #e7edf4 !important; }
 .training-check input { width: 18px; height: 18px; accent-color: var(--amber); }
+.training-check-confirm { max-width: 740px; }
+.training-check-confirm > p { color: #b4c1cb; line-height: 1.6; }
+.training-check-confirm details { margin: 18px 0; }
+.training-check-confirm summary { cursor: pointer; color: #8be9d9; }
+.training-check-confirm video { display: block; width: min(100%, 560px); margin: 12px 0; background: #050d14; }
+.training-check-confirm label { padding: 12px 0; }
+.training-export { margin-top: 12px; }
+.training-catalog { margin: 0 0 16px; padding: 12px 16px; border: 1px solid #2c4652; border-radius: 8px; }
+.training-catalog summary { cursor: pointer; color: #bdd1db; font-size: 13px; }
+.training-catalog p { color: #a8bcc9; }
+.training-catalog label { display: inline-grid; gap: 5px; max-width: 100%; margin: 0 12px 6px 0; color: #cad7df; font-size: 13px; }
+.training-catalog select { max-width: 100%; padding: 8px; border: 1px solid #3d5662; color: #e7edf4; background: #101d27; }

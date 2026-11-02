@@ -1,0 +1,30 @@
+.training-take { align-items: start; }
+.training-take .take-aim { color: #c8dae1; line-height: 1.5; }
+.training-take .training-stage { min-width: 0; }
+.training-take .training-stage video { object-fit: contain; }
+.take-preview-tag { position: absolute; top: 10px; left: 10px; padding: 5px 8px; color: #eaf3f5; background: #07141de8; border-radius: 4px; font-size: 11px; }
+.take-prompt-deck { display: grid; align-content: start; gap: 12px; min-width: 0; }
+.training-page .take-prompt-deck h2 { margin: 0; font-size: clamp(22px, 2.8vw, 34px); line-height: 1.12; color: #edf7fa; }
+.take-prompt-deck p { margin: 0; color: #c2d3dc; line-height: 1.5; }
+.take-prompt-deck .take-phase { display: flex; align-items: center; gap: 7px; color: #83e3d6; font-size: 12px; text-transform: uppercase; }
+.take-phase i { width: 8px; height: 8px; border-radius: 100%; background: #f9aa77; }
+.take-counter { display: flex; align-items: baseline; flex-wrap: wrap; gap: 10px; color: #c5d5df; font-size: 12px; }
+.take-counter strong { font-variant-numeric: tabular-nums; font-size: clamp(36px, 4vw, 54px); font-weight: 650; line-height: 1; color: #ffd29c; }
+.take-progress { display: flex; gap: 4px; }
+.take-progress span { height: 4px; border-radius: 8px; background: #3b4c59; }
+.take-progress .complete { background: #4caaa2; }
+.take-progress .active { background: #98e5d8; }
+.take-next { font-size: 13px; }
+.take-next b { margin-right: 5px; }
+.take-cancel { justify-self: start; }
+.take-announcement { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+@media (max-width: 900px) {
+  .training-take.take-active .training-stage { max-height: min(40vh, 320px); aspect-ratio: 16 / 9; width: 100%; }
+}
+@media (max-width: 600px) {
+  .training-take.training-panel { padding: 14px; gap: 15px; }
+  .take-counter { gap: 8px; }
+}
+.take-sound { display: flex; align-items: flex-start; gap: 9px; padding-top: 8px; color: #d0e0e7; font-size: 13px; }
+.take-sound input { margin: 2px 0 0; width: 17px; height: 17px; flex: none; accent-color: #7ad7c9; }
+.take-sound small { display: block; margin-top: 3px; color: #a6bdc8; line-height: 1.45; }

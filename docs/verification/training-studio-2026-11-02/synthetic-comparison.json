@@ -1,0 +1,58 @@
+{
+  "schema": "intelligent-dvr.guided-training-receipt.v1",
+  "measurement": "Whole-view person detections on sampled frames from this guided session.",
+  "calibration": {
+    "source_sha256": "8f02753c76f6278244987717e406e99197f98c2a5a4d65328292780c893997fd",
+    "model_sha256": "cf01496db8586a91e3ebdf4cd2ac65dc806acbe36c67d2b38821dc9d064c3cdb",
+    "rules_sha256": "4783e6332acf15a1155a6cb072933a2719194a15dd7a8e481145c7daf608af4f",
+    "labels_sha256": "162e772b1a736322be3ccb4a74560a0263f2bf85d3817aede296c37d22d792d6",
+    "inference_profile": "yolov8-raw-640",
+    "media_coverage": "unverified",
+    "prompt_alignment": "source-pts",
+    "transition_exclusion_seconds": 2,
+    "sampled_frames": 173,
+    "recommended_threshold": 0.4,
+    "recommendation_reason": "ok",
+    "baseline": {
+      "threshold": 0.7,
+      "person_found": 0,
+      "person_checks": 117,
+      "empty_view_detections": 0,
+      "empty_view_checks": 32
+    },
+    "candidate": {
+      "threshold": 0.4,
+      "person_found": 117,
+      "person_checks": 117,
+      "empty_view_detections": 0,
+      "empty_view_checks": 32
+    }
+  },
+  "fresh_check": {
+    "source_sha256": "9bb4f2083d9b9c70d462f6e0b22636dc96345cc5b876da516369799ca55e5b66",
+    "model_sha256": "cf01496db8586a91e3ebdf4cd2ac65dc806acbe36c67d2b38821dc9d064c3cdb",
+    "rules_sha256": "4783e6332acf15a1155a6cb072933a2719194a15dd7a8e481145c7daf608af4f",
+    "labels_sha256": "162e772b1a736322be3ccb4a74560a0263f2bf85d3817aede296c37d22d792d6",
+    "inference_profile": "yolov8-raw-640",
+    "media_coverage": "unverified",
+    "prompt_alignment": "source-pts",
+    "transition_exclusion_seconds": 2,
+    "prompts_confirmed_by_operator": true,
+    "camera_comparison": "matching-device",
+    "verdict": "improved",
+    "baseline": {
+      "threshold": 0.7,
+      "person_found": 0,
+      "person_checks": 32,
+      "empty_view_detections": 0,
+      "empty_view_checks": 25
+    },
+    "candidate": {
+      "threshold": 0.4,
+      "person_found": 32,
+      "person_checks": 32,
+      "empty_view_detections": 0,
+      "empty_view_checks": 25
+    }
+  }
+}

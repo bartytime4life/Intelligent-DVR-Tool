@@ -105,21 +105,11 @@ match the exact source file before overlays attach. See the
 
 ## 5. Improve detection
 
-![Camera check, guided prompts, then threshold comparison and explicit application.](https://raw.githubusercontent.com/wiki/bartytime4life/Intelligent-DVR-Tool/docs/media/guide/training.svg)
+Open **Train → Start session**, connect the camera, and follow the five prompts for 54 seconds. Review how often each setting found a person during the in-view prompts and flagged the empty room. You can preview a different threshold under **Advanced sensitivity**.
 
-![Actual Train landing page with detection tuning, person enrollment and readiness.](https://raw.githubusercontent.com/wiki/bartytime4life/Intelligent-DVR-Tool/docs/media/guide/train.jpg)
+Choose **Check on a new recording** for a 20-second check. Keep the same camera and view, follow the in-view and empty-room prompts, then confirm what happened. Apply a fresh improvement to future Recognition analyses, or keep your current setting. Download the JSON receipt to keep the counts and tested settings. [Training instructions and storage](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Guided-training).
 
-Open **Train → Start session**. Check the camera, connect it deliberately, and
-follow the on-screen sequence: in view, away, far across the room, partly hidden,
-then back in view. Keep the window in front so the recording and prompts stay
-together. The page imports and analyzes this session locally.
-
-Inspect found/missed moments and false alarms, compare the proposed threshold,
-then choose **Use … from now on** or **Keep current setting**. Applying saves a
-new rule set; the detector weights are not retrained. Results describe this
-session and room. [Training instructions and storage](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Guided-training).
-
-![Actual camera-check step before connection, with microphone-off guidance and an explicit Connect camera control.](https://raw.githubusercontent.com/wiki/bartytime4life/Intelligent-DVR-Tool/docs/media/guide/training-camera-check.jpg)
+See the [dated camera-check and enrollment screenshots](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-atlas) for the November 1 interface.
 
 ## 6. Enroll with consent
 

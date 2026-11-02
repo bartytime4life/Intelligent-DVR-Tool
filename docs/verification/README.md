@@ -1,5 +1,7 @@
 # Verification index
 
+[Guided training verification on November 2](training-studio-2026-11-02/README.md) covers fresh recording comparisons, model and rule selection, and the pinned-detector smoke check.
+
 [November 2 offline tracking evaluator validation](tracking-2026-11-02/README.md)
 records known-answer metrics, deterministic tracker scenarios and local contract
 checks. It does not measure physical-camera tracking accuracy.

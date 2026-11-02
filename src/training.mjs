@@ -9,6 +9,11 @@ export const TRAINING_SCRIPT = Object.freeze([
   { id: 'partial', prompt: 'Stand partly hidden', detail: 'Stand behind a chair or door frame so only part of you shows.', seconds: 10, expect: 'present' },
   { id: 'close', prompt: 'Come back and face the camera', detail: 'Return to your usual spot and stay until recording ends.', seconds: 8, expect: 'present' },
 ]);
+// A separately recorded check scores the two thresholds chosen before capture.
+export const CHECK_SCRIPT = Object.freeze([
+  { id: 'check-present', prompt: 'Walk through the camera’s view', detail: 'Stay in view and move as you usually would.', seconds: 10, expect: 'present' },
+  { id: 'check-empty', prompt: 'Leave the camera’s view', detail: 'Stay out of sight until the recording ends.', seconds: 10, expect: 'absent' },
+]);
 // Enrollment needs still, close, slightly varied views of one face.
 export const ENROLL_SCRIPT = Object.freeze([
   { id: 'look', prompt: 'Look at the camera', detail: 'Keep your face inside the oval and hold still.', seconds: 6 },
@@ -94,19 +99,53 @@ export function evaluate(labeled, threshold, script = TRAINING_SCRIPT, rule = {}
     observations: countObservations(labeled, threshold, rule) };
 }
 
-// Prefer zero false alarms in the empty room, then leave headroom above the
-// strongest empty-room score. When no setting can separate the person from
-// something in the empty room, keep the current one: raising it would only
-// hide the person. More sessions give a better-founded setting.
+function compareCounts(baseline, candidate) {
+  const extraFound = candidate.found - baseline.found;
+  const fewerEmptyHits = baseline.falseAlarms - candidate.falseAlarms;
+  if (!extraFound && !fewerEmptyHits) return 'unchanged';
+  if (extraFound >= 0 && fewerEmptyHits >= 0) return 'improved';
+  if (extraFound <= 0 && fewerEmptyHits <= 0) return 'worse';
+  return 'tradeoff';
+}
+
+export function compareTrainingCheck(labeled, currentThreshold, candidateThreshold) {
+  const baseline = evaluate(labeled, currentThreshold, CHECK_SCRIPT);
+  const candidate = evaluate(labeled, candidateThreshold, CHECK_SCRIPT);
+  // Three sampled frames per condition is a coverage floor for this clip, not a
+  // statistical confidence level. Both settings see exactly the same samples.
+  const verdict = baseline.presentChecks >= 3 && baseline.emptyChecks >= 3
+    ? compareCounts(baseline, candidate) : 'insufficient';
+  return { baseline, candidate, verdict };
+}
+
+// Fit the cutoff on calibration prompts. Give the person and empty-room
+// conditions equal weight regardless of duration. Prefer the empty-room
+// margin when multiple cutoffs give the same counts.
 export function recommendThreshold(labeled, options = {}) {
   const { min, max, step, margin, floor, current = 0.5 } = { ...SENSITIVITY, ...options };
   const present = labeled.filter(f => f.expect === 'present'), absent = labeled.filter(f => f.expect === 'absent');
   if (!present.some(f => f.score >= min)) return { threshold: null, reason: 'not-seen', emptyMax: null };
   if (!absent.length) return { threshold: current, reason: 'no-empty-check', emptyMax: null };
   const emptyMax = Math.max(0, ...absent.map(f => f.score));
-  if (emptyMax + margin > max) return { threshold: current, reason: 'empty-room-busy', emptyMax };
-  const threshold = clamp(roundTo(Math.max(emptyMax + margin, floor) + step / 2 - 1e-9, step), min, max);
-  return { threshold: Number(threshold.toFixed(2)), reason: 'ok', emptyMax };
+  const preferred = clamp(roundTo(Math.max(emptyMax + margin, floor) + step / 2 - 1e-9, step), min, max);
+  const countsAt = cutoff => ({
+    found: present.filter(f => f.score >= cutoff).length,
+    falseAlarms: absent.filter(f => f.score >= cutoff).length,
+  });
+  const baseline = countsAt(current);
+  let best = null;
+  for (let n = 0; n <= Math.round((max - min) / step); n++) {
+    const threshold = Number((min + n * step).toFixed(2));
+    if (threshold < floor || threshold > max) continue;
+    const candidate = countsAt(threshold);
+    if (!candidate.found || compareCounts(baseline, candidate) !== 'improved') continue;
+    const score = candidate.found * absent.length - candidate.falseAlarms * present.length;
+    if (!best || score > best.score || (score === best.score && Math.abs(threshold - preferred) < Math.abs(best.threshold - preferred))) {
+      best = { score, threshold };
+    }
+  }
+  if (best) return { threshold: best.threshold, reason: 'ok', emptyMax };
+  return { threshold: current, reason: emptyMax + margin > max ? 'empty-room-busy' : 'keep-current', emptyMax };
 }
 
 // At most one moment per `spacing` seconds, so the stills show different situations.
@@ -138,12 +177,51 @@ export function appendHistory(storage, entry) {
   catch { return { history, error: 'This session could not be saved in browser storage; the trained setting itself is saved on this computer.' }; }
 }
 
-export function readDefaultRules(storage) {
-  try { const value = storage.getItem(DEFAULT_RULES_KEY); return /^[a-z0-9-]{1,40}$/.test(value || '') ? value : ''; }
-  catch { return ''; }
+const catalogId = value => typeof value === 'string' && /^[a-z0-9-]{1,40}$/.test(value);
+export const TRAINING_SELECTION_EVENT = 'dvr-training-selection-changed';
+
+export function readTrainingSelection(storage) {
+  try {
+    const raw = storage.getItem(DEFAULT_RULES_KEY);
+    if (catalogId(raw)) return { modelId: '', rulesId: raw };
+    if (typeof raw !== 'string' || raw.length > 160) return null;
+    const saved = JSON.parse(raw);
+    return catalogId(saved?.modelId) && catalogId(saved?.rulesId)
+      ? { modelId: saved.modelId, rulesId: saved.rulesId } : null;
+  } catch { return null; }
 }
-export function writeDefaultRules(storage, id) {
-  try { storage.setItem(DEFAULT_RULES_KEY, id); return true; } catch { return false; }
+
+export function readDefaultRules(storage) {
+  return readTrainingSelection(storage)?.rulesId || '';
+}
+
+export function writeDefaultRules(storage, rulesId, modelId = '') {
+  if (!catalogId(rulesId) || (modelId !== '' && !catalogId(modelId))) return false;
+  try {
+    storage.setItem(DEFAULT_RULES_KEY, modelId ? JSON.stringify({ modelId, rulesId }) : rulesId);
+  } catch { return false; }
+  // The standard storage event only fires in other documents. Recognition may
+  // already be connected in this tab when the operator saves a checked setting.
+  globalThis.window?.dispatchEvent(new Event(TRAINING_SELECTION_EVENT));
+  return true;
+}
+
+// A newly checked rule travels with its detector. If either is unavailable,
+// select an ordinary compatible default. Only an explicit operator selection
+// can apply a model-bound saved rule to a different detector.
+export function resolveTrainingSelection(catalog, saved, explicit = null) {
+  const { models, rules } = catalog;
+  const hasModel = id => models.some(m => m.id === id);
+  const savedRule = rules.find(rule => rule.id === saved?.rulesId);
+  const savedPair = saved?.modelId && hasModel(saved.modelId) && savedRule?.models.includes(saved.modelId);
+  const explicitModel = explicit?.modelId && hasModel(explicit.modelId);
+  const modelId = explicitModel ? explicit.modelId : savedPair ? saved.modelId : models[0]?.id || '';
+  const compatible = rules.filter(rule => rule.models.includes(modelId));
+  const chosenRule = explicitModel && compatible.find(rule => rule.id === explicit.rulesId);
+  const foreignRule = saved?.modelId && saved.modelId !== modelId ? saved.rulesId : '';
+  const preferredRule = compatible.find(rule => rule.id === saved?.rulesId && rule.id !== foreignRule);
+  const fallback = compatible.find(rule => rule.id !== foreignRule);
+  return { modelId, rulesId: (chosenRule || preferredRule || fallback)?.id || '' };
 }
 
 export const percent = value => value === null || value === undefined ? '—' : `${Math.round(value * 100)}%`;

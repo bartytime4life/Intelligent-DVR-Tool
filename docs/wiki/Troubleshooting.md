@@ -20,7 +20,7 @@ Linux/Windows launcher. Check does not contact a configured camera.
 | Partial or unverified result | Read the coverage status and frame/time limits. Partial/unknown coverage is not complete coverage. |
 | Browser playback fails after native analysis | The browser may not support that codec. Keep the original, convert a copy and analyze that new encoded file. |
 | Overlay/result does not match a file | Select the exact analyzed source bytes. Re-encoding changes the hash and must not inherit old boxes. |
-| Training Apply is disabled | Check `--allow-training` and successful local service readiness. A session does not overwrite detector weights. |
+| Training does not offer to apply a setting | Check the fresh recording result. Apply needs at least three scored in-view samples and three empty-room samples, confirmed conditions, and a different threshold that improves one count without worsening the other. Check the timing message on both recordings, use a single whole-frame person rule and enable `--allow-training`. [Training guide](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Guided-training) |
 | Person enrollment is absent | Verify the two pinned face models and the enrollment-enabled launch path. Obtain consent before any capture. |
 | Facility is blank or WebGL fails | A fresh plan is intentionally empty. Check browser WebGL support, then add a building or explicitly open an example. |
 | A map request fails | Check the selected provider or use numeric coordinates/offline OSM import. Provider choice, search and tile loading are explicit actions. |

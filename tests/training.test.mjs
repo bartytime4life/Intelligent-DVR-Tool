@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { TRAINING_SCRIPT, scriptTimeline, scriptSeconds, labelFrames, countObservations, evaluate, recommendThreshold,
+import { TRAINING_SCRIPT, CHECK_SCRIPT, scriptTimeline, scriptSeconds, labelFrames, countObservations, evaluate, recommendThreshold, compareTrainingCheck,
   frameMoments, plural, readHistory, ENROLL_SCRIPT, BASELINE_SCRIPT, CONSENT_TEXT, baselineText, appendHistory, readDefaultRules, writeDefaultRules, HISTORY_KEY, percent } from '../src/training.mjs';
 
 const frame = (seconds, ...scores) => ({ seconds, detections: scores.map(score => ({ label: 'person', score, box: [0, 0, .5, .5] })) });
@@ -53,12 +53,45 @@ test('observations follow the rule engine: misses within max_gap keep one run', 
 
 test('recommended sensitivity leaves headroom above the empty room and explains edge cases', () => {
   const labeled = (empty, present = .9) => [{ expect: 'present', score: present }, { expect: 'absent', score: empty }];
-  assert.deepEqual(recommendThreshold(labeled(.26)), { threshold: .5, reason: 'ok', emptyMax: .26 });
-  assert.equal(recommendThreshold(labeled(0)).threshold, .4);
-  // Nothing separates the person from the empty room: keep the current setting rather than hide the person.
-  assert.deepEqual(recommendThreshold(labeled(.8), { current: .7 }), { threshold: .7, reason: 'empty-room-busy', emptyMax: .8 });
+  assert.deepEqual(recommendThreshold(labeled(.26)), { threshold: .5, reason: 'keep-current', emptyMax: .26 });
+  assert.equal(recommendThreshold(labeled(0)).threshold, .5); // No extra detections at .40.
+  assert.deepEqual(recommendThreshold(labeled(0, .45)), { threshold: .4, reason: 'ok', emptyMax: 0 });
+  assert.deepEqual(recommendThreshold(labeled(.8), { current: .7 }), { threshold: .9, reason: 'ok', emptyMax: .8 });
+  assert.deepEqual(recommendThreshold(labeled(.9), { current: .7 }), { threshold: .7, reason: 'empty-room-busy', emptyMax: .9 });
   assert.equal(recommendThreshold(labeled(.1, .2)).reason, 'not-seen');
   assert.deepEqual(recommendThreshold([{ expect: 'present', score: .9 }], { current: .6 }), { threshold: .6, reason: 'no-empty-check', emptyMax: null });
+});
+
+test('calibration preserves both counts and finds a useful cutoff even when the nominal margin would hide someone', () => {
+  const present = score => ({ expect: 'present', score }), empty = score => ({ expect: 'absent', score });
+  assert.deepEqual(recommendThreshold([present(.45), empty(.30)], { current: .4 }),
+    { threshold: .4, reason: 'keep-current', emptyMax: .3 });
+  assert.deepEqual(recommendThreshold([present(.6), present(.8), empty(.5)], { current: .5 }),
+    { threshold: .6, reason: 'ok', emptyMax: .5 });
+  assert.deepEqual(recommendThreshold([present(.45), present(.8), empty(.45)], { current: .45 }),
+    { threshold: .45, reason: 'keep-current', emptyMax: .45 });
+  assert.deepEqual(recommendThreshold([present(.8), empty(.5)], { current: .5 }),
+    { threshold: .7, reason: 'ok', emptyMax: .5 });
+});
+
+test('fresh-clip comparisons report separate person and empty-view counts for both frozen settings', () => {
+  const check = (present, empty, before, after) => {
+    const frames = [...present.map((score, i) => frame(i + 1, score)),
+      frame(10.5, .99), // Walking away; excluded from the paired measurement.
+      ...empty.map((score, i) => frame(i + 13, score))];
+    return compareTrainingCheck(labelFrames(frames, { script: CHECK_SCRIPT }), before, after);
+  };
+  const present = [.45, .75, .8], empty = [.3, .1, .2];
+  const { baseline, candidate, verdict } = check(present, empty, .5, .4);
+  assert.deepEqual([baseline.found, candidate.found, candidate.presentChecks], [2, 3, 3]);
+  assert.deepEqual([baseline.falseAlarms, candidate.falseAlarms, candidate.emptyChecks], [0, 0, 3]);
+  assert.equal(verdict, 'improved');
+  assert.equal(check(present, empty, .4, .5).verdict, 'worse');
+  assert.equal(check(present, empty, .45, .4).verdict, 'unchanged');
+  assert.equal(check(present, [.45, .3, .1], .5, .4).verdict, 'tradeoff');
+  assert.equal(check(present.slice(0, 2), empty, .5, .4).verdict, 'insufficient');
+  assert.equal(check(present, empty.slice(0, 2), .5, .4).verdict, 'insufficient');
+  assert.equal(check([], [], .5, .4).verdict, 'insufficient');
 });
 
 test('moments list false alarms first, then the weakest misses, spread at least 2 s apart', () => {

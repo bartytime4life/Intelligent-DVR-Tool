@@ -187,6 +187,9 @@ def rules_item(item):
     RuleEngine(parsed)
     item['classes'] = sorted({rule.label for rule in parsed})
     item['summary'] = [f'{r.label} ≥ {r.threshold:g}; {r.dwell:g}s in {r.name}' for r in parsed]
+    person = [rule for rule in parsed if rule.label == 'person']
+    item['training_reference'] = {'person_rules': len(person),
+                                  'whole_view': len(parsed) == 1 and bool(person) and list(person[0].rect) == [0, 0, 1, 1]}
     return item
 
 
@@ -265,7 +268,7 @@ class Jobs:
                     if len(choices) == 200:
                         break
             self.choices = choices
-            models = [{k: item[k] for k in ('id', 'name', 'profile')} for item in self.catalog['models'].values()]
+            models = [{k: item[k] for k in ('id', 'name', 'profile', 'sha256')} for item in self.catalog['models'].values()]
             rules = [self.rule_choice(item) for item in self.catalog['rules'].values()]
             return {'recordings': [{'id': key, 'name': p.name, 'bytes': sig[2]} for key, (p, sig) in choices.items()],
                     'models': models, 'rules': rules, 'limits': LIMITS,
@@ -280,6 +283,7 @@ class Jobs:
 
     def rule_choice(self, item):
         return {**{k: item[k] for k in ('id', 'name', 'summary')},
+                'sha256': item['sha256'], 'training_reference': item['training_reference'],
                 'models': [m['id'] for m in self.catalog['models'].values() if set(item['classes']) <= set(m['classes'])]}
 
     def save_training_rules(self, body):
@@ -1098,6 +1102,7 @@ def main(argv=None):
     parser.add_argument('--live-backend', choices=PREFERENCES, default='opencv-cpu',
                         help='Explicit live CUDA preference; CPU is default and startup fallback. No camera starts automatically.')
     parser.add_argument('--open-browser', action='store_true', help='Open the local app after binding; never connects cameras')
+    parser.add_argument('--start-page', choices=['train'], help='Show a specific workspace at the local address')
     args = parser.parse_args(argv)
     if bool(args.recordings) != bool(args.config):
         parser.error('Use --recordings and --config together')
@@ -1143,12 +1148,13 @@ def main(argv=None):
             diagnostics.event('SERVICE_START', analysis=jobs is not None, feeds=feeds is not None, recorder=recorder is not None,
                               imports=args.allow_recording_import, training=args.allow_training,
                               people=args.allow_face_enrollment)
-            print(f'Local Intelligent DVR: {server.origin}/ — explicit connections and jobs only; Ctrl+C stops.', flush=True)
+            start_url = server.origin + ('/#train' if args.start_page == 'train' else '/')
+            print(f'Local Intelligent DVR: {start_url} — explicit connections and jobs only; Ctrl+C stops.', flush=True)
             if args.open_browser:
                 import webbrowser
                 def open_browser():
                     try:
-                        webbrowser.open(server.origin + '/')
+                        webbrowser.open(start_url)
                     except Exception:
                         print('Open the printed loopback address in your browser.', flush=True)
                 threading.Thread(target=open_browser, daemon=True).start()

@@ -1,0 +1,87 @@
+.train-home { --train-mint: #84e8d8; --train-copy: #b3c6d2; --train-divider: #2d4653; }
+.train-home .train-kicker { display: flex; align-items: center; gap: 8px; margin: 0; color: var(--train-mint); font-size: 10px; line-height: 1.4; font-weight: 650; letter-spacing: .15em; }
+.train-home-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 20px; margin-bottom: 24px; }
+.train-home-header h1 { margin: 7px 0 8px; font-size: clamp(32px, 4vw, 46px); line-height: 1.05; font-weight: 600; letter-spacing: -.045em; }
+.train-home-header p:not(.train-kicker) { max-width: 56ch; color: var(--train-copy); line-height: 1.55; }
+.train-local { display: inline-flex; align-items: center; gap: 6px; flex: none; color: #b9d0dc; border: 1px solid var(--train-divider); background: #10202c; padding: 7px 11px; border-radius: 24px; font-size: 12px; }
+.train-home-deck { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: 16px; align-items: stretch; }
+.train-home-primary, .train-home .train-home-record { min-width: 0; overflow-wrap: anywhere; border-radius: 14px; }
+.train-home-primary { display: flex; flex-direction: column; justify-content: space-between; overflow: hidden; border: 1px solid #345853; background: radial-gradient(ellipse at 94% -8%, #184841 0%, transparent 50%), linear-gradient(140deg, #112d30, #0d202b 72%); }
+.train-home-primary-body, .train-home .train-home-record { padding: clamp(18px, 2.5vw, 30px); }
+.train-home-primary h2 { margin: 14px 0 8px; font-size: clamp(22px, 2.5vw, 30px); line-height: 1.2; letter-spacing: -.035em; }
+.train-home-primary-body > p:not(.train-kicker), .train-home .train-home-record > p:not(.train-kicker), .train-home-enroll p:not(.train-kicker) { color: var(--train-copy); line-height: 1.6; }
+.train-home-primary-body > p:not(.train-kicker) { max-width: 54ch; }
+.train-home-recipe { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; padding: 0; margin: 23px 0; list-style: none; }
+.train-home-recipe li { position: relative; display: flex; flex-direction: column; align-items: flex-start; gap: 3px; min-width: 0; }
+.train-home-recipe li::before { content: ''; position: absolute; top: 12px; left: 32px; right: 0; border-top: 1px solid #37594f; }
+.train-home-recipe li:last-child::before { display: none; }
+.train-home-recipe span { display: inline-grid; place-items: center; width: 24px; height: 24px; margin-bottom: 5px; border: 1px solid #41645f; border-radius: 6px; background: #163433; color: var(--train-mint); font-size: 11px; font-weight: 650; font-variant-numeric: tabular-nums; }
+.train-home-recipe b { color: #e6f0f1; font-size: 13px; }
+.train-home-recipe small, .train-home .train-record-date { color: #a8bcc8; font-size: 12px; line-height: 1.45; }
+.train-home .train-home-launch { min-height: 44px; gap: 14px; }
+.train-home button:disabled { cursor: not-allowed; }
+.train-home-script { margin-top: 8px; }
+.train-home summary { cursor: pointer; }
+.train-home summary:focus-visible { outline: 2px solid var(--cyan); outline-offset: 3px; border-radius: 4px; }
+.train-home-script summary { width: fit-content; padding: 11px 2px; color: #c1dadf; font-size: 13px; }
+.train-home-script ol { margin: 0 0 2px; padding-left: 24px; max-width: 51ch; color: #b8cbd6; font-size: 13px; }
+.train-home-script li { padding: 4px 0; }
+.train-home-script b { margin-left: 8px; color: var(--train-mint); font-weight: 600; }
+.train-home-readiness { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 4px 10px; padding: 13px clamp(18px, 2.5vw, 30px); border-top: 1px solid #2f4e4c; background: #102829; }
+.train-home-readiness > div { display: flex; align-items: flex-start; gap: 9px; }
+.train-home-readiness svg { flex: none; color: var(--train-mint); }
+.train-home-readiness strong { display: block; line-height: 19px; font-size: 13px; color: #c9e9de; }
+.train-home-readiness p { margin: 3px 0 0; color: #c7d1d7; font-size: 13px; line-height: 1.5; }
+.train-home-readiness.is-blocked { background: #2a241b; border-top-color: #665437; }
+.train-home-readiness.is-blocked strong, .train-home-readiness.is-blocked svg { color: #ffcd78; }
+.train-home-readiness .text-button { min-height: 36px; }
+.train-home .train-home-record { display: flex; flex-direction: column; border: 1px solid var(--train-divider); background: linear-gradient(145deg,#112432,#101d28); }
+.train-home-record h2 { margin: 14px 0 7px; font-size: 21px; }
+.train-record-verdict { margin: 12px 0 5px; font-weight: 600; }
+.train-rule-status { display: flex; align-items: flex-start; gap: 10px; padding: 17px 0 0; margin-top: auto; border-top: 1px solid var(--train-divider); }
+.train-home-record > p + .train-rule-status, .train-home-record > table + .train-rule-status { margin-top: 20px; }
+.train-rule-status svg { flex: none; color: #9bb5c4; }
+.train-rule-status div { display: grid; gap: 5px; }
+.train-rule-status span { color: #a9bdc9; font-size: 12px; }
+.train-rule-status strong { font-size: 14px; font-weight: 550; color: #e5edef; }
+.train-home-comparison { width: 100%; table-layout: fixed; border-collapse: collapse; margin: 7px 0 10px; font-size: 13px; font-variant-numeric: tabular-nums; }
+.train-home-comparison caption { padding: 6px 0; text-align: left; color: var(--train-copy); font-size: 12px; }
+.train-home-comparison th, .train-home-comparison td { padding: 8px 5px; text-align: start; vertical-align: top; border-bottom: 1px solid var(--train-divider); overflow-wrap: anywhere; }
+.train-home-comparison th { font-weight: 550; }
+.train-home-comparison thead th { color: #afc4d1; font-size: 12px; }
+.train-home-enroll { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 16px; border: 1px solid var(--train-divider); border-radius: 12px; padding: 20px; margin-top: 16px; background: #11212c; }
+.train-enroll-icon { display: inline-grid; place-items: center; width: 46px; height: 46px; border-radius: 12px; background: #1a3540; color: #a3ddd8; }
+.train-home-enroll h2 { margin: 5px 0; }
+.train-home-enroll p:not(.train-kicker) { max-width: 64ch; font-size: 13px; }
+.train-home-enroll button { min-height: 44px; }
+.train-home > .training-people { margin-top: 16px; margin-bottom: 0; }
+.train-home .train-home-history { margin-top: 20px; padding: 18px 20px; background: #0d1d29; }
+.train-home-ledger-heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
+.train-home-ledger-heading h2 { margin: 4px 0 0; }
+.train-home-ledger-heading > span { color: #aabfcc; font-size: 12px; }
+.train-home .train-home-history ol { margin: 12px 0 0; }
+.train-home .train-home-history li { display: block; padding: 0; }
+.train-home-history summary { min-height: 44px; padding: 12px 0; line-height: 1.5; }
+.train-home-history summary span { margin-right: 12px; }
+.train-history-date { font-variant-numeric: tabular-nums; color: #ebf0f3; }
+.train-history-decision { color: #a9c5c2; }
+.train-history-detail { max-width: 64ch; padding: 0 0 13px 18px; color: var(--train-copy); line-height: 1.55; }
+@media (max-width: 840px) {
+  .train-home-deck { grid-template-columns: minmax(0, 1fr); }
+  .train-home-record .train-rule-status { margin-top: 18px; }
+}
+@media (max-width: 550px) {
+  .train-home-header { flex-direction: column; gap: 10px; margin-bottom: 16px; }
+  .train-home-recipe { grid-template-columns: minmax(0, 1fr); gap: 4px; margin: 15px 0; }
+  .train-home-recipe li { display: grid; grid-template-columns: 25px minmax(0,1fr); align-items: center; column-gap: 8px; row-gap: 0; padding: 2px 0; }
+  .train-home-recipe li::before { display: none; }
+  .train-home-recipe span { grid-row: span 2; margin: 0; }
+  .train-home-recipe small { grid-column: 2; }
+  .train-home .train-home-launch { justify-content: center; width: 100%; }
+  .train-home-enroll { grid-template-columns: auto minmax(0,1fr); gap: 10px; padding: 16px; }
+  .train-home-enroll button { grid-column: 1 / -1; justify-content: center; }
+  .train-home .train-home-history { padding: 16px; }
+  .train-home-history summary span { display: block; padding-left: 16px; margin: 0; }
+  .train-home-history summary .train-history-date { display: inline; padding-left: 0; }
+  .train-history-detail { padding-left: 0; }
+}

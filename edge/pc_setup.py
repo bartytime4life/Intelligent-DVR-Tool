@@ -345,6 +345,7 @@ def main(argv=None):
     modes = parser.add_mutually_exclusive_group()
     modes.add_argument('--install', action='store_true')
     modes.add_argument('--check', action='store_true')
+    modes.add_argument('--train', action='store_true', help='Open Train with prepared local analysis, recording import and rule saving enabled')
     modes.add_argument('--prepare-analysis', type=Path, metavar='MODEL_ONNX', help='Prepare local analysis from the pinned existing YOLOX-S model; no download or inference')
     modes.add_argument('--native-probe', action='store_true', help=argparse.SUPPRESS)
     parser.add_argument('--feeds', action='store_true', help='Compatibility alias; the local feed service is the default')
@@ -383,6 +384,14 @@ def main(argv=None):
             return 0
         if not 1024 <= args.port <= 65535:
             raise SetupError('Use a port from 1024 to 65535.')
+        if args.train:
+            if args.facility or os.environ.get('DVR_GEO_LOCAL') == '1':
+                raise SetupError('Train needs the local analysis service. Omit --facility and clear DVR_GEO_LOCAL for this launch.')
+            args.analysis = args.allow_recording_import = args.allow_training = True
+            if not args.recordings and not args.config and not (ROOT / 'local-analysis/catalog.json').is_file():
+                prepare = (r'.\Start-Windows.cmd --prepare-analysis "C:\Models\yolox-s.onnx"' if sys.platform == 'win32'
+                           else 'bash scripts/run-linux.sh --prepare-analysis /path/to/yolox-s.onnx')
+                raise SetupError(f'Train needs the prepared local model. Use your approved model file with {prepare}, then start Train again.')
         if args.analysis and not args.recordings and not args.config and (ROOT / 'local-analysis/catalog.json').is_file():
             args.recordings = ROOT / 'local-analysis/recordings'
             args.config = ROOT / 'local-analysis/catalog.json'
@@ -464,6 +473,8 @@ def main(argv=None):
             print('Linux analysis recovery enabled: one last job; no automatic analysis or resume.', flush=True)
         else:
             print('Analysis recovery disabled: temporary results. Existing saved state is untouched.', flush=True)
+        if args.train:
+            service.extend(['--start-page', 'train'])
         if not args.no_browser:
             service.append('--open-browser')
         if sys.platform == 'linux':
