@@ -6,6 +6,11 @@
 
 **Quick path:** Keep independent labels separate from tuning → analyze approved recordings → evaluate detections and observations → inspect misses and false alerts.
 
+For continuity, identity switches, MOTA, IDF1 and HOTA, use the
+[offline tracking evaluator](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Tracking-evaluation). It reuses this manifest and
+the analyzer's saved tracks, with independent anonymous object IDs and labels on
+every sampled frame. Detection precision/recall remains a separate measurement.
+
 New analyzer results bind [recording coverage validation](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Recording-coverage).
 The evaluator checks those declarations and refuses partial/unverified coverage;
 historical traces retain explicit null validation metadata instead of being

@@ -52,6 +52,7 @@ PAGES = {
     'docs/performance-100-cameras.md': '100-camera-plan',
     'docs/field-acceptance.md': 'Field-acceptance',
     'docs/offline-evaluation.md': 'Offline-evaluation',
+    'docs/tracking-evaluation.md': 'Tracking-evaluation',
     'docs/offline-qualification.md': 'Offline-qualification',
     'docs/pilot-scope.md': 'Pilot-scope',
     'docs/architecture.md': 'Architecture-and-data',
@@ -79,7 +80,7 @@ GROUPS = {
     'Connect, analyze, review': ['Camera-sources', 'Public-webcams', 'Live-AI-and-tracking', 'Live-GPU', 'Recording-workflow', 'Local-analysis-service', 'Recognition-details', 'Recording-coverage', 'LAN-recording', 'Review-and-events', 'Zones'],
     'Train': ['Guided-training', 'Person-enrollment', 'Enhancement-comparison'],
     'Plan the facility': ['Facility-planning', 'Saved-facilities', 'Maps-and-shapes', 'Facility-setup-reliability', 'Local-map-services', 'Facility-study-kit', 'Image-diagnostics', 'Planar-calibration'],
-    'Plan and qualify the machine': ['Resource-controls', 'Hardware-guide', 'GPU-planning', '100-camera-plan', 'Field-acceptance', 'Offline-evaluation', 'Offline-qualification', 'Pilot-scope'],
+    'Plan and qualify the machine': ['Resource-controls', 'Hardware-guide', 'GPU-planning', '100-camera-plan', 'Field-acceptance', 'Offline-evaluation', 'Tracking-evaluation', 'Offline-qualification', 'Pilot-scope'],
     'Engineering and evidence': ['Architecture-and-data', 'Edge-CLI', 'Security-boundary', 'Third-party-notices', 'Evidence-and-validation', 'Roadmap', 'Visual-provenance', 'Wiki-publication'],
     'Dated records': ['Visual-tour', 'PR61-visual-provenance', 'Historical-visual-provenance', 'Facility-setup-research', 'Facility-upgrades-2026-10-29', 'Experience-review-2026-10-29', 'Review-2026-10-30', 'Assessment-2026-10-30', 'Workspace-audit-2026-10-31', 'Model-qualification-2026-10-26'],
 }

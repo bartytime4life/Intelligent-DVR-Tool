@@ -1,5 +1,11 @@
 # Product status and evidence
 
+[Offline tracking evaluation](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Tracking-evaluation) now measures saved traces
+against independently labeled sampled frames, reporting identity switches,
+misses, false tracks, MOTA, IDF1 and reference HOTA. Deterministic synthetic cases
+validate evaluator arithmetic, alignment and tracker integration; representative
+physical-camera tracking accuracy and multi-camera capacity remain unqualified.
+
 [Guide index](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Guide-index) · [Visual handbook](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-handbook) · [Screenshot atlas](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-atlas) · [Verification](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Evidence-and-validation)
 
 ![Conceptual overview of local camera, recording, review and facility planning.](https://raw.githubusercontent.com/wiki/bartytime4life/Intelligent-DVR-Tool/docs/media/guide/overview.jpg)

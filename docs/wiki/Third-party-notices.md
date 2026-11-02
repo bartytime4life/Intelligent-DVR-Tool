@@ -11,6 +11,12 @@
 - Optional OpenCV Python: https://github.com/opencv/opencv-python — see upstream
   wheel notices, including bundled components; OpenCV uses Apache-2.0.
 - Optional NumPy: https://numpy.org/ — BSD-3-Clause; bundled notices may apply.
+- Offline tracking metrics: TrackEval (MIT), pinned commit
+  `12c8791b303e0a0b50f753af204249e622d0281a`,
+  https://github.com/JonathonLuiten/TrackEval. The metric source subset,
+  [license](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/edge/_vendor/trackeval/LICENSE), upstream hashes and
+  [explicit adaptations](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/edge/_vendor/trackeval/README.md) are preserved.
+  The assignment adapter reuses the application's Hungarian solver.
 - Optional PyAV recording validator: https://github.com/PyAV-Org/PyAV — see its
   BSD-3-Clause license and the FFmpeg/library notices supplied in each installed wheel.
   The PC runtime pins 19.0.2; no native runtime binaries are vendored in this repository.

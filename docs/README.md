@@ -15,6 +15,7 @@
 | Install or test a PC | [PC kit](pc-testing.md) | [Linux](setup-linux.md), [Windows](setup-windows.md), [field runbook](field-acceptance.md) |
 | Connect one source | [Webcam and local DVR](local-camera-feeds.md) | [Approved public webcams](public-webcams.md) |
 | See people and objects live | [Live AI and tracking](live-detection.md) | [Optional GPU setup](live-gpu.md), [Review and Events](review-and-events.md), [zones](zones.md) |
+| Measure tracking accuracy | [Offline tracking evaluation](tracking-evaluation.md) | [Detection evaluation](offline-evaluation.md), [field acceptance](field-acceptance.md) |
 | Analyze a recording | [Clip-to-report workflow](recording-workflow.md) | [Service configuration](local-analysis-service.md), [Recognition](recording-recognition.md), [coverage](recording-coverage.md) |
 | Make and export review decisions | [Review desk and Events](review-and-events.md) | [Recognition reports](recording-workflow.md), [optional sharpening comparison](enhancement-comparison.md) |
 | Record one LAN camera | [LAN recording](lan-recording.md) | [Field runbook](field-acceptance.md), [coverage](recording-coverage.md) |

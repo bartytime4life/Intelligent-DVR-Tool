@@ -33,6 +33,12 @@ precision/recall and timing distributions, and computes false alerts per reviewe
 camera-hour only when all covered alerts have explicit decisions. Deterministic
 synthetic fixtures validate the infrastructure, not recognition quality.
 
+[Offline tracking evaluation](../docs/tracking-evaluation.md) adds MOTA, IDF1,
+HOTA, ID switches and timestamped errors from the same saved traces. It requires
+independent anonymous track labels on every sampled frame. Run
+`python -m edge.evaluate_tracking --manifest local-manifest.json --output new-report.json`.
+NumPy is the only numerical dependency; no camera, inference or review writes occur.
+
 The product requirement is now at least 100 simultaneous cameras. The
 [performance preparation guide](../docs/performance-100-cameras.md) documents
 the bounded scheduler and offline load model. `edge.capacity` is a virtual-time

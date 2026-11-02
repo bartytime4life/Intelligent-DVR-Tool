@@ -1,0 +1,24 @@
+{
+  "repository": "https://github.com/JonathonLuiten/TrackEval",
+  "commit": "12c8791b303e0a0b50f753af204249e622d0281a",
+  "upstream_sha256": {
+    "_timing.py": "62e60638efc675bccc35c7da65158f0f19ce31f332121efe7cc748bd92ad2b30",
+    "LICENSE": "f7e548c5729e464d878dd4abf691e323bbea028a756d08395d88b83e43dd2d86",
+    "utils.py": "c082ecfbb5061619642b82a034454022806f8e870f774e54dbfbdacaaf097132",
+    "metrics/_base_metric.py": "dac8b87bf3801269aa280b1cf91184f483de4f4e5c158bd07a4b1733b1a5722b",
+    "metrics/hota.py": "c582255c3d36bdb49c3ceeb2a5bd912cee009190dfcfe465b4173d03aaa97d6a",
+    "metrics/identity.py": "e76b1bdcbf5b193662431596a984cf70a5be32e903eb5f2a3d9921b4762f93ba",
+    "metrics/clear.py": "ab3963eac401073fe1b2957c734af1e531368f42fca49627c14422350b2744f0"
+  },
+  "adapted_sha256": {
+    "__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "_timing.py": "62e60638efc675bccc35c7da65158f0f19ce31f332121efe7cc748bd92ad2b30",
+    "assignment.py": "20a5739b5297b2112800e45eca5feaf0604d69eaceb6623be3ec5b993a0ddb4a",
+    "metrics/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "metrics/_base_metric.py": "dac8b87bf3801269aa280b1cf91184f483de4f4e5c158bd07a4b1733b1a5722b",
+    "metrics/clear.py": "3660a3d497c2d095043e5fa2fa8b004676cfb80a6fc6c78154fff5c36218294f",
+    "metrics/hota.py": "dfe6aad6cf6bb43be7912a4b79202ce9377f2c2f7a137c17e5e84baed3b9192f",
+    "metrics/identity.py": "892c0b9d00572dc39c41c3aa478c0532310ccee5fc4d0de4bff55c695670891e",
+    "utils.py": "c082ecfbb5061619642b82a034454022806f8e870f774e54dbfbdacaaf097132"
+  }
+}
