@@ -8,6 +8,7 @@ import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
 FIXED = (
+    'edge/requirements-live-cuda.txt', 'docs/live-gpu.md',
     'edge/requirements-qualification.txt', 'edge/local-feeds.example.json', 'edge/public-webcams.example.json',
     'edge/local-analysis.example.json', 'edge/rules.example.json',
     'edge/lan-recorder.example.json',

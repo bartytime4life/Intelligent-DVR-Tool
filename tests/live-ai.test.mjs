@@ -1,4 +1,5 @@
 import test from 'node:test';
+import { liveBackendLabel } from '../src/live-ai.mjs';
 import assert from 'node:assert/strict';
 import { liveCounts, liveBoxLabel, boxesFresh, liveObservationEvent, liveDetector, liveRequest, LIVE_BOX_MAX_AGE_MS } from '../src/live-ai.mjs';
 import { restoreSnapshot } from '../src/data.mjs';
@@ -9,6 +10,14 @@ import { recognitionFixture } from './fixtures/recognition.mjs';
 const session = { id: 'a'.repeat(32), camera: 'Front door', model_sha256: 'b'.repeat(64), state: 'live' };
 const observation = { id: 'c'.repeat(32), camera: 'Front door', label: 'person', score: .91, seconds: 3.2, started_seconds: 3.2,
   rule: 'person present in door for 0s', review_required: true };
+
+test('the tile labels actual execution and each CPU fallback reason', () => {
+  assert.equal(liveBackendLabel({ runtime: { backend_id: 'onnxruntime-cuda' } }), 'GPU · CUDA');
+  assert.equal(liveBackendLabel({ acceleration: { requested: 'cuda-preferred' } }), 'CPU · OpenCV');
+  assert.equal(liveBackendLabel({ acceleration: { code: 'CUDA_START_FAILED_CPU_FALLBACK' } }), 'CPU · GPU could not start');
+  assert.equal(liveBackendLabel({ acceleration: { code: 'GPU_DISABLED_AFTER_FAILURE' } }), 'CPU · GPU disabled after failure');
+  assert.equal(liveBackendLabel({ acceleration: { code: 'GPU_SLOT_BUSY' } }), 'CPU · GPU worker in use');
+});
 
 test('live counts, labels and box freshness describe only the analyzed frame', () => {
   const detections = [{ label: 'person', score: .9, track: 3 }, { label: 'person', score: .5 }, { label: 'car', score: .8, track: 1 }, { label: 'dog', score: .2 }];

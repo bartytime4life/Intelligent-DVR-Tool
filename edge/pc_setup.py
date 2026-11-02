@@ -349,6 +349,8 @@ def main(argv=None):
     modes.add_argument('--native-probe', action='store_true', help=argparse.SUPPRESS)
     parser.add_argument('--feeds', action='store_true', help='Compatibility alias; the local feed service is the default')
     parser.add_argument('--analysis', action='store_true')
+    parser.add_argument('--live-backend', choices=('opencv-cpu', 'cuda-preferred'), default='opencv-cpu',
+                        help='Opt-in live CUDA preference; requires analysis and a separately prepared GPU runtime')
     parser.add_argument('--recorder-config', type=Path, help='Enable one configured LAN recorder in Recognition; never starts capture automatically')
     parser.add_argument('--allow-recording-import', action='store_true', help='Enable explicit same-computer recording imports (64 MiB per file)')
     parser.add_argument('--allow-training', action='store_true', help='Let Train save tuned rule sets beside the analysis catalog (never overwrites)')
@@ -392,6 +394,8 @@ def main(argv=None):
             raise SetupError('--allow-training requires recording analysis configuration.')
         if args.allow_face_enrollment and (not args.recordings or not args.config):
             raise SetupError('--allow-face-enrollment requires recording analysis configuration.')
+        if args.live_backend != 'opencv-cpu' and (not args.recordings or not args.config or args.install or args.check or args.facility):
+            raise SetupError('--live-backend is a Start option requiring analysis configuration. GPU activation is tested only after Start AI.')
         if args.recorder_config and (not args.recordings or not args.config or args.install):
             raise SetupError('--recorder-config requires analysis configuration; enable it with Start or Check after installation.')
         if args.report and not args.check:
@@ -437,6 +441,8 @@ def main(argv=None):
         if not args.feeds_config.is_file():
             raise SetupError('DVR config is missing. Run the installer to create an empty local-feeds.json.')
         service = [str(python), '-m', 'edge.local_service', '--feeds-config', str(args.feeds_config), '--port', str(args.port)]
+        if args.live_backend != 'opencv-cpu':
+            service += ['--live-backend', args.live_backend]
         if args.recordings or args.config:
             if not args.recordings or not args.config:
                 raise SetupError('Supply the recording folder and analysis catalog together.')

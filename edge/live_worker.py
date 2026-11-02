@@ -34,6 +34,10 @@ class LoadFailed(Exception):
     """The configuration, model or rules could not be loaded; no frame was analyzed."""
 
 
+class GpuFailed(Exception):
+    """The selected GPU stopped; never reset tracks by restarting in this session."""
+
+
 def read_exact(stream, size):
     data = b''
     while len(data) < size:
@@ -74,7 +78,7 @@ def validate_config(config):
     return config
 
 
-def run(stdin, stdout):
+def run(stdin, stdout, backend_name='opencv-cpu'):
     import cv2
     import numpy as np
     from .analyze import decode
@@ -93,8 +97,14 @@ def run(stdin, stdout):
         engine = RuleEngine(rules, config['camera'], config['run_id'])
         tracker = Tracker(zones=zones_from_rules(rules))
         motion = Motion(cv2)
-        backend = create_backend('opencv-cpu', config['model'], config['profile'], cv2, np, THREADS,
-                                 model_sha256=config['model_sha256'])
+        if backend_name == 'onnxruntime-cuda':
+            from .live_backend import create_cuda
+            backend = create_cuda(config['model'], config['model_sha256'], config['profile'], np, THREADS)
+        elif backend_name == 'opencv-cpu':
+            backend = create_backend('opencv-cpu', config['model'], config['profile'], cv2, np, THREADS,
+                                     model_sha256=config['model_sha256'])
+        else:
+            raise ValueError('Unknown live backend')
         # One warm-up pass so the first camera frame is not charged for graph setup.
         backend.forward(prepare(np.zeros((360, 640, 3), dtype=np.uint8), config['profile'], cv2, np)[0])
     except Exception as error:
@@ -142,7 +152,12 @@ def run(stdin, stdout):
             if not idle:
                 blob, scale, padding = prepare(frame, config['profile'], cv2, np)
                 inference_began = time.perf_counter()
-                raw = backend.forward(blob)
+                try:
+                    raw = backend.forward(blob)
+                except Exception as error:
+                    if backend_name == 'onnxruntime-cuda':
+                        raise GpuFailed() from error
+                    raise
                 detections = decode(raw, config['labels'], frame.shape, scale, padding, cv2, np, config['profile'])
                 inference_ms = (time.perf_counter() - inference_began) * 1000
                 observations = engine.update(seconds, detections)
@@ -165,17 +180,29 @@ def run(stdin, stdout):
 
 
 def main():
+    import argparse
     from .analysis_worker import constrain
-    handle = constrain(MEMORY_BYTES, CPU_SECONDS)
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--backend', choices=('opencv-cpu', 'onnxruntime-cuda'), default='opencv-cpu')
+    args = parser.parse_args()
+    if args.backend == 'onnxruntime-cuda':
+        from .live_resources import constrain_gpu
+        handle = constrain_gpu(MEMORY_BYTES, CPU_SECONDS)
+    else:
+        handle = constrain(MEMORY_BYTES, CPU_SECONDS)
     os.environ.update(OMP_NUM_THREADS=str(THREADS), OPENBLAS_NUM_THREADS=str(THREADS), MKL_NUM_THREADS=str(THREADS),
                       OPENCV_IO_MAX_IMAGE_PIXELS=str(INPUT_PIXELS))
     try:
-        run(sys.stdin.buffer, sys.stdout.buffer)
+        run(sys.stdin.buffer, sys.stdout.buffer, args.backend)
     except BaseException as error:
         # One fixed line; native text, paths and frames never reach the parent or logs.
         try:
+            from .live_backend import CudaUnavailable
+            gpu_probe = ({'gpu_probe': error.__cause__.code if isinstance(error.__cause__, CudaUnavailable)
+                          else 'STARTUP_EXECUTION_FAILED'} if args.backend == 'onnxruntime-cuda' and isinstance(error, LoadFailed) else {})
             sys.stdout.buffer.write(json.dumps({'type': 'error', 'fatal': True,
-                'code': 'MODEL_LOAD_FAILED' if isinstance(error, LoadFailed) else 'WORKER_FAILED'}).encode() + b'\n')
+                **gpu_probe,
+                'code': 'MODEL_LOAD_FAILED' if isinstance(error, LoadFailed) else 'GPU_FAILED' if isinstance(error, GpuFailed) else 'WORKER_FAILED'}).encode() + b'\n')
             sys.stdout.buffer.flush()
         except OSError:
             pass

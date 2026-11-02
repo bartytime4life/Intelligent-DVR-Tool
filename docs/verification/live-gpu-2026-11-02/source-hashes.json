@@ -1,0 +1,26 @@
+{
+  "schema": "intelligent-dvr.live-gpu-sources.v1",
+  "base_commit": "041b22277de0077b42c154e3e69a70d1387b6b55",
+  "sha256": {
+    "edge/live_worker.py": "75159d80248ab01c5f38206f8e8aafb1fe158e58cb25d1ab9f14b3d89d14e609",
+    "edge/live_analysis.py": "312592bc415221a761511335dc13fe7922b31186e6b8cae4315a9b8b6f4084e0",
+    "edge/local_service.py": "1a2300ae6a983698603bbd0a4bf053fa12c77969b0916447bf2b42e1c36475ef",
+    "edge/pc_setup.py": "13df61d76b496d6c0261d885c30a7406b79465c4bce236397db2466e962f46c2",
+    "src/live-ai.mjs": "1eaea5eb31b1e1528eddfacad73eae3fb9ba1d114ffa3fce66cdf3844dd93f20",
+    "src/LiveDetection.jsx": "6973e5d0e1263c62207eea124c469b5fac06627377dc048b0839360055f74338",
+    "scripts/Start-IntelligentDvr.ps1": "5756e2914f440ceafc6d390792dc4a0eb47cd9a1c427acd9de68ace735d5bedd",
+    "scripts/build-pc-kit.py": "38d8716c08c948eb510d883b2d3d5fe8c01750502cb6738fd812983b6acd1adb",
+    "tests/live-ai.test.mjs": "289adbf88b9878922f92dd1a0c575f6165708722f07cd21cd888d5fdd38db72e",
+    "tests/test_pc_setup.py": "f771d53bbf9dec8554fd06c9f513bfea2df090f9102dbda38e73b39f5ace717e",
+    "docs/live-detection.md": "96aa04f736d8e773db7983d5cd945c993bbd034293fbea4d3f1ed7691b427b5d",
+    "docs/product-status.md": "bf3aa2b9d18e9a0561389d0b8daf5db3a5780b4ee71f6911d6c04ee6477c51a9",
+    "docs/gpu-planning.md": "4bf46917a3c34e37502c62862400ea81e0759755a043d8bbbf2616503bfe8bd5",
+    "docs/pc-testing.md": "41fc7759f3f4c616c7f53d9fdee9ab65bc8eb9a47c24ec9d9041cbb2471ccf2d",
+    "edge/live_backend.py": "6b4e6a87b9c72666c98281132c76c047a3e6ded5f4a3cf37fd0c54b34f67d0ac",
+    "edge/live_resources.py": "6a1c8b3351cada785dbb5a2064e47b4c7722582b1c20abca4009a0667cf1806c",
+    "edge/live_benchmark.py": "37d7b30e0f509a25b12954a2ff237deb7fe2caecb01ae2fb89d0e3a9450ce9ff",
+    "edge/requirements-live-cuda.txt": "61ad17d4d25600c997be4956a168ff0734eb68d057e972f32f4684fb16609ebb",
+    "tests/test_live_gpu.py": "1f87f89c2f1169a13cc4cc1987c5e1a3c3e78b6058485861bcfdfdde214cbec6",
+    "docs/live-gpu.md": "7a96c6d6826dbca36e4b2a331e3025153a7a0464ac3d756cc882a02fbea6ac32"
+  }
+}
