@@ -268,7 +268,7 @@ class Jobs:
                     if len(choices) == 200:
                         break
             self.choices = choices
-            models = [{k: item[k] for k in ('id', 'name', 'profile', 'sha256')} for item in self.catalog['models'].values()]
+            models = [{k: item[k] for k in ('id', 'name', 'profile', 'sha256', 'labels_sha256')} for item in self.catalog['models'].values()]
             rules = [self.rule_choice(item) for item in self.catalog['rules'].values()]
             return {'recordings': [{'id': key, 'name': p.name, 'bytes': sig[2]} for key, (p, sig) in choices.items()],
                     'models': models, 'rules': rules, 'limits': LIMITS,

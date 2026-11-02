@@ -56,7 +56,7 @@ Applying requires a confirmed improvement at a different threshold, reliable tim
 | --- | --- |
 | First and check recordings | Imported into the configured local recordings folder. Keep or remove them under your local retention policy. |
 | Checked setting | When you apply, the local service saves a rule file under `trained/` beside its catalog. Existing rule files remain available. The service allows up to 50 saved training rule sets. |
-| Recognition selection | This browser remembers the checked detector and saved rule together for future recording analyses. Recognition respects a manual selection you have already made. If the rule saved but the browser could not remember the preference, select that detector and rule by name in Recognition. |
+| Recognition selection | This browser remembers the checked detector and saved rule together for future recording analyses. New selections include fingerprints for the model, class labels and rule file, plus the inference profile. A changed component requires an explicit choice or a fresh check. Recognition respects a manual selection you have already made. If the rule saved but the browser could not remember the preference, select that detector and rule by name in Recognition. |
 | Session history | This browser keeps the latest 50 entries. Past sessions distinguish a first-recording result from a comparison confirmed on a second recording. |
 | Downloadable JSON receipt | Export the session’s counts, thresholds and fresh-check result, when available, as JSON. SHA-256 fingerprints identify the source recordings, detector, labels and rules. The file omits video, device IDs and names. |
 

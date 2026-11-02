@@ -189,11 +189,32 @@ test('recorded synthetic pixels improve on an independent check and explicitly s
   await expect(page.locator('.training-history li')).toContainText('Candidate improved this check');
   await page.reload();
   await expect(page.locator('.training-history li')).toHaveCount(1);
-  expect(await page.evaluate(() => JSON.parse(localStorage.getItem('dvr.analysis.defaultRules')))).toEqual({modelId:'synthetic-light', rulesId:rule.id});
+  expect(rule.sha256).toMatch(/^[0-9a-f]{64}$/);
+  expect(await page.evaluate(() => JSON.parse(localStorage.getItem('dvr.analysis.defaultRules')))).toEqual({
+    modelId: 'synthetic-light', rulesId: rule.id,
+    modelHash: receipt.fresh_check.model_sha256, labelHash: receipt.fresh_check.labels_sha256,
+    rulesHash: rule.sha256, profile: receipt.fresh_check.inference_profile,
+  });
   await page.getByRole('navigation', {name: 'Main navigation'}).getByRole('button', {name: /^Recognition/}).click();
   await page.getByRole('button', {name: 'Connect local analysis'}).click();
   await expect(page.getByLabel('Analysis rules')).toHaveValue(rule.id);
   await expect(page.getByLabel('Analysis model')).toHaveValue('synthetic-light');
+
+  // Only after the native captures, comparison, save and first reopen, simulate
+  // an operator replacing the detector bytes under the same catalog ID.
+  await page.route('**/api/analysis/session', async route => {
+    const response = await route.fetch();
+    const catalog = await response.json();
+    const replaced = catalog.models.find(model => model.id === 'synthetic-light');
+    expect(replaced.sha256).toBe(receipt.fresh_check.model_sha256);
+    replaced.sha256 = 'a'.repeat(64);
+    await route.fulfill({response, json: catalog});
+  });
+  await page.reload();
+  await page.getByRole('button', {name: 'Connect local analysis'}).click();
+  await expect(page.getByLabel('Analysis rules')).toHaveValue('presence');
+  await expect(page.getByLabel('Analysis model')).toHaveValue('synthetic');
+  expect(writes).toHaveLength(1);
 });
 
 test('service unavailability exposes a retry, preserves a legacy session, and fits a phone viewport', async ({page}, testInfo) => {

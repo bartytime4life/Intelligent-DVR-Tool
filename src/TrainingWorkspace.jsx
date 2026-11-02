@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { ArrowClockwise, CheckCircle, DownloadSimple, Trash, WarningCircle, X } from '@phosphor-icons/react';
 import { analysisRequest, importRecording, localAnalysisOrigin } from './local-analysis.mjs';
 import { CHECK_SCRIPT, TRAINING_SCRIPT, evaluate, frameMoments, compareTrainingCheck, readHistory, appendHistory,
-  readTrainingSelection, writeDefaultRules, plural, ENROLL_SCRIPT, BASELINE_SCRIPT, CONSENT_TEXT, baselineText } from './training.mjs';
+  readTrainingSelection, trainedPreferenceMatches, writeDefaultRules, plural, ENROLL_SCRIPT, BASELINE_SCRIPT, CONSENT_TEXT, baselineText } from './training.mjs';
 import { checkContextError, makeTrainingReceipt } from './training-evidence.mjs';
 import { downloadBlob } from './clip-capture.mjs';
 import CaptureSteps from './TrainingCapture.jsx';
@@ -57,15 +57,16 @@ export default function TrainingWorkspace({ onOpenRecognition }) {
   useEffect(() => { connect(); }, []);
 
   const preference = readTrainingSelection(store());
-  const inUse = service.rules?.find(rule => rule.id === preference?.rulesId &&
-    (!preference.modelId || (rule.models.includes(preference.modelId) && service.models.some(m => m.id === preference.modelId))));
+  const inUse = service.state === 'ready' && preference && trainedPreferenceMatches(service, preference)
+    ? service.rules.find(rule => rule.id === preference.rulesId) : null;
   function optionsForModel(modelId) {
     return (service.rules || []).filter(rule => rule.models.includes(modelId) &&
       (rule.training_reference === undefined || rule.training_reference.person_rules === 1));
   }
   function selectModel(modelId, desiredRule) {
     const eligible = optionsForModel(modelId);
-    const reference = eligible.find(r => r.id === desiredRule) || eligible.find(r => r.training_reference?.whole_view) || eligible[0];
+    const automatic = eligible.filter(r => inUse || r.id !== preference?.rulesId);
+    const reference = eligible.find(r => r.id === desiredRule) || automatic.find(r => r.training_reference?.whole_view) || automatic[0];
     setSelection({ modelId, rulesId: reference?.id || '' });
   }
   function reset(nextStep = null) {
@@ -124,6 +125,7 @@ export default function TrainingWorkspace({ onOpenRecognition }) {
         const model = currentSession.models?.find(item => item.id === outcome.modelId);
         const reference = currentSession.rules?.find(item => item.id === outcome.rulesId);
         if (!currentSession.training?.enabled || model?.sha256 !== outcome.modelHash ||
+            model.labels_sha256 !== outcome.labelHash || model.profile !== outcome.profile ||
             !reference?.sha256 || reference.sha256 !== outcome.ruleFileHash || !reference.models.includes(outcome.modelId)) {
           throw Error('The local detector, reference rule or saving permission has changed. Start a new session before using this setting.');
         }
@@ -136,7 +138,8 @@ export default function TrainingWorkspace({ onOpenRecognition }) {
         const response = await analysisRequest('/training/rules', { token: currentSession.token, method: 'POST',
           body: { name, label: 'person', threshold: value, rect, dwell, max_gap } });
         ({ rule } = await response.json());
-        selected = writeDefaultRules(store(), rule.id, outcome.modelId);
+        selected = writeDefaultRules(store(), rule.id, outcome.modelId, { modelHash: outcome.modelHash,
+          labelHash: outcome.labelHash, rulesHash: rule.sha256, profile: outcome.profile });
         setService(s => ({ ...s, rules: [...s.rules.filter(r => r.id !== rule.id), rule] }));
       }
       const threshold = selected ? value : outcome.current;
@@ -199,16 +202,19 @@ export default function TrainingWorkspace({ onOpenRecognition }) {
     </div>
     <ol className="training-steps" aria-label="Session progress">{STEPS.map(([id, label], i) => <li key={id}
       aria-current={activeStep === id ? 'step' : undefined} className={i < stageIndex ? 'complete' : ''}><b>{i + 1}</b>{label}</li>)}</ol>
-    {step === 'camera' && <details className="training-catalog">
+    {step === 'camera' && <details className="training-catalog" open={!selection.rulesId || undefined}>
       <summary>Detector and reference rule</summary>
       <p>The first recording and the fresh check use the same detector and reference rule.</p>
       <label>Detector<select value={selection.modelId} onChange={e => selectModel(e.target.value)}>
         {service.models.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}</select></label>
-      <label>Reference rule<select disabled={!selection.rulesId} value={selection.rulesId}
+      <label>Reference rule<select disabled={!optionsForModel(selection.modelId).length} value={selection.rulesId}
         onChange={e => setSelection(s => ({ ...s, rulesId: e.target.value }))}>
+        {!selection.rulesId && <option value="">Choose a reference rule</option>}
         {optionsForModel(selection.modelId).map(r => <option value={r.id} key={r.id}>{r.name}</option>)}</select></label>
     </details>}
-    {step === 'camera' && !selection.rulesId && <p role="alert">This detector needs a rule set with one person rule. Choose another detector above or add a person rule to the local catalog.</p>}
+    {step === 'camera' && !selection.rulesId && <p role="alert">{optionsForModel(selection.modelId).length
+      ? 'The saved detector or rule has changed. Choose a reference rule above to start a new calibration.'
+      : 'This detector needs a rule set with one person rule. Choose another detector above or add a person rule to the local catalog.'}</p>}
     {(step === 'camera' || step === 'record') && selection.rulesId && <CaptureSteps step={step} onStep={setStep}
       onClip={c => { setClip(c); setStep('analyze'); }} />}
     {step === 'analyze' && <AnalyzeStep selection={selection} clip={clip} script={TRAINING_SCRIPT}

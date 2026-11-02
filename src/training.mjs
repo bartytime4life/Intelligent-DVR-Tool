@@ -179,15 +179,22 @@ export function appendHistory(storage, entry) {
 
 const catalogId = value => typeof value === 'string' && /^[a-z0-9-]{1,40}$/.test(value);
 export const TRAINING_SELECTION_EVENT = 'dvr-training-selection-changed';
+const bindingFields = ['modelHash', 'labelHash', 'rulesHash', 'profile'];
+const digest = value => typeof value === 'string' && /^[a-f0-9]{64}$/.test(value);
+const validBinding = value => value && digest(value.modelHash) && digest(value.labelHash) &&
+  digest(value.rulesHash) && typeof value.profile === 'string' && /^[a-z0-9._-]{1,80}$/i.test(value.profile);
 
 export function readTrainingSelection(storage) {
   try {
     const raw = storage.getItem(DEFAULT_RULES_KEY);
     if (catalogId(raw)) return { modelId: '', rulesId: raw };
-    if (typeof raw !== 'string' || raw.length > 160) return null;
+    if (typeof raw !== 'string' || raw.length > 512) return null;
     const saved = JSON.parse(raw);
-    return catalogId(saved?.modelId) && catalogId(saved?.rulesId)
-      ? { modelId: saved.modelId, rulesId: saved.rulesId } : null;
+    if (!catalogId(saved?.modelId) || !catalogId(saved?.rulesId)) return null;
+    const pair = { modelId: saved.modelId, rulesId: saved.rulesId };
+    if (!bindingFields.some(key => Object.hasOwn(saved, key))) return pair;
+    if (!validBinding(saved)) return null;
+    return { ...pair, modelHash: saved.modelHash, labelHash: saved.labelHash, rulesHash: saved.rulesHash, profile: saved.profile };
   } catch { return null; }
 }
 
@@ -195,15 +202,30 @@ export function readDefaultRules(storage) {
   return readTrainingSelection(storage)?.rulesId || '';
 }
 
-export function writeDefaultRules(storage, rulesId, modelId = '') {
+export function writeDefaultRules(storage, rulesId, modelId = '', binding) {
   if (!catalogId(rulesId) || (modelId !== '' && !catalogId(modelId))) return false;
+  if (binding !== undefined && (!modelId || !validBinding(binding))) return false;
+  const pair = { modelId, rulesId };
+  if (binding) for (const key of bindingFields) pair[key] = binding[key];
   try {
-    storage.setItem(DEFAULT_RULES_KEY, modelId ? JSON.stringify({ modelId, rulesId }) : rulesId);
+    storage.setItem(DEFAULT_RULES_KEY, modelId ? JSON.stringify(pair) : rulesId);
   } catch { return false; }
   // The standard storage event only fires in other documents. Recognition may
   // already be connected in this tab when the operator saves a checked setting.
   globalThis.window?.dispatchEvent(new Event(TRAINING_SELECTION_EVENT));
   return true;
+}
+
+export function trainedPreferenceMatches(catalog, saved) {
+  if (!saved || !Array.isArray(catalog?.models) || !Array.isArray(catalog.rules)) return false;
+  const rule = catalog.rules.find(r => r.id === saved.rulesId);
+  if (!rule || !Array.isArray(rule.models)) return false;
+  if (!saved.modelId) return catalog.models.some(m => rule.models.includes(m.id)); // legacy rule-only preference
+  const model = catalog.models.find(m => m.id === saved.modelId);
+  if (!model || !rule.models.includes(model.id)) return false;
+  if (!bindingFields.some(key => Object.hasOwn(saved, key))) return true; // legacy model/rule ID pair
+  return validBinding(saved) && model.sha256 === saved.modelHash && model.labels_sha256 === saved.labelHash &&
+    model.profile === saved.profile && rule.sha256 === saved.rulesHash;
 }
 
 // A newly checked rule travels with its detector. If either is unavailable,
@@ -212,15 +234,18 @@ export function writeDefaultRules(storage, rulesId, modelId = '') {
 export function resolveTrainingSelection(catalog, saved, explicit = null) {
   const { models, rules } = catalog;
   const hasModel = id => models.some(m => m.id === id);
-  const savedRule = rules.find(rule => rule.id === saved?.rulesId);
-  const savedPair = saved?.modelId && hasModel(saved.modelId) && savedRule?.models.includes(saved.modelId);
+  const matches = trainedPreferenceMatches(catalog, saved);
+  const savedPair = saved?.modelId && matches;
   const explicitModel = explicit?.modelId && hasModel(explicit.modelId);
   const modelId = explicitModel ? explicit.modelId : savedPair ? saved.modelId : models[0]?.id || '';
   const compatible = rules.filter(rule => rule.models.includes(modelId));
-  const chosenRule = explicitModel && compatible.find(rule => rule.id === explicit.rulesId);
-  const foreignRule = saved?.modelId && saved.modelId !== modelId ? saved.rulesId : '';
-  const preferredRule = compatible.find(rule => rule.id === saved?.rulesId && rule.id !== foreignRule);
-  const fallback = compatible.find(rule => rule.id !== foreignRule);
+  // A stale preference must also be excluded from the ordinary first-rule
+  // fallback and from a selection cached before the catalog changed.
+  const staleRule = saved && !matches ? saved.rulesId : '';
+  const chosenRule = explicitModel && compatible.find(rule => rule.id === explicit.rulesId && rule.id !== staleRule);
+  const excluded = staleRule || (saved?.modelId && saved.modelId !== modelId ? saved.rulesId : '');
+  const preferredRule = compatible.find(rule => rule.id === saved?.rulesId && rule.id !== excluded);
+  const fallback = compatible.find(rule => rule.id !== excluded);
   return { modelId, rulesId: (chosenRule || preferredRule || fallback)?.id || '' };
 }
 
