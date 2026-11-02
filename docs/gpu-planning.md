@@ -90,3 +90,13 @@ No GPU purchase, accelerated backend or 100-camera operating claim is made by th
 - **G4:** [NVIDIA RTX 5090 reference specifications](https://www.nvidia.com/en-us/geforce/graphics-cards/50-series/rtx-5090/).
 - **G5:** [RTX PRO 4000 Blackwell SFF specifications](https://www.nvidia.com/en-us/products/workstations/professional-desktop-gpus/rtx-pro-4000-sff/).
 - **G6:** [NVIDIA Video Codec SDK](https://developer.nvidia.com/video-codec-sdk), [codec support matrix](https://developer.nvidia.com/video-encode-decode-support-matrix).
+
+
+## Optional live CUDA first step
+
+Monitor now has an explicit CUDA preference for the pinned YOLOX-S model, with
+CPU default/fallback, one GPU worker and two total live sessions. See the
+[setup and resource contract](live-gpu.md) and its
+[dated verification record](verification/live-gpu-2026-11-02/README.md).
+This does not qualify Windows/Linux live GPU execution, total VRAM consumption,
+physical cameras or sustained 100-camera operation.

@@ -311,3 +311,13 @@ add its existing `--state-dir` option when wanted. See
 [capture, analysis, reporting and retention](recording-workflow.md). The pinned
 model source and license are recorded in
 [`edge/candidates/opencv-zoo-yolox-s-2022nov.json`](../edge/candidates/opencv-zoo-yolox-s-2022nov.json).
+
+## Optional GPU for live Monitor detection
+
+CPU is still the normal installation and launch default. The opt-in live CUDA
+preference is available with analysis: --live-backend cuda-preferred on Linux,
+or -LiveBackend cuda-preferred through the Windows PowerShell launcher.
+Prepare the isolated runtime separately and run the generated-input benchmark
+before any camera test. Read [live GPU setup, fallback and resource limits](live-gpu.md);
+its Windows/Linux GPU acceptance and optional GPU installer remain unqualified.
+Install and Check never initialize a GPU or start a camera.

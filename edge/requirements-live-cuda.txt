@@ -1,0 +1,15 @@
+# Optional development runtime only, installed AFTER the hash-checked CPU base.
+# Never included in the default install. Python 3.12, x86-64 Windows/Linux.
+# Version pins, not a qualified GPU installer or a hash-locked wheel set.
+onnxruntime-gpu==1.31.1
+flatbuffers==25.12.19
+packaging==26.3
+# Reuse the October 28 Linux qualification's environment-local CUDA 13 libraries.
+# Windows requires compatible CUDA/cuDNN DLLs and the VC++ runtime separately.
+nvidia-cublas==13.8.2.12 ; sys_platform == "linux"
+nvidia-cuda-nvrtc==13.4.92 ; sys_platform == "linux"
+nvidia-cuda-runtime==13.4.92 ; sys_platform == "linux"
+nvidia-cudnn-cu13==9.27.0.42 ; sys_platform == "linux"
+nvidia-cufft==12.4.0.43 ; sys_platform == "linux"
+nvidia-curand==10.4.4.72 ; sys_platform == "linux"
+nvidia-nvjitlink==13.4.92 ; sys_platform == "linux"

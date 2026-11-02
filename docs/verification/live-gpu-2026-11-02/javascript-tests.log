@@ -1,0 +1,45 @@
+TAP version 13
+# Subtest: the tile labels actual execution and each CPU fallback reason
+ok 1 - the tile labels actual execution and each CPU fallback reason
+  ---
+  duration_ms: 0.331421
+  ...
+# Subtest: live counts, labels and box freshness describe only the analyzed frame
+ok 2 - live counts, labels and box freshness describe only the analyzed frame
+  ---
+  duration_ms: 0.333565
+  ...
+# Subtest: a live observation becomes a pending, recording-free queue entry that survives storage validation
+ok 3 - a live observation becomes a pending, recording-free queue entry that survives storage validation
+  ---
+  duration_ms: 7.422997
+  ...
+# Subtest: the detector starts explicitly, sends one frame at a time and keeps observations with their still
+ok 4 - the detector starts explicitly, sends one frame at a time and keeps observations with their still
+  ---
+  duration_ms: 3.548899
+  ...
+# Subtest: start and frame failures stop the detector with the service message
+ok 5 - start and frame failures stop the detector with the service message
+  ---
+  duration_ms: 1.929274
+  ...
+# Subtest: recognition results carry validated short-lived tracks
+ok 6 - recognition results carry validated short-lived tracks
+  ---
+  duration_ms: 1.100362
+  ...
+# Subtest: a restarted detector keeps the previous run’s unsent observations
+ok 7 - a restarted detector keeps the previous run’s unsent observations
+  ---
+  duration_ms: 0.235211
+  ...
+1..7
+# tests 7
+# suites 0
+# pass 7
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 17.662051

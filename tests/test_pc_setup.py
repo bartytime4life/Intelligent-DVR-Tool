@@ -174,6 +174,30 @@ class PcSetupTest(unittest.TestCase):
             self.assertEqual(args[args.index('--config')+1],str(self.root/'local-analysis/catalog.json'))
             with self.assertRaises(SystemExit): pc.main(['--no-browser'])
             self.assertNotIn('--config',execute.call_args.args[1])
+
+    def test_live_gpu_preference_forwards_on_linux_and_windows_without_starting_ai(self):
+        feeds = self.write('local-feeds.json', b'{"sources":[]}')
+        for platform in ('linux', 'win32'):
+            with self.subTest(platform=platform), patch.dict(os.environ, {}, clear=True), \
+                    patch.object(pc.sys, 'platform', platform), patch.object(pc, 'host_check'), \
+                    patch.object(pc, 'verify_kit'), patch.object(pc, 'built_interface'), \
+                    patch.object(pc, 'validate_environment', return_value=Path('/python')), \
+                    patch('os.execv', side_effect=SystemExit(0)) as execute, \
+                    patch('subprocess.call', return_value=0) as call:
+                args = ['--analysis', '--recordings', str(self.root), '--config', str(self.root/'catalog.json'),
+                        '--feeds-config', str(feeds), '--no-browser', '--live-backend', 'cuda-preferred']
+                if platform == 'linux':
+                    with self.assertRaises(SystemExit): pc.main(args)
+                    forwarded = execute.call_args.args[1]
+                else:
+                    self.assertEqual(pc.main(args), 0)
+                    forwarded = call.call_args.args[0]
+                self.assertEqual(forwarded[forwarded.index('--live-backend') + 1], 'cuda-preferred')
+
+    def test_live_gpu_option_is_rejected_for_install_check_or_missing_analysis(self):
+        with patch.dict(os.environ, {}, clear=True), patch.object(pc, 'host_check'):
+            for extra in ([], ['--install'], ['--check'], ['--facility']):
+                self.assertEqual(pc.main(['--live-backend', 'cuda-preferred'] + extra), 1)
             self.assertEqual(pc.main(['--allow-recording-import']),1)
 
     def test_temporary_override_bypasses_state_without_deleting_it(self):

@@ -48,18 +48,26 @@ skipped by the motion gate, frames dropped while busy, and tracks seen so far.
 
 | Limit | Value | Why |
 | --- | --- | --- |
-| Cameras with live AI at once | 2 | Each worker uses two CPU threads |
+| Cameras with live AI at once | 2 total, at most 1 optional GPU worker | Two threads per worker; GPU activation is explicit |
 | Frames analyzed per camera | at most 5 per second, one in flight | No backlog; a busy worker refuses the next frame, which is counted |
 | Frame size | JPEG up to 1 MiB and 1080p; the browser sends at most 960 px wide | Bounded decode and memory |
 | Session | 15 minutes, then press Start AI again | Explicit, time-bounded activity |
 | Lease | stops 15 s after the page stops sending frames | No orphaned work |
 | Frame deadline | 6 s for transfer and reply together; a worker that stops reading is stopped | No request or session can hang |
-| Worker | memory/CPU-time caps (memory cap on Linux/Windows; macOS refuses address-space limits) | Same isolation as recording jobs |
+| Worker | CPU memory/CPU-time caps; optional CUDA has a separate bounded policy | See [GPU resource policy](live-gpu.md#resource-policy-and-limits); macOS has no memory cap |
 | Boxes | hidden 1.5 s after their frame | Old boxes never sit over newer video |
 
 On the owner's Apple M4 Mac, the pinned YOLOX-S CPU model took about 80–90 ms per
 frame with two threads in development checks on one 960×540 test clip. That is a
 single-machine development observation, not a qualified latency or capacity figure.
+
+## Optional GPU execution
+
+CPU remains the default. On Windows/Linux, an explicit service preference can
+try the existing pinned ONNX Runtime CUDA backend for YOLOX-S. GPU startup must
+prove actual CUDA-only execution; a failed attempt starts a fresh CPU worker.
+The tile shows its actual backend and fallback reason. See [setup, recovery and
+resource limits](live-gpu.md) and the [November 2 measurement record](verification/live-gpu-2026-11-02/README.md).
 
 ## How it works
 
@@ -73,7 +81,7 @@ camera tile ──JPEG (≤960 px, ≤5/s)──▶ local service ──▶ live
 ```
 
 **Detection.** The pinned OpenCV Zoo YOLOX-S model (Ge et al., 2021), trained on
-the 80 COCO classes (Lin et al., 2014), runs on the CPU through OpenCV DNN with
+the 80 COCO classes (Lin et al., 2014), runs by default on the CPU through OpenCV DNN (or the optional verified CUDA path) with
 the same preprocessing, decoding and per-class non-maximum suppression as
 recording analysis. The worker verifies the model's SHA-256 against the catalog
 before parsing it.

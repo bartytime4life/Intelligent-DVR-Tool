@@ -312,6 +312,16 @@ add its existing `--state-dir` option when wanted. See
 model source and license are recorded in
 [`edge/candidates/opencv-zoo-yolox-s-2022nov.json`](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/edge/candidates/opencv-zoo-yolox-s-2022nov.json).
 
+## Optional GPU for live Monitor detection
+
+CPU is still the normal installation and launch default. The opt-in live CUDA
+preference is available with analysis: --live-backend cuda-preferred on Linux,
+or -LiveBackend cuda-preferred through the Windows PowerShell launcher.
+Prepare the isolated runtime separately and run the generated-input benchmark
+before any camera test. Read [live GPU setup, fallback and resource limits](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Live-GPU);
+its Windows/Linux GPU acceptance and optional GPU installer remain unqualified.
+Install and Check never initialize a GPU or start a camera.
+
 ---
 
 [Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/pc-testing.md) · Generated companion; dated evidence, examples and illustrations retain their labels.
