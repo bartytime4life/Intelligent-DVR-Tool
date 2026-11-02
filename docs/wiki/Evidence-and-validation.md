@@ -1,5 +1,9 @@
 # Verification index
 
+[November 2 offline tracking evaluator validation](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/tracking-2026-11-02/README.md)
+records known-answer metrics, deterministic tracker scenarios and local contract
+checks. It does not measure physical-camera tracking accuracy.
+
 November 1 visual documentation: [handbook, capture provenance and Wiki coverage checks](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/visual-documentation-2026-11-01/README.md).
 
 [Current visual atlas](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-atlas)

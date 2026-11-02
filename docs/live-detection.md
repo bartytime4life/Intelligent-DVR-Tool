@@ -1,5 +1,10 @@
 # Live AI and object tracking
 
+Saved recording traces can be compared with independent anonymous object labels
+using the [offline tracking evaluator](tracking-evaluation.md): identity switches,
+misses, false tracks, MOTA, IDF1 and HOTA. Synthetic evaluator validation does not
+establish physical-camera tracking accuracy.
+
 [Guide index](README.md) · [Camera sources](local-camera-feeds.md) · [Recognition](recording-recognition.md) · [Review and Events](review-and-events.md) · [Product status](product-status.md)
 
 **Added November 1, 2026.** Two capabilities turn per-frame detections into

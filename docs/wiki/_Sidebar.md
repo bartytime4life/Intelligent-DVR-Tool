@@ -55,6 +55,7 @@
 - [100 camera plan](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/100-camera-plan)
 - [Field acceptance](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Field-acceptance)
 - [Offline evaluation](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Offline-evaluation)
+- [Tracking evaluation](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Tracking-evaluation)
 - [Offline qualification](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Offline-qualification)
 - [Pilot scope](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Pilot-scope)
 

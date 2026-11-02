@@ -1,5 +1,10 @@
 # Live AI and object tracking
 
+Saved recording traces can be compared with independent anonymous object labels
+using the [offline tracking evaluator](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Tracking-evaluation): identity switches,
+misses, false tracks, MOTA, IDF1 and HOTA. Synthetic evaluator validation does not
+establish physical-camera tracking accuracy.
+
 [Guide index](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Guide-index) · [Camera sources](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Camera-sources) · [Recognition](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Recognition-details) · [Review and Events](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Review-and-events) · [Product status](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Product-status)
 
 **Added November 1, 2026.** Two capabilities turn per-frame detections into

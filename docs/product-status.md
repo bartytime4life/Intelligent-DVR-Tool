@@ -1,5 +1,11 @@
 # Product status and evidence
 
+[Offline tracking evaluation](tracking-evaluation.md) now measures saved traces
+against independently labeled sampled frames, reporting identity switches,
+misses, false tracks, MOTA, IDF1 and reference HOTA. Deterministic synthetic cases
+validate evaluator arithmetic, alignment and tracker integration; representative
+physical-camera tracking accuracy and multi-camera capacity remain unqualified.
+
 [Guide index](README.md) · [Visual handbook](how-to.md) · [Screenshot atlas](visual-atlas.md) · [Verification](verification/README.md)
 
 ![Conceptual overview of local camera, recording, review and facility planning.](media/guide/overview.jpg)

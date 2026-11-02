@@ -1,5 +1,9 @@
 # Verification index
 
+[November 2 offline tracking evaluator validation](tracking-2026-11-02/README.md)
+records known-answer metrics, deterministic tracker scenarios and local contract
+checks. It does not measure physical-camera tracking accuracy.
+
 November 1 visual documentation: [handbook, capture provenance and Wiki coverage checks](visual-documentation-2026-11-01/README.md).
 
 [Current visual atlas](../visual-atlas.md)

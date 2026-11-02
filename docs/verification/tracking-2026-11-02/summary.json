@@ -1,0 +1,34 @@
+{
+  "schema": "intelligent-dvr.tracking-evaluator-validation.v1",
+  "base_commit": "041b22277de0077b42c154e3e69a70d1387b6b55",
+  "data_kind": "synthetic",
+  "runtime": {
+    "python": "3.14.4",
+    "numpy": "2.3.5",
+    "platform": "Linux"
+  },
+  "focused_tests": {
+    "discovered": 72,
+    "passed": 72,
+    "failed": 0,
+    "skipped": 0,
+    "new_tracking_evaluator_tests": 20
+  },
+  "assignment_cases_within_one_test": 160,
+  "source_sha256": {
+    "edge/tracking.py": "0fecb3aa8519e18e875a4f147fa41424cc2105235cdc16290586f7e29049c48d",
+    "edge/evaluation.py": "942996df422bb274bf98358b740adc58d6c21c656fea92e2e972e1b7843c407c",
+    "edge/tracking_evaluation.py": "4d3c9d5fe467a546a90977902c6b33d99494e58bcb6b3f9e88695b73d66ddce8",
+    "edge/evaluate_tracking.py": "3ad1d02abad20b7b399781b2eed0917ec079988c3a813b49b83666679aaeb3a3",
+    "tests/test_tracking_evaluation.py": "079da50bd8e1ad4ab258a86718dd755a8e8c20d6d3c5e58c460c05e72d0989f3",
+    "tests/tracking_evaluation_fixtures.py": "4b14be51b7e024b39af4f8bf2752dd67eb8c46b08c456852501a66ace397f1e0",
+    "edge/_vendor/trackeval/upstream.json": "bd27e8359b543983342ce4e67e295251a57f7e2b652ae2db98e0c2ce7b879dfc"
+  },
+  "qualification": {
+    "physical_camera_tracking_accuracy": "unqualified",
+    "identity_verification": "not-performed",
+    "multi_camera_capacity": "unqualified"
+  },
+  "review_decisions_modified": false,
+  "camera_or_model_opened": false
+}
