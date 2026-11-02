@@ -1,6 +1,6 @@
 import React from 'react';
 import { Brain, PaperPlaneTilt, X } from '@phosphor-icons/react';
-import { LIVE_DISPLAY_SCORE, liveBoxLabel, liveCounts, boxesFresh } from './live-ai.mjs';
+import { LIVE_DISPLAY_SCORE, liveBoxLabel, liveCounts, boxesFresh, liveBackendLabel } from './live-ai.mjs';
 
 // Boxes are drawn in the analyzed frame's own pixel space; "meet" matches the tile's object-fit: contain.
 export function LiveOverlay({ ai, now }) {
@@ -39,7 +39,7 @@ export function LiveTileAI({ ai, available, onStart, onStop, onSend, onDismiss, 
       {ai?.state === 'stopped' && ai.error && <span className="live-ai-note">{ai.error}</span>}
     </div>
     {ai?.state === 'live' && session && <p className="live-ai-meta">
-      {session.model} · {session.rules} · {session.analyzed} analyzed{session.skipped_still ? ` · ${session.skipped_still} still frames skipped` : ''}{ai.skippedBusy ? ` · ${ai.skippedBusy} dropped while busy` : ''}
+      {liveBackendLabel(session)} · {session.model} · {session.rules} · {session.analyzed} analyzed{session.skipped_still ? ` · ${session.skipped_still} still frames skipped` : ''}{ai.skippedBusy ? ` · ${ai.skippedBusy} dropped while busy` : ''}
       {Object.keys(session.tracks_by_label || {}).length > 0 && <> · tracks so far: {Object.entries(session.tracks_by_label).map(([l, n]) => `${n} ${l}`).join(', ')}</>}
     </p>}
     {ai?.observations?.length > 0 && <ul className="live-ai-observations" aria-label="Live AI observations">

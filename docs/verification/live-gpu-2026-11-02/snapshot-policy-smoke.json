@@ -1,0 +1,128 @@
+{
+  "schema": "intelligent-dvr.live-backend-smoke.v1",
+  "captured_at": "2026-11-02T16:26:25.815566+00:00",
+  "platform": "linux",
+  "machine": "x86_64",
+  "python": "3.12.3",
+  "cpu_logical": 32,
+  "opencv": "4.13.0",
+  "numpy": "2.5.4",
+  "model_sha256": "c5c2d13e59ae883e6af3b45daea64af4833a4951c92d116ec270d9ddbe998063",
+  "labels_sha256": "76ce1473f01bd271bab54429737358a97160629cf970c5ec8384c2777dd0bae9",
+  "input": {
+    "kind": "generated pixels, no cameras",
+    "seed": 20261102,
+    "width": 320,
+    "height": 240,
+    "frame_sha256": [
+      "702b05005405d2682fbf13ff4ef648e1d0ed06ce7a51c8b26161357710d32cf8",
+      "5b4ae2c49fba27d724ae1719f07a18d9fbf0f3ca4b21da3ef1602dee4627f777",
+      "3afe3bbda6d75b79df7aac7c75a3aa31236fd6e9423aa544caaf4198937874e9",
+      "c81c819ae4b8292427fba1acf5db263a5387c4db8fe373811ea09a194b55784b",
+      "8f744cbc482647aad8bc0d78dbf1cf4cc5323aaeed74bb8d4f319cf1f61e8724",
+      "a14a384bed7dbefec044de75dfa41e1eb148d47f938d80e71f80f897ad94a9ce",
+      "bd71a4449c5001fae95e51443497cb5242a706d72705f58b2dc8c83d0128258b",
+      "9fa250e37cf0954841ff9ae261e6722d9aa16a115ddec46e01fabbbf6790b751",
+      "a787db0c355c62e7b9e9947aa056676f3c8a834337d0d09e840e35ef198151ce",
+      "ec5f60a9dd8d37f0781f38aa2f81585ec3c6f0c5d1900ec464adc69769cd9d81",
+      "39c1412aa17143350daad50faabe2acaeee4e40630a9d69dd06d92f8cfafbed8",
+      "213780bc4ef1d8c8aaa6475365abbb2f228fc5734ec91c5ab4e0badc0a4859e2"
+    ]
+  },
+  "scope": "One bounded worker at a time on generated JPEGs. Inference includes forward and detection decode/NMS. No physical-camera, tracking-quality, sustained-load or capacity qualification.",
+  "source_sha256": {
+    "edge/live_analysis.py": "312592bc415221a761511335dc13fe7922b31186e6b8cae4315a9b8b6f4084e0",
+    "edge/live_worker.py": "75159d80248ab01c5f38206f8e8aafb1fe158e58cb25d1ab9f14b3d89d14e609",
+    "edge/live_backend.py": "6b4e6a87b9c72666c98281132c76c047a3e6ded5f4a3cf37fd0c54b34f67d0ac",
+    "edge/live_resources.py": "8b9ac7b4725f532deacbc6594cecf05f42ee8fbc27866aafebdcbabecfef24ea",
+    "edge/analysis_worker.py": "223e0c6ea46b8c964482f6c3378e2b1d07f42daf8b92e89de3a9fd683435694c",
+    "edge/live_benchmark.py": "b8be14388fee65d4fca3358841b36d2a7a85a0fd17a14977b7f947ee424bc654",
+    "edge/cpu_backend.py": "020203e3ca656788f6e0d274033de66dfcf59764989f262bae39b533336311ee",
+    "edge/inference.py": "7e95beb9e25dd67ac5d8d977ec6c466874371d12d112119a85a619124687b2f1",
+    "edge/model_profiles.py": "9a0cfffa5a0fbb7312de96d49c894106a92f5bbc3fec6fa9a5594c0bab06e6b2",
+    "edge/tracking.py": "0fecb3aa8519e18e875a4f147fa41424cc2105235cdc16290586f7e29049c48d"
+  },
+  "cpu": {
+    "status": "measured",
+    "runtime": {
+      "opencv": "4.13.0",
+      "backend": "OpenCV CPU",
+      "backend_id": "opencv-cpu",
+      "threads": 2,
+      "fallback": "none"
+    },
+    "acceleration": {
+      "requested": "opencv-cpu",
+      "code": "CPU_DEFAULT"
+    },
+    "load_ms": 261.2,
+    "error": null,
+    "inference": {
+      "samples": 12,
+      "median_ms": 166.195,
+      "p95_ms": 179.93,
+      "min_ms": 162.54,
+      "max_ms": 179.93
+    },
+    "worker_total": {
+      "samples": 12,
+      "median_ms": 167.585,
+      "p95_ms": 181.76,
+      "min_ms": 164.21,
+      "max_ms": 181.76
+    },
+    "parent_round_trip": {
+      "samples": 12,
+      "median_ms": 167.969,
+      "p95_ms": 182.159,
+      "min_ms": 164.484,
+      "max_ms": 182.159
+    },
+    "detections_per_frame": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  "cuda": {
+    "status": "unavailable",
+    "runtime": {
+      "opencv": "4.13.0",
+      "backend": "OpenCV CPU",
+      "backend_id": "opencv-cpu",
+      "threads": 2,
+      "fallback": "none"
+    },
+    "acceleration": {
+      "requested": "cuda-preferred",
+      "code": "CUDA_START_FAILED_CPU_FALLBACK",
+      "gpu_probe": "RUNTIME_UNAVAILABLE"
+    },
+    "load_ms": 255.7,
+    "error": null,
+    "cpu_fallback_frame": {
+      "state": "result",
+      "runtime": {
+        "opencv": "4.13.0",
+        "backend": "OpenCV CPU",
+        "backend_id": "opencv-cpu",
+        "threads": 2,
+        "fallback": "none"
+      },
+      "inference_ms": 176.11
+    }
+  },
+  "decoded_agreement": {
+    "status": "not_measured",
+    "reason": "Both actual backends must run; fallback is not GPU evidence."
+  }
+}

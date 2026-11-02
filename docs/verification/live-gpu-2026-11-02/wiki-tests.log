@@ -1,0 +1,12 @@
+test_every_top_level_guide_has_a_wiki_page (test_wiki_docs.WikiPublicationTests.test_every_top_level_guide_has_a_wiki_page) ... ok
+test_links_pin_code_but_keep_guides_and_media_inside_wiki (test_wiki_docs.WikiPublicationTests.test_links_pin_code_but_keep_guides_and_media_inside_wiki) ... ok
+test_only_project_wiki_clone_is_accepted (test_wiki_docs.WikiPublicationTests.test_only_project_wiki_clone_is_accepted) ... ok
+test_private_or_outside_media_never_enters_write_set (test_wiki_docs.WikiPublicationTests.test_private_or_outside_media_never_enters_write_set) ... ok
+test_source_ref_cannot_inject_a_link (test_wiki_docs.WikiPublicationTests.test_source_ref_cannot_inject_a_link) ... ok
+test_staging_preserves_unknown_pages_and_check_is_read_only (test_wiki_docs.WikiPublicationTests.test_staging_preserves_unknown_pages_and_check_is_read_only) ... ok
+test_symlink_or_traversal_refused_before_any_writes (test_wiki_docs.WikiPublicationTests.test_symlink_or_traversal_refused_before_any_writes) ... ok
+
+----------------------------------------------------------------------
+Ran 7 tests in 0.076s
+
+OK

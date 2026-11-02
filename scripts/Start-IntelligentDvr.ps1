@@ -4,6 +4,7 @@ param(
     [switch]$Install,
     [switch]$Check,
     [switch]$Analysis,
+    [ValidateSet('opencv-cpu', 'cuda-preferred')][string]$LiveBackend = 'opencv-cpu',
     [switch]$AllowRecordingImport,
     [switch]$AllowTraining,
     [switch]$AllowFaceEnrollment,
@@ -31,6 +32,7 @@ try {
     if ($Install) { $TaskArgs += '--install' }
     if ($Check) { $TaskArgs += '--check' }
     if ($Analysis) { $TaskArgs += '--analysis' }
+    if ($LiveBackend -ne 'opencv-cpu') { $TaskArgs += @('--live-backend', $LiveBackend) }
     if ($AllowRecordingImport) { $TaskArgs += '--allow-recording-import' }
     if ($AllowTraining) { $TaskArgs += '--allow-training' }
     if ($AllowFaceEnrollment) { $TaskArgs += '--allow-face-enrollment' }

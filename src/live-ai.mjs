@@ -7,6 +7,17 @@ export const LIVE_DISPLAY_SCORE = 0.4;
 export const LIVE_BOX_MAX_AGE_MS = 1500;
 export const LIVE_OBSERVATIONS = 20;
 
+export function liveBackendLabel(session) {
+  if (session?.runtime?.backend_id === 'onnxruntime-cuda') return 'GPU · CUDA';
+  const code = session?.acceleration?.code;
+  if (code === 'CUDA_START_FAILED_CPU_FALLBACK') return 'CPU · GPU could not start';
+  if (code === 'GPU_DISABLED_AFTER_FAILURE') return 'CPU · GPU disabled after failure';
+  if (code === 'GPU_SLOT_BUSY') return 'CPU · GPU worker in use';
+  if (code === 'PLATFORM_UNSUPPORTED') return 'CPU · GPU unavailable on this OS';
+  if (code === 'PROFILE_UNSUPPORTED') return 'CPU · this model has no GPU path';
+  return 'CPU · OpenCV';
+}
+
 const hex = (v, n) => typeof v === 'string' && new RegExp(`^[a-f0-9]{${n}}$`).test(v);
 
 export async function liveRequest(path, { token, body, jpeg, signal, fetcher = fetch } = {}) {

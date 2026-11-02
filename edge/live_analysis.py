@@ -23,15 +23,17 @@ import threading
 import time
 
 from .diagnostics import Diagnostics
-from .live_worker import FRAME_BYTES, HEADER, INPUT_PIXELS, KEYFRAME_SECONDS, SESSION_SECONDS, THREADS
+from .live_worker import FRAME_BYTES, HEADER, INPUT_PIXELS, KEYFRAME_SECONDS, SESSION_SECONDS, THREADS, MEMORY_BYTES
+from .live_backend import candidate, PREFERENCES, CAPABILITY_CODES
 from .rules import Rule, RuleEngine
 
 ROOT = Path(__file__).resolve().parents[1]
 LIMITS = {'active_sessions': 2, 'lease_seconds': 15, 'session_seconds': SESSION_SECONDS, 'start_seconds': 30,
           'frame_seconds': 6, 'frame_bytes': FRAME_BYTES, 'input_pixels': INPUT_PIXELS, 'max_fps': 5,
-          'threads': THREADS, 'keyframe_seconds': KEYFRAME_SECONDS, 'observations_kept': 50}
+          'threads': THREADS, 'keyframe_seconds': KEYFRAME_SECONDS, 'observations_kept': 50, 'gpu_sessions': 1}
 ACTIVE = ('starting', 'live')
 MESSAGES = {
+    'GPU_FAILED': 'The GPU stopped. This AI session ended; Start AI again to use CPU. Track numbers begin again in the new session.',
     'MODEL_LOAD_FAILED': 'The local AI model could not be loaded. Run Check, confirm the model file still matches its SHA-256, then start AI again.',
     'WORKER_FAILED': 'Local AI stopped unexpectedly. Start AI again; if this repeats, run Check and review the diagnostic log.',
     'WORKER_EXITED': 'Local AI stopped (worker exited, possibly at a CPU or memory limit). Start AI again when ready.',
@@ -63,7 +65,10 @@ def _read(path, expected, limit=64 * 1024):
 
 class Live:
     def __init__(self, catalog, *, process_factory=subprocess.Popen, clock=time.monotonic, diagnostics=None,
-                 lease_seconds=None, start_seconds=None, frame_seconds=None):
+                 lease_seconds=None, start_seconds=None, frame_seconds=None, backend='opencv-cpu'):
+        if backend not in PREFERENCES:
+            raise ValueError('Unknown live backend preference')
+        self.backend, self.gpu_failed = backend, False
         self.catalog, self.process_factory, self.clock = catalog, process_factory, clock
         self.log = (diagnostics or Diagnostics()).event
         self.lease = lease_seconds or LIMITS['lease_seconds']
@@ -86,7 +91,7 @@ class Live:
         with self.lock:
             active = sum(s['state'] in ACTIVE for s in self.sessions.values())
         return {'enabled': True, 'models': models, 'rules': rules, 'limits': LIMITS, 'active': active,
-                'backend': 'opencv-cpu'}
+                'backend': self.backend, 'gpu_disabled': self.gpu_failed}
 
     def start(self, body):
         if (not isinstance(body, dict) or set(body) != {'model', 'rules', 'camera'}
@@ -104,7 +109,13 @@ class Live:
             for key in [k for k, s in self.sessions.items() if s['state'] not in ACTIVE]:
                 del self.sessions[key]
             if sum(s['state'] in ACTIVE for s in self.sessions.values()) >= LIMITS['active_sessions']:
-                raise LiveError('CAPACITY', 'Two cameras already have live AI. Stop one first; each uses two CPU threads.', 409)
+                raise LiveError('CAPACITY', 'Two cameras already have live AI. Stop one first.', 409)
+            use_gpu, reason = candidate(self.backend, model['profile'])
+            if use_gpu and self.gpu_failed:
+                use_gpu, reason = False, 'GPU_DISABLED_AFTER_FAILURE'
+            if use_gpu and any(s['state'] in ACTIVE and s.get('worker_backend') == 'onnxruntime-cuda'
+                               for s in self.sessions.values()):
+                use_gpu, reason = False, 'GPU_SLOT_BUSY'
             identifier = secrets.token_hex(16)
             session = {'id': identifier, 'camera': body['camera'], 'model': model['name'], 'model_id': model['id'],
                        'model_sha256': model['sha256'], 'rules': rules['name'], 'rules_id': rules['id'],
@@ -112,23 +123,26 @@ class Live:
                        'frames': 0, 'analyzed': 0, 'skipped_still': 0, 'refused_busy': 0, 'frame_errors': 0,
                        'observations': [], 'observations_total': 0, 'runtime': None, 'load_ms': None,
                        'process': None, 'lines': queue.Queue(maxsize=4), 'busy': False, 'previous': 0.0,
-                       'tracks_seen': set()}
+                       'tracks_seen': set(), 'worker_backend': 'onnxruntime-cuda' if use_gpu else 'opencv-cpu',
+                       'acceleration': {'requested': self.backend, 'code': reason}, 'memory_guard': None}
             self.sessions[identifier] = session
         config = {'model': str(model['path']), 'model_sha256': model['sha256'], 'profile': model['profile'],
                   'labels': labels, 'rules': rule_list, 'camera': body['camera'], 'run_id': secrets.token_hex(16),
                   'motion_gate': True}
-        try:
-            process = self.spawner.submit(self.process_factory, [sys.executable, '-m', 'edge.live_worker'], cwd=ROOT,
-                stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
-                env={**os.environ, 'DVR_LIVE_PARENT_PID': str(os.getpid())}).result()
-            session['process'] = process
-            threading.Thread(target=self._reader, args=(session,), daemon=True).start()
-            process.stdin.write(json.dumps(config).encode() + b'\n'); process.stdin.flush()
-        except (OSError, ValueError):
-            with self.lock:
-                self._stop(session, 'failed', 'START_FAILED')
-                return self._public(session)
-        line = self._next(session, self.start_limit)
+        line = self._launch(session, config)
+        with self.lock:
+            if session['state'] == 'starting' and use_gpu and (line is None or line.get('type') != 'ready'):
+                # A fresh CPU process restores the original hard memory policy.
+                # No camera frame has been sent, so tracking has not begun.
+                self._kill(session)
+                self.gpu_failed = True
+                session['worker_backend'] = 'opencv-cpu'
+                session['acceleration']['code'] = 'CUDA_START_FAILED_CPU_FALLBACK'
+                session['acceleration']['gpu_probe'] = (line.get('gpu_probe') if line is not None
+                    and line.get('gpu_probe') in CAPABILITY_CODES else 'STARTUP_EXECUTION_FAILED')
+                session['lines'] = queue.Queue(maxsize=4)
+        if use_gpu and session['state'] == 'starting' and session['worker_backend'] == 'opencv-cpu':
+            line = self._launch(session, config)
         with self.lock:
             if session['state'] != 'starting':
                 return self._public(session)
@@ -138,12 +152,43 @@ class Live:
                 self._stop(session, 'failed', line.get('code') if line.get('code') in MESSAGES else 'WORKER_FAILED')
             else:
                 session.update(state='live', runtime=line.get('runtime'), load_ms=line.get('load_ms'), touched=self.clock())
+                if session['worker_backend'] == 'onnxruntime-cuda':
+                    session['acceleration']['code'] = 'CUDA_STARTUP_VERIFIED'
                 self.log('LIVE_START', session=identifier)
             return self._public(session)
 
-    def _reader(self, session):
+    def _launch(self, session, config):
+        with self.lock:
+            if session['state'] != 'starting':
+                return None
+            try:
+                process = self.spawner.submit(self.process_factory,
+                    [sys.executable, '-m', 'edge.live_worker', '--backend', session['worker_backend']], cwd=ROOT,
+                    stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
+                    env={**os.environ, 'DVR_LIVE_PARENT_PID': str(os.getpid())}).result()
+                session['process'] = process
+                if session['worker_backend'] == 'onnxruntime-cuda':
+                    from .live_resources import guard
+                    session['memory_guard'] = guard(process, MEMORY_BYTES)
+                threading.Thread(target=self._reader, args=(process, session['lines']), daemon=True).start()
+                process.stdin.write(json.dumps(config).encode() + b'\n'); process.stdin.flush()
+            except (OSError, ValueError, RuntimeError):
+                return {'type': 'error', 'code': 'START_FAILED'}
+        line = self._next(session, self.start_limit)
+        if line is not None and line.get('type') == 'ready':
+            runtime = line.get('runtime')
+            if not isinstance(runtime, dict) or runtime.get('backend_id') != session['worker_backend']:
+                return {'type': 'error', 'code': 'WORKER_FAILED'}
+            startup = runtime.get('startup_execution')
+            counts = startup.get('node_execution_counts') if isinstance(startup, dict) else None
+            if session['worker_backend'] == 'onnxruntime-cuda' and (
+                    not isinstance(counts, dict) or set(counts) != {'CUDAExecutionProvider'}
+                    or type(counts['CUDAExecutionProvider']) is not int or counts['CUDAExecutionProvider'] <= 0):
+                return {'type': 'error', 'code': 'WORKER_FAILED'}
+        return line
+
+    def _reader(self, process, lines):
         """Bounded line reader: at most one JSON result is ever outstanding per session."""
-        process = session['process']
         try:
             for raw in iter(lambda: process.stdout.readline(4 * 1024 * 1024), b''):
                 try:
@@ -151,11 +196,11 @@ class Live:
                 except ValueError:
                     value = {'type': 'error', 'code': 'WORKER_FAILED', 'fatal': True}
                 with contextlib.suppress(queue.Full):
-                    session['lines'].put_nowait(value if isinstance(value, dict) else {'type': 'error', 'code': 'WORKER_FAILED', 'fatal': True})
+                    lines.put_nowait(value if isinstance(value, dict) else {'type': 'error', 'code': 'WORKER_FAILED', 'fatal': True})
         except (OSError, ValueError):
             pass
         with contextlib.suppress(queue.Full):
-            session['lines'].put_nowait(None)  # End of output.
+            lines.put_nowait(None)  # End of output.
 
     def _next(self, session, timeout):
         try:
@@ -250,6 +295,7 @@ class Live:
         return {'id': s['id'], 'camera': s['camera'], 'state': s['state'], 'error': s['error'],
                 'model': s['model'], 'model_id': s['model_id'], 'model_sha256': s['model_sha256'],
                 'rules': s['rules'], 'rules_id': s['rules_id'], 'runtime': s['runtime'], 'load_ms': s['load_ms'],
+                'acceleration': dict(s['acceleration']),
                 'elapsed_seconds': round(max(0, self.clock() - s['began']), 1),
                 'frames': s['frames'], 'analyzed': s['analyzed'], 'skipped_still': s['skipped_still'],
                 'refused_busy': s['refused_busy'], 'frame_errors': s['frame_errors'],
@@ -257,6 +303,18 @@ class Live:
                 'limits': LIMITS}
 
     def _stop(self, s, state, code):
+        if code in ('GPU_FAILED', 'WORKER_FAILED', 'WORKER_EXITED', 'WORKER_TIMEOUT') and s.get('worker_backend') == 'onnxruntime-cuda':
+            self.gpu_failed = True
+        self._kill(s)
+        s['state'] = state
+        s['error'] = {'code': code, 'message': MESSAGES.get(code, 'Local AI stopped.')} if code else None
+        s['busy'] = False
+        self.log('LIVE_STOP', session=s['id'], code=code)
+
+    def _kill(self, s):
+        if s.get('memory_guard') is not None:
+            s['memory_guard'].set()
+            s['memory_guard'] = None
         process = s['process']
         if process is not None:
             # Never write to the worker here: its pipe may be full. Killing ends any
@@ -266,10 +324,6 @@ class Live:
             process.wait()
             threading.Thread(target=self._close_pipes, args=(process,), daemon=True).start()
             s['process'] = None
-        s['state'] = state
-        s['error'] = {'code': code, 'message': MESSAGES.get(code, 'Local AI stopped.')} if code else None
-        s['busy'] = False
-        self.log('LIVE_STOP', session=s['id'], code=code)
 
     @staticmethod
     def _close_pipes(process):

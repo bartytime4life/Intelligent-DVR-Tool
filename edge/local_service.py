@@ -29,6 +29,7 @@ from .model_profiles import validate_binding
 from .rules import Rule, RuleEngine
 from .local_feeds import Feeds, FeedError, load_sources, shared_config
 from .live_analysis import Live, LiveError, LIMITS as LIVE_LIMITS
+from .live_backend import PREFERENCES
 from .result_store import ResultStore, VIDEO_BYTES, REVIEW_BYTES as RESULT_BYTES, EXTENSIONS
 from .recording_import import import_recording, ImportError as RecordingImportError, MAX_IMPORT_BYTES, MIMES as IMPORT_MIMES
 from .enhancement import PROFILE as ENHANCEMENT_PROFILE, validate_trace as validate_enhancement
@@ -1094,10 +1095,14 @@ def main(argv=None):
     parser.add_argument('--feeds-config', type=Path, help='Trusted LAN RTSP channels; see edge/local-feeds.example.json')
     parser.add_argument('--recorder-config', type=Path, help='Opt-in one-camera segment recorder; never starts automatically')
     parser.add_argument('--port', type=int, default=4173)
+    parser.add_argument('--live-backend', choices=PREFERENCES, default='opencv-cpu',
+                        help='Explicit live CUDA preference; CPU is default and startup fallback. No camera starts automatically.')
     parser.add_argument('--open-browser', action='store_true', help='Open the local app after binding; never connects cameras')
     args = parser.parse_args(argv)
     if bool(args.recordings) != bool(args.config):
         parser.error('Use --recordings and --config together')
+    if args.live_backend != 'opencv-cpu' and not args.config:
+        parser.error('--live-backend requires analysis configuration')
     if args.state_dir and not args.config:
         parser.error('--state-dir requires recording analysis configuration')
     if args.allow_recording_import and not args.config:
@@ -1123,7 +1128,7 @@ def main(argv=None):
                         people_dir=args.config.absolute().parent / 'people' if args.allow_face_enrollment else None)
             diagnostics = jobs.diagnostics
             # Live AI reuses the reviewed catalog; it runs only after Start AI on a Monitor tile.
-            live = Live(jobs.catalog, diagnostics=diagnostics)
+            live = Live(jobs.catalog, diagnostics=diagnostics, backend=args.live_backend)
         if args.feeds_config:
             feeds = Feeds(load_sources(args.feeds_config.absolute()), diagnostics=diagnostics)
             if shared_config(args.feeds_config):

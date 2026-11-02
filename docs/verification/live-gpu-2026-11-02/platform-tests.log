@@ -1,0 +1,24 @@
+test_comparison_rejects_score_box_label_and_frame_count_differences (test_live_gpu.PipelineParityTest.test_comparison_rejects_score_box_label_and_frame_count_differences) ... ok
+test_mock_cuda_preserves_decoding_tracks_and_rule_observations (test_live_gpu.PipelineParityTest.test_mock_cuda_preserves_decoding_tracks_and_rule_observations) ... OpenCV: FFMPEG: tag 0x30385056/'VP80' is not supported with codec id 139 and format 'webm / WebM'
+ok
+test_a_cpu_ready_reply_can_never_be_reported_as_gpu_execution (test_live_gpu.RecoveryTest.test_a_cpu_ready_reply_can_never_be_reported_as_gpu_execution) ... ok
+test_bad_gpu_receipt_recovers_to_cpu_without_leaving_a_starting_session (test_live_gpu.RecoveryTest.test_bad_gpu_receipt_recovers_to_cpu_without_leaving_a_starting_session) ... ok
+test_cancel_during_gpu_load_never_starts_fallback (test_live_gpu.RecoveryTest.test_cancel_during_gpu_load_never_starts_fallback) ... ok
+test_gpu_runtime_failure_stops_and_next_explicit_start_uses_cpu (test_live_gpu.RecoveryTest.test_gpu_runtime_failure_stops_and_next_explicit_start_uses_cpu) ... ok
+test_gpu_timeout_falls_back_and_stale_gpu_lines_cannot_reach_cpu (test_live_gpu.RecoveryTest.test_gpu_timeout_falls_back_and_stale_gpu_lines_cannot_reach_cpu) ... ok
+test_one_gpu_slot_and_two_total_sessions (test_live_gpu.RecoveryTest.test_one_gpu_slot_and_two_total_sessions) ... ok
+test_startup_failure_kills_gpu_then_uses_fresh_cpu_without_frames (test_live_gpu.RecoveryTest.test_startup_failure_kills_gpu_then_uses_fresh_cpu_without_frames) ... ok
+test_gpu_policy_is_separate_from_cpu_limits_on_each_platform (test_live_gpu.ResourceTest.test_gpu_policy_is_separate_from_cpu_limits_on_each_platform) ... ok
+test_real_file_limit_allows_the_pinned_model_snapshot_and_stays_bounded (test_live_gpu.ResourceTest.test_real_file_limit_allows_the_pinned_model_snapshot_and_stays_bounded) ... ok
+test_resident_watchdog_kills_on_limit_or_read_failure (test_live_gpu.ResourceTest.test_resident_watchdog_kills_on_limit_or_read_failure) ... ok
+test_unavailable_monitor_refuses_gpu_before_configuration (test_live_gpu.ResourceTest.test_unavailable_monitor_refuses_gpu_before_configuration) ... ok
+test_bad_hash_and_profile_never_reach_runtime (test_live_gpu.SelectionTest.test_bad_hash_and_profile_never_reach_runtime) ... ok
+test_capability_is_only_a_preflight_never_hardware_proof (test_live_gpu.SelectionTest.test_capability_is_only_a_preflight_never_hardware_proof) ... ok
+test_cuda_uses_verified_snapshot_even_if_catalog_path_changes (test_live_gpu.SelectionTest.test_cuda_uses_verified_snapshot_even_if_catalog_path_changes) ... ok
+test_selection_is_deterministic_and_cpu_does_not_import_ort (test_live_gpu.SelectionTest.test_selection_is_deterministic_and_cpu_does_not_import_ort) ... ok
+test_snapshot_reuses_strict_cuda_execution_proof (test_live_gpu.SelectionTest.test_snapshot_reuses_strict_cuda_execution_proof) ... ok
+
+----------------------------------------------------------------------
+Ran 18 tests in 0.421s
+
+OK

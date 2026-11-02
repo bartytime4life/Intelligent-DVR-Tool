@@ -30,5 +30,6 @@
     "multi_camera_capacity": "unqualified"
   },
   "review_decisions_modified": false,
-  "camera_or_model_opened": false
+  "camera_or_model_opened": false,
+  "integrated_main_commit": "712ba5bdb13d39fc0a0070dc207b8e5f5116a340"
 }

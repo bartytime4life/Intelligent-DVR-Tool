@@ -2,6 +2,11 @@
 
 Base: merged PR #75, `041b22277de0077b42c154e3e69a70d1387b6b55`.
 
+Integration updated onto merged PR #76,
+`712ba5bdb13d39fc0a0070dc207b8e5f5116a340`; the focused suite was repeated
+after retaining its GPU code and current guide changes. The recording tracker
+and detection-evaluation implementations are unchanged by that integration.
+
 Scope: local CLI, tracking/detection contracts, reference metric arithmetic,
 synthetic tracker integration and documentation. No footage, camera, model or
 network was used by the evaluator. No existing review decisions were changed.

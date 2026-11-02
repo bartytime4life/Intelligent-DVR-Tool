@@ -39,7 +39,7 @@ def watch_parent_pipe():
     threading.Thread(target=watch, daemon=True).start()
 
 
-def constrain(memory_bytes=None, cpu_seconds=None):
+def constrain(memory_bytes=None, cpu_seconds=None, *, file_bytes=34 * 1024**2):
     # Applied before importing native inference libraries. CPU is deliberately the
     # first service backend; CUDA's virtual address space needs a separate policy.
     memory_bytes, cpu_seconds = memory_bytes or MEMORY_BYTES, cpu_seconds or CPU_SECONDS
@@ -47,7 +47,7 @@ def constrain(memory_bytes=None, cpu_seconds=None):
         import resource
         if sys.platform == 'linux':  # macOS refuses RLIMIT_AS/RLIMIT_DATA, so its worker has no memory cap.
             resource.setrlimit(resource.RLIMIT_AS, (memory_bytes, memory_bytes))
-        resource.setrlimit(resource.RLIMIT_FSIZE, (34 * 1024**2, 34 * 1024**2))
+        resource.setrlimit(resource.RLIMIT_FSIZE, (file_bytes, file_bytes))
         resource.setrlimit(resource.RLIMIT_CPU, (cpu_seconds, cpu_seconds + 1))
         resource.setrlimit(resource.RLIMIT_CORE, (0, 0))
         return None
