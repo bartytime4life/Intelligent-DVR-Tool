@@ -68,6 +68,21 @@ class FakeWorker:
     def wait(self, timeout=None): return self.returncode
 
 
+class StalledWorker(FakeWorker):
+    """Announces readiness, then stops reading: a frame write blocks until the process is killed."""
+    def __init__(self):
+        super().__init__([]); self.killed = threading.Event()
+
+    def write(self, data):
+        if self.config is None:
+            return super().write(data)
+        self.killed.wait()
+        raise BrokenPipeError()
+
+    def kill(self):
+        super().kill(); self.killed.set()
+
+
 def result(**extra):
     return {'type': 'result', 'seconds': 1, 'width': 640, 'height': 360, 'motion': .1, 'detector': 'ran',
             'detections': [{'label': 'person', 'score': .9, 'box': [.1, .1, .2, .5], 'track': 1}],
@@ -122,7 +137,7 @@ class LiveTest(unittest.TestCase):
         self.assertLess(worker.sent[0][0], worker.sent[1][0])  # Strictly increasing session time.
         stopped = live.stop(session['id'])
         self.assertEqual(stopped['state'], 'stopped')
-        self.assertEqual(worker.returncode, 0)
+        self.assertEqual(worker.returncode, -9)  # Stopped without writing to a possibly full pipe.
         with self.assertRaises(LiveError) as caught:
             live.frame(session['id'], JPEG)
         self.assertEqual(caught.exception.code, 'NOT_LIVE')
@@ -206,6 +221,31 @@ class LiveTest(unittest.TestCase):
         with self.assertRaises(LiveError) as caught:
             live.frame(b['id'], JPEG)
         self.assertEqual(caught.exception.code, 'WORKER_EXITED')
+
+    def test_a_worker_that_stops_reading_cannot_block_frames_or_stop(self):
+        worker = StalledWorker()
+        live = self.live([worker, StalledWorker()], frame_seconds=.3)
+        session = self.start(live)
+        began = time.monotonic()
+        with self.assertRaises(LiveError) as caught:
+            live.frame(session['id'], JPEG + b'0' * 200_000)
+        self.assertEqual(caught.exception.code, 'WORKER_TIMEOUT')
+        self.assertLess(time.monotonic() - began, 2)
+        self.assertTrue(worker.killed.is_set())
+        other = self.start(live, 'Other')
+        codes = []
+        def blocked():
+            try:
+                live.frame(other['id'], JPEG)
+            except LiveError as error:
+                codes.append(error.code)
+        thread = threading.Thread(target=blocked, daemon=True)
+        thread.start(); time.sleep(.1)
+        began = time.monotonic()
+        self.assertEqual(live.stop(other['id'])['state'], 'stopped')  # Stop does not wait on the blocked write.
+        self.assertLess(time.monotonic() - began, 1)
+        thread.join(2); self.assertFalse(thread.is_alive())
+        self.assertEqual(codes, ['NOT_LIVE'])
 
     def test_start_failures_and_load_timeouts_are_actionable(self):
         def broken(*a, **k): raise OSError('sensitive /path')

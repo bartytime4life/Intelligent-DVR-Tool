@@ -183,11 +183,24 @@ class Live:
                     if s['lines'].get_nowait() is None:
                         s['lines'].put_nowait(None); break
             process = s['process']
-        try:
-            process.stdin.write(HEADER.pack(seconds, len(data)) + data); process.stdin.flush()
-            line = self._next(s, self.frame_limit)
-        except (OSError, ValueError):
+        # The transfer shares the frame deadline: a worker that stops reading must
+        # not hold a request (or the session) in a blocked pipe write.
+        deadline = time.monotonic() + self.frame_limit
+        sent = {}
+        def send():
+            try:
+                process.stdin.write(HEADER.pack(seconds, len(data)) + data); process.stdin.flush()
+                sent['ok'] = True
+            except (OSError, ValueError):
+                sent['ok'] = False
+        writer = threading.Thread(target=send, daemon=True)
+        writer.start(); writer.join(self.frame_limit)
+        if writer.is_alive():
+            line = None  # Still blocked: _stop below kills the worker, which ends the write.
+        elif not sent['ok']:
             line = {'type': 'error', 'code': 'WORKER_EXITED', 'fatal': True}
+        else:
+            line = self._next(s, max(0, deadline - time.monotonic()))
         with self.lock:
             s['busy'] = False
             if s['state'] != 'live':
@@ -242,19 +255,24 @@ class Live:
     def _stop(self, s, state, code):
         process = s['process']
         if process is not None:
-            with contextlib.suppress(OSError, ValueError):
-                process.stdin.write(HEADER.pack(0.0, 0)); process.stdin.flush()
-            with contextlib.suppress(OSError, ValueError):
-                process.stdin.close()
-            try:
-                process.wait(timeout=1)
-            except subprocess.TimeoutExpired:
-                process.kill(); process.wait()
+            # Never write to the worker here: its pipe may be full. Killing ends any
+            # blocked frame transfer; the worker holds no state worth a graceful exit.
+            with contextlib.suppress(OSError):
+                process.kill()
+            process.wait()
+            threading.Thread(target=self._close_pipes, args=(process,), daemon=True).start()
             s['process'] = None
         s['state'] = state
         s['error'] = {'code': code, 'message': MESSAGES.get(code, 'Local AI stopped.')} if code else None
         s['busy'] = False
         self.log('LIVE_STOP', session=s['id'], code=code)
+
+    @staticmethod
+    def _close_pipes(process):
+        # A frame writer may still hold stdin until the kill reaches it; close off-lock.
+        for stream in (process.stdin, process.stdout):
+            with contextlib.suppress(OSError, ValueError, AttributeError):
+                stream.close()
 
     def _supervise(self):
         while not self.closed.wait(.5):

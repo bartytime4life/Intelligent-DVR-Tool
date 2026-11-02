@@ -70,9 +70,10 @@ export async function captureJpeg(element, { maxWidth = 960, quality = 0.8, docu
 // Drives one live session. capture() returns the current frame as a JPEG Blob (or
 // null while no picture is shown). onChange receives a fresh snapshot after every step.
 export function liveDetector({ token, model, rules, camera, capture, onChange, fetcher = fetch,
-  now = () => performance.now(), wall = () => Date.now(), wait = ms => new Promise(r => setTimeout(r, ms)), maxFps = 5 }) {
+  now = () => performance.now(), wall = () => Date.now(), wait = ms => new Promise(r => setTimeout(r, ms)), maxFps = 5, observations = [] }) {
   let running = false, controller = null;
-  const state = { state: 'idle', session: null, result: null, resultAt: 0, error: '', observations: [],
+  // A restarted detector keeps a previous run's unsent observations so they can still be sent.
+  const state = { state: 'idle', session: null, result: null, resultAt: 0, error: '', observations: observations.slice(0, LIVE_OBSERVATIONS),
     fps: 0, latencyMs: null, skippedBusy: 0, frameErrors: 0 };
   const emit = patch => { Object.assign(state, patch); onChange?.({ ...state, observations: [...state.observations] }); };
   async function loop() {
@@ -109,7 +110,7 @@ export function liveDetector({ token, model, rules, camera, capture, onChange, f
     async start() {
       if (running) return;
       running = true; controller = new AbortController();
-      emit({ state: 'starting', error: '', result: null, observations: [], fps: 0, latencyMs: null });
+      emit({ state: 'starting', error: '', result: null, fps: 0, latencyMs: null });
       try {
         const session = await liveRequest('/start', { token, body: { model, rules, camera }, signal: controller.signal, fetcher });
         if (!running) { void liveRequest(`/${session.id}/stop`, { token, body: {}, fetcher }).catch(() => {}); return; }

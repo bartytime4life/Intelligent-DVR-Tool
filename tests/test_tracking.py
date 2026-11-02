@@ -130,6 +130,20 @@ class TrackerTest(unittest.TestCase):
         self.assertLessEqual(len(tracker.tracks), MAX_ACTIVE)
         self.assertEqual(tracker.dropped, 30)
 
+    def test_numbered_tracks_never_exceed_the_summary_cap(self):
+        from unittest.mock import patch
+        from edge import tracking
+        with patch.object(tracking, 'MAX_SUMMARIES', 2):
+            tracker = Tracker()
+            boxes = [box(100, 100), box(500, 100), box(900, 100)]
+            self.assertEqual(tracker.update(0, boxes, W, H), [1, 2, None])
+            self.assertEqual(tracker.update(.2, boxes, W, H), [1, 2, None])  # Followed, never numbered.
+            tracker.update(.4, boxes + [box(300, 400)], W, H)
+            self.assertEqual(tracker.update(.6, boxes + [box(300, 400)], W, H)[3], None)
+            record = tracker.finish()
+        self.assertEqual([t['id'] for t in record['tracks']], [1, 2])
+        self.assertEqual(record['tracks_dropped'], 2)
+
     def test_class_summary(self):
         tracks = [{'label': 'person', 'duration_seconds': d} for d in (1, 5, 3)] + [{'label': 'car', 'duration_seconds': 2}]
         self.assertEqual(class_summary(tracks), {'car': {'tracks': 1, 'median_duration_seconds': 2, 'longest_duration_seconds': 2},

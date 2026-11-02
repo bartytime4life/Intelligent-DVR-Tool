@@ -53,8 +53,12 @@ export default function LiveMonitor({onZoneStill, queue, visibleTiles=4, onCount
     detectors.current.delete(id); detector.stop(message);
   }
   function startAi(tile) {
-    if (!aiReady || detectors.current.has(tile.id)) return;
+    const previous = detectors.current.get(tile.id);
+    if (!aiReady || ['starting','live'].includes(previous?.snapshot.state)) return;
+    // A failed or stopped detector is replaced; its unsent observations carry over.
+    detectors.current.delete(tile.id);
     const detector = liveDetector({token:aiInfo.token, model:aiInfo.live.models[0].id, rules:aiRule.id, camera:tile.name,
+      observations:(aiStates[tile.id]?.observations || []).filter(o => !o.sent),
       capture: () => captureJpeg(pictures.current.get(tile.id)),
       onChange: snapshot => { if (alive.current) setAiStates(states => ({...states, [tile.id]:snapshot})); }});
     detectors.current.set(tile.id, detector); void detector.start();

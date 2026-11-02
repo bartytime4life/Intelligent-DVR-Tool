@@ -33,8 +33,12 @@ labeled footage (see [measure it](#measure-before-relying-on-it)).
    track number; dashed grey boxes are detections not yet confirmed as a track.
 5. When a rule fires, an amber observation appears under the tile. **Send to
    Events** puts it in the review queue with the analyzed still frame. Nothing
-   reaches Events automatically. Observations stay sendable after **Stop AI**.
-6. Press **Stop AI**, disconnect the camera, leave Monitor or hide the page to stop.
+   reaches Events automatically. Observations stay sendable after **Stop AI**. If
+   this browser cannot store the still (private browsing, full storage), the
+   observation is not sent and stays on the tile so you can retry.
+6. If AI stops with an error (for example, the worker took too long), press
+   **Start AI** again on the same tile; unsent observations are kept.
+7. Press **Stop AI**, disconnect the camera, leave Monitor or hide the page to stop.
 
 The tile reports what the AI is doing: counts of what it currently sees, analyzed
 frames per second, the time this computer took for the last frame, still frames
@@ -49,6 +53,7 @@ skipped by the motion gate, frames dropped while busy, and tracks seen so far.
 | Frame size | JPEG up to 1 MiB and 1080p; the browser sends at most 960 px wide | Bounded decode and memory |
 | Session | 15 minutes, then press Start AI again | Explicit, time-bounded activity |
 | Lease | stops 15 s after the page stops sending frames | No orphaned work |
+| Frame deadline | 6 s for transfer and reply together; a worker that stops reading is stopped | No request or session can hang |
 | Worker | memory/CPU-time caps (memory cap on Linux/Windows; macOS refuses address-space limits) | Same isolation as recording jobs |
 | Boxes | hidden 1.5 s after their frame | Old boxes never sit over newer video |
 
@@ -98,7 +103,9 @@ noise weights:
    the very first frame are confirmed at once). Start candidates from unmatched
    boxes scoring ≥ 0.6. Drop tracks unseen for 2 seconds.
 
-Matching is class-aware: a person box never continues a car track. Each track
+Matching is class-aware: a person box never continues a car track. A run numbers at most
+2,000 tracks; later ones are still followed but unnumbered and counted as not
+retained, so every number in a result has a summary. Each track
 records when it was first and last seen, its scores, a path of up to 32 points,
 and its time inside each rule zone of its class (centre point inside the zone,
 counting gaps up to the rule's `max_gap`).

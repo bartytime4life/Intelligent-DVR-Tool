@@ -399,7 +399,12 @@ export function App() {
     } catch (err) { setToast(err.message); return false; }
   }
   async function addLiveObservation(event, still) {
-    if (still) await putImage("thumbnails", event.id, still);
+    // The still is a live observation's only image evidence: never queue it without one.
+    if (!still || !(await putImage("thumbnails", event.id, still))) {
+      setToast("This browser could not save the observation’s still, so it was not sent. Free browser storage or leave private browsing, then send it again.");
+      return false;
+    }
+    // On refusal (a full queue), the unreferenced still is pruned with the queue's stills.
     return addObservations([event], false);
   }
   function exportReviews() { download(reviewExport(eventsRef.current), "dvr-reviews.json"); }

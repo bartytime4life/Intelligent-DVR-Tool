@@ -131,3 +131,16 @@ test('recognition results carry validated short-lived tracks', () => {
   }
   assert.equal(validateTracking({ frames: [] }), null);
 });
+
+test('a restarted detector keeps the previous run’s unsent observations', async () => {
+  const kept = { observation, still: new Blob(['x']), capturedAt: 5 };
+  const snapshots = [];
+  const { fetcher } = service();
+  const detector = liveDetector({ token: 't', model: 'm', rules: 'r', camera: 'c', capture: async () => null, observations: [kept],
+    onChange: s => snapshots.push(s), fetcher, wait: async () => {} });
+  assert.deepEqual(detector.snapshot.observations, [kept]);
+  await detector.start();
+  assert.equal(snapshots[0].state, 'starting');
+  assert.deepEqual(snapshots.at(-1).observations, [kept]);
+  detector.stop();
+});

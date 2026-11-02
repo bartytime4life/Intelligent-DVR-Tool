@@ -286,6 +286,11 @@ class Tracker:
         return result
 
     def _confirm(self, track):
+        # Every numbered track keeps a summary. Past the cap a track is still followed
+        # (so it cannot spawn duplicates) but gets no number, and is counted as dropped.
+        if self.next_id > MAX_SUMMARIES:
+            self.dropped += 1
+            return
         track.id, self.next_id = self.next_id, self.next_id + 1
 
     def _hit(self, track, i, seconds, boxes, scores, width, height):
