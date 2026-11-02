@@ -20,7 +20,7 @@
     "edge/live_resources.py": "8b9ac7b4725f532deacbc6594cecf05f42ee8fbc27866aafebdcbabecfef24ea",
     "edge/live_benchmark.py": "b8be14388fee65d4fca3358841b36d2a7a85a0fd17a14977b7f947ee424bc654",
     "edge/requirements-live-cuda.txt": "61ad17d4d25600c997be4956a168ff0734eb68d057e972f32f4684fb16609ebb",
-    "tests/test_live_gpu.py": "21419a393289610786b3a9e963b1191d11764033220d6e6978db57f1eae94802",
+    "tests/test_live_gpu.py": "88a0059bbad196b011bdb58e3640a61505189d53416de895a8b1fec9e8620877",
     "docs/live-gpu.md": "0a6d5e62cc27b4b844b9c438e2d097ec406f4bc5eed2d4752ea47e815c40c3c8",
     "scripts/build-wiki.py": "8d2119a9b75c20852ea2263a0c9ffdf5b6890dcbf6f3aac03e4af2817bae22da",
     "docs/README.md": "49dd2b2b5156c5aa6922e2b929e680bc06f464e6f5dd999fbd001e5f8a541e1a",

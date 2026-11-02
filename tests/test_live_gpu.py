@@ -81,8 +81,14 @@ class RecoveryTest(unittest.TestCase):
         self.catalog['models']['model']['profile'] = YOLOX_PROFILE
         self.guard = patch('edge.live_resources.guard', return_value=threading.Event())
         self.guard.start()
+        # These are simulated supported-platform workers on every CI host.
+        # Production macOS selection remains explicitly CPU-only.
+        self.selection = patch('edge.live_analysis.candidate',
+            side_effect=lambda preference, profile: backend.candidate(preference, profile, 'linux'))
+        self.selection.start()
 
     def tearDown(self):
+        self.selection.stop()
         self.guard.stop()
         fixtures.LiveTest.tearDown(self)
 

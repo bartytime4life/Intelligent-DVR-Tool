@@ -97,3 +97,12 @@ worker policy, PC setup, service routes and person-enrollment workers. The
 current smoke receipt includes analysis_worker.py in its source hashes.
 The [initial smoke receipt](generated-smoke.json) remains historical to its
 recorded source hashes; use snapshot-policy-smoke.json for the latest policy.
+
+## Cross-platform simulated test fixture
+
+Mac CI exposed a host-OS assumption in the simulated GPU recovery tests: macOS
+correctly selects CPU, while those fixtures expected a supported Linux GPU
+worker. The fixture now explicitly simulates Linux selection on every CI host;
+separate selection tests continue to verify that production macOS stays CPU-only.
+[All 18 platform-independent contract tests](platform-tests.log) pass locally
+after the correction. This changes no production selection or inference code.
