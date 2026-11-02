@@ -43,6 +43,10 @@ authorized GPU hardware, then use labeled representative recordings for quality.
   backend/fallback labels and existing start/frame/error/review contracts.
 - Linux launcher shell syntax, Windows PowerShell launcher parsing on Linux,
   and LiveDetection JSX transformation passed.
+- The full GitHub Linux run caught the new guide's missing Wiki registration.
+  The canonical guide index, Wiki page mapping/sidebar and seven affected
+  generated mirrors were corrected. [Seven additional Wiki tests](wiki-tests.log), exact Wiki
+  regeneration checks and the documentation validator then passed locally.
 - Model hash/profile refusal, private verified snapshot loading, wrong runtime/
   provider/version, missing or invalid CUDA execution proof, GPU-slot limits,
   GPU startup timeout, late output isolation, mid-session GPU failure, explicit

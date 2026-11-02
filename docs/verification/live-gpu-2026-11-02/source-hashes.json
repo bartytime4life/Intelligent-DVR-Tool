@@ -21,6 +21,15 @@
     "edge/live_benchmark.py": "37d7b30e0f509a25b12954a2ff237deb7fe2caecb01ae2fb89d0e3a9450ce9ff",
     "edge/requirements-live-cuda.txt": "61ad17d4d25600c997be4956a168ff0734eb68d057e972f32f4684fb16609ebb",
     "tests/test_live_gpu.py": "1f87f89c2f1169a13cc4cc1987c5e1a3c3e78b6058485861bcfdfdde214cbec6",
-    "docs/live-gpu.md": "7a96c6d6826dbca36e4b2a331e3025153a7a0464ac3d756cc882a02fbea6ac32"
+    "docs/live-gpu.md": "7a96c6d6826dbca36e4b2a331e3025153a7a0464ac3d756cc882a02fbea6ac32",
+    "scripts/build-wiki.py": "8d2119a9b75c20852ea2263a0c9ffdf5b6890dcbf6f3aac03e4af2817bae22da",
+    "docs/README.md": "49dd2b2b5156c5aa6922e2b929e680bc06f464e6f5dd999fbd001e5f8a541e1a",
+    "docs/wiki/_Sidebar.md": "cdf2c7e3ef0fc7a0e185ea8ba9d0ef86b61d46b76eebad6de598235a041d593e",
+    "docs/wiki/Product-status.md": "8a8f6d5943f801f63c0d61ce962932348a3b170d66e447af84a897c1c3b291ed",
+    "docs/wiki/Guide-index.md": "e5c24f2c948ec060608a60c635354754c5ec137a8bcd057f0a135fbad637e23b",
+    "docs/wiki/PC-testing.md": "0b6239d5c1e9953a5f103ff3f80952524f7c26c24ecfa9432e8da28c3604ea63",
+    "docs/wiki/Live-AI-and-tracking.md": "9f1fb78318ce846f10e351190a0b2e50e6f0fdd7094819fddec62c67846d3890",
+    "docs/wiki/Live-GPU.md": "e0c525fcc985529ea4e969e2cf8fe95f1ab083647ce6a381a7a12ccf13bfc310",
+    "docs/wiki/GPU-planning.md": "604b6eaab078f4e3519354979c3abb13eff7950594faf0b956e79313380e870a"
   }
 }
