@@ -8,6 +8,7 @@ one is still being analyzed is refused, so there is no backlog and latency stays
 visible. Sessions end when the page stops sending frames (lease), after 15
 minutes, on Stop, or when the service stops. Nothing is recorded or uploaded.
 """
+from concurrent.futures import ThreadPoolExecutor
 import contextlib
 import hashlib
 import json
@@ -71,6 +72,9 @@ class Live:
         self.lock = threading.RLock()
         self.sessions = {}
         self.closed = threading.Event()
+        # Linux parent-death signals follow the spawning *thread*: start workers from one
+        # long-lived thread, never the short-lived HTTP request thread (as edge.local_feeds does).
+        self.spawner = ThreadPoolExecutor(1, thread_name_prefix='dvr-live-spawn')
         self.thread = threading.Thread(target=self._supervise, daemon=True)
         self.thread.start()
 
@@ -114,9 +118,9 @@ class Live:
                   'labels': labels, 'rules': rule_list, 'camera': body['camera'], 'run_id': secrets.token_hex(16),
                   'motion_gate': True}
         try:
-            process = self.process_factory([sys.executable, '-m', 'edge.live_worker'], cwd=ROOT,
+            process = self.spawner.submit(self.process_factory, [sys.executable, '-m', 'edge.live_worker'], cwd=ROOT,
                 stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
-                env={**os.environ, 'DVR_LIVE_PARENT_PID': str(os.getpid())})
+                env={**os.environ, 'DVR_LIVE_PARENT_PID': str(os.getpid())}).result()
             session['process'] = process
             threading.Thread(target=self._reader, args=(session,), daemon=True).start()
             process.stdin.write(json.dumps(config).encode() + b'\n'); process.stdin.flush()
@@ -295,3 +299,4 @@ class Live:
                 if s['state'] in ACTIVE:
                     with contextlib.suppress(Exception):
                         self._stop(s, 'stopped', None)
+        self.spawner.shutdown()

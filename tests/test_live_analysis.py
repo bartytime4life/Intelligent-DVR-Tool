@@ -333,6 +333,23 @@ class LiveWorkerTest(unittest.TestCase):
         self.assertEqual([r['detector'] for r in lines[1:]], ['ran', 'skipped-still', 'skipped-still', 'ran', 'skipped-still'])
         self.assertTrue(all(r['detections'] == [] for r in lines[1:]))
 
+    def test_worker_outlives_the_request_thread_that_started_it(self):
+        # On Linux a worker dies with the thread that spawned it; HTTP request threads are short-lived.
+        import cv2
+        import numpy as np
+        live = Live(load_catalog(self.root / 'config.json'))
+        try:
+            started = []
+            thread = threading.Thread(target=lambda: started.append(live.start({'model': 'synthetic', 'rules': 'presence', 'camera': 'Fixture'})))
+            thread.start(); thread.join(60)
+            self.assertEqual(started[0]['state'], 'live', started[0]['error'])
+            time.sleep(.5)  # Long enough for a parent-death signal to land.
+            jpeg = cv2.imencode('.jpg', np.full((240, 320, 3), 90, dtype=np.uint8))[1].tobytes()
+            reply = live.frame(started[0]['id'], jpeg)
+            self.assertEqual(reply['detections'][0]['track'], 1)
+        finally:
+            live.close()
+
     def test_changed_model_bytes_are_refused_before_any_frame(self):
         from edge import live_worker
         model = self.root / 'fixture.onnx'
