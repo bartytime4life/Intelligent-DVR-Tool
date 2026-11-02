@@ -1,3 +1,5 @@
+from contextlib import redirect_stderr, redirect_stdout
+from io import StringIO
 import hashlib
 import importlib.util
 import json
@@ -175,6 +177,62 @@ class PcSetupTest(unittest.TestCase):
             with self.assertRaises(SystemExit): pc.main(['--no-browser'])
             self.assertNotIn('--config',execute.call_args.args[1])
 
+    def test_train_launch_uses_prepared_files_and_explicit_permissions(self):
+        catalog = self.write('local-analysis/catalog.json', b'{}')
+        feeds = self.write('local-feeds.json', b'{"sources":[]}')
+        for platform in ('linux', 'win32'):
+            with self.subTest(platform=platform), patch.dict(os.environ, {}, clear=True), \
+                    patch.object(pc, 'ROOT', self.root), patch.object(pc, 'host_check'), \
+                    patch.object(pc.sys, 'platform', platform), patch.object(pc, 'verify_kit'), \
+                    patch.object(pc, 'built_interface'), patch.object(pc, 'validate_environment', return_value=Path('/python')), \
+                    patch('os.execv', side_effect=SystemExit(0)) as execute, patch('subprocess.call', return_value=0) as invoke:
+                options = ['--train', '--feeds-config', str(feeds), '--port', '4197']
+                if platform == 'linux':
+                    with self.assertRaises(SystemExit): pc.main(options)
+                    args = execute.call_args.args[1]
+                else:
+                    self.assertEqual(pc.main(options), 0)
+                    args = invoke.call_args.args[0]
+                self.assertEqual(args[args.index('--config')+1], str(catalog))
+                self.assertEqual(args[args.index('--recordings')+1], str(catalog.parent/'recordings'))
+                self.assertEqual(args[args.index('--start-page')+1], 'train')
+                self.assertEqual(args[args.index('--port')+1], '4197')
+                self.assertTrue({'--open-browser', '--allow-recording-import', '--allow-training'} <= set(args))
+                self.assertNotIn('--allow-face-enrollment', args)
+
+    def test_train_refuses_launch_conflicts_and_explains_missing_preparation(self):
+        for option in ('--check', '--install', '--native-probe'):
+            with self.subTest(option=option), redirect_stderr(StringIO()), self.assertRaises(SystemExit) as error:
+                pc.main(['--train', option])
+            self.assertEqual(error.exception.code, 2)
+        with patch.dict(os.environ, {}, clear=True), patch.object(pc, 'ROOT', self.root), \
+                patch.object(pc, 'host_check'), patch.object(pc, 'validate_environment') as launch:
+            for options, remedy in [(['--train'], '--prepare-analysis'), (['--train', '--facility'], 'Omit --facility')]:
+                diagnostic = StringIO()
+                with redirect_stderr(diagnostic):
+                    self.assertEqual(pc.main(options), 1)
+                self.assertIn(remedy, diagnostic.getvalue())
+            with patch.dict(os.environ, {'DVR_GEO_LOCAL': '1'}), redirect_stderr(StringIO()):
+                self.assertEqual(pc.main(['--train']), 1)
+            launch.assert_not_called()
+
+    def test_start_page_opens_only_fixed_local_train_fragment(self):
+        from edge import local_service
+        import threading
+        self.write('dist/client/index.html')
+        with patch.object(local_service, 'ROOT', self.root), patch.object(local_service, 'LocalServer') as factory, \
+                patch.object(local_service, 'load_sources'), patch.object(local_service, 'Feeds'), \
+                patch.object(local_service, 'shared_config', return_value=False):
+            server = factory.return_value.__enter__.return_value
+            server.origin = 'http://127.0.0.1:4197'
+            for extra, suffix in [([], '/'), (['--start-page', 'train'], '/#train')]:
+                opened = threading.Event()
+                with patch('webbrowser.open', side_effect=lambda url: opened.set()) as browser, redirect_stdout(StringIO()):
+                    local_service.main(['--feeds-config', str(self.root/'feeds.json'), '--open-browser', *extra])
+                    self.assertTrue(opened.wait(2))
+                browser.assert_called_once_with(server.origin + suffix)
+            with redirect_stderr(StringIO()), self.assertRaises(SystemExit):
+                local_service.main(['--start-page', 'https://example.invalid'])
     def test_live_gpu_preference_forwards_on_linux_and_windows_without_starting_ai(self):
         feeds = self.write('local-feeds.json', b'{"sources":[]}')
         for platform in ('linux', 'win32'):
@@ -301,6 +359,8 @@ class PcSetupTest(unittest.TestCase):
         with zipfile.ZipFile(self.root/'first.zip') as archive:
             names = archive.namelist()
             self.assertIn('Intelligent-DVR-PC/START-HERE.md', names)
+            self.assertIn('Intelligent-DVR-PC/Start-Training-Windows.cmd', names)
+            self.assertEqual(archive.getinfo('Intelligent-DVR-PC/Start-Training-Linux.sh').external_attr >> 16, 0o100755)
             self.assertFalse(any('private' in name or name.endswith('/local-feeds.json') for name in names))
         with self.assertRaises(FileExistsError): builder.build(self.root/'first.zip', 'b'*40, self.root)
 

@@ -35,17 +35,24 @@ def unchecked(source_hash, frames, termination):
             'anchor': 'none', 'validator_version': None}
 
 
-def verify(source, source_hash, observed_frames, progress=None):
+def verify(source, source_hash, observed_frames, progress=None, *, sampled_pts=None):
     """Check an alleged EOF using strict decode plus available inventory anchors.
 
     Decode at most observed_frames + 1 frames: an additional frame already proves
     the analyzer stopped early. A clean native EOF alone never certifies coverage.
     Native calls run within the service worker's existing time/memory limits.
+    Optionally supply a dict from sampled frame indices to None. Populate it
+    only after the whole stream has monotonic PTS, usable extent and a matching
+    source hash. No timestamp array is added to the coverage contract.
     """
     from .evaluation import local_file, digest
     source = local_file(source)
     if not 16 <= source.stat().st_size <= 512 * 1024**2 or type(observed_frames) is not int or not 1 <= observed_frames <= 100000:
         raise CoverageError('MEDIA_UNSUPPORTED')
+    if sampled_pts is not None and (not isinstance(sampled_pts, dict) or len(sampled_pts) > 10000
+            or any(type(i) is not int or not 0 <= i < observed_frames or v is not None for i, v in sampled_pts.items())):
+        raise ValueError('Invalid sampled timestamp request')
+    relative_pts = {}
     try:
         import av
     except ImportError:
@@ -98,6 +105,8 @@ def verify(source, source_hash, observed_frames, progress=None):
                                 timing_valid = False
                             if first is None:
                                 first = seconds
+                            if timing_valid and sampled_pts is not None and count - 1 in sampled_pts:
+                                relative_pts[count - 1] = seconds - first
                             previous = seconds
                             tick = max(tick, float(frame.time_base))
                             last_end = seconds + float(frame.duration * frame.time_base) if frame.duration > 0 else None
@@ -132,6 +141,8 @@ def verify(source, source_hash, observed_frames, progress=None):
             raise CoverageError('MEDIA_CORRUPT') from None
     if digest(source) != source_hash:
         raise CoverageError('MEDIA_INVENTORY_MISMATCH')
+    if sampled_pts is not None and timing_valid and decoded_duration is not None and math.isfinite(decoded_duration) and decoded_duration > 0:
+        sampled_pts.update(relative_pts)
     return result
 
 

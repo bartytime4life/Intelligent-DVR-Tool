@@ -1,0 +1,118 @@
+{
+  "schema": "intelligent-dvr.guided-training-runtime-smoke.v1",
+  "input": "Chromium generated test pattern, two independently captured WebM clips",
+  "qualification": "Runtime and prompt timing on generated pixels only. Scripted person and empty conditions have no independent labels in this run.",
+  "physical_camera_used": false,
+  "operator_confirmed_prompts": false,
+  "setting_saved": false,
+  "detector": "OpenCV Zoo YOLOX-S FP32",
+  "model_sha256": "c5c2d13e59ae883e6af3b45daea64af4833a4951c92d116ec270d9ddbe998063",
+  "runtime": {
+    "browser": "156.0.8078.47",
+    "python": "3.12.3",
+    "opencv": "4.13.0",
+    "numpy": "2.5.4",
+    "machine": "x86_64",
+    "backend": "OpenCV CPU",
+    "backend_id": "opencv-cpu",
+    "threads": 2,
+    "fallback": "none"
+  },
+  "production_training_asset": {
+    "file": "TrainingWorkspace-Tk2VI5aE.js",
+    "sha256": "76099740ccc9778f1c86eca64fa1d25d166f8518f412baa7d80e05dae61ee9f0"
+  },
+  "source_sha256": {
+    "src/TrainingAnalyze.jsx": "21ebec42a802f8266dd54fa73db335d3d00b2f94c897b2c3a6f183021b53130b",
+    "src/TrainingWorkspace.jsx": "f25a9dff24e5442a478e63cfb9972d89beb5e7eba86ea728ad3d1dffd210efc7",
+    "src/training-evidence.mjs": "b4dc186f2c13ca15af7d8d335c4918ec7e6f2bef498cf2d798a7ff28656f00d2",
+    "src/training-time.mjs": "4e5ae86780c498d61116d2eba8604984c479bb9aeba268dfa5d6929d37f7eeb5",
+    "src/training.mjs": "29fca608c47e3f233f0219313205514bfa0966d79eb456ba70e74b1497ed14e3",
+    "edge/analyze.py": "4263d01d3bfbab83cac8af052b1c0bbf7b1bca9001de81655345da565f005ca4",
+    "edge/media_coverage.py": "c8278e13a703a480998515452a831ff12a590020aa3e9f1804391e107cc354dc"
+  },
+  "calibration_summary_sha256": "e8b7df9ee89763b088fdd99b91544d6c4ed87ea5c83caa8011bd2f7af4062b1b",
+  "calibration_export": {
+    "prompt_alignment": "source-pts",
+    "threshold": 0.5,
+    "person_checks": 107,
+    "person_detections": 0,
+    "empty_checks": 29,
+    "empty_view_detections": 0,
+    "recommendation": "not-seen"
+  },
+  "fresh_check": {
+    "reached_operator_confirmation": true,
+    "compare_button_enabled": false,
+    "timing_gate": "source-pts required to reach confirmation",
+    "operator_confirmed": false
+  },
+  "clips": [
+    {
+      "source_sha256": "c50bde78911f9c80d429faad70d8125c7414fc2916951192beebda9509ce2d34",
+      "model_sha256": "c5c2d13e59ae883e6af3b45daea64af4833a4951c92d116ec270d9ddbe998063",
+      "profile": "opencv-zoo-yolox-s-2022nov",
+      "state": "partial",
+      "coverage": "unverified",
+      "termination": "source-end",
+      "decoded_frames": 810,
+      "sampled_frames": 162,
+      "frames_with_person_box": 0,
+      "source_timing": "pyav-relative-pts-v1",
+      "decoded_duration_seconds": 53.998999999999995,
+      "pts_first": 0,
+      "pts_last": 53.699,
+      "all_pts_monotonic": true,
+      "frames_with_person_at_baseline": 0,
+      "max_person_score": 0,
+      "all_detection_boxes": 112,
+      "classes": [
+        "kite",
+        "mouse",
+        "apple",
+        "sports ball",
+        "frisbee",
+        "orange"
+      ],
+      "stride": 5
+    },
+    {
+      "source_sha256": "c6c90548731e653b4032f682bca640c9b0cfd8f77c1a88c3fbfe31459755593e",
+      "model_sha256": "c5c2d13e59ae883e6af3b45daea64af4833a4951c92d116ec270d9ddbe998063",
+      "profile": "opencv-zoo-yolox-s-2022nov",
+      "state": "partial",
+      "coverage": "unverified",
+      "termination": "source-end",
+      "decoded_frames": 300,
+      "sampled_frames": 60,
+      "frames_with_person_box": 0,
+      "source_timing": "pyav-relative-pts-v1",
+      "decoded_duration_seconds": 19.999000000000002,
+      "pts_first": 0,
+      "pts_last": 19.699,
+      "all_pts_monotonic": true,
+      "frames_with_person_at_baseline": 0,
+      "max_person_score": 0,
+      "all_detection_boxes": 41,
+      "classes": [
+        "kite",
+        "mouse",
+        "apple",
+        "sports ball",
+        "frisbee",
+        "orange"
+      ],
+      "stride": 5
+    }
+  ],
+  "page_errors": [],
+  "capture_finished_utc": "2026-11-02T20:29:18.076849+00:00",
+  "labels_sha256": "76ce1473f01bd271bab54429737358a97160629cf970c5ec8384c2777dd0bae9",
+  "rules_sha256": "95a0ae62c5da5b52934c30cab2b625848383ad76cda8db80f73f5f8efe3e055a",
+  "maximum_duration_drift_seconds": 0.5,
+  "timing_qualification": "Source-relative sampled presentation timestamps were strictly increasing from zero. The calibration export verified source-pts and the fresh recording passed the same active-timer tolerance to reach confirmation. Both decoders reached source-end without independent container duration or frame-count inventories.",
+  "artifacts": {
+    "exported_calibration_json_sha256": "e8b7df9ee89763b088fdd99b91544d6c4ed87ea5c83caa8011bd2f7af4062b1b",
+    "fresh_confirmation_screenshot_sha256": "c57ac2da01a88f41eaa349883bcfada4d38f7fd2997654841ae0cd9142e31ddd"
+  }
+}

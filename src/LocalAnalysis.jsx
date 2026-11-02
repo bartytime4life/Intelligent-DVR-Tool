@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { activeJob, analysisRequest, localAnalysisOrigin, openJobResult, importRecording, refused } from './local-analysis.mjs';
 import { downloadBlob } from './clip-capture.mjs';
 import { loopbackAddress } from './live-feeds.mjs';
-import { readDefaultRules } from './training.mjs';
+import { DEFAULT_RULES_KEY, TRAINING_SELECTION_EVENT, readTrainingSelection, resolveTrainingSelection } from './training.mjs';
 
 export default function LocalAnalysis({ onResult, onBusy, clip, onClip, recorderBusy = false, currentRun = null }) {
   const [catalog, setCatalog] = useState(null), [job, setJob] = useState(null);
@@ -10,6 +10,8 @@ export default function LocalAnalysis({ onResult, onBusy, clip, onClip, recorder
   const [error, setError] = useState(''), [message, setMessage] = useState(''), [working, setWorking] = useState(false);
   const [connected, setConnected] = useState(false), [opening, setOpening] = useState(false);
   const [compareEnhancement, setCompareEnhancement] = useState(false);
+  const [selectionChanged, setSelectionChanged] = useState(false);
+  const explicitSelection = useRef(null), savedSelection = useRef(null);
   const token = useRef(''), version = useRef(0), opened = useRef(''), controller = useRef(null);
   // Results open automatically when nothing is loaded, or for a job started here while the same review stayed loaded.
   // They never silently replace a different review.
@@ -21,6 +23,22 @@ export default function LocalAnalysis({ onResult, onBusy, clip, onClip, recorder
   const local = localAnalysisOrigin(globalThis.location), loopback = loopbackAddress(globalThis.location);
   useEffect(() => { onBusy(Boolean(working || opening || activeJob(job))); }, [working, opening, job, onBusy]);
   useEffect(() => () => { version.current++; controller.current?.abort(); }, []);
+  useEffect(() => {
+    const changed = event => {
+      if (event.type === TRAINING_SELECTION_EVENT || event.key === DEFAULT_RULES_KEY) setSelectionChanged(true);
+    };
+    window.addEventListener(TRAINING_SELECTION_EVENT, changed);
+    window.addEventListener('storage', changed);
+    return () => {
+      window.removeEventListener(TRAINING_SELECTION_EVENT, changed);
+      window.removeEventListener('storage', changed);
+    };
+  }, []);
+  // Refresh a previously connected catalogue once an active operation finishes.
+  // The operator's explicit choices still take precedence on this page.
+  useEffect(() => {
+    if (selectionChanged && connected && !busy) void connect({ selectionOnly: true });
+  }, [selectionChanged, connected, busy]);
   // The session reports a recorder started elsewhere; a stop seen on this page clears that report.
   useEffect(() => { if (!recorderBusy) setCatalog(c => c?.recorder_active ? { ...c, recorder_active: false } : c); }, [recorderBusy]);
 
@@ -30,8 +48,9 @@ export default function LocalAnalysis({ onResult, onBusy, clip, onClip, recorder
     const response = await analysisRequest(path, { token: token.current, ...options, signal });
     return response.json();
   }
-  async function connect() {
+  async function connect(options = {}) {
     if (!local) return;
+    setSelectionChanged(false);
     const ticket = ++version.current;
     controller.current?.abort(); controller.current = new AbortController();
     setWorking(true); setConnected(false); setError(''); setMessage('Connecting to this computer…');
@@ -39,16 +58,29 @@ export default function LocalAnalysis({ onResult, onBusy, clip, onClip, recorder
       const value = await request('/session');
       if (!Array.isArray(value.recordings) || !Array.isArray(value.models) || !Array.isArray(value.rules) || !value.token) throw Error('This app has no local analysis service. Open the configured local application.');
       if (ticket !== version.current) return;
-      token.current = value.token; setCatalog(value); setConnected(true); setJob(value.job);
+      token.current = value.token; setCatalog(value); setConnected(true);
+      // An automatic choice refresh must never open the training job's video.
+      if (options.selectionOnly !== true) setJob(value.job);
       setRecording(previous => value.recordings.some(r => r.id === previous) ? previous : '');
-      setModel(previous => value.models.some(m => m.id === previous) ? previous : value.models[0]?.id || '');
-      // A rule set saved by guided training is preselected; an explicit choice on this page still wins.
-      const trained = (() => { try { return readDefaultRules(globalThis.localStorage); } catch { return ''; } })();
-      setRules(previous => value.rules.some(r => r.id === previous) ? previous
-        : value.rules.find(r => r.id === trained)?.id || value.rules[0]?.id || '');
+      try { savedSelection.current = readTrainingSelection(globalThis.localStorage); }
+      catch { savedSelection.current = null; }
+      const choice = resolveTrainingSelection(value, savedSelection.current, explicitSelection.current);
+      setModel(choice.modelId); setRules(choice.rulesId);
       setMessage(value.ready ? 'Choose a recording, model and rules. Analysis starts only when you press Analyze recording.' : 'Analysis or recording-validation dependencies are missing. Run the current installer or install the optional edge requirements, then reconnect.');
     } catch (err) { if (ticket === version.current) { setError(err.message); setMessage(''); } }
     finally { if (ticket === version.current) setWorking(false); }
+  }
+  function chooseModel(modelId) {
+    const saved = savedSelection.current;
+    const foreignSavedRule = saved?.modelId && saved.modelId !== modelId && saved.rulesId === rules;
+    const explicit = { modelId, rulesId: foreignSavedRule ? '' : rules };
+    const choice = resolveTrainingSelection(catalog, saved, explicit);
+    explicitSelection.current = choice;
+    setModel(choice.modelId); setRules(choice.rulesId);
+  }
+  function chooseRules(rulesId) {
+    explicitSelection.current = { modelId: model, rulesId };
+    setRules(rulesId);
   }
   async function start() {
     setWorking(true); setError(''); setMessage('Starting the selected recording…');
@@ -153,8 +185,8 @@ export default function LocalAnalysis({ onResult, onBusy, clip, onClip, recorder
       </div>
       <fieldset disabled={busy || !connected} className="local-analysis-fields">
         <label>Recording<select aria-label="Recording to analyze" value={recording} onChange={e => setRecording(e.target.value)}><option value="">Choose a recording…</option>{catalog.recordings.map(r => <option key={r.id} value={r.id}>{r.name} · {(r.bytes/1024**2).toFixed(1)} MiB</option>)}</select></label>
-        <label>Model<select aria-label="Analysis model" value={model} onChange={e => setModel(e.target.value)}>{catalog.models.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}</select></label>
-        <label>Rules<select aria-label="Analysis rules" value={rules} onChange={e => setRules(e.target.value)}>{catalog.rules.map(r => <option key={r.id} value={r.id}>{r.name}</option>)}</select></label>
+        <label>Model<select aria-label="Analysis model" value={model} onChange={e => chooseModel(e.target.value)}>{catalog.models.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}</select></label>
+        <label>Rules<select aria-label="Analysis rules" value={rules} onChange={e => chooseRules(e.target.value)}>{!rules && <option value="">Choose a compatible rule set</option>}{catalog.rules.map(r => <option key={r.id} value={r.id}>{r.name}</option>)}</select></label>
       </fieldset>
       {catalog.enhancement_comparisons?.includes('mild-unsharp-v1') && <div className="recording-import">
         <label><input type="checkbox" checked={compareEnhancement} disabled={busy || !connected} onChange={e => setCompareEnhancement(e.target.checked)} /> Compare mild sharpening (experimental)</label>

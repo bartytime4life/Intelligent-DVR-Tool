@@ -223,3 +223,10 @@ per-observation Send to Events with the analyzed still (mode live-model, no
 recording). Recording traces add the same tracks. Track numbers are continuity
 estimates, never identities; tracking quality (MOTA/IDF1/HOTA), physical cameras
 and capacity remain unqualified. See docs/live-detection.md for sources.
+
+Owner training priority (2026-11-02): make local training easy to complete and
+give operators plainly measurable results. In guided detection, compare the
+current and trial threshold on fresh, operator-confirmed footage before offering
+a saved improvement. Keep sample counts, recording timing and the selected
+detector explicit. Synthetic exercise results do not qualify physical cameras.
+See docs/training.md for the operator flow.

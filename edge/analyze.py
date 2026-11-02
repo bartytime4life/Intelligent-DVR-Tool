@@ -246,9 +246,11 @@ def main(argv=None, progress=None, local_capture=False):
     if not processed:
         raise Failure('NO_FRAMES', 'No frames were decoded; no receipt was written')
     report(phase='verifying', frames_read=frames, frames_analyzed=processed)
+    sampled_pts = dict.fromkeys(f['frame_index'] for f in trace_frames) if retain_frames else None
     coverage = unchecked(source_hash, frames, termination) if partial else verify_coverage(
         args.video, source_hash, frames,
-        progress=lambda count: report(phase='verifying', frames_read=frames, frames_analyzed=processed))
+        progress=lambda count: report(phase='verifying', frames_read=frames, frames_analyzed=processed),
+        sampled_pts=sampled_pts)
     partial = partial or coverage['status'] != 'inventory-matched'
     validate_coverage(coverage, source_hash, frames, 'partial' if partial else 'completed')
     # The CPU backend already verified the bytes it parsed against model_hash; later file
@@ -293,6 +295,12 @@ def main(argv=None, progress=None, local_capture=False):
                  'runtime':dict(runtime),
                  'timing_scope':receipt['timing']['scope'],'human_review_required':True}
         trace['media_coverage'] = coverage
+        if sampled_pts and all(value is not None for value in sampled_pts.values()):
+            # Existing rules, tracker and evaluator retain their index/FPS clock.
+            # Train can align a browser prompt to the independently decoded media clock.
+            trace['source_timing'] = 'pyav-relative-pts-v1'
+            for frame in trace_frames:
+                frame['source_seconds'] = sampled_pts[frame['frame_index']]
         trace['tracking'] = tracking
         if enhancement:
             trace['enhancement_comparison'] = enhancement

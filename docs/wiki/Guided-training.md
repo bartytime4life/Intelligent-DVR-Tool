@@ -1,81 +1,74 @@
 # Guided training
 
-[Guide index](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Guide-index) · [Visual handbook](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-handbook) · [Screenshot atlas](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-atlas) · [Troubleshooting](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Troubleshooting)
-
-![Workflow diagram for training.](https://raw.githubusercontent.com/wiki/bartytime4life/Intelligent-DVR-Tool/docs/media/guide/training.svg)
-
-**Quick path:** Train → Start session → check camera → follow prompts → compare thresholds → apply a new rule or keep the current setting.
-
-**Train** turns detection tuning into one guided page. A session records about a
-minute from this computer's webcam while on-screen prompts tell the person what to
-do, analyzes the clip with the configured local CPU detector, compares what it saw
-with what the prompts asked for, and suggests a detection threshold. Applying it
-saves a new rule set that Recognition then selects by default. Video, results and
-the saved setting stay on this computer.
-
-Results describe this camera, room and session. They are not accuracy, camera or
-operational qualification.
+Use **Train → Start session** to check how often the detector spots a person in your camera’s view. You can try a different detection threshold, then compare the two settings on a second recording before choosing which to use in Recognition. A lower threshold accepts weaker detections. A higher threshold requires stronger evidence of a person.
 
 ## Start
 
-1. Start the local app with recording import and training enabled:
-   - macOS: double-click `Start-Mac.command` (see the
-     [Mac setup](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Mac-setup)).
-   - Linux: `bash scripts/run-linux.sh --analysis --allow-recording-import --allow-training`
-     with the recordings folder and catalog from the [analysis guide](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Local-analysis-service).
-   - Windows: `.\scripts\Start-IntelligentDvr.ps1 -Analysis -AllowRecordingImport -AllowTraining`
-     with the same folder and catalog.
-2. Open **Train**. When it says *This computer is ready*, press **Start session**.
+Use one webcam and one person who agrees to take part. Set the camera where it will be used and keep its position and lighting consistent across both recordings. The prepared local analysis setup includes a whole-frame person rule suitable for this session.
 
-Without `--allow-training` a session still runs and shows results, but **Use … from
-now on** stays disabled.
+Once the detector and recording inbox are prepared, open training from the installed folder. The Linux and Windows training launchers open **Train** with local analysis, recording import and rule saving enabled. You choose when to connect the webcam and start recording.
 
-## A session
-
-| Step | What happens |
+| Platform | Launch with training enabled |
 | --- | --- |
-| Camera check | Connect the webcam on this page (no microphone). A framing guide and a brightness check help before recording. |
-| Guided recording | 54 seconds of prompts with a countdown: stay in view (10 s), leave the view (12 s), walk across the far side (14 s), stand partly hidden (10 s), come back (8 s). If the window is hidden or covered, recording and the script pause and resume three seconds after it returns. |
-| Analysis | The clip is imported into the recordings folder and analyzed by the selected catalog model as an ordinary job. |
-| Results | Each prompt shows how many sampled moments found a person; the empty-room prompt shows false alarms. A slider compares the current and chosen thresholds, including how many observations the rule would emit. Stills of misses and false alarms come from the analyzed copy in this page only. |
-| Apply | Saves the chosen threshold as a new rule set and selects it by default in Recognition. **Keep current setting** records the session without changing anything. |
+| macOS | Double-click `Start-Mac.command` in the configured checkout. [Mac setup](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Mac-setup) |
+| Linux | Run `bash Start-Training-Linux.sh`. [Prepare recording recognition](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/PC-testing#prepare-recording-recognition) |
+| Windows | Double-click `Start-Training-Windows.cmd`. [Prepare recording recognition](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/PC-testing#prepare-recording-recognition) |
 
-## How results are computed
+For a custom catalog or port, pass those options to `bash scripts/run-linux.sh --train` or `.\scripts\Start-IntelligentDvr.ps1 -Train`. If the app reports missing setup, follow the preparation instructions above, then reopen Train.
 
-- A sampled frame belongs to the prompt shown when it was recorded. Its position
-  comes from its index among the decoded frames scaled to the recorded (unpaused)
-  length, because browser recordings declare unreliable frame rates.
-- The first two seconds after each prompt change are skipped while the person reacts.
-- **Found** counts frames in the in-view prompts where a `person` detection meets the
-  threshold. **False alarms** count frames in the empty-room prompt that do.
-- The recommendation keeps the empty room at zero false alarms and adds 0.20 of
-  headroom above the strongest empty-room score (minimum 0.40, range 0.30–0.90),
-  because lighting changes scores: a wall portrait scored 0.26 in the evening and
-  0.43 in daylight. If no threshold in range separates the person from something in
-  the empty room, the current setting is kept and a zone is suggested instead.
-- Observation counts use the analyzer's rule semantics: a run continues while
-  matches are at most `max_gap` seconds apart.
+## Make the first recording
+
+1. Select **Start session**. At **Camera check**, open **Detector and reference rule** if you want to choose the local detector and the rule used for the Current column. Select **Connect camera**, grant camera permission, and check the framing and lighting. The microphone stays off.
+2. Start the guided recording. The five prompts take **54 seconds**. Stay in view for 10 seconds, leave for 12, walk along the far side for 14, stand partly hidden for 10, then return for 8. If you want an audible cue while out of view, enable **Play prompt tones** before recording. One tone marks a prompt and two mark the finish. The tones play locally. Keep the training tab visible to follow the script. If the tab becomes hidden, capture pauses and gives you a countdown when you return.
+3. Let local analysis finish. Compare **Current** and **Trial**. For each threshold, the scorecard gives the number of person detections during the in-view prompts and the number of person flags during the empty-room prompt. Each count includes the number of frames checked.
+4. Open **Review the first recording** to inspect individual prompts and available stills. Under **Advanced sensitivity**, move the slider from 0.30 to 0.90 in steps of 0.05 to preview how another threshold would score on the same frames. You can choose **Keep current setting** and record the calibration in your history.
+
+The app tests suggested thresholds from **0.40 through 0.90** in steps of 0.05. It considers a change only when it still finds someone during the in-view prompts, improves one count and holds or improves the other. It gives the in-view and empty-room conditions equal weight when ranking those choices. Ties favor a setting close to a safety margin above the strongest empty-room score. The fresh recording tests whichever threshold you chose.
+
+## Check the setting on new footage
+
+Select **Check on a new recording** to fix the trial threshold before recording. With the same camera and view, walk through the frame for **10 seconds**, then leave the frame empty for **10 seconds**. The app scores the current and trial settings on the same new samples, using the same detector and rule configuration as the first recording.
+
+Confirm that the person was actually in view and the room was actually empty at the prompted times. If someone else walked into view or you missed a prompt, repeat the check. The prompt timings tell the app what you expected and your confirmation establishes the conditions for this comparison.
+
+Read the two rows together. More in-view finds are better. Fewer empty-room flags are better. Each sample is one frame, so two flagged frames can come from the same object.
+
+![Training scorecard on synthetic inputs. At thresholds 0.70 and 0.40 the test model reports 0 of 32 and 32 of 32 during the in-view prompt. Both settings flag 0 of 25 empty-prompt frames.](https://raw.githubusercontent.com/wiki/bartytime4life/Intelligent-DVR-Tool/docs/media/training-2026-11-02/scorecard.png)
+
+**Synthetic browser example.** A test model responds to changes in the brightness of generated pixels. On the same fresh recording, lowering the threshold from 0.70 to 0.40 changed its in-view count from 0/32 to 32/32. Both settings flagged 0/25 empty-prompt frames. This exercises the comparison, confirmation and save workflow. [Download the example JSON receipt](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/training-studio-2026-11-02/synthetic-comparison.json)
+
+A separate run exercised the pinned YOLOX-S detector and recording timestamps on generated video. Physical-camera accuracy needs independently labeled, representative recordings. [Pinned detector runtime record](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/training-studio-2026-11-02/pinned-detector-smoke.json) · [Offline evaluation](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Offline-evaluation)
+
+## Choose the result
+
+| Fresh check result | What to do |
+| --- | --- |
+| Trial improves one count and holds or improves the other | Choose **Use checked setting** if the difference helps your work. You can also keep the current setting. |
+| Both settings give the same counts, or the current setting does better | Choose **Keep current setting**. The comparison is still useful as a baseline. |
+| More finds come with more empty-room flags, or fewer flags come with fewer finds | Review the tradeoff. Try another calibration if the missed views or empty-room flags matter for this camera. |
+| Fewer than three scored samples in either condition | Repeat the check. Both conditions need at least three samples for a verdict. |
+
+Applying requires a confirmed improvement at a different threshold, reliable timing on both recordings, permission to save training rules, and a rule set containing a single whole-frame person rule. A set with one person rule plus other rules, or one person rule limited to a zone, can be measured as a whole-view comparison. To apply a threshold, start a new session with a single whole-frame person rule. If your active set has zero or multiple person rules, choose a set with one person threshold before training. A change to the trial threshold needs a new check.
 
 ## What is saved where
 
-| Item | Location |
+| Item | Where to find it |
 | --- | --- |
-| Session clip | The configured recordings folder, as an ordinary import (same limits) |
-| Trained rule set | `trained/trained-<hash>.rules.json` beside the analysis catalog, private permissions, never overwritten, at most 50 |
-| Default selection and session history | This browser's storage (last 50 sessions) |
+| First and check recordings | Imported into the configured local recordings folder. Keep or remove them under your local retention policy. |
+| Checked setting | When you apply, the local service saves a rule file under `trained/` beside its catalog. Existing rule files remain available. The service allows up to 50 saved training rule sets. |
+| Recognition selection | This browser remembers the checked detector and saved rule together for future recording analyses. New selections include fingerprints for the model, class labels and rule file, plus the inference profile. A changed component requires an explicit choice or a fresh check. Recognition respects a manual selection you have already made. If the rule saved but the browser could not remember the preference, select that detector and rule by name in Recognition. |
+| Session history | This browser keeps the latest 50 entries. Past sessions distinguish a first-recording result from a comparison confirmed on a second recording. |
+| Downloadable JSON receipt | Export the session’s counts, thresholds and fresh-check result, when available, as JSON. SHA-256 fingerprints identify the source recordings, detector, labels and rules. The file omits video, device IDs and names. |
 
-A trained rule set is a plain analyzer rules file, so the command-line analyzer can
-use it with `--rules`. Move older files out of `trained/` and restart the app to
-make room or retire them.
+Training adjusts the threshold used by a recognition rule. Only new recording analyses using the selected rule use its threshold. Previously reviewed observations retain their decisions. For a consenting individual’s face baseline, choose **Enroll a person** and follow its separate consent and deletion controls. [Person enrollment](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Person-enrollment)
 
-## Limits
+## How frames are counted
 
-One person, one camera and one room per session. The script does not prove what the
-person actually did; skipped transition frames reduce but do not remove mistakes.
-Training tunes a threshold on the pinned detector. It does not retrain the model,
-identify people or qualify detection for other cameras, rooms or lighting.
+The local decoder (PyAV) reads the presentation time of each sampled frame. Its decoded video duration must agree with the active recording clock within half a second. This check runs on both recordings and excludes paused time. If a complete calibration clip lacks reliable timing, you can still review estimated counts based on frame position. Record again before applying a setting. A partial clip or analysis that covered only the beginning of a recording cannot supply a training result.
 
-To set a baseline for a specific, consenting person, see [person enrollment](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Person-enrollment).
+The scorecard skips the first two seconds after a prompt change to give you time to respond. A frame counts as a find or flag when its strongest person score meets the threshold. Both settings are fixed before the fresh recording starts.
+
+For installation or service problems, see [local analysis setup](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Local-analysis-service) and [troubleshooting](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Troubleshooting).
 
 ---
 

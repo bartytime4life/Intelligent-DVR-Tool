@@ -59,7 +59,7 @@ Detection scores are model outputs. Track numbers follow one box across frames; 
 
 | Your goal | What to do | What the result means |
 | --- | --- | --- |
-| Reduce misses or false alarms for this camera | [Train → Start session](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Guided-training) | A threshold setting for this session; detector weights are not retrained |
+| Measure and tune person detection for this view | [Train → Start session](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Guided-training) | Compare two thresholds on a fresh recording. Keep the current setting or save a checked improvement for Recognition. |
 | Review a possible enrolled-person match | [Get consent, enroll, then explicitly check a local job](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Person-enrollment) | A local suggestion for human confirmation, not proof of identity |
 | Watch a specific image region | [Draw a zone on the correct still](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Zones) | A class-presence rule in that camera's image coordinates |
 | Plan a building and cameras | [Facility: shell → floors → rooms/openings → cameras](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Facility-planning) | Editable proposed geometry and estimated coverage |

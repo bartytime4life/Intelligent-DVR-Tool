@@ -304,6 +304,8 @@ Windows PowerShell:
 .\scripts\Start-IntelligentDvr.ps1 -Analysis -AllowRecordingImport
 ```
 
+After preparation, open **Train** in one step. Run `bash Start-Training-Linux.sh` on Linux or double-click `Start-Training-Windows.cmd` on Windows. Connect the webcam and start the session when ready. [Guided training](training.md)
+
 Use `--check --analysis` / `-Check -Analysis` to validate the prepared catalog.
 Explicit `--recordings` and `--config` / `-Recordings` and `-AnalysisConfig`
 continue to support custom configurations. Recovery remains opt-in on Linux;

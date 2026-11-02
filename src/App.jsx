@@ -1127,7 +1127,7 @@ export function App() {
         <strong>{liveCount ? `${liveCount} receiving` : 'No camera preview active'}</strong>
         {recorderStatus?.active && <><span className="footer-divider" /><strong className="footer-recording">LAN recording active{recorderStatus.name ? ` · ${recorderStatus.name}` : ''}</strong></>}
         <span className="footer-divider" />
-        <span>Record a webcam clip explicitly, then analyze it in Recognition. Live previews do not run AI.</span>
+        <span>Record a clip for Recognition, or choose Start AI on a connected Monitor tile.</span>
         <span className="footer-end">Edge-first. Human-reviewed.</span>
       </footer>
       <input
@@ -1298,7 +1298,7 @@ export function App() {
             duration rule. It is not a judgment about a person’s intent.
           </p>
           <p>
-            Recognition can analyze a selected local recording with a configured model and rules. Monitor can explicitly capture a short webcam clip. Live previews do not run AI or track people.
+            Recognition analyzes selected local recordings. In Monitor, choose Start AI on a connected tile for live detections and short-lived tracks, or record a short webcam clip for later review.
           </p>
           <div className="notice">
             <WarningCircle size={21} />

@@ -1,11 +1,11 @@
-"""Generated pixels and constant ONNX boxes: integration fixtures, never accuracy."""
+"""Generated pixels and ONNX integration fixtures. No physical-camera measurements."""
 import argparse
 import hashlib
 import json
 from pathlib import Path
 
 
-def build(root):
+def build(root, *, training_model=False):
     import cv2
     import numpy as np
     import onnx
@@ -24,6 +24,22 @@ def build(root):
         [helper.make_tensor_value_info('detections', TensorProto.FLOAT, [1, 5, 1])], initializers)
     model = helper.make_model(graph, opset_imports=[helper.make_opsetid('', 11)]); model.ir_version = 7
     onnx.save(model, str(root / 'fixture.onnx'))
+    models = [{'id': 'synthetic', 'name': 'Synthetic test model', 'path': 'fixture.onnx',
+               'labels': 'labels.json', 'profile': 'yolov8-raw-640',
+               'sha256': hashlib.sha256((root / 'fixture.onnx').read_bytes()).hexdigest()}]
+    if training_model:
+        # Same one-box graph, with confidence equal to mean RGB on the decoded
+        # image. Controlled gray levels in two real recordings exercise calibration.
+        weights = np.zeros((5, 3), dtype=np.float32)
+        weights[4, :] = 1 / 3
+        tensors = {tensor.name: tensor for tensor in model.graph.initializer}
+        tensors['weights'].CopyFrom(numpy_helper.from_array(weights, 'weights'))
+        tensors['bias'].CopyFrom(numpy_helper.from_array(np.array([320, 320, 160, 160, 0], dtype=np.float32), 'bias'))
+        model.graph.name = 'synthetic-light-response'
+        onnx.save(model, str(root / 'light-response.onnx'))
+        models.append({'id': 'synthetic-light', 'name': 'Synthetic light-response model', 'path': 'light-response.onnx',
+                       'labels': 'labels.json', 'profile': 'yolov8-raw-640',
+                       'sha256': hashlib.sha256((root / 'light-response.onnx').read_bytes()).hexdigest()})
     # VP8 is decodable by the browser as well as the CPU analyzer.
     writer = cv2.VideoWriter(str(recordings / 'synthetic.webm'), cv2.VideoWriter_fourcc(*'VP80'), 10, (320, 240))
     if not writer.isOpened():
@@ -37,9 +53,7 @@ def build(root):
     (recordings / 'invalid.mp4').write_text('not a video')
     (root / 'labels.json').write_text('["person"]')
     (root / 'rules.json').write_text('[{"name":"whole frame","label":"person","rect":[0,0,1,1],"dwell":1}]')
-    (root / 'config.json').write_text(json.dumps({'models': [{'id': 'synthetic', 'name': 'Synthetic test model',
-        'path': 'fixture.onnx', 'labels': 'labels.json', 'profile': 'yolov8-raw-640',
-        'sha256': hashlib.sha256((root / 'fixture.onnx').read_bytes()).hexdigest()}],
+    (root / 'config.json').write_text(json.dumps({'models': models,
         'rules': [{'id': 'presence', 'name': 'Person presence', 'path': 'rules.json'}]}))
     return root
 
@@ -47,4 +61,6 @@ def build(root):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--output', type=Path, required=True)
-    build(parser.parse_args().output)
+    parser.add_argument('--training-model', action='store_true', help='Include the input-dependent light-response fixture')
+    args = parser.parse_args()
+    build(args.output, training_model=args.training_model)

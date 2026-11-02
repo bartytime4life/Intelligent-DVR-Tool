@@ -15,6 +15,7 @@ FIXED = (
     'edge/candidates/opencv-zoo-yolox-s-2022nov.json',
     'scripts/run-linux.sh', 'scripts/Start-IntelligentDvr.ps1',
     'Install-Windows.cmd', 'Check-Windows.cmd', 'Start-Windows.cmd',
+    'Start-Training-Linux.sh', 'Start-Training-Windows.cmd',
 )
 
 
