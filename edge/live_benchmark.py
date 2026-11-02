@@ -77,7 +77,7 @@ def measure(model, count=12):
                         'frame_sha256': [hashlib.sha256(f).hexdigest() for f in frames]},
               'scope': 'One bounded worker at a time on generated JPEGs. Inference includes forward and detection decode/NMS. No physical-camera, tracking-quality, sustained-load or capacity qualification.',
               'source_sha256': {p: hashlib.sha256((ROOT / p).read_bytes()).hexdigest() for p in
-                  ('edge/live_analysis.py', 'edge/live_worker.py', 'edge/live_backend.py', 'edge/live_resources.py',
+                  ('edge/live_analysis.py', 'edge/live_worker.py', 'edge/live_backend.py', 'edge/live_resources.py', 'edge/analysis_worker.py',
                    'edge/live_benchmark.py', 'edge/cpu_backend.py', 'edge/inference.py', 'edge/model_profiles.py', 'edge/tracking.py')}}
     replies = {}
     with tempfile.TemporaryDirectory(prefix='dvr-live-benchmark-') as directory:

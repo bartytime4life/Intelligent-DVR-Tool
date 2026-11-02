@@ -184,7 +184,7 @@ class ResourceTest(unittest.TestCase):
         with patch('edge.analysis_worker.constrain', return_value='handle') as cap:
             with patch.object(resources.sys, 'platform', 'linux'):
                 self.assertEqual(resources.constrain_gpu(3 * 1024**3, 1920), 'handle')
-                cap.assert_called_with(resources.GPU_VIRTUAL_BYTES, 1920)
+                cap.assert_called_with(resources.GPU_VIRTUAL_BYTES, 1920, file_bytes=resources.GPU_FILE_BYTES)
             with patch.object(resources.sys, 'platform', 'win32'):
                 resources.constrain_gpu(3 * 1024**3, 1920)
                 cap.assert_called_with(3 * 1024**3, 1920)
@@ -215,6 +215,46 @@ class ResourceTest(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             resources.guard(process, 100, platform='linux', reader=lambda pid: 101)
         self.assertEqual(killed, [True])
+
+    @unittest.skipUnless(__import__('sys').platform == 'linux', 'Native Linux resource limits')
+    def test_real_file_limit_allows_the_pinned_model_snapshot_and_stays_bounded(self):
+        import subprocess
+        import sys
+        # No weights or CUDA required: same byte count as the catalog artifact.
+        # The child applies the real OS policy before writing either file and
+        # reaches the stub runtime through the production verified-snapshot path.
+        code = """
+import hashlib,json,resource,tempfile
+from pathlib import Path
+from types import SimpleNamespace
+from unittest.mock import patch
+from edge.live_resources import constrain_gpu,GPU_FILE_BYTES
+from edge.live_backend import create_cuda
+from edge.model_profiles import YOLOX_PROFILE
+size=json.loads(Path('edge/candidates/'+YOLOX_PROFILE+'.json').read_text())['model_bytes']
+constrain_gpu(3*1024**3,30)
+assert resource.getrlimit(resource.RLIMIT_FSIZE)==(GPU_FILE_BYTES,GPU_FILE_BYTES)
+with tempfile.TemporaryDirectory() as directory:
+    model=Path(directory)/'fixture.onnx'
+    model.write_bytes(b'0'*size)
+    def load(name,snapshot,*args):
+        assert snapshot.stat().st_size==size
+        return SimpleNamespace(runtime={})
+    with patch('edge.model_profiles.validate_binding'), patch('edge.live_backend.capability',return_value={'available':True}), patch('edge.live_backend.qualified_backend',side_effect=load):
+        create_cuda(model,hashlib.sha256(model.read_bytes()).hexdigest(),YOLOX_PROFILE,None,2)
+    try:
+        with (Path(directory)/'overflow').open('wb') as f:
+            f.truncate(GPU_FILE_BYTES+1)
+    except OSError:
+        pass
+    else:
+        raise AssertionError('File quota not enforced')
+print('snapshot-size-and-hard-file-limit-passed')
+"""
+        result = subprocess.run([sys.executable, '-c', code], capture_output=True, text=True, timeout=15,
+                                cwd=Path(__file__).resolve().parents[1])
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn('snapshot-size-and-hard-file-limit-passed', result.stdout)
 
 
 @unittest.skipUnless(fixtures.NATIVE, 'Native fixture requirements needed')

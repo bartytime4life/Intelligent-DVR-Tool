@@ -17,11 +17,11 @@
     "docs/gpu-planning.md": "4bf46917a3c34e37502c62862400ea81e0759755a043d8bbbf2616503bfe8bd5",
     "docs/pc-testing.md": "41fc7759f3f4c616c7f53d9fdee9ab65bc8eb9a47c24ec9d9041cbb2471ccf2d",
     "edge/live_backend.py": "6b4e6a87b9c72666c98281132c76c047a3e6ded5f4a3cf37fd0c54b34f67d0ac",
-    "edge/live_resources.py": "6a1c8b3351cada785dbb5a2064e47b4c7722582b1c20abca4009a0667cf1806c",
-    "edge/live_benchmark.py": "37d7b30e0f509a25b12954a2ff237deb7fe2caecb01ae2fb89d0e3a9450ce9ff",
+    "edge/live_resources.py": "8b9ac7b4725f532deacbc6594cecf05f42ee8fbc27866aafebdcbabecfef24ea",
+    "edge/live_benchmark.py": "b8be14388fee65d4fca3358841b36d2a7a85a0fd17a14977b7f947ee424bc654",
     "edge/requirements-live-cuda.txt": "61ad17d4d25600c997be4956a168ff0734eb68d057e972f32f4684fb16609ebb",
-    "tests/test_live_gpu.py": "1f87f89c2f1169a13cc4cc1987c5e1a3c3e78b6058485861bcfdfdde214cbec6",
-    "docs/live-gpu.md": "7a96c6d6826dbca36e4b2a331e3025153a7a0464ac3d756cc882a02fbea6ac32",
+    "tests/test_live_gpu.py": "21419a393289610786b3a9e963b1191d11764033220d6e6978db57f1eae94802",
+    "docs/live-gpu.md": "0a6d5e62cc27b4b844b9c438e2d097ec406f4bc5eed2d4752ea47e815c40c3c8",
     "scripts/build-wiki.py": "8d2119a9b75c20852ea2263a0c9ffdf5b6890dcbf6f3aac03e4af2817bae22da",
     "docs/README.md": "49dd2b2b5156c5aa6922e2b929e680bc06f464e6f5dd999fbd001e5f8a541e1a",
     "docs/wiki/_Sidebar.md": "cdf2c7e3ef0fc7a0e185ea8ba9d0ef86b61d46b76eebad6de598235a041d593e",
@@ -29,7 +29,8 @@
     "docs/wiki/Guide-index.md": "e5c24f2c948ec060608a60c635354754c5ec137a8bcd057f0a135fbad637e23b",
     "docs/wiki/PC-testing.md": "0b6239d5c1e9953a5f103ff3f80952524f7c26c24ecfa9432e8da28c3604ea63",
     "docs/wiki/Live-AI-and-tracking.md": "9f1fb78318ce846f10e351190a0b2e50e6f0fdd7094819fddec62c67846d3890",
-    "docs/wiki/Live-GPU.md": "e0c525fcc985529ea4e969e2cf8fe95f1ab083647ce6a381a7a12ccf13bfc310",
-    "docs/wiki/GPU-planning.md": "604b6eaab078f4e3519354979c3abb13eff7950594faf0b956e79313380e870a"
+    "docs/wiki/Live-GPU.md": "b6b278b43ab35e51b8811d473dc890ce0b16a01e69bfd7bd7e5d484dc9bd1097",
+    "docs/wiki/GPU-planning.md": "604b6eaab078f4e3519354979c3abb13eff7950594faf0b956e79313380e870a",
+    "edge/analysis_worker.py": "223e0c6ea46b8c964482f6c3378e2b1d07f42daf8b92e89de3a9fd683435694c"
   }
 }

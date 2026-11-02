@@ -12,6 +12,7 @@ import sys
 import threading
 
 GPU_VIRTUAL_BYTES = 128 * 1024**4
+GPU_FILE_BYTES = 40 * 1024**2  # Private pinned YOLOX-S snapshot is 35,858,002 bytes.
 RSS_POLL_SECONDS = .05
 
 
@@ -19,7 +20,11 @@ def constrain_gpu(memory_bytes, cpu_seconds):
     from .analysis_worker import constrain
     if sys.platform not in ('linux', 'win32'):
         raise RuntimeError('Live CUDA policy supports Linux and Windows only')
-    return constrain(GPU_VIRTUAL_BYTES if sys.platform == 'linux' else memory_bytes, cpu_seconds)
+    if sys.platform == 'linux':
+        # Choose the bounded file limit before constrain sets the hard limit;
+        # it cannot be raised afterwards. CPU workers retain their 34 MiB cap.
+        return constrain(GPU_VIRTUAL_BYTES, cpu_seconds, file_bytes=GPU_FILE_BYTES)
+    return constrain(memory_bytes, cpu_seconds)
 
 
 def resident_bytes(pid):

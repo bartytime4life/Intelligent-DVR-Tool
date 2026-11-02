@@ -2,7 +2,7 @@
 
 Base: [PR #75, `041b22277de0077b42c154e3e69a70d1387b6b55`](https://github.com/bartytime4life/Intelligent-DVR-Tool/commit/041b22277de0077b42c154e3e69a70d1387b6b55).
 Candidate sources are bound by [source hashes](source-hashes.json); the
-[generated-input receipt](generated-smoke.json) separately binds all executed
+[current generated-input receipt](snapshot-policy-smoke.json) separately binds all executed
 backend, worker, profile and tracker sources.
 
 ## Actual local measurements
@@ -15,11 +15,11 @@ was accessed.
 
 | Actual run | Result |
 | --- | --- |
-| CPU forward plus detection decode/NMS | Median 169.275 ms; p95 179.39 ms; 12 frames |
-| Complete worker processing | Median 171.15 ms; p95 185.6 ms |
-| Parent pipe round trip | Median 171.506 ms; p95 186.013 ms |
+| CPU forward plus detection decode/NMS | Median 166.195 ms; p95 179.93 ms; 12 frames |
+| Complete worker processing | Median 167.585 ms; p95 181.76 ms |
+| Parent pipe round trip | Median 167.969 ms; p95 182.159 ms |
 | CUDA attempt | Unavailable: `RUNTIME_UNAVAILABLE`; fresh CPU fallback started |
-| One frame after real CPU fallback | Successful result; 166.17 ms inference/decode |
+| One frame after real CPU fallback | Successful result; 176.11 ms inference/decode |
 | CPU versus actual GPU agreement/speed | Not measured; no GPU execution occurred |
 
 ONNX Runtime was absent from the available native environment. The installed
@@ -79,3 +79,21 @@ Linux GPU memory enforcement intentionally differs from CPU isolation: a finite
 overshoot. Windows retains the existing hard 3 GiB Job Object committed-memory
 cap. The 1 GiB CUDA arena option is not a total device-memory quota. See the full
 [resource contract](../../live-gpu.md#resource-policy-and-limits) before enabling.
+
+## Review follow-up: model snapshot file quota
+
+The review identified that the reused Linux 34 MiB per-file hard limit was smaller
+than the supported 35,858,002-byte YOLOX-S snapshot. GPU workers now select a
+bounded 40 MiB hard limit before lowering it; ordinary CPU/recording workers
+retain 34 MiB. A native Linux child regression writes the catalog artifact's
+exact byte count, reaches the production verified-snapshot loader using a stub
+runtime, and confirms that a file above 40 MiB still fails. This is a real OS/file
+quota check, not CUDA execution.
+
+[All 18 GPU-contract tests](snapshot-tests.log) passed. A fresh
+[112-case compatibility run](snapshot-compatibility.log) passed 105 and skipped
+seven socket-dependent cases, covering live workers, the common recording
+worker policy, PC setup, service routes and person-enrollment workers. The
+current smoke receipt includes analysis_worker.py in its source hashes.
+The [initial smoke receipt](generated-smoke.json) remains historical to its
+recorded source hashes; use snapshot-policy-smoke.json for the latest policy.

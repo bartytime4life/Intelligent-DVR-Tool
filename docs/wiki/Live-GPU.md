@@ -118,6 +118,12 @@ CPU workers retain the existing Linux 3 GiB hard address-space limit and Windows
 Job Object committed-memory cap. GPU workers keep the two-thread, file/core,
 CPU-time, frame-size and parent deadline/session bounds.
 
+The Linux GPU per-file write limit is 40 MiB so the verified 35,858,002-byte model
+snapshot fits. CPU workers retain their existing 34 MiB limit. A native Linux
+subprocess regression writes the catalog artifact's exact byte count under the
+real GPU policy, reaches the snapshot loader, and verifies that larger files
+still fail. The runtime in this regression is a stub, not CUDA execution.
+
 CUDA needs a large virtual address range. On Linux its worker instead has a
 finite 128 TiB address-space ceiling and a **parent-owned 50 ms RSS watchdog at
 3 GiB**; inability to read the child's memory kills it. This is sampled enforcement,
