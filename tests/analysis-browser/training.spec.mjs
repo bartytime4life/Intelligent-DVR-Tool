@@ -67,6 +67,7 @@ test('the real synthetic CPU workflow pauses recording, checks a fresh take, and
   await setVisibility(page, 'visible');
   await expect(prompt.locator('.take-phase')).toContainText('Get ready to resume');
   await expect(firstResult(page)).toBeVisible({timeout: 115000});
+  await page.getByRole('checkbox', {name: /Add this session to the combined evidence/}).check();
   await expect(apply(page)).toHaveCount(0);
   await page.screenshot({path: testInfo.outputPath('calibration-scorecard.png'), fullPage: true});
   await recordFreshCheck(page);
@@ -98,6 +99,21 @@ test('the real synthetic CPU workflow pauses recording, checks a fresh take, and
   await expect(page.locator('.training-history li')).toHaveCount(1);
   expect(writes).toEqual([]);
   expect(await page.evaluate(() => localStorage.getItem('dvr.analysis.defaultRules'))).toBeNull();
+  await expect(page.getByRole('region', {name: 'Combined training evidence'})).toContainText('1 of 50 sessions saved');
+  await startCalibration(page);
+  await expect(firstResult(page)).toBeVisible({timeout: 115000});
+  await expect(page.getByRole('region', {name: 'Combined session results'})).toContainText('1 earlier matching session');
+  await page.getByRole('checkbox', {name: /Add this session to the combined evidence/}).check();
+  await expect(page.getByRole('region', {name: 'Combined session results'})).toContainText('2 calibration sessions inform the suggestion');
+  await page.getByRole('button', {name: 'Keep current setting'}).click();
+  await page.getByRole('button', {name: 'Back to Train'}).click();
+  await page.reload();
+  await expect(page.getByRole('region', {name: 'Combined training evidence'})).toContainText('2 of 50 sessions saved');
+  await expect(page.locator('.training-history li')).toHaveCount(2);
+  const library = await page.evaluate(() => JSON.parse(localStorage.getItem('dvr.training.library.v1')));
+  expect(library.sessions).toHaveLength(2);
+  expect(new Set(library.sessions.map(s => s.calibration.sourceHash)).size).toBe(2);
+  await page.screenshot({path: testInfo.outputPath('two-saved-sessions.png'), fullPage: true});
 });
 
 test('recorded synthetic pixels improve on an independent check and explicitly select the tested model and rule', async ({page}, testInfo) => {
@@ -149,6 +165,7 @@ test('recorded synthetic pixels improve on an independent check and explicitly s
   const writes = ruleWrites(page);
   await startCalibration(page, 'synthetic-light');
   await expect(firstResult(page)).toBeVisible({timeout: 115000});
+  await page.getByRole('checkbox', {name: /Add this session to the combined evidence/}).check();
   await expect(apply(page)).toHaveCount(0);
   await recordFreshCheck(page);
   await expect(page.getByRole('heading', {name: 'Better on the fresh check'})).toBeVisible();

@@ -9,6 +9,7 @@ import { build } from 'esbuild';
 import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { evaluate } from '../src/training.mjs';
+import { trainingSessionEvidence } from '../src/training-library.mjs';
 
 // Exercise the actual component under the same JSX compiler used by Vite.
 // Externalizing React by absolute path shares the server renderer's hook state.
@@ -69,4 +70,18 @@ test('missing empty prompts are disclosed separately from zero person flags', ()
   const html = render({ outcome: { ...outcome, labeled: labeled.filter(f => f.expect === 'present') } });
   assert.match(html, /No samples/);
   assert.match(html, /No comparison available/);
+});
+
+test('an improved fresh result cannot override regression on an earlier session', () => {
+  const previous = trainingSessionEvidence('Door', {
+    ...outcome, sourceHash: '1'.repeat(64), modelHash: '2'.repeat(64), labelHash: '3'.repeat(64),
+    profile: 'yolov8-raw-640', cameraKey: '', timing: { verified: true }, rule: { dwell: 0, max_gap: 2 },
+    labeled: [...[.8, .8, .8].map(score => ({ expect: 'present', score })),
+      ...[.45, .45, .45].map(score => ({ expect: 'absent', score }))],
+  });
+  const html = render({ check, pastSessions: [previous], viewName: 'Door' });
+  assert.match(html, /adds empty-room flags/);
+  assert.doesNotMatch(html, /Use checked setting/);
+  assert.match(html, /Keep current setting/);
+  assert.doesNotMatch(render({ check, libraryError: 'Could not read saved evidence' }), /Use checked setting/);
 });
