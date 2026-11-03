@@ -5,6 +5,7 @@ import json
 import os
 from pathlib import Path
 import shutil
+import sqlite3
 import tempfile
 import unittest
 from types import SimpleNamespace
@@ -309,6 +310,59 @@ class LibraryTest(unittest.TestCase):
         self.library.configure({**self.settings, 'recursive': False})
         self.start(); self.settle()
         self.assertFalse(self.library.status()['scan_limited'])
+
+    def test_unavailable_cached_backup_handle_is_reopened_at_the_same_path(self):
+        self.recording(); self.start(); self.settle(); self.library.stop()
+        original=self.library.db; check=self.library._check_roots; row=self.first()
+        # Inject a stale mounted-volume identity without renaming open SQLite
+        # files, which Windows correctly prevents even in a test directory.
+        def reattached(**kwargs):
+            if self.library.db is original:raise LibraryError('FOLDER_CHANGED','Volume reattached')
+            return check(**kwargs)
+        with patch.object(self.library,'_check_roots',reattached):
+            self.assertIsNotNone(self.library.status()['error'])
+            self.assertIsNone(self.library.configure(self.settings)['error'])
+        self.assertIsNot(self.library.db,original)
+        self.start(); self.settle()
+        self.assertEqual(len(self.library.status()['items']),1)
+        self.assertEqual(self.first()['sha256'],row['sha256'])
+
+    def test_index_read_error_still_exposes_paused_setup_for_recovery(self):
+        from unittest.mock import Mock
+        original=self.library.db
+        self.library.db=Mock(); self.library.db.execute.side_effect=sqlite3.OperationalError('offline volume')
+        try:
+            status=self.library.status()
+            self.assertEqual(status['state'],'paused')
+            self.assertIsNotNone(status['error'])
+            self.assertEqual(status['items'],[])
+        finally:self.library.db=original
+
+    def descriptor_clock(self, *, changes=False):
+        real_fstat=os.fstat
+        calls={}
+        def fstat(fd):
+            info=real_fstat(fd); calls[fd]=calls.get(fd,0)+1
+            fields={key:getattr(info,key) for key in ('st_mode','st_dev','st_ino','st_size','st_mtime_ns','st_ctime_ns')}
+            fields['st_ctime_ns']+=1000000000+(1 if changes and calls[fd]>=3 else 0)
+            return SimpleNamespace(**fields)
+        return fstat
+
+    def test_windows_distinct_path_and_descriptor_ctimes_allow_verified_copy(self):
+        self.recording(); self.start(); self.library.scan(); self.now+=31
+        with patch('edge.backup_library.sys.platform','win32'), patch('edge.backup_library.os.fstat',self.descriptor_clock()):
+            self.library.scan()
+        self.assertEqual(self.first()['state'],'saved')
+        self.assertIsNone(self.library.status()['error'])
+
+    def test_windows_descriptor_metadata_change_during_copy_is_still_refused(self):
+        source=self.recording(); before=source.read_bytes()
+        self.start(); self.library.scan(); self.now+=31
+        with patch('edge.backup_library.sys.platform','win32'), patch('edge.backup_library.os.fstat',self.descriptor_clock(changes=True)):
+            self.library.scan()
+        self.assertEqual(self.library.status()['items'],[])
+        self.assertIn('changed during copying',self.library.status()['error'])
+        self.assertEqual(source.read_bytes(),before)
 
 
 if __name__ == '__main__': unittest.main()

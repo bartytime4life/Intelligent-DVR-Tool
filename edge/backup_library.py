@@ -14,6 +14,7 @@ import secrets
 import shutil
 import sqlite3
 import stat
+import sys
 import threading
 import tempfile
 import time
@@ -233,6 +234,14 @@ class BackupLibrary:
             if self.active or self.analysis or self.scanning:
                 raise LibraryError('BUSY', 'Stop backup and wait for analysis to finish before changing folders.', 409)
             if self.db is not None and self.config and self.config['backup_folder'] == config['backup_folder']:
+                try:
+                    self._check_roots(include_source=False)
+                    self.db.execute('SELECT 1').fetchone()
+                except (OSError, LibraryError, sqlite3.Error):
+                    # A reattached/replaced volume at the same path needs fresh
+                    # identities and a new database handle, not the old lease.
+                    self._close_store()
+            if self.db is not None and self.config and self.config['backup_folder'] == config['backup_folder']:
                 self.config = config
                 self.source_identity = ordinary_directory(Path(config['source_folder'])) if Path(config['source_folder']).exists() else None
                 self.seen.clear()
@@ -303,15 +312,17 @@ class BackupLibrary:
 
     def status(self):
         with self.lock:
-            rows, size, free, count = [], 0, None, 0
+            rows, size, free, count, duplicates = [], 0, None, 0, 0
             if self.config and self.db is not None:
                 try:
+                    self._check_roots(include_source=False)
                     size = self._usage()
                     free = self.disk_usage(self.backup).free
-                except (OSError, LibraryError):
+                    rows = [dict(r) for r in self.db.execute('SELECT * FROM items ORDER BY copied_at DESC, id DESC LIMIT 100')]
+                    count = self.db.execute('SELECT COUNT(*) FROM items').fetchone()[0]
+                    duplicates = max(0, self.db.execute('SELECT COUNT(*) FROM sources').fetchone()[0] - count)
+                except (OSError, LibraryError, sqlite3.Error):
                     self.error = 'Backup storage is unavailable or contains unexpected entries. Inspect the selected folder.'
-                rows = [dict(r) for r in self.db.execute('SELECT * FROM items ORDER BY copied_at DESC, id DESC LIMIT 100')]
-                count = self.db.execute('SELECT COUNT(*) FROM items').fetchone()[0]
             for row in rows:
                 row['analysis_eligible'] = row['extension'] in EXTENSIONS and row['bytes'] <= VIDEO_BYTES
                 row.pop('review_sha256', None)
@@ -324,7 +335,7 @@ class BackupLibrary:
                     'waiting': self.waiting, 'scan_limited': self.scan_limited,
                     'unsupported': [{'extension': k, 'count': v} for k, v in sorted(self.unsupported.items())],
                     'limits': {'analysis_max_bytes': VIDEO_BYTES, 'max_items': MAX_ITEMS, 'max_file_bytes': MAX_FILE_BYTES},
-                    'counters': {'copied': count, 'duplicates': max(0, self.db.execute('SELECT COUNT(*) FROM sources').fetchone()[0] - count) if self.db else 0}}
+                    'counters': {'copied': count, 'duplicates': duplicates}}
 
     def _candidates(self):
         source = Path(self.config['source_folder'])
@@ -397,7 +408,12 @@ class BackupLibrary:
             sha, count = hashlib.sha256(), 0
             with open_regular(source) as incoming, part.open('xb') as output:
                 os.chmod(part, 0o600)
-                if signature(os.fstat(incoming.fileno())) != before:
+                descriptor_before = signature(os.fstat(incoming.fileno()))
+                # CPython on Windows reports creation time for path ctime but
+                # change time for descriptor ctime. Compare their common fields;
+                # retain the full independent before/after checks for both APIs.
+                if (descriptor_before[:4] != before[:4] or
+                        (sys.platform != 'win32' and descriptor_before != before)):
                     raise LibraryError('SOURCE_CHANGED', 'The OEM recording changed before copying. Waiting for it to settle again.')
                 while block := incoming.read(1024 * 1024):
                     if not self.active or self.closed.is_set():
@@ -413,7 +429,7 @@ class BackupLibrary:
                     with self.lock: self.copying['copied_bytes'] = count
                 output.flush()
                 os.fsync(output.fileno())
-                if count != before[2] or signature(os.fstat(incoming.fileno())) != before or signature(source.lstat()) != before:
+                if count != before[2] or signature(os.fstat(incoming.fileno())) != descriptor_before or signature(source.lstat()) != before:
                     raise LibraryError('SOURCE_CHANGED', 'The OEM recording changed during copying. Waiting before copying again.')
             self._source_safe(source)
             source_hash = sha.hexdigest()
