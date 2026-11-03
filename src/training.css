@@ -110,3 +110,20 @@
 .training-catalog p { color: #a8bcc9; }
 .training-catalog label { display: inline-grid; gap: 5px; max-width: 100%; margin: 0 12px 6px 0; color: #cad7df; font-size: 13px; }
 .training-catalog select { max-width: 100%; padding: 8px; border: 1px solid #3d5662; color: #e7edf4; background: #101d27; }
+
+.training-coach { margin-block: 16px; }
+.training-coach .train-kicker { color: #84e8d8; letter-spacing: .12em; font-size: 11px; margin: 0 0 6px; }
+.training-coach .training-actions label { display: grid; gap: 4px; min-width: 0; font-size: 12px; color: #c4d6df; }
+.training-coach select { max-width: 100%; padding: 8px; border: 1px solid #37535e; border-radius: 6px; background: #112431; color: #e7edf4; }
+.training-coach [role="status"]:not(:empty) { margin-top: 14px; line-height: 1.5; }
+.training-coach-answer { border-left: 2px solid #58dccd; padding-left: 12px; overflow-wrap: anywhere; }
+.training-coach-answer p { white-space: pre-wrap; }
+.training-coach-answer small { color: #b4c1cb; }
+.training-assistant summary { cursor: pointer; font-weight: 600; }
+.training-assistant input[type=file] { max-width: 100%; }
+.training-assistant .train-receipt { margin-top: 12px; }
+.training-assistant .train-receipt dl { margin-top: 14px; }
+@media (max-width: 600px) {
+  .training-coach .training-actions { align-items: stretch; }
+  .training-coach :is(select, button) { max-width: 100%; overflow-wrap: anywhere; }
+}
