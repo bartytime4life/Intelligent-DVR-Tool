@@ -1,3 +1,4 @@
+import TrainingAssistant from './TrainingAssistant.jsx';
 import React from 'react';
 import { Aperture, ArrowClockwise, ArrowRight, CheckCircle, CircleNotch, ClockCounterClockwise, LockSimple, SlidersHorizontal, UserFocus, WarningCircle } from '@phosphor-icons/react';
 import { CHECK_SCRIPT, TRAINING_SCRIPT, percent, scriptSeconds } from './training.mjs';
@@ -122,6 +123,7 @@ export default function TrainingHome({ service, history, inUse, onStart, onEnrol
         <p>With the person’s agreement, capture face views for possible-match suggestions. Review each suggestion in Recognition.</p></div>
       <button className="button" disabled={!ready} onClick={onEnroll}>Enroll a person</button>
     </section>}
+    <TrainingAssistant />
     {children}
     <SessionHistory history={history} />
   </section>;
