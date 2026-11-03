@@ -32,10 +32,14 @@ Use **Current task** at the top or the seven detailed steps in the left rail. Pr
 
 1. Set the facility name and geographic origin. Coordinates are longitude then
    latitude; local geometry is meters east/north of that origin.
-   **Use my location** requests one browser position after a click. It fills a
-   suggestion, reports accuracy and requires Save site to commit. Denied,
-   unavailable and timed-out requests retain manual coordinate entry. Cancel
-   ignores late results. No location request starts on page load or continuously.
+   A new facility starts in central Kansas. **Use my location** asks the browser
+   for high accuracy for up to 20 seconds. A fresh reading with a reported
+   radius of 100 m or less previews a pin. Check it against the roof and choose
+   **Save site**. Coarse results leave the coordinates and pin alone. If the
+   device cannot provide a close fix, search the address, pick the roof on the
+   map, enter coordinates, or explicitly keep the entered coordinates. Editing
+   coordinates, choosing a different location, leaving the form or cancelling
+   stops the request. Device accuracy depends on the location provider.
    Submitted address/place search is another route: choose a provider, submit,
    select a suggestion, review coordinates and Save site. Nothing is sent while
    typing. Changing the origin relocates all existing local geometry geographically.
@@ -226,7 +230,7 @@ Do not put camera credentials or recordings in a facility JSON file.
 The default map uses only local geometry and a 20-meter grid. The **Map layer**
 switch on the map (available in every task) adds a real map under the plan so a
 site can be traced instead of drawn from memory; see [Real map layer](#real-map-layer).
-Nothing is requested until the user chooses Streets or Aerial (or **Find my site
+Nothing is requested until the user chooses Streets, Aerial or Satellite (or **Find my site
 on the map**), and the choice is then remembered in this browser only. There is
 no tile-prefetch, bulk-download or offline-download feature. See the
 [OSMF tile policy](https://operations.osmfoundation.org/policies/tiles/).
@@ -241,7 +245,7 @@ mocked up with little effort. The flow is:
 
 1. On a blank facility, **Find my site on the map** turns on Aerial (Streets
    outside the contiguous U.S.) and focuses the address search.
-2. Choosing an address, **Use my location** or **Pick site on map** moves the map
+2. Choosing an address, receiving a precise device fix or clicking a map pin moves the map
    to that place and shows a pin. Nothing is saved until **Save site**.
 3. After **Save site**, the "Next: outline your buildings" card offers:
    - **Find mapped buildings** — one click opens the OpenStreetMap draft panel and
@@ -267,6 +271,13 @@ timeout and the user can pick another service, open an offline extract or trace.
 | Grid (default) | None | Local 20 m grid only. |
 | Streets | `tile.openstreetmap.org` tiles for the area being viewed; ODbL data, OSMF tile policy | Worldwide. Building outlines appear only where volunteers have mapped them. Light interactive use only; no SLA. |
 | Aerial | USGS The National Map `USGSImageryOnly` cached tiles (`basemap.nationalmap.gov`, zoom ≤ 16, about 2 m per pixel) plus one 800 m × 800 m NAIP site photo at about 0.6 m per pixel from `imagery.nationalmap.gov` `exportImage` | Contiguous United States only; outside it the photo is not requested and the map offers Streets. Public-domain USGS/USDA imagery. The photo is rendered on request (6–45 s observed on 2026-11-01); a 60 s timeout, 6 MB limit and Retry apply. Capture dates vary by state and are not shown. |
+| Satellite | 2016 Sentinel-2 cloudless imagery from EOX. At zoom 16 and closer, 512-pixel USGS/USDA NAIP tiles follow the view across the contiguous U.S. | Satellite imagery provides regional context at about 10 m/pixel. The roof layer is aircraft photography, typically 0.6 m/pixel, with varying capture dates. Beyond native resolution, zooming enlarges the same pixels. |
+
+Select **Satellite** in the map toolbar, switch to **2D** and zoom in to inspect roofs. Panning requests imagery for the new view. Building and camera edits remain local. Providers receive the tile area. [EOX public endpoint terms](https://cloudless.eox.at/documentation/faq) · [USGS imagery service](https://imagery.nationalmap.gov/arcgis/rest/services/USGSNAIPImagery/ImageServer).
+
+![Kansas State Capitol roof and paths visible in the Facility editor with Satellite selected, 2D view and USGS/USDA aerial detail.](media/facility-capitol-roof-detail.webp)
+
+This example shows the Kansas State Capitol at public coordinates entered by hand. The built editor received real Sentinel-2 and USGS imagery in Chromium. The location tests used controlled browser readings.
 
 Requests are made by the browser, so the provider sees the viewer's IP address and
 the area being viewed. For Streets, the request also includes the app origin

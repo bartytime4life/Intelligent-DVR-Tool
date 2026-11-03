@@ -12,7 +12,7 @@ import {createStairMap} from "./facility-stair-map.mjs";
 import {createWindowMap} from "./facility-window-map.mjs";
 import {createDoorwayMap} from "./facility-doorway-map.mjs";
 import { doriArcs } from "./facility-dori.mjs";
-import { basemap, loadStreetTile, StreetTileBlocked, inAerialCoverage, sitePhotoRequest, loadSitePhoto, photoFailure } from "./facility-basemap.mjs";
+import { basemap, ROOF_ZOOM, roofTileSource, loadStreetTile, StreetTileBlocked, inAerialCoverage, sitePhotoRequest, loadSitePhoto, photoFailure } from "./facility-basemap.mjs";
 import "./facility-map-geometry.css";
 setWorkerUrl(workerUrl);
 addProtocol("dvr-osm", loadStreetTile);
@@ -173,7 +173,7 @@ function createFacilityMap(container, callbacks, initialPlan, options = {}) {
   const photo = { key: null, request: null, controller: null, objectUrl: null, status: null };
   function reportPhoto(status) {
     photo.status = status;
-    callbacks.onBasemapStatus?.(status);
+    if (basemapId === "aerial") callbacks.onBasemapStatus?.(status);
   }
   function removePhotoLayer() {
     if (map.getLayer("site-photo")) map.removeLayer("site-photo");
@@ -251,7 +251,21 @@ select", markers = [];
   map.on("resize", scheduleLabels);
   map.on("rotate", () => callbacks.onBearing?.((map.getBearing() + 360) % 360));
   // Map picture failures (offline, provider down, outside coverage) never block plan editing.
-  let tileStatus = null;
+  let tileStatus = null, roofArea = null, roofStatus = null;
+  function reportRoofTiles(next) {
+    if (roofStatus !== next) callbacks.onBasemapStatus?.({ roofs: next });
+    roofStatus = next;
+  }
+  map.on("sourcedata", e => {
+    if (e.sourceId === "roof-tiles" && e.tile?.state === "loaded" && roofStatus !== "error") reportRoofTiles("ready");
+  });
+  function reportRoofArea() {
+    if (basemapId !== "satellite") return;
+    const inside = map.getZoom() >= ROOF_ZOOM && inAerialCoverage(map.getCenter().toArray());
+    if (inside !== roofArea) callbacks.onBasemapStatus?.({ roofArea: inside });
+    roofArea = inside;
+  }
+  map.on("moveend", reportRoofArea);
   map.on("error", (e) => {
     if (e.sourceId === "basemap-tiles") {
       if (tileStatus === "blocked") return;
@@ -264,6 +278,10 @@ select", markers = [];
         tileStatus = "error";
       }
       callbacks.onBasemapStatus?.({ tiles: tileStatus });
+      return;
+    }
+    if (e.sourceId === "roof-tiles") {
+      reportRoofTiles("error");
       return;
     }
     if (e.sourceId === "site-photo") {
@@ -778,6 +796,10 @@ e-stroke-width": 2 } });
       if (!ready) return;
       const next = basemap(id);
       if (next.id !== basemapId) {
+        if (map.getLayer("roof-detail")) map.removeLayer("roof-detail");
+        if (map.getSource("roof-tiles")) map.removeSource("roof-tiles");
+        roofArea = null;
+        roofStatus = null;
         if (map.getLayer("basemap")) map.removeLayer("basemap");
         if (map.getSource("basemap-tiles")) map.removeSource("basemap-tiles");
         basemapId = next.id;
@@ -787,7 +809,13 @@ e-stroke-width": 2 } });
           map.addLayer({ id: "basemap", type: "raster", source: "basemap-tiles", paint: next.id === "streets" ?
             { "raster-saturation": -0.2, "raster-brightness-max": 0.9 } : {} }, map.getLayer("site-photo") ? "site-photo" : "grid");
         }
+        if (next.id === "satellite") {
+          map.addSource("roof-tiles", roofTileSource());
+          map.addLayer({ id: "roof-detail", type: "raster", source: "roof-tiles", minzoom: ROOF_ZOOM }, "grid");
+          reportRoofArea();
+        }
       }
+      if (map.getLayer("roof-detail")) map.setPaintProperty("roof-detail", "raster-opacity", fade);
       if (map.getLayer("basemap")) map.setPaintProperty("basemap", "raster-opacity", fade);
       if (map.getLayer("site-photo")) map.setPaintProperty("site-photo", "raster-opacity", fade);
       basemapFade = fade;

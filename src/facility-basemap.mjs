@@ -1,5 +1,5 @@
 // Real map layers for Facility Studio. Every external request is made only after the
-// user chooses Streets or Aerial; Grid (local geometry only) stays the default.
+// user chooses an imagery or street layer; Grid (local geometry only) stays the default.
 export const BASEMAP_KEY = 'dvr.facility.basemap';
 export const BASEMAP_FADE_KEY = 'dvr.facility.basemapFade';
 export const BASEMAPS = [
@@ -14,6 +14,10 @@ export const BASEMAPS = [
     // Acknowledgment wording requested by USGS for The National Map services.
     attribution: 'Map services and data available from <a href="https://www.usgs.gov/faqs/what-are-terms-uselicensing-map-services-and-data-national-map" target="_blank" rel="noreferrer">U.S. Geological Survey, National Geospatial Program</a> · USDA NAIP imagery',
     disclosure: 'Your browser requests aerial pictures of the area you view from basemap.nationalmap.gov and one sharper site photo from imagery.nationalmap.gov (U.S. Geological Survey). Coverage is the contiguous United States.' },
+  { id: 'satellite', label: 'Satellite', title: 'Satellite + U.S. roof detail', external: true, host: 'tiles.maps.eox.at',
+    tiles: ['https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless_3857/default/g/{z}/{y}/{x}.jpg'], maxzoom: 14,
+    attribution: '<a href="https://s2maps.eu/" target="_blank" rel="noreferrer">Sentinel-2 cloudless by EOX IT Services GmbH</a> (Contains modified Copernicus Sentinel data 2016) · <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noreferrer">CC BY 4.0</a>',
+    disclosure: 'Your browser requests the 2016 Sentinel-2 satellite overview from tiles.maps.eox.at. At building zoom in the contiguous United States, imagery.nationalmap.gov supplies sharper USGS/USDA aerial photographs of the area in view. Capture dates and detail vary.' },
 ];
 export const basemap = id => BASEMAPS.find(b => b.id === id) || BASEMAPS[0];
 // OSM sometimes returns HTTP 200 with a warning PNG. Cross-origin requests may
@@ -75,8 +79,9 @@ export function writeBasemapPreference({ id, fade }, storage) {
 export const fadeChoices = () => [...FADES];
 // The NAIP mosaic covers the conterminous United States. This box is deliberately coarse:
 // parts of Canada and Mexico fall inside it and simply return no imagery (transparent pixels).
+export const AERIAL_BOUNDS = [-125, 24.3, -66.5, 49.5];
 export function inAerialCoverage([lng, lat]) {
-  return Number.isFinite(lng) && Number.isFinite(lat) && lng >= -125 && lng <= -66.5 && lat >= 24.3 && lat <= 49.5;
+  return Number.isFinite(lng) && Number.isFinite(lat) && lng >= AERIAL_BOUNDS[0] && lng <= AERIAL_BOUNDS[2] && lat >= AERIAL_BOUNDS[1] && lat <= AERIAL_BOUNDS[3];
 }
 // One sharper 800 m photo of the site area from the NAIP image service (about 0.6 m per pixel);
 // the service renders it on request, which has taken 6–45 s in testing.
@@ -85,6 +90,14 @@ export const SITE_PHOTO = {
   url: 'https://imagery.nationalmap.gov/arcgis/rest/services/USGSNAIPImagery/ImageServer/exportImage',
   halfSize: 400, pixels: 1360, maxBytes: 6e6, timeout: 60000,
 };
+// MapLibre inserts the Web Mercator bounds of each visible tile. Requesting
+// 512 px at z17 samples close to the native NAIP resolution in the lower 48.
+export const ROOF_ZOOM = 16;
+export const roofTileSource = () => ({
+  type: 'raster', minzoom: ROOF_ZOOM, maxzoom: 17, tileSize: 512, bounds: [...AERIAL_BOUNDS],
+  tiles: [`${SITE_PHOTO.url}?bbox={bbox-epsg-3857}&bboxSR=3857&imageSR=3857&size=512,512&format=jpgpng&f=image`],
+  attribution: '<a href="https://www.usgs.gov/the-national-map-data-delivery" target="_blank" rel="noreferrer">U.S. Geological Survey, National Geospatial Program</a> · USDA NAIP aerial imagery',
+});
 const R = 6378137, HALF_WORLD = Math.PI * R;
 const toMercator = ([lng, lat]) => [lng * HALF_WORLD / 180, Math.log(Math.tan((90 + lat) * Math.PI / 360)) * R];
 const fromMercator = ([x, y]) => [x * 180 / HALF_WORLD, (2 * Math.atan(Math.exp(y / R)) - Math.PI / 2) * 180 / Math.PI];

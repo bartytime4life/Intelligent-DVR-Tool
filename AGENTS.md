@@ -241,3 +241,8 @@ per-recording regressions. Preserve browser evidence across navigation/reload;
 report storage errors and refuse overflow instead of silently forgetting sessions.
 Training tunes recognition rules; more sessions do not guarantee accuracy gains or
 retrain detector weights. Existing consent-based face refinement stays separate.
+
+Owner facility-location and imagery preference (2026-11-02): coarse device
+locations must leave the site alone. Offer address or manual pin correction and
+keep Save site explicit. Provide real, detailed overhead imagery to inspect
+individual buildings, with the satellite and aerial sources labeled.
