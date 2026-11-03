@@ -815,16 +815,19 @@ label. Inside the active building it belongs to the current level; elsewhere it 
         <select aria-label="Measurement units" disabled={linePending} value={units} onChange={e=>setUnits(e.target.value)}><option value="metric">Meters · m / m²</option><option value="imperial">Feet · ft / ft²</option></select>
       </div>
       <div className="facility-map-context"><span className={`facility-local-dot${layer.external ? ' is-online' : ''}`} />{plan.name}<small>{layer.id === 'grid' ? `Local grid · ${formatDistance(20,units)} spacing · no map pictures requested` :
+        layerStatus.tiles === 'blocked' ? 'Streets unavailable · showing the local grid' :
         layer.id === 'streets' ? 'Streets · OpenStreetMap · requested for the area you view' :
         layerStatus.photo === 'loading' ? 'Aerial · USGS · loading a sharper site photo…' :
         layerStatus.photo === 'ready' ? `Aerial · USGS NAIP site photo ≈ ${formatDistance(layerStatus.metresPerPixel, units)} per pixel · photo dates vary; not a live view` :
         'Aerial · USGS The National Map · requested for the area you view'}</small></div>
-      {layer.external && (layerStatus.photo === 'outside' || layerStatus.photo === 'error' || layerStatus.tiles === 'error') && <div className="facility-layer-notice" role="status">
-        <WarningCircle size={17} aria-hidden="true"/><span>{layerStatus.photo === 'outside' && layer.id === 'aerial' ? 'Aerial photos cover the contiguous United States. Streets works worldwide.' :
+      {layer.external && (layerStatus.photo === 'outside' || layerStatus.photo === 'error' || layerStatus.tiles) && <div className="facility-layer-notice" role="status">
+        <WarningCircle size={17} aria-hidden="true"/><span>{layerStatus.tiles === 'blocked' ? 'OpenStreetMap declined this request. You can keep editing on the grid.' :
+          layerStatus.photo === 'outside' && layer.id === 'aerial' ? 'Aerial photos cover the contiguous United States. Streets works worldwide.' :
           layerStatus.photo === 'error' && layer.id === 'aerial' ? layerStatus.message : 'Some map pictures could not load. Your plan is unaffected; check the connection or switch layers.'}</span>
         {layer.id === 'aerial' && layerStatus.photo === 'outside' && <button type="button" onClick={() => chooseLayer('streets')}>Use Streets</button>}
         {layer.id === 'aerial' && layerStatus.photo === 'error' && <button type="button" onClick={() => api.current?.retrySitePhoto()}>Retry photo</button>}
-        {layerStatus.tiles === 'error' && !(layer.id === 'aerial' && layerStatus.photo) && <button type="button" onClick={() => chooseLayer('grid')}>Use Grid</button>}
+        {layerStatus.tiles === 'blocked' && inAerialCoverage(photoCenter) && <button type="button" onClick={() => chooseLayer('aerial')}>Use Aerial</button>}
+        {layerStatus.tiles && !(layer.id === 'aerial' && layerStatus.photo) && <button type="button" onClick={() => chooseLayer('grid')}>Use Grid</button>}
       </div>}
       {!!mapDrafts.length && <div className="facility-draft-banner" role="status">{draftPreviewError ? `Draft preview unavailable: ${draftPreviewError}` : `Preview: ${mapDrafts.length} of ${draftCandidates.length || mapDrafts.length} mapped buildings selected · click an outline to include or exclude it, then add them`}</div>}
       {mapError && <div className="facility-map-error" role="alert"><WarningCircle /><span>{mapError}</span><button aria-label="Dismiss graphics message" onClick={() => setMapError(

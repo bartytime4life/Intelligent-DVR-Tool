@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { BASEMAPS, BASEMAP_KEY, BASEMAP_FADE_KEY, SITE_PHOTO, basemap, readBasemapPreference, writeBasemapPreference, inAerialCoverage, sitePhotoRequest, loadSitePhoto, photoFailure } from '../src/facility-basemap.mjs';
+import { BASEMAPS, BASEMAP_KEY, BASEMAP_FADE_KEY, SITE_PHOTO, basemap, loadStreetTile, StreetTileBlocked, readBasemapPreference, writeBasemapPreference, inAerialCoverage, sitePhotoRequest, loadSitePhoto, photoFailure } from '../src/facility-basemap.mjs';
 const memory = (values = {}) => ({ values, getItem(k) { return k in this.values ? this.values[k] : null; }, setItem(k, v) { this.values[k] = String(v); } });
 const image = (bytes = 3, type = 'image/jpeg', headers = {}) => new Response(new Uint8Array(bytes), { headers: { 'content-type': type, ...headers } });
 
@@ -9,10 +9,34 @@ test('grid is the default layer and the only one that requests nothing', () => {
   assert.equal(readBasemapPreference(null).id, 'grid');
   assert.deepEqual(BASEMAPS.filter(b => !b.external).map(b => b.id), ['grid']);
   for (const layer of BASEMAPS.filter(b => b.external)) {
-    assert.ok(layer.tiles.every(url => url.startsWith(`https://${layer.host}/`)), layer.id);
+    const prefix = layer.id === 'streets' ? 'dvr-osm://tiles/' : `https://${layer.host}/`;
+    assert.ok(layer.tiles.every(url => url.startsWith(prefix)), layer.id);
     assert.ok(layer.attribution && layer.disclosure.includes(layer.host), layer.id);
   }
   assert.equal(basemap('unknown').id, 'grid');
+});
+
+test('street tiles identify the app origin and preserve normal browser caching', async () => {
+  const controller = new AbortController();
+  const request = { url: 'dvr-osm://tiles/3/2/1.png' };
+  const result = await loadStreetTile(request, controller, (url, options) => {
+    assert.equal(url, 'https://tile.openstreetmap.org/3/2/1.png');
+    assert.equal(options.signal, controller.signal);
+    assert.equal(options.referrerPolicy, 'strict-origin');
+    assert.equal(options.credentials, 'omit');
+    assert.equal(options.redirect, 'error');
+    assert.equal(options.cache, undefined);
+    assert.deepEqual(options.headers, { Accept: 'image/png' });
+    return image(7412, 'image/png', { 'cache-control': 'max-age=600', expires: 'Wed, 04 Nov 2026 08:00:00 GMT' });
+  });
+  assert.equal(result.data.byteLength, 7412); // Same length as a refusal image, different content.
+  assert.equal(result.cacheControl, 'max-age=600');
+  assert.equal(result.expires, 'Wed, 04 Nov 2026 08:00:00 GMT');
+  for (const response of [new Response(null, { status: 403 }), new Response(null, { status: 429 }), image(3, 'image/png', { 'x-blocked': 'Access denied' })]) {
+    await assert.rejects(() => loadStreetTile(request, controller, () => response), StreetTileBlocked);
+  }
+  await assert.rejects(() => loadStreetTile(request, controller, () => new Response(null, { status: 503 })), /503/);
+  await assert.rejects(() => loadStreetTile({ url: 'dvr-osm://untrusted/3/2/1.png' }, controller), /Invalid street tile/);
 });
 
 test('layer preferences are validated and survive storage failures', () => {
