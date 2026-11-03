@@ -1,6 +1,8 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { CaretDown, ChartBar, CheckCircle, FrameCorners, PersonSimple, SlidersHorizontal, VideoCamera } from '@phosphor-icons/react';
 import { evaluate, frameMoments, recommendThreshold, SENSITIVITY } from './training.mjs';
+import { compareTrainingLibrary, recommendCumulativeThreshold } from './training-library.mjs';
+import './training-library.css';
 import './training-scorecard.css';
 
 const checkHeadings = {
@@ -56,20 +58,26 @@ function Measure({ title, Icon, baseline, candidate, field, totalField, preferen
   </section>;
 }
 
-export default function TrainingScorecard({ outcome, service, onCheck, onSave, onRetry, saving, error, check, renderMoments, onPreview }) {
-  const recommendation = useMemo(() => recommendThreshold(outcome.labeled, { current: outcome.current }), [outcome]);
+const NO_SESSIONS = [];
+export default function TrainingScorecard({ outcome, service, onCheck, onSave, onRetry, saving, error, check, renderMoments, onPreview,
+  pastSessions = NO_SESSIONS, viewName, includeSession, onInclude, libraryError }) {
+  const recommendation = useMemo(() => includeSession ? recommendCumulativeThreshold(outcome, pastSessions)
+    : recommendThreshold(outcome.labeled, { current: outcome.current }), [outcome, pastSessions, includeSession]);
   const [selection, setSelection] = useState(check?.value ?? recommendation.threshold ?? outcome.current);
   const [evidenceOpen, setEvidenceOpen] = useState(false);
   // Once a new recording has been scored, its two thresholds stay fixed.
   const fresh = check?.result;
   const value = fresh ? check.value : selection;
+  useEffect(() => { onPreview?.(value); }, [value, onPreview]);
   const calibration = useMemo(() => evaluate(outcome.labeled, value), [outcome, value]);
   const original = useMemo(() => evaluate(outcome.labeled, outcome.current), [outcome]);
   const baseline = fresh?.baseline ?? original;
   const candidate = fresh?.candidate ?? calibration;
   const confirmed = check?.confirmed === true;
+  const combined = compareTrainingLibrary(pastSessions, outcome.current, value, includeSession ? outcome : null);
   const canApply = outcome.canApply === true && confirmed && fresh?.verdict === 'improved' &&
-    candidate.threshold === value && baseline.threshold === outcome.current && value !== outcome.current;
+    candidate.threshold === value && baseline.threshold === outcome.current && value !== outcome.current &&
+    !combined.regressions && !libraryError;
   const moments = useMemo(() => frameMoments(outcome.labeled, value), [outcome, value]);
   const scored = candidate.presentChecks + candidate.emptyChecks;
   function preview(next) {
@@ -104,6 +112,21 @@ export default function TrainingScorecard({ outcome, service, onCheck, onSave, o
         ? `Both columns use the same fresh recording.${confirmed ? ' You confirmed the prompt conditions.' : ''}`
         : 'Both columns use the first recording. The prompts describe what was expected in each sampled frame.'}</p>
       {outcome.canApply !== true && <p className="train-score-help">This comparison uses whole-view person scores. {outcome.applyReason || 'This rule set requires manual configuration.'}</p>}
+      {viewName && <section className="train-score-library" aria-label="Combined session results">
+        <h3>Build on “{viewName}”</h3>
+        <p>{pastSessions.length} earlier matching {pastSessions.length === 1 ? 'session' : 'sessions'} available. Other cameras, detector versions and rule settings stay separate.</p>
+        <label className="training-check"><input type="checkbox" checked={!!includeSession} disabled={saving || !!fresh || !outcome.canApply || !!libraryError}
+          onChange={e => onInclude(e.target.checked)} /> Add this session to the combined evidence. I followed all five prompts in this camera view.</label>
+        {includeSession && <p>{pastSessions.length + 1} calibration {pastSessions.length ? 'sessions inform' : 'session informs'} the suggestion. Each session has equal weight; saved fresh checks are used only to look for regressions.</p>}
+        {!!combined.recordings && <table><caption>Replay of saved evidence{includeSession ? ' and this calibration' : ''}</caption>
+          <thead><tr><th scope="col">Setting</th><th scope="col">Person found</th><th scope="col">Empty-room flags</th></tr></thead>
+          <tbody>{[['Current', combined.baseline], ['Trial', combined.candidate]].map(([label, m]) => <tr key={label}>
+            <th scope="row">{label}</th><td>{m.found} / {m.presentChecks}</td><td>{m.falseAlarms} / {m.emptyChecks}</td>
+          </tr>)}</tbody></table>}
+        {combined.regressions > 0 && <p role="alert">This trial loses person finds or adds empty-room flags on {combined.regressions} earlier or calibration recordings. Keep the current setting and gather another session.</p>}
+        <p className="training-note">Evidence stays in this browser. A new setting still needs an improved fresh check and cannot worsen either count on any saved recording. This tunes a rule threshold; it does not retrain detector weights.</p>
+        {libraryError && <p role="alert">{libraryError}</p>}
+      </section>}
       <div className="train-score-decision">
         <div className="train-score-actions">
           {!fresh && <button className="button amber" disabled={saving} onClick={() => onCheck(value)}><VideoCamera size={18} aria-hidden="true" />Check on a new recording</button>}

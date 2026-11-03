@@ -1,0 +1,69 @@
+{
+  "schema": "intelligent-dvr.cumulative-training-verification.v1",
+  "date": "2026-11-02",
+  "timezone": "America/Chicago",
+  "tested_code_commit": "870e5f09fc7346ab7b73a00683db0d533a41c3d5",
+  "base_commit": "a0b20e91091cbaa3b1b28fafa2f660c59e61bd95",
+  "environment": {
+    "platform": "darwin",
+    "architecture": "arm64",
+    "python": "3.12.15",
+    "node": "v22.23.3",
+    "packages": {
+      "opencv-python-headless": "4.14.0.94",
+      "numpy": "2.5.4",
+      "av": "19.0.2",
+      "onnx": "1.23.2"
+    }
+  },
+  "frontend": {
+    "tests": 324,
+    "pass": 324,
+    "fail": 0,
+    "skipped": 0
+  },
+  "packaging": {
+    "tests": 4,
+    "pass": 4,
+    "fail": 0,
+    "skipped": 0
+  },
+  "native": {
+    "tests": 451,
+    "pass": 337,
+    "fail": 0,
+    "skipped": 114,
+    "skip_scope": "platform/dependency skips on macOS; not passes"
+  },
+  "training_browser": {
+    "tests": 3,
+    "pass": 3,
+    "fail": 0,
+    "skipped": 0,
+    "cases": [
+      {
+        "title": "the real synthetic CPU workflow pauses recording, checks a fresh take, and keeps the current rule",
+        "outcome": "expected",
+        "status": "passed",
+        "duration_ms": 149359
+      },
+      {
+        "title": "recorded synthetic pixels improve on an independent check and explicitly select the tested model and rule",
+        "outcome": "expected",
+        "status": "passed",
+        "duration_ms": 86658
+      },
+      {
+        "title": "service unavailability exposes a retry, preserves a legacy session, and fits a phone viewport",
+        "outcome": "expected",
+        "status": "passed",
+        "duration_ms": 778
+      }
+    ]
+  },
+  "build": "passed",
+  "source_fingerprints": "source-hashes.json",
+  "screenshot_provenance": "../../media/training-2026-11-02/cumulative-manifest.json",
+  "inputs": "Generated camera streams and synthetic ONNX fixtures only. No owner footage, face templates or private camera configuration.",
+  "qualification": "Software behavior and evidence bookkeeping; no physical-camera accuracy, detector retraining, GPU or capacity claim."
+}

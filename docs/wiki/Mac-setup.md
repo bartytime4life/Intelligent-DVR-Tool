@@ -108,6 +108,9 @@ saves and camera permissions belong to that exact origin.
    their existing export controls. Browser localStorage/IndexedDB is **not**
    part of a checkout or folder backup. Keep using the same browser and origin;
    do not clear site storage during the update.
+   Combined training evidence also belongs to that browser and origin. Keep
+   that profile and port; exported training count receipts cannot restore the
+   scored evidence library. Save any pending session decision before refreshing.
 4. In the same checkout, update and rerun Install, Check, then Start:
 
    ```bash

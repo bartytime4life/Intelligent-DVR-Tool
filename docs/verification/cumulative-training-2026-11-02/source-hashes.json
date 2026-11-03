@@ -1,0 +1,15 @@
+{
+  "src/training-library.mjs": "a517dd228cfcf9ac8e6b1c5f5274c5f380f3e08d518094ff9fd4dc630440e267",
+  "src/TrainingLibrary.jsx": "a6d0fb4e7f6d9a7430da9bbca57d1b8cca25d9e7f9cbef794c5a350dbceb8173",
+  "src/training-library.css": "fe665590ba21e0f41d2656061868a6f3b5d268dd155ca65a64b3fbd5aa55be5f",
+  "src/TrainingWorkspace.jsx": "3ea4fb36439ea389ea2359fef195c2b6d701c56e56042c284c041bdb233f9750",
+  "src/TrainingScorecard.jsx": "75b6ac84aee86421acff9cb7bbf61351c29cdc9514b88e8711d33ed0fdf15e0c",
+  "tests/training-library.test.mjs": "7923524b662a17bc6f59a823f36ffa1b854bad2db3b7239702d1eb095b99b9df",
+  "tests/training-scorecard.test.mjs": "63088daa202ddec9a562f398510f2c25efe23acbad0ee6924fca7185151760bc",
+  "tests/analysis-browser/training.spec.mjs": "f49933ca7b266a19a344965a2aa1c740d0afca17eff8a01353d92afbcc891d28",
+  "src/training.mjs": "07a83e4c4a63f4f8bd33327a247e4dbb4852cdabb8d20be698ce0965e36d71f3",
+  "src/training-evidence.mjs": "b4dc186f2c13ca15af7d8d335c4918ec7e6f2bef498cf2d798a7ff28656f00d2",
+  "src/training-time.mjs": "4e5ae86780c498d61116d2eba8604984c479bb9aeba268dfa5d6929d37f7eeb5",
+  "src/TrainingAnalyze.jsx": "21ebec42a802f8266dd54fa73db335d3d00b2f94c897b2c3a6f183021b53130b",
+  "tests/local_analysis_fixture.py": "3daa8e50bc542cffa6e97a158ac2987175193511cb03a903a02f332b3ed051e6"
+}

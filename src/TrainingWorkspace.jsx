@@ -9,6 +9,10 @@ import CaptureSteps from './TrainingCapture.jsx';
 import TrainingHome from './TrainingHome.jsx';
 import TrainingScorecard from './TrainingScorecard.jsx';
 import AnalyzeStep from './TrainingAnalyze.jsx';
+import TrainingLibrary from './TrainingLibrary.jsx';
+import { readTrainingLibrary, compatibleTrainingSessions, trainingSessionEvidence, withTrainingLibraryDecision,
+  removeTrainingEvidence, compareTrainingLibrary, trainingLibraryReceipt, recommendCumulativeThreshold,
+  trainingEvidenceAdditionError, reusedTrainingSource } from './training-library.mjs';
 import './training.css';
 
 const STEPS = [['camera', 'Camera check'], ['record', 'Guided recording'], ['analyze', 'Analysis'], ['results', 'Compare'], ['check', 'Fresh check'], ['done', 'Decision']];
@@ -19,6 +23,9 @@ const clock = seconds => `${Math.floor(seconds / 60)}:${String(Math.floor(second
 export default function TrainingWorkspace({ onOpenRecognition }) {
   const [service, setService] = useState({ state: 'connecting', message: 'Checking this computer…' });
   const [history, setHistory] = useState(() => readHistory(store()));
+  const [library, setLibrary] = useState(() => readTrainingLibrary(store()));
+  const [viewName, setViewName] = useState(() => readTrainingLibrary(store()).sessions.at(-1)?.view || 'My camera view');
+  const [includeSession, setIncludeSession] = useState(false);
   const [step, setStep] = useState(null);
   const [clip, setClip] = useState(null);
   const [outcome, setOutcome] = useState(null);
@@ -70,6 +77,8 @@ export default function TrainingWorkspace({ onOpenRecognition }) {
     setSelection({ modelId, rulesId: reference?.id || '' });
   }
   function reset(nextStep = null) {
+    setLibrary(readTrainingLibrary(store()));
+    setIncludeSession(false);
     if (nextStep === 'camera') {
       const model = service.models?.find(m => inUse && m.id === preference?.modelId) ||
         service.models?.find(m => m.profile.startsWith('opencv-zoo-yolox')) || service.models?.[0];
@@ -119,41 +128,60 @@ export default function TrainingWorkspace({ onOpenRecognition }) {
     setSaving(true);
     setError('');
     try {
-      let rule = null, selected = false;
-      if (apply) {
-        const currentSession = await (await analysisRequest('/session', { signal: AbortSignal.timeout(10000) })).json();
-        const model = currentSession.models?.find(item => item.id === outcome.modelId);
-        const reference = currentSession.rules?.find(item => item.id === outcome.rulesId);
-        if (!currentSession.training?.enabled || model?.sha256 !== outcome.modelHash ||
-            model.labels_sha256 !== outcome.labelHash || model.profile !== outcome.profile ||
-            !reference?.sha256 || reference.sha256 !== outcome.ruleFileHash || !reference.models.includes(outcome.modelId)) {
-          throw Error('The local detector, reference rule or saving permission has changed. Start a new session before using this setting.');
+      await withTrainingLibraryDecision(store(), async ({ library: latest, saveEvidence }) => {
+        if ((apply || includeSession) && latest.error) throw Error(latest.error);
+        if (apply && reusedTrainingSource(latest.sessions, [outcome.sourceHash, check.context.sourceHash]))
+          throw Error('One of these recordings is already in the saved evidence. Make new recordings before applying a setting.');
+        const past = compatibleTrainingSessions(latest.sessions, viewName, outcome);
+        const protection = compareTrainingLibrary(past, outcome.current, value, includeSession ? outcome : null);
+        if (apply && protection.regressions) throw Error('This setting loses person finds or adds empty-room flags on saved evidence. Keep the current setting and record another session.');
+        // Validate evidence before saving a rule. Storage failures are reported
+        // separately so a successfully saved rule is never presented as lost.
+        const evidence = includeSession ? trainingSessionEvidence(viewName, outcome, checked ? check : null) : null;
+        if (evidence) {
+          const problem = trainingEvidenceAdditionError(latest.sessions, evidence);
+          if (problem) throw Error(problem);
         }
-        // Keep the original dwell and gap. Only a single whole-view person rule
-        // can be tuned here, so a session cannot replace a set of zone rules.
-        const { dwell, max_gap, rect } = outcome.rule;
-        // Identical checked rule contents are reusable, including after a lost
-        // response. Repeated sessions need not consume another catalog slot.
-        const name = `Person · checked threshold ${value.toFixed(2)}`;
-        const response = await analysisRequest('/training/rules', { token: currentSession.token, method: 'POST',
-          body: { name, label: 'person', threshold: value, rect, dwell, max_gap } });
-        ({ rule } = await response.json());
-        selected = writeDefaultRules(store(), rule.id, outcome.modelId, { modelHash: outcome.modelHash,
-          labelHash: outcome.labelHash, rulesHash: rule.sha256, profile: outcome.profile });
-        setService(s => ({ ...s, rules: [...s.rules.filter(r => r.id !== rule.id), rule] }));
-      }
-      const threshold = selected ? value : outcome.current;
-      const scored = checked ? (selected ? check.result.candidate : check.result.baseline) : evaluate(outcome.labeled, threshold);
-      const counts = m => ({ found: m.found, presentChecks: m.presentChecks, falseAlarms: m.falseAlarms, emptyChecks: m.emptyChecks });
-      const entry = { at: new Date().toISOString(), kind: 'detection', threshold, applied: selected,
-        detectionRate: scored.detectionRate, ...counts(scored), checks: scored.presentChecks + scored.emptyChecks,
-        ...(rule && { rulesId: rule.id }),
-        ...(checked && { check: { value: check.value, verdict: check.result.verdict,
-          baseline: counts(check.result.baseline), candidate: counts(check.result.candidate) } }) };
-      const historyResult = appendHistory(store(), entry);
-      if (!historyResult.error) setHistory(historyResult.history);
-      setSaved({ rule, selected, historySaved: !historyResult.error });
-      setStep('done');
+        let rule = null, selected = false;
+        if (apply) {
+          const currentSession = await (await analysisRequest('/session', { signal: AbortSignal.timeout(10000) })).json();
+          const model = currentSession.models?.find(item => item.id === outcome.modelId);
+          const reference = currentSession.rules?.find(item => item.id === outcome.rulesId);
+          if (!currentSession.training?.enabled || model?.sha256 !== outcome.modelHash ||
+              model.labels_sha256 !== outcome.labelHash || model.profile !== outcome.profile ||
+              !reference?.sha256 || reference.sha256 !== outcome.ruleFileHash || !reference.models.includes(outcome.modelId)) {
+            throw Error('The local detector, reference rule or saving permission has changed. Start a new session before using this setting.');
+          }
+          // Keep the original dwell and gap. Only a single whole-view person rule
+          // can be tuned here, so a session cannot replace a set of zone rules.
+          const { dwell, max_gap, rect } = outcome.rule;
+          // Identical checked rule contents are reusable, including after a lost
+          // response. Repeated sessions need not consume another catalog slot.
+          const name = `Person · checked threshold ${value.toFixed(2)}`;
+          const response = await analysisRequest('/training/rules', { token: currentSession.token, method: 'POST',
+            body: { name, label: 'person', threshold: value, rect, dwell, max_gap } });
+          ({ rule } = await response.json());
+          selected = writeDefaultRules(store(), rule.id, outcome.modelId, { modelHash: outcome.modelHash,
+            labelHash: outcome.labelHash, rulesHash: rule.sha256, profile: outcome.profile });
+          setService(s => ({ ...s, rules: [...s.rules.filter(r => r.id !== rule.id), rule] }));
+        }
+        const threshold = selected ? value : outcome.current;
+        const scored = checked ? (selected ? check.result.candidate : check.result.baseline) : evaluate(outcome.labeled, threshold);
+        const counts = m => ({ found: m.found, presentChecks: m.presentChecks, falseAlarms: m.falseAlarms, emptyChecks: m.emptyChecks });
+        const entry = { at: new Date().toISOString(), kind: 'detection', threshold, applied: selected,
+          detectionRate: scored.detectionRate, ...counts(scored), checks: scored.presentChecks + scored.emptyChecks,
+          ...(rule && { rulesId: rule.id }),
+          ...(checked && { check: { value: check.value, verdict: check.result.verdict,
+            baseline: counts(check.result.baseline), candidate: counts(check.result.candidate) } }) };
+        const historyResult = appendHistory(store(), entry);
+        if (!historyResult.error) setHistory(historyResult.history);
+        const libraryResult = evidence ? saveEvidence(evidence) : latest;
+        setLibrary(libraryResult);
+        setSaved({ rule, selected, historySaved: !historyResult.error,
+          evidenceSaved: !!evidence && !libraryResult.error, evidenceError: evidence ? libraryResult.error : '',
+          evidenceCount: libraryResult.sessions.length });
+        setStep('done');
+      });
     } catch (e) {
       setError(e.message);
     } finally {
@@ -165,11 +193,21 @@ export default function TrainingWorkspace({ onOpenRecognition }) {
   function exportMeasurement() {
     try {
       const receipt = makeTrainingReceipt({ ...outcome, value: preview }, check?.confirmed ? check : null);
+      const past = compatibleTrainingSessions(library.sessions, viewName, outcome);
+      if (includeSession) {
+        const recommendation = recommendCumulativeThreshold(outcome, past);
+        receipt.calibration.recommended_threshold = recommendation.threshold;
+        receipt.calibration.recommendation_reason = recommendation.reason;
+        receipt.calibration.recommendation_basis = 'equally-weighted-confirmed-calibration-sessions';
+      }
+      receipt.combined_evidence = trainingLibraryReceipt(past, outcome.current,
+        check?.value ?? preview ?? outcome.current, includeSession ? outcome : null);
       receipt.decision = saved ? {
         status: saved.selected ? 'selected-for-recognition' : saved.rule ? 'rule-saved-selection-unavailable' : 'kept-current',
         selected_threshold: saved.selected ? check.value : null,
         reference_threshold: outcome.current,
         history_saved_in_this_browser: saved.historySaved,
+        combined_evidence_saved_in_this_browser: saved.evidenceSaved,
       } : { status: 'awaiting-decision' };
       const name = `training-${check?.confirmed ? 'check' : 'calibration'}-${outcome.sourceHash.slice(0, 12)}.json`;
       downloadBlob(new Blob([JSON.stringify(receipt, null, 2) + '\n'], { type: 'application/json' }), name);
@@ -182,6 +220,12 @@ export default function TrainingWorkspace({ onOpenRecognition }) {
   if (!step) return <TrainingHome service={service} history={history}
     inUse={inUse}
     onStart={() => reset('camera')} onEnroll={() => setPersonFlow({ kind: 'enroll' })} onRetry={connect}>
+    <TrainingLibrary library={library} busy={saving} onRemove={async source => {
+      if (saveLock.current) return;
+      saveLock.current = true; setSaving(true);
+      try { setLibrary(await removeTrainingEvidence(store(), source)); }
+      finally { saveLock.current = false; setSaving(false); }
+    }} />
     {service.people?.enabled && <section className="training-people" aria-label="Enrolled people">
       <h2>Enrolled people</h2>
       {peopleError ? <div role="alert"><p>{peopleError}</p><button className="button" onClick={() => loadPeople(service)}>Try again</button></div>
@@ -212,10 +256,17 @@ export default function TrainingWorkspace({ onOpenRecognition }) {
         {!selection.rulesId && <option value="">Choose a reference rule</option>}
         {optionsForModel(selection.modelId).map(r => <option value={r.id} key={r.id}>{r.name}</option>)}</select></label>
     </details>}
+    {step === 'camera' && <section className="training-panel training-view" aria-label="Training camera view">
+      <h2>Build on the same camera view</h2>
+      <label>Camera view name<input maxLength={64} list="training-view-names" value={viewName} onChange={e => setViewName(e.target.value)} /></label>
+      <datalist id="training-view-names">{[...new Set(library.sessions.map(s => s.view))].map(view => <option key={view} value={view} />)}</datalist>
+      <p>Reuse this name for the same camera position and view. Choose a new name after moving the camera. Confirmed sessions with matching detector and rule settings contribute together.</p>
+      {library.error && <p role="alert">{library.error}</p>}
+    </section>}
     {step === 'camera' && !selection.rulesId && <p role="alert">{optionsForModel(selection.modelId).length
       ? 'The saved detector or rule has changed. Choose a reference rule above to start a new calibration.'
       : 'This detector needs a rule set with one person rule. Choose another detector above or add a person rule to the local catalog.'}</p>}
-    {(step === 'camera' || step === 'record') && selection.rulesId && <CaptureSteps step={step} onStep={setStep}
+    {(step === 'camera' || step === 'record') && selection.rulesId && viewName.trim() && <CaptureSteps step={step} onStep={setStep}
       onClip={c => { setClip(c); setStep('analyze'); }} />}
     {step === 'analyze' && <AnalyzeStep selection={selection} clip={clip} script={TRAINING_SCRIPT}
       onSession={session => setService({ ...session, state: 'ready' })}
@@ -233,8 +284,10 @@ export default function TrainingWorkspace({ onOpenRecognition }) {
       onDone={finishCheck} onRetry={() => startCheck(check.value)} onBack={discardCheck} />}
     {step === 'confirm' && <ConfirmCheck source={check.context.source} onRetry={() => startCheck(check.value)}
       onConfirm={() => { setCheck(s => ({ ...s, confirmed: true })); setStep('results'); }} onBack={discardCheck} />}
-    {step === 'results' && outcome && <><TrainingScorecard key={check?.context?.sourceHash || outcome.sourceHash}
+    {step === 'results' && outcome && <><TrainingScorecard key={`${check?.context?.sourceHash || outcome.sourceHash}-${includeSession}`}
       service={service} outcome={outcome} check={check} onCheck={startCheck} onSave={saveDecision} onPreview={setPreview}
+      pastSessions={compatibleTrainingSessions(library.sessions, viewName, outcome)} viewName={viewName}
+      includeSession={includeSession} onInclude={setIncludeSession} libraryError={library.error}
       onRetry={() => reset('camera')} error={error} saving={saving}
       renderMoments={value => <MomentsForValue outcome={outcome} value={value} />} />
       <button className="text-button training-export" onClick={exportMeasurement}><DownloadSimple size={17} /> Download {check?.confirmed ? 'check comparison' : 'calibration summary'} (JSON)</button>
@@ -247,6 +300,8 @@ export default function TrainingWorkspace({ onOpenRecognition }) {
         : 'You can return to Train to check another setting or room.'}</p>
       <p className="training-note" role={saved.historySaved ? undefined : 'alert'}>{saved.historySaved
         ? 'This browser saved the session summary in Past sessions.' : 'This browser could not save the session history. Download the measurement below to keep it.'}</p>
+      {saved.evidenceSaved && <p>This session now contributes to “{viewName}”. {saved.evidenceCount} sessions are saved across your camera views. Start another session to build on matching evidence.</p>}
+      {saved.evidenceError && <p role="alert">The setting decision was saved, but this session could not join the combined evidence: {saved.evidenceError}</p>}
       {error && <p role="alert">{error}</p>}
       <div className="training-actions">
         <button className="button amber" onClick={() => reset()}>Back to Train</button>

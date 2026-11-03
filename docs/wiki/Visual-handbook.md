@@ -107,6 +107,11 @@ match the exact source file before overlays attach. See the
 
 Open **Train → Start session**, connect the camera, and follow the five prompts for 54 seconds. Review how often each setting found a person during the in-view prompts and flagged the empty room. You can preview a different threshold under **Advanced sensitivity**.
 
+Give the camera view a name and reuse it for repeat sessions. Select **Add this
+session to the combined evidence** after confirming all five prompts. Saving a
+decision retains those scores, so later matching sessions build on earlier
+examples. The scorecard replays saved recordings to guard against regressions.
+
 Choose **Check on a new recording** for a 20-second check. Keep the same camera and view, follow the in-view and empty-room prompts, then confirm what happened. Apply a fresh improvement to future Recognition analyses, or keep your current setting. Download the JSON receipt to keep the counts and tested settings. [Training instructions and storage](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Guided-training).
 
 See the [dated camera-check and enrollment screenshots](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-atlas) for the November 1 interface.

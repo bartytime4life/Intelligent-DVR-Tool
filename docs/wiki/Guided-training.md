@@ -50,6 +50,62 @@ A separate run exercised the pinned YOLOX-S detector and recording timestamps on
 
 Applying requires a confirmed improvement at a different threshold, reliable timing on both recordings, permission to save training rules, and a rule set containing a single whole-frame person rule. A set with one person rule plus other rules, or one person rule limited to a zone, can be measured as a whole-view comparison. To apply a threshold, start a new session with a single whole-frame person rule. If your active set has zero or multiple person rules, choose a set with one person threshold before training. A change to the trial threshold needs a new check.
 
+## Build on multiple sessions
+
+At Camera check, give the **Camera view name** a useful name such as “Front door.”
+Reuse it for later sessions with the same camera position and view. Use a new name
+after moving the camera. At the scorecard, select **Add this session to the
+combined evidence** only after confirming you followed all five prompts.
+Choose Keep current setting or Use checked setting to save that session's evidence.
+Incomplete sessions and unconfirmed prompt conditions do not join the collection.
+
+![Actual browser test showing two confirmed sessions retained after a reload. All inputs and displayed sessions are synthetic test data.](https://raw.githubusercontent.com/wiki/bartytime4life/Intelligent-DVR-Tool/docs/media/training-2026-11-02/cumulative-sessions.png)
+
+**Generated test example:** two sessions remain saved for one named camera view
+after reopening Train. The constant-output fixture detector is a workflow test,
+not a camera accuracy result. [Screenshot provenance](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/media/training-2026-11-02/cumulative-manifest.json).
+
+The next session can use all matching confirmed calibration recordings together.
+Matching requires the same named view, camera identifier (when available), detector
+and class-label fingerprints, inference profile, dwell and maximum gap. A newly
+saved threshold may have a different rule name/hash and can still build on the old
+evidence. Other camera views, changed models and specialized zone rules stay separate.
+When the browser cannot supply a camera identifier, your named-view confirmation is
+the camera reference; take care to use the same physical camera and position.
+
+In browsers that provide Web Locks, saving a decision holds a shared browser
+lock through the service checks and rule save, so another training tab cannot
+add a contrary example between replay and application. Without that browser
+feature, use one training tab at a time.
+
+Each calibration session has equal weight when ranking threshold suggestions,
+with the in-view and empty-view conditions weighted equally. A proposal must avoid
+losing any person finds or adding empty-room flags on every calibration recording.
+Saved fresh checks do not fit the suggestion: they are replayed to look for
+regressions. The scorecard shows combined counts alongside the latest recording's
+counts. Even after several sessions, applying still requires an improved,
+operator-confirmed fresh check, and neither count may worsen on any saved
+calibration or check recording. Reusing identical recording bytes cannot inflate
+the session count or supply another fresh check.
+
+**Combined training evidence** on Train shows saved sessions and lets you remove
+an old session from future comparisons. Removing evidence leaves recordings,
+saved rules and review decisions available. The library retains up to 50 sessions
+and two million serialized characters in this browser; it refuses additions at
+the limit rather than automatically dropping earlier evidence. Storage failures
+are shown explicitly. Reloading or returning to Train retains saved evidence;
+clearing browser storage or changing browser/origin loses it. Historical summary-only
+sessions lack the scores and provenance needed for pooling and remain in Past sessions.
+
+More confirmed sessions provide more examples to test a rule, but they cannot
+guarantee higher accuracy. This workflow tunes a person-presence threshold; it
+does not retrain neural-network weights. Counts on guided prompts are session
+measurements, not independently established detection accuracy. Face baseline
+refinement remains the separate consent-based person workflow.
+
+[Cumulative-session verification and machine-readable results](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/cumulative-training-2026-11-02/README.md)
+describe generated test inputs separately from physical-camera qualification.
+
 ## What is saved where
 
 | Item | Where to find it |
@@ -58,7 +114,8 @@ Applying requires a confirmed improvement at a different threshold, reliable tim
 | Checked setting | When you apply, the local service saves a rule file under `trained/` beside its catalog. Existing rule files remain available. The service allows up to 50 saved training rule sets. |
 | Recognition selection | This browser remembers the checked detector and saved rule together for future recording analyses. New selections include fingerprints for the model, class labels and rule file, plus the inference profile. A changed component requires an explicit choice or a fresh check. Recognition respects a manual selection you have already made. If the rule saved but the browser could not remember the preference, select that detector and rule by name in Recognition. |
 | Session history | This browser keeps the latest 50 entries. Past sessions distinguish a first-recording result from a comparison confirmed on a second recording. |
-| Downloadable JSON receipt | Export the session’s counts, thresholds and fresh-check result, when available, as JSON. SHA-256 fingerprints identify the source recordings, detector, labels and rules. The file omits video, device IDs and names. |
+| Combined training evidence | This browser keeps up to 50 explicitly confirmed sessions, including their scored person/empty samples, detector provenance and local camera reference. It does not automatically evict older evidence. Save a decision to add a session; simply exiting does not add it. |
+| Downloadable JSON receipt | Export the session’s counts, thresholds and fresh-check result, when available, as JSON. Combined evidence adds aggregate counts and prior recording fingerprints; this summary cannot restore the scored library. SHA-256 fingerprints identify the source recordings, detector, labels and rules. The file omits video, device IDs and names. |
 
 Training adjusts the threshold used by a recognition rule. Only new recording analyses using the selected rule use its threshold. Previously reviewed observations retain their decisions. For a consenting individual’s face baseline, choose **Enroll a person** and follow its separate consent and deletion controls. [Person enrollment](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Person-enrollment)
 

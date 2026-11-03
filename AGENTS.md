@@ -230,3 +230,14 @@ current and trial threshold on fresh, operator-confirmed footage before offering
 a saved improvement. Keep sample counts, recording timing and the selected
 detector explicit. Synthetic exercise results do not qualify physical cameras.
 See docs/training.md for the operator flow.
+
+Owner cumulative-training decision (2026-11-02): confirmed training sessions must
+contribute together for the same named camera view, detector/label fingerprints,
+inference profile and non-threshold rule settings. Keep old calibration samples
+when a trained threshold changes. Give calibration sessions equal weight, reserve
+fresh checks for validation/regression guards, reject reused recordings and require
+a new confirmed improvement before applying. Display combined sample counts and
+per-recording regressions. Preserve browser evidence across navigation/reload;
+report storage errors and refuse overflow instead of silently forgetting sessions.
+Training tunes recognition rules; more sessions do not guarantee accuracy gains or
+retrain detector weights. Existing consent-based face refinement stays separate.

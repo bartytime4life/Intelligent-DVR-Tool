@@ -59,7 +59,7 @@ Detection scores are model outputs. Track numbers follow one box across frames; 
 
 | Your goal | What to do | What the result means |
 | --- | --- | --- |
-| Measure and tune person detection for this view | [Train → Start session](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Guided-training) | Compare two thresholds on a fresh recording. Keep the current setting or save a checked improvement for Recognition. |
+| Measure and tune person detection for this view | [Train → Start session](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Guided-training) | Build on confirmed sessions for the same named camera view. Check a proposed threshold on fresh footage and earlier evidence before saving it for Recognition. |
 | Review a possible enrolled-person match | [Get consent, enroll, then explicitly check a local job](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Person-enrollment) | A local suggestion for human confirmation, not proof of identity |
 | Watch a specific image region | [Draw a zone on the correct still](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Zones) | A class-presence rule in that camera's image coordinates |
 | Plan a building and cameras | [Facility: shell → floors → rooms/openings → cameras](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Facility-planning) | Editable proposed geometry and estimated coverage |
@@ -70,7 +70,7 @@ Detection scores are model outputs. Track numbers follow one box across frames; 
 
 ![Export browser work, back up the private analysis folder, and verify a copy outside the checkout before updating.](https://raw.githubusercontent.com/wiki/bartytime4life/Intelligent-DVR-Tool/docs/media/guide/preserve.svg)
 
-Browser reviews, rules, plans and session choices belong to the exact browser and origin. Models, recordings, tuned rule files and enrolled-person templates live in the private local service folders. Export temporary results before stopping the service; back up both storage areas separately. Keep the same browser and port for everyday work.
+Browser reviews, rules, plans, combined training evidence and session choices belong to the exact browser and origin. Models, recordings, tuned rule files and enrolled-person templates live in the private local service folders. Export temporary results before stopping the service; back up both storage areas separately. Keep the same browser and port for everyday work. Training JSON receipts preserve counts and provenance; they cannot restore the browser's scored evidence library.
 
 [Updates and migration](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Mac-setup#preserve-data-when-updating) · [Saved facilities](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Saved-facilities) · [Troubleshooting](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Troubleshooting).
 
@@ -115,6 +115,10 @@ python3 scripts/build-wiki.py --check
 ```
 
 Use the platform's isolated dependencies for native checks; optional test fixtures require ONNX. [Verification](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Evidence-and-validation) keeps historical and current test scopes separate. PR #71's tested head passed 16 reported GitHub checks, including Mac source installation, Linux/Windows validation, the PC kit and controlled browser regressions; these are software checks, not field acceptance.
+
+[Cumulative training results](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/cumulative-training-2026-11-02/README.md)
+record compatible-session pooling, browser persistence, duplicate-source
+refusal and protection against regressions on saved examples.
 
 This repository does not currently assign a software license. Public availability does not grant a software license. [Third-party notices](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Third-party-notices) cover separately licensed components/models; [SECURITY.md](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Security-boundary) describes the prototype boundary. No pretrained weights, private recordings, templates or credentials are bundled.
 
