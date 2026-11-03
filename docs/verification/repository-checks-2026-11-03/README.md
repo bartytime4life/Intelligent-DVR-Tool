@@ -13,9 +13,12 @@ physical-device qualification.
 
 - Keep the application and setup available when a saved backup disk is offline
   or settings are invalid. Preserve the saved configuration and recover on an
-  explicit reconnect/start without recreating missing backup storage.
+  explicit reconnect/start without recreating missing backup storage. Reopen stale
+  handles after a same-path drive reconnect and keep setup available on index I/O errors.
 - Report incomplete recursive scans, use full Windows file identities before
-  copying, and resolve macOS temporary-path aliases in the fault fixtures.
+  copying, independently check Windows descriptor/path timestamps, and resolve
+  macOS temporary-path aliases in the fault fixtures. The Mac preservation smoke
+  includes the expected empty backup lease in its full-file snapshot.
 - Keep a healthy shared GPU available after invalid media; preserve genuine
   accelerator failure handling and Linux-only result-persistence boundaries.
 - Limit development HTTP delivery to frontend files/dependencies, default both
@@ -38,7 +41,7 @@ physical-device qualification.
 
 ## Validation
 
-The summary records final counts. On the owner Linux runtime, all **492 Python**
+The summary records final counts. On the owner Linux runtime, all **496 Python**
 tests and **365 frontend** tests passed with loopback checks enabled and no skips.
 The production build, four Sites checks, source-launcher smoke, PowerShell/shell
 syntax and a fresh PC-kit extraction/hash check passed. Python, JS/MJS and shell
@@ -56,6 +59,8 @@ Dependency compatibility passed. npm audit found no known advisories, and an
 [OSV batch lookup](https://google.github.io/osv.dev/api/) found no matches for the
 18 exact Python package/version pairs declared in the requirements files.
 These checks do not establish that all dependencies are vulnerability-free.
+
+The Windows timestamp repair follows the [CPython path API](https://github.com/python/cpython/blob/3.12/Modules/posixmodule.c) and [descriptor API](https://github.com/python/cpython/blob/3.12/Python/fileutils.c): they report different meanings for ctime. Identity, size and modification time still match across APIs; each API retains its full independent before/after check.
 
 The Codex Security Standard scan completed against the unchanged pre-fix source,
 with one medium and one low finding. Both are repaired and regression-checked in

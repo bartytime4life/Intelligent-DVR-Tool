@@ -2,12 +2,12 @@
   "schema": "intelligent-dvr.repository-checks.v1",
   "date": "2026-11-03",
   "base_commit": "78c17233f8933182922533d6c61599c3ac1d2972",
-  "source_commit": "d8d75648155bb7a2da66184ba88002b4f9770b8c",
+  "source_commit": "61978dac323480d0f0fa64733989c1aa0c9f6d6d",
   "security_audited_revision": "b54593d7de533ce1a4200e6e6665cb24bacc1d12",
   "source_sha256": {
     "SECURITY.md": "f7fbfa307c1a3dbe1850f50ee05be6ba22fc9848cdef94ef13f46ccd6cf56eeb",
     "docs/wiki/Security-boundary.md": "7dfb963c89a6589354df64d9df1111ef28512e7282300b35e713fe6c0c7e2884",
-    "edge/backup_library.py": "088474037a51712ab781127f2a5bdda4e153fffee2fd027697dca2873f1f590d",
+    "edge/backup_library.py": "c3c4346718078a33c6cbbf2943dfaa600806af9a3a256f0d592bf5d075975450",
     "edge/local_service.py": "5cad5bf6e566c85a3a8f0838cb2ed5e26b63c09578060329f0233df95b4cf884",
     "package.json": "125eb93d501bb31ccf600c4cc92a6cba5a2db8167fc4e30f5902502bed1d1c7a",
     "playwright.analysis.config.mjs": "f318487ffe908c1e32da38381a404c4b0899d4d0e3e4aa85698b63393a16d5e9",
@@ -35,15 +35,17 @@
     "tests/facility-delivery.test.mjs": "bd3871af24b43c50c91a4fc21677d7fd8f16450779e60157e3c133bab07796fe",
     "tests/live-ai.test.mjs": "fe595231591eb81286c5d1fd58d2ca24899e21dabe9da759981f148e194d7dc2",
     "tests/local-images.test.mjs": "228f637f55a5359527ecd2eccab4e4865147446b642905599822aeb20d3a4551",
-    "tests/test_backup_library.py": "f7824e499b1d798d2aab27545e5fed7bfc2b19fdc4eb4ee93c3dcc116d372b50",
+    "tests/test_backup_library.py": "69124844300d6c136119fdfabec83496b6a4e11b31741a0c8b8a8514cee346a6",
     "tests/test_gpu_default.py": "29d3464263fe90667763b0690ccc190fa03b2b88af05c6b88cd44bc0b6372283",
     "tests/workspace-state.test.mjs": "2040ecc0bf9e57d85f4e78722c20438e975403c440a2ec0766967c4e0d13a280",
-    "vite.config.mjs": "397801e05fddd18fd761e53e4cad47248744f85faf747f886532c468e082028b"
+    "vite.config.mjs": "397801e05fddd18fd761e53e4cad47248744f85faf747f886532c468e082028b",
+    "docs/wiki/Evidence-and-validation.md": "41a62c872c047410f0fb33e8966b248c9d8d531b8cbcfc0fa39c031f361c7a6a",
+    "scripts/smoke-mac-install.py": "5e69c01bc78bb569d2c8ee05e90d8198a418acab4cefadb30110d386817907f5"
   },
   "checks": {
     "python": {
-      "tests": 492,
-      "passed": 492,
+      "tests": 496,
+      "passed": 496,
       "skipped": 0,
       "failures": 0
     },
@@ -89,9 +91,9 @@
     },
     "documentation_local_links": 1193,
     "pc_kit": {
-      "source_commit": "d8d75648155bb7a2da66184ba88002b4f9770b8c",
+      "sha256": "888bb4add332f974a924314458f554f7b7508c323cb0e5e70882c4457f39838d",
+      "source_commit": "61978dac323480d0f0fa64733989c1aa0c9f6d6d",
       "files": 94,
-      "sha256": "8171c58510dba5119f95797a14f55e6245380f61ad28500cb578bb478c409858",
       "extraction_verified": true
     },
     "browser_total": 146
