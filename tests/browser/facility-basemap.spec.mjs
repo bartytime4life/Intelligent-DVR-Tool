@@ -78,6 +78,37 @@ test('unavailable map pictures leave the plan editable and offer a way back',asy
   await expect(page.getByRole('button',{name:'Save site',exact:true})).toBeEnabled();
 });
 
+test('Streets sends only the app origin and stops on an HTTP 200 policy tile',async({page})=>{
+  await open(page);
+  // Exercise the installed Python service's document policy on the normal editor.
+  await page.route('**/index.html*',async route=>{
+    const result=await route.fetch();
+    await route.fulfill({response:result,headers:{...result.headers(),'referrer-policy':'no-referrer'}});
+  });
+  const referrers=[];
+  await page.route('https://tile.openstreetmap.org/**',async route=>{
+    referrers.push(await route.request().headerValue('referer'));
+    await route.fulfill({contentType:'image/png',body:png,headers:{
+      'access-control-allow-origin':'*','access-control-expose-headers':'x-blocked','x-blocked':'Access denied'
+    }});
+  });
+  await page.goto('/index.html?private=omit#facility');
+  const before=await savedPlan(page);
+  await page.getByRole('button',{name:'Streets',exact:true}).click();
+  const notice=page.locator('.facility-layer-notice');
+  await expect(notice).toContainText('OpenStreetMap declined');
+  await expect(pill(page)).toContainText('showing the local grid');
+  expect(referrers.length).toBeGreaterThan(0);
+  expect([...new Set(referrers)]).toEqual([new URL(page.url()).origin+'/']);
+  expect(await savedPlan(page)).toEqual(before);
+  await expect(page.getByRole('button',{name:'Save site',exact:true})).toBeEnabled();
+  await notice.getByRole('button',{name:'Use Grid',exact:true}).click();
+  await expect(notice).toHaveCount(0);
+  await page.unroute('https://tile.openstreetmap.org/**');
+  await page.getByRole('button',{name:'Streets',exact:true}).click();
+  await expect(pill(page)).toContainText('Streets · OpenStreetMap');
+});
+
 test('aerial photos are not requested outside their coverage',async({page})=>{
   const requests=await open(page);
   await page.getByLabel('Longitude',{exact:true}).fill('11.2574936');

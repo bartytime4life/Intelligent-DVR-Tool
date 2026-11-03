@@ -6,9 +6,9 @@ export const BASEMAPS = [
   { id: 'grid', label: 'Grid', title: 'Local grid', external: false,
     disclosure: 'Local plan geometry only. No map pictures are requested.' },
   { id: 'streets', label: 'Streets', title: 'Streets · OpenStreetMap', external: true, host: 'tile.openstreetmap.org',
-    tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'], maxzoom: 19, coverage: 'world',
+    tiles: ['dvr-osm://tiles/{z}/{x}/{y}.png'], maxzoom: 19, coverage: 'world',
     attribution: '© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a> contributors',
-    disclosure: 'Your browser requests street-map pictures of the area you view from tile.openstreetmap.org. Building outlines appear where volunteers have mapped them.' },
+    disclosure: 'Your browser requests street-map pictures of the area you view from tile.openstreetmap.org and identifies the request with the app’s origin. Building outlines appear where volunteers have mapped them.' },
   { id: 'aerial', label: 'Aerial', title: 'Aerial · USGS The National Map', external: true, host: 'basemap.nationalmap.gov', photoHost: 'imagery.nationalmap.gov',
     tiles: ['https://basemap.nationalmap.gov/arcgis/rest/services/USGSImageryOnly/MapServer/tile/{z}/{y}/{x}'], maxzoom: 16, coverage: 'us',
     // Acknowledgment wording requested by USGS for The National Map services.
@@ -16,6 +16,40 @@ export const BASEMAPS = [
     disclosure: 'Your browser requests aerial pictures of the area you view from basemap.nationalmap.gov and one sharper site photo from imagery.nationalmap.gov (U.S. Geological Survey). Coverage is the contiguous United States.' },
 ];
 export const basemap = id => BASEMAPS.find(b => b.id === id) || BASEMAPS[0];
+// OSM sometimes returns HTTP 200 with a warning PNG. Cross-origin requests may
+// hide X-Blocked, so also recognize the exact two examples published by OSMF:
+// https://community.openstreetmap.org/t/133421/1
+const blockedStreetImages = new Map([
+  [7412, '6eabebf6e8f2ff16f9109c808d7e7a0228fed0235a05c074b4a1ef99f964edfd'],
+  [7044, '7f1c4a9af4d86ed75964a017a36497d123613628f34e22c2493be14f89a24bae'],
+]);
+export class StreetTileBlocked extends Error {
+  constructor() { super('OpenStreetMap declined the street map request.'); }
+}
+
+export async function loadStreetTile({ url }, { signal }, fetcher = fetch) {
+  const tile = /^dvr-osm:\/\/tiles\/(\d+\/\d+\/\d+\.png)$/.exec(url);
+  if (!tile) throw Error('Invalid street tile address.');
+  const response = await fetcher(`https://tile.openstreetmap.org/${tile[1]}`, {
+    signal, headers: { Accept: 'image/png' }, referrerPolicy: 'strict-origin',
+    credentials: 'omit', redirect: 'error',
+  });
+  if (response.status === 403 || response.status === 429 || response.headers.has('x-blocked')) {
+    throw new StreetTileBlocked();
+  }
+  if (!response.ok) {
+    // MapLibre falls back to parent tiles when a particular zoom tile is missing.
+    throw Object.assign(new Error(`Street map unavailable (HTTP ${response.status}).`), { status: response.status });
+  }
+  const data = await response.arrayBuffer();
+  const expected = blockedStreetImages.get(data.byteLength);
+  if (expected && globalThis.crypto?.subtle) {
+    const digest = new Uint8Array(await crypto.subtle.digest('SHA-256', data));
+    if (Array.from(digest, byte => byte.toString(16).padStart(2, '0')).join('') === expected) throw new StreetTileBlocked();
+  }
+  return { data, cacheControl: response.headers.get('cache-control'), expires: response.headers.get('expires') };
+}
+
 const FADES = [0.4, 0.55, 0.7, 0.85, 1];
 export const DEFAULT_FADE = 0.85;
 // Reading window.localStorage itself throws when the browser blocks site storage, so it is

@@ -269,7 +269,9 @@ timeout and the user can pick another service, open an offline extract or trace.
 | Aerial | USGS The National Map `USGSImageryOnly` cached tiles (`basemap.nationalmap.gov`, zoom ≤ 16, about 2 m per pixel) plus one 800 m × 800 m NAIP site photo at about 0.6 m per pixel from `imagery.nationalmap.gov` `exportImage` | Contiguous United States only; outside it the photo is not requested and the map offers Streets. Public-domain USGS/USDA imagery. The photo is rendered on request (6–45 s observed on 2026-11-01); a 60 s timeout, 6 MB limit and Retry apply. Capture dates vary by state and are not shown. |
 
 Requests are made by the browser, so the provider sees the viewer's IP address and
-the area being viewed. Plans, cameras, recordings and credentials are never sent.
+the area being viewed. For Streets, the request also includes the app origin
+(scheme, hostname and port). If OpenStreetMap declines access, the editor shows
+the local grid and offers Aerial where available. Plans, cameras, recordings and credentials are never sent.
 Only the layer name and a picture-strength setting are stored (`localStorage`
 keys `dvr.facility.basemap` and `dvr.facility.basemapFade`); the site photo is
 kept in memory for the session and is not part of saved plans or exports.
