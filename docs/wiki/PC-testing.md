@@ -20,6 +20,26 @@ uses `--analysis --recorder-config local-recorder.json` on Linux or
 until Start recording & analysis in Recognition. Its segment recovery works on
 both OSes; existing Linux-only manual last-analysis recovery is unchanged.
 
+## Local addresses
+
+| Open this | Address |
+| --- | --- |
+| DVR Monitor, Train and Facility | [Monitor](http://127.0.0.1:4298/#monitor) · [Train](http://127.0.0.1:4298/#train) · [Facility](http://127.0.0.1:4298/#facility) |
+| Standalone Training Lab | [Open the Lab](http://127.0.0.1:4188/) after starting the extracted package with Start-Lab-Linux.sh or Start-Lab-Windows.cmd |
+| Ollama runtime for a local assistant | `http://127.0.0.1:11434` |
+
+The DVR also serves an [entry page for the standalone Lab](http://127.0.0.1:4298/ollama-lab/offline.html).
+The full standalone workbench and its saved sessions live at the Lab address.
+A frontend-only Vite preview uses the PC port too. Run the native launcher to use local DVR services.
+
+**Updating an existing installation.** Browser reviews and facility plans belong
+to the original browser profile, hostname and port. To keep using records made
+on 4173 or 4299, start the DVR with that same port (for example
+`bash Start-Training-Linux.sh --port 4299` or `Start-Windows.cmd --port 4299`).
+Alternatively, export supported data at the old origin and import it at 4298.
+For the native launcher, an explicit port takes precedence over `DVR_PORT`.
+For Vite alone, pass `--port` to override the default. The macOS source launcher uses 4180.
+
 ## Get the PC kit
 
 Open the [PC install kit workflow](https://github.com/bartytime4life/Intelligent-DVR-Tool/actions/workflows/pc-install.yml).
@@ -65,7 +85,7 @@ Inside the extracted **Intelligent-DVR-PC** folder:
    **READY for explicit PC testing**. Recording analysis may say NOT_CONFIGURED;
    that is expected for webcam/DVR preview tests.
 3. Double-click **Start-Windows.cmd**. Keep its terminal open. It opens
-   **http://127.0.0.1:4173/** in your browser. Stop with Ctrl+C.
+   **http://127.0.0.1:4298/** in your browser. Stop with Ctrl+C.
 
 If Windows or organizational policy blocks the download, have the operator
 review/approve it normally. Do not disable protections. The .cmd entry points do
@@ -92,7 +112,7 @@ bash scripts/run-linux.sh --check
 bash scripts/run-linux.sh
 ~~~
 
-The last command opens **http://127.0.0.1:4173/**. Keep its terminal open and stop
+The last command opens **http://127.0.0.1:4298/**. Keep its terminal open and stop
 with Ctrl+C. **DVR_PYTHON=/path/to/python3.12** selects an interpreter;
 **--no-browser** suppresses browser opening.
 
@@ -266,7 +286,7 @@ local-feeds.json or private recordings as diagnostics.
 | WARN: dvr_config_permissions | Other accounts can read local-feeds.json; run chmod 600 local-feeds.json (readiness still passes) |
 | Browser cannot play analyzed video | Convert a copy to a supported codec, then analyze that copy |
 
-Use the same browser profile and exact **http://127.0.0.1:4173** origin for
+Use the same browser profile and exact **http://127.0.0.1:4298** origin for
 continuity. A changed port/origin has separate browser storage. Export reviews,
 rules and facility plans before updates; browser storage is not a backup.
 

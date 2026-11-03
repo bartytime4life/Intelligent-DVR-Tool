@@ -19,7 +19,7 @@ param(
     [string]$RecorderConfig = '',
     [string]$Report = '',
     [string]$Python = '',
-    [ValidateRange(1024, 65535)][int]$Port = 4173
+    [ValidateRange(1024, 65535)][int]$Port
 )
 $ErrorActionPreference = 'Stop'
 $TaskRoot = Split-Path -Parent $PSScriptRoot
@@ -29,7 +29,8 @@ try {
     if ($Python) { $TaskPython = $Python }
     elseif (Get-Command py -ErrorAction SilentlyContinue) { $TaskPython = 'py'; $TaskPythonArgs = @('-3.12') }
     else { $TaskPython = 'python' }
-    $TaskArgs = @('-m', 'edge.pc_setup', '--port', "$Port")
+    $TaskArgs = @('-m', 'edge.pc_setup')
+    if ($PSBoundParameters.ContainsKey('Port')) { $TaskArgs += @('--port', "$Port") }
     if ($Install) { $TaskArgs += '--install' }
     if ($Check) { $TaskArgs += '--check' }
     if ($Analysis) { $TaskArgs += '--analysis' }

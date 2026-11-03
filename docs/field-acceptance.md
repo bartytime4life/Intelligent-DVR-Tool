@@ -42,7 +42,7 @@ bash scripts/run-linux.sh
 .\scripts\Start-IntelligentDvr.ps1
 ~~~
 
-Start opens `http://127.0.0.1:4173/`. Stop with Ctrl+C. Install/Check must not contact cameras or start inference. A READY result is software readiness, **not** device acceptance. Readiness JSON excludes camera credentials/endpoints; inspect before sharing. If the port is busy, use `--port 4175` on Linux or `-Port 4175` on Windows. Browser localStorage is origin-specific; export reviews, rules and facility plans before changing ports, browser profile or kit.
+Start opens `http://127.0.0.1:4298/`. Stop with Ctrl+C. Install/Check must not contact cameras or start inference. A READY result is software readiness, **not** device acceptance. Readiness JSON excludes camera credentials/endpoints; inspect before sharing. If the port is busy, use `--port 4175` on Linux or `-Port 4175` on Windows. Browser localStorage is origin-specific; export reviews, rules and facility plans before changing ports, browser profile or kit.
 
 ## 2. Prove a real webcam-to-human-review workflow
 

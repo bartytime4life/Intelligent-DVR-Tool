@@ -31,7 +31,7 @@ Choose the job you want to finish:
 Use [Mac Install / Check / Start](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Mac-setup), or the
 [Linux/Windows PC kit](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/PC-testing). Run **Install**, then **Check**, then **Start**.
 Keep the Start terminal open. Use the address it prints: the Mac default is
-**http://127.0.0.1:4180/**; the PC kit default is **http://127.0.0.1:4173/**.
+**http://127.0.0.1:4180/**; the PC kit default is **http://127.0.0.1:4298/**.
 
 For recognition and training, prepare the verified local models and catalog
 first. A browser-only preview can display the interface while the local analysis
