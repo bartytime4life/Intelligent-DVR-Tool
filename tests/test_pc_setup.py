@@ -126,7 +126,7 @@ class PcSetupTest(unittest.TestCase):
         cases = [({}, [], 4298), ({'DVR_PORT': '4299'}, [], 4299),
                  ({'DVR_PORT': '4299'}, ['--port', '4310'], 4310)]
         for env, args, port in cases:
-            with self.subTest(port=port), patch.dict(os.environ, env, clear=True), \
+            with self.subTest(port=port), patch.dict(os.environ, env, clear=True), patch.object(pc, 'host_check'), \
                     patch.object(pc, 'check', return_value={'checks': [], 'ready': True}) as checked, \
                     redirect_stdout(StringIO()) as output:
                 self.assertEqual(pc.main(['--check', *args]), 0)
