@@ -17,7 +17,7 @@
 .stair-map-actions .stair-destination {display:flex;flex-flow:row;align-items:center;gap:5px;margin:0}
 .stair-map-actions .stair-destination span {margin:0;color:#c6eae3;font-size:12px}
 .stair-map-actions select {max-width:130px;color:#dcf5ef;background:#18383f;border:1px solid #4d747d;border-radius:4px;padding:5px}
-.stair-map-actions button {width:auto;min-height:32px;margin:0;padding:5px 8px;touch-action:manipulation}
+.stair-map-actions button {width:auto;min-height:32px;margin:0;padding:5px 8px}
 .stair-map-actions small {flex-basis:100%;max-width:33em;color:#ffd19a}
 @media(pointer:coarse){.stair-map-handle{width:42px;height:42px}.stair-map-actions button,.stair-map-actions select{min-height:38px}}
 .stair-map-handle.badge-left span {left:auto;right:calc(100% + 7px)}

@@ -106,6 +106,22 @@ const HOME_STEP = { building: 1, room: 2, doorway:2, window:2, label: 2, opening
 const SOLID_KINDS = { room: "Room", opening: "Floor opening", "floor-path": "Floor pathway" };
 // onDirtyChange(true) while leaving would discard unsaved edits, drafts or memory-only facilities.
 function FacilityBuilder({onDirtyChange,...props}){return <FacilityLibrary onDirtyChange={onDirtyChange}>{libraryProps=><FacilityEditor key={libraryProps.facilityId} {...props} {...libraryProps}/>}</FacilityLibrary>;}
+// After a map drag, mobile browsers can omit the compatibility click on an
+// external form button. Submit a completed tap directly and suppress that click.
+function MapFormSubmit({form,label,disabled,children}) {
+  const touch = useRef(null);
+  return <button type="submit" form={form} aria-label={label} className="facility-primary" disabled={disabled}
+    onTouchStart={e=>{const p=e.touches.length===1?e.touches[0]:null;touch.current=p?[p.clientX,p.clientY]:null;}}
+    onTouchCancel={()=>{touch.current=null;}}
+    onTouchEnd={e=>{
+      const start=touch.current,p=e.changedTouches[0];touch.current=null;
+      if(disabled || !start || !p || Math.hypot(p.clientX-start[0],p.clientY-start[1])>10)return;
+      const rect=e.currentTarget.getBoundingClientRect();
+      if(p.clientX<rect.left || p.clientX>rect.right || p.clientY<rect.top || p.clientY>rect.bottom)return;
+      e.preventDefault();e.currentTarget.form?.requestSubmit();
+    }}>{children}</button>;
+}
+
 function FacilityEditor({onPreviewCount,initialPlan,facilityControls,onPersist,onDraftChange,onImportFacilities,onOpenImport}) {
   const initial=useRef({plan:initialPlan,status:'Ready to edit',error:''});
   const [siteDirty,setSiteDirty]=useState(false),[shapePending,setShapePending]=useState(false),[linePending,setLinePending]=useState(false);
@@ -847,11 +863,11 @@ label. Inside the active building it belongs to the current level; elsewhere it 
       {step===2 && view==='floors' && ready && selected.kind==='window' && draft?.id===selected.id && draft.level===floor && <div className="window-map-actions" role="group" aria-label="Window map actions">
         <strong>{formatDistance(draft.width,units)} wide</strong>
         <button type="button" className="facility-secondary" onClick={()=>{setMapFocus(false);requestAnimationFrame(()=>properties.current?.querySelector('.facility-windows')?.scrollIntoView({block:'center'}));}}>Window details</button>
-        {propertyDirty?<button type="submit" form="facility-window-form" aria-label="Save window on map" className="facility-primary" disabled={!!previewError}>Save</button>:<button type="button" className="facility-primary" aria-label="Place another window on map" onClick={()=>startTool('window')}>Add another</button>}
+        {propertyDirty?<MapFormSubmit form="facility-window-form" label="Save window on map" disabled={!!previewError}>Save</MapFormSubmit>:<button type="button" className="facility-primary" aria-label="Place another window on map" onClick={()=>startTool('window')}>Add another</button>}
       </div>}
       {ready && view==='floors' && stairEditor && <div className="stair-map-actions" role="group" aria-label="Stair map actions">
         <span>From <strong>L{stairEditor.fromLevel+1}</strong></span><StairDestination onMap building={b} item={stairEditor} onChange={setDraft}/>
-        {propertyDirty ? <><button type="submit" form="facility-stair-form" aria-label="Save stair on map" className="facility-primary" disabled={!!(stairIssue || previewError)}>Save</button>
+        {propertyDirty ? <><MapFormSubmit form="facility-stair-form" label="Save stair on map" disabled={!!(stairIssue || previewError)}>Save</MapFormSubmit>
           <button type="button" aria-label="Discard stair changes on map" className="facility-secondary" onClick={discardPlacement}><X/></button></> : <button type="button" className="facility-secondary" onClick={()=>startTool('stair')}>Place another</button>}
         {(stairIssue || previewError) && <small role="status">{stairIssue || previewError}</small>}
       </div>}
