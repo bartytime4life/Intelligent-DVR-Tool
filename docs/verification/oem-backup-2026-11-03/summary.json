@@ -1,0 +1,79 @@
+{
+  "schema": "intelligent-dvr.oem-backup-verification.v1",
+  "date": "2026-11-03",
+  "upstream_base": "4cc2c79e876756ac304068a2b4a29c0d7dee3367",
+  "host": "owner-linux",
+  "python": {
+    "discovered": 477,
+    "passed": 477,
+    "skipped": 0,
+    "failed": 0,
+    "real_loopback": true
+  },
+  "frontend": {
+    "discovered": 357,
+    "passed": 356,
+    "skipped": 1,
+    "failed": 0
+  },
+  "browser": {
+    "backup_controlled_routes": 12,
+    "native_backup_cpu_review": 1,
+    "existing_controlled_rtsp_recorder": 2,
+    "failed": 0,
+    "browser": "Google Chrome via Playwright 1.61.1"
+  },
+  "sites": {
+    "passed": 4,
+    "failed": 0
+  },
+  "documentation": {
+    "links_media": "passed",
+    "generated_wiki_pages": 63,
+    "native_wiki_published": false
+  },
+  "source_sha256": {
+    "edge/backup_library.py": "e129560808d6776fb7babf66b1394ca1e4fd725a5adcf7ca9d16a7a33444ca89",
+    "edge/dvr_setup.py": "313dc49998b291f3293419c784f8b5de5972ea7a43ad21c4660bb1fa3c0ba2d8",
+    "edge/local_service.py": "e4f2de2003180bd597553621b0e41e8ca7f7f062c76ae99f56eb597c951f01f7",
+    "edge/local_feeds.py": "70e3e580fbd0d281037e5a7c730eee29c200b0c277fbd87280b96b9f0f51cf42",
+    "edge/pc_setup.py": "bf0fde54b4e25495f410aeb1383b6fa0d150a2acc7e36f247e8b2ca2ba2e1296",
+    "src/BackupLibrary.jsx": "84ac7e14250b879470982931f0474c5d78a78ca92bf94ab2b2e1b5b5e3d70202",
+    "src/backup-library.mjs": "d7b3d716f12d1d3a279832774d51506bb6cbd1f7ce6ff361a9821db5890a53c6",
+    "src/backup-library.css": "81d6c17e0e063695fb165ec0aff8e0d6710763f340eba7963a3b75cf1347f9c8",
+    "src/RecognitionReview.jsx": "d224330a53c68b573116ca0f684c7a1e02375b1ed56ca573d53e55bad60fd5a6",
+    "src/LanRecorder.jsx": "747a8bae27dbaa60658233e8e71f8969484113cc93630ae879f0dfbc33b8964e",
+    "Start-DVR-Companion-Linux.sh": "2de0e4bbbb13aa9aabadb746137ed8a17d564ddca7cc2c34e5f892cfb3b791e0",
+    "Start-DVR-Companion-Windows.cmd": "405cc698b7e25f0ed91e4761684782e8b64fa58da463d97d8edd4bc564134615",
+    "scripts/build-pc-kit.py": "190308a3e669c4648abdda16473d8d4fd497576485b5e5e55020340d7a29331b",
+    "scripts/build-wiki.py": "34e3195d45695a80e8e8fcc921186c47fbb43c7840c98204067d7df121d287aa",
+    "tests/test_backup_library.py": "ba69402480a395fd4c638b4dd3a287980766614c644c8a15df9402da6964cbc1",
+    "tests/test_dvr_setup.py": "80455ae34b1ec92f32c2c05bdff46a70788641610a2bae51d589439529a29aad",
+    "tests/library_native_fixture.py": "5e4962e7573d24defcc07c14c26e27653568a51c54d301f519c737687c9c5298",
+    "tests/library-native-browser/backup-native.spec.mjs": "0ff8d2df7f3f4984222f8c1742932d3ade3c310c0207651d9ceacb5dc375bf86",
+    "tests/backup-library.test.mjs": "f883b5ff3206a29054ac6815bb02fc80baaa1d02d2565435dddd2405c593b119",
+    "tests/library-browser/backup-library.spec.mjs": "462179ace57cce6b323b1d041a0a66abbcc5f78952070852556ab6f5c9c84957"
+  },
+  "local_log_sha256": {
+    "oem-python-sockets.log": "fd0825f31daa89451fe395294ae601322d1381f78eb820eca23bc14b8e97204f",
+    "oem-frontend.log": "fa70829ba98c86a5ad26adcadf7a443fca81613396ceb3d25dca6a774f3f1e60",
+    "oem-native-browser.log": "3087fd039fa5b8357d222ef9b790fc00dd8e3ef1d44027d6a8ab761a43d040f4",
+    "oem-recorder-browser.log": "31fbcae126a1c93ca8f81ce2008d165005bf2f1c1f2bc2cc727a0b5b46d9c138",
+    "oem-sites.log": "cd454accc3a9104c209740f433abb7ecf521aa1ff3928a73250e7ff024eeb8a2",
+    "oem-final-targeted.log": "beafc025f49aae9a8e423454fe66bb4c98749a34038083b8a8d04dd9b0d8800d"
+  },
+  "qualification": {
+    "physical_oem": "not_tested",
+    "physical_camera": "not_tested",
+    "windows_mac_device": "not_tested",
+    "recognition_accuracy": "unqualified",
+    "continuous_recording": "unqualified",
+    "power_loss_durability": "unqualified",
+    "100_camera_capacity": "unqualified"
+  },
+  "final_targeted_python": {
+    "passed": 25,
+    "failed": 0,
+    "purpose": "Latest storage-availability status and backup/setup paths"
+  }
+}

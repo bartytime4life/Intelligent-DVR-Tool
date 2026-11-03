@@ -1,5 +1,7 @@
 # Camera clip → recognition → reviewed report
 
+For an existing OEM DVR, use the [watched-folder backup workflow](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/OEM-backup) to preserve another verified local copy before optional analysis.
+
 [Guide index](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Guide-index) · [Visual handbook](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-handbook) · [Screenshot atlas](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-atlas) · [Troubleshooting](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Troubleshooting)
 
 ![Workflow diagram for recording workflow.](https://raw.githubusercontent.com/wiki/bartytime4life/Intelligent-DVR-Tool/docs/media/guide/recording.svg)

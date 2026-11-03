@@ -1,5 +1,7 @@
 # Your guide to Intelligent DVR
 
+[Use an existing OEM DVR: local backup and guided LAN setup](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/OEM-backup).
+
 [Home](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Home) · [Visual handbook](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-handbook) · [First session](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Getting-started) · [Troubleshooting](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Troubleshooting) · [Product status](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Product-status)
 
 ![Conceptual overview of the camera, local recording, human-review computer and facility plan.](https://raw.githubusercontent.com/wiki/bartytime4life/Intelligent-DVR-Tool/docs/media/guide/overview.jpg)

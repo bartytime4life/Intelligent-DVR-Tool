@@ -31,6 +31,11 @@ export default function LanRecorder({onResult, onBusy, blocked, onImport, onStat
     finally { setWorking(false); }
   }
   useEffect(() => {
+    const configured = () => { if (local) void connect(); };
+    window.addEventListener('dvr-recorder-configured', configured);
+    return () => window.removeEventListener('dvr-recorder-configured', configured);
+  }, [local]);
+  useEffect(() => {
     if (!connected) return;
     let disposed = false;
     const timer = setTimeout(async () => {

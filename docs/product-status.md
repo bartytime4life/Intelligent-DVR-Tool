@@ -1,5 +1,12 @@
 # Product status and evidence
 
+**November 3 source follow-up:** [OEM companion backup](oem-backup.md) adds
+owner-selected watched folders, verified byte-for-byte local copies, durable
+review storage, optional queued analysis and guided private RTSP source/recorder
+setup. Controlled Linux source checks do not establish particular OEM/device,
+Windows/Mac, continuous-recording or 100-camera acceptance. It does not implement
+ONVIF discovery, vendor SDKs or universal proprietary-format analysis.
+
 [Offline tracking evaluation](tracking-evaluation.md) now measures saved traces
 against independently labeled sampled frames, reporting identity switches,
 misses, false tracks, MOTA, IDF1 and reference HOTA. Deterministic synthetic cases

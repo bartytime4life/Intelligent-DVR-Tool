@@ -452,7 +452,8 @@ def main(argv=None):
         python = validate_environment()
         if not args.feeds_config.is_file():
             raise SetupError('DVR config is missing. Run the installer to create an empty local-feeds.json.')
-        service = [str(python), '-m', 'edge.local_service', '--feeds-config', str(args.feeds_config), '--port', str(args.port)]
+        service = [str(python), '-m', 'edge.local_service', '--feeds-config', str(args.feeds_config),
+                   '--camera-setup-config', str(args.feeds_config), '--port', str(args.port)]
         if args.live_backend != 'opencv-cpu':
             service += ['--live-backend', args.live_backend]
         if args.recordings or args.config:

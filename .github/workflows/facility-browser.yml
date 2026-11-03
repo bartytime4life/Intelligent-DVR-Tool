@@ -29,6 +29,10 @@ jobs:
         run: npx playwright test --config=playwright.feeds.config.mjs
       - name: One-camera recorder with controlled RTSP, CPU analysis and browser review
         run: npx playwright test --config=playwright.recorder.config.mjs
+      - name: OEM backup setup and browser status/error checks
+        run: npx playwright test --config=playwright.library.config.mjs
+      - name: OEM copied recording through real local CPU analysis and review
+        run: npx playwright test --config=playwright.library-native.config.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -38,5 +42,7 @@ jobs:
             qa-local/analysis-browser-results.json
             qa-local/feeds-browser-results.json
             qa-local/recorder-browser-results.json
+            qa-local/library-browser-results.json
+            qa-local/library-native-browser-results.json
             test-results/
             qa-local/workspace-audit/

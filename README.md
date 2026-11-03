@@ -43,6 +43,16 @@ See [local addresses and earlier installations](docs/pc-testing.md#local-address
 
 *Controlled local captures from the merged PR #71 application source. The facility is a fictional built-in example. No private footage, enrolled people or surveyed site is pictured. [Full gallery and capture details](docs/visual-atlas.md).*
 
+## Use your existing DVR
+
+Keep the OEM software recording and use **Recognition → Use my existing DVR**
+to select its finished-recording/export folder and a separate local backup folder.
+The tool verifies each copied file, preserves originals, avoids duplicate copies,
+and optionally analyzes eligible videos. Guided IP-camera/LAN-DVR channel setup
+also saves authorized RTSP sources without JSON editing on the PC launcher.
+[Setup, supported formats and limits](docs/oem-backup.md). This companion path
+has controlled software checks; particular OEMs and physical devices still need acceptance.
+
 ## From one clip to a useful review
 
 ![Capture or import a selected clip, analyze it locally, then review and export the matched results.](docs/media/guide/recording.svg)

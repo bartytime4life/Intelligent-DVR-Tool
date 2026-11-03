@@ -17,6 +17,15 @@ The source may be a DVR/NVR's documented RTSP channel or a standalone IP camera.
 camera acceptance, recognition accuracy, continuous archival recording or a
 100-camera capacity claim. See the [verification record](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/lan-recorder-2026-10-30/README.md).
 
+## Guided source setup
+
+The ordinary Linux/Windows launcher now offers **Recognition → Use my existing
+DVR → Connect an IP camera or LAN DVR**. Save the documented channel, select it,
+and choose **Use for LAN recording**. This prepares the same stopped one-camera
+recorder; explicitly Start below. Existing file-based setup remains available.
+For full-byte copies from OEM recording/export folders, use the separate
+[OEM backup library](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/OEM-backup), which has no automatic deletion.
+
 ## Configure and start deliberately
 
 1. Complete [PC setup and pinned model preparation](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/PC-testing). Configure an

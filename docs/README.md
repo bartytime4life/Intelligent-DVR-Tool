@@ -1,5 +1,7 @@
 # Your guide to Intelligent DVR
 
+[Use an existing OEM DVR: local backup and guided LAN setup](oem-backup.md).
+
 [Home](../README.md) · [Visual handbook](how-to.md) · [First session](getting-started.md) · [Troubleshooting](troubleshooting.md) · [Product status](product-status.md)
 
 ![Conceptual overview of the camera, local recording, human-review computer and facility plan.](media/guide/overview.jpg)

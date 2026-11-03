@@ -246,3 +246,12 @@ Owner facility-location and imagery preference (2026-11-02): coarse device
 locations must leave the site alone. Offer address or manual pin correction and
 keep Save site explicit. Provide real, detailed overhead imagery to inspect
 individual buildings, with the satellite and aerial sources labeled.
+
+
+Owner OEM-companion request (2026-11-03): keep the existing OEM DVR recording on
+its host computer while Intelligent DVR makes a separate verified local copy of
+finished recordings and optionally analyzes those copies. Prefer guided folder
+and authorized LAN/IP-camera setup, preserve original bytes and credentials, show
+storage/interruption/coverage limits, and require device/OEM acceptance before
+claiming broad compatibility. No automatic deletion in the OEM backup library;
+keep its full-byte copies distinct from the sampled LAN recorder's retention.
