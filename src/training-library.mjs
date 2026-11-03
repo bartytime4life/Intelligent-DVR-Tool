@@ -62,29 +62,43 @@ export function trainingSessionEvidence(view, outcome, check) {
   return record;
 }
 
-async function mutate(storage, change) {
-  const write = () => {
-    const library = readTrainingLibrary(storage);
-    if (library.error) return library;
-    try {
-      const sessions = change(library.sessions);
-      const raw = JSON.stringify({ version: 1, sessions });
-      if (raw.length > MAX_LIBRARY_BYTES) throw Error('The training evidence library is full. Remove an older session before adding another.');
-      storage.setItem(TRAINING_LIBRARY_KEY, raw);
-      return { sessions, error: '' };
-    } catch (error) { return { ...library, error: error.message || 'Training evidence could not be saved. Existing sessions were preserved.' }; }
-  };
+function mutateUnlocked(storage, change) {
+  const library = readTrainingLibrary(storage);
+  if (library.error) return library;
+  try {
+    const sessions = change(library.sessions);
+    const raw = JSON.stringify({ version: 1, sessions });
+    if (raw.length > MAX_LIBRARY_BYTES) throw Error('The training evidence library is full. Remove an older session before adding another.');
+    storage.setItem(TRAINING_LIBRARY_KEY, raw);
+    return { sessions, error: '' };
+  } catch (error) { return { ...library, error: error.message || 'Training evidence could not be saved. Existing sessions were preserved.' }; }
+}
+
+function withLibraryLock(work) {
   // Serialize read/merge/write across tabs as well as rapid clicks in this tab.
-  try { return await (globalThis.navigator?.locks ? navigator.locks.request(TRAINING_LIBRARY_KEY, write) : write()); }
+  return globalThis.navigator?.locks ? navigator.locks.request(TRAINING_LIBRARY_KEY, work) : work();
+}
+
+async function mutate(storage, change) {
+  try { return await withLibraryLock(() => mutateUnlocked(storage, change)); }
   catch { return { ...readTrainingLibrary(storage), error: 'Training evidence could not be saved. Check browser storage and try again.' }; }
 }
 
+function addEvidence(sessions, record) {
+  const problem = trainingEvidenceAdditionError(sessions, record);
+  if (problem) throw Error(problem);
+  return [...sessions, record];
+}
+
 export function saveTrainingEvidence(storage, record) {
-  return mutate(storage, sessions => {
-    const problem = trainingEvidenceAdditionError(sessions, record);
-    if (problem) throw Error(problem);
-    return [...sessions, record];
-  });
+  return mutate(storage, sessions => addEvidence(sessions, record));
+}
+
+export function withTrainingLibraryDecision(storage, decide) {
+  // Keep the same lock through the asynchronous service checks and rule save.
+  // Otherwise another tab could add a contrary example after the last replay.
+  return withLibraryLock(() => decide({ library: readTrainingLibrary(storage),
+    saveEvidence: record => mutateUnlocked(storage, sessions => addEvidence(sessions, record)) }));
 }
 
 export function trainingEvidenceAdditionError(sessions, record) {

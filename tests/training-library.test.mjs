@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { TRAINING_LIBRARY_KEY, readTrainingLibrary, trainingSessionEvidence, saveTrainingEvidence,
   removeTrainingEvidence, compatibleTrainingSessions, recommendCumulativeThreshold,
-  compareTrainingLibrary, trainingLibraryReceipt } from '../src/training-library.mjs';
+  compareTrainingLibrary, trainingLibraryReceipt, withTrainingLibraryDecision } from '../src/training-library.mjs';
 
 const sha = n => n.toString(16).padStart(64, '0');
 const storage = () => { const data = new Map(); return { getItem: k => data.get(k) ?? null, setItem: (k, v) => data.set(k, v) }; };
@@ -90,4 +90,39 @@ test('capacity, corrupt data and storage errors preserve previous evidence', asy
   store.setItem(TRAINING_LIBRARY_KEY, '{broken');
   assert.ok((await saveTrainingEvidence(store, evidence(51))).error);
   assert.equal(store.getItem(TRAINING_LIBRARY_KEY), '{broken');
+});
+
+test('a decision holds the browser lock through service waits without deadlocking its own evidence save', async () => {
+  const original = Object.getOwnPropertyDescriptor(globalThis, 'navigator');
+  let tail = Promise.resolve();
+  Object.defineProperty(globalThis, 'navigator', { configurable: true, value: { locks: { request(name, work) {
+    assert.equal(name, TRAINING_LIBRARY_KEY);
+    const next = tail.then(work);
+    tail = next.catch(() => {});
+    return next;
+  } } } });
+  try {
+    const store = storage();
+    await saveTrainingEvidence(store, evidence(1));
+    let release, started;
+    const waiting = new Promise(resolve => { release = resolve; });
+    const ready = new Promise(resolve => { started = resolve; });
+    const decision = withTrainingLibraryDecision(store, async ({ library, saveEvidence }) => {
+      assert.equal(library.sessions.length, 1);
+      started();
+      await waiting; // models/rules request and rule save are in flight
+      return saveEvidence(evidence(2));
+    });
+    await ready;
+    const otherTab = saveTrainingEvidence(store, evidence(3));
+    await Promise.resolve();
+    assert.equal(readTrainingLibrary(store).sessions.length, 1);
+    release();
+    assert.equal((await decision).sessions.length, 2);
+    assert.equal((await otherTab).sessions.length, 3);
+    assert.deepEqual(readTrainingLibrary(store).sessions.map(s => s.calibration.sourceHash), [sha(1), sha(2), sha(3)]);
+  } finally {
+    if (original) Object.defineProperty(globalThis, 'navigator', original);
+    else delete globalThis.navigator;
+  }
 });

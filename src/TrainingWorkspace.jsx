@@ -10,7 +10,7 @@ import TrainingHome from './TrainingHome.jsx';
 import TrainingScorecard from './TrainingScorecard.jsx';
 import AnalyzeStep from './TrainingAnalyze.jsx';
 import TrainingLibrary from './TrainingLibrary.jsx';
-import { readTrainingLibrary, compatibleTrainingSessions, trainingSessionEvidence, saveTrainingEvidence,
+import { readTrainingLibrary, compatibleTrainingSessions, trainingSessionEvidence, withTrainingLibraryDecision,
   removeTrainingEvidence, compareTrainingLibrary, trainingLibraryReceipt, recommendCumulativeThreshold,
   trainingEvidenceAdditionError, reusedTrainingSource } from './training-library.mjs';
 import './training.css';
@@ -128,59 +128,60 @@ export default function TrainingWorkspace({ onOpenRecognition }) {
     setSaving(true);
     setError('');
     try {
-      const latest = readTrainingLibrary(store());
-      if ((apply || includeSession) && latest.error) throw Error(latest.error);
-      if (apply && reusedTrainingSource(latest.sessions, [outcome.sourceHash, check.context.sourceHash]))
-        throw Error('One of these recordings is already in the saved evidence. Make new recordings before applying a setting.');
-      const past = compatibleTrainingSessions(latest.sessions, viewName, outcome);
-      const protection = compareTrainingLibrary(past, outcome.current, value, includeSession ? outcome : null);
-      if (apply && protection.regressions) throw Error('This setting loses person finds or adds empty-room flags on saved evidence. Keep the current setting and record another session.');
-      // Validate evidence before saving a rule. Storage failures are reported
-      // separately so a successfully saved rule is never presented as lost.
-      const evidence = includeSession ? trainingSessionEvidence(viewName, outcome, checked ? check : null) : null;
-      if (evidence) {
-        const problem = trainingEvidenceAdditionError(latest.sessions, evidence);
-        if (problem) throw Error(problem);
-      }
-      let rule = null, selected = false;
-      if (apply) {
-        const currentSession = await (await analysisRequest('/session', { signal: AbortSignal.timeout(10000) })).json();
-        const model = currentSession.models?.find(item => item.id === outcome.modelId);
-        const reference = currentSession.rules?.find(item => item.id === outcome.rulesId);
-        if (!currentSession.training?.enabled || model?.sha256 !== outcome.modelHash ||
-            model.labels_sha256 !== outcome.labelHash || model.profile !== outcome.profile ||
-            !reference?.sha256 || reference.sha256 !== outcome.ruleFileHash || !reference.models.includes(outcome.modelId)) {
-          throw Error('The local detector, reference rule or saving permission has changed. Start a new session before using this setting.');
+      await withTrainingLibraryDecision(store(), async ({ library: latest, saveEvidence }) => {
+        if ((apply || includeSession) && latest.error) throw Error(latest.error);
+        if (apply && reusedTrainingSource(latest.sessions, [outcome.sourceHash, check.context.sourceHash]))
+          throw Error('One of these recordings is already in the saved evidence. Make new recordings before applying a setting.');
+        const past = compatibleTrainingSessions(latest.sessions, viewName, outcome);
+        const protection = compareTrainingLibrary(past, outcome.current, value, includeSession ? outcome : null);
+        if (apply && protection.regressions) throw Error('This setting loses person finds or adds empty-room flags on saved evidence. Keep the current setting and record another session.');
+        // Validate evidence before saving a rule. Storage failures are reported
+        // separately so a successfully saved rule is never presented as lost.
+        const evidence = includeSession ? trainingSessionEvidence(viewName, outcome, checked ? check : null) : null;
+        if (evidence) {
+          const problem = trainingEvidenceAdditionError(latest.sessions, evidence);
+          if (problem) throw Error(problem);
         }
-        // Keep the original dwell and gap. Only a single whole-view person rule
-        // can be tuned here, so a session cannot replace a set of zone rules.
-        const { dwell, max_gap, rect } = outcome.rule;
-        // Identical checked rule contents are reusable, including after a lost
-        // response. Repeated sessions need not consume another catalog slot.
-        const name = `Person · checked threshold ${value.toFixed(2)}`;
-        const response = await analysisRequest('/training/rules', { token: currentSession.token, method: 'POST',
-          body: { name, label: 'person', threshold: value, rect, dwell, max_gap } });
-        ({ rule } = await response.json());
-        selected = writeDefaultRules(store(), rule.id, outcome.modelId, { modelHash: outcome.modelHash,
-          labelHash: outcome.labelHash, rulesHash: rule.sha256, profile: outcome.profile });
-        setService(s => ({ ...s, rules: [...s.rules.filter(r => r.id !== rule.id), rule] }));
-      }
-      const threshold = selected ? value : outcome.current;
-      const scored = checked ? (selected ? check.result.candidate : check.result.baseline) : evaluate(outcome.labeled, threshold);
-      const counts = m => ({ found: m.found, presentChecks: m.presentChecks, falseAlarms: m.falseAlarms, emptyChecks: m.emptyChecks });
-      const entry = { at: new Date().toISOString(), kind: 'detection', threshold, applied: selected,
-        detectionRate: scored.detectionRate, ...counts(scored), checks: scored.presentChecks + scored.emptyChecks,
-        ...(rule && { rulesId: rule.id }),
-        ...(checked && { check: { value: check.value, verdict: check.result.verdict,
-          baseline: counts(check.result.baseline), candidate: counts(check.result.candidate) } }) };
-      const historyResult = appendHistory(store(), entry);
-      if (!historyResult.error) setHistory(historyResult.history);
-      const libraryResult = evidence ? await saveTrainingEvidence(store(), evidence) : latest;
-      setLibrary(libraryResult);
-      setSaved({ rule, selected, historySaved: !historyResult.error,
-        evidenceSaved: !!evidence && !libraryResult.error, evidenceError: evidence ? libraryResult.error : '',
-        evidenceCount: libraryResult.sessions.length });
-      setStep('done');
+        let rule = null, selected = false;
+        if (apply) {
+          const currentSession = await (await analysisRequest('/session', { signal: AbortSignal.timeout(10000) })).json();
+          const model = currentSession.models?.find(item => item.id === outcome.modelId);
+          const reference = currentSession.rules?.find(item => item.id === outcome.rulesId);
+          if (!currentSession.training?.enabled || model?.sha256 !== outcome.modelHash ||
+              model.labels_sha256 !== outcome.labelHash || model.profile !== outcome.profile ||
+              !reference?.sha256 || reference.sha256 !== outcome.ruleFileHash || !reference.models.includes(outcome.modelId)) {
+            throw Error('The local detector, reference rule or saving permission has changed. Start a new session before using this setting.');
+          }
+          // Keep the original dwell and gap. Only a single whole-view person rule
+          // can be tuned here, so a session cannot replace a set of zone rules.
+          const { dwell, max_gap, rect } = outcome.rule;
+          // Identical checked rule contents are reusable, including after a lost
+          // response. Repeated sessions need not consume another catalog slot.
+          const name = `Person · checked threshold ${value.toFixed(2)}`;
+          const response = await analysisRequest('/training/rules', { token: currentSession.token, method: 'POST',
+            body: { name, label: 'person', threshold: value, rect, dwell, max_gap } });
+          ({ rule } = await response.json());
+          selected = writeDefaultRules(store(), rule.id, outcome.modelId, { modelHash: outcome.modelHash,
+            labelHash: outcome.labelHash, rulesHash: rule.sha256, profile: outcome.profile });
+          setService(s => ({ ...s, rules: [...s.rules.filter(r => r.id !== rule.id), rule] }));
+        }
+        const threshold = selected ? value : outcome.current;
+        const scored = checked ? (selected ? check.result.candidate : check.result.baseline) : evaluate(outcome.labeled, threshold);
+        const counts = m => ({ found: m.found, presentChecks: m.presentChecks, falseAlarms: m.falseAlarms, emptyChecks: m.emptyChecks });
+        const entry = { at: new Date().toISOString(), kind: 'detection', threshold, applied: selected,
+          detectionRate: scored.detectionRate, ...counts(scored), checks: scored.presentChecks + scored.emptyChecks,
+          ...(rule && { rulesId: rule.id }),
+          ...(checked && { check: { value: check.value, verdict: check.result.verdict,
+            baseline: counts(check.result.baseline), candidate: counts(check.result.candidate) } }) };
+        const historyResult = appendHistory(store(), entry);
+        if (!historyResult.error) setHistory(historyResult.history);
+        const libraryResult = evidence ? saveEvidence(evidence) : latest;
+        setLibrary(libraryResult);
+        setSaved({ rule, selected, historySaved: !historyResult.error,
+          evidenceSaved: !!evidence && !libraryResult.error, evidenceError: evidence ? libraryResult.error : '',
+          evidenceCount: libraryResult.sessions.length });
+        setStep('done');
+      });
     } catch (e) {
       setError(e.message);
     } finally {
