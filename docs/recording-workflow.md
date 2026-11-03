@@ -1,5 +1,7 @@
 # Camera clip → recognition → reviewed report
 
+For an existing OEM DVR, use the [watched-folder backup workflow](oem-backup.md) to preserve another verified local copy before optional analysis.
+
 [Guide index](README.md) · [Visual handbook](how-to.md) · [Screenshot atlas](visual-atlas.md) · [Troubleshooting](troubleshooting.md)
 
 ![Workflow diagram for recording workflow.](media/guide/recording.svg)

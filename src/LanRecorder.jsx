@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { analysisRequest, localAnalysisOrigin, boundedBody, refused } from './local-analysis.mjs';
+import { analysisRequest, analysisBackendLabel, localAnalysisOrigin, boundedBody, refused } from './local-analysis.mjs';
 import { recorderRequest, openSegment, recorderMessage, TIMING_DRIFT_WARNING_SECONDS } from './lan-recorder.mjs';
 import { saveObservationStills } from './local-images.mjs';
 import { downloadBlob } from './clip-capture.mjs';
@@ -30,6 +30,11 @@ export default function LanRecorder({onResult, onBusy, blocked, onImport, onStat
     } catch (err) { setConnected(false); setError(err.message); }
     finally { setWorking(false); }
   }
+  useEffect(() => {
+    const configured = () => { if (local) void connect(); };
+    window.addEventListener('dvr-recorder-configured', configured);
+    return () => window.removeEventListener('dvr-recorder-configured', configured);
+  }, [local]);
   useEffect(() => {
     if (!connected) return;
     let disposed = false;
@@ -104,6 +109,7 @@ export default function LanRecorder({onResult, onBusy, blocked, onImport, onStat
         <span>Last segment {status.seconds_since_completed_segment === null ? 'not completed this session' : `${status.seconds_since_completed_segment}s ago`} · retry in {status.retry_seconds}s</span>
         {status.supervisor && <span className={status.supervisor.alive ? '' : 'recognition-error'}>Supervisor {status.supervisor.alive ? `running · checked ${status.supervisor.last_tick_age_seconds ?? '—'}s ago` : 'stopped — restart the service'}</span>}
       </div>
+      {status.analysis_job && <p role="status">{analysisBackendLabel(status.analysis_job, catalog?.backend)} · {status.analysis_job.frames_analyzed} samples analyzed</p>}
       {status.error && <p className="recognition-error" role="status">{recorderMessage(status.error)}</p>}
       <p className="local-analysis-footnote">This first recorder reconnects between segments and samples frames. Gaps are possible. Clip playback uses a nominal 10 fps; the timing download records local receive times. These are not camera timestamps, unique-person counts or verified recognition accuracy. Restart always leaves recording stopped.</p>
       {!!status.segments.length && (() => {

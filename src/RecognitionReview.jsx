@@ -3,6 +3,7 @@ import { parseRecognition, frameSummary, canShowBoxes, matchRecording, trackRows
 import './recognition.css';
 import LocalAnalysis from './LocalAnalysis.jsx';
 import LanRecorder from './LanRecorder.jsx';
+import BackupLibrary from './BackupLibrary.jsx';
 import RecognitionReport from './RecognitionReport.jsx';
 import { coverageLabel } from './media-coverage.mjs';
 import { saveObservationStills, grabFrame } from './local-images.mjs';
@@ -17,6 +18,7 @@ export default function RecognitionReview({ onImport, active = true, clip, onCli
   const [threshold, setThreshold] = useState(0.5), [status, setStatus] = useState(''), [error, setError] = useState('');
   const [analysisBusy, setAnalysisBusy] = useState(false);
   const [recorderBusy, setRecorderBusy] = useState(false);
+  const [libraryBusy, setLibraryBusy] = useState(false);
   const [detectionInput, setDetectionInput] = useState('original');
   const [sending, setSending] = useState(false);
   // Suggestions exist only for results from this computer's own analysis jobs with enrollment on.
@@ -126,12 +128,13 @@ export default function RecognitionReview({ onImport, active = true, clip, onCli
     <p className="eyebrow">LOCAL RECORDING · MODEL OBSERVATIONS</p>
     <h1>Recognition</h1>
     <p className="recognition-intro">See detected people and objects on the recording they came from. Inspect each sampled scene, then send observations for human review.</p>
-    <LanRecorder onResult={openLocalResult} onBusy={setRecorderBusy} blocked={analysisBusy} onImport={onImport} onStatus={onRecorderStatus} />
-    <LocalAnalysis onResult={openLocalResult} onBusy={setAnalysisBusy} clip={clip} onClip={onClip} recorderBusy={recorderBusy} currentRun={run} />
+    <BackupLibrary onResult={openLocalResult} onBusy={setLibraryBusy} blocked={analysisBusy || recorderBusy} />
+    <LanRecorder onResult={openLocalResult} onBusy={setRecorderBusy} blocked={analysisBusy || libraryBusy} onImport={onImport} onStatus={onRecorderStatus} />
+    <LocalAnalysis onResult={openLocalResult} onBusy={setAnalysisBusy} clip={clip} onClip={onClip} recorderBusy={recorderBusy || libraryBusy} currentRun={run} />
     <h2 className="recognition-import-heading">Or open previously exported results</h2>
     <div className="recognition-loaders">
-      <label className="button">1. Open recognition results<input type="file" accept=".json,application/json" onChange={loadRun} disabled={analysisBusy} aria-label="Open recognition results" /></label>
-      <label className={`button ${!run ? 'disabled' : ''}`}>2. Match original recording<input type="file" accept="video/*,.avi,.mkv" disabled={!run || analysisBusy} onChange={loadVideo} aria-label="Match original recording" /></label>
+      <label className="button">1. Open recognition results<input type="file" accept=".json,application/json" onChange={loadRun} disabled={analysisBusy || libraryBusy} aria-label="Open recognition results" /></label>
+      <label className={`button ${!run ? 'disabled' : ''}`}>2. Match original recording<input type="file" accept="video/*,.avi,.mkv" disabled={!run || analysisBusy || libraryBusy} onChange={loadVideo} aria-label="Match original recording" /></label>
     </div>
     <ol className="recognition-progress" aria-label="Recording review progress">
       <li className={run ? 'complete' : 'current'}><span>1</span><div>Open results<small>{run ? `${run.trace.frames.length} samples loaded` : 'Analyzer review JSON'}</small></div></li>

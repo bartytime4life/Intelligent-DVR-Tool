@@ -28,3 +28,8 @@ readiness-*.json
 local-analysis/
 .analysis-setup-*/
 test-results/
+
+# Private OEM companion settings, manifests and backup recordings
+.backup-library/
+Intelligent-DVR-Backup/
+guided-recorder.json

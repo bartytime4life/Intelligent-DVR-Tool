@@ -1,5 +1,9 @@
 # Verification index
 
+[GPU-first default, November 3](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/gpu-default-2026-11-03/README.md) records actual RTX 5080 CUDA execution, recorded-video and OEM-copy analysis, shared GPU-slot policy and explicit CPU fallback.
+
+[OEM companion backup, November 3](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/oem-backup-2026-11-03/README.md) records verified file copying, optional local analysis, guided LAN setup and controlled browser checks; physical OEM/device acceptance remains open.
+
 [Cumulative training, November 2](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/cumulative-training-2026-11-02/README.md)
 records compatible-session pooling, replay/regression guards, duplicate-source
 refusal, browser persistence and storage limits. Its generated-camera checks

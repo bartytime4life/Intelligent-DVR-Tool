@@ -50,7 +50,10 @@ class FeedError(Exception):
 
 def load_sources(config):
     """Only the local owner supplies endpoints; never accept browser URLs."""
-    data = read_json(config, 64 * 1024)
+    return validate_sources(read_json(config, 64 * 1024))
+
+
+def validate_sources(data):
     if not isinstance(data, dict) or set(data) != {'sources'} or not isinstance(data['sources'], list) or len(data['sources']) > 100:
         raise ValueError('Configure up to 100 sources in a sources array')
     sources = {}

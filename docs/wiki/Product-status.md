@@ -1,5 +1,14 @@
 # Product status and evidence
 
+**GPU preference:** live AI and recorded-video analysis now default to GPU first with visible CPU fallback and an explicit CPU override. Actual controlled RTX 5080 checks are recorded in the [GPU-default verification](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/gpu-default-2026-11-03/README.md); physical-device accuracy and capacity remain separate.
+
+**November 3 source follow-up:** [OEM companion backup](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/OEM-backup) adds
+owner-selected watched folders, verified byte-for-byte local copies, durable
+review storage, optional queued analysis and guided private RTSP source/recorder
+setup. Controlled Linux source checks do not establish particular OEM/device,
+Windows/Mac, continuous-recording or 100-camera acceptance. It does not implement
+ONVIF discovery, vendor SDKs or universal proprietary-format analysis.
+
 [Offline tracking evaluation](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Tracking-evaluation) now measures saved traces
 against independently labeled sampled frames, reporting identity switches,
 misses, false tracks, MOTA, IDF1 and reference HOTA. Deterministic synthetic cases

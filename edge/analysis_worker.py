@@ -1,4 +1,4 @@
-"""Private bounded CPU worker. Uses edge.analyze; no separate inference pipeline."""
+"""Private bounded recording worker. Uses edge.analyze; no separate inference pipeline."""
 import json
 import os
 from pathlib import Path
@@ -85,19 +85,27 @@ def run(directory):
     directory = Path(directory)
     if sys.platform != 'linux' and os.environ.get('DVR_ANALYSIS_PARENT_PIPE') == '1':
         watch_parent_pipe()
-    handle = constrain()
+    args = json.loads((directory / 'args.json').read_text(encoding='utf-8'))
+    backend = args[args.index('--backend') + 1] if '--backend' in args else 'opencv-cpu'
+    if backend == 'onnxruntime-cuda':
+        from .live_resources import constrain_gpu
+        handle = constrain_gpu(MEMORY_BYTES, CPU_SECONDS)
+    elif backend == 'opencv-cpu':
+        handle = constrain()
+    else:
+        raise ValueError('Unsupported recording backend')
     os.environ.update(OMP_NUM_THREADS='2', OPENBLAS_NUM_THREADS='2', MKL_NUM_THREADS='2',
                       OPENCV_FFMPEG_CAPTURE_OPTIONS='protocol_whitelist;file',
                       OPENCV_VIDEOIO_PRIORITY_LIST='FFMPEG')
     from .analyze import main
-    args = json.loads((directory / 'args.json').read_text(encoding='utf-8'))
     last = 0
+    previous_phase = None
     def progress(**fields):
-        nonlocal last
+        nonlocal last, previous_phase
         now = time.monotonic()
-        if fields['phase'] in ('analyzing', 'verifying') and now - last < .25:
+        if fields['phase'] == previous_phase and fields['phase'] in ('analyzing', 'verifying') and now - last < .25:
             return
-        last = now
+        last, previous_phase = now, fields['phase']
         temporary = directory / 'progress.tmp'
         temporary.write_text(json.dumps(fields), encoding='utf-8')
         replace(temporary, directory / 'progress.json', best_effort=True)  # The parent polls this file.

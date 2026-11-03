@@ -1,0 +1,73 @@
+.backup-library { border-color: #47746b; background: linear-gradient(125deg, #16302e, #14212b 75%); }
+.backup-library .backup-intro { max-width: 70ch; color: #d3e2e5; margin-top: 0; }
+.backup-library .backup-steps { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); padding: 0; margin: 22px 0 14px; list-style: none; border-top: 1px solid #3e5c5d; border-bottom: 1px solid #3e5c5d; }
+.backup-steps li { display: grid; grid-template-columns: 26px minmax(0,1fr); align-items: center; column-gap: 9px; padding: 15px 12px 15px 0; color: #d4e4e6; }
+.backup-steps li > span { grid-row: span 2; display: grid; place-items: center; width: 24px; height: 24px; border: 1px solid #668184; font-size: 12px; color: #c4dcdf; border-radius: 6px; }
+.backup-steps strong { font-size: 13px; font-weight: 600; }
+.backup-steps small { margin-top: 4px; color: #afc3cc; font-size: 11px; line-height: 1.4; }
+.backup-steps .current > span { background: #64ddcb; border-color: #64ddcb; color: #092522; }
+.backup-steps .complete > span { border-color: #64ddcb; color: #81eddd; }
+.backup-library fieldset { min-width: 0; border: 0; margin: 20px 0 0; padding: 0; }
+.backup-library legend { color: #e5eeee; font-size: 14px; font-weight: 600; margin-bottom: 16px; padding: 0; }
+.backup-library label { color: #d2e1e6; font-size: 13px; display: block; min-width: 0; }
+.backup-library label > small { display: block; color: #a9c0c9; font-size: 12px; margin: 5px 0 8px; }
+.backup-library input:not([type="checkbox"]), .backup-library select { min-width: 0; width: 100%; border: 1px solid #46626b; background: #0e1d27; color: #e6edef; border-radius: 6px; padding: 11px 12px; font: inherit; }
+.backup-library input::placeholder { color: #99adb9; }
+.backup-library input:focus-visible, .backup-library select:focus-visible, .backup-library summary:focus-visible { outline: 2px solid #78e6d5; outline-offset: 3px; }
+.backup-library input:disabled, .backup-library select:disabled { opacity: .6; }
+.backup-path-input { display: flex; gap: 9px; align-items: stretch; }
+.backup-path-input > input { flex: 1; }
+.backup-path-input .button { flex: 0 0 auto; white-space: nowrap; }
+.backup-folder-fields > label + label { margin-top: 16px; }
+.backup-library summary { cursor: pointer; color: #d6e7e6; font-size: 13px; line-height: 1.6; padding: 10px 0; }
+.backup-library summary:hover { color: #8be9d9; }
+.backup-library .backup-settings { margin-top: 14px; }
+.backup-settings-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); align-items: end; gap: 15px; margin: 9px 0 14px; }
+.backup-settings-grid input, .backup-model-fields select, .backup-camera-fields input { margin-top: 8px; }
+.backup-library .backup-checkbox { display: flex; gap: 9px; align-items: center; line-height: 1.5; margin: 10px 0; }
+.backup-checkbox input { flex: 0 0 auto; width: 17px; height: 17px; margin: 0; accent-color: #64ddcb; }
+.backup-local-note { font-size: 12px; color: #b6cbd0; line-height: 1.6; }
+.backup-unsaved { font-size: 12px; color: #f2cc87; }
+.backup-library .backup-format-note { font-size: 12px; color: #b7ccd0; max-width: 100ch; }
+.backup-analysis-fields { border-top: 1px solid #3d585b !important; padding-top: 10px !important; }
+.backup-model-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 15px; }
+.backup-library .backup-notice { color: #f1d39c; font-size: 12px; border-left: 2px solid #b5985c; padding-left: 10px; }
+.backup-library .recognition-error { color: #ffb9ac; overflow-wrap: anywhere; }
+.backup-running { background: #17483e; }
+.backup-library .backup-storage { display: flex; flex-wrap: wrap; gap: 12px 26px; padding: 16px 0; border-top: 1px solid #3d585b; border-bottom: 1px solid #3d585b; margin: 20px 0 4px; }
+.backup-storage > span { color: #bfd0d6; font-size: 12px; line-height: 1.6; }
+.backup-storage strong { color: #e2eeee; font-weight: 600; }
+.backup-copy-progress { margin: 18px 0; padding: 14px; background: #0e2027; border-left: 2px solid #64ddcb; display: grid; gap: 8px; color: #cfdfdf; font-size: 12px; overflow-wrap: anywhere; }
+.backup-copy-progress strong { color: #e2eeee; font-weight: 600; }
+.backup-copy-progress progress { width: 100%; height: 8px; accent-color: #64ddcb; }
+.backup-limits { margin-top: 18px; }
+.backup-library .backup-limits .local-analysis-footnote { margin: 8px 0 0; }
+.backup-saved summary { font-weight: 600; }
+.backup-saved summary span { color: #b7cbd0; font-weight: 400; }
+.backup-list { max-height: 26rem; overflow: auto; }
+.backup-item { display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 14px 0; border-top: 1px solid #3d585b; }
+.backup-item > div:first-child { min-width: 0; }
+.backup-item strong { font-size: 13px; color: #e7eff1; overflow-wrap: anywhere; }
+.backup-item small, .backup-item-meta { display: block; margin-top: 5px; font-size: 12px; line-height: 1.5; color: #b8ccd2; overflow-wrap: anywhere; }
+.backup-item .local-analysis-actions { flex: 0 0 auto; margin: 0; }
+.backup-item-completed { box-shadow: inset 2px 0 0 #64ddcb; padding-left: 12px; }
+.backup-camera-setup { border-top: 1px solid #3d585b; margin-top: 20px; padding-top: 6px; }
+.backup-camera-setup > summary { font-weight: 600; }
+.backup-library .backup-camera-fields { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 16px; margin: 15px 0; }
+.backup-camera-fields legend { margin-bottom: 0; }
+.backup-channel-path { grid-column: 1 / -1; }
+.backup-camera-fields .button { align-self: end; }
+.backup-library .backup-existing-sources { color: #bfe8de; overflow-wrap: anywhere; }
+@media(max-width: 760px) {
+  .backup-library .backup-steps { grid-template-columns: minmax(0,1fr); }
+  .backup-steps li { padding: 10px 0; }
+  .backup-steps li + li { border-top: 1px solid #314b4d; }
+  .backup-path-input { flex-direction: column; }
+  .backup-settings-grid, .backup-model-fields, .backup-library .backup-camera-fields { grid-template-columns: minmax(0,1fr); }
+  .backup-item { align-items: flex-start; flex-direction: column; gap: 12px; }
+  .backup-library button { min-height: 42px; }
+}
+.backup-recorder-source { border-top: 1px solid #3d585b; padding-top: 18px; margin-top: 18px; display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 14px; align-items: end; }
+.backup-recorder-source select { margin-top: 8px; }
+.backup-recorder-source p { grid-column: 1 / -1; margin: 0; }
+@media(max-width: 760px) { .backup-recorder-source { grid-template-columns: minmax(0,1fr); } }

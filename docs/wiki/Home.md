@@ -43,6 +43,17 @@ See [local addresses and earlier installations](https://github.com/bartytime4lif
 
 *Controlled local captures from the merged PR #71 application source. The facility is a fictional built-in example. No private footage, enrolled people or surveyed site is pictured. [Full gallery and capture details](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-atlas).*
 
+## Use your existing DVR
+
+Keep the OEM software recording and use **Recognition → Use my existing DVR**
+to select its finished-recording/export folder and a separate local backup folder.
+The tool verifies each copied file, preserves originals, avoids duplicate copies,
+and optionally analyzes eligible videos. Local analysis prefers the GPU, with a
+visible CPU fallback and an explicit CPU override. [GPU guide](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Live-GPU). Guided IP-camera/LAN-DVR channel setup
+also saves authorized RTSP sources without JSON editing on the PC launcher.
+[Setup, supported formats and limits](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/OEM-backup). This companion path
+has controlled software checks; particular OEMs and physical devices still need acceptance.
+
 ## From one clip to a useful review
 
 ![Capture or import a selected clip, analyze it locally, then review and export the matched results.](https://raw.githubusercontent.com/wiki/bartytime4life/Intelligent-DVR-Tool/docs/media/guide/recording.svg)

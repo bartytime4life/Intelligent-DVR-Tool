@@ -79,3 +79,19 @@ export async function openJobResult(job, token, signal, fetcher = fetch) {
   if (signal?.aborted) throw new DOMException('Result opening cancelled', 'AbortError');
   return { bundle, file, name: job.recording };
 }
+
+
+export function analysisBackendLabel(job, preference) {
+  if (job?.backend === 'onnxruntime-cuda') return 'GPU · CUDA';
+  const reasons = {
+    CUDA_START_FAILED_CPU_FALLBACK:'CPU · GPU could not start',
+    GPU_DISABLED_AFTER_FAILURE:'CPU · GPU disabled after failure',
+    GPU_SLOT_BUSY:'CPU · GPU worker in use',
+    PLATFORM_UNSUPPORTED:'CPU · GPU unavailable on this OS',
+    PROFILE_UNSUPPORTED:'CPU · this model has no GPU path',
+  };
+  if (job?.backend === 'opencv-cpu') return reasons[job.acceleration_code] || 'CPU · OpenCV';
+  if (job && job.state === 'running') return 'Preparing analysis · runtime not confirmed';
+  if (job) return 'Runtime not reported';
+  return preference === 'cuda-preferred' ? 'GPU first · CPU fallback' : preference === 'opencv-cpu' ? 'CPU selected' : 'Local analysis';
+}

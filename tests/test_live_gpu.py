@@ -102,6 +102,19 @@ class RecoveryTest(unittest.TestCase):
             'runtime': {'backend_id': 'onnxruntime-cuda', 'startup_execution': {'node_execution_counts': {'CUDAExecutionProvider': 1}}}}).encode() + b'\n')
         return worker
 
+    def test_shared_recording_lease_selects_cpu_until_released(self):
+        from edge.acceleration import GpuSlot
+        slot=GpuSlot();self.assertTrue(slot.acquire('recording')[0])
+        cpu,gpu=FakeWorker([]),self.gpu()
+        live=self.live([cpu,gpu],gpu_slot=slot)
+        first=self.start(live,'A')
+        self.assertEqual(first['acceleration']['code'],'GPU_SLOT_BUSY')
+        self.assertEqual(slot.owner,'recording')
+        live.stop(first['id']);slot.release('recording')
+        second=self.start(live,'B')
+        self.assertEqual(second['runtime']['backend_id'],'onnxruntime-cuda')
+        live.stop(second['id']);self.assertIsNone(slot.owner)
+
     def test_one_gpu_slot_and_two_total_sessions(self):
         gpu, cpu = self.gpu(), FakeWorker([])
         live = self.live([gpu, cpu])

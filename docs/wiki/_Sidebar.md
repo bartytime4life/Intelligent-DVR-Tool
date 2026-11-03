@@ -28,6 +28,7 @@
 - [Recognition details](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Recognition-details)
 - [Recording coverage](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Recording-coverage)
 - [LAN recording](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/LAN-recording)
+- [OEM backup](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/OEM-backup)
 - [Review and events](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Review-and-events)
 - [Zones](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Zones)
 

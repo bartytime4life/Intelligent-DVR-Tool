@@ -118,6 +118,7 @@ def main(argv=None):
     modes.add_argument('--prepare-analysis', type=Path, metavar='MODEL_ONNX')
     parser.add_argument('--face-detector', type=Path)
     parser.add_argument('--face-recognizer', type=Path)
+    parser.add_argument('--analysis-backend', choices=('opencv-cpu','cuda-preferred'), help='Recording preference; unsupported accelerators use CPU')
     parser.add_argument('--port', type=int, default=os.environ.get('DVR_PORT') or 4180)
     parser.add_argument('--no-browser', action='store_true')
     parser.add_argument('--skip-port-check', action='store_true', help='With --check only: inspect an installation while its service is running')
@@ -179,6 +180,8 @@ def main(argv=None):
             pc.create_settings(ROOT)
             command = [str(python), '-m', 'edge.local_service', '--feeds-config', str(ROOT / 'local-feeds.json'),
                        *options, '--port', str(args.port)]
+            if args.analysis_backend:
+                command += ['--analysis-backend',args.analysis_backend]
             if not args.no_browser:
                 command.append('--open-browser')
         os.execv(str(command[0]), [str(x) for x in command])

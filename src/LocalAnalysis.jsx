@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { activeJob, analysisRequest, localAnalysisOrigin, openJobResult, importRecording, refused } from './local-analysis.mjs';
+import { activeJob, analysisBackendLabel, analysisRequest, localAnalysisOrigin, openJobResult, importRecording, refused } from './local-analysis.mjs';
 import { downloadBlob } from './clip-capture.mjs';
 import { loopbackAddress } from './live-feeds.mjs';
 import { DEFAULT_RULES_KEY, TRAINING_SELECTION_EVENT, readTrainingSelection, resolveTrainingSelection } from './training.mjs';
@@ -164,7 +164,7 @@ export default function LocalAnalysis({ onResult, onBusy, clip, onClip, recorder
   const compatible = catalog?.rules.find(r => r.id === rules)?.models.includes(model);
   return <section className="local-analysis" aria-label="Local recording analysis">
     <div className="local-analysis-heading"><div><p className="eyebrow">ANALYZE ON THIS COMPUTER</p><h2>Recording → recognition</h2></div>
-      <span className="local-analysis-badge">CPU · local files only</span></div>
+      <span className="local-analysis-badge">{analysisBackendLabel(job, catalog?.backend)}</span></div>
     {!catalog && <p>Choose from your configured recordings folder. One bounded job runs at a time; footage and inference stay on this computer.</p>}
     {!local && <p>Analysis is available in the local application. This hosted preview can still open exported recognition results below.{loopback && <> <a href={loopback}>Open this page at 127.0.0.1</a></>}</p>}
     <div className="local-analysis-actions">
@@ -206,6 +206,7 @@ export default function LocalAnalysis({ onResult, onBusy, clip, onClip, recorder
       </div>
     </>}
     {job && <div className="local-analysis-job" aria-live="polite">
+      <p>{analysisBackendLabel(job, catalog?.backend)}</p>
       <strong>{job.recording}</strong><span>{job.phase} · {job.elapsed_seconds}s</span>
       {job.recovered && <p>Recovered from local storage after a service restart. No analysis was rerun.</p>}
       {job.compare_enhancement && <p>Original + mild sharpening comparison · original-only rule observations</p>}
