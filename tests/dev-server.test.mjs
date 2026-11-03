@@ -18,7 +18,7 @@ test('development serves the frontend but refuses private runtime files and raw 
     await mkdir(dirname(join(fixture,path)),{recursive:true});
     await writeFile(join(fixture,path),sentinel);
   }
-  const server=await createServer({...config,configFile:false,root,logLevel:'silent',optimizeDeps:{noDiscovery:true,include:[]},
+  const server=await createServer({...config,configFile:false,root,cacheDir:join(fixture,'vite-cache'),logLevel:'silent',optimizeDeps:{noDiscovery:true,include:[]},
     server:{...config.server,port:0,strictPort:false,preTransformRequests:false,warmup:{clientFiles:[]}}});
   try {
     await server.listen();
