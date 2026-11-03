@@ -5,6 +5,7 @@ import { CHECK_SCRIPT, TRAINING_SCRIPT, evaluate, frameMoments, compareTrainingC
   readTrainingSelection, trainedPreferenceMatches, writeDefaultRules, plural, ENROLL_SCRIPT, BASELINE_SCRIPT, CONSENT_TEXT, baselineText } from './training.mjs';
 import { checkContextError, makeTrainingReceipt } from './training-evidence.mjs';
 import { downloadBlob } from './clip-capture.mjs';
+import OllamaCoach from './OllamaCoach.jsx';
 import CaptureSteps from './TrainingCapture.jsx';
 import TrainingHome from './TrainingHome.jsx';
 import TrainingScorecard from './TrainingScorecard.jsx';
@@ -268,6 +269,7 @@ export default function TrainingWorkspace({ onOpenRecognition }) {
       : 'This detector needs a rule set with one person rule. Choose another detector above or add a person rule to the local catalog.'}</p>}
     {(step === 'camera' || step === 'record') && selection.rulesId && viewName.trim() && <CaptureSteps step={step} onStep={setStep}
       onClip={c => { setClip(c); setStep('analyze'); }} />}
+    {step === 'camera' && <OllamaCoach />}
     {step === 'analyze' && <AnalyzeStep selection={selection} clip={clip} script={TRAINING_SCRIPT}
       onSession={session => setService({ ...session, state: 'ready' })}
       onRetry={() => reset('camera')} onDone={result => { setOutcome(result); setClip(null); setStep('results'); }} />}
