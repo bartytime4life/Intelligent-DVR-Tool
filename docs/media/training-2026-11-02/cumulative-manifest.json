@@ -1,0 +1,12 @@
+{
+  "capture_source_commit": "870e5f09fc7346ab7b73a00683db0d533a41c3d5",
+  "capture": "Chromium screenshot from tests/analysis-browser/training.spec.mjs; desktop after two saved sessions and a reload",
+  "asset": "cumulative-sessions.png",
+  "sha256": "35c4bf961958b9ef6522391c86ddf2772393ce98fa366ffb740b2a335df682ee",
+  "width": 1440,
+  "height": 1284,
+  "generated_camera": true,
+  "detector": "constant-output synthetic ONNX fixture",
+  "private_data": false,
+  "accuracy_claim": false
+}

@@ -32,7 +32,7 @@ records remain available without invented imagery.
 | Webcam clip | Record webcam clip → Stop recording → Open clip in Recognition | Opt-in bounded clip ready for a separately authorized local import and analysis job |
 | Local DVR | Configure local-feeds.json, restart, load/select a channel and connect | Bounded RTSP/TCP preview; actionable connection errors |
 | Recognition | Configure an approved recordings folder/model/rules; connect and explicitly analyze | Progress, cancellation and source-matched results using the existing analyzer |
-| Train · detection tuning | Record the guided calibration, select a trial threshold, then check it on fresh footage. [Guided session](training.md) | Compare in-view finds and empty-room flags. You can save a checked improvement as a new Recognition rule. |
+| Train · detection tuning | Name the camera view, record calibration and confirm its prompts. Repeat sessions with that view name, then check a proposed threshold on fresh footage. [Guided session](training.md) | Matching confirmed sessions contribute together. A saved improvement must pass the fresh check and avoid regressions on earlier evidence. |
 | Train: person enrollment | Enable [enrollment](person-enrollment.md), obtain consent and capture the guided baseline | A deletable face template stays in the local service; Recognition can explicitly request possible matches for local jobs |
 | Events | Send a verified observation for review; add a note, confirm/dismiss and export | Decisions remain through workspace switches; no new simulated events |
 | Zones | Use a still from a Monitor preview, a Recognition frame or an image file, draw the zone and **Export analyzer rules** | A rule file the local analyzer accepts, in full-frame coordinates of that camera's image; no live inference implied |
@@ -56,6 +56,11 @@ changing the browser profile, port or installation. Keep credentials and footage
 out of exported planning/review metadata.
 
 Training rules and person templates live beside the local service catalog, while session clips remain in the recordings folder. Deleting a person template does not delete those clips. See [training storage](training.md#what-is-saved-where) and [enrollment deletion](person-enrollment.md#storage-and-deletion).
+
+Combined training evidence stays in this browser, with room for 50 confirmed
+sessions. Keep the same browser profile and origin across updates. Older
+summary-only sessions stay in Past sessions; they cannot be pooled into the new
+scored library. Downloaded count receipts do not restore that library.
 
 Facility import validates before replacement, and Undo restores the previous
 edit. The [facility guide](facility-builder.md) documents bounds and source fields.

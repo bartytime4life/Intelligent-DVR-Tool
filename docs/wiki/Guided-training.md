@@ -59,6 +59,12 @@ combined evidence** only after confirming you followed all five prompts.
 Choose Keep current setting or Use checked setting to save that session's evidence.
 Incomplete sessions and unconfirmed prompt conditions do not join the collection.
 
+![Actual browser test showing two confirmed sessions retained after a reload. All inputs and displayed sessions are synthetic test data.](https://raw.githubusercontent.com/wiki/bartytime4life/Intelligent-DVR-Tool/docs/media/training-2026-11-02/cumulative-sessions.png)
+
+**Generated test example:** two sessions remain saved for one named camera view
+after reopening Train. The constant-output fixture detector is a workflow test,
+not a camera accuracy result. [Screenshot provenance](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/media/training-2026-11-02/cumulative-manifest.json).
+
 The next session can use all matching confirmed calibration recordings together.
 Matching requires the same named view, camera identifier (when available), detector
 and class-label fingerprints, inference profile, dwell and maximum gap. A newly
@@ -66,6 +72,11 @@ saved threshold may have a different rule name/hash and can still build on the o
 evidence. Other camera views, changed models and specialized zone rules stay separate.
 When the browser cannot supply a camera identifier, your named-view confirmation is
 the camera reference; take care to use the same physical camera and position.
+
+In browsers that provide Web Locks, saving a decision holds a shared browser
+lock through the service checks and rule save, so another training tab cannot
+add a contrary example between replay and application. Without that browser
+feature, use one training tab at a time.
 
 Each calibration session has equal weight when ranking threshold suggestions,
 with the in-view and empty-view conditions weighted equally. A proposal must avoid
@@ -91,6 +102,9 @@ guarantee higher accuracy. This workflow tunes a person-presence threshold; it
 does not retrain neural-network weights. Counts on guided prompts are session
 measurements, not independently established detection accuracy. Face baseline
 refinement remains the separate consent-based person workflow.
+
+[Cumulative-session verification and machine-readable results](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/cumulative-training-2026-11-02/README.md)
+describe generated test inputs separately from physical-camera qualification.
 
 ## What is saved where
 

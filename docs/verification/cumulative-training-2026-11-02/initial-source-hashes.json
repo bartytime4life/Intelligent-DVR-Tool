@@ -1,0 +1,10 @@
+{
+  "src/training-library.mjs": "429cb4f13f4de2e3ea9590053cb55fc85cab6f8b9763f50c00234cc145f61778",
+  "src/TrainingLibrary.jsx": "a6d0fb4e7f6d9a7430da9bbca57d1b8cca25d9e7f9cbef794c5a350dbceb8173",
+  "src/training-library.css": "fe665590ba21e0f41d2656061868a6f3b5d268dd155ca65a64b3fbd5aa55be5f",
+  "src/TrainingWorkspace.jsx": "c26e5fb832b64abcbabe87b70d149f3e5915332afeba7e0cb382305e6d6a1662",
+  "src/TrainingScorecard.jsx": "75b6ac84aee86421acff9cb7bbf61351c29cdc9514b88e8711d33ed0fdf15e0c",
+  "tests/training-library.test.mjs": "54b07282db8fd3e1b110caf088448227688b03d7b609883adee8dd99be744dba",
+  "tests/training-scorecard.test.mjs": "63088daa202ddec9a562f398510f2c25efe23acbad0ee6924fca7185151760bc",
+  "tests/analysis-browser/training.spec.mjs": "8e2a19148b2cf39d270e589b6e196cadfe033d0b841f12ffac760f8ec9953397"
+}

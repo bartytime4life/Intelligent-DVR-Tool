@@ -1,5 +1,10 @@
 # Verification index
 
+[Cumulative training, November 2](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/cumulative-training-2026-11-02/README.md)
+records compatible-session pooling, replay/regression guards, duplicate-source
+refusal, browser persistence and storage limits. Its generated-camera checks
+establish workflow behavior, not physical-camera accuracy.
+
 [Guided training verification on November 2](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/training-studio-2026-11-02/README.md) covers fresh recording comparisons, model and rule selection, and the pinned-detector smoke check.
 
 [November 2 offline tracking evaluator validation](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/tracking-2026-11-02/README.md)

@@ -59,7 +59,7 @@ Detection scores are model outputs. Track numbers follow one box across frames; 
 
 | Your goal | What to do | What the result means |
 | --- | --- | --- |
-| Measure and tune person detection for this view | [Train → Start session](docs/training.md) | Compare two thresholds on a fresh recording. Keep the current setting or save a checked improvement for Recognition. |
+| Measure and tune person detection for this view | [Train → Start session](docs/training.md) | Build on confirmed sessions for the same named camera view. Check a proposed threshold on fresh footage and earlier evidence before saving it for Recognition. |
 | Review a possible enrolled-person match | [Get consent, enroll, then explicitly check a local job](docs/person-enrollment.md) | A local suggestion for human confirmation, not proof of identity |
 | Watch a specific image region | [Draw a zone on the correct still](docs/zones.md) | A class-presence rule in that camera's image coordinates |
 | Plan a building and cameras | [Facility: shell → floors → rooms/openings → cameras](docs/facility-builder.md) | Editable proposed geometry and estimated coverage |
@@ -70,7 +70,7 @@ Detection scores are model outputs. Track numbers follow one box across frames; 
 
 ![Export browser work, back up the private analysis folder, and verify a copy outside the checkout before updating.](docs/media/guide/preserve.svg)
 
-Browser reviews, rules, plans and session choices belong to the exact browser and origin. Models, recordings, tuned rule files and enrolled-person templates live in the private local service folders. Export temporary results before stopping the service; back up both storage areas separately. Keep the same browser and port for everyday work.
+Browser reviews, rules, plans, combined training evidence and session choices belong to the exact browser and origin. Models, recordings, tuned rule files and enrolled-person templates live in the private local service folders. Export temporary results before stopping the service; back up both storage areas separately. Keep the same browser and port for everyday work. Training JSON receipts preserve counts and provenance; they cannot restore the browser's scored evidence library.
 
 [Updates and migration](docs/setup-macos.md#preserve-data-when-updating) · [Saved facilities](docs/saved-facilities.md) · [Troubleshooting](docs/troubleshooting.md).
 
@@ -115,5 +115,9 @@ python3 scripts/build-wiki.py --check
 ```
 
 Use the platform's isolated dependencies for native checks; optional test fixtures require ONNX. [Verification](docs/verification/README.md) keeps historical and current test scopes separate. PR #71's tested head passed 16 reported GitHub checks, including Mac source installation, Linux/Windows validation, the PC kit and controlled browser regressions; these are software checks, not field acceptance.
+
+[Cumulative training results](docs/verification/cumulative-training-2026-11-02/README.md)
+record compatible-session pooling, browser persistence, duplicate-source
+refusal and protection against regressions on saved examples.
 
 This repository does not currently assign a software license. Public availability does not grant a software license. [Third-party notices](docs/third-party-notices.md) cover separately licensed components/models; [SECURITY.md](SECURITY.md) describes the prototype boundary. No pretrained weights, private recordings, templates or credentials are bundled.
