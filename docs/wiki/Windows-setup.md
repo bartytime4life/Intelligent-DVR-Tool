@@ -35,7 +35,7 @@ PowerShell alternatives:
 Install uses edge/requirements-qualification.txt in an isolated .venv, creates an
 empty local-feeds.json if absent and exits. Check tests package integrity, pinned
 native libraries, local video/JPEG decoding, temporary storage, config and port
-availability. Start opens the actual local service at http://127.0.0.1:4173.
+availability. Start opens the actual local service at http://127.0.0.1:4298.
 No camera or inference job starts automatically. Ctrl+C stops the foreground app.
 
 Use -Python python or an explicit Python 3.12 path when needed; -NoBrowser avoids

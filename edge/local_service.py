@@ -1,5 +1,6 @@
 """Explicit loopback jobs and previews; bounded recording import is opt-in."""
 import argparse
+import errno
 import hashlib
 import hmac
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -23,7 +24,7 @@ from urllib.parse import urlsplit, unquote
 
 from .diagnostics import Diagnostics
 from .evaluation import anchor, local_file, read_json, relative_file
-from . import failures
+from . import DEFAULT_PC_PORT, failures
 from .fileops import open_regular
 from .model_profiles import validate_binding
 from .rules import Rule, RuleEngine
@@ -1098,7 +1099,7 @@ def main(argv=None):
     parser.add_argument('--allow-face-enrollment', action='store_true', help='Allow consent-based face templates in the catalog folder\'s people/ folder; needs the pinned face models')
     parser.add_argument('--feeds-config', type=Path, help='Trusted LAN RTSP channels; see edge/local-feeds.example.json')
     parser.add_argument('--recorder-config', type=Path, help='Opt-in one-camera segment recorder; never starts automatically')
-    parser.add_argument('--port', type=int, default=4173)
+    parser.add_argument('--port', type=int, default=os.environ.get('DVR_PORT') or DEFAULT_PC_PORT)
     parser.add_argument('--live-backend', choices=PREFERENCES, default='opencv-cpu',
                         help='Explicit live CUDA preference; CPU is default and startup fallback. No camera starts automatically.')
     parser.add_argument('--open-browser', action='store_true', help='Open the local app after binding; never connects cameras')
@@ -1144,7 +1145,14 @@ def main(argv=None):
             from .lan_recorder import Recorder, validate_config
             config = validate_config(args.recorder_config.absolute(), feeds.sources)
             recorder = Recorder(config, feeds.sources, jobs, jobs.recordings / '.lan-recorder', diagnostics=diagnostics)
-        with LocalServer(args.port, jobs, ROOT / 'dist/client', feeds, recorder, live) as server:
+        try:
+            listener = LocalServer(args.port, jobs, ROOT / 'dist/client', feeds, recorder, live)
+        except OSError as exc:
+            if exc.errno == errno.EADDRINUSE or getattr(exc, 'winerror', None) == 10048:
+                parser.exit(1, f'Port {args.port} is already in use. If the DVR is running, open http://127.0.0.1:{args.port}/ '
+                               'in your browser. Otherwise, choose an unused --port.\n')
+            raise
+        with listener as server:
             diagnostics.event('SERVICE_START', analysis=jobs is not None, feeds=feeds is not None, recorder=recorder is not None,
                               imports=args.allow_recording_import, training=args.allow_training,
                               people=args.allow_face_enrollment)

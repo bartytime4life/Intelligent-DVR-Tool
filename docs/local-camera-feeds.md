@@ -69,10 +69,10 @@ Windows PowerShell:
 Direct command after building (`npm run build`), using the installed edge Python:
 
 ```bash
-python -m edge.local_service --feeds-config local-feeds.json --port 4173
+python -m edge.local_service --feeds-config local-feeds.json --port 4298
 ```
 
-Open `http://127.0.0.1:4173/` directly. Add `--recordings /your/folder --config
+Open `http://127.0.0.1:4298/` directly. Add `--recordings /your/folder --config
 /your/analysis.json` to enable recording analysis in the same app. Launchers also
 accept both modes/configurations together. The hosted Site can use browser
 webcams but cannot bridge LAN DVR channels through this local service.

@@ -14,6 +14,8 @@ import sys
 import tempfile
 import time
 
+from . import DEFAULT_PC_PORT
+
 ROOT = Path(__file__).resolve().parents[1]
 REQUIREMENTS = 'edge/requirements-qualification.txt'
 MAC_REQUIREMENTS = 'edge/requirements-macos.txt'
@@ -242,7 +244,7 @@ def persistence_check(directory):
         store.close()
 
 
-def check(port=4173, feeds_config=None, recordings=None, config=None, *, root=ROOT, bind=True, facility=False, state_dir=None, recorder_config=None):
+def check(port=DEFAULT_PC_PORT, feeds_config=None, recordings=None, config=None, *, root=ROOT, bind=True, facility=False, state_dir=None, recorder_config=None):
     host_check()
     checks = []
     def record(name, operation):
@@ -259,7 +261,7 @@ def check(port=4173, feeds_config=None, recordings=None, config=None, *, root=RO
         record('facility_preview', facility_ready)
     def runtime():
         python = validate_environment(root)
-        result = command([python, '-m', 'edge.pc_setup', '--native-probe'],
+        result = command([python, '-m', 'edge.pc_setup', '--native-probe', '--port', str(port)],
                          'Runtime probe failed. Rerun the installer.', root=root, timeout=30, capture=True)
         return json.loads(result)
     record('native_runtime', runtime)
@@ -317,7 +319,7 @@ def check(port=4173, feeds_config=None, recordings=None, config=None, *, root=RO
                     sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
                 sock.bind(('127.0.0.1', port))
                 sock.listen(1)
-            return 'loopback port available at check time; no requests served'
+            return f'http://127.0.0.1:{port}/ available at check time; no requests served'
         record('loopback_port', loopback)
     return {'schema': 'intelligent-dvr.pc-readiness.v1',
             'ready': not any(c['status'] == 'fail' for c in checks),
@@ -363,7 +365,7 @@ def main(argv=None):
     retention = parser.add_mutually_exclusive_group()
     retention.add_argument('--state-dir', type=Path, help='Opt-in Linux last-analysis recovery in a dedicated private folder (or DVR_STATE_DIR)')
     retention.add_argument('--temporary', action='store_true', help='Disable recovery for this launch, overriding DVR_STATE_DIR; preserves saved state')
-    parser.add_argument('--port', type=int, default=os.environ.get('DVR_PORT') or 4173)
+    parser.add_argument('--port', type=int, default=os.environ.get('DVR_PORT') or DEFAULT_PC_PORT)
     parser.add_argument('--no-browser', action='store_true')
     parser.add_argument('--report', type=Path, help='New readiness report, without camera endpoints or credentials')
     args = parser.parse_args(argv)
@@ -426,6 +428,7 @@ def main(argv=None):
             raise SetupError('Local geo preview and the camera/analysis service use separate launch modes. Clear DVR_GEO_LOCAL for camera/analysis testing.')
         if args.check:
             result = check(args.port, args.feeds_config, args.recordings, args.config, facility=facility, state_dir=state_dir, recorder_config=args.recorder_config)
+            print(f'Checking local DVR address http://127.0.0.1:{args.port}/')
             for item in result['checks']:
                 print(f"{item['status'].upper()}: {item['check']}")
                 if item['status'] in ('fail', 'warn'):

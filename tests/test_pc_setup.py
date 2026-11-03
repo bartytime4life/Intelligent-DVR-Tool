@@ -122,6 +122,17 @@ class PcSetupTest(unittest.TestCase):
             with self.assertRaises(pc.SetupError): pc.install(self.root)
         self.assertEqual((self.root/'local-feeds.json').read_bytes(), b'owner settings')
 
+    def test_check_uses_the_pc_port_then_environment_then_explicit_override(self):
+        cases = [({}, [], 4298), ({'DVR_PORT': '4299'}, [], 4299),
+                 ({'DVR_PORT': '4299'}, ['--port', '4310'], 4310)]
+        for env, args, port in cases:
+            with self.subTest(port=port), patch.dict(os.environ, env, clear=True), \
+                    patch.object(pc, 'check', return_value={'checks': [], 'ready': True}) as checked, \
+                    redirect_stdout(StringIO()) as output:
+                self.assertEqual(pc.main(['--check', *args]), 0)
+                self.assertEqual(checked.call_args.args[0], port)
+                self.assertIn(f'http://127.0.0.1:{port}/', output.getvalue())
+
     def test_local_geo_legacy_opt_in_selects_source_preview(self):
         with patch.dict(os.environ, {'DVR_GEO_LOCAL':'1'}, clear=True), patch.object(pc, 'host_check'), \
                 patch.object(pc, 'facility_command', return_value=['npm','run','preview']) as selected, \
