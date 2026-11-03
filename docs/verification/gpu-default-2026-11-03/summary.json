@@ -1,0 +1,215 @@
+{
+  "schema": "intelligent-dvr.gpu-default-verification.v1",
+  "date": "2026-11-03",
+  "base": "3cf606a07a23e35da65f6c6efbe59bf312e8e971",
+  "hardware": {
+    "gpu": "NVIDIA GeForce RTX 5080",
+    "vram_mib": 16303,
+    "driver": "580.178.04"
+  },
+  "runtime": {
+    "onnxruntime_gpu": "1.31.1",
+    "opencv": "4.13.0",
+    "numpy": "2.5.4",
+    "python": "3.12.3",
+    "pip_check": "passed",
+    "pinned_cpu_base_validation": "passed"
+  },
+  "checks": {
+    "full_python": {
+      "passed": 486,
+      "failed": 0,
+      "skipped": 0
+    },
+    "final_targeted": {
+      "passed": 59,
+      "failed": 0,
+      "includes_new_gpu_cancellation_test": true
+    },
+    "frontend": {
+      "passed": 357,
+      "skipped": 1,
+      "failed": 0
+    },
+    "browser_ui": {
+      "passed": 12,
+      "failed": 0
+    },
+    "real_cuda_oem_backup_browser": {
+      "passed": 1,
+      "failed": 0
+    },
+    "sites": {
+      "passed": 4
+    },
+    "build": "passed",
+    "powershell_parser": "passed"
+  },
+  "current_live": {
+    "cpu_median_ms": 173.45,
+    "gpu_median_ms": 8.67,
+    "gpu_status": "measured",
+    "decoded_generated_agreement": {
+      "passed": true,
+      "absolute_tolerance": 0.0001,
+      "scope": "Generated-pixel decoded detections only; raw tensors, representative object/track accuracy and identity are not qualified."
+    },
+    "note": "Generated frames only; software checks also used the host. Not a capacity or accuracy benchmark."
+  },
+  "recording_checks": {
+    "generated_only": true,
+    "results": [
+      {
+        "preference": "opencv-cpu",
+        "actual": "opencv-cpu",
+        "acceleration_code": "CPU_DEFAULT",
+        "elapsed_seconds": 3.236,
+        "runtime": {
+          "python": "3.12.3",
+          "opencv": "4.13.0",
+          "numpy": "2.5.4",
+          "machine": "x86_64",
+          "backend": "OpenCV CPU",
+          "backend_id": "opencv-cpu",
+          "threads": 2,
+          "fallback": "none"
+        },
+        "timing": {
+          "scope": "local inference and postprocessing only; not end-to-end camera latency",
+          "p50_ms": 143.6220789910294,
+          "p95_ms": 150.41970898164436
+        },
+        "frames_read": 100,
+        "frames_analyzed": 20,
+        "source_sha256": "4c955f64ed49051b54e9b25a1505fae2e27b358b35253c5718c2a2d77152ac0c"
+      },
+      {
+        "preference": "cuda-preferred",
+        "actual": "onnxruntime-cuda",
+        "acceleration_code": "CUDA_STARTUP_VERIFIED",
+        "elapsed_seconds": 1.027,
+        "runtime": {
+          "python": "3.12.3",
+          "opencv": "4.13.0",
+          "numpy": "2.5.4",
+          "machine": "x86_64",
+          "backend": "ONNX Runtime CUDA",
+          "backend_id": "onnxruntime-cuda",
+          "onnxruntime": "1.31.1",
+          "threads": 2,
+          "fallback": "disabled",
+          "precision": "FP32, TF32 disabled",
+          "provider_options": {
+            "device_id": 0,
+            "use_tf32": 0,
+            "gpu_mem_limit": 1073741824,
+            "arena_extend_strategy": "kSameAsRequested",
+            "cudnn_conv_algo_search": "HEURISTIC",
+            "cudnn_conv_use_max_workspace": "0"
+          },
+          "startup_execution": {
+            "scope": "One synthetic zero-input startup probe, not per-frame profiling or capacity qualification.",
+            "warmup_runs_excluded": 1,
+            "node_execution_counts": {
+              "CUDAExecutionProvider": 203
+            },
+            "profile_sha256": "df5926011731451c650e892dfb9000d702924db66a02537889283605d5cf18a2"
+          }
+        },
+        "timing": {
+          "scope": "local inference and postprocessing only; not end-to-end camera latency",
+          "p50_ms": 8.58880351006519,
+          "p95_ms": 8.98758100811392
+        },
+        "frames_read": 100,
+        "frames_analyzed": 20,
+        "source_sha256": "4c955f64ed49051b54e9b25a1505fae2e27b358b35253c5718c2a2d77152ac0c"
+      }
+    ]
+  },
+  "cpu_only_fallback_check": {
+    "generated_only": true,
+    "results": [
+      {
+        "preference": "opencv-cpu",
+        "actual": "opencv-cpu",
+        "acceleration_code": "CPU_DEFAULT",
+        "elapsed_seconds": 3.232,
+        "runtime": {
+          "python": "3.12.3",
+          "opencv": "4.13.0",
+          "numpy": "2.5.4",
+          "machine": "x86_64",
+          "backend": "OpenCV CPU",
+          "backend_id": "opencv-cpu",
+          "threads": 2,
+          "fallback": "none"
+        },
+        "timing": {
+          "scope": "local inference and postprocessing only; not end-to-end camera latency",
+          "p50_ms": 143.47078748687636,
+          "p95_ms": 149.2877450073138
+        },
+        "frames_read": 100,
+        "frames_analyzed": 20,
+        "source_sha256": "17133692e4b044bb885331999e903b05aac67a22c6a447b63fc513d0b26a47e3"
+      },
+      {
+        "preference": "cuda-preferred",
+        "actual": "opencv-cpu",
+        "acceleration_code": "CUDA_START_FAILED_CPU_FALLBACK",
+        "elapsed_seconds": 3.34,
+        "runtime": {
+          "python": "3.12.3",
+          "opencv": "4.13.0",
+          "numpy": "2.5.4",
+          "machine": "x86_64",
+          "backend": "OpenCV CPU",
+          "backend_id": "opencv-cpu",
+          "threads": 2,
+          "fallback": "none"
+        },
+        "timing": {
+          "scope": "local inference and postprocessing only; not end-to-end camera latency",
+          "p50_ms": 144.36345499416348,
+          "p95_ms": 151.76465301192366
+        },
+        "frames_read": 100,
+        "frames_analyzed": 20,
+        "source_sha256": "17133692e4b044bb885331999e903b05aac67a22c6a447b63fc513d0b26a47e3"
+      }
+    ]
+  },
+  "source_sha256": {
+    "edge/acceleration.py": "5fe6ce9f61701f85cfa65b4d25e6064cba68219a987f4ea28a75d0e63cdfedd2",
+    "edge/analysis_worker.py": "2bb39cc144a87309fc18ecfb328429774bd2ed8c3472c167ee4e7a8b475067fb",
+    "edge/live_analysis.py": "5204f0929f77af2797b4533953d81616a72006fbcd41b5a61f378126c642ad3c",
+    "edge/local_service.py": "b0ac820a0800ea1fc8c5186c22e57adb80de7e5b5460f39ca89d347d8525476b",
+    "edge/result_store.py": "9c3c6b146e025e75bd77db37fdfb7f09347258ec04d4e48d6150d3d14f7275ff",
+    "edge/pc_setup.py": "dc48e4a5e1564794ddd1b089c1d03607edf670575604df5c3ae6ad97bf243e13",
+    "edge/mac_setup.py": "0d751902492f3059fd85582433e30c2a69561ac4d54bc5638ff4a0c4df806895",
+    "edge/backup_library.py": "ff47a4ecfa5565e312827419247f3160e8c5ed18223d3ed3a554bfdb09ba20cc",
+    "edge/lan_recorder.py": "f749129da163f7ca40c985a10cab38d06accd9887ccb50c8f1301e1b4c4d123f",
+    "src/local-analysis.mjs": "d6f6f7216e9cc4fd809e65932682184957e2eddcb2934268ccd178f8cf50a2a8",
+    "src/LocalAnalysis.jsx": "42d3157abcd0b92ee5c5011ef36ad4ba270fe6642a8498c5de58549907510b03",
+    "src/BackupLibrary.jsx": "824ce0631a19a16da0736fd1fc210ae38ea550124ed492cc47d1c60833b35319",
+    "src/LanRecorder.jsx": "3e7e1af06ab16ef3e43cae5f4e27ef754d30647371fc594328763f7bc6b669cb",
+    "tests/test_gpu_default.py": "9f44726d45fdcd1ecbf1f7feaf21bf5ea0bd4897bec5b1fa61c1979b9e44a1b1",
+    "tests/test_live_gpu.py": "decdd4b3c7320179f7250cd3b40f36011e337220494804a552af18a776edd49b",
+    "tests/test_pc_setup.py": "47de6c1377df66df0e04e4be5979405f2a0f67ff862ee0287afbc925e2590235",
+    "tests/library_native_fixture.py": "1dfd7afce27d596171a097bbbf168772dbe47b8cbf4da471bdefcb756f366c2b",
+    "tests/library-native-browser/backup-native.spec.mjs": "14e5e896d660422a846b383bde76ace274b7e7212744d5a6bf5e6d092a753747",
+    "edge/failures.py": "138823b4c6173e187a70d7d6019659dcbf1654f5a670b6d341b4cf2b41b2c3ee",
+    "edge/prepare_analysis.py": "d37ab0b1f1a9b6ae608448210d011ebac26a39c58cfa8d51042a8ed1d88769b7",
+    "scripts/Start-IntelligentDvr.ps1": "662551e3f15dcb46fc36fa42695418d3d6f4ec2fa19b1c0bead587b01f44acc8",
+    "tests/local-analysis.test.mjs": "d071f3d3d22b226b5bed23a120dbd29ef3ffc1a85a066655c87419c3f300af5a",
+    "tests/test_result_recovery.py": "26f8dd4aae90da47c7bb3d2ff430d23fdbd564250e23cb58a5c3626bb698814f"
+  },
+  "limitations": [
+    "No physical cameras or OEM integration endurance",
+    "No Windows GPU execution",
+    "No recognition or tracking accuracy claim",
+    "No continuous recording or 100-camera qualification",
+    "Decode and copy are not GPU-accelerated by this change"
+  ]
+}

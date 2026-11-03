@@ -255,3 +255,12 @@ and authorized LAN/IP-camera setup, preserve original bytes and credentials, sho
 storage/interruption/coverage limits, and require device/OEM acceptance before
 claiming broad compatibility. No automatic deletion in the OEM backup library;
 keep its full-byte copies distinct from the sampled LAN recorder's retention.
+
+
+Owner GPU preference (2026-11-03): prefer the GPU by default for live AI and
+recorded-video analysis, including OEM backups. Keep a visible, safe CPU fallback
+and explicit CPU override. Verify actual CUDA execution on the owner host; GPU
+preference or provider availability alone is not execution evidence. Preserve
+models, footage and existing environments. Do not change the pinned inference,
+journal, supervision, scheduler or profiling sources. No camera or inference
+starts automatically from this preference.

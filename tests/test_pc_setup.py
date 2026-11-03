@@ -263,6 +263,19 @@ class PcSetupTest(unittest.TestCase):
                     forwarded = call.call_args.args[0]
                 self.assertEqual(forwarded[forwarded.index('--live-backend') + 1], 'cuda-preferred')
 
+    def test_cpu_overrides_forward_for_both_workloads(self):
+        feeds = self.write('local-feeds.json', b'{"sources":[]}')
+        with patch.dict(os.environ, {}, clear=True), patch.object(pc, 'host_check'), \
+                patch.object(pc.sys, 'platform', 'linux'), patch.object(pc, 'verify_kit'), \
+                patch.object(pc, 'built_interface'), patch.object(pc, 'validate_environment', return_value=Path('/python')), \
+                patch('os.execv', side_effect=SystemExit(0)) as execute:
+            with self.assertRaises(SystemExit):
+                pc.main(['--analysis','--recordings',str(self.root),'--config',str(self.root/'catalog.json'),
+                         '--feeds-config',str(feeds),'--no-browser','--live-backend','opencv-cpu','--analysis-backend','opencv-cpu'])
+            args=execute.call_args.args[1]
+            self.assertEqual(args[args.index('--live-backend')+1],'opencv-cpu')
+            self.assertEqual(args[args.index('--analysis-backend')+1],'opencv-cpu')
+
     def test_live_gpu_option_is_rejected_for_install_check_or_missing_analysis(self):
         with patch.dict(os.environ, {}, clear=True), patch.object(pc, 'host_check'):
             for extra in ([], ['--install'], ['--check'], ['--facility']):

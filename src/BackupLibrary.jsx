@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { analysisRequest, localAnalysisOrigin, refused } from './local-analysis.mjs';
+import { analysisRequest, analysisBackendLabel, localAnalysisOrigin, refused } from './local-analysis.mjs';
 import { DEFAULT_LIBRARY_CONFIG, libraryRequest, libraryConfig, cameraConfig, openLibraryItem, libraryCoverage, storageSize } from './backup-library.mjs';
 import { MAX_VIDEO_BYTES } from './recognition.mjs';
 import './backup-library.css';
@@ -143,6 +143,7 @@ export default function BackupLibrary({onResult, onBusy, blocked = false}) {
     {error && <p className="recognition-error" role="alert">{error}</p>}
     {status?.error && <p className="recognition-error" role="alert">{status.error}</p>}
     {status && <>
+      {status.analysis_job && <p role="status">{analysisBackendLabel(status.analysis_job, catalog?.backend)} · {status.analysis_job.frames_analyzed} samples analyzed</p>}
       <div className="backup-storage" aria-label="Backup storage status"><span><strong>{storageSize(status.storage_bytes)}</strong> saved / {status.config?.max_storage_gib ?? config.max_storage_gib} GiB budget</span><span><strong>{storageSize(status.disk_free_bytes)}</strong> disk free</span><span><strong>{status.waiting ?? 0}</strong> files waiting for quiet time</span><span><strong>{status.counters?.copied ?? 0}</strong> copied · {status.counters?.duplicates ?? 0} duplicates skipped</span></div>
       {copying && <div className="backup-copy-progress" role="status"><strong>Saving another copy: {copying.name}</strong><span>{storageSize(copyDone)} of {storageSize(copyTotal)}</span><progress aria-label={`Copy progress for ${copying.name}`} max={copyTotal ?? 1} value={copyTotal !== null && copyDone !== null ? copyDone : undefined} /></div>}
       {status.scan_limited && <p className="backup-notice">The source scan reached its file limit. Some files have not been checked yet.</p>}

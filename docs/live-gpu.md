@@ -1,7 +1,9 @@
-# Optional GPU detection in Monitor
+# GPU-first local analysis
 
-CPU remains the default. This first live GPU option prefers NVIDIA CUDA on
-Windows/Linux x86-64 and only for the exact pinned OpenCV Zoo YOLOX-S FP32 model.
+The local service prefers NVIDIA CUDA by default for live AI and saved-video
+analysis, including copied OEM videos and LAN-recorder segments. CPU is an
+automatic, visibly labeled fallback. CUDA supports Windows/Linux x86-64 and only
+the exact pinned OpenCV Zoo YOLOX-S FP32 model.
 It reuses the existing ONNX Runtime CUDA execution checks; it does not add a new
 model, identity method, GPU video decoder or camera source.
 
@@ -10,8 +12,9 @@ model, identity method, GPU video decoder or camera source.
 
 ## Prepare the runtime separately
 
-The normal Install/Check/Start CPU path remains dependable and does not install
-GPU packages. Make a separate test copy of the app and back up private settings,
+The normal installer prepares the verified CPU base and does not install GPU
+packages. GPU-first preference alone does not prove GPU execution: without a
+prepared CUDA runtime, the first selected job/session reports CPU fallback. Make a separate test copy of the app and back up private settings,
 catalogs and recordings before changing its isolated Python environment. Do not
 install CPU and GPU ONNX Runtime packages into the same environment.
 
@@ -68,9 +71,10 @@ and held-out labels, using the existing offline CUDA qualification/evaluation
 workflow, before relying on object or track quality. Treat a failed agreement
 check as a blocker to promotion, regardless of a favorable speed ratio.
 
-## Explicit service preference
+## Default preference and CPU override
 
-Start the test app with analysis configured and add the optional preference:
+Ordinary analysis launches now prefer CUDA for both workloads. These explicit
+options are equivalent to the defaults:
 
 Linux:
 
@@ -84,8 +88,12 @@ Windows PowerShell:
 .\scripts\Start-IntelligentDvr.ps1 -Analysis -LiveBackend cuda-preferred
 ```
 
-The lower-level service accepts --live-backend cuda-preferred with its existing
---recordings and --config arguments. Use the same port/origin as the test copy
+The lower-level service also accepts `--analysis-backend cuda-preferred` for
+recorded-video jobs with its existing `--recordings` and `--config` arguments.
+For CPU-only operation, use `--analysis-backend opencv-cpu` and/or
+`--live-backend opencv-cpu` (PowerShell `-AnalysisBackend opencv-cpu` and
+`-LiveBackend opencv-cpu`). Mac recordings accept `--analysis-backend opencv-cpu`;
+unsupported platforms/models select CPU automatically. Use the same port/origin as the test copy
 normally uses to retain browser work. Starting the service starts no cameras or
 inference; **Start AI** on a connected camera is still required.
 
@@ -96,21 +104,32 @@ fallback reason. Merely selecting cuda-preferred is not GPU execution proof.
 
 - CPU preference: no ONNX Runtime import or GPU initialization.
 - CUDA preference: unsupported OS/model or a busy GPU slot selects CPU with an
-  explicit reason. At most one GPU worker and two total live sessions.
+  explicit reason. One shared GPU slot covers live AI and recorded analysis
+  within this service. There are still at most two total live sessions. Other
+  processes, such as OEM software, are outside this slot policy.
 - The CUDA child verifies the catalog hash and pinned profile, parses a private
   verified model snapshot, checks runtime version/provider/tensor contract/options,
   and proves CUDA-only node execution with a synthetic startup probe. FP32 is
   retained and TF32 is disabled. Compiled provider availability alone is not
   hardware support.
-- GPU load failure, missing libraries/provider/device, worker exit or startup
+- Live GPU load failure, missing libraries/provider/device, worker exit or startup
   deadline: kill/reap the GPU worker, then try a fresh bounded CPU worker once.
   Each attempt has the existing 30-second start deadline (60 seconds total).
   No camera frame is sent before readiness.
-- A running GPU error, crash, memory guard kill or six-second frame deadline ends
+- A running live GPU error, crash, memory guard kill or six-second frame deadline ends
   the session visibly. The next explicit Start AI uses CPU until service restart.
   No frame is retried silently and no tracker resets inside a live session.
 - Stop, page lease, session expiry and service shutdown still kill the worker.
   Ordinary Stop/lease/session expiry do not disable a healthy accelerator.
+
+Recorded jobs use the same hash-bound detector, rule engine, source validation
+and review format on both backends. The job/status and completed review report the
+actual backend. A GPU model-load/dependency failure or 30-second GPU startup
+deadline launches one fresh CPU worker from the original private recording
+snapshot, under the same total five-minute job budget. A GPU failure during
+recording inference remains a failed job; it is not silently replayed or mixed
+with CPU output. A GPU failure disables further GPU attempts until service
+restart. Restarting the service itself never starts cameras or analysis.
 
 ## Resource policy and limits
 
@@ -126,10 +145,10 @@ still fail. The runtime in this regression is a stub, not CUDA execution.
 
 CUDA needs a large virtual address range. On Linux its worker instead has a
 finite 128 TiB address-space ceiling and a **parent-owned 50 ms RSS watchdog at
-3 GiB**; inability to read the child's memory kills it. This is sampled enforcement,
+3 GiB** for live AI (4 GiB for recorded-video workers); inability to read the child's memory kills it. This is sampled enforcement,
 not the CPU path's hard allocation cap: brief resident-memory peaks can exceed
-3 GiB before termination. On Windows the existing 3 GiB Job Object committed-memory
-limit remains. CUDA under that Windows limit is not yet qualified.
+3 GiB before termination. On Windows the existing Job Object committed-memory limit remains: 3 GiB live,
+4 GiB recorded. CUDA under that Windows limit is not yet qualified.
 
 The reused 1 GiB CUDA arena limit is **not a total VRAM quota**. Driver/context
 and other allocations can exceed it, as the
@@ -142,5 +161,7 @@ at most five frames/s from the browser, 1 MiB/1080p inputs, 15-minute sessions,
 15-second lease and six-second frame deadline. Tracking and rule semantics,
 camera authorization, same-origin token checks and local-only processing remain.
 
-No physical-camera acceptance, cross-platform GPU qualification, representative
-tracking accuracy, GPU speedup or 100-camera capacity follows from these changes.
+See the [GPU-default verification](verification/gpu-default-2026-11-03/README.md)
+for revision-bound owner-PC software measurements. No physical-camera acceptance,
+cross-platform GPU qualification, representative tracking accuracy or 100-camera
+capacity follows from a short controlled run.

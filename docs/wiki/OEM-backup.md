@@ -32,7 +32,7 @@ must still be checked. It cannot promise compatibility with every DVR.
    scans. Choose **Save settings**. No copying has started yet.
 5. Optionally check **Analyze copied videos automatically**, choose the prepared
    model and compatible rules, then choose **Start backup**. Without that checkbox,
-   the tool copies files without claiming the analyzer. Analysis processes one
+   the tool copies files without claiming the analyzer. Analysis prefers the GPU, with a visible CPU fallback, and processes one
    copied video at a time and waits while another job owns the analyzer.
 6. Open **Saved videos → Review backup** to inspect a completed source-matched
    result. Complete and partial coverage remain distinct. Events still require
@@ -79,6 +79,8 @@ removes JSON editing for the ordinary Linux/Windows setup path. The recorder
 remains a bounded, sampled video-only pilot with possible gaps and automatic
 retention. It is separate from the full-byte OEM backup library and is not an
 archival substitute. See [LAN recording limits](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/LAN-recording).
+
+GPU preference and CPU overrides follow the [local GPU guide](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Live-GPU).
 
 ## Storage, integrity and recovery
 

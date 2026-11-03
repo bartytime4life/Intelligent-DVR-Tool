@@ -303,6 +303,7 @@ class BackupLibrary:
             return {'configured': self.config is not None, 'config': dict(self.config) if self.config else None,
                     'active': self.active, 'analyzing': self.analysis is not None,
                     'copying': dict(self.copying) if self.copying else None,
+                    'analysis_job': self.jobs.snapshot(self.analysis['job']) if self.analysis else None,
                     'state': 'stopping' if (self.analysis or self.scanning) and not self.active else 'running' if self.active else 'paused',
                     'error': self.error, 'items': rows, 'storage_bytes': size, 'disk_free_bytes': free,
                     'waiting': self.waiting, 'scan_limited': self.scan_limited,

@@ -1,5 +1,7 @@
 # Product status and evidence
 
+**GPU preference:** live AI and recorded-video analysis now default to GPU first with visible CPU fallback and an explicit CPU override. Actual controlled RTX 5080 checks are recorded in the [GPU-default verification](verification/gpu-default-2026-11-03/README.md); physical-device accuracy and capacity remain separate.
+
 **November 3 source follow-up:** [OEM companion backup](oem-backup.md) adds
 owner-selected watched folders, verified byte-for-byte local copies, durable
 review storage, optional queued analysis and guided private RTSP source/recorder

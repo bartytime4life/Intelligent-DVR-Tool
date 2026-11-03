@@ -25,6 +25,7 @@ import time
 from .diagnostics import Diagnostics
 from .live_worker import FRAME_BYTES, HEADER, INPUT_PIXELS, KEYFRAME_SECONDS, SESSION_SECONDS, THREADS, MEMORY_BYTES
 from .live_backend import candidate, PREFERENCES, CAPABILITY_CODES
+from .acceleration import DEFAULT_BACKEND, GpuSlot
 from .rules import Rule, RuleEngine
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -65,10 +66,11 @@ def _read(path, expected, limit=64 * 1024):
 
 class Live:
     def __init__(self, catalog, *, process_factory=subprocess.Popen, clock=time.monotonic, diagnostics=None,
-                 lease_seconds=None, start_seconds=None, frame_seconds=None, backend='opencv-cpu'):
+                 lease_seconds=None, start_seconds=None, frame_seconds=None, backend=DEFAULT_BACKEND, gpu_slot=None):
         if backend not in PREFERENCES:
             raise ValueError('Unknown live backend preference')
         self.backend, self.gpu_failed = backend, False
+        self.gpu_slot = gpu_slot or GpuSlot()
         self.catalog, self.process_factory, self.clock = catalog, process_factory, clock
         self.log = (diagnostics or Diagnostics()).event
         self.lease = lease_seconds or LIMITS['lease_seconds']
@@ -91,7 +93,7 @@ class Live:
         with self.lock:
             active = sum(s['state'] in ACTIVE for s in self.sessions.values())
         return {'enabled': True, 'models': models, 'rules': rules, 'limits': LIMITS, 'active': active,
-                'backend': self.backend, 'gpu_disabled': self.gpu_failed}
+                'backend': self.backend, 'gpu_disabled': self.gpu_failed or self.gpu_slot.failed}
 
     def start(self, body):
         if (not isinstance(body, dict) or set(body) != {'model', 'rules', 'camera'}
@@ -117,6 +119,8 @@ class Live:
                                for s in self.sessions.values()):
                 use_gpu, reason = False, 'GPU_SLOT_BUSY'
             identifier = secrets.token_hex(16)
+            if use_gpu:
+                use_gpu, reason = self.gpu_slot.acquire(identifier)
             session = {'id': identifier, 'camera': body['camera'], 'model': model['name'], 'model_id': model['id'],
                        'model_sha256': model['sha256'], 'rules': rules['name'], 'rules_id': rules['id'],
                        'state': 'starting', 'error': None, 'began': self.clock(), 'touched': self.clock(),
@@ -124,7 +128,7 @@ class Live:
                        'observations': [], 'observations_total': 0, 'runtime': None, 'load_ms': None,
                        'process': None, 'lines': queue.Queue(maxsize=4), 'busy': False, 'previous': 0.0,
                        'tracks_seen': set(), 'worker_backend': 'onnxruntime-cuda' if use_gpu else 'opencv-cpu',
-                       'acceleration': {'requested': self.backend, 'code': reason}, 'memory_guard': None}
+                       'acceleration': {'requested': self.backend, 'code': reason}, 'memory_guard': None, 'gpu_lease': use_gpu}
             self.sessions[identifier] = session
         config = {'model': str(model['path']), 'model_sha256': model['sha256'], 'profile': model['profile'],
                   'labels': labels, 'rules': rule_list, 'camera': body['camera'], 'run_id': secrets.token_hex(16),
@@ -136,6 +140,7 @@ class Live:
                 # No camera frame has been sent, so tracking has not begun.
                 self._kill(session)
                 self.gpu_failed = True
+                self.gpu_slot.disable()
                 session['worker_backend'] = 'opencv-cpu'
                 session['acceleration']['code'] = 'CUDA_START_FAILED_CPU_FALLBACK'
                 session['acceleration']['gpu_probe'] = (line.get('gpu_probe') if line is not None
@@ -305,6 +310,7 @@ class Live:
     def _stop(self, s, state, code):
         if code in ('GPU_FAILED', 'WORKER_FAILED', 'WORKER_EXITED', 'WORKER_TIMEOUT') and s.get('worker_backend') == 'onnxruntime-cuda':
             self.gpu_failed = True
+            self.gpu_slot.disable()
         self._kill(s)
         s['state'] = state
         s['error'] = {'code': code, 'message': MESSAGES.get(code, 'Local AI stopped.')} if code else None
@@ -324,6 +330,9 @@ class Live:
             process.wait()
             threading.Thread(target=self._close_pipes, args=(process,), daemon=True).start()
             s['process'] = None
+        if s.get('gpu_lease'):
+            self.gpu_slot.release(s['id'])
+            s['gpu_lease'] = False
 
     @staticmethod
     def _close_pipes(process):

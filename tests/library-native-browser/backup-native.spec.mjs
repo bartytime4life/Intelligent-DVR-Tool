@@ -34,7 +34,11 @@ test('OEM source → verified backup → real CPU analysis → matching browser 
   const status=await (await page.request.get('/api/library/status',{headers:{'X-DVR-Token':session.token}})).json();
   expect(status.items).toHaveLength(1);
   expect(status.items[0].sha256).toBe(before);
-  expect(status.items[0].observations).toBeGreaterThan(0);
+  if (process.env.DVR_LIBRARY_CATALOG) {
+    const result=await (await page.request.get(`/api/library/items/${status.items[0].id}/result`,{headers:{'X-DVR-Token':session.token}})).json();
+    expect(result.receipt.runtime.backend_id).toBe('onnxruntime-cuda');
+    expect(result.receipt.runtime.startup_execution.node_execution_counts.CUDAExecutionProvider).toBeGreaterThan(0);
+  } else expect(status.items[0].observations).toBeGreaterThan(0);
   expect(status.active).toBe(false);
   expect(await page.evaluate(()=>JSON.parse(localStorage.getItem('dvr.events.v1')||'[]').length)).toBe(0);
 });

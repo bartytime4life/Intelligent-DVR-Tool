@@ -27,6 +27,7 @@ class RecoveryTest(unittest.TestCase):
         names = {'source_sha256':next(directory.glob('source.*')), 'model_sha256':directory/'model.onnx',
                  'labels_sha256':directory/'labels.json', 'rules_file_sha256':directory/'rules.json'}
         receipt = {key:hashlib.sha256(path.read_bytes()).hexdigest() for key,path in names.items()}
+        receipt['runtime'] = {'backend_id':'opencv-cpu'}
         receipt['state'] = 'completed'
         receipt['frames_read'] = 1
         receipt['media_coverage'] = {'schema':'intelligent-dvr.media-coverage.v1',
