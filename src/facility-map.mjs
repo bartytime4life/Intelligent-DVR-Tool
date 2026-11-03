@@ -1,4 +1,4 @@
-import { Map, NavigationControl, ScaleControl, AttributionControl, Marker, MercatorCoordinate, setWorkerUrl } from "maplibre-gl";
+import { Map, NavigationControl, ScaleControl, AttributionControl, Marker, MercatorCoordinate, addProtocol, setWorkerUrl } from "maplibre-gl";
 import workerUrl from "maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url";
 import * as THREE from "three";
 import { TerraDraw, TerraDrawPolygonMode, TerraDrawLineStringMode } from "./vendor/terra-draw.mjs";
@@ -12,9 +12,10 @@ import {createStairMap} from "./facility-stair-map.mjs";
 import {createWindowMap} from "./facility-window-map.mjs";
 import {createDoorwayMap} from "./facility-doorway-map.mjs";
 import { doriArcs } from "./facility-dori.mjs";
-import { basemap, inAerialCoverage, sitePhotoRequest, loadSitePhoto, photoFailure } from "./facility-basemap.mjs";
+import { basemap, loadStreetTile, StreetTileBlocked, inAerialCoverage, sitePhotoRequest, loadSitePhoto, photoFailure } from "./facility-basemap.mjs";
 import "./facility-map-geometry.css";
 setWorkerUrl(workerUrl);
+addProtocol("dvr-osm", loadStreetTile);
 const fc = (features) => ({ type: "FeatureCollection", features });
 const feat = (type, coordinates, properties = {}) => ({ type: "Feature", geometry: { type, coordinates }, properties });
 const polygon = (ring, origin, props) => feat("Polygon", [ring.map((p) => toLngLat(p, origin))], props);
@@ -209,7 +210,7 @@ function createFacilityMap(container, callbacks, initialPlan, options = {}) {
   // Over map pictures the plan is drawn lighter so roofs and paving stay visible for tracing.
   function applyBasemapStyle() {
     if (!ready) return;
-    const external = basemapId !== "grid";
+    const external = basemapId !== "grid" && tileStatus !== "blocked";
     map.setPaintProperty("grid", "line-color", external ? "#d9f2f6" : "#36505c");
     map.setPaintProperty("grid", "line-opacity", external ? 0.16 : 0.26);
     map.setPaintProperty("buildings", "fill-extrusion-opacity", !external ? 0.96 : view === "2d" || OVERHEAD_TOOLS.includes(tool) ? 0.42 : 0.74);
@@ -250,11 +251,19 @@ select", markers = [];
   map.on("resize", scheduleLabels);
   map.on("rotate", () => callbacks.onBearing?.((map.getBearing() + 360) % 360));
   // Map picture failures (offline, provider down, outside coverage) never block plan editing.
-  let tileErrorShown = false;
+  let tileStatus = null;
   map.on("error", (e) => {
     if (e.sourceId === "basemap-tiles") {
-      if (!tileErrorShown) callbacks.onBasemapStatus?.({ tiles: "error" });
-      tileErrorShown = true;
+      if (tileStatus === "blocked") return;
+      if (basemapId === "streets" && e.error instanceof StreetTileBlocked) {
+        tileStatus = "blocked";
+        map.setLayoutProperty("basemap", "visibility", "none");
+        applyBasemapStyle();
+      } else {
+        if (tileStatus === "error") return;
+        tileStatus = "error";
+      }
+      callbacks.onBasemapStatus?.({ tiles: tileStatus });
       return;
     }
     if (e.sourceId === "site-photo") {
@@ -772,7 +781,7 @@ e-stroke-width": 2 } });
         if (map.getLayer("basemap")) map.removeLayer("basemap");
         if (map.getSource("basemap-tiles")) map.removeSource("basemap-tiles");
         basemapId = next.id;
-        tileErrorShown = false;
+        tileStatus = null;
         if (next.external) {
           map.addSource("basemap-tiles", { type: "raster", tiles: next.tiles, tileSize: 256, maxzoom: next.maxzoom, attribution: next.attribution });
           map.addLayer({ id: "basemap", type: "raster", source: "basemap-tiles", paint: next.id === "streets" ?
