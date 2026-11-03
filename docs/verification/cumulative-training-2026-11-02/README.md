@@ -22,6 +22,9 @@ OpenCV 4.14.0.94, NumPy 2.5.4, PyAV 19.0.2 and ONNX 1.23.2.
 The production build, documentation checks, generated Wiki mirror and source
 diff checks passed. Full platform CI is reported separately in the pull request's
 GitHub Actions checks; local macOS results are not substituted for Linux/Windows CI.
+The serial browser workflow has a thirty-minute job budget for geometry,
+recording analysis (including repeat training), feeds, recorder checks and
+artifact upload. No browser suite or assertion is removed.
 
 The publication review also extended the browser lock through asynchronous
 service checks and rule saving. A separate regression test queues another tab's
