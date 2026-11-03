@@ -44,3 +44,12 @@ test('abandoned result opening cannot publish', async () => {
   const controller = new AbortController(); controller.abort();
   await assert.rejects(openJobResult(job, 'token', controller.signal, serve()), /cancelled/);
 });
+
+test('recording backend labels distinguish preference, verified execution and CPU fallback',async()=>{
+  const {analysisBackendLabel}=await import('../src/local-analysis.mjs');
+  assert.equal(analysisBackendLabel(null,'cuda-preferred'),'GPU first · CPU fallback');
+  assert.equal(analysisBackendLabel({state:'running',backend:null},'cuda-preferred'),'Preparing analysis · runtime not confirmed');
+  assert.equal(analysisBackendLabel({backend:'onnxruntime-cuda'}),'GPU · CUDA');
+  assert.equal(analysisBackendLabel({backend:'opencv-cpu',acceleration_code:'GPU_SLOT_BUSY'}),'CPU · GPU worker in use');
+  assert.equal(analysisBackendLabel({backend:'opencv-cpu',acceleration_code:'CUDA_START_FAILED_CPU_FALLBACK'}),'CPU · GPU could not start');
+});

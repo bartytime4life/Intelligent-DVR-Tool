@@ -1,5 +1,7 @@
 # Verification index
 
+[GPU-first default, November 3](gpu-default-2026-11-03/README.md) records actual RTX 5080 CUDA execution, recorded-video and OEM-copy analysis, shared GPU-slot policy and explicit CPU fallback.
+
 [OEM companion backup, November 3](oem-backup-2026-11-03/README.md) records verified file copying, optional local analysis, guided LAN setup and controlled browser checks; physical OEM/device acceptance remains open.
 
 [Cumulative training, November 2](cumulative-training-2026-11-02/README.md)

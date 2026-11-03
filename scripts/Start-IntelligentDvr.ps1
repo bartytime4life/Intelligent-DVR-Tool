@@ -5,7 +5,8 @@ param(
     [switch]$Check,
     [switch]$Analysis,
     [switch]$Train,
-    [ValidateSet('opencv-cpu', 'cuda-preferred')][string]$LiveBackend = 'opencv-cpu',
+    [ValidateSet('opencv-cpu', 'cuda-preferred')][string]$LiveBackend = 'cuda-preferred',
+    [ValidateSet('opencv-cpu', 'cuda-preferred')][string]$AnalysisBackend = 'cuda-preferred',
     [switch]$AllowRecordingImport,
     [switch]$AllowTraining,
     [switch]$AllowFaceEnrollment,
@@ -35,7 +36,8 @@ try {
     if ($Check) { $TaskArgs += '--check' }
     if ($Analysis) { $TaskArgs += '--analysis' }
     if ($Train) { $TaskArgs += '--train' }
-    if ($LiveBackend -ne 'opencv-cpu') { $TaskArgs += @('--live-backend', $LiveBackend) }
+    if ($PSBoundParameters.ContainsKey('LiveBackend')) { $TaskArgs += @('--live-backend', $LiveBackend) }
+    if ($PSBoundParameters.ContainsKey('AnalysisBackend')) { $TaskArgs += @('--analysis-backend', $AnalysisBackend) }
     if ($AllowRecordingImport) { $TaskArgs += '--allow-recording-import' }
     if ($AllowTraining) { $TaskArgs += '--allow-training' }
     if ($AllowFaceEnrollment) { $TaskArgs += '--allow-face-enrollment' }

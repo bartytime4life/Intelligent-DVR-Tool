@@ -568,6 +568,7 @@ class Recorder:
                 # A stopped thread or a growing tick age means nothing records, analyzes or expires.
                 'supervisor': {'alive': bool(self.thread and self.thread.is_alive()),
                                'last_tick_age_seconds': None if self.last_tick is None else round(self.clock() - self.last_tick, 1)},
+                'analysis_job': self.jobs.snapshot(self.analysis['job_id']) if self.analysis else None,
                 'worker': dict(self.metrics), 'segments': [dict(r) for r in reversed(self.rows)]}
 
     def artifact(self, identifier, kind):

@@ -48,7 +48,8 @@ See [local addresses and earlier installations](docs/pc-testing.md#local-address
 Keep the OEM software recording and use **Recognition → Use my existing DVR**
 to select its finished-recording/export folder and a separate local backup folder.
 The tool verifies each copied file, preserves originals, avoids duplicate copies,
-and optionally analyzes eligible videos. Guided IP-camera/LAN-DVR channel setup
+and optionally analyzes eligible videos. Local analysis prefers the GPU, with a
+visible CPU fallback and an explicit CPU override. [GPU guide](docs/live-gpu.md). Guided IP-camera/LAN-DVR channel setup
 also saves authorized RTSP sources without JSON editing on the PC launcher.
 [Setup, supported formats and limits](docs/oem-backup.md). This companion path
 has controlled software checks; particular OEMs and physical devices still need acceptance.

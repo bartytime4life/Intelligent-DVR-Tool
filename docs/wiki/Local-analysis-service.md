@@ -7,7 +7,7 @@
 **Quick path:** Prepare a compatible model/catalog → start the local service → Connect local analysis → select a recording, model and rules → Analyze recording.
 
 Recognition can select a recording from an explicitly configured folder, start
-CPU analysis, show frame progress, cancel and open the verified result in the same
+local analysis, show frame progress, cancel and open the verified result in the same
 application. The service calls the existing `edge.analyze` implementation and the
 browser reuses `parseRecognition` and `matchRecording`. PR #25's retained sessions,
 review decisions, queue limits, export and Undo remain in place.
@@ -96,7 +96,8 @@ labeled unverified instead of being retroactively validated.
 | Catalog | First 1,000 directory entries considered; at most 200 supported recordings listed; refresh explicitly after changing files |
 | Inputs | Nonempty MP4/MOV, WebM/MKV or AVI container header; 512 MiB recording/model; 64 KiB labels/rules; models hash checked before execution |
 | Jobs | One active job, no pending queue, five-minute wall deadline including preparation; cancel wins publication races |
-| CPU | Two OpenCV inference and two FFmpeg decoder threads requested; 6,000 decoded frames; sample every five; 4 GiB Linux virtual-address or Windows process-commit limit (macOS refuses address-space limits, so its worker has **no memory cap**); Linux and macOS file-size cap and a summed CPU-time backstop (1,260 s: four threads for the full wall deadline) |
+| GPU preference | Linux/Windows pinned YOLOX-S; shared one-GPU slot; Linux 128 TiB VA ceiling with sampled 4 GiB parent RSS guard; Windows 4 GiB Job Object; CUDA arena is not a total VRAM quota. [Full policy](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Live-GPU#resource-policy-and-limits) |
+| CPU fallback | Two OpenCV inference and two FFmpeg decoder threads requested; 6,000 decoded frames; sample every five; 4 GiB Linux virtual-address or Windows process-commit limit (macOS refuses address-space limits, so its worker has **no memory cap**); Linux and macOS file-size cap and a summed CPU-time backstop (1,260 s: four threads for the full wall deadline) |
 | Results | Existing 1,000-observation, 100,000-detection, 32 MiB review contract; browser validates full contract before attaching exact source |
 | HTTP | 2 KiB JSON controls; optional explicit same-computer binary import up to 64 MiB; at most 16 concurrent connections (extra ones are closed), five-second socket timeout, 30-second import loop deadline; chunked output; downloads stream outside service locks |
 | Retention | Default: one private temporary recording/result snapshot until the next explicit job or graceful shutdown. Opt-in Linux storage retains the last job across service restarts; model/config snapshots are removed after processing |
@@ -212,9 +213,12 @@ current browser review decisions only when observation identities and evidence
 match. Display thresholds do not rewrite rule outcomes. Imports of invalid
 recognition bundles preserve the previous loaded review.
 
-CPU is the service's default and available fallback path; CUDA remains an explicit
-separate CLI backend with its existing no-silent-fallback policy. This service does
-not automatically switch GPU/CPU or claim GPU job qualification. Native decoder
+The service defaults to GPU-first analysis with a visible CPU fallback; use
+`--analysis-backend opencv-cpu` to force CPU. The pinned CUDA path proves
+CUDA-only model execution before accepting GPU results. A startup failure can
+restart once in a fresh CPU worker; a failure during inference stays failed.
+The standalone CLI retains its explicit-backend/no-fallback behavior. See
+[GPU selection and resource policy](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Live-GPU). Native decoder
 network protocols are restricted to local files. Map-provider choices elsewhere in
 the app remain optional and separate; the analysis service makes no cloud calls.
 
@@ -232,7 +236,7 @@ independently measured recognition quality or sustained 100-camera capacity.
 
 **Status:** Implemented for review, October 29, 2026.
 
-A single Python loopback server serves the built app and manages one isolated CPU
+A single Python loopback server serves the built app and manages one isolated recording
 worker. The worker calls the existing analyzer with a progress callback; no new
 inference engine or competing receipt schema is introduced. Read-only folder
 selection avoids browser footage uploads and ambiguous arbitrary-path execution.

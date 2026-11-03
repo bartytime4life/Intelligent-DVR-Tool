@@ -48,7 +48,8 @@ See [local addresses and earlier installations](https://github.com/bartytime4lif
 Keep the OEM software recording and use **Recognition → Use my existing DVR**
 to select its finished-recording/export folder and a separate local backup folder.
 The tool verifies each copied file, preserves originals, avoids duplicate copies,
-and optionally analyzes eligible videos. Guided IP-camera/LAN-DVR channel setup
+and optionally analyzes eligible videos. Local analysis prefers the GPU, with a
+visible CPU fallback and an explicit CPU override. [GPU guide](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Live-GPU). Guided IP-camera/LAN-DVR channel setup
 also saves authorized RTSP sources without JSON editing on the PC launcher.
 [Setup, supported formats and limits](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/OEM-backup). This companion path
 has controlled software checks; particular OEMs and physical devices still need acceptance.

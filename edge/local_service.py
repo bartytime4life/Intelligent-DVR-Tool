@@ -30,7 +30,8 @@ from .model_profiles import validate_binding
 from .rules import Rule, RuleEngine
 from .local_feeds import Feeds, FeedError, load_sources, shared_config
 from .live_analysis import Live, LiveError, LIMITS as LIVE_LIMITS
-from .live_backend import PREFERENCES
+from .live_backend import PREFERENCES, candidate
+from .acceleration import DEFAULT_BACKEND, GpuSlot
 from .result_store import ResultStore, VIDEO_BYTES, REVIEW_BYTES as RESULT_BYTES, EXTENSIONS
 from .recording_import import import_recording, ImportError as RecordingImportError, MAX_IMPORT_BYTES, MIMES as IMPORT_MIMES
 from .enhancement import PROFILE as ENHANCEMENT_PROFILE, validate_trace as validate_enhancement
@@ -216,11 +217,14 @@ def load_trained(directory):
 
 class Jobs:
     def __init__(self, recordings, catalog, *, wall_seconds=300, process_factory=subprocess.Popen, state_dir=None, allow_import=False,
-                 training_dir=None, people_dir=None, face_runner=None):
+                 training_dir=None, people_dir=None, face_runner=None, backend=DEFAULT_BACKEND, gpu_slot=None):
         # Resolved once (OS links above it are fine); the folder and its entries are not links.
         recordings = anchor(recordings)
         if not recordings.is_dir() or recordings.is_symlink():
             raise ValueError('Select a regular local recordings directory without symlinks')
+        if backend not in PREFERENCES:
+            raise ValueError('Unknown recording backend preference')
+        self.backend, self.gpu_slot = backend, gpu_slot or GpuSlot()
         self.recordings, self.catalog = recordings, catalog
         self.allow_import = allow_import
         self.training_dir = training_dir
@@ -276,7 +280,7 @@ class Jobs:
             return {'recordings': [{'id': key, 'name': p.name, 'bytes': sig[2]} for key, (p, sig) in choices.items()],
                     'models': models, 'rules': rules, 'limits': LIMITS,
                     'enhancement_comparisons': [ENHANCEMENT_PROFILE],
-                    'backend': 'opencv-cpu', 'job': None if self.managed else self.snapshot(),
+                    'backend': self.backend, 'job': None if self.managed else self.snapshot(),
                     'recorder_active': self.owner is not None,
                     'recording_import': {'enabled': self.allow_import, 'max_bytes': MAX_IMPORT_BYTES},
                     'training': {'enabled': self.training_dir is not None, 'limit': TRAINED_LIMIT},
@@ -612,7 +616,8 @@ class Jobs:
             job = {'id': secrets.token_hex(16), 'state': 'running', 'phase': 'preparing',
                         'recording': source.name, 'model': model['name'], 'rules': rules['name'],
                         'frames_read': 0, 'frames_analyzed': 0, 'max_frames': LIMITS['max_frames'],
-                        'elapsed_seconds': 0, 'error': None}
+                        'elapsed_seconds': 0, 'error': None, 'backend_preference': self.backend, 'backend': None,
+                        'acceleration_code': 'NOT_STARTED'}
             if 'compare_enhancement' in request:
                 job['compare_enhancement'] = request['compare_enhancement']
             if self.store and owner is None:
@@ -734,24 +739,86 @@ class Jobs:
                     '--output', str(directory / 'receipt.json'), '--review-output', str(directory / 'review.json')]
             if self.job.get('compare_enhancement'):
                 args += ['--compare-enhancement', self.job['compare_enhancement']]
-            (directory / 'args.json').write_text(json.dumps(args), encoding='utf-8')
-            self._check(began)
-            self.process = self.process_factory([sys.executable, '-m', 'edge.analysis_worker', str(directory)], cwd=ROOT,
-                                               stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
-                                               env={**os.environ, 'DVR_ANALYSIS_PARENT_PID': str(os.getpid()), 'DVR_ANALYSIS_PARENT_PIPE': '1'})
-            while self.process.poll() is None:
-                self._check(began)
-                self._progress(directory, began)
-                self.cancel_event.wait(.1)
-            self._check(began)
-            if self.process.returncode != 0:
-                # Strict {"code"} file from the worker, else a classified signal/NTSTATUS exit.
-                code = failures.read(directory, failures.ANALYSIS) or failures.exit_cause(self.process.returncode)
-                if code:
-                    raise JobError(code, failures.ANALYSIS[code])
-                raise JobError('PROCESS_FAILED', 'The analyzer stopped. Check that the recording plays, the model matches its profile, and the CPU dependencies are installed. Try a shorter recording; memory and CPU limits also stop jobs.')
+            use_gpu, reason = candidate(self.backend, model['profile'])
+            leased = False
+            if use_gpu:
+                use_gpu, reason = self.gpu_slot.acquire(self.job['id'])
+                leased = use_gpu
+            selected = 'onnxruntime-cuda' if use_gpu else 'opencv-cpu'
+            self.job['acceleration_code'] = reason
+            try:
+                while True:
+                    args[args.index('--backend') + 1] = selected
+                    (directory / 'args.json').write_text(json.dumps(args), encoding='utf-8')
+                    self._check(began)
+                    self.process = self.process_factory([sys.executable, '-m', 'edge.analysis_worker', str(directory)], cwd=ROOT,
+                                                       stdin=subprocess.PIPE, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                                                       env={**os.environ, 'DVR_ANALYSIS_PARENT_PID': str(os.getpid()), 'DVR_ANALYSIS_PARENT_PIPE': '1'})
+                    guard = None
+                    startup_at = time.monotonic()
+                    startup_timeout = False
+                    try:
+                        if selected == 'onnxruntime-cuda':
+                            from .live_resources import guard as guard_gpu
+                            try:
+                                guard = guard_gpu(self.process, LIMITS['memory_bytes'])
+                            except RuntimeError:
+                                startup_timeout = True
+                                self.process.kill()
+                        while self.process.poll() is None:
+                            self._check(began)
+                            self._progress(directory, began)
+                            if self.job['phase'] in ('analyzing', 'verifying', 'completed'):
+                                self.job['backend'] = selected
+                                if selected == 'onnxruntime-cuda': self.job['acceleration_code'] = 'CUDA_STARTUP_VERIFIED'
+                            if selected == 'onnxruntime-cuda' and self.job['backend'] is None and time.monotonic() - startup_at > 30:
+                                startup_timeout = True
+                                self.process.kill()
+                                break
+                            self.cancel_event.wait(.1)
+                        self.process.wait()
+                    finally:
+                        if guard is not None: guard.set()
+                    self._check(began)
+                    code = failures.read(directory, failures.ANALYSIS) or failures.exit_cause(self.process.returncode)
+                    if self.process.returncode == 0:
+                        break
+                    gpu_failure = selected == 'onnxruntime-cuda'
+                    if gpu_failure: self.gpu_slot.disable()
+                    if gpu_failure and (startup_timeout or code in ('MODEL_LOAD_FAILED', 'DEPENDENCY_MISSING')):
+                        # No completed result exists. A separate CPU process reads the original
+                        # private snapshot from the beginning; outputs from the failed attempt are discarded.
+                        if getattr(self.process, 'stdin', None): self.process.stdin.close()
+                        self.process = None
+                        if leased:
+                            self.gpu_slot.release(self.job['id'])
+                            leased = False
+                        for name in ('progress.json','progress.tmp','receipt.json','review.json','failure.json','failure.tmp'):
+                            (directory / name).unlink(missing_ok=True)
+                        selected = 'opencv-cpu'
+                        self.job.update(backend=None, phase='preparing', frames_read=0, frames_analyzed=0,
+                                        acceleration_code='CUDA_START_FAILED_CPU_FALLBACK')
+                        continue
+                    if code:
+                        raise JobError(code, failures.ANALYSIS[code])
+                    raise JobError('PROCESS_FAILED', 'The analyzer stopped. Check the recording, model and local runtime, then retry.')
+            finally:
+                if leased:
+                    # Wait for GPU process termination before lending the device to another workload.
+                    if self.process and self.process.poll() is None:
+                        self.process.kill(); self.process.wait()
+                    self.gpu_slot.release(self.job['id'])
             review = read_json(directory / 'review.json', RESULT_BYTES)
             receipt, trace = review['receipt'], review['trace']
+            runtime = receipt.get('runtime', {})
+            if runtime.get('backend_id') != selected or trace.get('runtime') != runtime:
+                raise JobError('RESULT_MISMATCH', 'The recorded runtime does not match the selected analyzer.')
+            if selected == 'onnxruntime-cuda':
+                counts = runtime.get('startup_execution', {}).get('node_execution_counts', {})
+                if set(counts) != {'CUDAExecutionProvider'} or type(counts['CUDAExecutionProvider']) is not int or counts['CUDAExecutionProvider'] <= 0:
+                    raise JobError('RESULT_MISMATCH', 'CUDA execution was not verified. No GPU result was accepted.')
+                self.job['acceleration_code'] = 'CUDA_STARTUP_VERIFIED'
+            self.job['backend'] = selected
             expected = {'source_sha256': source_hash, 'model_sha256': model_hash,
                         'labels_sha256': labels_hash, 'rules_file_sha256': rules_hash}
             if (review['schema'] != 'intelligent-dvr.recognition-review.v1' or
@@ -1154,15 +1221,18 @@ def main(argv=None):
     parser.add_argument('--camera-setup-config', type=Path, help='Allow owner-triggered local camera setup in this private feed configuration; saving never connects')
     parser.add_argument('--recorder-config', type=Path, help='Opt-in one-camera segment recorder; never starts automatically')
     parser.add_argument('--port', type=int, default=os.environ.get('DVR_PORT') or DEFAULT_PC_PORT)
-    parser.add_argument('--live-backend', choices=PREFERENCES, default='opencv-cpu',
-                        help='Explicit live CUDA preference; CPU is default and startup fallback. No camera starts automatically.')
+    parser.add_argument('--analysis-backend', choices=PREFERENCES, help='Recording analysis preference; default GPU first with visible CPU fallback')
+    parser.add_argument('--live-backend', choices=PREFERENCES,
+                        help='Live AI preference; default GPU first with visible CPU fallback. No camera starts automatically.')
     parser.add_argument('--open-browser', action='store_true', help='Open the local app after binding; never connects cameras')
     parser.add_argument('--start-page', choices=['train'], help='Show a specific workspace at the local address')
     args = parser.parse_args(argv)
     if bool(args.recordings) != bool(args.config):
         parser.error('Use --recordings and --config together')
-    if args.live_backend != 'opencv-cpu' and not args.config:
+    if args.live_backend and args.live_backend != 'opencv-cpu' and not args.config:
         parser.error('--live-backend requires analysis configuration')
+    if args.analysis_backend and not args.config:
+        parser.error('--analysis-backend requires analysis configuration')
     if args.state_dir and not args.config:
         parser.error('--state-dir requires recording analysis configuration')
     if args.allow_recording_import and not args.config:
@@ -1184,14 +1254,16 @@ def main(argv=None):
     jobs = feeds = recorder = live = library = camera_setup = server = None
     diagnostics = Diagnostics()
     try:
+        gpu_slot = GpuSlot()
         if args.config:
             jobs = Jobs(args.recordings, load_catalog(args.config.absolute()), state_dir=args.state_dir, allow_import=args.allow_recording_import,
                         training_dir=args.config.absolute().parent / 'trained' if args.allow_training else None,
-                        people_dir=args.config.absolute().parent / 'people' if args.allow_face_enrollment else None)
+                        people_dir=args.config.absolute().parent / 'people' if args.allow_face_enrollment else None,
+                        backend=args.analysis_backend or DEFAULT_BACKEND, gpu_slot=gpu_slot)
             diagnostics = jobs.diagnostics
             library = BackupLibrary(jobs, args.config.absolute().parent / '.backup-library')
             # Live AI reuses the reviewed catalog; it runs only after Start AI on a Monitor tile.
-            live = Live(jobs.catalog, diagnostics=diagnostics, backend=args.live_backend)
+            live = Live(jobs.catalog, diagnostics=diagnostics, backend=args.live_backend or DEFAULT_BACKEND, gpu_slot=gpu_slot)
         if args.feeds_config:
             feeds = Feeds(load_sources(args.feeds_config.absolute()), diagnostics=diagnostics)
             if shared_config(args.feeds_config):

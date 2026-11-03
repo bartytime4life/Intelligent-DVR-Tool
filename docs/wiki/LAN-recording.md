@@ -7,7 +7,7 @@
 **Quick path:** Configure one authorized private RTSP channel → connect the recorder → explicitly start → inspect finalized segments → stop and review gaps.
 
 This opt-in pilot records one authorized RTSP channel and feeds finalized segments
-into the existing local CPU analyzer. It reuses the configured-source allowlist,
+into the existing local GPU-first analyzer with visible CPU fallback. It reuses the configured-source allowlist,
 pinned TCP relay, OpenCV decoder, model/rule catalog, Jobs service and Recognition
 review contract. It does not add FFmpeg executables, another inference server,
 ONVIF discovery, camera scanning, vendor cloud access, audio or public-camera capture.

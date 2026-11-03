@@ -41,7 +41,7 @@ def prepare(model, *, root=ROOT, face_detector=None, face_recognizer=None):
         # Whole-frame class presence only; users can add their own reviewed zones.
         rules = [{'name':'whole-frame person presence', 'label':'person', 'rect':[0,0,1,1], 'threshold':.5, 'dwell':0}]
         (temp / 'rules.json').write_text(json.dumps(rules, indent=2)+'\n', encoding='utf-8')
-        config = {'models':[{'id':'yolox-s','name':'YOLOX-S · 80 classes · CPU','path':'yolox-s.onnx',
+        config = {'models':[{'id':'yolox-s','name':'YOLOX-S · 80 classes','path':'yolox-s.onnx',
             'labels':'coco80.json','profile':candidate['profile'],'sha256':candidate['model_sha256']}],
             'rules':[{'id':'person-presence','name':'Person present · whole frame','path':'rules.json'}]}
         if face_detector is not None:
