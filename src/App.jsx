@@ -5,9 +5,9 @@ import LiveMonitor from "./LiveMonitor.jsx";
 const RecognitionReview = lazy(() => import("./RecognitionReview.jsx"));
 const TrainingWorkspace = lazy(() => import("./TrainingWorkspace.jsx"));
 import { mergeRecognitionEvents } from './recognition.mjs';
-import { workspaceFromHash, readWorkspace, writeWorkspace, preserveUnreadable, reviewExport, parseReviewExport } from './workspace-state.mjs';
+import { workspaceFromHash, readWorkspace, writeWorkspace, preserveUnreadable, reviewExport, parseReviewExport, pauseHiddenPlayback } from './workspace-state.mjs';
 import { backdropDismiss } from './dialog-dismiss.mjs';
-import { getImage, putImage, deleteImage, pruneImages, imageFileFrame } from './local-images.mjs';
+import { getImage, putImage, deleteImage, pruneImages, imageFileFrame, observationImageKey } from './local-images.mjs';
 import { ANALYZER_CLASSES, DEFAULT_MAX_GAP, analyzerRules, analyzerFilename } from './zone-rules.mjs';
 import { filterEvents, queueChoices, nextPending, queueCSV, dismissPending, restorePending } from './review-queue.mjs';
 import { DEFAULT_SETUP, parseSetup } from "./resources.mjs";
@@ -246,7 +246,8 @@ function Overlay({
 }
 // Bumped when observations arrive so stills saved just before them are read again.
 const StillVersion = React.createContext(0);
-function Still({ id, large = false, fallback = null }) {
+function Still({ event, large = false, fallback = null }) {
+  const id = observationImageKey(event);
   const version = React.useContext(StillVersion);
   const [url, setUrl] = useState("");
   useEffect(() => {
@@ -255,14 +256,14 @@ function Still({ id, large = false, fallback = null }) {
     getImage("thumbnails", id).then((blob) => { if (live && blob) { made = URL.createObjectURL(blob); setUrl(made); } });
     return () => { live = false; if (made) URL.revokeObjectURL(made); };
   }, [id, version]);
-  return url ? <img className={`event-still${large ? " large" : ""}`} src={url} alt="Still from the verified source recording at this observation" /> : fallback;
+  return url ? <img className={`event-still${large ? " large" : ""}`} src={url} alt={event.mode === 'live-model' ? 'Analyzed live frame for this observation' : 'Still from the source-matched recording at this observation'} /> : fallback;
 }
 function EventRow({ event, review, zone }) {
   const c = cameraOf(event);
   return (
     <article className="event-card">
       <div className="event-preview">
-        <Still id={event.id} fallback={<Camera size={35} />} />
+        <Still event={event} fallback={<Camera size={35} />} />
         <span className="sample-badge">
           {event.mode === "sample" ? "SAMPLE" : event.mode === "live-model" ? "LIVE" : "OFFLINE"}
         </span>
@@ -386,9 +387,10 @@ export function App() {
     window.addEventListener("hashchange", changed);
     return () => { window.removeEventListener("popstate", changed); window.removeEventListener("hashchange", changed); };
   }, []);
-  function addObservations(added, openEvents = true) {
+  function addObservations(added, openEvents = true, validateOnly = false) {
     try {
       const merged = mergeRecognitionEvents(eventsRef.current, added);
+      if (validateOnly) return true;
       const newCount = merged.length - eventsRef.current.length;
       eventsRef.current = merged;
       setEvents(merged);
@@ -399,8 +401,10 @@ export function App() {
     } catch (err) { setToast(err.message); return false; }
   }
   async function addLiveObservation(event, still) {
+    try { mergeRecognitionEvents(eventsRef.current, [event]); }
+    catch (err) { setToast(err.message); return false; }
     // The still is a live observation's only image evidence: never queue it without one.
-    if (!still || !(await putImage("thumbnails", event.id, still))) {
+    if (!still || !(await putImage("thumbnails", observationImageKey(event), still))) {
       setToast("This browser could not save the observation’s still, so it was not sent. Free browser storage or leave private browsing, then send it again.");
       return false;
     }
@@ -422,6 +426,7 @@ export function App() {
   });
   const loadedSetup = useRef(resourceState.setup), adoptedSetup = useRef(null);
   const [pageHidden, setPageHidden] = useState(document.hidden);
+  useEffect(() => pauseHiddenPlayback(document), []);
   const resources = resourceState.setup;
   useEffect(() => {
     const changed = () => setPageHidden(document.hidden);
@@ -552,7 +557,7 @@ export function App() {
   }
   // Stills follow the queue: removed with their observations, kept while Undo can restore them.
   useEffect(() => {
-    const timer = setTimeout(() => { pruneImages("thumbnails", new Set([...events, ...(clearedEvents || [])].map((e) => e.id))); }, 2000);
+    const timer = setTimeout(() => { pruneImages("thumbnails", new Set([...events, ...(clearedEvents || [])].flatMap(e => [e.id, observationImageKey(e)]))); }, 2000);
     return () => clearTimeout(timer);
   }, [events, clearedEvents]);
   function saveRule(e) {
@@ -666,7 +671,7 @@ export function App() {
           {(eventsRecovery || rulesRecovery) && <button className="text-button" onClick={() => { eventsRecovery?.dismiss(); rulesRecovery?.dismiss(); }}>Dismiss</button>}
         </div>}
         {recognitionOpened && <div hidden={tab !== "Recognition"}><WorkspaceBoundary name="Recognition"><Suspense fallback={<div className="content-page"><h1>Opening recognition review…</h1></div>}>
-          <RecognitionReview active={tab === "Recognition" && !pageHidden} onImport={addObservations} clip={capturedClip} onClip={setCapturedClip} reviews={events} evidence={evidence} onRecorderStatus={setRecorderStatus} onZoneStill={offerZoneStill} />
+          <RecognitionReview active={tab === "Recognition" && !pageHidden} onImport={addObservations} onValidateImport={added => addObservations(added, false, true)} clip={capturedClip} onClip={setCapturedClip} reviews={events} evidence={evidence} onRecorderStatus={setRecorderStatus} onZoneStill={offerZoneStill} />
         </Suspense></WorkspaceBoundary></div>}
         {tab === "Train" && <WorkspaceBoundary name="Train"><Suspense fallback={<div className="content-page"><h1>Opening training…</h1></div>}><TrainingWorkspace onOpenRecognition={() => setTab("Recognition")} /></Suspense></WorkspaceBoundary>}
         {tab === "Facility" && <WorkspaceBoundary name="Facility"><Suspense fallback={<div className="content-page"><h1>Opening facility builder…</h1></div>}><FacilityBuilder onPreviewCount={setLiveCount} onDirtyChange={(dirty) => { facilityDirty.current = dirty; }} /></Suspense></WorkspaceBoundary>}
@@ -807,7 +812,7 @@ export function App() {
                     onClick={() => review(e)}
                   >
                     <span className="table-icon">
-                      <Still id={e.id} fallback={e.label === "person" ? <User size={24} /> : <Cube size={24} />} />
+                      <Still event={e} fallback={e.label === "person" ? <User size={24} /> : <Cube size={24} />} />
                     </span>
                     <span className="event-row-title">
                       {e.title}
@@ -1048,7 +1053,7 @@ export function App() {
                 </div>
                 <div className="setting-row">
                   <span>Live detection on previews</span>
-                  <strong>Off · recordings only</strong>
+                  <strong>Start AI on each connected Monitor tile</strong>
                 </div>
                 <div className="setting-row">
                   <span>Detection model</span>
@@ -1163,7 +1168,7 @@ export function App() {
           <div className="review-dialog-layout">
             <div>
               <div className="missing-evidence">
-                <Still id={modal.event.id} large fallback={<Camera size={44} />} />
+                <Still event={modal.event} large fallback={<Camera size={44} />} />
                 <h3>{modal.event.mode === 'sample' ? 'Legacy sample observation' : modal.event.mode === 'live-model' ? 'Live AI observation · still only' : 'Original footage stays local'}</h3>
                 <p>{modal.event.mode === 'sample' ? 'This retained sample has no real camera evidence. Your previous decision and notes are preserved.'
                   : modal.event.mode === 'live-model' ? 'Live AI saw this on the camera preview. Only the analyzed still above is kept in this browser; no recording exists. Check the scene or your recorder before confirming.'

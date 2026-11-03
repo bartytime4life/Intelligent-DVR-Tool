@@ -63,19 +63,20 @@ export default function LiveMonitor({onZoneStill, queue, visibleTiles=4, onCount
       onChange: snapshot => { if (alive.current) setAiStates(states => ({...states, [tile.id]:snapshot})); }});
     detectors.current.set(tile.id, detector); void detector.start();
   }
-  async function sendObservation(id, index) {
-    const detector = detectors.current.get(id), item = aiStates[id]?.observations?.[index];
+  async function sendObservation(id, observationId) {
+    const item = aiStates[id]?.observations?.find(o => o.observation.id === observationId);
     if (!item || !onLiveObservation) return;
     try {
-      if (!await onLiveObservation(liveObservationEvent(item.observation, aiStates[id].session, item.capturedAt), item.still)) return;
-      if (detector) detector.markSent(index);
-      else setAiStates(states => ({...states, [id]:{...states[id], observations:states[id].observations.map((o, i) => i === index ? {...o, sent:true} : o)}}));
+      if (!await onLiveObservation(liveObservationEvent(item.observation, item.session, item.capturedAt), item.still)) return;
+      const detector = detectors.current.get(id);
+      if (detector) detector.markSent(observationId);
+      else setAiStates(states => ({...states, [id]:{...states[id], observations:states[id].observations.map(o => o.observation.id === observationId ? {...o, sent:true} : o)}}));
     } catch (err) { setError(err.message); }
   }
-  function dismissObservation(id, index) {
+  function dismissObservation(id, observationId) {
     const detector = detectors.current.get(id);
-    if (detector) detector.dismiss(index);
-    else setAiStates(states => ({...states, [id]:{...states[id], observations:states[id].observations.filter((_, i) => i !== index)}}));
+    if (detector) detector.dismiss(observationId);
+    else setAiStates(states => ({...states, [id]:{...states[id], observations:states[id].observations.filter(o => o.observation.id !== observationId)}}));
   }
   async function disconnect(id) {
     stopAi(id);

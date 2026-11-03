@@ -2,6 +2,19 @@ import { initialEvents, restoreSnapshot } from './data.mjs';
 import { mergeRecognitionEvents } from './recognition.mjs';
 
 export const WORKSPACES = ['Monitor', 'Recognition', 'Train', 'Facility', 'Events', 'Zones', 'System', 'Settings'];
+// Apply the same policy to every file player, including lazy workspaces/modals.
+// Camera streams keep their own capture/visibility lifecycle.
+export function pauseHiddenPlayback(documentRef) {
+  const pause = () => {
+    if (documentRef.hidden) for (const video of documentRef.querySelectorAll('video')) {
+      if (!video.srcObject) video.pause();
+    }
+  };
+  documentRef.addEventListener('visibilitychange', pause);
+  documentRef.addEventListener('play', pause, true);
+  pause();
+  return () => {documentRef.removeEventListener('visibilitychange', pause); documentRef.removeEventListener('play', pause, true);};
+}
 export function workspaceFromHash(hash) {
   if (hash === '') return 'Monitor';
   return WORKSPACES.find(name => `#${name.toLowerCase()}` === hash) || null;

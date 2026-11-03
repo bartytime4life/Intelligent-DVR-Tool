@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { initialEvents, parseReceipt, reviewEvent, restoreSnapshot } from '../src/data.mjs';
 import { mergeRecognitionEvents } from '../src/recognition.mjs';
 import { recognitionFixture } from './fixtures/recognition.mjs';
-import { workspaceFromHash, readWorkspace, writeWorkspace, preserveUnreadable, unreadableKey, reviewExport, parseReviewExport, resetSamples } from '../src/workspace-state.mjs';
+import { workspaceFromHash, readWorkspace, writeWorkspace, preserveUnreadable, unreadableKey, reviewExport, parseReviewExport, resetSamples, pauseHiddenPlayback } from '../src/workspace-state.mjs';
 import { outsideDialog, backdropDismiss } from '../src/dialog-dismiss.mjs';
 
 const imported = () => parseReceipt(recognitionFixture().receipt);
@@ -107,4 +107,16 @@ test('restored or undone human reviews replace matching pending entries only', (
 test('root history entry restores Monitor while the skip link leaves the workspace alone', () => {
   assert.equal(workspaceFromHash(''), 'Monitor');
   assert.equal(workspaceFromHash('#workspace'), null);
+});
+test('sample review exports refuse optional fields that would crash event consumers',()=>{
+  for(const patch of [{provenance:{source_sha256:1}},{cameraName:{}},{seconds:'wrong'}])
+    assert.throws(()=>parseReviewExport(reviewExport([{...initialEvents[0],...patch}])));
+});
+test('all file players pause when hidden, including a player started in a hidden page',()=>{
+  const listeners=new Map();let paused=0;
+  const documentRef={hidden:false,querySelectorAll:()=>[{srcObject:null,pause:()=>paused++},{srcObject:{},pause:()=>assert.fail('camera has its own lifecycle')}],
+    addEventListener:(name,fn)=>listeners.set(name,fn),removeEventListener:name=>listeners.delete(name)};
+  const stop=pauseHiddenPlayback(documentRef);
+  assert.equal(paused,0);documentRef.hidden=true;listeners.get('visibilitychange')();listeners.get('play')();
+  assert.equal(paused,2);stop();assert.equal(listeners.size,0);
 });

@@ -71,7 +71,9 @@ test.describe('touch stairs',()=>{
     const dx=x-sx,dy=y-sy,client=await context.newCDPSession(page);
     await client.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x,y}]});
     for(let i=1;i<=6;i++)await client.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x:x+(-dx-dy)*i/6,y:y+(dx-dy)*i/6}]});
-    await client.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});await btn(page,'Save stair on map').tap();
+    await client.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
+    await btn(page,'Save stair on map').tap();
+    await expect.poll(async()=>(await savedPlan(page)).stairs).toHaveLength(1);
     const saved=await savedPlan(page),stair=saved.stairs[0];expect(stair).toMatchObject({fromLevel:2,toLevel:0});expect(stair.bearing).toBeCloseTo(270,-1);
     near(stairAnchors(stair,building)[0],[9,7],.4);expect(saved.openings).toEqual([]);
   });

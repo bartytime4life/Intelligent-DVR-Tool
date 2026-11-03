@@ -19,7 +19,8 @@ export function createGeoMiddleware({enabled=false, photonPort=2322, overpassPor
     if(!kind)return reply(404,{error:'Unknown local geo route.'});
     if(!enabled)return reply(503,{error:'Local geo delivery is disabled. Use an offline extract or configure local services.'});
     const host=req.headers.host || '';
-    if(!/^(127\.0\.0\.1|localhost|\[::1\])(?::\d+)?$/.test(host) ||
+    if(!['127.0.0.1','::1','::ffff:127.0.0.1'].includes(req.socket?.remoteAddress) ||
+       !/^(127\.0\.0\.1|localhost|\[::1\])(?::\d+)?$/.test(host) ||
        (req.headers.origin && req.headers.origin!==`http://${host}`) || req.headers['sec-fetch-site']==='cross-site')
       return reply(403,{error:'Local same-origin requests only.'});
     if(req.method!==(kind==='search'?'GET':'POST'))return reply(405,{error:'Unsupported method.'});

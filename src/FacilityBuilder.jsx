@@ -650,9 +650,10 @@ function FacilityEditor({onPreviewCount,initialPlan,facilityControls,onPersist,o
     if (!draft) return;
     if(selected.kind==='stair' && stairIssue){setError(stairIssue);return;}
     let next;
-    try { next = edited(selected.kind, draft); } catch (x) { setError(x.message); return; }
+    try { next = validateFacility(edited(selected.kind, draft)); } catch (x) { setError(x.message); return; }
     const motion = selected.kind === 'building' && selectedItem && buildingMotion(selectedItem, draft);
-    if (commit(next, motion && !motion.identity ? "Building and its contents moved — Undo available" : "Changes saved")) setDraft(structuredClone(draft));
+    if (commit(next, motion && !motion.identity ? "Building and its contents moved — Undo available" : "Changes saved"))
+      setDraft(structuredClone(next[keyOf[selected.kind]].find(item => item.id === draft.id)));
   }
   function removeSelected() {
     if (!selectedItem) return;

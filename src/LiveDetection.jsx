@@ -45,8 +45,8 @@ export function LiveTileAI({ ai, available, onStart, onStop, onSend, onDismiss, 
     {ai?.observations?.length > 0 && <ul className="live-ai-observations" aria-label="Live AI observations">
       {ai.observations.map((o, i) => <li key={o.observation.id}>
         <span><strong>{o.observation.label}</strong> · {o.observation.rule}<small>{new Date(o.capturedAt).toLocaleTimeString()} · score {o.observation.score.toFixed(2)}</small></span>
-        {o.sent ? <span className="live-ai-sent">In Events</span> : <button className="text-button" onClick={() => onSend(i)}><PaperPlaneTilt aria-hidden="true" />Send to Events</button>}
-        <button className="icon-button" aria-label="Dismiss this live observation" onClick={() => onDismiss(i)}><X /></button>
+        {o.sent ? <span className="live-ai-sent">In Events</span> : <button className="text-button" onClick={() => onSend(o.observation.id)}><PaperPlaneTilt aria-hidden="true" />Send to Events</button>}
+        <button className="icon-button" aria-label="Dismiss this live observation" onClick={() => onDismiss(o.observation.id)}><X /></button>
       </li>)}
     </ul>}
   </div>;

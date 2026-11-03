@@ -7,7 +7,7 @@ import { loopbackAddress } from './live-feeds.mjs';
 
 const mib = bytes => Number.isFinite(bytes) ? `${(bytes / 1024**2).toFixed(1)} MiB` : 'not available';
 
-export default function LanRecorder({onResult, onBusy, blocked, onImport, onStatus}) {
+export default function LanRecorder({onResult, onBusy, blocked, onImport, onValidateImport, onStatus}) {
   const [status, setStatus] = useState(null), [catalog, setCatalog] = useState(null);
   const [model, setModel] = useState(''), [rules, setRules] = useState('');
   const [error, setError] = useState(''), [working, setWorking] = useState(false), [connected, setConnected] = useState(false);
@@ -70,6 +70,7 @@ export default function LanRecorder({onResult, onBusy, blocked, onImport, onStat
     try {
       const {bundle, file} = await openSegment(row, token.current, lifetime.current.signal);
       if (!bundle.events.length) { setNotice('This segment has no rule observations to send.'); markHandled(row.id); return; }
+      if (onValidateImport?.(bundle.events) === false) return;
       await saveObservationStills(file, bundle);
       if (onImport?.(bundle.events, false)) { markHandled(row.id); setNotice(`${bundle.events.length} observations from ${new Date(row.created_at * 1000).toLocaleTimeString()} sent to Events for review.`); }
     } catch (err) { setError(`${err.message} Nothing was sent; your current review is preserved.`); }

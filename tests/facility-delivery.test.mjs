@@ -7,8 +7,9 @@ import { createGeoMiddleware } from '../scripts/facility-local-services.mjs';
 import { osmQuery,searchBounds } from '../src/facility-starter.mjs';
 const query=osmQuery(searchBounds([-98,38.5],0,0,250,250));
 const form=new URLSearchParams({data:query}).toString();
-async function invoke(middleware,{url='/geo/search?q=Example&limit=5&lang=en',method='GET',body='',headers={}}={}){
+async function invoke(middleware,{url='/geo/search?q=Example&limit=5&lang=en',method='GET',body='',headers={},peer='127.0.0.1'}={}){
   const req=Readable.from([Buffer.from(body)]);req.url=url;req.method=method;req.headers={host:'127.0.0.1:4182',...headers};req.complete=true;
+  req.socket={remoteAddress:peer};
   const res=new EventEmitter();res.headers={};res.setHeader=(k,v)=>res.headers[k]=v;res.end=value=>{res.body=JSON.parse(value);res.writableEnded=true;};
   let next=false;await middleware(req,res,()=>{next=true;});return {...res,next};
 }
@@ -29,6 +30,13 @@ test('cross-origin, rebinding, method and arbitrary-query attempts never call up
     let calls=0;const middleware=createGeoMiddleware({enabled:true,fetcher:()=>{calls++;}});assert.notEqual((await invoke(middleware,request)).statusCode,200);assert.equal(calls,0);
   }
   assert.throws(()=>createGeoMiddleware({photonPort:'https://attacker.invalid'}));
+});
+test('forged loopback headers do not authorize a remote TCP client',async()=>{
+  for(const peer of ['192.168.1.20','203.0.113.5',undefined]){
+    let calls=0;const middleware=createGeoMiddleware({enabled:true,fetcher:()=>{calls++;}});
+    assert.equal((await invoke(middleware,{peer:peer ?? null})).statusCode,403);
+    assert.equal(calls,0);
+  }
 });
 test('bounded canonical Overpass queries work; invalid, partial and oversized responses fail closed',async()=>{
   let request;const middleware=createGeoMiddleware({enabled:true,fetcher:async(url,opts)=>{request={url,...opts};return new Response(JSON.stringify({elements:[]}));}});
