@@ -275,6 +275,10 @@ timeout and the user can pick another service, open an offline extract or trace.
 
 Select **Satellite** in the map toolbar, switch to **2D** and zoom in to inspect roofs. Panning requests imagery for the new view. Building and camera edits remain local. Providers receive the tile area. [EOX public endpoint terms](https://cloudless.eox.at/documentation/faq) · [USGS imagery service](https://imagery.nationalmap.gov/arcgis/rest/services/USGSNAIPImagery/ImageServer).
 
+![Kansas State Capitol roof and paths visible in the Facility editor with Satellite selected, 2D view and USGS/USDA aerial detail.](media/facility-capitol-roof-detail.webp)
+
+This example shows the Kansas State Capitol at public coordinates entered by hand. The built editor received real Sentinel-2 and USGS imagery in Chromium. The location tests used controlled browser readings.
+
 Requests are made by the browser, so the provider sees the viewer's IP address and
 the area being viewed. For Streets, the request also includes the app origin
 (scheme, hostname and port). If OpenStreetMap declines access, the editor shows
