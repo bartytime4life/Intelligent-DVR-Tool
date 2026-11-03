@@ -133,8 +133,15 @@ class BackupLibrary:
         try:
             settings = self.state_dir / 'config.json'
             if settings.exists():
-                config = validate_config(read_json(settings, 8192), require_source=False)
-                self._open(config)
+                try:
+                    config = validate_config(read_json(settings, 8192), require_source=False)
+                    self.config = config
+                    self._open(config, create=False)
+                except (OSError, ValueError, TypeError, LibraryError, sqlite3.Error):
+                    # Optional removable storage must not prevent the local app
+                    # and its folder-recovery controls from starting.
+                    self._close_store()
+                    self.error = 'Backup settings or storage are unavailable. Reconnect the disk or save accessible folders; backup remains paused.'
             self.thread = threading.Thread(target=self._supervise, name='dvr-backup-library', daemon=True) if supervise else None
             if self.thread:
                 self.thread.start()
@@ -152,17 +159,19 @@ class BackupLibrary:
             self.backup_lock.__exit__(None, None, None)
             self.backup_lock = None
 
-    def _open(self, config):
+    def _open(self, config, *, create=True):
         backup = Path(config['backup_folder'])
         if backup.is_symlink():
             raise LibraryError('STORAGE', 'The backup folder cannot be a symbolic link.')
-        backup.mkdir(mode=0o700, parents=True, exist_ok=True)
+        if create:
+            backup.mkdir(mode=0o700, parents=True, exist_ok=True)
         identity = ordinary_directory(backup)
         # Everything owned by this feature is in a separate namespace; never prune arbitrary user files.
         store = backup / 'Intelligent-DVR-Backup'
         if store.is_symlink():
             raise LibraryError('STORAGE', 'The backup library cannot be a symbolic link.')
-        store.mkdir(mode=0o700, exist_ok=True)
+        if create:
+            store.mkdir(mode=0o700, exist_ok=True)
         ordinary_directory(store)
         os.chmod(store, 0o700)
         lease = folder_lock(store)
@@ -223,7 +232,7 @@ class BackupLibrary:
         with self.lock:
             if self.active or self.analysis or self.scanning:
                 raise LibraryError('BUSY', 'Stop backup and wait for analysis to finish before changing folders.', 409)
-            if self.config and self.config['backup_folder'] == config['backup_folder']:
+            if self.db is not None and self.config and self.config['backup_folder'] == config['backup_folder']:
                 self.config = config
                 self.source_identity = ordinary_directory(Path(config['source_folder'])) if Path(config['source_folder']).exists() else None
                 self.seen.clear()
@@ -245,6 +254,12 @@ class BackupLibrary:
                 raise LibraryError('BUSY', 'Wait for the current analysis to stop before restarting backup.', 409)
             if self.active:
                 raise LibraryError('BUSY', 'Backup is already running. Stop before changing analysis options.', 409)
+            if self.db is None:
+                try:
+                    self._open(self.config, create=False)
+                except (OSError, ValueError, LibraryError, sqlite3.Error):
+                    self._close_store()
+                    raise LibraryError('STORAGE', 'Backup storage is unavailable. Reconnect the disk or save accessible folders.', 409) from None
             if body['analyze']:
                 model = self.jobs.catalog['models'].get(body['model'])
                 rules = self.jobs.catalog['rules'].get(body['rules'])
@@ -289,7 +304,7 @@ class BackupLibrary:
     def status(self):
         with self.lock:
             rows, size, free, count = [], 0, None, 0
-            if self.config:
+            if self.config and self.db is not None:
                 try:
                     size = self._usage()
                     free = self.disk_usage(self.backup).free
@@ -330,11 +345,15 @@ class BackupLibrary:
                         if entry.is_dir(follow_symlinks=False):
                             if self.config['recursive'] and depth < 16:
                                 pending.append((path, depth + 1))
+                            elif self.config['recursive']:
+                                self.scan_limited = True
                             continue
                         if path.suffix.lower() not in BACKUP_EXTENSIONS or len(entry.name) > 200:
                             continue
                         try:
-                            info = entry.stat(follow_symlinks=False)
+                            # Windows DirEntry.stat omits file identity fields.
+                            # Use the same path stat as the later descriptor check.
+                            info = path.lstat()
                             if stat.S_ISREG(info.st_mode) and info.st_size > MAX_FILE_BYTES:
                                 self.oversized += 1
                             if stat.S_ISREG(info.st_mode) and 0 < info.st_size <= MAX_FILE_BYTES:
@@ -539,7 +558,7 @@ class BackupLibrary:
                 self.db.commit()
 
     def tick(self):
-        if self.config:
+        if self.config and self.db is not None:
             self._analysis_tick()
             if self.active and self.clock() - self.last_scan >= 5:
                 self.last_scan = self.clock()

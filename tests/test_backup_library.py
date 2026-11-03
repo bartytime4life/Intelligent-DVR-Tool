@@ -19,10 +19,10 @@ from local_analysis_fixture import build
 class LibraryTest(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
-        self.root = build(Path(self.temp.name) / 'fixture')
-        self.source = Path(self.temp.name) / 'oem'
+        self.root = build(Path(self.temp.name).resolve() / 'fixture')
+        self.source = Path(self.temp.name).resolve() / 'oem'
         self.source.mkdir()
-        self.backup = Path(self.temp.name) / 'backup'
+        self.backup = Path(self.temp.name).resolve() / 'backup'
         self.jobs = Jobs(self.root / 'recordings', load_catalog(self.root / 'config.json'))
         self.now = 1000.0
         self.free = 1000 * GIB
@@ -260,6 +260,55 @@ class LibraryTest(unittest.TestCase):
         self.assertEqual(self.library.status()['state'], 'stopping')
         self.library.scanning = False
         self.assertEqual(self.library.configure(self.settings)['state'], 'paused')
+
+    def test_offline_backup_does_not_prevent_startup_or_recreate_missing_storage(self):
+        self.recording(); self.start(); self.settle()
+        row = self.first()
+        self.library.close()
+        detached = self.backup.with_name('detached-backup')
+        self.backup.rename(detached)
+        self.library = self.make()
+        status = self.library.status()
+        self.assertTrue(status['configured'])
+        self.assertFalse(status['active'])
+        self.assertIsNotNone(status['error'])
+        self.assertEqual(status['items'], [])
+        self.assertFalse(self.backup.exists())
+        self.library.tick()  # Paused unavailable storage has no DB to poll.
+        with self.assertRaisesRegex(LibraryError, 'storage is unavailable'):
+            self.start()
+        self.assertFalse(self.backup.exists())
+        detached.rename(self.backup)
+        self.start()
+        self.assertEqual(self.first()['sha256'], row['sha256'])
+
+    def test_unavailable_store_can_be_reconfigured_to_a_new_folder(self):
+        self.library.close()
+        detached = self.backup.with_name('detached-backup')
+        self.backup.rename(detached)
+        self.library = self.make()
+        result = self.library.configure({**self.settings, 'backup_folder': str(self.backup.with_name('new-backup'))})
+        self.assertIsNone(result['error'])
+        self.assertEqual(result['state'], 'paused')
+        self.assertTrue(detached.exists())
+
+    def test_invalid_saved_settings_leave_setup_available(self):
+        self.library.close()
+        (self.root / 'settings/config.json').write_text('{broken')
+        self.library = self.make()
+        self.assertFalse(self.library.status()['configured'])
+        self.assertIsNotNone(self.library.status()['error'])
+        self.assertIsNone(self.library.configure(self.settings)['error'])
+
+    def test_depth_limit_reports_incomplete_scan_but_nonrecursive_is_deliberate(self):
+        self.recording('/'.join(['nested'] * 17 + ['camera.webm']))
+        self.start(); self.settle()
+        self.assertEqual(self.library.status()['items'], [])
+        self.assertTrue(self.library.status()['scan_limited'])
+        self.library.stop()
+        self.library.configure({**self.settings, 'recursive': False})
+        self.start(); self.settle()
+        self.assertFalse(self.library.status()['scan_limited'])
 
 
 if __name__ == '__main__': unittest.main()
