@@ -99,7 +99,7 @@ export function evaluate(labeled, threshold, script = TRAINING_SCRIPT, rule = {}
     observations: countObservations(labeled, threshold, rule) };
 }
 
-function compareCounts(baseline, candidate) {
+export function compareCounts(baseline, candidate) {
   const extraFound = candidate.found - baseline.found;
   const fewerEmptyHits = baseline.falseAlarms - candidate.falseAlarms;
   if (!extraFound && !fewerEmptyHits) return 'unchanged';

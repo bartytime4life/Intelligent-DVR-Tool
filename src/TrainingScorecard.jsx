@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { CaretDown, ChartBar, CheckCircle, FrameCorners, PersonSimple, SlidersHorizontal, VideoCamera } from '@phosphor-icons/react';
 import { evaluate, frameMoments, recommendThreshold, SENSITIVITY } from './training.mjs';
+import OllamaCoach from './OllamaCoach.jsx';
 import { compareTrainingLibrary, recommendCumulativeThreshold } from './training-library.mjs';
 import './training-library.css';
 import './training-scorecard.css';
@@ -127,6 +128,15 @@ export default function TrainingScorecard({ outcome, service, onCheck, onSave, o
         <p className="training-note">Evidence stays in this browser. A new setting still needs an improved fresh check and cannot worsen either count on any saved recording. This tunes a rule threshold; it does not retrain detector weights.</p>
         {libraryError && <p role="alert">{libraryError}</p>}
       </section>}
+      {combined.regressions > 0 || libraryError ? <p className="training-note">Keep the current setting until the saved-session checks pass.</p> :
+        <OllamaCoach evidence={{
+          stage: fresh ? 'Fresh check' : 'Calibration',
+          promptConditionsConfirmed: confirmed,
+          settings: [baseline, candidate].map(({ threshold, found, presentChecks, falseAlarms, emptyChecks }, index) => ({
+            role: index ? 'Trial' : outcome.canApply ? 'Current' : 'Reference',
+            threshold, found, presentChecks, falseAlarms, emptyChecks,
+          })),
+        }} />}
       <div className="train-score-decision">
         <div className="train-score-actions">
           {!fresh && <button className="button amber" disabled={saving} onClick={() => onCheck(value)}><VideoCamera size={18} aria-hidden="true" />Check on a new recording</button>}

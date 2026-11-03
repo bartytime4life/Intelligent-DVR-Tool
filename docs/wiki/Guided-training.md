@@ -16,6 +16,16 @@ Once the detector and recording inbox are prepared, open training from the insta
 
 For a custom catalog or port, pass those options to `bash scripts/run-linux.sh --train` or `.\scripts\Start-IntelligentDvr.ps1 -Train`. If the app reports missing setup, follow the preparation instructions above, then reopen Train.
 
+## Ask the local training assistant
+
+Open **Train → Find installed models**, choose a model, then select **Help me get started**. Discovery inspects metadata on this PC. It does not start a recording or load model weights. If the list is empty, open Ollama and check `ollama list` on this machine, then scan again. Only installed local models with chat completion support appear. Use a loopback address for the DVR. Ollama normally listens on `127.0.0.1:11434`. For an offline installation, configure the Ollama service with `OLLAMA_NO_CLOUD=1` and restart it. [Ollama local-only configuration](https://docs.ollama.com/faq#how-do-i-disable-ollamas-cloud-features)
+
+On a guided scorecard, **Explain these results** sends thresholds, sampled counts and the recording stage. The DVR checks the model’s reading and its suggested next action. A wrong answer falls back to the measured scorecard. Missing confirmation, too few samples or a saved-session regression takes priority over model advice. The operator controls camera access and setting changes.
+
+To use a run from the separate **Training Lab**, open **Reports** there and export the JSON run receipt. In the installed DVR, choose **Train → Review a Training Lab receipt**. The app checks the payload hash and recounts held-out object matches, extra boxes and misses. Counts are available before choosing a model. **Suggest a review step** gives the model only those counts, sample size, threshold and run type. The model chooses among review actions that fit the receipt. Synthetic receipts describe generated footage. An imported recording receipt declares its inference backend. The hash checks file integrity and does not authenticate its author.
+
+**Compare model settings** runs generated scorecards on installed models after an explicit start. Compare checked counts, next actions and elapsed times, then verify a candidate on fresh cases. **Export answers and timings** saves the test receipt. These timings measure assistant responses. The benchmark does not qualify detector speed or camera accuracy.
+
 ## Make the first recording
 
 1. Select **Start session**. At **Camera check**, open **Detector and reference rule** if you want to choose the local detector and the rule used for the Current column. Select **Connect camera**, grant camera permission, and check the framing and lighting. The microphone stays off.
