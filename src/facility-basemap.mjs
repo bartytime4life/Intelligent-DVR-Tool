@@ -37,7 +37,10 @@ export async function loadStreetTile({ url }, { signal }, fetcher = fetch) {
   if (response.status === 403 || response.status === 429 || response.headers.has('x-blocked')) {
     throw new StreetTileBlocked();
   }
-  if (!response.ok) throw Error(`Street map unavailable (HTTP ${response.status}).`);
+  if (!response.ok) {
+    // MapLibre falls back to parent tiles when a particular zoom tile is missing.
+    throw Object.assign(new Error(`Street map unavailable (HTTP ${response.status}).`), { status: response.status });
+  }
   const data = await response.arrayBuffer();
   const expected = blockedStreetImages.get(data.byteLength);
   if (expected && globalThis.crypto?.subtle) {

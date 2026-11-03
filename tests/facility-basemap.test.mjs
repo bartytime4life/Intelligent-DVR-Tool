@@ -35,6 +35,7 @@ test('street tiles identify the app origin and preserve normal browser caching',
   for (const response of [new Response(null, { status: 403 }), new Response(null, { status: 429 }), image(3, 'image/png', { 'x-blocked': 'Access denied' })]) {
     await assert.rejects(() => loadStreetTile(request, controller, () => response), StreetTileBlocked);
   }
+  await assert.rejects(() => loadStreetTile(request, controller, () => new Response(null, { status: 404 })), { status: 404 });
   await assert.rejects(() => loadStreetTile(request, controller, () => new Response(null, { status: 503 })), /503/);
   await assert.rejects(() => loadStreetTile({ url: 'dvr-osm://untrusted/3/2/1.png' }, controller), /Invalid street tile/);
 });
