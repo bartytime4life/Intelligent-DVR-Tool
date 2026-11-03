@@ -261,7 +261,7 @@ def check(port=DEFAULT_PC_PORT, feeds_config=None, recordings=None, config=None,
         record('facility_preview', facility_ready)
     def runtime():
         python = validate_environment(root)
-        result = command([python, '-m', 'edge.pc_setup', '--native-probe'],
+        result = command([python, '-m', 'edge.pc_setup', '--native-probe', '--port', str(port)],
                          'Runtime probe failed. Rerun the installer.', root=root, timeout=30, capture=True)
         return json.loads(result)
     record('native_runtime', runtime)

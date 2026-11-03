@@ -166,7 +166,7 @@ def main(argv=None):
         options = analysis_options()
         python = pc.validate_environment(ROOT) if options else None
         if python:
-            pc.command([python, '-m', 'edge.pc_setup', '--native-probe'],
+            pc.command([python, '-m', 'edge.pc_setup', '--native-probe', '--port', str(args.port)],
                        'Local Python runtime is not ready. Run Install-Mac.command, then Check-Mac.command.',
                        root=ROOT, timeout=30, capture=True)
         npm = ensure_frontend()
