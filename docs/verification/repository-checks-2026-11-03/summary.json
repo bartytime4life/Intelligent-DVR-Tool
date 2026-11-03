@@ -1,0 +1,128 @@
+{
+  "schema": "intelligent-dvr.repository-checks.v1",
+  "date": "2026-11-03",
+  "base_commit": "78c17233f8933182922533d6c61599c3ac1d2972",
+  "source_commit": "d8d75648155bb7a2da66184ba88002b4f9770b8c",
+  "security_audited_revision": "b54593d7de533ce1a4200e6e6665cb24bacc1d12",
+  "source_sha256": {
+    "SECURITY.md": "f7fbfa307c1a3dbe1850f50ee05be6ba22fc9848cdef94ef13f46ccd6cf56eeb",
+    "docs/wiki/Security-boundary.md": "7dfb963c89a6589354df64d9df1111ef28512e7282300b35e713fe6c0c7e2884",
+    "edge/backup_library.py": "088474037a51712ab781127f2a5bdda4e153fffee2fd027697dca2873f1f590d",
+    "edge/local_service.py": "5cad5bf6e566c85a3a8f0838cb2ed5e26b63c09578060329f0233df95b4cf884",
+    "package.json": "125eb93d501bb31ccf600c4cc92a6cba5a2db8167fc4e30f5902502bed1d1c7a",
+    "playwright.analysis.config.mjs": "f318487ffe908c1e32da38381a404c4b0899d4d0e3e4aa85698b63393a16d5e9",
+    "playwright.facility.config.mjs": "4518e92f938580984c097e6386c825a1c4903e16ba43843ed21671056e0cc572",
+    "playwright.feeds.config.mjs": "2ff2f22913c8f411c81f06752a3d3a40addc5834be6d5d88bb22ed6abc8a1d1e",
+    "playwright.recorder.config.mjs": "9f6ed80c9b8776d2258285a2431868088cc8eeb14766616154580a68aacaf656",
+    "scripts/facility-local-services.mjs": "882b06ddea46fd16ee1770fc27ca01f839f8260c9f20826dc2e1fe7319fc58a6",
+    "src/App.jsx": "2fc0532347c22a33c6524114282821e4bce5bceeb09a837a6f670dc141c532ef",
+    "src/BackupLibrary.jsx": "d5615b32bcb4939a0a43e2b084c7f213f388029a5a7f6e1f2f567a0ec9bb58f9",
+    "src/FacilityBuilder.jsx": "7e8b9ddc2a42f49d51bd816969a2cbc05930570659a74e39a01a921d5c855268",
+    "src/LanRecorder.jsx": "1fbb31d8bb223ea4f022036ebdb484eab0c448ba9fa382618a4d95669de2932c",
+    "src/LiveDetection.jsx": "a2edc307157bced484c350e0ad8ccd749d094b2b94e1cef82f6bcab324f5a128",
+    "src/LiveMonitor.jsx": "937a366f0eb96bd63cc15474798c816f94e1f02b296d55acd7704e86739c264c",
+    "src/RecognitionReview.jsx": "8f853c013fff7d18e04ef9c11164be634f41b4f814ae44a05a7c2c93e0821c23",
+    "src/SystemSetup.jsx": "260b2b2d075281a8b4ac710c781a1d160c6c5187dadbbdca56ae508196c1ac83",
+    "src/data.mjs": "9c73d812c6c23909c5f08c9487554d9f6e849fbb4f2378c946905ca21e0f9dee",
+    "src/live-ai.mjs": "5002cbaaf3a651eee29a815bc9c893624d3d9527b438c0353569a8f3fe22aec7",
+    "src/local-images.mjs": "c42f5ae349ee81ea6a4f021cb733f3aa5c0f1e15eb178799b672e653bb3c19e1",
+    "src/recognition.mjs": "be87190e94cbab5f7bb9d798bd3ce2950923e4e303e67a054ac44a4e14a7d2ac",
+    "src/workspace-state.mjs": "2ada8643da77d0428b3a83d3f3722ffbb2f47735ad168fd4b43cb604bcd732f2",
+    "tests/browser/audit-regressions.spec.mjs": "6be10786fce1d0ea8f98bf033f0158695be16cf88ed6c6d3a869beff00209fd9",
+    "tests/browser/facility-stair-placement.spec.mjs": "9611ea84b0d4bae210ceb32617c4b4d7260d51e88cc60384f08d06554abbe437",
+    "tests/browser/facility-windows.spec.mjs": "ee85edd8506ae716fbe0e256d7147bfe1d4f19fad19c27c13aa23fb8515bc64c",
+    "tests/dev-server.test.mjs": "b24ea0c6ca374e97efa8a42943b8808a90c96de33736d0049ebee136c5117834",
+    "tests/facility-delivery.test.mjs": "bd3871af24b43c50c91a4fc21677d7fd8f16450779e60157e3c133bab07796fe",
+    "tests/live-ai.test.mjs": "fe595231591eb81286c5d1fd58d2ca24899e21dabe9da759981f148e194d7dc2",
+    "tests/local-images.test.mjs": "228f637f55a5359527ecd2eccab4e4865147446b642905599822aeb20d3a4551",
+    "tests/test_backup_library.py": "f7824e499b1d798d2aab27545e5fed7bfc2b19fdc4eb4ee93c3dcc116d372b50",
+    "tests/test_gpu_default.py": "29d3464263fe90667763b0690ccc190fa03b2b88af05c6b88cd44bc0b6372283",
+    "tests/workspace-state.test.mjs": "2040ecc0bf9e57d85f4e78722c20438e975403c440a2ec0766967c4e0d13a280",
+    "vite.config.mjs": "397801e05fddd18fd761e53e4cad47248744f85faf747f886532c468e082028b"
+  },
+  "checks": {
+    "python": {
+      "tests": 492,
+      "passed": 492,
+      "skipped": 0,
+      "failures": 0
+    },
+    "frontend": {
+      "tests": 365,
+      "passed": 365,
+      "skipped": 0,
+      "failures": 0
+    },
+    "sites": {
+      "tests": 4,
+      "passed": 4
+    },
+    "syntax": {
+      "python": 126,
+      "js_mjs": 147,
+      "shell": 3,
+      "powershell": "passed",
+      "jsx": "production build"
+    },
+    "browser": {
+      "facility_and_workspaces": 99,
+      "native_analysis_training": 19,
+      "camera_feeds": 13,
+      "lan_recorder": 2,
+      "backup_ui": 12,
+      "native_cuda_backup_review": 1
+    },
+    "production_build": "passed",
+    "source_launcher": "passed",
+    "pc_kit_extraction": "passed",
+    "documentation": "passed",
+    "wiki_pages_navigation": 63,
+    "dependency_compatibility": "pip check passed",
+    "npm_audit_known_vulnerabilities": 0,
+    "osv_declared_python_package_versions": 18,
+    "osv_matches": 0,
+    "gpu_after_invalid_media": {
+      "invalid_recording_error": "VIDEO_OPEN_FAILED",
+      "gpu_available_after_invalid_recording": true,
+      "next_recording_backend": "onnxruntime-cuda",
+      "cuda_startup_nodes": 203
+    },
+    "documentation_local_links": 1193,
+    "pc_kit": {
+      "source_commit": "d8d75648155bb7a2da66184ba88002b4f9770b8c",
+      "files": 94,
+      "sha256": "8171c58510dba5119f95797a14f55e6245380f61ad28500cb578bb478c409858",
+      "extraction_verified": true
+    },
+    "browser_total": 146
+  },
+  "security": {
+    "scan_id": "f9b400e6-d366-409e-af00-629158f64e99",
+    "status": "completed",
+    "coverage": "partial",
+    "findings": {
+      "medium": 1,
+      "low": 1
+    },
+    "remediated_in_source": [
+      "development-private-files",
+      "observation-thumbnail-binding"
+    ],
+    "limits": "Every edge Python module and non-vendored product JS/JSX received source review; auxiliary utilities, most tests and third-party implementation coverage is not complete."
+  },
+  "pinned_files_unchanged": [
+    "edge/inference.py",
+    "edge/journal.py",
+    "edge/supervision.py",
+    "edge/scheduler.py",
+    "edge/profiling.py"
+  ],
+  "privacy": "Generated media and controlled loopback sources only. Private footage, camera credentials, templates and models were not committed or uploaded. Existing installations and environments were preserved.",
+  "limits": [
+    "Physical OEM/camera compatibility and endurance unqualified",
+    "No recognition/tracking accuracy or 100-camera qualification",
+    "Windows/macOS host/device and Windows GPU acceptance separate from hosted software CI",
+    "No driver, power or system setting changes",
+    "Native GitHub Wiki publication separate"
+  ]
+}

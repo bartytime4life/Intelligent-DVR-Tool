@@ -1,5 +1,7 @@
 # Verification index
 
+[Repository checks and repairs, November 3](repository-checks-2026-11-03/README.md) covers cross-platform backup fixes, private-file and review-image boundaries, live provenance, browser regressions and qualification limits.
+
 [GPU-first default, November 3](gpu-default-2026-11-03/README.md) records actual RTX 5080 CUDA execution, recorded-video and OEM-copy analysis, shared GPU-slot policy and explicit CPU fallback.
 
 [OEM companion backup, November 3](oem-backup-2026-11-03/README.md) records verified file copying, optional local analysis, guided LAN setup and controlled browser checks; physical OEM/device acceptance remains open.
