@@ -15,7 +15,7 @@
 Use the [PC test kit](pc-testing.md) for a prebuilt Linux/Windows installation,
 or use the same launch scripts from a source checkout. Install finishes without
 starting a service. Check validates the software setup. Start opens the local
-application at http://127.0.0.1:4173 with all cameras disconnected.
+application at http://127.0.0.1:4298 with all cameras disconnected.
 
 For an Apple silicon Mac source checkout, follow the [Mac Install / Check / Start](setup-macos.md). That launcher uses http://127.0.0.1:4180 by default; its prerequisites and worker limits differ from the Linux/Windows kit.
 
@@ -51,7 +51,7 @@ separate testing.
 
 Use **Export reviews**, **Back up browser rules**, **Export plan** and **Export all facilities**. See the [update checklist](setup-macos.md#preserve-data-when-updating). Browser localStorage
 belongs to the exact origin and browser profile; it is not a backup or shared
-audit system. Keep your chosen origin stable across updates (PC kit default http://127.0.0.1:4173; Mac source launcher http://127.0.0.1:4180). Export before
+audit system. Keep your chosen origin stable across updates (PC kit default http://127.0.0.1:4298; Mac source launcher http://127.0.0.1:4180). Export before
 changing the browser profile, port or installation. Keep credentials and footage
 out of exported planning/review metadata.
 

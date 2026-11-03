@@ -36,7 +36,7 @@ creates an empty local-feeds.json only if absent, and exits without starting a
 server. In a source checkout it first runs npm ci and builds the UI. The Check
 step validates files, native video support, temporary storage, config and port
 availability. Start runs the actual local camera service at
-http://127.0.0.1:4173 and opens the browser; cameras remain disconnected.
+http://127.0.0.1:4298 and opens the browser; cameras remain disconnected.
 
 Stop with Ctrl+C. DVR_PORT=4175 selects another port; DVR_PYTHON selects a
 Python 3.12 executable. An incompatible environment is refused, not replaced.

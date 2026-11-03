@@ -31,7 +31,7 @@ Choose the job you want to finish:
 Use [Mac Install / Check / Start](setup-macos.md), or the
 [Linux/Windows PC kit](pc-testing.md). Run **Install**, then **Check**, then **Start**.
 Keep the Start terminal open. Use the address it prints: the Mac default is
-**http://127.0.0.1:4180/**; the PC kit default is **http://127.0.0.1:4173/**.
+**http://127.0.0.1:4180/**; the PC kit default is **http://127.0.0.1:4298/**.
 
 For recognition and training, prepare the verified local models and catalog
 first. A browser-only preview can display the interface while the local analysis

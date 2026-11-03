@@ -58,7 +58,14 @@ def main(archive, evidence):
         report = evidence/'readiness.json'
         run('check', '--port', str(port), '--report', str(report))
         if is_windows:
-            run('check', '-Port', str(port), ps=True)
+            env['DVR_PORT'] = str(port)
+            try:
+                if f'http://127.0.0.1:{port}/' not in run('check', ps=True).stdout:
+                    raise RuntimeError('PowerShell did not honor DVR_PORT')
+                env['DVR_PORT'] = 'invalid-unless-overridden'
+                run('check', '-Port', str(port), ps=True)
+            finally:
+                env.pop('DVR_PORT')
         data = json.loads(report.read_text())
         if not data['ready'] or 'private-fixture' in report.read_text() or '192.168.1.123' in report.read_text():
             raise RuntimeError('Readiness failed or disclosed private settings')
@@ -89,6 +96,9 @@ def main(archive, evidence):
                 if not public['ready'] or len(public['sources'])!=1 or 'private-fixture' in body.decode():
                     raise RuntimeError('Installed catalog contract failed')
                 if request('/')[0]!=200: raise RuntimeError('Installed interface unavailable')
+                status, entry = request('/ollama-lab/offline.html')
+                if status != 200 or b'http://127.0.0.1:4188/offline.html' not in entry or b'/#train' not in entry:
+                    raise RuntimeError('Installed Training Lab entry page unavailable')
                 if request('/api/analysis/session')[0]!=503: raise RuntimeError('Unconfigured analysis must remain unavailable')
                 # No connect/start API is invoked. A real device is never contacted.
             finally:

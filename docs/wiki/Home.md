@@ -19,9 +19,13 @@ A local-first camera-analysis and facility-planning project from **BARTA AI Solu
 | Your computer / task | Open this guide | Local address |
 | --- | --- | --- |
 | Apple silicon Mac, macOS 14+ | [Install → Check → Start](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Mac-setup) | `http://127.0.0.1:4180/` |
-| Linux or Windows PC | [Prebuilt kit or source setup](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/PC-testing) | `http://127.0.0.1:4173/` |
+| Linux or Windows PC | [Prebuilt kit or source setup](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/PC-testing) | `http://127.0.0.1:4298/` |
 | Browser-only interface development | [Source preview](#run-the-source-only-ui-preview) | Address printed by Vite |
 | An installed system ready for real-device testing | [Field acceptance runbook](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Field-acceptance) | Your chosen stable local origin |
+
+On a PC the native app opens at [DVR Monitor](http://127.0.0.1:4298/#monitor).
+For guided training on Linux, run `bash Start-Training-Linux.sh`.
+See [local addresses and earlier installations](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/PC-testing#local-addresses) for the standalone Lab and previously saved browser work.
 
 ![Install, check readiness, then start the local app before deliberately connecting a camera.](https://raw.githubusercontent.com/wiki/bartytime4life/Intelligent-DVR-Tool/docs/media/guide/start.svg)
 
@@ -88,7 +92,7 @@ Use Node.js 22 and npm from the repository root:
 
 ```bash
 npm ci
-npm run dev -- --host 127.0.0.1 --port 4173
+npm run dev -- --host 127.0.0.1 --port 4298
 ```
 
 This starts the browser interface preview. Use the platform launcher for the local camera bridge, recording import, analysis and training APIs. [Mac](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Mac-setup) · [PC kit](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/PC-testing).

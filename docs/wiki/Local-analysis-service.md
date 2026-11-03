@@ -64,7 +64,7 @@ with the edge dependencies installed, is:
 python -m edge.local_service --recordings /absolute/path/to/approved-recordings --config edge/local-analysis.example.json
 ```
 
-Open `http://127.0.0.1:4173/#recognition`. Use the exact address printed by the
+Open `http://127.0.0.1:4298/#recognition`. Use the exact address printed by the
 service. It intentionally does not accept alternate hosts, remote access or
 hosted-site calls. Starting the service does **not** start inference. In Recognition:
 
