@@ -1,3 +1,4 @@
+import { requestSiteLocation } from "./facility-location.mjs";
 import BuildingShapePicker from "./BuildingShapePicker.jsx";
 import React, { useEffect, useMemo, useRef, useState, useContext } from "react";
 import {
@@ -552,6 +553,12 @@ function FacilityEditor({onPreviewCount,initialPlan,facilityControls,onPersist,o
     setMapLayer(next);
     writeBasemapPreference(next);
   }
+  function satelliteCaption() {
+    if (!layerStatus.roofArea) return 'Sentinel-2 satellite overview · 2016 · about 10 m/pixel';
+    if (layerStatus.roofs === 'error') return 'Satellite overview · some U.S. roof tiles are unavailable';
+    if (layerStatus.roofs !== 'ready') return 'Satellite overview · loading U.S. roof detail…';
+    return 'USGS/USDA aerial roof detail · typically 0.6 m/pixel where available';
+  }
   function findSiteOnMap() {
     setEmptyDismissed(true);
     go(0);
@@ -617,7 +624,7 @@ function FacilityEditor({onPreviewCount,initialPlan,facilityControls,onPersist,o
     setFloor(level);setView('floors');
   }
   function startTool(kind) {
-    if (editingDirty && !["aim-camera", "move-camera"].includes(kind)) {
+    if (editingDirty && !(kind === "site-pin" && step === 0 && siteDirty) && !["aim-camera", "move-camera"].includes(kind)) {
       setError("Save or discard your preview before drawing.");
       return;
     }
@@ -799,7 +806,7 @@ label. Inside the active building it belongs to the current level; elsewhere it 
         <div><strong>Work faster in Facility Studio</strong><button type="button" onClick={() => setHelpOpen(false)} aria-label="Close facility help"><X size={17}/></button></div>
         <p><kbd>1</kbd>–<kbd>7</kbd> switches tasks, <kbd>?</kbd> toggles this help, and <kbd>Esc</kbd> cancels drawing. Ctrl/⌘+Z undoes committed edits.</p>
         <p>Use <strong>Focus map</strong> to maximize the canvas and stop hidden camera previews, then <strong>Show panels</strong> to edit, save and explicitly reconnect. Camera drag/aim previews are unsaved until Save camera. Alt+Arrow nudges a selected camera 0.5 m; [ and ] rotate it 5°.</p>
-        <p><strong>Map layer</strong>: Grid requests nothing. Streets and Aerial load pictures of the area you view so you can trace your real site; they are a drawing guide, not a survey.</p>
+        <p><strong>Map layer</strong>: Grid requests nothing. Streets, Aerial and Satellite load pictures of the area you view so you can trace your real site; they are a drawing guide, not a survey.</p>
         <p>Camera coverage, distances and handoffs are planning estimates. Real video sampling is opt-in under a selected camera's Image diagnostics.</p>
       </section>}
       {!emptyDismissed && !sitePreview && !draftCandidates.length && !plan.buildings.length && !plan.cameras.length && !plan.labels.length && !plan.zones?.length && !plan.route.length && tool==='select' && step===0 && <FacilityEmptyState disabled={navigationDirty} ready={ready} onFindSite={findSiteOnMap} onBuild={()=>{go(1);requestAnimationFrame(()=>{properties.current?.querySelector('.building-shapes button')?.focus({preventScroll:true});properties.current?.scrollIntoView({block:'nearest'});});}} onImport={onOpenImport} />}
@@ -817,16 +824,18 @@ label. Inside the active building it belongs to the current level; elsewhere it 
       <div className="facility-map-context"><span className={`facility-local-dot${layer.external ? ' is-online' : ''}`} />{plan.name}<small>{layer.id === 'grid' ? `Local grid · ${formatDistance(20,units)} spacing · no map pictures requested` :
         layerStatus.tiles === 'blocked' ? 'Streets unavailable · showing the local grid' :
         layer.id === 'streets' ? 'Streets · OpenStreetMap · requested for the area you view' :
+        layer.id === 'satellite' ? satelliteCaption() :
         layerStatus.photo === 'loading' ? 'Aerial · USGS · loading a sharper site photo…' :
         layerStatus.photo === 'ready' ? `Aerial · USGS NAIP site photo ≈ ${formatDistance(layerStatus.metresPerPixel, units)} per pixel · photo dates vary; not a live view` :
         'Aerial · USGS The National Map · requested for the area you view'}</small></div>
-      {layer.external && (layerStatus.photo === 'outside' || layerStatus.photo === 'error' || layerStatus.tiles) && <div className="facility-layer-notice" role="status">
+      {layer.external && (layerStatus.photo === 'outside' || layerStatus.photo === 'error' || layerStatus.tiles || layerStatus.roofs === 'error' && layerStatus.roofArea) && <div className="facility-layer-notice" role="status">
         <WarningCircle size={17} aria-hidden="true"/><span>{layerStatus.tiles === 'blocked' ? 'OpenStreetMap declined this request. You can keep editing on the grid.' :
+          layerStatus.roofs === 'error' && layerStatus.roofArea ? 'Some roof images could not load. The satellite overview remains available where its tiles load.' :
           layerStatus.photo === 'outside' && layer.id === 'aerial' ? 'Aerial photos cover the contiguous United States. Streets works worldwide.' :
           layerStatus.photo === 'error' && layer.id === 'aerial' ? layerStatus.message : 'Some map pictures could not load. Your plan is unaffected; check the connection or switch layers.'}</span>
         {layer.id === 'aerial' && layerStatus.photo === 'outside' && <button type="button" onClick={() => chooseLayer('streets')}>Use Streets</button>}
         {layer.id === 'aerial' && layerStatus.photo === 'error' && <button type="button" onClick={() => api.current?.retrySitePhoto()}>Retry photo</button>}
-        {layerStatus.tiles === 'blocked' && inAerialCoverage(photoCenter) && <button type="button" onClick={() => chooseLayer('aerial')}>Use Aerial</button>}
+        {(layerStatus.tiles === 'blocked' && inAerialCoverage(photoCenter) || layerStatus.roofs === 'error' && layerStatus.roofArea) && <button type="button" onClick={() => chooseLayer('aerial')}>Use Aerial</button>}
         {layerStatus.tiles && !(layer.id === 'aerial' && layerStatus.photo) && <button type="button" onClick={() => chooseLayer('grid')}>Use Grid</button>}
       </div>}
       {!!mapDrafts.length && <div className="facility-draft-banner" role="status">{draftPreviewError ? `Draft preview unavailable: ${draftPreviewError}` : `Preview: ${mapDrafts.length} of ${draftCandidates.length || mapDrafts.length} mapped buildings selected · click an outline to include or exclude it, then add them`}</div>}
@@ -877,8 +886,8 @@ pect its modeled view.", "Draw a route and review proposed camera transitions.",
       <div className="facility-property-body">
       {step === 0 && <fieldset className="facility-layer-choice"><legend>Map layer</legend>
         <div>{BASEMAPS.map(option => <label key={option.id}><input type="radio" name="facility-map-layer" value={option.id} checked={layer.id === option.id} disabled={!ready} onChange={() => chooseLayer(option.id)}/>{option.title}</label>)}</div>
-        <small>{layer.disclosure}{layer.external ? ' Plans, cameras and recordings are never sent. This choice is remembered in this browser.' : ' Choose Streets or Aerial to see and trace your real site.'}</small></fieldset>}
-      {step === 0 && <SiteForm onDirtyChange={setSiteDirty} onPreview={setSitePreview} addressFocus={addressFocus} pickedOrigin={pickedOrigin} onPin={()=>startTool("site-pin")} ready={ready} plan={plan} commit={commit} center={() => api.current?.center()} />}
+        <small>{layer.disclosure}{layer.external ? ' Plans, cameras and recordings are never sent. This choice is remembered in this browser.' : ' Choose Satellite for a regional view and U.S. roof detail, or choose Streets or Aerial.'}</small></fieldset>}
+      {step === 0 && <SiteForm onDirtyChange={setSiteDirty} onPreview={setSitePreview} addressFocus={addressFocus} focusAddress={()=>setAddressFocus(n=>n+1)} pickedOrigin={pickedOrigin} onPin={()=>startTool("site-pin")} ready={ready} plan={plan} commit={commit} center={() => api.current?.center()} />}
       {step === 0 && !plan.buildings.length && !draftCandidates.length && <div className="facility-next-callout"><MapTrifold size={20} aria-hidden="true"/><div><strong>Next: outline your buildings</strong>
         <p>Start from buildings already mapped around your site, then keep the ones that are yours. Or trace each roof yourself{layer.external ? '' : ' (turn on Streets or Aerial to see your real site)'}. You can adjust every corner and dimension afterwards.</p>
         <div className="facility-next-actions"><button type="button" className="facility-primary" disabled={!ready || navigationDirty} onClick={() => {setView('2d');setDraftLoad(n => n + 1);}}><Buildings aria-hidden="true"/>Find mapped buildings</button>
@@ -1081,51 +1090,64 @@ function CoverageMetrics({ metrics, blindZone, onBlindZone, blindSpots, dirty, u
     <p className="facility-caption">Grid sample of up to {MAX_COVERAGE_CELLS.toLocaleString('en-US')} cells per zone, and about every {formatDistance(.5, units)} along the route, tested against the drawn ground fans of {metrics.cameras} included {metrics.cameras === 1 ? 'camera' : 'cameras'}. {dirty ? 'Includes the unsaved camera preview. ' : ''}Indoor and level zones are not estimated because coverage is ground-plane only. Planning estimate; verify on site.</p>
   </section>;
 }
-function SiteForm({ plan, commit, center, pickedOrigin, onPin, ready, onDirtyChange, onPreview, addressFocus }) {
+function SiteForm({ plan, commit, center, pickedOrigin, onPin, ready, onDirtyChange, onPreview, addressFocus, focusAddress }) {
   const [name, setName] = useState(plan.name), [lng, setLng] = useState(plan.origin[0]), [lat, setLat] = useState(plan.origin[1]);
   const [locating, setLocating] = useState(false), [locationNote, setLocationNote] = useState("");
   const mapped = plan.buildings.some(b => b.source), [keep, setKeep] = useState(mapped), [formError, setFormError] = useState("");
   const hasGeometry = plan.buildings.length || plan.cameras.length || plan.labels.length || plan.zones?.length || plan.route.length;
-  const locationRequest = useRef(0);
+  const stopRequest = useRef(null);
+  const [chooseLocation, setChooseLocation] = useState(false);
+  function stopLocating() {
+    stopRequest.current?.();
+    stopRequest.current = null;
+    setLocating(false);
+  }
+  function manualCoordinate(setValue, value) {
+    stopLocating();
+    setChooseLocation(false);
+    setLocationNote("");
+    onPreview(null);
+    setValue(value);
+  }
   const changed=name!==plan.name || lng!==plan.origin[0] || lat!==plan.origin[1];
   useEffect(()=>{onDirtyChange(changed);return()=>onDirtyChange(false);},[changed,onDirtyChange]);
-  useEffect(() => () => { locationRequest.current++; onPreview(null); }, []);
+  useEffect(() => () => { stopRequest.current?.(); onPreview(null); }, []);
   useEffect(()=>{
     if(!pickedOrigin)return;
-    locationRequest.current++;setLocating(false);setLng(+pickedOrigin[0].toFixed(7));setLat(+pickedOrigin[1].toFixed(7));
+    stopLocating();setChooseLocation(false);setLng(+pickedOrigin[0].toFixed(7));setLat(+pickedOrigin[1].toFixed(7));
     setLocationNote('Map pin suggestion. Review coordinates, then Save site.');
     onPreview([...pickedOrigin]);
   },[pickedOrigin]);
   function locate() {
     if (locating) return;
+    function unavailable(message) {
+      setLocating(false);
+      setChooseLocation(true);
+      setLocationNote(message + " Search for the facility address, pick its roof on the map, or enter coordinates.");
+    }
     if (!window.isSecureContext || !navigator.geolocation) {
-      setLocationNote("Location is unavailable here. Enter longitude and latitude below.");
+      unavailable("Device location is unavailable here.");
       return;
     }
-    const request = ++locationRequest.current;
+    setChooseLocation(false);
     setLocating(true);
-    setLocationNote("Waiting for your location permission. You can use coordinates instead.");
-    navigator.geolocation.getCurrentPosition(({ coords }) => {
-      if (request !== locationRequest.current) return;
-      setLocating(false);
-      if (!Number.isFinite(coords.longitude) || !Number.isFinite(coords.latitude) || Math.abs(coords.latitude) > 80) {
-        setLocationNote("This position is outside the supported map range. Enter site coordinates below.");
-        return;
-      }
-      setLng(Number(coords.longitude.toFixed(7)));
-      setLat(Number(coords.latitude.toFixed(7)));
-      onPreview([Number(coords.longitude.toFixed(7)), Number(coords.latitude.toFixed(7))]);
-      const accuracy = Number.isFinite(coords.accuracy) ? ` Reported accuracy: ±${Math.ceil(coords.accuracy)} m.` : "";
-      setLocationNote("Suggested device position only." + accuracy + " Confirm this is your facility before saving.");
-    }, (error) => {
-      if (request !== locationRequest.current) return;
-      setLocating(false);
-      setLocationNote(error.code === 1 ? "Location permission was declined. Enter site coordinates below." :
-        error.code === 3 ? "Location timed out. Try again or enter site coordinates below." :
-        "Your location could not be determined. Enter site coordinates below.");
-    }, { enableHighAccuracy: false, timeout: 10000, maximumAge: 0 });
+    setLocationNote("Allow location access to look for a precise reading (up to 20 seconds).");
+    stopRequest.current = requestSiteLocation(navigator.geolocation, {
+      progress: setLocationNote,
+      failed: unavailable,
+      found: (origin, radius) => {
+        setLocating(false);
+        setLng(origin[0]);
+        setLat(origin[1]);
+        onPreview(origin);
+        setLocationNote(`Device estimate within ${radius}. Check the pin against the building before choosing Save site.`);
+      },
+    });
   }
   useEffect(() => {
+    stopLocating();
+    setChooseLocation(false);
+    setLocationNote("");
     setName(plan.name);
     setLng(plan.origin[0]);
     setLat(plan.origin[1]);
@@ -1133,8 +1155,9 @@ function SiteForm({ plan, commit, center, pickedOrigin, onPin, ready, onDirtyCha
     setFormError("");
     onPreview(null);
   }, [plan]);
-  return <><button type="button" className="facility-secondary" disabled={!ready} onClick={onPin}>Pick site on map</button><AddressSearch focusSignal={addressFocus} initiallyOpen={!hasGeometry} onChoose={p=>{locationRequest.current++;setLocating(false);setLng(+p.origin[0].toFixed(7));setLat(+p.origin[1].toFixed(7));onPreview([+p.origin[0].toFixed(7),+p.origin[1].toFixed(7)]);setLocationNote('Suggested: '+p.label+'. The map shows this place; check the pin, then Save site. Existing plan positions remain unchanged until then.');}} /><form onSubmit={(e) => {
+  return <><button type="button" className="facility-secondary" disabled={!ready} onClick={()=>{stopLocating();setLocationNote("Click the facility on the map.");onPin();}}>Pick site on map</button><AddressSearch focusSignal={addressFocus} initiallyOpen={!hasGeometry} onChoose={p=>{stopLocating();setChooseLocation(false);setLng(+p.origin[0].toFixed(7));setLat(+p.origin[1].toFixed(7));onPreview([+p.origin[0].toFixed(7),+p.origin[1].toFixed(7)]);setLocationNote('Suggested: '+p.label+'. The map shows this place; check the pin, then Save site. Existing plan positions remain unchanged until then.');}} /><form onSubmit={(e) => {
     e.preventDefault();
+    if (locating || chooseLocation) return;
     const moved = lng !== plan.origin[0] || lat !== plan.origin[1];
     let next = { ...plan, name, origin: [lng, lat] };
     if (moved && keep && hasGeometry) {
@@ -1143,12 +1166,16 @@ function SiteForm({ plan, commit, center, pickedOrigin, onPin, ready, onDirtyCha
     setFormError("");
     if (commit(next, moved && keep && hasGeometry ? "Site origin saved — buildings and cameras kept their map positions" : "Site origin saved — choose an area and review building outlines below")) center();
   }}><button type="button" className="facility-secondary" disabled={locating} onClick={locate}>{locating ? "Finding location…" : "Use my location"}</button>
-  {locating && <button type="button" className="facility-secondary" onClick={() => { locationRequest.current++; setLocating(false); setLocationNote("Location suggestion cancelled. Enter site coordinates below."); }}>Cancel location</button>}
-  <p className="facility-caption">Uses your browser’s location service once, only when requested. Review the suggestion before Save site. This does not find building outlines.</p>
+  {locating && <button type="button" className="facility-secondary" onClick={() => { stopLocating(); setLocationNote("Location search cancelled. You can search by address or choose a map pin."); }}>Cancel location</button>}
+  <p className="facility-caption">A new plan starts in central Kansas. Use my location asks your device for an estimate within 100 m. If the pin looks wrong, search for the facility address or pick its roof on the map.</p>
   {locationNote && <p className="facility-caption" role="status">{locationNote}</p>}
-  <Field label="Facility name" type="text" value={name} onChange={setName} /><Field label="Latitude" value={lat} min={-80} max={80} onChange={setLat} /><Field label="Longitude" value={lng} min={-180} max={180} onChange={setLng} />
+  {chooseLocation && <div className="facility-action-row">
+    <button type="button" className="facility-secondary" onClick={focusAddress}>Find by address</button>
+    <button type="button" className="facility-secondary" onClick={()=>{setChooseLocation(false);setLocationNote("Review the coordinates below before saving.");}}>Keep entered coordinates</button>
+  </div>}
+  <Field label="Facility name" type="text" value={name} onChange={setName} /><Field label="Latitude" value={lat} min={-80} max={80} onChange={v=>manualCoordinate(setLat,v)} /><Field label="Longitude" value={lng} min={-180} max={180} onChange={v=>manualCoordinate(setLng,v)} />
   {!!hasGeometry && <label className="facility-checkbox"><input type="checkbox" checked={keep} onChange={e=>setKeep(e.target.checked)} />Keep buildings at their map positions<small>{mapped ? 'On by default because this plan has map-sourced buildings.' : 'Off by default for hand-drawn plans.'}</small></label>}
-  <p className="facility-caption">Building and camera positions are meters east and north of this origin. {hasGeometry && keep ? 'Saving a new origin re-centres the local grid; buildings, cameras, zones and routes keep their map positions and dimensions.' : 'Changing the origin moves the whole plan geographically.'} This is a local planning coordinate system, not a surveyed model.</p>{formError && <p className="error" role="alert">{formError}</p>}<button className="facility-primary" type="submit" disabled={locating}>Save site<Check /></button>{changed && <button type="button" className="facility-secondary" onClick={()=>{setName(plan.name);setLng(plan.origin[0]);setLat(plan.origin[1]);setLocationNote('');setFormError('');onPreview(null);}}>Discard site edits</button>}</form></>;
+  <p className="facility-caption">Building and camera positions are meters east and north of this origin. {hasGeometry && keep ? 'Saving a new origin re-centres the local grid; buildings, cameras, zones and routes keep their map positions and dimensions.' : 'Changing the origin moves the whole plan geographically.'} This is a local planning coordinate system, not a surveyed model.</p>{formError && <p className="error" role="alert">{formError}</p>}<button className="facility-primary" type="submit" disabled={locating || chooseLocation}>Save site<Check /></button>{changed && <button type="button" className="facility-secondary" onClick={()=>{stopLocating();setChooseLocation(false);setName(plan.name);setLng(plan.origin[0]);setLat(plan.origin[1]);setLocationNote('');setFormError('');onPreview(null);}}>Discard site edits</button>}</form></>;
 }
 function PlanPasteDialog({ close, onImport }) {
   const ref = useRef();

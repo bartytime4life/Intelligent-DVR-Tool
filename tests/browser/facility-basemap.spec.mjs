@@ -4,7 +4,7 @@ import {readFileSync} from 'node:fs';
 
 // A 1×1 PNG stands in for every map picture; no real provider is contacted.
 const png=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGMwSCgAAAHEAQHpOvu6AAAAAElFTkSuQmCC','base64');
-const hosts=['tile.openstreetmap.org','basemap.nationalmap.gov','imagery.nationalmap.gov'];
+const hosts=['tiles.maps.eox.at','tile.openstreetmap.org','basemap.nationalmap.gov','imagery.nationalmap.gov'];
 const place={type:'FeatureCollection',features:[{type:'Feature',geometry:{type:'Point',coordinates:[-94.7844298,38.9698085]},properties:{name:'Recorded municipal campus (mock search result)',city:'Lenexa',state:'Kansas'}}]};
 
 async function open(page,{pictures='ok'}={}) {
@@ -184,4 +184,109 @@ test('the start card steps aside once a site is suggested or saved without using
   await expect(card).toHaveCount(0);
   await page.getByRole('button',{name:'Save site',exact:true}).click();
   await expect(card).toHaveCount(0);
+});
+
+test('a coarse device position keeps the site in place until a precise fix arrives and is saved',async({page})=>{
+  await page.addInitScript(()=>{
+    Object.defineProperty(navigator,'geolocation',{value:{
+      watchPosition(success, failure, options) { window.deviceFix = success; window.deviceFailure = failure; window.locationOptions = options; return 7; },
+      clearWatch(id) { window.clearedWatch = id; }
+    }});
+  });
+  await open(page);
+  const before = await savedPlan(page);
+  const lat = page.getByLabel('Latitude',{exact:true});
+  const lng = page.getByLabel('Longitude',{exact:true});
+  const original = [await lng.inputValue(), await lat.inputValue()];
+  const send = (longitude,latitude,accuracy)=>page.evaluate(coords=>window.deviceFix({coords,timestamp:Date.now()}),{longitude,latitude,accuracy});
+  await page.getByRole('button',{name:'Use my location',exact:true}).click();
+  expect(await page.evaluate(()=>window.locationOptions)).toMatchObject({enableHighAccuracy:true,maximumAge:0});
+  await send(-101,37,95000);
+  await expect(page.getByText(/reports a 95 km radius/)).toBeVisible();
+  expect([await lng.inputValue(),await lat.inputValue()]).toEqual(original);
+  await expect(page.locator('.facility-site-preview')).toHaveCount(0);
+  await send(-95.678,39.0483,12);
+  await expect(lat).toHaveValue('39.0483');
+  await expect(lng).toHaveValue('-95.678');
+  await expect(page.locator('.facility-site-preview')).toBeVisible();
+  await expect(page.getByText(/Device estimate within 12 m/)).toBeVisible();
+  expect(await savedPlan(page)).toEqual(before);
+  expect(await page.evaluate(()=>window.clearedWatch)).toBe(7);
+  await page.getByRole('button',{name:'Save site',exact:true}).click();
+  expect((await savedPlan(page)).origin).toEqual([-95.678,39.0483]);
+  await page.reload();
+  await expect(lat).toHaveValue('39.0483');
+  await expect(lng).toHaveValue('-95.678');
+});
+
+test('a failed device fix cannot save the default as GPS or overwrite a manual correction',async({page})=>{
+  await page.addInitScript(()=>{
+    Object.defineProperty(navigator,'geolocation',{value:{
+      watchPosition(success,error) {window.fix=success;window.fail=error;return 1;}, clearWatch(){}
+    }});
+  });
+  await open(page);
+  const locate=page.getByRole('button',{name:'Use my location',exact:true});
+  const save=page.getByRole('button',{name:'Save site',exact:true});
+  await locate.click();
+  await page.evaluate(()=>{window.fix({coords:{longitude:-101,latitude:37,accuracy:48000},timestamp:Date.now()});window.fail({code:3});});
+  await expect(page.getByText(/best reported accuracy was 48 km/)).toBeVisible();
+  await expect(save).toBeDisabled();
+  await page.getByRole('button',{name:'Find by address',exact:true}).click();
+  await expect(page.getByLabel('Address or place name',{exact:true})).toBeFocused();
+  await locate.click();
+  await page.getByLabel('Latitude',{exact:true}).fill('39.0483');
+  await page.evaluate(()=>window.fix({coords:{longitude:-102,latitude:38,accuracy:5},timestamp:Date.now()}));
+  await expect(page.getByLabel('Latitude',{exact:true})).toHaveValue('39.0483');
+  await expect(page.locator('.facility-site-preview')).toHaveCount(0);
+  await expect(save).toBeEnabled();
+});
+
+test('Satellite loads georeferenced roof tiles as the operator pans, with a working grid fallback',async({page})=>{
+  const requests=await open(page);
+  const roofRequests=()=>requests.filter(u=>u.hostname==='imagery.nationalmap.gov' && u.searchParams.get('size')==='512,512');
+  expect(requests).toHaveLength(0);
+  await page.getByRole('button',{name:'Satellite',exact:true}).click();
+  await expect.poll(()=>requests.filter(u=>u.hostname==='tiles.maps.eox.at').length).toBeGreaterThan(0);
+  await expect.poll(()=>roofRequests().length).toBeGreaterThan(0);
+  const first=roofRequests()[0], bounds=first.searchParams.get('bbox').split(',').map(Number);
+  expect(bounds.every(Number.isFinite)).toBe(true);
+  expect(bounds[0]).toBeLessThan(bounds[2]);
+  expect(first.searchParams.get('bboxSR')).toBe('3857');
+  await expect(pill(page)).toContainText('USGS/USDA aerial');
+  const before=await savedPlan(page);
+  await page.getByRole('button',{name:'2D',exact:true}).click();
+  const seen=new Set(roofRequests().map(u=>u.href));
+  const map=page.locator('.maplibregl-canvas');
+  const box=await map.boundingBox();
+  const x=box.x+box.width*.8, y=box.y+box.height*.65;
+  for(let i=0;i<3;i++){await page.mouse.move(x,y);await page.mouse.down();await page.mouse.move(x-box.width*.6,y,{steps:7});await page.mouse.up();}
+  await expect.poll(()=>roofRequests().some(u=>!seen.has(u.href))).toBe(true);
+  expect(await savedPlan(page)).toEqual(before);
+  await page.reload();
+  await expect(page.getByRole('button',{name:'Satellite',exact:true})).toHaveAttribute('aria-pressed','true');
+  await page.getByRole('button',{name:'Grid',exact:true}).click();
+  await expect(pill(page)).toContainText('no map pictures requested');
+});
+
+test('Satellite keeps overseas views on Sentinel-2 and reports a U.S. roof outage',async({page})=>{
+  const requests=await open(page);
+  const save=page.getByRole('button',{name:'Save site',exact:true});
+  const setPlace=async(lng,lat)=>{
+    await page.getByLabel('Longitude',{exact:true}).fill(String(lng));
+    await page.getByLabel('Latitude',{exact:true}).fill(String(lat));
+    await save.click();
+  };
+  await setPlace(11.26,46.45);
+  await page.getByRole('button',{name:'Satellite',exact:true}).click();
+  await expect(pill(page)).toContainText('Sentinel-2 satellite overview');
+  await expect.poll(()=>requests.filter(u=>u.hostname==='tiles.maps.eox.at').length).toBeGreaterThan(0);
+  expect(requests.some(u=>u.hostname==='imagery.nationalmap.gov')).toBe(false);
+  await page.route('https://imagery.nationalmap.gov/**',r=>r.abort());
+  await setPlace(-95.678,39.0483);
+  await expect(page.locator('.facility-layer-notice')).toContainText('Some roof images could not load');
+  await expect(page.locator('.facility-map-error')).toHaveCount(0);
+  expect((await savedPlan(page)).origin).toEqual([-95.678,39.0483]);
+  await page.getByRole('button',{name:'Grid',exact:true}).click();
+  await expect(page.locator('.facility-layer-notice')).toHaveCount(0);
 });
