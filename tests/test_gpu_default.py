@@ -1,6 +1,7 @@
 """GPU-first service wiring and fault injection. Simulated CUDA is not GPU evidence."""
 import importlib.util
 import json
+import sys
 from pathlib import Path
 import tempfile
 import threading
@@ -61,7 +62,7 @@ class RecordingPreferenceTest(unittest.TestCase):
         self.jobs.thread.join(10);self.assertFalse(self.jobs.thread.is_alive())
         return self.jobs.snapshot()
     def test_default_requires_cuda_proof_and_persists_the_actual_backend(self):
-        job=self.start(state_dir=self.root/'retained')
+        job=self.start(state_dir=self.root/'retained' if sys.platform == 'linux' else None)
         self.assertEqual(job['state'],'completed',job)
         self.assertEqual(job['backend'],'onnxruntime-cuda')
         self.assertEqual(job['acceleration_code'],'CUDA_STARTUP_VERIFIED')
@@ -90,6 +91,24 @@ class RecordingPreferenceTest(unittest.TestCase):
         job=self.start()
         self.assertEqual(job['state'],'failed');self.assertEqual(job['error']['code'],'INFERENCE_FAILED')
         self.assertEqual(self.calls,['onnxruntime-cuda']);self.assertIsNone(self.jobs.gpu_slot.owner)
+        self.assertTrue(self.jobs.gpu_slot.failed)
+
+    def test_invalid_recording_leaves_gpu_available_for_the_next_job(self):
+        for code in ('VIDEO_OPEN_FAILED', 'FRAME_RATE_INVALID', 'NO_FRAMES', 'MEDIA_CORRUPT', 'MEMORY_LIMIT'):
+            with self.subTest(code=code):
+                self.fail_gpu=True;self.gpu_error=code;self.calls=[]
+                job=self.start()
+                self.assertEqual(job['state'],'failed',job)
+                self.assertFalse(self.jobs.gpu_slot.failed)
+                self.assertIsNone(self.jobs.gpu_slot.owner)
+                self.fail_gpu=False
+                choices=self.jobs.available()
+                recording=next(r['id'] for r in choices['recordings'] if r['name']=='synthetic.webm')
+                self.jobs.start({'recording':recording,'model':'synthetic','rules':'presence'})
+                self.jobs.thread.join(10)
+                self.assertEqual(self.jobs.snapshot()['backend'],'onnxruntime-cuda')
+                self.assertEqual(self.calls,['onnxruntime-cuda','onnxruntime-cuda'])
+                self.jobs.close();self.jobs=None
     def test_cancel_reaps_gpu_before_releasing_slot_and_does_not_fallback(self):
         running=FakeProcess()
         self.jobs=Jobs(self.root/'recordings',load_catalog(self.root/'config.json'),process_factory=lambda *a,**k:running)
