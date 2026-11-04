@@ -1,6 +1,12 @@
 // Small stills kept in this browser only (IndexedDB). Every call fails soft: no storage means no image.
 const DB = 'intelligent-dvr', VERSION = 1;
 export const STORES = ['thumbnails', 'zone-stills'];
+// An unsigned observation ID alone cannot bind an image to its evidence.
+// Human decisions/notes are deliberately excluded so reviewing keeps the still.
+export function observationImageKey(event) {
+  return JSON.stringify(['observation-v2', ...['id', 'mode', 'camera', 'cameraName', 'title', 'label', 'time', 'seconds', 'score', 'rule'].map(k => event[k] ?? null),
+    ...['source_sha256', 'model_sha256', 'session', 'captured_at'].map(k => event.provenance?.[k] ?? null)]);
+}
 // A still written moments ago may belong to observations that are still being added to the queue.
 const GRACE_MS = 60_000;
 let opening = null;
@@ -104,7 +110,7 @@ export async function saveObservationStills(source, run, options) {
   let saved = 0;
   for (const [i, event] of run.events.entries()) {
     const blob = stills.get(times[i]);
-    if (blob && await putImage('thumbnails', event.id, blob)) saved++;
+    if (blob && await putImage('thumbnails', observationImageKey(event), blob)) saved++;
   }
   return saved;
 }

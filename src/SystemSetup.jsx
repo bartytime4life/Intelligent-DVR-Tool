@@ -23,7 +23,10 @@ export default function SystemSetup({ setup, onApply, onDirtyChange, storageErro
   dirtyCallback.current = onDirtyChange;
   useEffect(() => { dirtyCallback.current?.(dirty); }, [dirty]);
   useEffect(() => () => { dirtyCallback.current?.(false); }, []);
-  useEffect(() => { setDraft(structuredClone(setup)); setDirty(false); }, [setup]);
+  useEffect(() => {
+    if (dirty) { setStatus('Saved setup changed in another tab. Your draft is kept. Apply it explicitly, or discard it and load the saved setup.'); return; }
+    setDraft(structuredClone(setup));
+  }, [setup]);
   let result, problem = "";
   try { result = calculateSetup(draft); } catch (err) { problem = err.message; }
   function change(group, key, value) {
@@ -118,7 +121,7 @@ export default function SystemSetup({ setup, onApply, onDirtyChange, storageErro
           </div>
           <p className="hint">The analyzer enforces threads and frame count when given the exported policy. The scheduler adapter enforces slots, retained bytes and dispatch age. It creates no workers. These are not OS CPU/RAM or GPU power limits.</p>
         </Card>
-        <Card icon={GraphicsCard} title="GPU & VRAM planning" caption="Choose a qualification candidate. The current analyzer still uses OpenCV CPU." className="system-gpu">
+        <Card icon={GraphicsCard} title="GPU & VRAM planning" caption="Choose a qualification candidate. Local analysis prefers a supported GPU with visible CPU fallback; these estimates do not change its runtime." className="system-gpu">
           <div className="system-fields"><label className="system-field"><span>GPU candidate</span><select value={draft.gpu.profile} onChange={e => gpuProfile(e.target.value)}>{Object.entries(GPU_PRESETS).map(([id, g]) => <option key={id} value={id}>{g.label}</option>)}</select></label>
             <label className="system-field"><span>GPU location</span><select value={draft.gpu.location} onChange={e => gpuProfile(draft.gpu.profile, e.target.value)}><option value="separate-host">Separate analytics host</option><option value="same-host">This recording host</option></select></label>
             {field("gpu", "vramGiB", "Usable VRAM plan (GiB)", 1, 4096, .1)}
@@ -175,6 +178,7 @@ export default function SystemSetup({ setup, onApply, onDirtyChange, storageErro
         <button type="button" className="button" disabled={!!problem} onClick={() => download(validateSetup(draft), "dvr-machine-setup.json")}><DownloadSimple />Export setup plan</button>
         <button type="button" className="text-button" onClick={() => setupFile.current.click()}><UploadSimple />Import setup</button>
         <button type="button" className="text-button" onClick={() => { setDraft(structuredClone(DEFAULT_SETUP)); setDirty(true); setFileError(""); setStatus("Defaults restored in draft. Apply when ready."); }}><ArrowCounterClockwise />Reset draft</button>
+        {dirty && <button type="button" className="text-button" onClick={() => {setDraft(structuredClone(setup)); setDirty(false); setFileError(''); setStatus('Saved setup loaded.');}}>Discard draft & load saved setup</button>}
       </div><p className="system-save-state" role="status">{status || (dirty ? "Draft changed. Apply browser limits when ready; exported policies are applied separately by local tools." : "Applied setup is stored in this browser. Hardware, retention and power figures are estimates.")}</p>
     </form>
     <div className="system-docs"><div><h2>Build the machine, then prove the workload.</h2><p>The 100-camera target needs actual recording and analytics qualification. Hardware choices alone establish neither.</p></div><div><a href={`${DOCS}hardware-guide.md`} target="_blank" rel="noreferrer">Hardware & drive shortlist ↗</a><a href={`${DOCS}resource-controls.md`} target="_blank" rel="noreferrer">What each limit enforces ↗</a></div></div>

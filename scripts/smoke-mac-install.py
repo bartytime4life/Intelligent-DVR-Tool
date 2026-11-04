@@ -48,6 +48,10 @@ def main(evidence):
         (folder/'config.json').rename(folder/'catalog.json')
         for subdir in ('people','trained'):
             (folder/subdir).mkdir();(folder/subdir/'preserve.bin').write_bytes(b'private fixture data')
+        # Start creates this persistent empty lease, even with backup unconfigured.
+        # Include it in the preservation snapshot so additions elsewhere still fail.
+        (folder/'.backup-library').mkdir()
+        (folder/'.backup-library/.dvr-import.lock').write_bytes(b'')
         # A configured LAN address must remain idle throughout installation/check/start.
         (root/'local-feeds.json').write_text(json.dumps({'sources':[{'id':'idle','name':'Idle fixture',
             'host':'192.168.1.123','path':'/fixture','username':'viewer','password':'private-fixture'}]}))

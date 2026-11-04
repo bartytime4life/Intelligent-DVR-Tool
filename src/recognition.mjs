@@ -54,14 +54,26 @@ export function validateTracking(t) {
     return null;
   }
   require(value?.schema === 'intelligent-dvr.tracks.v1' && text(value.method, 80) && Array.isArray(value.tracks) && value.tracks.length <= 2000, 'Invalid tracking record.');
+  require(value.classes && typeof value.classes === 'object' && !Array.isArray(value.classes) && Object.keys(value.classes).length <= 2000 &&
+    integer(value.tracks_dropped, 0, 100000), 'Invalid tracking summary.');
   const byId = new Map();
   for (const track of value.tracks) {
     require(integer(track?.id, 1, 1e9) && !byId.has(track.id) && text(track.label, 80) && finite(track.first_seconds) && finite(track.last_seconds) &&
       track.first_seconds >= 0 && track.last_seconds >= track.first_seconds && integer(track.hits, 1, 100000) &&
+      finite(track.duration_seconds) && track.duration_seconds >= 0 && Math.abs(track.duration_seconds - (track.last_seconds - track.first_seconds)) <= 1e-5 &&
       Array.isArray(track.path) && track.path.length <= 64 && track.path.every(p => Array.isArray(p) && p.length === 3 && p.every(finite) && p[1] >= 0 && p[1] <= 1 && p[2] >= 0 && p[2] <= 1) &&
       track.zones && typeof track.zones === 'object' && Object.values(track.zones).every(z => finite(z?.seconds) && z.seconds >= 0 && finite(z.entered_seconds)),
       'Invalid track in the tracking record.');
     byId.set(track.id, track);
+  }
+  const durations = new Map();
+  for (const track of value.tracks) durations.set(track.label, [...(durations.get(track.label) || []), track.duration_seconds]);
+  require(Object.keys(value.classes).length === durations.size, 'Invalid tracking class summary.');
+  for (const [label, times] of durations) {
+    const summary = value.classes[label]; times.sort((a,b) => a-b);
+    require(summary && summary.tracks === times.length && finite(summary.longest_duration_seconds) && finite(summary.median_duration_seconds) &&
+      Math.abs(summary.longest_duration_seconds - times.at(-1)) <= .001 &&
+      Math.abs(summary.median_duration_seconds - times[Math.floor(times.length / 2)]) <= .001, 'Invalid tracking class summary.');
   }
   for (const frame of t.frames) {
     const seen = new Set();

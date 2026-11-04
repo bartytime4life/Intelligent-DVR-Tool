@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { parseRecognition, frameSummary, canShowBoxes, matchRecording, trackRows, boxLabel, MAX_REVIEW_BYTES } from './recognition.mjs';
+import { parseRecognition, frameSummary, canShowBoxes, matchRecording, trackRows, boxLabel, MAX_REVIEW_BYTES, mergeRecognitionEvents } from './recognition.mjs';
 import './recognition.css';
 import LocalAnalysis from './LocalAnalysis.jsx';
 import LanRecorder from './LanRecorder.jsx';
@@ -12,7 +12,7 @@ import { analysisRequest } from './local-analysis.mjs';
 const sameBox = (a, b) => a.length === 4 && a.every((v, i) => v === b[i]);
 const matchKey = m => `${m.frame_index}:${m.box_index}`;
 
-export default function RecognitionReview({ onImport, active = true, clip, onClip, reviews = [], evidence = null, onRecorderStatus, onZoneStill }) {
+export default function RecognitionReview({ onImport, onValidateImport, active = true, clip, onClip, reviews = [], evidence = null, onRecorderStatus, onZoneStill }) {
   const [run, setRun] = useState(null), [index, setIndex] = useState(0);
   const [source, setSource] = useState(null), [media, setMedia] = useState({});
   const [threshold, setThreshold] = useState(0.5), [status, setStatus] = useState(''), [error, setError] = useState('');
@@ -111,9 +111,13 @@ export default function RecognitionReview({ onImport, active = true, clip, onCli
   async function sendToEvents() {
     const sent = run, from = source;
     setSending(true);
-    try { if (from) await saveObservationStills(from.url, sent); }
+    try {
+      if (onValidateImport?.(sent.events) === false) return;
+      mergeRecognitionEvents(reviews, sent.events);
+      if (from) await saveObservationStills(from.url, sent);
+      onImport(sent.events);
+    } catch (err) { setStatus(err.message); }
     finally { setSending(false); }
-    onImport(sent.events);
   }
   function readMedia() {
     const el = video.current;
@@ -129,7 +133,7 @@ export default function RecognitionReview({ onImport, active = true, clip, onCli
     <h1>Recognition</h1>
     <p className="recognition-intro">See detected people and objects on the recording they came from. Inspect each sampled scene, then send observations for human review.</p>
     <BackupLibrary onResult={openLocalResult} onBusy={setLibraryBusy} blocked={analysisBusy || recorderBusy} />
-    <LanRecorder onResult={openLocalResult} onBusy={setRecorderBusy} blocked={analysisBusy || libraryBusy} onImport={onImport} onStatus={onRecorderStatus} />
+    <LanRecorder onResult={openLocalResult} onBusy={setRecorderBusy} blocked={analysisBusy || libraryBusy} onImport={onImport} onValidateImport={onValidateImport} onStatus={onRecorderStatus} />
     <LocalAnalysis onResult={openLocalResult} onBusy={setAnalysisBusy} clip={clip} onClip={onClip} recorderBusy={recorderBusy || libraryBusy} currentRun={run} />
     <h2 className="recognition-import-heading">Or open previously exported results</h2>
     <div className="recognition-loaders">

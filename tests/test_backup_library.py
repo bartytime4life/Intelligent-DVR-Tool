@@ -5,6 +5,7 @@ import json
 import os
 from pathlib import Path
 import shutil
+import sqlite3
 import tempfile
 import unittest
 from types import SimpleNamespace
@@ -19,10 +20,10 @@ from local_analysis_fixture import build
 class LibraryTest(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
-        self.root = build(Path(self.temp.name) / 'fixture')
-        self.source = Path(self.temp.name) / 'oem'
+        self.root = build(Path(self.temp.name).resolve() / 'fixture')
+        self.source = Path(self.temp.name).resolve() / 'oem'
         self.source.mkdir()
-        self.backup = Path(self.temp.name) / 'backup'
+        self.backup = Path(self.temp.name).resolve() / 'backup'
         self.jobs = Jobs(self.root / 'recordings', load_catalog(self.root / 'config.json'))
         self.now = 1000.0
         self.free = 1000 * GIB
@@ -260,6 +261,108 @@ class LibraryTest(unittest.TestCase):
         self.assertEqual(self.library.status()['state'], 'stopping')
         self.library.scanning = False
         self.assertEqual(self.library.configure(self.settings)['state'], 'paused')
+
+    def test_offline_backup_does_not_prevent_startup_or_recreate_missing_storage(self):
+        self.recording(); self.start(); self.settle()
+        row = self.first()
+        self.library.close()
+        detached = self.backup.with_name('detached-backup')
+        self.backup.rename(detached)
+        self.library = self.make()
+        status = self.library.status()
+        self.assertTrue(status['configured'])
+        self.assertFalse(status['active'])
+        self.assertIsNotNone(status['error'])
+        self.assertEqual(status['items'], [])
+        self.assertFalse(self.backup.exists())
+        self.library.tick()  # Paused unavailable storage has no DB to poll.
+        with self.assertRaisesRegex(LibraryError, 'storage is unavailable'):
+            self.start()
+        self.assertFalse(self.backup.exists())
+        detached.rename(self.backup)
+        self.start()
+        self.assertEqual(self.first()['sha256'], row['sha256'])
+
+    def test_unavailable_store_can_be_reconfigured_to_a_new_folder(self):
+        self.library.close()
+        detached = self.backup.with_name('detached-backup')
+        self.backup.rename(detached)
+        self.library = self.make()
+        result = self.library.configure({**self.settings, 'backup_folder': str(self.backup.with_name('new-backup'))})
+        self.assertIsNone(result['error'])
+        self.assertEqual(result['state'], 'paused')
+        self.assertTrue(detached.exists())
+
+    def test_invalid_saved_settings_leave_setup_available(self):
+        self.library.close()
+        (self.root / 'settings/config.json').write_text('{broken')
+        self.library = self.make()
+        self.assertFalse(self.library.status()['configured'])
+        self.assertIsNotNone(self.library.status()['error'])
+        self.assertIsNone(self.library.configure(self.settings)['error'])
+
+    def test_depth_limit_reports_incomplete_scan_but_nonrecursive_is_deliberate(self):
+        self.recording('/'.join(['nested'] * 17 + ['camera.webm']))
+        self.start(); self.settle()
+        self.assertEqual(self.library.status()['items'], [])
+        self.assertTrue(self.library.status()['scan_limited'])
+        self.library.stop()
+        self.library.configure({**self.settings, 'recursive': False})
+        self.start(); self.settle()
+        self.assertFalse(self.library.status()['scan_limited'])
+
+    def test_unavailable_cached_backup_handle_is_reopened_at_the_same_path(self):
+        self.recording(); self.start(); self.settle(); self.library.stop()
+        original=self.library.db; check=self.library._check_roots; row=self.first()
+        # Inject a stale mounted-volume identity without renaming open SQLite
+        # files, which Windows correctly prevents even in a test directory.
+        def reattached(**kwargs):
+            if self.library.db is original:raise LibraryError('FOLDER_CHANGED','Volume reattached')
+            return check(**kwargs)
+        with patch.object(self.library,'_check_roots',reattached):
+            self.assertIsNotNone(self.library.status()['error'])
+            self.assertIsNone(self.library.configure(self.settings)['error'])
+        self.assertIsNot(self.library.db,original)
+        self.start(); self.settle()
+        self.assertEqual(len(self.library.status()['items']),1)
+        self.assertEqual(self.first()['sha256'],row['sha256'])
+
+    def test_index_read_error_still_exposes_paused_setup_for_recovery(self):
+        from unittest.mock import Mock
+        original=self.library.db
+        self.library.db=Mock(); self.library.db.execute.side_effect=sqlite3.OperationalError('offline volume')
+        try:
+            status=self.library.status()
+            self.assertEqual(status['state'],'paused')
+            self.assertIsNotNone(status['error'])
+            self.assertEqual(status['items'],[])
+        finally:self.library.db=original
+
+    def descriptor_clock(self, *, changes=False):
+        real_fstat=os.fstat
+        calls={}
+        def fstat(fd):
+            info=real_fstat(fd); calls[fd]=calls.get(fd,0)+1
+            fields={key:getattr(info,key) for key in ('st_mode','st_dev','st_ino','st_size','st_mtime_ns','st_ctime_ns')}
+            fields['st_ctime_ns']+=1000000000+(1 if changes and calls[fd]>=3 else 0)
+            return SimpleNamespace(**fields)
+        return fstat
+
+    def test_windows_distinct_path_and_descriptor_ctimes_allow_verified_copy(self):
+        self.recording(); self.start(); self.library.scan(); self.now+=31
+        with patch('edge.backup_library.sys.platform','win32'), patch('edge.backup_library.os.fstat',self.descriptor_clock()):
+            self.library.scan()
+        self.assertEqual(self.first()['state'],'saved')
+        self.assertIsNone(self.library.status()['error'])
+
+    def test_windows_descriptor_metadata_change_during_copy_is_still_refused(self):
+        source=self.recording(); before=source.read_bytes()
+        self.start(); self.library.scan(); self.now+=31
+        with patch('edge.backup_library.sys.platform','win32'), patch('edge.backup_library.os.fstat',self.descriptor_clock(changes=True)):
+            self.library.scan()
+        self.assertEqual(self.library.status()['items'],[])
+        self.assertIn('changed during copying',self.library.status()['error'])
+        self.assertEqual(source.read_bytes(),before)
 
 
 if __name__ == '__main__': unittest.main()

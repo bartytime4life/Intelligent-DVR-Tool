@@ -783,7 +783,10 @@ class Jobs:
                     code = failures.read(directory, failures.ANALYSIS) or failures.exit_cause(self.process.returncode)
                     if self.process.returncode == 0:
                         break
-                    gpu_failure = selected == 'onnxruntime-cuda'
+                    # A decoder/input/resource failure is not accelerator failure.
+                    # Keep the shared device available for other recordings and live AI.
+                    gpu_failure = selected == 'onnxruntime-cuda' and (
+                        startup_timeout or code in ('MODEL_LOAD_FAILED', 'DEPENDENCY_MISSING', 'INFERENCE_FAILED'))
                     if gpu_failure: self.gpu_slot.disable()
                     if gpu_failure and (startup_timeout or code in ('MODEL_LOAD_FAILED', 'DEPENDENCY_MISSING')):
                         # No completed result exists. A separate CPU process reads the original

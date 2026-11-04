@@ -88,7 +88,7 @@ test('the detector starts explicitly, sends one frame at a time and keeps observ
   assert.equal(last.observations[0].capturedAt, 1000);
   assert.ok(last.fps > 0);
   assert.equal(detector.snapshot.skippedBusy, 1);
-  detector.markSent(0);
+  detector.markSent(observation.id);
   assert.equal(snapshots.at(-1).observations[0].sent, true);
   detector.stop();
   await new Promise(r => setTimeout(r, 0));
@@ -114,6 +114,31 @@ test('start and frame failures stop the detector with the service message', asyn
   await assert.rejects(liveRequest('/x', { token: 't', fetcher: async () => { throw TypeError('offline'); } }), /local AI service is unavailable/);
 });
 
+test('retained live observations keep their original session and stable completion ID after prepend',async()=>{
+  const older={observation:{...observation,id:'d'.repeat(32)},still:new Blob(['old']),capturedAt:1000,session:{...session,id:'e'.repeat(32)}};
+  const {fetcher}=service({frames:[{observations:[observation],detections:[]}]});
+  const detector=liveDetector({token:'t',model:'m',rules:'r',camera:'c',observations:[older],capture:async()=>new Blob(['new']),fetcher,wait:async()=>{}});
+  await detector.start();
+  for(let i=0;i<20&&detector.snapshot.observations.length<2;i++)await new Promise(r=>setTimeout(r,0));
+  detector.markSent(older.observation.id);
+  const observations=detector.snapshot.observations;
+  assert.equal(observations[0].sent,undefined);
+  assert.equal(observations[1].sent,true);
+  assert.equal(liveObservationEvent(observations[1].observation,observations[1].session,1000).provenance.session,older.session.id);
+  assert.equal(observations[0].session.id,session.id);
+  detector.dismiss(older.observation.id);assert.equal(detector.snapshot.observations.length,1);detector.stop();
+});
+
+test('slow inference does not make already-stale capture boxes fresh',async()=>{
+  let clock=100;
+  const serviceMock=service({frames:[{observations:[],detections:[]}]});
+  const detector=liveDetector({token:'t',model:'m',rules:'r',camera:'c',capture:async()=>new Blob(['jpeg']),now:()=>clock,
+    fetcher:async(url,options)=>{if(url.includes('/frame'))clock+=2000;return serviceMock.fetcher(url,options);},wait:async()=>{}});
+  await detector.start();
+  for(let i=0;i<20&&!detector.snapshot.result;i++)await new Promise(r=>setTimeout(r,0));
+  assert.equal(boxesFresh(detector.snapshot,clock),false);detector.stop();
+});
+
 test('recognition results carry validated short-lived tracks', () => {
   const value = recognitionFixture();
   value.trace.frames[0].detections[0].track = 1;
@@ -133,6 +158,12 @@ test('recognition results carry validated short-lived tracks', () => {
     v => { v.trace.tracking.tracks[0].first_seconds = .1; },
     v => { v.trace.tracking.tracks.push({ ...v.trace.tracking.tracks[0] }); },
     v => { v.trace.tracking.schema = 'other'; },
+    v => { v.trace.tracking.tracks[0].duration_seconds = 'bad'; },
+    v => { v.trace.tracking.tracks[0].duration_seconds = 12; },
+    v => { v.trace.tracking.classes.person.longest_duration_seconds = {}; },
+    v => { v.trace.tracking.classes.person.median_duration_seconds = 'bad'; },
+    v => { v.trace.tracking.classes.person.tracks = 2; },
+    v => { v.trace.tracking.classes = []; },
     v => { delete v.trace.tracking; },
   ]) {
     const changed = structuredClone(value); change(changed);

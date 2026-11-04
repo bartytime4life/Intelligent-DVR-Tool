@@ -96,6 +96,7 @@ export function liveDetector({ token, model, rules, camera, capture, onChange, f
       if (!running) break;
       if (!blob) { await wait(250); continue; }
       const capturedAt = wall();
+      const capturedMonotonic = now();
       try {
         const result = await liveRequest(`/${state.session.id}/frame`, { token, jpeg: blob, signal: controller.signal, fetcher });
         if (!running) break;
@@ -103,8 +104,8 @@ export function liveDetector({ token, model, rules, camera, capture, onChange, f
         previous = finished;
         // Exponential moving average of analyzed frames per second, from actual reply spacing.
         const fps = interval ? (state.fps ? state.fps * 0.8 + 200 / interval : 1000 / interval) : state.fps;
-        const added = (result.observations || []).map(o => ({ observation: o, still: blob, capturedAt }));
-        emit({ state: 'live', session: result.session, result, resultAt: finished, fps, latencyMs: finished - began, error: '',
+        const added = (result.observations || []).map(o => ({ observation: o, still: blob, capturedAt, session: {...result.session} }));
+        emit({ state: 'live', session: result.session, result, resultAt: capturedMonotonic, fps, latencyMs: finished - began, error: '',
           observations: [...added.reverse(), ...state.observations].slice(0, LIVE_OBSERVATIONS) });
       } catch (error) {
         if (!running || error.name === 'AbortError') break;
@@ -138,7 +139,7 @@ export function liveDetector({ token, model, rules, camera, capture, onChange, f
       if (id && (wasRunning || state.state === 'live')) void liveRequest(`/${id}/stop`, { token, body: {}, fetcher }).catch(() => {});
       emit({ state: 'stopped', result: null, error: message });
     },
-    dismiss(index) { state.observations.splice(index, 1); emit({}); },
-    markSent(index) { if (state.observations[index]) { state.observations[index] = { ...state.observations[index], sent: true }; emit({}); } },
+    dismiss(id) { state.observations = state.observations.filter(o => o.observation.id !== id); emit({}); },
+    markSent(id) { state.observations = state.observations.map(o => o.observation.id === id ? {...o, sent:true} : o); emit({}); },
   };
 }

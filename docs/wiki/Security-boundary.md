@@ -49,7 +49,7 @@ The facility editor imports at most 2 MB of validated geometry/label JSON and
 copies declared fields only. Imported URLs are never fetched and labels render
 as text. Plan data stays in browser localStorage and explicit exports. The
 optional online street-map toggle sends the visible viewport to OpenStreetMap;
-it is off by default and not persisted. Review sensitive site coordinates before
+fresh browser storage defaults to Grid. A selected Streets, Aerial or Satellite layer is remembered and can request imagery again on later editor visits. Review sensitive site coordinates before
 enabling any external basemap. No camera connection, capture, inference or person
 identity association is started by the planner. Rehearsal links are simulated,
 unverified, session-only decisions. Model/image imports and arbitrary remote map
@@ -94,7 +94,7 @@ is performed by System or the supplied launchers.
 
 ## Local recording job service
 
-The optional `edge.local_service` binds only to `127.0.0.1`, checks exact Host and browser origin, and requires a per-service token for jobs and artifacts. Loopback is reachable by every account on the computer. On Linux, every API request, including the token-issuing session endpoints, must come from a TCP socket owned by the service's own OS account (looked up in `/proc/net/tcp` and `tcp6`, IPv4-mapped clients included); if those tables are unavailable, as on WSL1, API requests are refused. Windows has no such check: any local account can open the session endpoints and obtain the token, so run the service only on a computer whose other accounts you trust. It accepts opaque catalog selections, never client paths/commands. An explicit `--allow-recording-import` switch enables same-computer file copies with a 64 MiB per-file cap, 20-file/512 MiB inbox limits, 64 MiB free-space reserve, container-header and SHA-256 verification, exclusive publication, and idempotent content-derived names. Imports do not start inference. An OS-released folder lock serializes imports across services; after a crash, the next import reclaims the left-over partial file. No remote upload endpoint or cloud inference is added. One isolated CPU worker invokes the existing analyzer with bounded local snapshots, time, memory, threads and frame/output limits. It is single-user software for owner-approved recordings and hash-pinned models, not a hostile-model sandbox. See [the full boundary and shutdown/recovery behavior](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Local-analysis-service).
+The optional `edge.local_service` binds only to `127.0.0.1`, checks exact Host and browser origin, and requires a per-service token for jobs and artifacts. Loopback is reachable by every account on the computer. On Linux, every API request, including the token-issuing session endpoints, must come from a TCP socket owned by the service's own OS account (looked up in `/proc/net/tcp` and `tcp6`, IPv4-mapped clients included); if those tables are unavailable, as on WSL1, API requests are refused. Windows and macOS have no such check: any local account can open the session endpoints and obtain the token, so run the service only on a computer whose other accounts you trust. Analysis accepts opaque catalog selections, never client commands. The separately tokened OEM companion intentionally accepts validated absolute source and backup folders, with non-overlap, regular-file and identity checks; explicit Start grants reads/copies under the service account. Guided camera setup can save validated private RTSP credentials without connecting the camera. An explicit `--allow-recording-import` switch enables same-computer file copies with a 64 MiB per-file cap, 20-file/512 MiB inbox limits, 64 MiB free-space reserve, container-header and SHA-256 verification, exclusive publication, and idempotent content-derived names. Imports do not start inference. An OS-released folder lock serializes imports across services; after a crash, the next import reclaims the left-over partial file. No remote upload endpoint or cloud inference is added. One recording worker invokes the analyzer with bounded local snapshots, time, threads and frame/output limits. Analysis prefers supported CUDA execution with visible CPU fallback; CPU and GPU memory enforcement differ by platform, as described in the GPU guide. Worker isolation is a resource policy, not a filesystem or network sandbox. It is single-user software for owner-approved recordings and hash-pinned models, not a hostile-model sandbox. See [the full boundary and shutdown/recovery behavior](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Local-analysis-service).
 
 ### Worker failure codes and the diagnostic log
 
@@ -166,6 +166,12 @@ recorder's private `work/` folder. That copy is SHA-256 verified once per Start
 and then reused only while its file signature is unchanged. Each receipt still
 binds the hash of the model bytes the analyzer parsed, and the service checks that
 hash against the pinned catalog value.
+
+## Development server and stored images
+
+The Vite development and preview listeners default to loopback. Development serves only frontend source, public assets, the entry page and dependencies. Private DVR files elsewhere in the checkout remain outside its filesystem allowlist even when a developer explicitly overrides the host. Keep recordings, camera settings and face templates outside frontend/public directories. The optional geo middleware also requires a loopback TCP peer; forwarding a loopback Host header does not authorize a remote client. Production continues to serve only the built client.
+
+Observation thumbnails are keyed by their source/model/session and observation metadata. Conflicting or full-queue imports are checked before saving stills, and the final queue merge is checked again after asynchronous work. Old ID-only thumbnails remain stored with their events but are not displayed as source-verified images; reopen the matching recording and send its verified observations again to refresh them. Review decisions and notes are preserved.
 
 ---
 

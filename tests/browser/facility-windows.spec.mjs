@@ -82,7 +82,7 @@ test.describe('touch window editing',()=>{
     await client.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
     expect(await value(page,'Window width')).toBeGreaterThan(1.8);
     const initial=await value(page,'Window center along wall');await move.press('ArrowRight');expect(await value(page,'Window center along wall')).toBeCloseTo(initial+.1,2);
-    await btn(page,'Save window on map').click();await btn(page,'Place another window on map').click();
+    await btn(page,'Save window on map').tap();await btn(page,'Place another window on map').click();
     await expect(page.getByText('Click a highlighted outside wall.',{exact:true})).toBeVisible();
     await fallback(page);await btn(page,'Save window').click();expect((await savedPlan(page)).windows.length).toBe(2);
   });

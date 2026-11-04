@@ -151,6 +151,9 @@ export function restoreSnapshot(key, value, fallback) {
             !e.id || e.id.length > 128 || e.title.length > 300 ||
             e.label.length > 80 || e.time.length > 100 || e.rule.length > 200 || e.note.length > 2000 ||
             (e.mode === "sample" && !cameras.some(c => c.id === e.camera)) ||
+            (e.mode === "sample" && e.provenance != null) ||
+            (e.cameraName !== undefined && typeof e.cameraName !== "string") ||
+            (e.seconds !== undefined && (!Number.isFinite(e.seconds) || e.seconds < 0)) ||
             !Number.isFinite(e.score) ||
             e.score < 0 ||
             e.score > 1 ||
