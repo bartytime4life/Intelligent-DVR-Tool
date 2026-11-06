@@ -1,0 +1,22 @@
+{
+  "schema": "intelligent-dvr.field-byte-check.v1",
+  "utc": "2026-11-06T04:47:24.094216+00:00",
+  "input_kind": "generated",
+  "operator_asserted_completed_and_approved": true,
+  "operator_supplied_revision": "32d3d9262c733826c4182f4e37f2af403d1242a3 plus field acceptance changes",
+  "platform": "Linux",
+  "python": "3.12.3",
+  "verifier_sha256": "900cfa722178aaed0fe54c04673f13f971dc2d9e3a6043f759c16ecee233a827",
+  "field_acceptance": "NOT_ESTABLISHED",
+  "limits": "Byte matching and reported review metadata only; not authenticity, decoding, runtime attestation, accuracy, recovery or capacity.",
+  "source_sha256": "80be4641562cfd4a4ad531a880b299b0d23565727b08109120ab1619a975d2a1",
+  "backup_sha256": "80be4641562cfd4a4ad531a880b299b0d23565727b08109120ab1619a975d2a1",
+  "bytes": 1911,
+  "independent_file": true,
+  "separate_physical_device": "NOT_VERIFIED",
+  "review_binding": "MATCHED",
+  "review_sha256": "03acdf2d223cd6a143d8d3fa34c3a331a7082f693dbb9b13e358ed10949bee68",
+  "reported_backend": "opencv-cpu",
+  "reported_coverage": "completed",
+  "check": "PASS"
+}

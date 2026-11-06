@@ -15,6 +15,7 @@
 | Understand the whole tool | [Visual operator handbook](how-to.md) | [First session](getting-started.md), [screenshots](visual-atlas.md) |
 | Install or update a Mac | [Mac Install / Check / Start](setup-macos.md) | [Local analysis setup](local-analysis-service.md), [troubleshooting](troubleshooting.md) |
 | Install or test a PC | [PC kit](pc-testing.md) | [Linux](setup-linux.md), [Windows](setup-windows.md), [field runbook](field-acceptance.md) |
+| Verify one completed OEM recording | [OEM acceptance procedure](oem-field-acceptance.md) | [Backup setup](oem-backup.md), [GPU execution](live-gpu.md) |
 | Connect one source | [Webcam and local DVR](local-camera-feeds.md) | [Approved public webcams](public-webcams.md) |
 | See people and objects live | [Live AI and tracking](live-detection.md) | [Optional GPU setup](live-gpu.md), [Review and Events](review-and-events.md), [zones](zones.md) |
 | Measure tracking accuracy | [Offline tracking evaluation](tracking-evaluation.md) | [Detection evaluation](offline-evaluation.md), [field acceptance](field-acceptance.md) |

@@ -34,6 +34,7 @@ PAGES = {
     'docs/recording-coverage.md': 'Recording-coverage',
     'docs/lan-recording.md': 'LAN-recording',
     'docs/oem-backup.md': 'OEM-backup',
+    'docs/oem-field-acceptance.md': 'OEM-field-acceptance',
     'docs/review-and-events.md': 'Review-and-events',
     'docs/zones.md': 'Zones',
     'docs/training.md': 'Guided-training',
@@ -78,7 +79,7 @@ PAGES = {
 GROUPS = {
     'Start here': ['Home', 'Visual-handbook', 'Guide-index', 'Getting-started', 'Visual-atlas', 'Product-status'],
     'Install and recover': ['Mac-setup', 'PC-testing', 'Linux-setup', 'Windows-setup', 'Troubleshooting'],
-    'Connect, analyze, review': ['Camera-sources', 'Public-webcams', 'Live-AI-and-tracking', 'Live-GPU', 'Recording-workflow', 'Local-analysis-service', 'Recognition-details', 'Recording-coverage', 'LAN-recording', 'OEM-backup', 'Review-and-events', 'Zones'],
+    'Connect, analyze, review': ['Camera-sources', 'Public-webcams', 'Live-AI-and-tracking', 'Live-GPU', 'Recording-workflow', 'Local-analysis-service', 'Recognition-details', 'Recording-coverage', 'LAN-recording', 'OEM-backup', 'OEM-field-acceptance', 'Review-and-events', 'Zones'],
     'Train': ['Guided-training', 'Person-enrollment', 'Enhancement-comparison'],
     'Plan the facility': ['Facility-planning', 'Saved-facilities', 'Maps-and-shapes', 'Facility-setup-reliability', 'Local-map-services', 'Facility-study-kit', 'Image-diagnostics', 'Planar-calibration'],
     'Plan and qualify the machine': ['Resource-controls', 'Hardware-guide', 'GPU-planning', '100-camera-plan', 'Field-acceptance', 'Offline-evaluation', 'Tracking-evaluation', 'Offline-qualification', 'Pilot-scope'],

@@ -12,6 +12,8 @@ This source implementation has controlled Linux software checks. Compatibility
 with a particular OEM, physical camera, Windows/Mac host, codec or mounted share
 must still be checked. It cannot promise compatibility with every DVR.
 
+Before relying on a real OEM, complete the [one-recording field acceptance procedure](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/OEM-field-acceptance).
+
 ## Quick setup
 
 1. Open **Start-DVR-Companion-Windows.cmd** or **Start-DVR-Companion-Linux.sh**
