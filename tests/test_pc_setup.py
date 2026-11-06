@@ -383,6 +383,7 @@ class PcSetupTest(unittest.TestCase):
         with zipfile.ZipFile(self.root/'first.zip') as archive:
             names = archive.namelist()
             self.assertIn('Intelligent-DVR-PC/START-HERE.md', names)
+            self.assertIn('Intelligent-DVR-PC/docs/oem-field-acceptance.md', names)
             self.assertIn('Intelligent-DVR-PC/Start-Training-Windows.cmd', names)
             self.assertEqual(archive.getinfo('Intelligent-DVR-PC/Start-Training-Linux.sh').external_attr >> 16, 0o100755)
             self.assertFalse(any('private' in name or name.endswith('/local-feeds.json') for name in names))

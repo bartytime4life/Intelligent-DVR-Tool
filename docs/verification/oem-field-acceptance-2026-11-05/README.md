@@ -42,3 +42,18 @@ Generated inference is not recognition-quality evidence. The
 [operator procedure](../../oem-field-acceptance.md) identifies the missing physical
 observations and leaves them NOT RUN until documented. No existing installation,
 private recordings, model files, camera settings or credentials were modified.
+
+## Review follow-up
+
+The first hosted runs found the same missing Wiki registration on Linux, Windows
+and macOS (`test_every_top_level_guide_has_a_wiki_page`); each ran 505 tests and
+reported that single failure. Registered the guide in the Wiki page list and
+navigation, regenerated 64 Wiki files, and added the guide to the PC-kit allowlist
+with a packaging assertion. Seven Wiki tests now pass; 32 PC setup tests pass
+with two environment-specific skips in the focused invocation. Documentation
+checks now cover 1,209 local links.
+
+Built and extracted a disposable PC archive, confirmed that it contains the guide,
+and ran the packaged verifier's help and generated-byte comparison from the
+extracted directory without importing from the source checkout. Both passed.
+This validates packaging and byte comparison, not video decoding or device access.

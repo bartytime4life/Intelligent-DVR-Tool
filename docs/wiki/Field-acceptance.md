@@ -10,7 +10,7 @@
 
 This guide turns the local prototype into a **reproducible, operator-approved PC test**. It is not production certification. Keep the exact revision, physical devices, observed behavior and limits with each result. Passing CI or running generated footage does not establish detection accuracy or 100-camera operation.
 
-**For the OEM companion, start with [one completed recording acceptance](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/oem-field-acceptance.md): generated preliminary checks, CPU/CUDA runs, independent byte receipts and isolated recovery drills.**
+**For the OEM companion, start with [one completed recording acceptance](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/OEM-field-acceptance): generated preliminary checks, CPU/CUDA runs, independent byte receipts and isolated recovery drills.**
 
 ## Know which workload you are testing
 
