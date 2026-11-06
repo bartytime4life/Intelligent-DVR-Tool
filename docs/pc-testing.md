@@ -336,8 +336,8 @@ model source and license are recorded in
 
 ## Optional GPU for live Monitor detection
 
-CPU is still the normal installation and launch default. The opt-in live CUDA
-preference is available with analysis: --live-backend cuda-preferred on Linux,
+The normal installation is CPU-only; analysis launches prefer CUDA with a visible
+CPU fallback. An explicit live CUDA preference is available with analysis: --live-backend cuda-preferred on Linux,
 or -LiveBackend cuda-preferred through the Windows PowerShell launcher.
 Prepare the isolated runtime separately and run the generated-input benchmark
 before any camera test. Read [live GPU setup, fallback and resource limits](live-gpu.md);

@@ -10,6 +10,8 @@
 
 This guide turns the local prototype into a **reproducible, operator-approved PC test**. It is not production certification. Keep the exact revision, physical devices, observed behavior and limits with each result. Passing CI or running generated footage does not establish detection accuracy or 100-camera operation.
 
+**For the OEM companion, start with [one completed recording acceptance](oem-field-acceptance.md): generated preliminary checks, CPU/CUDA runs, independent byte receipts and isolated recovery drills.**
+
 ## Know which workload you are testing
 
 | Workload | Available today | Not demonstrated |
@@ -17,10 +19,10 @@ This guide turns the local prototype into a **reproducible, operator-approved PC
 | Browser webcam | Explicit live preview and user-triggered clip capture, with a requested 60-second stop and 64 MiB maximum | All camera drivers, precise timing, unattended background capture |
 | DVR/IP camera preview | Private-IPv4 RTSP/TCP and bounded CPU decoding; up to four active previews | ONVIF discovery, public endpoints, RTSP/UDP, RTSPS, long-running capacity |
 | LAN recording | One configured RTSP channel with explicit Start/Stop, verified sampled segments and bounded retention | Gapless archive, parallel channel recording, sustained physical-device acceptance |
-| Local Recognition | Selected recording, pinned compatible model, bounded CPU inference, human-reviewed source-matched reports | Identity recognition, tracking, continuous live inference, independently measured accuracy |
+| Local Recognition | Selected recording, pinned compatible model, GPU-preferred bounded inference with visible CPU fallback, human-reviewed source-matched reports | Identity recognition, tracking, continuous live inference, independently measured accuracy |
 | Facility and scale preparation | Planned FOV/coverage estimates, offline scheduler/CUDA experiments | Actual person handoffs, surveyed geometry or 100 active live cameras |
 
-The CPU service does **not** silently substitute a GPU backend. Optional CUDA is an explicit offline CLI route with its own qualification record. [Camera limits](local-camera-feeds.md) · [Analysis contract](local-analysis-service.md) · [One-camera recorder](lan-recording.md).
+The local service prefers CUDA when prepared and reports actual execution or CPU fallback. The default installer remains CPU-only. See [GPU setup and execution checks](live-gpu.md). [Camera limits](local-camera-feeds.md) · [Analysis contract](local-analysis-service.md) · [One-camera recorder](lan-recording.md).
 
 ## 1. Install a reviewed revision
 
