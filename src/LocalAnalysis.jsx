@@ -150,7 +150,7 @@ export default function LocalAnalysis({ onResult, onBusy, clip, onClip, recorder
       setMessage(`Analysis of ${job.recording} is complete. Choose Open results to review it; the review shown below stays open until then.`);
       return;
     }
-    const ticket = version.current;
+    const ticket = version.current, reviewAtOpening = runRef.current;
     const operation = transfers.current.begin(controller.current?.signal, reason => {
       if (ticket !== version.current) return;
       setOpening(false);
@@ -163,6 +163,10 @@ export default function LocalAnalysis({ onResult, onBusy, clip, onClip, recorder
     setOpening(true); setError(''); setMessage('Opening results and verifying the recording fingerprint…');
     openJobResult(job, token.current, operation.signal).then(value => {
       if (!transfers.current.isCurrent(operation) || ticket !== version.current) return;
+      if (runRef.current !== reviewAtOpening) {
+        setMessage('A different review was opened while these results were loading. Your newer review stays open. Choose Open results again to replace it when ready.');
+        return;
+      }
       // The job id lets Recognition ask this service for enrolled-people suggestions on these frames.
       resultHandler.current({ ...value, local: { job: job.id, token: token.current, people: catalog?.people || null } });
       setMessage('Analysis opened. Recording fingerprint matched; review the sampled detections below.');

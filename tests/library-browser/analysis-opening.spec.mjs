@@ -75,7 +75,7 @@ test('a stalled automatic result opening reaches its deadline and leaves Refresh
   await page.addInitScript(() => {
     const timeout = AbortSignal.timeout.bind(AbortSignal);
     Object.defineProperty(AbortSignal, 'timeout', {configurable:true,
-      value:milliseconds => timeout(milliseconds === 120000 ? 250 : milliseconds)});
+      value:milliseconds => timeout(milliseconds === 120000 ? 1000 : milliseconds)});
   });
   const state = await setup(page, 'source', false);
   const refresh = panel(page).getByRole('button', {name:'Refresh choices', exact:true});
@@ -88,4 +88,45 @@ test('a stalled automatic result opening reaches its deadline and leaves Refresh
   await expect(refresh).toBeEnabled();
   await expect(page.locator('.recognition-facts')).toHaveCount(0);
   expect(state.writes).toEqual([]);
+});
+
+test('a newer backup review stays open when an older automatic local result transfer finishes', async ({page}) => {
+  const state = await setup(page, 'result', false);
+  const backupId = 'b'.repeat(32), backupBytes = Buffer.from('generated newer backup source');
+  const backupSha = createHash('sha256').update(backupBytes).digest('hex');
+  const backupResult = recognitionFixture(backupSha);
+  backupResult.receipt.camera = backupResult.trace.camera = 'newer-generated-backup';
+  backupResult.receipt.events.forEach(event => {event.camera = 'newer-generated-backup';});
+  const item = {id:backupId, state:'completed', name:'generated-backup.webm', bytes:backupBytes.length,
+    sha256:backupSha, copied_at:1000, observations:1, analysis_eligible:true, coverage:'completed'};
+  await page.route('**/api/library/**', route => {
+    const path = new URL(route.request().url()).pathname;
+    if (route.request().method() === 'POST') state.writes.push(path);
+    if (path === '/api/library/status') return route.fulfill({json:{
+      configured:true, active:false, analyzing:false, state:'paused', error:null,
+      config:{source_folder:'/generated/source', backup_folder:'/generated/backup', max_storage_gib:100,
+        reserve_gib:2, settle_seconds:60, recursive:true}, storage_bytes:backupBytes.length, disk_free_bytes:1024**3,
+      waiting:0, scan_limited:false, unsupported:[], items:[item], limits:{max_items:100}, counters:{copied:1, duplicates:0},
+    }});
+    if (path === `/api/library/items/${backupId}/result`) return route.fulfill({json:backupResult});
+    if (path === `/api/library/items/${backupId}/source`) return route.fulfill({contentType:'video/webm', body:backupBytes});
+    return route.fulfill({status:503, json:{error:{message:'Unused generated backup endpoint.'}}});
+  });
+  await page.route('**/api/setup/cameras', route => route.fulfill({json:{enabled:true, sources:[]}}));
+  await page.getByRole('button', {name:/^Use my existing DVR/}).click();
+  const backup = page.getByRole('region', {name:'Existing DVR backup'});
+  await backup.getByRole('button', {name:'Connect to this computer', exact:true}).click();
+  await backup.locator('.backup-saved summary').click();
+  await backup.getByRole('button', {name:'Review backup', exact:true}).click();
+  await expect(page.locator('.recognition-facts')).toContainText('newer-generated-backup');
+
+  // The local controller is still waiting. Finishing its older transfer must
+  // offer a deliberate reopen instead of replacing the newly chosen backup.
+  await state.stalled[0].fulfill({json:recognitionFixture(sha)});
+  await page.getByRole('button', {name:/^Analyze a recording/}).click();
+  await expect(panel(page).locator('.local-analysis-message')).toContainText('Your newer review stays open');
+  await expect(panel(page).getByRole('button', {name:'Open results again', exact:true})).toBeEnabled();
+  await expect(page.locator('.recognition-facts')).toContainText('newer-generated-backup');
+  expect(state.writes).toEqual([]);
+  expect(await page.evaluate(() => JSON.parse(localStorage.getItem('dvr.events.v1') || '[]'))).toEqual([]);
 });
