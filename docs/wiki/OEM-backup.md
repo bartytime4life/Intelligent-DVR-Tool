@@ -44,6 +44,12 @@ Before relying on a real OEM, complete the [one-recording field acceptance proce
    remain. Closing a browser tab does not stop the service; restarting the service
    always leaves backup paused. Settings and completed reviews survive restart.
 
+Opening **Review backup** verifies the result and exact saved recording. One
+opening runs at a time with a two-minute deadline. **Cancel backup opening**
+releases its controls and preserves the current review. While connected with
+backup or analysis active, **Stop backup** remains available during opening.
+Cancelling an opening does not stop background backup or delete a saved video.
+
 To expose camera setup with a direct developer invocation, use matching
 `--feeds-config` and `--camera-setup-config` paths. File backup is available when
 `--recordings` and `--config` are supplied together. No extra server, subscription,
@@ -93,6 +99,10 @@ storage and saved-video details. Copy progress stops displaying as current until
 you refresh the connection; background backup may still be running. Switching
 Recognition tasks retains pending folder edits and shows backup activity or an
 attention notice on its task button.
+
+Status announcements describe changes in backup/analysis state and connection
+availability. Storage totals and sample counts still update on screen without
+being announced on every poll.
 
 During index recovery, malformed receipts and unexpected entries are left
 untouched while valid saved copies remain available. A persistent recovery

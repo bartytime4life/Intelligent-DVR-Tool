@@ -14,6 +14,7 @@ import TrainingLibrary from './TrainingLibrary.jsx';
 import { readTrainingLibrary, compatibleTrainingSessions, trainingSessionEvidence, withTrainingLibraryDecision,
   removeTrainingEvidence, compareTrainingLibrary, trainingLibraryReceipt, recommendCumulativeThreshold,
   trainingEvidenceAdditionError, reusedTrainingSource } from './training-library.mjs';
+import { trainingHasPendingWork, personHasPendingWork } from './training-lifecycle.mjs';
 import './training.css';
 
 const STEPS = [['camera', 'Camera check'], ['record', 'Guided recording'], ['analyze', 'Analysis'], ['results', 'Compare'], ['check', 'Fresh check'], ['done', 'Decision']];
@@ -21,7 +22,7 @@ const storage = () => { try { return globalThis.localStorage; } catch { return n
 const memory = { getItem: () => null, setItem: () => { throw Error('unavailable'); } };
 const store = () => storage() || memory;
 const clock = seconds => `${Math.floor(seconds / 60)}:${String(Math.floor(seconds % 60)).padStart(2, '0')}`;
-export default function TrainingWorkspace({ onOpenRecognition }) {
+export default function TrainingWorkspace({ onOpenRecognition, onDirtyChange }) {
   const [service, setService] = useState({ state: 'connecting', message: 'Checking this computer…' });
   const [history, setHistory] = useState(() => readHistory(store()));
   const [library, setLibrary] = useState(() => readTrainingLibrary(store()));
@@ -39,7 +40,12 @@ export default function TrainingWorkspace({ onOpenRecognition }) {
   const [error, setError] = useState('');
   const [peopleError, setPeopleError] = useState('');
   const [people, setPeople] = useState([]), [personFlow, setPersonFlow] = useState(null);
+  const [personPending, setPersonPending] = useState(false);
   const local = localAnalysisOrigin(globalThis.location);
+  const pending = trainingHasPendingWork({ step, clip, outcome, check, saved, saving, includeSession, personPending });
+  const dirtyHandler = useRef(onDirtyChange); dirtyHandler.current = onDirtyChange;
+  useEffect(() => { onDirtyChange?.(pending); }, [pending, onDirtyChange]);
+  useEffect(() => () => dirtyHandler.current?.(false), []);
 
   async function loadPeople(value) {
     setPeopleError('');
@@ -78,6 +84,7 @@ export default function TrainingWorkspace({ onOpenRecognition }) {
     setSelection({ modelId, rulesId: reference?.id || '' });
   }
   function reset(nextStep = null) {
+    if (pending && !window.confirm('Discard this unfinished training session? Camera capture will stop and analysis cancellation will be requested. Unsaved recordings and results will be lost; saved rules and evidence stay available.')) return;
     setLibrary(readTrainingLibrary(store()));
     setIncludeSession(false);
     if (nextStep === 'camera') {
@@ -215,7 +222,7 @@ export default function TrainingWorkspace({ onOpenRecognition }) {
     } catch (e) { setError(`Could not export the measurement. ${e.message}`); }
   }
 
-  if (personFlow) return <PersonSession service={service} flow={personFlow}
+  if (personFlow) return <PersonSession service={service} flow={personFlow} onPendingChange={setPersonPending}
     onExit={() => { setPersonFlow(null); loadPeople(service); }} onChanged={() => loadPeople(service)} />;
 
   if (!step) return <TrainingHome service={service} history={history}
@@ -397,13 +404,20 @@ function PersonRow({ person, service, disabled, onCheck, onDeleted }) {
 
 // Enrollment: consent, a 20 s face capture, then an optional 12 s baseline check.
 // A baseline check alone (from the people list) skips the first two.
-function PersonSession({ service, flow, onExit, onChanged }) {
+function PersonSession({ service, flow, onExit, onChanged, onPendingChange }) {
   const enrolling = flow.kind === 'enroll';
   const [stage, setStage] = useState(enrolling ? 'consent' : 'baseline');
   const [capture, setCapture] = useState('camera');
   const [name, setName] = useState(''), [agreed, setAgreed] = useState(false);
   const [person, setPerson] = useState(flow.person || null);
   const [status, setStatus] = useState(null), [error, setError] = useState('');
+  const pending = personHasPendingWork({ stage, capture, name, agreed, busy: status?.busy });
+  useEffect(() => { onPendingChange?.(pending); }, [pending, onPendingChange]);
+  useEffect(() => () => onPendingChange?.(false), [onPendingChange]);
+  const exit = () => {
+    if (pending && !window.confirm('Leave this unfinished person session? Camera capture will stop and unsaved input will be lost. Templates already saved on this computer stay available; a submitted operation may still finish.')) return;
+    onExit();
+  };
   const steps = enrolling ? [['consent', 'Consent'], ['enroll', 'Face capture'], ['baseline', 'Baseline check'], ['done', 'Done']]
     : [['baseline', 'Baseline check'], ['done', 'Done']];
   async function importClip(clip) {
@@ -434,7 +448,7 @@ function PersonSession({ service, flow, onExit, onChanged }) {
   return <section className="content-page training-page" aria-label="Person enrollment">
     <div className="training-session-head">
       <div><p className="eyebrow">{enrolling ? 'ENROLL A PERSON' : 'BASELINE CHECK'}</p><h1>{person ? person.name : 'Enroll a person'}</h1></div>
-      <button className="text-button" onClick={onExit}><X size={16} /> Exit</button>
+      <button className="text-button" onClick={exit}><X size={16} /> Exit</button>
     </div>
     <ol className="training-steps">{steps.map(([id, label], i) => <li key={id} aria-current={stage === id ? 'step' : undefined}
       className={current > i ? 'complete' : ''}><b>{i + 1}</b>{label}</li>)}</ol>
@@ -457,7 +471,7 @@ function PersonSession({ service, flow, onExit, onChanged }) {
       <p>A 12-second baseline check shows how well the DVR recognizes {person.name} in everyday views, and adds the views it matches.</p>
       <div className="training-actions">
         <button className="button amber" onClick={() => { setStatus(null); setCapture('camera'); }}>Run the baseline check</button>
-        <button className="text-button" onClick={onExit}>Skip for now</button>
+        <button className="text-button" onClick={exit}>Skip for now</button>
       </div>
     </section>}
     {stage === 'baseline' && capture !== 'intro' && !status?.busy && <CaptureSteps step={capture} onStep={setCapture} onClip={finishBaseline}
@@ -468,7 +482,7 @@ function PersonSession({ service, flow, onExit, onChanged }) {
       <CheckCircle size={40} /><h2>{status.text}</h2>
       {status.tip && <p>{status.tip}</p>}
       <p>{status.baseline?.other ? `${plural(status.baseline.other, 'view')} matched someone else; check that only ${person.name} was in view.` : 'Run another check any time from Train to measure and refine the template.'}</p>
-      <div className="training-actions"><button className="button amber" onClick={onExit}>Back to Train</button></div>
+      <div className="training-actions"><button className="button amber" onClick={exit}>Back to Train</button></div>
     </section>}
   </section>;
 }

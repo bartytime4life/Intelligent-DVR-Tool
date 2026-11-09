@@ -55,7 +55,7 @@ test('matching synthetic recording enables boxes only at paused analyzed samples
   const buffer=Buffer.from(bytes), sha=createHash('sha256').update(buffer).digest('hex');
   await page.getByLabel('Open recognition results').setInputFiles(upload(recognitionFixture(sha)));
   await page.getByLabel('Match original recording').setInputFiles({name:'synthetic.webm',mimeType:'video/webm',buffer});
-  await expect(page.getByRole('status')).toContainText('fingerprint matched');
+  await expect(page.locator('.recognition-status')).toContainText('fingerprint matched');
   await expect(page.locator('.recognition-boxes rect')).toHaveCount(2);
   await page.getByRole('navigation',{name:'Main navigation'}).getByRole('button',{name:/^Events/}).click();
   await expect(page.locator('video')).not.toBeVisible();

@@ -1,5 +1,11 @@
-import { boundedBody, serviceFailure } from './local-analysis.mjs';
+import { analysisRequest, boundedBody, serviceFailure } from './local-analysis.mjs';
 import { parseRecognition, matchRecording, MAX_REVIEW_BYTES, MAX_VIDEO_BYTES } from './recognition.mjs';
+
+// A stalled shared-catalogue request must release the recorder's connection controls.
+export function recorderSession({signal, fetcher = fetch, timeout = 15000} = {}) {
+  return analysisRequest('/session', {fetcher,
+    signal: AbortSignal.any([signal, AbortSignal.timeout(timeout)].filter(Boolean))});
+}
 
 export async function recorderRequest(path, {token, body, signal, fetcher = fetch} = {}) {
   let response;

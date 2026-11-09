@@ -18,7 +18,7 @@ test('real local HTTP job invokes CPU analyzer and automatically opens verified 
   await expect(page.getByRole('button',{name:'Analyze recording',exact:true})).toBeDisabled();
   await select(page);
   await page.getByRole('button',{name:'Analyze recording',exact:true}).click();
-  await expect(page.getByRole('status')).toContainText('fingerprint matched');
+  await expect(page.locator('.recognition-status')).toContainText('fingerprint matched');
   await expect(page.locator('.recognition-boxes rect')).toHaveCount(1);
   await expect(page.locator('.recognition-facts')).toContainText('6 sampled frames');
   await expect(page.locator('.recognition-facts')).toContainText('CPU analysis');

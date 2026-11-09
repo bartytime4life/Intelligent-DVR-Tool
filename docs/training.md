@@ -129,6 +129,26 @@ describe generated test inputs separately from physical-camera qualification.
 
 Training adjusts the threshold used by a recognition rule. Only new recording analyses using the selected rule use its threshold. Previously reviewed observations retain their decisions. For a consenting individual’s face baseline, choose **Enroll a person** and follow its separate consent and deletion controls. [Person enrollment](person-enrollment.md)
 
+## Leave or restart a session
+
+Train asks before discarding an unfinished recording, analysis, calibration,
+fresh check or edited enrollment consent. The same protection applies when you
+use Exit, start over, change workspaces or navigate Back/Forward; reload/close
+uses the browser's unfinished-work warning. Opening camera setup before recording,
+or an optional baseline setup before capture, does not by itself need this warning.
+
+Cancel the warning to keep the session open. Confirming it releases the session's
+in-memory recordings and results, stops its camera capture and requests
+cancellation of its own analysis job. A submitted enrollment or baseline operation
+may still finish; already saved templates, rule files and imported recordings stay
+on this computer.
+
+A completed decision releases the warning only after its requested browser saves
+succeed. A rule saved by the local service does not establish that this browser
+remembered its selection, history or requested combined evidence. Read each save
+message and **Download measurement (JSON)** before leaving if a save failed.
+That summary does not restore the full scored evidence library or video.
+
 ## How frames are counted
 
 The local decoder (PyAV) reads the presentation time of each sampled frame. Its decoded video duration must agree with the active recording clock within half a second. This check runs on both recordings and excludes paused time. If a complete calibration clip lacks reliable timing, you can still review estimated counts based on frame position. Record again before applying a setting. A partial clip or analysis that covered only the beginning of a recording cannot supply a training result.

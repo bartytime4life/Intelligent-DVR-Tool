@@ -1,5 +1,16 @@
 # Product status and evidence
 
+**Current source workflow updates:** Train warns before leaving unfinished work
+and retains the warning after a requested browser save fails. Reviews and browser
+rules keep both versions when another tab saves over unsaved local work; operators
+can download both, choose a version and manage up to ten preserved conflict copies
+per workspace. OEM and LAN review transfers have cancellation/deadline controls
+that leave Stop available while connected, and status announcements focus on state
+changes. See [review recovery](review-and-events.md#resolve-a-browser-save-conflict),
+[training](training.md#leave-or-restart-a-session), [OEM backup](oem-backup.md) and
+[LAN recording](lan-recording.md). These describe source behavior; the dated
+verification records below keep their original revisions and qualification limits.
+
 **GPU preference:** live AI and recorded-video analysis now default to GPU first with visible CPU fallback and an explicit CPU override. Actual controlled RTX 5080 checks are recorded in the [GPU-default verification](verification/gpu-default-2026-11-03/README.md); physical-device accuracy and capacity remain separate.
 
 **November 3 source follow-up:** [OEM companion backup](oem-backup.md) adds

@@ -25,6 +25,11 @@ Linux/Windows launcher. Check does not contact a configured camera.
 | Facility is blank or WebGL fails | A fresh plan is intentionally empty. Check browser WebGL support, then add a building or explicitly open an example. |
 | A map request fails | Check the selected provider or use numeric coordinates/offline OSM import. Provider choice, search and tile loading are explicit actions. |
 | Browser save fails or another tab changed the plan | Preserve exports and resolve the visible conflict/error before editing further. Do not reset storage to force a save. |
+| Reviews or rules show a save conflict | Download this tab's version and the other version, then explicitly choose which to use. Later edits remain in memory while saving is paused. [Conflict recovery](review-and-events.md#resolve-a-browser-save-conflict) |
+| All ten saved conflict copies are occupied | Open **Saved conflict copies**, download and inspect an older copy, then choose **Remove this copy** before retrying. No older copy is removed automatically. |
+| Browser cannot coordinate workspace saves | Preserve review/rule exports before closing. The app keeps changes in memory when shared browser save locking is unavailable. |
+| Train warns before leaving | Cancel to keep unfinished recordings, checks or consent input. If a decision finished but a browser save failed, download the measurement and inspect the save messages before leaving. [Training saves and exit](training.md#leave-or-restart-a-session) |
+| A backup or LAN review transfer stalls | Use **Cancel backup opening** or **Cancel review transfer**. These operations also have a two-minute deadline and preserve the current review. Stop the connected recorder or backup separately if needed. |
 
 ## Before reinstalling or moving folders
 

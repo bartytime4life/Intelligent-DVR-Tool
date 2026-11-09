@@ -71,7 +71,7 @@ test('observations sent from a matched recording keep a local still in Events', 
   const buffer=Buffer.from(bytes), sha=createHash('sha256').update(buffer).digest('hex');
   await page.getByLabel('Open recognition results').setInputFiles(upload(recognitionFixture(sha)));
   await page.getByLabel('Match original recording').setInputFiles({name:'synthetic.webm',mimeType:'video/webm',buffer});
-  await expect(page.getByRole('status')).toContainText('fingerprint matched');
+  await expect(page.locator('.recognition-status')).toContainText('fingerprint matched');
   await page.getByRole('button',{name:'Send 1 observations to Events'}).click();
   await expect(page).toHaveURL(/#events$/);
   const still = page.locator('.event-table-row img.event-still');

@@ -50,7 +50,7 @@ For full-byte copies from OEM recording/export folders, use the separate
    configuration without connecting a camera; it does not qualify camera access,
    sustained performance or recorder storage recovery. The normal installer and
    launcher never start recording. No model download or paid inference is added.
-4. Open **Recognition → Connect LAN recorder**. Select the prepared model and
+4. Open **Recognition → Record a LAN camera → Connect LAN recorder**. Select the prepared model and
    appropriate rules. Press **Start recording & analysis** only after approving
    the camera, permitted recording purpose and local retention.
 5. Completed segments appear in the list. **Review segment** checks the exact
@@ -62,6 +62,18 @@ For full-byte copies from OEM recording/export folders, use the separate
    explicit later Start, using their originally selected model/rule IDs. Closing
    the page does not stop a session. Closing the local service does. After any
    service restart, recording and analysis remain stopped until another Start.
+
+**Review segment**, **Send to Events** and **Save timing** share one bounded
+transfer at a time, with a two-minute deadline. **Cancel review transfer** stops
+that transfer and keeps the current review; a cancelled handoff sends nothing to
+Events. **Stop recording & analysis** stays available during a transfer while the
+recorder is connected and active. Use Stop explicitly when you want capture and
+analysis to stop; cancelling a review transfer leaves them running.
+
+Status announcements report transitions such as recording, reconnecting, stopping
+or losing contact. Frequently refreshed counters and elapsed times remain readable
+without repeating them through screen-reader announcements on every poll. If
+status becomes unknown, recording may still be running; reconnect to check it.
 
 Only one recorder exists per service and recording directory. It claims the
 existing one-job analyzer while active; separate manual jobs/imports are refused

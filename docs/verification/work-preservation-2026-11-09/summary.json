@@ -1,0 +1,44 @@
+{
+  "date": "2026-11-09",
+  "base_commit": "82a316e33c7ff121951a74989ee626417a8f300f",
+  "branch": "codex/dvr-work-preservation-20261109",
+  "sources": {
+    "src/App.jsx": "28084700fad3b31642820240d787bfd7851be4df7f3d12e18376b0fdd8c5ccbc",
+    "src/BackupLibrary.jsx": "45bba9b412d6ac7c603e3a250304a7bacf368a046ceec92fe94c8508f994c4fe",
+    "src/LanRecorder.jsx": "b3dc07f12afc2262263065704c05633c51e9e675a5b91674cba19d5de1ba94a0",
+    "src/LocalAnalysis.jsx": "910a55529e5c2644192c63a43566fa94b8cf18f27cdbd1aedefe5308453566a2",
+    "src/TrainingWorkspace.jsx": "26db28fd934bf93d6077ff987f75abe128cc680cd9bc028c0c5abb834a50cffc",
+    "src/WorkspaceConflict.jsx": "a281b19db918842e18f9afb6b140e45202ceceb29564284f85e9ea99429fcf3d",
+    "src/lan-recorder.mjs": "09ee3f1b98c9942ed12e4f25c3739d8ec5a974ed916c8ecc56291b3e6def244a",
+    "src/recognition.css": "0cdb6c4dba18f62dc122433549c71b24c99d0ac90717d26119b1c0457d9a3198",
+    "src/review-transfer.mjs": "9809ff459f8c9aacea75900d33a37dae4c1cc8b1bd31b3e27d4ffffa7e63817f",
+    "src/status-announcements.mjs": "255b938f91f6222b4a080f2324aa43d13e682f4925df61459219e59587f45aac",
+    "src/training-lifecycle.mjs": "9a79392470f09418fabf4cf7e6bd81a588f55a7f2a68b002fdbbe1a5dca6c754",
+    "src/workspace-conflict.css": "eeefc3065a576c9e8d454245d33a5d35d48f9f4e105a25c2ad776f9d0a6105ff",
+    "src/workspace-save.mjs": "87eb055fac1599364b158b7cf8a87028af7ac9c8c3b6e87a702b2d84d07e6c83"
+  },
+  "protected_sources": {
+    "edge/inference.py": "7e95beb9e25dd67ac5d8d977ec6c466874371d12d112119a85a619124687b2f1",
+    "edge/journal.py": "70f7a3419d05d76380ea32ad5de20ee440bc17256e25baf0f2289a86e46a495a",
+    "edge/supervision.py": "03f334d5fa072e5f3ad02bd90536fd2c00fc97ebfaa54ca1ef1c10b64b80a9cf",
+    "edge/scheduler.py": "8639b46d3ba2e1a14efaa7ff647f412e6be437685ec7be5717a00983835b9019",
+    "edge/profiling.py": "f7c0a3e4b831d7f996840aec51a73e3fe68e06627cdce854716c576068f80f91"
+  },
+  "checks": {
+    "frontend": {
+      "passed": 412,
+      "failed": 0,
+      "skipped": 0,
+      "socket_checks_enabled": true
+    },
+    "sites_packaging": {
+      "passed": 4
+    },
+    "production_build": "passed; existing large Facility chunk warning retained",
+    "documentation": "passed",
+    "wiki_consistency": "passed",
+    "browser_walkthrough": "generated consent name retained after cancelled navigation and Exit; later browser automation stalled on confirmation; cross-tab and transfer specs await hosted CI",
+    "native_python": "not rerun locally; no Python changes; hosted checks pending"
+  },
+  "scope": "Generated inputs and source/browser checks only; no installed service, physical device, private recordings, model execution or deployment in this local pass."
+}
