@@ -1,0 +1,68 @@
+{
+  "schema": "intelligent-dvr.facility-recovery-verification.v1",
+  "date": "2026-11-09",
+  "source_base": "c3f517851e05ea20d9c2def2dcd1365fb0e158d1",
+  "branch": "codex/facility-recovery-20261109",
+  "implementation_sha256": {
+    "package.json": "858608784d3c3e98842715be2b46ed58e4f4808231a8128b9ecd355336b29b62",
+    "src/FacilityBuilder.jsx": "845ff8fd95417fa00650b8496daef910534562eeb6762fe44f94dabe36e65912",
+    "src/FacilityLibrary.jsx": "f0777c557ba1791a43c61739147260f9f830f7537034c8371db3dc31f30bbf18",
+    "src/FacilityStarter.jsx": "793585b1002bcacd2f0ad9052edf971db15f09fb14549a9d51bb43709097182c",
+    "src/FloorGeometry.jsx": "b5de38ef38098e55ff0e07450f518bf39b3d31d6bc8284991a8a0b1866d85ef9",
+    "src/WorkspaceConflict.jsx": "976d0b04bf3f43f119259f308d5ba13f97c9fa10cccfaa867dc49aac397652cd",
+    "src/facility-library.css": "de12415b7773220e7d4cfa5255f2f036fbd0302f4ab6b9642e7576ee3f61e39d",
+    "src/facility-library.mjs": "85d193176cddb24eff17d9b4f0b059d3f9fff5e539c0fd8b42277c80c70c142e",
+    "src/facility-map.mjs": "d3c08c40d612ac55cadf4a3710489e7f94877da07138f78b2ad9a7b43ba9aefb",
+    "src/facility-save.mjs": "0459f3032e745948e04a96366a8db0e4a6b9a99f7cd29b8def625cbb6d083376",
+    "src/facility.css": "a5c152c39f8ab9499f2ed37fe740ebca7362a8507e28622914259c2cf8f1053a"
+  },
+  "protected_sources": {
+    "edge/inference.py": {
+      "sha256": "7e95beb9e25dd67ac5d8d977ec6c466874371d12d112119a85a619124687b2f1",
+      "byte_identical_to_base": true
+    },
+    "edge/journal.py": {
+      "sha256": "70f7a3419d05d76380ea32ad5de20ee440bc17256e25baf0f2289a86e46a495a",
+      "byte_identical_to_base": true
+    },
+    "edge/supervision.py": {
+      "sha256": "03f334d5fa072e5f3ad02bd90536fd2c00fc97ebfaa54ca1ef1c10b64b80a9cf",
+      "byte_identical_to_base": true
+    },
+    "edge/scheduler.py": {
+      "sha256": "8639b46d3ba2e1a14efaa7ff647f412e6be437685ec7be5717a00983835b9019",
+      "byte_identical_to_base": true
+    },
+    "edge/profiling.py": {
+      "sha256": "f7c0a3e4b831d7f996840aec51a73e3fe68e06627cdce854716c576068f80f91",
+      "byte_identical_to_base": true
+    }
+  },
+  "screenshots_sha256": {
+    "01-narrow-before.png": "23a64f7878d4bff983396b87d993945f8ecde5579ae7aac27f3ee4278564995e",
+    "02-narrow-after.png": "cd79cd7b08e5c04c19877a4d5b188bb69ec7fe76c360e8aca41b8c7e5e2ea9ef",
+    "03-route-draft.png": "96aded20d48044afa7030f9e4226a48ea5a33e132fce67b44938e9763f84ad9b",
+    "04-save-conflict.png": "671a23984c5316d5a99cea9366f9d4b5bf05b1dd4930086e438f21ed6d998942"
+  },
+  "local_checks": {
+    "frontend_domain": {
+      "passed": 424,
+      "failed": 0,
+      "skipped": 0,
+      "socket_checks": true
+    },
+    "sites_packaging": {
+      "passed": 4,
+      "failed": 0
+    },
+    "production_build": "passed",
+    "browser_regressions": "pending_completion",
+    "documentation": "pending_final_receipt"
+  },
+  "limits": [
+    "Generated plans and controlled browser responses only",
+    "No physical-site or survey acceptance",
+    "No recognition, endurance or 100-camera qualification",
+    "No camera, inference, installed service, deployment or native Wiki publication changes"
+  ]
+}

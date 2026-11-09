@@ -532,6 +532,7 @@ e-stroke-width": 2 } });
       document.removeEventListener("mousemove", move); document.removeEventListener("mouseup", up);
       document.removeEventListener("touchmove", move); document.removeEventListener("touchend", up); document.removeEventListener("touchcancel", cancel);
       document.removeEventListener("keydown", key, true);
+      window.removeEventListener("blur", cancel);
       const done = drag;
       drag = null;
       if (done.frame !== null) cancelAnimationFrame(done.frame);
@@ -550,6 +551,7 @@ e-stroke-width": 2 } });
     document.addEventListener("mousemove", move); document.addEventListener("mouseup", up);
     document.addEventListener("touchmove", move, {passive: false}); document.addEventListener("touchend", up); document.addEventListener("touchcancel", cancel);
     document.addEventListener("keydown", key, true);
+    window.addEventListener("blur", cancel);
   }
   function handleElement() {
     const el = document.createElement("span");

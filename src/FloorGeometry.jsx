@@ -1,4 +1,4 @@
-import React,{useState} from 'react';
+import React,{useEffect,useRef,useState} from 'react';
 import {Polygon,Path,Trash,Check} from '@phosphor-icons/react';
 import {createFloorOpening,createFloorPath,ceilingOpenings} from './facility.mjs';
 import {stairRunFootprint} from './facility-stairs.mjs';
@@ -8,19 +8,29 @@ import LineDimensions from './LineDimensions.jsx';
 import './floor-geometry.css';
 
 // Pointer-free alternative to drawing an open line.
-export function PointListEntry({label,units='metric',disabled=false,submitLabel='Save points',onSubmit,hint=''}) {
+export function PointListEntry({label,units='metric',disabled=false,submitLabel='Save points',onSubmit,onDirtyChange,hint=''}) {
   const [text,setText]=useState(''),[error,setError]=useState('');
+  const dirty=!!text.trim(),dirtyCallback=useRef(onDirtyChange);dirtyCallback.current=onDirtyChange;
+  useEffect(()=>{dirtyCallback.current?.(dirty);},[dirty]);
+  useEffect(()=>()=>dirtyCallback.current?.(false),[]);
   function submit(){try{if(onSubmit(parsePointList(text,units))!==false){setText('');setError('');}}catch(e){setError(e.message);}}
   return <details className="facility-advanced facility-point-list"><summary>Enter {label.toLowerCase()} as coordinates</summary>
     <label className="facility-field"><span>{label}<small>east, north · {units==='imperial'?'ft':'m'}</small></span><textarea aria-label={label} rows={4} value={text} disabled={disabled} spellCheck={false} placeholder={'0, -20\n15, -20\n30, 5'} onChange={e=>{setText(e.target.value);setError('');}}/></label>
     <p className="facility-caption">One point per line, measured east and north of the site origin. {hint}</p>
     <button type="button" className="facility-secondary" disabled={disabled || !text.trim()} onClick={submit}>{submitLabel}</button>
+    {dirty && <button type="button" className="facility-link" onClick={()=>{setText('');setError('');}}>Discard {label.toLowerCase()}</button>}
     {error && <p className="error" role="alert">{error}</p>}
   </details>;
 }
 
-export default function FloorGeometry({plan,building,floor:requestedFloor,selected,draft,onDraft,onSelect,commit,onDraw,disabled=false,ready,units='metric',pending=false,onPendingChange}) {
+export default function FloorGeometry({plan,building,floor:requestedFloor,selected,draft,onDraft,onSelect,commit,onDraw,disabled=false,ready,units='metric',pending=false,onPendingChange,pointDraftPending=false,onPointDraftChange}) {
   const [error,setError]=useState('');
+  const addedPath=useRef(null);
+  useEffect(()=>{
+    if(pointDraftPending || !addedPath.current)return;
+    const id=addedPath.current;addedPath.current=null;
+    if(plan.paths?.some(path=>path.id===id))onSelect(id,'path');
+  },[pointDraftPending,plan.paths,onSelect]);
   if(!building)return null;
   // Undo can remove the selected top level before the parent's floor effect runs.
   const floor=Math.max(0,Math.min(building.floors-1,Number.isInteger(requestedFloor)?requestedFloor:0));
@@ -31,6 +41,7 @@ export default function FloorGeometry({plan,building,floor:requestedFloor,select
   const item=ownDraft && draft.buildingId===building.id && draft.level===floor ? draft : null;
   const ownDirty=item && JSON.stringify(item)!==JSON.stringify((plan[selected.kind==='opening'?'openings':'paths'] || []).find(o=>o.id===item.id));
   const locked=disabled && !ownDirty;
+  const geometryLocked=disabled || pending || pointDraftPending;
   const room=selected.kind==='room' && plan.rooms.find(r=>r.id===selected.id && r.buildingId===building.id && r.level===floor);
   const stair=selected.kind==='stair' && (plan.stairs || []).find(s=>s.id===selected.id && s.buildingId===building.id);
   function addOpening(footprint,level,name,removeRoom=false) {
@@ -46,27 +57,27 @@ export default function FloorGeometry({plan,building,floor:requestedFloor,select
     if(commit({...plan,buildings:plan.buildings.map(b=>b.id===building.id?{...b,openFloors}:b)},open?'Solid floor restored; partial openings retained':'Entire level opened; ceiling below updated'))setError('');
   }
   function addPath(points){
-    try{const path=createFloorPath(plan,building.id,floor,points);if(!commit({...plan,paths:[...(plan.paths || []),path]},'Floor path saved from point list — Undo available'))return false;onSelect(path.id,'path');setError('');return true;}
+    try{const path=createFloorPath(plan,building.id,floor,points);if(!commit({...plan,paths:[...(plan.paths || []),path]},'Floor path saved from point list — Undo available'))return false;addedPath.current=path.id;setError('');return true;}
     catch(e){setError(e.message);return false;}
   }
   function save(e){e.preventDefault();const key=selected.kind==='opening'?'openings':'paths';if(commit({...plan,[key]:(plan[key] || []).map(o=>o.id===item.id?item:o)},'Floor geometry saved; ceiling below updated'))setError('');}
   function remove(){const key=selected.kind==='opening'?'openings':'paths';if(commit({...plan,[key]:(plan[key] || []).filter(o=>o.id!==item.id)},selected.kind==='opening'?'Opening closed with solid floor — Undo available':'Path removed — Undo available')){onSelect(building.id,'building');setError('');}}
   return <section className="facility-floor-geometry" aria-label="Floor surfaces and pathways">
     <h3>Floor surface · Level {floor+1}</h3>
-    <label className="facility-checkbox"><input type="checkbox" checked={!open} disabled={disabled || pending} onChange={toggleFloor}/>Solid floor at this level</label>
+    <label className="facility-checkbox"><input type="checkbox" checked={!open} disabled={geometryLocked} onChange={toggleFloor}/>Solid floor at this level</label>
     <p className="facility-caption">{open?'This whole level is open air. The floor slab and the ceiling beneath it are removed.':'Cut out an atrium, stairwell or other open area. The same cutout opens the ceiling of the level below.'} Partial cutouts stay saved when toggling the entire floor.</p>
-    <div className="facility-action-row"><button className="facility-secondary" disabled={disabled || pending || !ready || open} onClick={()=>onDraw('opening')}><Polygon/>Draw floor opening</button><button className="facility-secondary" disabled={disabled || pending || !ready || open} onClick={()=>onDraw('floor-path')}><Path/>Draw floor pathway</button></div>
-    {room && <button className="facility-secondary" disabled={disabled || pending || open} onClick={()=>addOpening(room.footprint,floor,room.name+' opening',true)}>Convert selected room to opening</button>}
-    {stair && <button className="facility-secondary" disabled={disabled || pending || (building.openFloors || []).includes(Math.max(stair.fromLevel,stair.toLevel))} onClick={()=>addOpening(stairRunFootprint(stair,building),Math.max(stair.fromLevel,stair.toLevel),stair.name+' upper opening')}>Cut upper floor over stair run</button>}
+    <div className="facility-action-row"><button className="facility-secondary" disabled={geometryLocked || !ready || open} onClick={()=>onDraw('opening')}><Polygon/>Draw floor opening</button><button className="facility-secondary" disabled={geometryLocked || !ready || open} onClick={()=>onDraw('floor-path')}><Path/>Draw floor pathway</button></div>
+    {room && <button className="facility-secondary" disabled={geometryLocked || open} onClick={()=>addOpening(room.footprint,floor,room.name+' opening',true)}>Convert selected room to opening</button>}
+    {stair && <button className="facility-secondary" disabled={geometryLocked || (building.openFloors || []).includes(Math.max(stair.fromLevel,stair.toLevel))} onClick={()=>addOpening(stairRunFootprint(stair,building),Math.max(stair.fromLevel,stair.toLevel),stair.name+' upper opening')}>Cut upper floor over stair run</button>}
     <p className="facility-caption">Pathways stay inside solid floor; openings cannot be crossed. Stair cutouts reserve the flight run and keep both landings. Verify headroom and guards on site.</p>
-    <PointListEntry label="Pathway points" units={units} disabled={disabled || pending || open} submitLabel={`Add pathway on Level ${floor+1}`} onSubmit={addPath} hint="Points must stay on solid floor inside this building."/>
-    <div className="facility-item-list compact">{[...openings.map(o=>({...o,kind:'opening'})),...paths.map(o=>({...o,kind:'path'}))].map(o=><button key={o.id} disabled={disabled || pending} className={selected.id===o.id?'selected':''} onClick={()=>onSelect(o.id,o.kind)}>{o.kind==='opening'?<Polygon/>:<Path/>}<span>{o.name}<small>{o.kind==='opening'?'Open to below':'Floor pathway'}</small></span></button>)}</div>
+    <PointListEntry label="Pathway points" units={units} disabled={disabled || pending || open} submitLabel={`Add pathway on Level ${floor+1}`} onSubmit={addPath} onDirtyChange={onPointDraftChange} hint="Points must stay on solid floor inside this building."/>
+    <div className="facility-item-list compact">{[...openings.map(o=>({...o,kind:'opening'})),...paths.map(o=>({...o,kind:'path'}))].map(o=><button key={o.id} disabled={geometryLocked} className={selected.id===o.id?'selected':''} onClick={()=>onSelect(o.id,o.kind)}>{o.kind==='opening'?<Polygon/>:<Path/>}<span>{o.name}<small>{o.kind==='opening'?'Open to below':'Floor pathway'}</small></span></button>)}</div>
     {!!ceilingOpenings(plan,building.id,floor).length && <p className="facility-caption">Dashed boundaries show ceiling openings from the level above.</p>}
     {item && <form onSubmit={save}>
-      <label className="facility-field"><span>{selected.kind==='opening'?'Opening name':'Pathway name'}</span><input aria-label={selected.kind==='opening'?'Opening name':'Pathway name'} required maxLength={100} value={item.name} onChange={e=>onDraft({...item,name:e.target.value})}/></label>
-      {selected.kind==='opening'?<ShapeDimensions shape={item} onChange={onDraft} units={units}/>:<LineDimensions onDirtyChange={onPendingChange} points={item.points} onChange={points=>onDraft({...item,points})} units={units}/>}
-      <button className="facility-primary" disabled={locked || pending} type="submit">Save {selected.kind==='opening'?'opening':'pathway'}<Check/></button>
-      <button className="facility-delete" disabled={disabled || pending} type="button" onClick={remove}><Trash/>{selected.kind==='opening'?'Close opening with solid floor':'Remove pathway'}<small>Undo available</small></button>
+      <label className="facility-field"><span>{selected.kind==='opening'?'Opening name':'Pathway name'}</span><input aria-label={selected.kind==='opening'?'Opening name':'Pathway name'} disabled={pointDraftPending} required maxLength={100} value={item.name} onChange={e=>onDraft({...item,name:e.target.value})}/></label>
+      {selected.kind==='opening'?<ShapeDimensions disabled={pointDraftPending} shape={item} onChange={onDraft} units={units}/>:<LineDimensions disabled={pointDraftPending} onDirtyChange={onPendingChange} points={item.points} onChange={points=>onDraft({...item,points})} units={units}/>}
+      <button className="facility-primary" disabled={locked || pending || pointDraftPending} type="submit">Save {selected.kind==='opening'?'opening':'pathway'}<Check/></button>
+      <button className="facility-delete" disabled={geometryLocked} type="button" onClick={remove}><Trash/>{selected.kind==='opening'?'Close opening with solid floor':'Remove pathway'}<small>Undo available</small></button>
     </form>}
     {error&&<p role="alert" className="error">{error}</p>}
   </section>;

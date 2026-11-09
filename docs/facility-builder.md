@@ -30,6 +30,9 @@ saves reopen the last active site. See [saved facilities and backups](saved-faci
 
 Use **Current task** at the top or the seven detailed steps in the left rail. Press **1–7** outside inputs for quick task navigation, **?** for Help, and **Focus map / Show panels** when you need more space. Save or discard any in-progress edit before changing tasks. [Keyboard and measurement details](facility-image-diagnostics.md).
 
+On narrow and intermediate windows, the property inspector sits below the full-width
+map. Map-layer buttons wrap when needed and remain available by keyboard.
+
 1. Set the facility name and geographic origin. Coordinates are longitude then
    latitude; local geometry is meters east/north of that origin.
    A new facility starts in central Kansas. **Use my location** asks the browser
@@ -203,7 +206,8 @@ recognition-quality claim.
 - **Direct manipulation.** Dragging the selected camera (mouse or touch) or its
   round heading handle previews the move live on the map; release, Alt+Arrow and
   `[` / `]` change only the unsaved draft. Save camera commits, Discard preview
-  restores it and Undo covers the commit. Escape cancels a drag.
+  restores it and Undo covers the commit. Escape or switching focus away from
+  the browser window cancels a drag and restores map panning.
 - **Installer sheet.** Download installer sheet writes a printable, offline HTML
   page of the saved plan with the same restrictive CSP as the recognition report:
   an inline SVG plan (buildings, outdoor zones, route, estimated fans and camera
@@ -226,6 +230,11 @@ failure is visible and leaves the collection in memory so it can be exported. Th
 editable local state, not an authoritative audit trail. They have no multi-user
 authentication, encrypted-at-rest database, server retention or signed provenance.
 Do not put camera credentials or recordings in a facility JSON file.
+
+Facility saves use a shared browser lock and report pending saves. If another tab
+changes a collection, download both versions and choose one in **Facilities save
+conflict**. The replaced version is preserved first; failed backups block the
+choice. See [storage and recovery](saved-facilities.md#storage-and-recovery).
 
 The default map uses only local geometry and a 20-meter grid. The **Map layer**
 switch on the map (available in every task) adds a real map under the plan so a

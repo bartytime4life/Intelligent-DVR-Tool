@@ -191,7 +191,13 @@ export function facilityFilename(plan) {
 // these with fresh collection IDs, so opening a backup cannot overwrite a site.
 export function parseFacilityFile(text) {
   if (typeof text !== 'string' || bytes(text) > MAX_LIBRARY_BYTES) throw Error('Facility files must be 4 MB or smaller.');
-  const value = JSON.parse(text);
+  let value = JSON.parse(text);
+  // Conflict-copy downloads preserve an envelope around the original bytes.
+  // Accept one correctly bound wrapper so a valid saved copy can be restored normally.
+  if (value?.schema === 'intelligent-dvr.workspace-backup.v1' && value.key === LIBRARY_KEY && typeof value.raw === 'string') {
+    if (bytes(value.raw) > MAX_LIBRARY_BYTES) throw Error('Facility files must be 4 MB or smaller.');
+    value = JSON.parse(value.raw);
+  }
   if (value?.schema === LIBRARY_SCHEMA) return validateLibrary(value).facilities.map(item => item.plan);
   if (bytes(text) > MAX_FACILITY_BYTES) throw Error('Individual facility files must be 2 MB or smaller.');
   return [cleanPlan(value)];

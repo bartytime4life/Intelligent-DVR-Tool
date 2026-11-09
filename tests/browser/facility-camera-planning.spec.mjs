@@ -74,11 +74,14 @@ test('drag, rotate handle and keyboard edits change only the camera draft until 
   expect(await saved(page)).toEqual(before);
   await page.getByLabel('Camera name',{exact:true}).fill('North yard');
   await page.getByRole('button',{name:'Save camera',exact:true}).click();
+  await expect(page.locator('.facility-library-save')).toContainText('Saved in this browser');
+  await expect.poll(async()=>(await saved(page)).cameras[0].x).toBe(east);
   const camera=(await saved(page)).cameras[0];
   expect(camera.x).toBe(east);expect(camera.y).toBeCloseTo(north+.5,5);expect(camera.bearing).toBeCloseTo(bearing-5,5);
   expect(camera.pixelsWide).toBe(1920);expect(camera.channel).toBe('NVR-1 ch 1');
   await page.getByRole('button',{name:'Undo edit',exact:true}).click();
-  expect(await saved(page)).toEqual(before);
+  await expect(page.locator('.facility-library-save')).toContainText('Saved in this browser');
+  await expect.poll(()=>saved(page)).toEqual(before);
   expect(errors).toEqual([]);
 });
 
@@ -96,6 +99,28 @@ test('touch drag moves the selected camera draft',async({page})=>{
   },[cx,cy]);
   await expect.poll(()=>value(page,'Camera east')).toBeLessThan(-5);
   expect((await saved(page)).cameras[0].x).toBe(0);
+});
+
+test('losing window focus cancels a camera drag without leaving a stale release handler',async({page})=>{
+  const errors=[];page.on('pageerror',error=>errors.push(error.message));
+  await openFixture(page);
+  await page.getByRole('button',{name:/^4 Cameras/}).click();
+  const before=await saved(page), [cx,cy]=await centreCamera(page);
+  await page.mouse.move(cx,cy);await page.mouse.down();
+  await page.mouse.move(cx+60,cy+20,{steps:5});
+  await expect(page.locator('.facility-drag-hint')).toBeVisible();
+  await page.evaluate(()=>window.dispatchEvent(new Event('blur')));
+  await expect(page.locator('.facility-drag-hint')).toHaveCount(0);
+  await page.mouse.move(cx+90,cy+30);await page.mouse.up();
+  expect(await value(page,'Camera east')).toBe(0);
+  expect(await value(page,'Camera north')).toBe(0);
+  expect(await saved(page)).toEqual(before);
+  // A fresh drag still previews normally; the cancelled drag cannot commit on release.
+  await page.mouse.move(cx,cy);await page.mouse.down();
+  await page.mouse.move(cx+60,cy+20,{steps:5});await page.mouse.up();
+  await expect.poll(()=>value(page,'Camera east')).toBeGreaterThan(5);
+  expect(await saved(page)).toEqual(before);
+  expect(errors).toEqual([]);
 });
 
 test('coverage step reports zone and route coverage, marks indoor zones and toggles blind spots',async({page})=>{

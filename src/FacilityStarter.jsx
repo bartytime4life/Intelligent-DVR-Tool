@@ -4,6 +4,7 @@ import { displayLength, enteredLength } from "./facility-shape-edit.mjs";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { OSM_SERVERS, dimensions, searchBounds, parseOsmBuildings, fetchOsmBuildings, draftFacility, clearFootprintCache, polygonAreaSelection, parseAreaVertices } from "./facility-starter.mjs";
 import { FOOTPRINT_SERVICES } from "./facility-services.mjs";
+const INITIAL_AREA_VERTICES='-125,-125\n125,-125\n125,125\n-125,125';
 function Numeric({ label, value, onChange, min, max, step = "any" }) {
   return <label className="facility-field"><span>{label}</span><input type="number" aria-label={label} required value={value} min={min} max={max} step={step} onChange={(e) => onChange(
   e.target.value === "" ? "" : Number(e.target.value))} /></label>;
@@ -21,16 +22,21 @@ function ConstructionGuide() {
 }
 // loadSignal: each increase opens this panel and loads drafts for the current area (the one-click path).
 // toggle: {id, serial} from a click on a draft outline on the map.
-function OpenMapStarter({ plan, commit, onPreview, onArea, disabled, drawnArea, onDrawArea, onCancelArea, ready, units = 'metric', loadSignal = 0, toggle }) {
+function OpenMapStarter({ plan, commit, onPreview, onArea, onPendingChange, disabled, drawnArea, onDrawArea, onCancelArea, ready, units = 'metric', loadSignal = 0, toggle }) {
   const [open, setOpen] = useState(false), [east, setEast] = useState(0), [north, setNorth] = useState(0), [width, setWidth] = useState(
   250), [depth, setDepth] = useState(250), [result, setResult] = useState(null), [checked, setChecked] = useState([]), [
   busy, setBusy] = useState(false), [message, setMessage] = useState(""), [mode, setMode] = useState("append"), [paste, setPaste] = useState(
   "");
-  const [areaMode,setAreaMode]=useState('rectangle'),[vertices,setVertices]=useState('-125,-125\n125,-125\n125,125\n-125,125');
+  const [areaMode,setAreaMode]=useState('rectangle'),[vertices,setVertices]=useState(INITIAL_AREA_VERTICES);
+  const [reading,setReading]=useState(false);
+  const areaValues=JSON.stringify([east,north,width,depth,areaMode,vertices]);
+  const [settledArea,setSettledArea]=useState(areaValues);
+  const pending=busy || reading || Boolean(paste.trim()) || Boolean(result?.buildings.length) || areaValues!==settledArea;
   useEffect(()=>{if(drawnArea){setAreaMode('polygon');setVertices(drawnArea.slice(0,-1).map(p=>p.join(',')).join('\n'));}},[drawnArea]);
   const controller = useRef(), generation = useRef(0), lastQuery = useRef(0), callbacks = useRef(), panel = useRef();
   const handledLoad = useRef(loadSignal), pendingLoad = useRef(false), revealResult = useRef(false), status = useRef();
-  callbacks.current = { onPreview, onArea };
+  callbacks.current = { onPreview, onArea, onPendingChange };
+  useEffect(()=>{callbacks.current.onPendingChange?.(pending);},[pending]);
   const [endpoint,setEndpoint] = useState(OSM_SERVERS[0]);
   const fileGeneration = useRef(0);
   const selection = useMemo(() => {
@@ -50,7 +56,6 @@ function OpenMapStarter({ plan, commit, onPreview, onArea, disabled, drawnArea, 
   useEffect(() => {
     callbacks.current.onPreview(open ? chosen : [], mode === 'new', open ? (result?.buildings || []).map(b => ({id: b.id, footprint: b.footprint, included: checked.includes(b.id)})) : []);
   }, [chosen, open, mode]);
-  useEffect(()=>{if(!open)onCancelArea();},[open]);
   useEffect(() => {
     callbacks.current.onArea(open ? selection : null);
   }, [selection, open]);
@@ -59,10 +64,11 @@ function OpenMapStarter({ plan, commit, onPreview, onArea, disabled, drawnArea, 
     fileGeneration.current++;
     controller.current?.abort();
     setBusy(false);
+    setReading(false);
     setResult(null);
     setChecked([]);
     setMessage("");
-  }, [plan, east, north, width, depth, endpoint, open, areaMode, vertices]);
+  }, [plan, east, north, width, depth, endpoint, areaMode, vertices]);
   // Runs after the reset above, so a load requested while the panel was closed is not cancelled by opening it.
   useEffect(() => {
     if (loadSignal === handledLoad.current) return;
@@ -82,7 +88,21 @@ function OpenMapStarter({ plan, commit, onPreview, onArea, disabled, drawnArea, 
     controller.current?.abort();
     callbacks.current.onPreview([], false, []);
     callbacks.current.onArea(null);
+    callbacks.current.onPendingChange?.(false);
   }, []);
+  function discardDraft() {
+    generation.current++;
+    fileGeneration.current++;
+    controller.current?.abort();
+    pendingLoad.current=false;
+    revealResult.current=false;
+    setBusy(false);setReading(false);setResult(null);setChecked([]);setPaste('');setMode('append');
+    setEast(0);setNorth(0);setWidth(250);setDepth(250);setAreaMode('rectangle');
+    setVertices(INITIAL_AREA_VERTICES);
+    setSettledArea(JSON.stringify([0,0,250,250,'rectangle',INITIAL_AREA_VERTICES]));
+    onCancelArea();
+    setMessage('');
+  }
   function accept(data) {
     const next = parseOsmBuildings(data, plan.origin, bounds, new Date().toISOString(), selection?.ring);
     const existing = new Set(plan.buildings.map((b) => b.id));
@@ -98,6 +118,7 @@ race the buildings on the map, try a smaller nearby area or draw a shape.`);
     generation.current++;
     fileGeneration.current++;
     controller.current?.abort();
+    setBusy(false);setReading(false);
     setResult(null); setChecked([]); setMessage('');
     try {
       if(new TextEncoder().encode(text).length>2e6)throw Error('Extract exceeds 2 MB.');
@@ -111,6 +132,8 @@ race the buildings on the map, try a smaller nearby area or draw a shape.`);
       return;
     }
     lastQuery.current = Date.now();
+    fileGeneration.current++;
+    setReading(false);
     const token = ++generation.current;
     const c = new AbortController();
     controller.current = c;
@@ -136,6 +159,7 @@ race the buildings on the map, try a smaller nearby area or draw a shape.`);
   return <details ref={panel} className="facility-starter" open={open} onToggle={(e) => {
     if (e.target === e.currentTarget) setOpen(e.currentTarget.open);
   }}><summary>Draft buildings from OpenStreetMap</summary>
+    {pending && <div className="facility-action-row"><p className="facility-caption" role="status">Map draft not added. Apply the selected buildings or discard this draft before changing tasks.</p><button type="button" className="facility-secondary" onClick={discardDraft}>Discard map draft</button></div>}
     <ol className="facility-starter-progress" aria-label="Building draft steps"><li>1. Save location</li><li>2. Confirm area</li><li>3. Review outlines</li><li>4. Apply selected</li></ol>
     <p className="facility-caption">First save your address, GPS suggestion or coordinates above. This area is relative to the saved origin: {plan.
   origin[1]}, {plan.origin[0]}. Adjust its dimensions and offsets to select the area outlined on the map.</p>
@@ -173,15 +197,18 @@ ary; the whole footprint will be kept." : ""} Source: {b.source.id}. Updated: {b
 dings added \u2014 Undo available")) {
       setResult(null);
       setChecked([]);
+      setPaste('');
+      setSettledArea(areaValues);
     }
     } catch(e) { setMessage(e.message); }
   }}>Use {chosen.length} selected buildings</button></>}
     <details><summary>Open an offline OSM file or paste JSON</summary><p className="facility-caption">Open or paste Overpass JSON with complete way/member geometry. Maximum 2 MB. Uses the same area origin and review checks. No network request. Save or export your source extract separately; the plan retains source IDs and dates.</p>
       <label className="facility-field"><span>Offline OSM file</span><input aria-label="Offline OSM file" type="file" accept=".json,application/json" disabled={!bounds || busy || disabled} onChange={async e=>{
         const f=e.target.files?.[0]; e.target.value=''; if(!f)return;
-        const token=++fileGeneration.current;setResult(null);setChecked([]);
+        const token=++fileGeneration.current;setResult(null);setChecked([]);setReading(true);
         try { if(f.size>2e6)throw Error('Extract exceeds 2 MB.'); const text=await f.text(); if(token!==fileGeneration.current)return; reviewText(text); }
         catch(e){if(token===fileGeneration.current)setMessage(e.message);}
+        finally{if(token===fileGeneration.current)setReading(false);}
       }} /></label><textarea aria-label="OSM extract JSON" rows={5} maxLength={2e6} value={paste} onChange={(e) => setPaste(
   e.target.value)} /><button className="facility-secondary" disabled={!bounds || busy || disabled} onClick={() => {
     reviewText(paste);

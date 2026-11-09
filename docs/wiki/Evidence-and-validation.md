@@ -1,5 +1,9 @@
 # Verification index
 
+[Facility draft continuity and browser save recovery, November 9](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/facility-recovery-2026-11-09/README.md)
+records protected coordinate/map/import drafts, locked collection saves, portable
+conflict copies, narrow-window layout and interrupted camera-drag checks.
+
 [Work preservation and interruptible review, November 9](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/work-preservation-2026-11-09/README.md)
 records unfinished Train protection, browser save conflicts, preserved-copy recovery,
 bounded review transfers, quieter announcements and local-check limits.
