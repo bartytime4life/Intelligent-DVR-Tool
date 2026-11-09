@@ -18,7 +18,7 @@ Before relying on a real OEM, complete the [one-recording field acceptance proce
 
 1. Open **Start-DVR-Companion-Windows.cmd** or **Start-DVR-Companion-Linux.sh**
    with your already prepared local model (on Mac use the ordinary Start). Then open
-   **Recognition → Connect to this computer**. The ordinary Linux/Windows PC
+   **Recognition → Use my existing DVR → Connect to this computer**. The ordinary Linux/Windows PC
    launcher exposes guided camera setup. A prepared Mac analysis launch exposes
    the folder backup; its LAN preview/recorder platform limits still apply.
 2. Choose the **DVR source folder** where the OEM finishes recordings or exports.
@@ -37,7 +37,8 @@ Before relying on a real OEM, complete the [one-recording field acceptance proce
    the tool copies files without claiming the analyzer. Analysis prefers the GPU, with a visible CPU fallback, and processes one
    copied video at a time and waits while another job owns the analyzer.
 6. Open **Saved videos → Review backup** to inspect a completed source-matched
-   result. Complete and partial coverage remain distinct. Events still require
+   result. Legacy completion labels explicitly leave recording coverage unverified;
+   only structured coverage metadata describes why analysis stopped. Events still require
    an explicit human handoff from the existing Recognition review.
 7. **Stop backup** pauses copying and cancels its active analysis. Completed copies
    remain. Closing a browser tab does not stop the service; restarting the service
@@ -75,7 +76,8 @@ and never placed in browser storage or URLs. Existing manual/public sources are
 preserved. Use **Monitor** to explicitly connect the saved channel.
 
 To use the existing one-camera recorder, select the saved channel and choose
-**Use for LAN recording**. Review its settings below, then explicitly choose
+**Use for LAN recording**. The app opens the **Record a LAN camera** task and
+moves keyboard focus there. Review its settings, then explicitly choose
 **Start recording & analysis**. Saving/configuring alone never connects it. This
 removes JSON editing for the ordinary Linux/Windows setup path. The recorder
 remains a bounded, sampled video-only pilot with possible gaps and automatic
@@ -85,6 +87,17 @@ archival substitute. See [LAN recording limits](lan-recording.md).
 GPU preference and CPU overrides follow the [local GPU guide](live-gpu.md).
 
 ## Storage, integrity and recovery
+
+If contact with the service is lost, **Status unknown** labels the last checked
+storage and saved-video details. Copy progress stops displaying as current until
+you refresh the connection; background backup may still be running. Switching
+Recognition tasks retains pending folder edits and shows backup activity or an
+attention notice on its task button.
+
+During index recovery, malformed receipts and unexpected entries are left
+untouched while valid saved copies remain available. A persistent recovery
+warning reports that recovery skipped entries; saving settings or restarting backup does
+not clear it. Inspect and preserve those files before any manual repair.
 
 Copies live under `BACKUP_FOLDER/Intelligent-DVR-Backup/`. Each saved video has
 its own directory containing `source.EXT` and a private `receipt.json`; completed

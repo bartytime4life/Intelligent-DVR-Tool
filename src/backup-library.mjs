@@ -56,19 +56,21 @@ export function cameraConfig(values) {
 export async function openLibraryItem(item, token, signal, fetcher = fetch) {
   if (item?.state !== 'completed' || !/^[a-f0-9]{32}$/.test(item.id) || !/^[a-f0-9]{64}$/.test(item.sha256)) throw Error('Choose a completed backup analysis.');
   if (item.bytes > MAX_VIDEO_BYTES) throw Error('This backup is too large for browser review. The saved copy remains in your backup folder.');
+  if (signal?.aborted) throw new DOMException('Opening cancelled', 'AbortError');
   const request = path => libraryRequest(`/items/${item.id}/${path}`, {token, signal, fetcher, timeout: 120000});
-  const bundle = parseRecognition(JSON.parse(await (await boundedBody(await request('result'), MAX_REVIEW_BYTES)).text()));
+  const bundle = parseRecognition(JSON.parse(await (await boundedBody(await request('result'), MAX_REVIEW_BYTES, {signal})).text()));
   if (bundle.receipt.source_sha256 !== item.sha256) throw Error('The backup result fingerprint changed. Refresh status before reviewing.');
-  const file = await boundedBody(await request('source'), MAX_VIDEO_BYTES);
-  await matchRecording(file, item.sha256);
+  const file = await boundedBody(await request('source'), MAX_VIDEO_BYTES, {signal});
+  await matchRecording(file, item.sha256, {signal});
   if (signal?.aborted) throw new DOMException('Opening cancelled', 'AbortError');
   return {bundle, file, name: item.name};
 }
 
 export function libraryCoverage(item) {
   if (item?.state !== 'completed') return '';
-  if (item.coverage === 'completed') return 'Analysis coverage: completed';
-  if (item.coverage === 'partial') return 'Partial analysis — recording limits reached';
+  // Older library rows contain only the job state, with no inventory or termination evidence.
+  if (item.coverage === 'completed') return 'Analysis finished · recording coverage unverified';
+  if (item.coverage === 'partial') return 'Partial analysis · recording coverage unverified';
   if (!item.coverage || typeof item.coverage !== 'object') return 'Recording coverage unverified';
   if (['frame-limit','event-limit'].includes(item.coverage.termination) || item.coverage.status === 'unverified' ||
       (item.coverage.status === 'inventory-matched' && item.coverage.termination === 'source-end')) {

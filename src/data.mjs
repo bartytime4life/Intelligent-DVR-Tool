@@ -198,6 +198,12 @@ export function restoreSnapshot(key, value, fallback) {
     return fallback;
   }
 }
+// This decision token survives browser saves/exports and distinguishes actions
+// made with identical notes and timestamps. It is not an authenticity signature.
+export function createReviewRevision() {
+  return [...globalThis.crypto.getRandomValues(new Uint8Array(16))].map(value => value.toString(16).padStart(2, '0')).join('');
+}
+
 export function reviewEvent(events, id, status, note) {
   if (!["confirmed", "dismissed"].includes(status))
     throw Error("Invalid review action");
@@ -208,6 +214,7 @@ export function reviewEvent(events, id, status, note) {
           status,
           note: note.slice(0, 2000),
           reviewedAt: new Date().toISOString(),
+          reviewRevision: createReviewRevision(),
         }
       : e,
   );

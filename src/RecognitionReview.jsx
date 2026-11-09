@@ -8,9 +8,16 @@ import RecognitionReport from './RecognitionReport.jsx';
 import { coverageLabel } from './media-coverage.mjs';
 import { saveObservationStills, grabFrame } from './local-images.mjs';
 import { analysisRequest } from './local-analysis.mjs';
+import { FileVideo, HardDrives, VideoCamera, FolderOpen } from '@phosphor-icons/react';
 
 const sameBox = (a, b) => a.length === 4 && a.every((v, i) => v === b[i]);
 const matchKey = m => `${m.frame_index}:${m.box_index}`;
+const tasks = [
+  {id: 'recording', title: 'Analyze a recording', detail: 'Choose a saved video on this computer', Icon: FileVideo},
+  {id: 'backup', title: 'Use my existing DVR', detail: 'Keep a verified copy of finished videos', Icon: HardDrives},
+  {id: 'recorder', title: 'Record a LAN camera', detail: 'One authorized RTSP source', Icon: VideoCamera},
+  {id: 'import', title: 'Open saved results', detail: 'Match an export to its original video', Icon: FolderOpen},
+];
 
 export default function RecognitionReview({ onImport, onValidateImport, active = true, clip, onClip, reviews = [], evidence = null, onRecorderStatus, onZoneStill }) {
   const [run, setRun] = useState(null), [index, setIndex] = useState(0);
@@ -19,11 +26,24 @@ export default function RecognitionReview({ onImport, onValidateImport, active =
   const [analysisBusy, setAnalysisBusy] = useState(false);
   const [recorderBusy, setRecorderBusy] = useState(false);
   const [libraryBusy, setLibraryBusy] = useState(false);
+  const [libraryStatus, setLibraryStatus] = useState(null);
+  const [task, setTask] = useState('recording');
+  const [taskNotice, setTaskNotice] = useState('');
+  const recorderPanel = useRef(), focusRecorder = useRef(false);
   const [detectionInput, setDetectionInput] = useState('original');
   const [sending, setSending] = useState(false);
   // Suggestions exist only for results from this computer's own analysis jobs with enrollment on.
   const [local, setLocal] = useState(null), [matches, setMatches] = useState(null);
   const video = useRef(), generation = useRef(0), sourceGeneration = useRef(0);
+  useEffect(() => { if (clip) setTask('recording'); }, [clip]);
+  useEffect(() => {
+    const configured = () => { focusRecorder.current = true; setTask('recorder'); setTaskNotice('LAN recorder source saved. Check its settings below; recording starts only when you explicitly choose Start recording & analysis.'); };
+    window.addEventListener('dvr-recorder-configured', configured);
+    return () => window.removeEventListener('dvr-recorder-configured', configured);
+  }, []);
+  useEffect(() => {
+    if (task === 'recorder' && focusRecorder.current) { recorderPanel.current?.focus(); focusRecorder.current = false; }
+  }, [task]);
   useEffect(() => () => { generation.current++; sourceGeneration.current++; }, []);
   useEffect(() => () => { if (source) URL.revokeObjectURL(source.url); }, [source]);
   useEffect(() => {
@@ -132,24 +152,43 @@ export default function RecognitionReview({ onImport, onValidateImport, active =
     <p className="eyebrow">LOCAL RECORDING · MODEL OBSERVATIONS</p>
     <h1>Recognition</h1>
     <p className="recognition-intro">See detected people and objects on the recording they came from. Inspect each sampled scene, then send observations for human review.</p>
-    <BackupLibrary onResult={openLocalResult} onBusy={setLibraryBusy} blocked={analysisBusy || recorderBusy} />
-    <LanRecorder onResult={openLocalResult} onBusy={setRecorderBusy} blocked={analysisBusy || libraryBusy} onImport={onImport} onValidateImport={onValidateImport} onStatus={onRecorderStatus} />
-    <LocalAnalysis onResult={openLocalResult} onBusy={setAnalysisBusy} clip={clip} onClip={onClip} recorderBusy={recorderBusy || libraryBusy} currentRun={run} />
-    <h2 className="recognition-import-heading">Or open previously exported results</h2>
+    <div className="recognition-task-heading"><h2>What would you like to do?</h2><p>Choose one path. Your current review stays available below.</p></div>
+    <div className="recognition-tasks" role="group" aria-label="Recognition tasks">
+      {tasks.map(({id, title, detail, Icon}) => <button key={id} className="recognition-task" aria-pressed={task === id} aria-controls={`recognition-task-${id}`} onClick={() => setTask(id)}>
+        <Icon size={23} aria-hidden="true" /><strong>{title}</strong><span>{detail}</span>
+        {id === 'backup' && (libraryStatus?.unknown ? <small>Status unknown · reconnect</small> : libraryStatus?.error ? <small>Needs attention · open for details</small> : libraryStatus?.active ? <small>Backup running</small> : null)}
+        {(id === 'recording' && analysisBusy || id === 'backup' && libraryBusy || id === 'recorder' && recorderBusy) && <small>In use · open for status</small>}
+      </button>)}
+    </div>
+    {/* Keep each controller mounted: choosing another task must not forget a job,
+        a pending folder edit, or the status of recording that continues locally. */}
+    <div id="recognition-task-backup" className="recognition-task-panel" hidden={task !== 'backup'}>
+      <BackupLibrary onResult={openLocalResult} onBusy={setLibraryBusy} onStatus={setLibraryStatus} blocked={analysisBusy || recorderBusy} />
+    </div>
+    <div id="recognition-task-recorder" className="recognition-task-panel" ref={recorderPanel} tabIndex={-1} role="region" aria-label="LAN recording task" hidden={task !== 'recorder'}>
+      {taskNotice && <p className="recognition-status" role="status">{taskNotice}</p>}
+      <LanRecorder onResult={openLocalResult} onBusy={setRecorderBusy} blocked={analysisBusy || libraryBusy} onImport={onImport} onValidateImport={onValidateImport} onStatus={onRecorderStatus} />
+    </div>
+    <div id="recognition-task-recording" className="recognition-task-panel" hidden={task !== 'recording'}>
+      <LocalAnalysis onResult={openLocalResult} onBusy={setAnalysisBusy} clip={clip} onClip={onClip} recorderBusy={recorderBusy || libraryBusy} currentRun={run} />
+    </div>
+    <div id="recognition-task-import" className="recognition-task-panel" hidden={task !== 'import'}>
+    <h2 className="recognition-import-heading">Open previously exported results</h2>
     <div className="recognition-loaders">
       <label className="button">1. Open recognition results<input type="file" accept=".json,application/json" onChange={loadRun} disabled={analysisBusy || libraryBusy} aria-label="Open recognition results" /></label>
       <label className={`button ${!run ? 'disabled' : ''}`}>2. Match original recording<input type="file" accept="video/*,.avi,.mkv" disabled={!run || analysisBusy || libraryBusy} onChange={loadVideo} aria-label="Match original recording" /></label>
     </div>
-    <ol className="recognition-progress" aria-label="Recording review progress">
+    </div>
+    {(run || task === 'import') && <ol className="recognition-progress" aria-label="Recording review progress">
       <li className={run ? 'complete' : 'current'}><span>1</span><div>Open results<small>{run ? `${run.trace.frames.length} samples loaded` : 'Analyzer review JSON'}</small></div></li>
       <li className={source ? 'complete' : run ? 'current' : ''}><span>2</span><div>Match recording<small>{source ? source.name : 'Verify original file'}</small></div></li>
       <li><span>3</span><div>Review observations<small>Inspect, then send to Events</small></div></li>
-    </ol>
+    </ol>}
     <p className="recognition-status" role="status">{status || 'Video stays on this computer. Start a local analysis above or open an exported result.'}</p>
     {error && <p className="recognition-error" role="alert">{error}</p>}
     {!run && <div className="recognition-empty">
       <h2>Start with one approved recording</h2>
-      <p>Connect to the local analysis service above, choose your recording, model and rules, then press Analyze recording. Completed results open here with their matching source.</p>
+      <p>{task === 'backup' ? 'Connect to this computer, choose your source and backup folders, then save settings. Start backup when ready; automatic analysis is optional.' : task === 'recorder' ? 'Connect the configured LAN recorder to check its settings. Recording and analysis start only when you explicitly choose Start recording & analysis.' : task === 'import' ? 'Open the analyzer’s results file, then select the original video. Its fingerprint must match before sampled detections can be shown on it.' : 'Connect to local analysis above, choose your recording, model and rules, then press Analyze recording. Completed results open here with their matching source.'}</p>
       <p>The result file contains sampled detections and rule observations. It contains no video. <a href="https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/recording-recognition.md" target="_blank" rel="noreferrer">Open the recording recognition guide</a> for the optional command-line workflow.</p>
     </div>}
     {run && <>

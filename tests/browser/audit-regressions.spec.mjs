@@ -8,6 +8,7 @@ test('conflicting recording imports leave the original reviewed thumbnail untouc
   const old={...parseRecognition(recognitionFixture()).events[0],status:'confirmed',note:'Existing review'};
   await page.addInitScript(event=>localStorage.setItem('dvr.events.v1',JSON.stringify([event])),old);
   await page.goto('/#recognition');
+  await page.getByRole('button',{name:/^Open saved results/}).click();
   await page.evaluate(async event=>{
     const images=await import('/src/local-images.mjs');
     if(!await images.putImage('thumbnails',images.observationImageKey(event),new Blob(['original-still'])))throw Error('Fixture image could not be saved');

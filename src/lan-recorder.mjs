@@ -19,11 +19,12 @@ export async function recorderRequest(path, {token, body, signal, fetcher = fetc
 
 export async function openSegment(segment, token, signal, fetcher = fetch) {
   if (segment?.state !== 'completed' || !/^[a-f0-9]{32}$/.test(segment.id)) throw Error('Select a completed segment.');
+  if (signal?.aborted) throw new DOMException('Opening cancelled', 'AbortError');
   const request = path => recorderRequest(`/segments/${segment.id}/${path}`, {token, signal, fetcher});
-  const bundle = parseRecognition(JSON.parse(await (await boundedBody(await request('result'), MAX_REVIEW_BYTES)).text()));
+  const bundle = parseRecognition(JSON.parse(await (await boundedBody(await request('result'), MAX_REVIEW_BYTES, {signal})).text()));
   if (bundle.receipt.source_sha256 !== segment.sha256) throw Error('The segment fingerprint changed. Refresh status.');
-  const file = await boundedBody(await request('source'), MAX_VIDEO_BYTES);
-  await matchRecording(file, segment.sha256);
+  const file = await boundedBody(await request('source'), MAX_VIDEO_BYTES, {signal});
+  await matchRecording(file, segment.sha256, {signal});
   if (signal?.aborted) throw new DOMException('Opening cancelled', 'AbortError');
   return {bundle, file, name: `${segment.source}-${segment.id}.webm`};
 }

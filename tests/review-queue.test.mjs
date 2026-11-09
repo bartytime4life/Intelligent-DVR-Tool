@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { parseReceipt, reviewEvent } from '../src/data.mjs';
 import { recognitionFixture } from './fixtures/recognition.mjs';
 import { eventSeconds, filterEvents, queueChoices, nextPending, queueCSV, dismissPending, restorePending } from '../src/review-queue.mjs';
+import { reviewExport, parseReviewExport } from '../src/workspace-state.mjs';
 
 const queue = () => {
   const base = parseReceipt(recognitionFixture().receipt)[0];
@@ -51,6 +52,15 @@ test('CSV export neutralizes spreadsheet formulas and keeps review notes', () =>
   assert.match(csv, /"'=HYPERLINK\(""x""\)"/);
   assert.ok(csv.endsWith('\r\n'));
 });
+test('CSV export preserves analysis state and live capture provenance without inventing a recording', () => {
+  const [event] = queue();
+  const session = 'd'.repeat(32), captured = '2026-11-09T12:00:00.000Z';
+  const csv = queueCSV([{...event, mode:'live-model', provenance:{state:'live', model_sha256:'e'.repeat(64), session, captured_at:captured}}]);
+  assert.match(csv, /"analysis_state","live_session","captured_at"\r\n/);
+  assert.ok(csv.includes(`"live-model","","${'e'.repeat(64)}"`));
+  assert.ok(csv.includes(`"live","${session}","${captured}"`));
+  assert.ok(queueCSV([event]).includes(`"${event.provenance.state}","",""\r\n`));
+});
 
 test('bulk dismissal undo restores only entries still carrying that decision', () => {
   const events = queue();
@@ -61,4 +71,42 @@ test('bulk dismissal undo restores only entries still carrying that decision', (
   assert.equal(restored.find(e => e.id === 'a').status, 'pending');
   assert.equal(restored.find(e => e.id === 'b').note, 'checked footage');
   assert.equal(restored.find(e => e.id === 'c').status, 'confirmed');
+});
+test('bulk undo preserves a later decision made at the same timestamp', () => {
+  const events = queue(), at = '2026-11-09T12:00:00.000Z';
+  const result = dismissPending(events, ['a', 'b'], 'bulk', at);
+  const later = result.events.map(e => e.id === 'b' ? {...e, note:'Checked footage', reviewedAt:at} : e);
+  const restored = restorePending(later, result);
+  assert.equal(restored.find(e => e.id === 'a').status, 'pending');
+  assert.equal(restored.find(e => e.id === 'b').status, 'dismissed');
+  assert.equal(restored.find(e => e.id === 'b').note, 'Checked footage');
+});
+test('unchanged bulk decisions remain undoable after a review export JSON roundtrip', () => {
+  const events = queue(), result = dismissPending(events, ['a', 'b'], 'bulk');
+  const loaded = parseReviewExport(JSON.parse(JSON.stringify(reviewExport(result.events))));
+  assert.notEqual(loaded[0], result.events[0]);
+  assert.equal(loaded[0].reviewRevision, result.events[0].reviewRevision);
+  assert.deepEqual(restorePending(loaded, result), events);
+  // Historical exports without decision tokens remain readable.
+  assert.deepEqual(parseReviewExport(JSON.parse(JSON.stringify(reviewExport(events)))), events);
+});
+test('bulk undo keeps a later individual decision with an identical note and timestamp', () => {
+  const events = queue(), at = '2026-11-09T12:00:00.000Z';
+  const result = dismissPending(events, ['a', 'b'], 'bulk', at);
+  const later = reviewEvent(result.events, 'b', 'dismissed', 'bulk').map(e => e.id === 'b' ? {...e, reviewedAt:at} : e);
+  assert.notEqual(later.find(e => e.id === 'b').reviewRevision, result.events.find(e => e.id === 'b').reviewRevision);
+  const loaded = parseReviewExport(JSON.parse(JSON.stringify(reviewExport(later))));
+  const restored = restorePending(loaded, result);
+  assert.deepEqual(restored.find(e => e.id === 'a'), events.find(e => e.id === 'a'));
+  assert.deepEqual(restored.find(e => e.id === 'b'), loaded.find(e => e.id === 'b'));
+});
+test('bulk undo keeps field edits even when an older client preserves the decision token', () => {
+  const events = queue(), at = '2026-11-09T12:00:00.000Z';
+  const result = dismissPending(events, ['a', 'b'], 'bulk', at);
+  const original = result.events.find(e => e.id === 'b');
+  for (const change of [{note:'Rechecked'}, {status:'confirmed'}, {reviewedAt:'2026-11-09T12:00:01.000Z'}, {score:.2},
+    {provenance:{...original.provenance, source_sha256:'f'.repeat(64)}}]) {
+    const later = result.events.map(e => e.id === 'b' ? {...e, ...change} : e);
+    assert.deepEqual(restorePending(later, result).find(e => e.id === 'b'), later.find(e => e.id === 'b'));
+  }
 });

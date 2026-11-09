@@ -33,10 +33,11 @@ async function fixture(page,{status=emptyStatus(),pickerDisabled=false}={}) {
     return reply({error:{message:'Fixture endpoint is not configured.'}},503);
   });
   await page.goto('/#recognition');
+  await page.getByRole('button',{name:'Use my existing DVR Keep a verified copy of finished videos',exact:true}).click();
   return state;
 }
 const panel=page=>page.getByRole('region',{name:'Existing DVR backup'});
-async function connect(page) {await panel(page).getByRole('button',{name:'Connect to this computer'}).click();await expect(panel(page).getByRole('button',{name:'Refresh backup connection'})).toBeVisible();}
+async function connect(page) {await page.getByRole('button',{name:/^Use my existing DVR Keep a verified copy/}).click();await panel(page).getByRole('button',{name:'Connect to this computer'}).click();await expect(panel(page).getByRole('button',{name:'Refresh backup connection'})).toBeVisible();}
 
 test('novice setup saves folders, starts backup only, stops explicitly and survives reconnect',async({page})=>{
   const state=await fixture(page);
@@ -203,4 +204,22 @@ test('storage fields share their input baseline at tablet width',async({page})=>
   const tops=await panel(page).locator('.backup-settings-grid input').evaluateAll(inputs=>inputs.map(input=>input.getBoundingClientRect().top));
   expect(Math.max(...tops)-Math.min(...tops)).toBeLessThanOrEqual(1);
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBe(true);
+});
+
+test('task switching keeps unsaved folders and reports background backup separately from analyzer use',async({page})=>{
+  const state=await fixture(page,{status:{...emptyStatus(),configured:true,config:savedConfig}});await connect(page);
+  await panel(page).getByRole('textbox',{name:'DVR source folder',exact:true}).fill('/local/pending-folder-edit');
+  await page.getByRole('button',{name:/^Open saved results/}).click();
+  await expect(panel(page)).not.toBeVisible();
+  await expect(page.getByRole('heading',{name:'Open previously exported results'})).toBeVisible();
+  await page.getByRole('button',{name:/^Use my existing DVR/}).click();
+  await expect(panel(page).getByRole('textbox',{name:'DVR source folder',exact:true})).toHaveValue('/local/pending-folder-edit');
+  await expect(panel(page).getByText('Unsaved folder settings')).toBeVisible();
+  state.status={...state.status,active:true,state:'running'};
+  await expect(page.getByRole('button',{name:/^Use my existing DVR/})).toContainText('Backup running');
+  await page.getByRole('button',{name:/^Analyze a recording/}).click();
+  await expect(page.getByRole('button',{name:/^Use my existing DVR/})).toContainText('Backup running');
+  state.statusLost=true;
+  await expect(page.getByRole('button',{name:/^Use my existing DVR/})).toContainText('Status unknown',{timeout:7000});
+  expect(state.requests.filter(r=>r.path==='/api/library/start'||r.path==='/api/library/stop')).toHaveLength(0);
 });

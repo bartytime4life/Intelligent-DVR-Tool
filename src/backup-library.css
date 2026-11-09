@@ -34,6 +34,8 @@
 .backup-library .backup-notice { color: #f1d39c; font-size: 12px; border-left: 2px solid #b5985c; padding-left: 10px; }
 .backup-library .recognition-error { color: #ffb9ac; overflow-wrap: anywhere; }
 .backup-running { background: #17483e; }
+.backup-library .backup-stale { border-color: #9d7c43; color: #f2cf8c; background: #342b1c; }
+.backup-library .backup-connection-hint { color: #c6dce0; border-left: 2px solid #62d6c7; padding-left: 12px; margin-top: 14px; }
 .backup-library .backup-storage { display: flex; flex-wrap: wrap; gap: 12px 26px; padding: 16px 0; border-top: 1px solid #3d585b; border-bottom: 1px solid #3d585b; margin: 20px 0 4px; }
 .backup-storage > span { color: #bfd0d6; font-size: 12px; line-height: 1.6; }
 .backup-storage strong { color: #e2eeee; font-weight: 600; }

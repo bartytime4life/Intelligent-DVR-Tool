@@ -1130,7 +1130,7 @@ export function App() {
       <footer className="footer">
         <Info size={21} />
         <strong>{liveCount ? `${liveCount} receiving` : 'No camera preview active'}</strong>
-        {recorderStatus?.active && <><span className="footer-divider" /><strong className="footer-recording">LAN recording active{recorderStatus.name ? ` · ${recorderStatus.name}` : ''}</strong></>}
+        {(recorderStatus?.active || recorderStatus?.unknown) && <><span className="footer-divider" /><strong className="footer-recording" role="status">{recorderStatus.unknown ? 'Recording status unknown' : 'LAN recording active'}{recorderStatus.name ? ` · ${recorderStatus.name}` : ''}{recorderStatus.unknown && ' · reconnect in Recognition'}</strong></>}
         <span className="footer-divider" />
         <span>Record a clip for Recognition, or choose Start AI on a connected Monitor tile.</span>
         <span className="footer-end">Edge-first. Human-reviewed.</span>

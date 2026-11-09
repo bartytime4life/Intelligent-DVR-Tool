@@ -11,12 +11,21 @@ progress, cancellation and automatic source-matched result opening. See
 [local analysis setup and limits](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Local-analysis-service). The command-line
 workflow below remains available for existing receipt users.
 
+Recognition starts with **Analyze a recording**. Use the task chooser to switch
+to **Use my existing DVR**, **Record a LAN camera**, or **Open saved results**.
+Only the selected setup is shown; switching keeps pending folder edits, jobs and
+the loaded review. Choosing a task does not start copying, recording or inference.
+The backup card reports running or unavailable status even while another task is
+shown. After a recorder connection fails, **Recording status unknown** remains
+visible across workspaces until a successful refresh confirms its current state.
+
 [Home](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Home) · [Analyzer](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Edge-CLI) · [Deployment path](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Roadmap#recognition-deployment-path--october-29-2026)
 
 The implemented local milestone is a bounded **one-recording recognition and human
 review workflow**. The analyzer runs the selected local model; the Recognition
 workspace displays its actual sampled detections against the matching recording.
-The Monitor workspace still contains generated samples.
+Monitor starts empty and offers explicitly connected sources; preview and live AI
+remain separate from this recording workflow.
 
 ## Run one approved recording
 
@@ -47,15 +56,15 @@ filenames for each run:
   --review-output receipts/pilot-01-review.json
 ```
 
-The optional CUDA backend remains an explicit selection in its separately
-qualified environment, with no automatic fallback. The local application job
-service uses CPU; its model/rule selectors do not select a CUDA backend. A trace can still be requested independently with
+This explicit command uses CPU. The local application prefers its configured GPU
+backend with a visible CPU fallback; see the [local GPU guide](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Live-GPU) for
+selection, overrides and execution evidence. A trace can still be requested independently with
 `--trace-output`; review output contains its own trace without needing that flag.
 
 ## Review what the detector observed
 
 1. Open **Recognition** (or the local application's `/#recognition` route).
-2. Choose the generated `pilot-01-review.json`.
+2. Choose **Open saved results**, then open the generated `pilot-01-review.json`.
 3. Choose the **original** recording. The browser computes its SHA-256 and
    requires an exact match before attaching footage or boxes.
 4. Use Previous/Next sample or the sample slider. Boxes and class/score labels

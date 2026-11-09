@@ -9,6 +9,7 @@ test('OEM source → verified backup → real CPU analysis → matching browser 
   const before=createHash('sha256').update(await readFile(source)).digest('hex');
   await page.goto('/');
   await page.getByRole('button',{name:'Recognition',exact:true}).click();
+  await page.getByRole('button',{name:/^Use my existing DVR Keep a verified copy/}).click();
   const panel=page.getByRole('region',{name:'Existing DVR backup'});
   await panel.getByRole('button',{name:'Connect to this computer',exact:true}).click();
   await expect(panel.getByRole('button',{name:'Save settings',exact:true})).toBeEnabled();
@@ -20,7 +21,7 @@ test('OEM source → verified backup → real CPU analysis → matching browser 
   await panel.getByRole('button',{name:'Start backup',exact:true}).click();
   await panel.getByText('Saved videos',{exact:false}).click();
   await expect(panel.getByRole('button',{name:'Review backup',exact:true})).toBeVisible({timeout:45000});
-  await expect(panel.getByText('Analysis coverage: completed',{exact:true})).toBeVisible();
+  await expect(panel.getByText('Analysis finished · recording coverage unverified',{exact:true})).toBeVisible();
   expect(createHash('sha256').update(await readFile(source)).digest('hex')).toBe(before);
   await panel.getByRole('button',{name:'Stop backup',exact:true}).click();
   await expect(panel.getByRole('button',{name:'Start backup',exact:true})).toBeEnabled();

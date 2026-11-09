@@ -61,13 +61,24 @@ test('incomplete, invalid-id, oversized and cancelled reviews cannot replace a c
   for (const change of [{state:'queued'},{id:'../../private'},{sha256:'bad'}]) await assert.rejects(openLibraryItem({...row,...change},'t'),/completed/);
   await assert.rejects(openLibraryItem({...row,bytes:MAX_VIDEO_BYTES+1},'t'),/too large/);
   const controller=new AbortController(); controller.abort();
-  await assert.rejects(openLibraryItem(row,'t',controller.signal,serve()),/cancelled/);
+  await assert.rejects(openLibraryItem(row,'t',controller.signal,async()=>assert.fail('Cancelled opening must not fetch')),/cancelled/);
   await assert.rejects(openLibraryItem(row,'t',undefined,async()=>new Response('too big',{headers:{'content-length':String(MAX_VIDEO_BYTES+1)}})),/size limit/);
+});
+test('cancelling a backup review terminates its hashing worker', {timeout:1000}, async () => {
+  const originalWorker=globalThis.Worker, controller=new AbortController(); let terminated=false;
+  globalThis.Worker=class {
+    postMessage() { queueMicrotask(()=>controller.abort()); }
+    terminate() { terminated=true; }
+  };
+  try {
+    await assert.rejects(openLibraryItem(row,'t',controller.signal,serve()),error=>error.name==='AbortError');
+    assert.equal(terminated,true);
+  } finally {globalThis.Worker=originalWorker;}
 });
 test('coverage is absent until completion and remains qualified for partial or missing metadata', () => {
   assert.equal(libraryCoverage({state:'analyzing',coverage:'completed'}),'');
-  assert.equal(libraryCoverage({state:'completed',coverage:'completed'}),'Analysis coverage: completed');
-  assert.match(libraryCoverage({state:'completed',coverage:'partial'}),/Partial/);
+  assert.equal(libraryCoverage({state:'completed',coverage:'completed'}),'Analysis finished · recording coverage unverified');
+  assert.equal(libraryCoverage({state:'completed',coverage:'partial'}),'Partial analysis · recording coverage unverified');
   assert.match(libraryCoverage({state:'completed',coverage:'unverified'}),/unverified/);
   assert.match(libraryCoverage({state:'completed',coverage:{}}),/unverified/);
   assert.match(libraryCoverage({state:'completed',coverage:{termination:'frame-limit',status:'not-checked'}}),/frame limit|frame-limit|frame limit|decoded-frame limit/);
