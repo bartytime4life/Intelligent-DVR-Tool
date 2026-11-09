@@ -17,6 +17,18 @@ jobs:
       - run: npm ci
       - run: npm install --no-save --package-lock=false @playwright/test@1.56.1
       - run: npx playwright install --with-deps chromium
+      - name: Review saves and unfinished training preflight
+        id: review_preflight
+        run: >-
+          npx playwright test --config=playwright.facility.config.mjs
+          review-workflow.spec.mjs review-workspace.spec.mjs
+          work-preservation.spec.mjs training-preservation.spec.mjs
+      - name: Interrupted review and status recovery preflight
+        # Report independent transfer failures even when a review assertion fails.
+        if: ${{ !cancelled() && (steps.review_preflight.outcome == 'success' || steps.review_preflight.outcome == 'failure') }}
+        run: >-
+          npx playwright test --config=playwright.library.config.mjs
+          analysis-opening.spec.mjs polling-recovery.spec.mjs
       - run: npx playwright test --config=playwright.facility.config.mjs
       - uses: actions/setup-python@v5
         with:

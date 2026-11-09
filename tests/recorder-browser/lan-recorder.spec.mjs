@@ -20,10 +20,16 @@ test('explicit native RTSP recording, existing CPU analysis, source-matched revi
   await expect(panel.locator('.local-analysis-message')).toContainText(/sent to Events for review|no rule observations/);
   await expect(page).toHaveURL(/#recognition$/);
   await expect(page.locator('.recognition-status')).toContainText('fingerprint matched');
-  const sent = await page.evaluate(()=>JSON.parse(localStorage.getItem('dvr.events.v1')||'[]').filter(e=>e.mode==='offline-model').length);
-  if (await panel.locator('.local-analysis-message').textContent().then(t=>/sent to Events/.test(t))) expect(sent).toBeGreaterThan(0);
+  const sentMessage = await panel.locator('.local-analysis-message').textContent();
+  const sent = /^(\d+) observations .* sent to Events/.exec(sentMessage);
+  const savedEvents = () => page.evaluate(()=>JSON.parse(localStorage.getItem('dvr.events.v1')||'[]'));
+  // Wait for the exact handoff count to be committed before capturing/reloading.
+  if (sent) await expect.poll(async()=>(await savedEvents()).filter(e=>e.mode==='offline-model').length).toBe(Number(sent[1]));
+  else { expect(sentMessage).toContain('no rule observations'); expect(await savedEvents()).toEqual([]); }
+  const persisted = await savedEvents();
   await page.screenshot({path:'test-results/recorder/desktop.png',fullPage:true});
   await page.reload();
+  await expect.poll(savedEvents).toEqual(persisted);
   await page.getByRole('button',{name:/^Record a LAN camera/}).click();
   await panel.getByRole('button',{name:'Connect LAN recorder'}).click();
   await expect(panel.getByRole('button',{name:'Stop recording & analysis'})).toBeEnabled();

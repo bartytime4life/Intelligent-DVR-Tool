@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { createHash } from 'node:crypto';
 import { recognitionFixture } from '../fixtures/recognition.mjs';
+import { parseReceipt } from '../../src/data.mjs';
 
 const upload = value => ({name:'review.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(value))});
 
@@ -19,8 +20,9 @@ test('recognition keeps evidence separate, rejects wrong files, and sends observ
   await page.getByRole('button',{name:'Send 1 observations to Events'}).click();
   await page.getByRole('button',{name:'Events',exact:false}).first().click();
   await expect(page.locator('.event-table-row').filter({hasText:'test-recording'})).toBeVisible();
-  const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('dvr.events.v1')));
-  expect(stored.find(e => e.id === 'import-fixture-observation')).toMatchObject({mode:'offline-model',camera:null});
+  // The queue updates before its shared browser save lock commits storage.
+  await expect.poll(() => page.evaluate(() => JSON.parse(localStorage.getItem('dvr.events.v1') || '[]')))
+    .toEqual(parseReceipt(recognitionFixture().receipt));
 });
 
 test('recognition rejects mixed provenance and displays partial coverage on a narrow screen', async ({page}) => {
