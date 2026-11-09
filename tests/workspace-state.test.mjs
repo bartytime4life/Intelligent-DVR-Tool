@@ -136,6 +136,46 @@ const saveHarness = (raw = JSON.stringify(imported())) => {
 const changedReview = (events, status = 'confirmed', note = 'This tab') => reviewEvent(events, events[0].id, status, note);
 const backupValues = harness => [...harness.map].filter(([key]) => key.startsWith(`${harness.key}.conflict-backup.`)).map(([,raw]) => JSON.parse(raw).raw);
 
+test('successive review decisions preserve the last edit while its shared save lock is pending', async () => {
+  const [base]=imported(), events=['a','b','c'].map(id=>({...base,id:`import-${id}`,sourceId:id}));
+  const h=saveHarness(JSON.stringify(events));let release, delay=false;
+  const barrier=new Promise(resolve=>{release=resolve;});
+  const session=createWorkspaceSave(h.storage,h.key,[],{withLock:work=>delay ? barrier.then(work) : Promise.resolve().then(work)});
+  session.update(previous=>reviewEvent(previous,'import-a','confirmed',''));
+  assert.equal(await session.flush(),true);
+  session.update(previous=>reviewEvent(previous,'import-c','dismissed','cd'));
+  assert.equal(await session.flush(),true);
+  delay=true;
+  session.update(previous=>reviewEvent(previous,'import-b','dismissed',''));
+  const saving=session.flush();
+  const statuses=value=>Object.fromEntries(value.map(event=>[event.id,event.status]));
+  const finished={'import-a':'confirmed','import-b':'dismissed','import-c':'dismissed'};
+  // Rendering the last decision does not imply that the async lock has committed it.
+  assert.deepEqual(statuses(session.snapshot().value),finished);
+  assert.equal(session.snapshot().hasUnsavedChanges,true);
+  assert.deepEqual(statuses(JSON.parse(h.map.get(h.key))),{...finished,'import-b':'pending'});
+  release();assert.equal(await saving,true);
+  assert.deepEqual(statuses(JSON.parse(h.map.get(h.key))),finished);
+  assert.equal(JSON.parse(h.map.get(h.key)).find(event=>event.id==='import-c').note,'cd');
+  assert.equal(session.snapshot().hasUnsavedChanges,false);
+});
+
+test('several review edits queued before a shared lock opens persist without replacing each other', async () => {
+  const [base]=imported(), events=['a','b','c'].map(id=>({...base,id:`import-${id}`,sourceId:id}));
+  const h=saveHarness(JSON.stringify(events));let release;
+  const barrier=new Promise(resolve=>{release=resolve;});
+  const session=createWorkspaceSave(h.storage,h.key,[],{withLock:work=>barrier.then(work)});
+  const saves=[];
+  for (const [id,status,note] of [['import-a','confirmed',''],['import-c','dismissed','cd'],['import-b','dismissed','']]) {
+    session.update(previous=>reviewEvent(previous,id,status,note));saves.push(session.flush());
+  }
+  release();await Promise.all(saves);
+  const persisted=JSON.parse(h.map.get(h.key));
+  assert.deepEqual(persisted.map(event=>event.status),['confirmed','dismissed','dismissed']);
+  assert.equal(persisted.find(event=>event.id==='import-c').note,'cd');
+  assert.equal(session.snapshot().hasUnsavedChanges,false);
+});
+
 test('clean tabs adopt validated saves and removals without writing them back', async () => {
   const h = saveHarness(), remote = changedReview(imported(), 'dismissed', 'Other tab');
   h.map.set(h.key, JSON.stringify(remote)); h.session.receive();

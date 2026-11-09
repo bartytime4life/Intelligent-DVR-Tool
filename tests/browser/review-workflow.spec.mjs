@@ -31,8 +31,10 @@ test('keyboard review confirms, dismisses and advances through pending observati
   await expect(dialog).toContainText('1 of 1 awaiting review');
   await page.keyboard.press('d');
   await expect(dialog).toHaveCount(0);
-  const statuses = Object.fromEntries((await stored(page)).map(e => [e.id, e.status]));
-  expect(statuses).toEqual({'import-a':'confirmed', 'import-b':'dismissed', 'import-c':'dismissed'});
+  await expect(page.locator('.event-table-row .status')).toHaveText(['confirmed', 'dismissed', 'dismissed']);
+  // The UI updates immediately; the shared browser save lock commits asynchronously.
+  await expect.poll(async () => Object.fromEntries((await stored(page)).map(e => [e.id, e.status])))
+    .toEqual({'import-a':'confirmed', 'import-b':'dismissed', 'import-c':'dismissed'});
   expect((await stored(page)).find(e => e.id === 'import-c').note).toBe('cd');
 });
 

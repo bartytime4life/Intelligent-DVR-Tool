@@ -8,7 +8,7 @@
     "src/LanRecorder.jsx": "b3dc07f12afc2262263065704c05633c51e9e675a5b91674cba19d5de1ba94a0",
     "src/LocalAnalysis.jsx": "910a55529e5c2644192c63a43566fa94b8cf18f27cdbd1aedefe5308453566a2",
     "src/TrainingWorkspace.jsx": "26db28fd934bf93d6077ff987f75abe128cc680cd9bc028c0c5abb834a50cffc",
-    "src/WorkspaceConflict.jsx": "a281b19db918842e18f9afb6b140e45202ceceb29564284f85e9ea99429fcf3d",
+    "src/WorkspaceConflict.jsx": "1d287c0a226d1760ee4c0bc9f17ceec8839c1e1edfe6789b0d02866d7867ac9f",
     "src/lan-recorder.mjs": "09ee3f1b98c9942ed12e4f25c3739d8ec5a974ed916c8ecc56291b3e6def244a",
     "src/recognition.css": "0cdb6c4dba18f62dc122433549c71b24c99d0ac90717d26119b1c0457d9a3198",
     "src/review-transfer.mjs": "9809ff459f8c9aacea75900d33a37dae4c1cc8b1bd31b3e27d4ffffa7e63817f",
@@ -26,7 +26,7 @@
   },
   "checks": {
     "frontend": {
-      "passed": 412,
+      "passed": 414,
       "failed": 0,
       "skipped": 0,
       "socket_checks_enabled": true
@@ -37,8 +37,27 @@
     "production_build": "passed; existing large Facility chunk warning retained",
     "documentation": "passed",
     "wiki_consistency": "passed",
-    "browser_walkthrough": "generated consent name retained after cancelled navigation and Exit; later browser automation stalled on confirmation; cross-tab and transfer specs await hosted CI",
+    "browser_walkthrough": "Generated Train guards, conflicting reviews, both exports, failed choice preservation, explicit adoption and archived-copy download verified after browser automation recovered; no horizontal overflow at CSS widths390 and320. Full hosted attempt at d0e7970 passed101/103 Facility/review cases; two timing/trigger assumptions repaired for a subsequent full run.",
     "native_python": "not rerun locally; no Python changes; hosted checks pending"
   },
-  "scope": "Generated inputs and source/browser checks only; no installed service, physical device, private recordings, model execution or deployment in this local pass."
+  "scope": "Generated inputs and source/browser checks only; no installed service, physical device, private recordings, model execution or deployment in this local pass.",
+  "workflow_sha256": "5074c355d42e95134325deefcfb1dfa387ecdde064acc72a28fdc3ca30cd3834",
+  "screenshots": {
+    "03-preserved-copy.jpg": {
+      "sha256": "dba6756d40cb5bd432d0a392692460ebaa174df005e2f2ae8c2bfadff2ead851",
+      "capture_source": "d0e7970a5a574e7cc08b8e10f0c048dac1c4f7e3"
+    },
+    "01-training-retained.jpg": {
+      "sha256": "39b4e139d609c43a88a3ec25fe135ad8896ffb572c268b1724b8106f96f31455",
+      "capture_source": "4a743d22c7778e6070c00cbdb39d6afcd43a3d8b"
+    },
+    "05-conflict-desktop.jpg": {
+      "sha256": "31d0f910946a4836c149129c8b37c1b620d8246eb821e08e3c43cac91ce558fe",
+      "capture_source": "d0e7970a5a574e7cc08b8e10f0c048dac1c4f7e3"
+    },
+    "04-conflict-mobile.jpg": {
+      "sha256": "d81eda4f1bbece5a0a6a8a05b809898079278ad9c9bd85ab86b773be043fc7b4",
+      "capture_source": "d0e7970a5a574e7cc08b8e10f0c048dac1c4f7e3"
+    }
+  }
 }

@@ -84,14 +84,30 @@ test('recognition session survives workspace changes and browser Back/Forward', 
 });
 
 test('save failures stay visible and never report a review as saved', async ({page}) => {
-  await page.addInitScript(() => { Storage.prototype.setItem = () => {throw new DOMException('Quota exceeded','QuotaExceededError');}; });
   await page.goto('/#events');
-  await expect(page.getByRole('alert')).toContainText('only in memory');
+  const before = await stored(page), warning = page.locator('.workspace-storage-warning');
+  await expect(warning).toHaveCount(0);
+  // Fail the actual review edit, after the generated queue has been seeded.
+  // Opening an unchanged workspace must not write merely to discover a quota error.
+  await page.evaluate(() => {
+    const write = Storage.prototype.setItem;
+    Storage.prototype.setItem = function (key, value) {
+      if (this === localStorage && key === 'dvr.events.v1') throw new DOMException('Quota exceeded','QuotaExceededError');
+      return write.call(this, key, value);
+    };
+  });
   await page.locator('.event-table-row').first().click();
+  await page.getByLabel('Review note', {exact:true}).fill('Generated note retained only in this tab');
   await page.getByRole('button',{name:'Dismiss event'}).click();
+  await page.keyboard.press('Escape'); // Close the next pending review.
+  await expect(page.getByRole('dialog', {name:'Review observation'})).toHaveCount(0);
+  await expect(page.locator('.event-table-row .status').first()).toHaveText('dismissed');
+  await expect(warning).toContainText('only in memory');
+  await expect(page.locator('.toast')).toContainText('Event dismissed');
   await expect(page.locator('.toast')).not.toContainText('saved');
-  await expect(page.getByRole('alert')).toContainText('Export before closing');
-  await expect(page.getByRole('alert').getByRole('button',{name:'Export reviews'})).toBeVisible();
+  await expect(warning).toContainText('Export before closing');
+  await expect(warning.getByRole('button',{name:'Export reviews'})).toBeVisible();
+  expect(await stored(page)).toEqual(before);
 });
 
 test('narrow-screen queue controls, source filters and empty states remain usable', async ({page}) => {
