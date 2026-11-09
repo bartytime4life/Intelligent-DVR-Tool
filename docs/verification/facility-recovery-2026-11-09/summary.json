@@ -39,9 +39,9 @@
     }
   },
   "screenshots_sha256": {
-    "01-narrow-before.png": "23a64f7878d4bff983396b87d993945f8ecde5579ae7aac27f3ee4278564995e",
-    "02-narrow-after.png": "cd79cd7b08e5c04c19877a4d5b188bb69ec7fe76c360e8aca41b8c7e5e2ea9ef",
-    "03-route-draft.png": "96aded20d48044afa7030f9e4226a48ea5a33e132fce67b44938e9763f84ad9b",
+    "01-narrow-before.jpg": "23a64f7878d4bff983396b87d993945f8ecde5579ae7aac27f3ee4278564995e",
+    "02-narrow-after.jpg": "cd79cd7b08e5c04c19877a4d5b188bb69ec7fe76c360e8aca41b8c7e5e2ea9ef",
+    "03-route-draft.jpg": "96aded20d48044afa7030f9e4226a48ea5a33e132fce67b44938e9763f84ad9b",
     "04-save-conflict.png": "671a23984c5316d5a99cea9366f9d4b5bf05b1dd4930086e438f21ed6d998942"
   },
   "local_checks": {
@@ -56,13 +56,67 @@
       "failed": 0
     },
     "production_build": "passed",
-    "browser_regressions": "pending_completion",
-    "documentation": "pending_final_receipt"
+    "browser_regressions": {
+      "passed": 119,
+      "failed": 0,
+      "skipped": 0,
+      "workers": 1,
+      "browser_channel": "chrome",
+      "configuration": "playwright.facility.config.mjs"
+    },
+    "documentation": "passed",
+    "affected_browser_regressions": {
+      "passed": 29,
+      "failed": 0,
+      "workers": 1,
+      "browser_channel": "chrome"
+    },
+    "native_service_module": {
+      "passed": 34,
+      "failed": 0,
+      "skipped": 0,
+      "socket_checks": true
+    },
+    "native_admission_scheduling": {
+      "passed": 10,
+      "failed": 0,
+      "injected_api_release_delay_ms": 100
+    }
   },
   "limits": [
     "Generated plans and controlled browser responses only",
     "No physical-site or survey acceptance",
     "No recognition, endurance or 100-camera qualification",
     "No camera, inference, installed service, deployment or native Wiki publication changes"
-  ]
+  ],
+  "implementation_commit": "623bb67b43ee437c9e6cabff9f4ee527ee19d4ad",
+  "capture_sizes": {
+    "01-narrow-before.jpg": [
+      662,
+      1548
+    ],
+    "02-narrow-after.jpg": [
+      647,
+      1514
+    ],
+    "03-route-draft.jpg": [
+      1265,
+      908
+    ],
+    "04-save-conflict.png": [
+      1440,
+      1000
+    ]
+  },
+  "test_sha256": {
+    "tests/browser/facility-camera-planning.spec.mjs": "09b1fbc0c14e78775516809ef508ee206bd367e1dc106f7fcd41e01b1fe83e8f",
+    "tests/browser/facility-draft-preservation.spec.mjs": "478105bfd4a3ad3002e313d0168039d41175483bc85c9c741978226e231ada9f",
+    "tests/browser/facility-geometry.spec.mjs": "299fb49c130eaf51cf89683a8fc078bbf12e7e2f3b0557fdd3b1e960ff2e90f6",
+    "tests/browser/facility-map-draft-preservation.spec.mjs": "66573d0456cb2ca6919a69c04592cdb8906205b9d459c5c316383081cf72b675",
+    "tests/browser/facility-recovery.spec.mjs": "de6dbf425287bee3b6be96c07b8625a2e8c4fd33e083168940ae5494931b24dd",
+    "tests/browser/facility-studio.spec.mjs": "4fb8f4c6bf95dd868746f50159155f811c96440578643fb5669f19b7ce643e00",
+    "tests/browser/facility-test-helpers.mjs": "a036184ca86a6f8a923329108e7d6689eff4b712a3571ef0310c156ea8da4e63",
+    "tests/facility-save.test.mjs": "2914c142cab9b7fd25dd5007ce4d8c86f22111b7bb8e17ebd26bbc515359121d",
+    "tests/test_local_service.py": "0939b995137b2b2acdda21365747a852b0cc24dc476db5f262907656245a25b5"
+  }
 }
