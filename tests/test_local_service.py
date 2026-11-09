@@ -452,6 +452,31 @@ class ServiceTest(unittest.TestCase):
         import socket
         service = self.service(process_factory=lambda *a, **k: FakeProcess(1))
         server = LocalServer(0, service, self.root)
+        self.assertEqual(server.HANDLERS, 16)
+        # A completed TCP connect only enters the listen backlog. Observe the
+        # real admission semaphore so each idle socket owns a handler before
+        # opening another, and API headers cannot race its final slot release.
+        slots, condition = server.slots, threading.Condition()
+        class ObservedSlots:
+            in_use = peak = admitted = rejected = 0
+            def acquire(self, blocking=False):
+                with condition:
+                    acquired = slots.acquire(blocking=blocking)
+                    if acquired:
+                        self.in_use += 1; self.admitted += 1
+                        self.peak = max(self.peak, self.in_use)
+                    else: self.rejected += 1
+                    condition.notify_all()
+                    return acquired
+            def release(self):
+                with condition:
+                    slots.release(); self.in_use -= 1
+                    condition.notify_all()
+        observed = server.slots = ObservedSlots()
+        def wait_for(predicate, message):
+            with condition:
+                self.assertTrue(condition.wait_for(predicate, timeout=3),
+                                f'{message}: {observed.in_use} active, {observed.admitted} admitted, {observed.rejected} rejected')
         thread = threading.Thread(target=server.serve_forever, daemon=True); thread.start()
         address, idle = ('127.0.0.1', server.server_port), []
         def request(path):
@@ -460,16 +485,25 @@ class ServiceTest(unittest.TestCase):
             finally: conn.close()
         try:
             # Speculative browser connections that never send a request line.
-            idle += [socket.create_connection(address, timeout=3) for _ in range(server.HANDLERS - 1)]
+            for count in range(1, server.HANDLERS):
+                idle.append(socket.create_connection(address, timeout=3))
+                wait_for(lambda: observed.in_use == count, 'Idle connection was not admitted')
             began = time.monotonic(); self.assertEqual(request('/api/analysis/session'), 200)
             self.assertLess(time.monotonic() - began, 2)  # Sequential serving waited 5 s per idle socket.
-            idle.append(socket.create_connection(address, timeout=3)); time.sleep(.3)
+            wait_for(lambda: observed.in_use == len(idle), 'API handler did not release its slot')
+            idle.append(socket.create_connection(address, timeout=3))
+            wait_for(lambda: observed.in_use == server.HANDLERS, 'Final idle connection was not admitted')
+            admitted, rejected = observed.admitted, observed.rejected
             with socket.create_connection(address, timeout=3) as extra:
+                wait_for(lambda: observed.rejected > rejected, 'Connection over the handler limit was not rejected')
                 try: data = extra.recv(1)
                 except ConnectionResetError: data = b''
             self.assertEqual(data, b'')  # Over the bound: closed unanswered, no thread started.
+            self.assertEqual(observed.admitted, admitted)
+            self.assertEqual(observed.peak, server.HANDLERS)
             for connection in idle: connection.close()
-            idle.clear(); time.sleep(.3)
+            idle.clear()
+            wait_for(lambda: observed.in_use == 0, 'Idle handlers did not release their slots')
             self.assertEqual(request('/api/analysis/session'), 200)
         finally:
             for connection in idle: connection.close()

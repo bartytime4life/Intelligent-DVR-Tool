@@ -14,7 +14,8 @@ receipts and historical media remain unchanged.
    buttons remain keyboard reachable. These screenshots use the blank local grid;
    no external map layer, location request or device was activated.
 
-   [Before](01-narrow-before.png) · [After](02-narrow-after.png)
+   [Before at 662 px](01-narrow-before.jpg) · [After at 647 px](02-narrow-after.jpg).
+   Automated layout checks also use 662 px and 800 px windows.
 
 2. **Enter a route draft and try another task — protected.** Coordinates remain
    visible; task changes refuse the unfinished edit. Units and floor changes
@@ -22,7 +23,7 @@ receipts and historical media remain unchanged.
    Pasted facility JSON and map extracts similarly retain unfinished work, and
    collapsed map panels retain reviewed candidates and partial area drawings.
 
-   ![Generated route draft remains in Handoffs after a refused task change.](03-route-draft.png)
+   ![Generated route draft remains in Handoffs after a refused task change.](03-route-draft.jpg)
 
 3. **Recover a two-tab save conflict — verified with generated plans.** Failed
    local storage retains the in-memory plan. A different tab's save produces two
@@ -47,7 +48,11 @@ receipts and historical media remain unchanged.
   its release handlers without committing the cancelled movement.
 - Local frontend/domain checks: **424 passed, zero skips**. Production build,
   four Sites packaging checks, documentation and generated Wiki checks passed.
-- Full local browser regression result: **pending completion**.
+- Native service module: **34 passed**, plus **10 repeated admission checks**
+  under a controlled API-slot-release delay. The test waits for real slot
+  admission/release instead of fixed sleeps, retains the 16-handler limit and
+  public EOF/reset check, and changes no production timeout or service source.
+- Full local browser regression suite: **119 passed** with one worker and the local Chrome channel, including all sixteen new cases.
 
 The in-app browser captures were inspected from the saved files. Automated
 browser cases use generated local plans and controlled responses. This is not
