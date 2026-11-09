@@ -9,6 +9,7 @@ export default function WorkspaceConflict({ kind, localCount, conflict, exportLo
   const [copyNotice, setCopyNotice] = useState('');
   if (!conflict) return null;
   const title = kind === 'reviews' ? 'Reviews' : 'Rules';
+  const noun = count => `${kind === 'reviews' ? 'review' : 'rule'}${count === 1 ? '' : 's'}`;
   async function choose(method) {
     if (working) return;
     setWorking(true); setUnexpected('');
@@ -43,8 +44,8 @@ export default function WorkspaceConflict({ kind, localCount, conflict, exportLo
       <div><h2 id={titleId}>{title} save conflict</h2><p>Your changes are still in this tab. Saving is paused until you choose a version.</p></div>
     </div>
     <div className="workspace-conflict-versions">
-      <div><h3>This tab</h3><p>{localCount} {kind} in memory</p><button className="button" onClick={exportLocal}><DownloadSimple size={17} aria-hidden="true" />Download this version</button></div>
-      <div><h3>Other tab</h3><p>{conflict.remoteDeleted ? 'The saved version was removed.' : conflict.remoteValid ? `${conflict.remoteValue.length} saved ${kind}` : 'The saved version cannot be read.'}</p><button className="button" onClick={exportRemote} disabled={conflict.remoteRaw == null && !conflict.remoteValid}><DownloadSimple size={17} aria-hidden="true" />Download other version</button></div>
+      <div><h3>This tab</h3><p>{localCount} {noun(localCount)} in memory</p><button className="button" onClick={exportLocal}><DownloadSimple size={17} aria-hidden="true" />Download this version</button></div>
+      <div><h3>Other tab</h3><p>{conflict.remoteDeleted ? 'The saved version was removed.' : conflict.remoteValid ? `${conflict.remoteValue.length} saved ${noun(conflict.remoteValue.length)}` : 'The saved version cannot be read.'}</p><button className="button" onClick={exportRemote} disabled={conflict.remoteRaw == null && !conflict.remoteValid}><DownloadSimple size={17} aria-hidden="true" />Download other version</button></div>
     </div>
     <p>The version you replace is backed up in this browser first. Downloads give you a separate copy.</p>
     {(conflict.error || unexpected) && <p className="workspace-conflict-error" role="alert">{unexpected || conflict.error}</p>}
