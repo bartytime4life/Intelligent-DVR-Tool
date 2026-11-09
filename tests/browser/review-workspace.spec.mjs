@@ -13,7 +13,7 @@ test('maximum recognition run has an explicit clear, export, undo and successful
   await page.getByLabel('Open recognition results').setInputFiles(upload(bundle));
   await page.getByRole('button',{name:'Send 1000 observations to Events'}).click();
   await expect(page.locator('.toast')).toContainText('exceed 1,000');
-  expect((await stored(page)).length).toBe(2);
+  await expect.poll(async () => (await stored(page)).length).toBe(2);
   await nav(page,'Events').click();
   await page.getByRole('button',{name:'Clear queue',exact:true}).click();
   const downloading = page.waitForEvent('download');
@@ -22,28 +22,31 @@ test('maximum recognition run has an explicit clear, export, undo and successful
   expect(download.suggestedFilename()).toBe('dvr-reviews.json');
   await page.getByRole('button',{name:'Clear queue now'}).click();
   await expect(page.getByRole('heading',{name:'Your review queue is empty'})).toBeVisible();
+  await expect.poll(() => stored(page)).toEqual([]);
   await page.getByRole('button',{name:'Undo clear'}).click();
-  expect((await stored(page)).length).toBe(2);
+  await expect.poll(async () => (await stored(page)).length).toBe(2);
   await page.getByRole('button',{name:'Clear queue',exact:true}).click();
   await page.getByRole('button',{name:'Clear queue now'}).click();
+  await expect.poll(() => stored(page)).toEqual([]);
   await nav(page,'Recognition').click();
   await expect(page.getByText('Sample 1 of 2',{exact:false})).toBeVisible();
   await page.getByRole('button',{name:'Send 1000 observations to Events'}).click();
   await expect(page).toHaveURL(/#events$/);
   await expect(page.getByLabel('Review queue summary')).toContainText('1000 / 1,000');
-  expect((await stored(page)).length).toBe(1000);
+  await expect.poll(async () => (await stored(page)).length).toBe(1000);
   // A second distinct import must still refuse overflow without discarding reviews.
   const extra = recognitionFixture().receipt;
   extra.events[0].id = 'extra-at-capacity';
   await page.getByLabel('Import receipt or review export').setInputFiles(upload(extra));
   await expect(page.locator('.toast')).toContainText('exceed 1,000');
-  expect((await stored(page)).length).toBe(1000);
+  await expect.poll(async () => (await stored(page)).length).toBe(1000);
 });
 
 test('receipt import preserves review decisions and review exports restore an emptied queue', async ({page}) => {
   await page.goto('/#events');
   const receipt = recognitionFixture().receipt;
   await page.getByLabel('Import receipt or review export').setInputFiles(upload(receipt));
+  await expect.poll(async () => (await stored(page)).find(e => e.mode === 'offline-model')?.status).toBe('pending');
   await page.locator('.event-table-row').filter({hasText:'test-recording'}).click();
   await page.getByLabel('Review note').fill('Checked the original recording');
   await page.getByRole('button',{name:'Dismiss event'}).click();
@@ -51,19 +54,25 @@ test('receipt import preserves review decisions and review exports restore an em
   await expect(page.getByRole('dialog',{name:'Review observation'})).toContainText('Legacy sample observation');
   await page.keyboard.press('Escape');
   await expect(page.getByRole('dialog')).toHaveCount(0);
+  // Modal updates precede the asynchronous shared-lock save. Capture the
+  // reviewed snapshot only after its exact decision and note have committed.
+  await expect.poll(async () => (await stored(page)).find(e => e.mode === 'offline-model'))
+    .toMatchObject({status:'dismissed', note:'Checked the original recording'});
   const reviewed = (await stored(page)).find(e=>e.mode==='offline-model');
   await page.getByLabel('Import receipt or review export').setInputFiles(upload(receipt));
-  expect((await stored(page)).find(e=>e.id===reviewed.id)).toEqual(reviewed);
+  await expect(page.locator('.toast')).toContainText('0 new observations added. Existing decisions kept.');
+  await expect.poll(async () => (await stored(page)).find(e=>e.id===reviewed.id)).toEqual(reviewed);
   const backup={schema:'intelligent-dvr.review-export.v1',events:await stored(page)};
   await page.getByRole('button',{name:'Clear queue',exact:true}).click();
   await page.getByRole('button',{name:'Clear queue now'}).click();
+  await expect.poll(() => stored(page)).toEqual([]);
   await page.reload();
   await expect(page.getByRole('heading',{name:'Your review queue is empty'})).toBeVisible();
   // Restore after the receipt has re-created a matching pending entry.
   await page.getByLabel('Import receipt or review export').setInputFiles(upload(receipt));
-  expect((await stored(page)).find(e=>e.id===reviewed.id).status).toBe('pending');
+  await expect.poll(async () => (await stored(page)).find(e=>e.id===reviewed.id)?.status).toBe('pending');
   await page.getByLabel('Import receipt or review export').setInputFiles(upload(backup));
-  expect((await stored(page)).find(e=>e.id===reviewed.id)).toEqual(reviewed);
+  await expect.poll(async () => (await stored(page)).find(e=>e.id===reviewed.id)).toEqual(reviewed);
 });
 
 test('recognition session survives workspace changes and browser Back/Forward', async ({page}) => {
@@ -107,7 +116,7 @@ test('save failures stay visible and never report a review as saved', async ({pa
   await expect(page.locator('.toast')).not.toContainText('saved');
   await expect(warning).toContainText('Export before closing');
   await expect(warning.getByRole('button',{name:'Export reviews'})).toBeVisible();
-  expect(await stored(page)).toEqual(before);
+  await expect.poll(() => stored(page)).toEqual(before);
 });
 
 test('narrow-screen queue controls, source filters and empty states remain usable', async ({page}) => {

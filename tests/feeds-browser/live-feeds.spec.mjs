@@ -28,7 +28,7 @@ test('monitor starts empty without stock images, synthetic events or camera acti
   await expect(page.getByRole('button',{name:'Connect source',exact:true})).toHaveCount(1);
   await expect(page.getByRole('group',{name:'Camera source shortcuts'}).getByRole('button')).toHaveCount(3);
   await expect(page.locator('.camera-wall img,.camera-wall video')).toHaveCount(0);
-  expect(await page.evaluate(()=>JSON.parse(localStorage.getItem('dvr.events.v1')))).toEqual([]);
+  expect(await page.evaluate(()=>JSON.parse(localStorage.getItem('dvr.events.v1')||'[]'))).toEqual([]);
   expect(requests.filter(u=>/loading-dock|front-entrance|warehouse-aisle|sales-floor|parking-lot|\/api\/feeds\/connect/.test(u))).toEqual([]);
   await page.screenshot({path:'test-results/real-monitor-empty-desktop.png',fullPage:true});
 });

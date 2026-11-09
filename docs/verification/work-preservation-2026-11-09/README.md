@@ -70,7 +70,12 @@ storage-error check expected an unchanged workspace to write on startup. The
 specifications now wait for the real committed decisions and trigger a real
 failed edit. Two delayed-lock unit cases prove all rapid decisions and notes are
 retained. Short review/Train/conflict and mocked-transfer preflights now run before
-the full browser workflow, so regressions in these paths surface earlier.
+the full browser workflow, so regressions in these paths surface earlier. The
+first focused follow-up also caught a receipt-import test capturing its reviewed
+snapshot before the commit; export/restore and native handoff assertions now wait
+for their exact saved state. Fresh-start checks accept an untouched absent queue
+key as empty. The independent transfer preflight still runs after a review
+preflight failure, so both groups can report issues in the same attempt.
 
 Generated specifications cover stalled result/source downloads, immediate
 cancellation, late-response ownership, polling recovery and zero unintended

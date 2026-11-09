@@ -41,7 +41,7 @@
     "native_python": "not rerun locally; no Python changes; hosted checks pending"
   },
   "scope": "Generated inputs and source/browser checks only; no installed service, physical device, private recordings, model execution or deployment in this local pass.",
-  "workflow_sha256": "5074c355d42e95134325deefcfb1dfa387ecdde064acc72a28fdc3ca30cd3834",
+  "workflow_sha256": "f7c8056bb08eed083c47e08f2d3fccdbeef1bcfebd10d232e4fdbec440eeb421",
   "screenshots": {
     "03-preserved-copy.jpg": {
       "sha256": "dba6756d40cb5bd432d0a392692460ebaa174df005e2f2ae8c2bfadff2ead851",
