@@ -2,11 +2,14 @@ import React, { useEffect, useRef, useState } from 'react';
 import { analysisRequest, analysisBackendLabel, localAnalysisOrigin, refused } from './local-analysis.mjs';
 import { DEFAULT_LIBRARY_CONFIG, libraryRequest, libraryConfig, cameraConfig, openLibraryItem, libraryCoverage, storageSize } from './backup-library.mjs';
 import { MAX_VIDEO_BYTES } from './recognition.mjs';
+import { backupAnnouncement, analysisAnnouncement } from './status-announcements.mjs';
+import { createReviewTransfer } from './review-transfer.mjs';
 import './backup-library.css';
 
 export default function BackupLibrary({onResult, onBusy, onStatus, blocked = false}) {
   const [status, setStatus] = useState(null), [catalog, setCatalog] = useState(null), [config, setConfig] = useState({...DEFAULT_LIBRARY_CONFIG});
   const [connected, setConnected] = useState(false), [working, setWorking] = useState(false), [dirty, setDirty] = useState(false);
+  const [transferring, setTransferring] = useState(false);
   const [checkedAt, setCheckedAt] = useState(null);
   const [error, setError] = useState(''), [message, setMessage] = useState(''), [pickerNote, setPickerNote] = useState('');
   const [analyze, setAnalyze] = useState(false), [model, setModel] = useState(''), [rules, setRules] = useState('');
@@ -14,10 +17,12 @@ export default function BackupLibrary({onResult, onBusy, onStatus, blocked = fal
   const [camera, setCamera] = useState({name:'',host:'',port:554,path:'',username:'',password:''}), [cameraWorking, setCameraWorking] = useState(false);
   const [recorderSource, setRecorderSource] = useState('');
   const token = useRef(''), lifetime = useRef(null), pending = useRef(false);
+  const transfers = useRef(null);
+  if (!transfers.current) transfers.current = createReviewTransfer();
   const local = localAnalysisOrigin(globalThis.location);
-  useEffect(() => { lifetime.current = new AbortController(); return () => lifetime.current.abort(); }, []);
+  useEffect(() => { lifetime.current = new AbortController(); return () => { lifetime.current.abort(); transfers.current.cancel(); }; }, []);
   // Copying alone does not reserve the analyzer. A disconnected status stays visible until refreshed.
-  useEffect(() => { onBusy(Boolean(status?.analyzing)); }, [status?.analyzing, onBusy]);
+  useEffect(() => { onBusy(Boolean(transferring || status?.analyzing)); }, [transferring, status?.analyzing, onBusy]);
   useEffect(() => { onStatus?.({active: Boolean(connected && status?.active), unknown: Boolean(status && !connected), error: Boolean(error || status?.error)}); }, [connected, status?.active, status?.error, error, onStatus]);
   const request = (path, body, setup = false) => libraryRequest(path, {token: token.current, body, setup, signal: lifetime.current.signal});
   const receivedStatus = next => { setStatus(next); setCheckedAt(Date.now()); };
@@ -46,7 +51,7 @@ export default function BackupLibrary({onResult, onBusy, onStatus, blocked = fal
     finally { pending.current = false; setWorking(false); }
   }
   useEffect(() => {
-    if (!connected) return;
+    if (!connected || working) return;
     let disposed = false;
     const timer = setTimeout(async () => {
       if (pending.current) { if (!disposed) setStatus(s => s && {...s}); return; }
@@ -54,7 +59,7 @@ export default function BackupLibrary({onResult, onBusy, onStatus, blocked = fal
       catch (err) { if (!disposed) {setConnected(false); setError(`Status unavailable. Background backup may continue. ${err.message} Reconnect before starting again.`);} }
     }, 2000);
     return () => {disposed = true; clearTimeout(timer);};
-  }, [connected, status]);
+  }, [connected, status, working]);
   const edit = (key, value) => {setConfig(c => ({...c, [key]: value})); setDirty(true);};
   async function pickFolder(key) {
     setWorking(true); setError(''); setPickerNote(''); pending.current = true;
@@ -82,10 +87,20 @@ export default function BackupLibrary({onResult, onBusy, onStatus, blocked = fal
     } finally {pending.current = false; setWorking(false);}
   }
   async function open(item) {
-    pending.current = true; setWorking(true); setError('');
-    try {onResult(await openLibraryItem(item, token.current, lifetime.current.signal)); setMessage(`Opened ${item.name}. Review its sampled frames below.`);}
-    catch (err) {setError(`${err.message} Your current review is preserved.`);}
-    finally {pending.current = false; setWorking(false);}
+    if (pending.current) return;
+    const operation = transfers.current.begin(lifetime.current.signal, reason => {
+      if (lifetime.current.signal.aborted) return;
+      setTransferring(false);
+      setMessage(reason?.name === 'TimeoutError' ? 'Opening timed out. Your current review is preserved. Try again when ready.' : 'Opening cancelled. Your current review is preserved.');
+    });
+    if (!operation) return;
+    setTransferring(true); setError(''); setMessage('');
+    try {
+      const result = await openLibraryItem(item, token.current, operation.signal);
+      if (!transfers.current.isCurrent(operation)) return;
+      onResult(result); setMessage(`Opened ${item.name}. Review its sampled frames below.`);
+    } catch (err) {if (transfers.current.isCurrent(operation)) setError(`${err.message} Your current review is preserved.`);}
+    finally {if (transfers.current.finish(operation) && !lifetime.current.signal.aborted) setTransferring(false);}
   }
   async function saveCamera(event) {
     event.preventDefault(); setCameraWorking(true); setCameraError(''); setCameraMessage('');
@@ -114,15 +129,16 @@ export default function BackupLibrary({onResult, onBusy, onStatus, blocked = fal
   const copyTotal = Number.isFinite(copying?.bytes) && copying.bytes > 0 ? copying.bytes : null;
   const copyDone = Number.isFinite(copying?.copied_bytes) ? Math.max(0, Math.min(copying.copied_bytes, copyTotal ?? Infinity)) : null;
   return <section className="local-analysis backup-library" aria-label="Existing DVR backup">
+    <p className="local-analysis-announcement" role="status" aria-live="polite" aria-atomic="true">{backupAnnouncement(status, connected)}</p>
     <div className="local-analysis-heading"><div><p className="eyebrow">LOCAL BACKUP &amp; ANALYSIS</p><h2>Use my existing DVR</h2></div>
       <span className={`local-analysis-badge ${connected && status?.active ? 'backup-running' : !connected && status ? 'backup-stale' : ''}`}>{connected ? stopping ? 'Stopping backup' : status?.analyzing ? 'Analyzing locally' : status?.active ? 'Backup running' : 'Backup paused' : status ? 'Status unknown' : 'Not connected'}</span></div>
     <p className="backup-intro">Keep your OEM DVR software recording. Save another copy of its finished videos here, with optional analysis on this computer.</p>
     <ol className="backup-steps" aria-label="DVR companion setup"><li className={connected ? !status?.configured ? 'current' : 'complete' : ''}><span>1</span><strong>Choose folders</strong><small>Your DVR → your backup</small></li><li className={connected && status?.active ? 'current' : ''}><span>2</span><strong>Keep another copy</strong><small>Start when you are ready</small></li><li className={connected && status?.analyzing ? 'current' : ''}><span>3</span><strong>Analyze locally</strong><small>Optional · review every result</small></li></ol>
-    <div className="local-analysis-actions"><button className="button" onClick={connect} disabled={!local || working}>{status ? 'Refresh backup connection' : 'Connect to this computer'}</button><span className="backup-local-note">Files and analysis stay on this computer.</span></div>
+    <div className="local-analysis-actions"><button className="button" onClick={connect} disabled={!local || working || transferring}>{status ? 'Refresh backup connection' : 'Connect to this computer'}</button><span className="backup-local-note">Files and analysis stay on this computer.</span></div>
     {!connected && !status && <p className="backup-connection-hint">Start here: connect to the local app to unlock folder setup. Connecting checks availability; backup starts only when you choose Start backup.</p>}
     {!connected && status && <p className="backup-notice" role="status">Last checked {new Date(checkedAt).toLocaleTimeString()}. Saved-video details, storage and progress below are from that check. Backup may still be running. Refresh the connection to check its current state.</p>}
     {!local && <p>Open the installed local app at 127.0.0.1 to use local backup and camera setup.</p>}
-    <fieldset className="backup-folder-fields" disabled={unavailable || status?.active || status?.analyzing || stopping}>
+    <fieldset className="backup-folder-fields" disabled={unavailable || transferring || status?.active || status?.analyzing || stopping}>
       <legend>1. Choose your folders</legend>
       <label>DVR source folder <small>Read only · finished recordings or OEM exports</small><span className="backup-path-input"><input value={config.source_folder} onChange={e => edit('source_folder',e.target.value)} placeholder="Full path to your DVR recordings" aria-label="DVR source folder" autoComplete="off" spellCheck="false" /><button type="button" className="button" onClick={() => pickFolder('source_folder')}>Choose source folder</button></span></label>
       <label>Separate backup folder <small>The additional copy is saved here</small><span className="backup-path-input"><input value={config.backup_folder} onChange={e => edit('backup_folder',e.target.value)} placeholder="Full path to a separate backup folder" aria-label="Backup folder" autoComplete="off" spellCheck="false" /><button type="button" className="button" onClick={() => pickFolder('backup_folder')}>Choose backup folder</button></span></label>
@@ -135,7 +151,7 @@ export default function BackupLibrary({onResult, onBusy, onStatus, blocked = fal
     </fieldset>
     {pickerNote && <p className="backup-notice" role="status">{pickerNote}</p>}
     <p className="backup-format-note">Finished MP4, MOV, M4V, AVI, MKV and WebM videos can be copied and analyzed. Common proprietary DVR and legacy video formats are copied as backup only; export a standard video from the OEM software for analysis. Files must stop changing before they are copied; quiet time cannot confirm a recording has finished.</p>
-    <fieldset className="backup-analysis-fields" disabled={unavailable || status?.active || status?.analyzing || stopping}>
+    <fieldset className="backup-analysis-fields" disabled={unavailable || transferring || status?.active || status?.analyzing || stopping}>
       <legend>2. Keep another copy · 3. Analyze locally</legend>
       <label className="backup-checkbox"><input type="checkbox" checked={analyze} onChange={e => setAnalyze(e.target.checked)} />Analyze copied videos automatically</label>
       <span className="backup-local-note">Off by default. Selecting this starts local analysis when you start backup.</span>
@@ -143,21 +159,23 @@ export default function BackupLibrary({onResult, onBusy, onStatus, blocked = fal
       {analyze && blocked && <p className="backup-notice">Another recording or analysis is using the analyzer. You can start backup with automatic analysis turned off.</p>}
       {analyze && catalog && (!catalog.ready || !compatible) && <p className="backup-notice">Choose a compatible model and rule set. The local analysis dependencies must be ready.</p>}
     </fieldset>
-    <div className="local-analysis-actions backup-start-actions"><button className="button amber" disabled={unavailable || !status?.configured || dirty || status?.active || status?.analyzing || stopping || (analyze && (blocked || !catalog?.ready || !compatible))} onClick={() => act('start',{analyze,model,rules},analyze ? 'Backup started with local analysis enabled.' : 'Backup started. Finished videos will be copied; analysis is off.')}>Start backup</button><button className="button" disabled={unavailable || (!status?.active && !status?.analyzing)} onClick={() => act('stop',{},'Backup is stopping. Saved copies are preserved; restart stays paused.')}>Stop backup</button></div>
+    <div className="local-analysis-actions backup-start-actions"><button className="button amber" disabled={unavailable || transferring || !status?.configured || dirty || status?.active || status?.analyzing || stopping || (analyze && (blocked || !catalog?.ready || !compatible))} onClick={() => act('start',{analyze,model,rules},analyze ? 'Backup started with local analysis enabled.' : 'Backup started. Finished videos will be copied; analysis is off.')}>Start backup</button><button className="button" disabled={unavailable || (!status?.active && !status?.analyzing)} onClick={() => act('stop',{},'Backup is stopping. Saved copies are preserved; restart stays paused.')}>Stop backup</button></div>
+    {transferring && <div className="local-analysis-actions"><p role="status">Opening backup and verifying its recording…</p><button className="button" onClick={() => transfers.current.cancel()}>Cancel backup opening</button></div>}
     {message && <p className="local-analysis-message" role="status">{message}</p>}
     {error && <p className="recognition-error" role="alert">{error}</p>}
     {status?.error && <p className="recognition-error" role="alert">{status.error}</p>}
     {status && <>
-      {status.analysis_job && <p role="status">{analysisBackendLabel(status.analysis_job, catalog?.backend)} · {status.analysis_job.frames_analyzed} samples analyzed</p>}
+      <p className="local-analysis-announcement" role="status" aria-live="polite" aria-atomic="true">{analysisAnnouncement(status.analysis_job, connected)}</p>
+      {status.analysis_job && <p>{analysisBackendLabel(status.analysis_job, catalog?.backend)} · {status.analysis_job.frames_analyzed} samples analyzed</p>}
       <div className="backup-storage" aria-label="Backup storage status"><span><strong>{storageSize(status.storage_bytes)}</strong> saved / {status.config?.max_storage_gib ?? config.max_storage_gib} GiB budget</span><span><strong>{storageSize(status.disk_free_bytes)}</strong> disk free</span><span><strong>{status.waiting ?? 0}</strong> files waiting for quiet time</span><span><strong>{status.counters?.copied ?? 0}</strong> copied · {status.counters?.duplicates ?? 0} duplicates skipped</span></div>
-      {copying && <div className="backup-copy-progress" role="status"><strong>{connected ? 'Saving another copy' : 'Last reported copy'}: {copying.name}</strong><span>{storageSize(copyDone)} of {storageSize(copyTotal)}{!connected && ' · progress unavailable'}</span>{connected && <progress aria-label={`Copy progress for ${copying.name}`} max={copyTotal ?? 1} value={copyTotal !== null && copyDone !== null ? copyDone : undefined} />}</div>}
+      {copying && <div className="backup-copy-progress"><strong>{connected ? 'Saving another copy' : 'Last reported copy'}: {copying.name}</strong><span>{storageSize(copyDone)} of {storageSize(copyTotal)}{!connected && ' · progress unavailable'}</span>{connected && <progress aria-label={`Copy progress for ${copying.name}`} max={copyTotal ?? 1} value={copyTotal !== null && copyDone !== null ? copyDone : undefined} />}</div>}
       {status.scan_limited && <p className="backup-notice">The source scan is incomplete because of an entry/depth limit or an inaccessible folder. Choose a narrower source folder or check folder access.</p>}
       {!!status.unsupported?.length && <p className="backup-notice">Backup only: {status.unsupported.map(item => `${item.extension || 'no extension'} (${item.count})`).join(', ')}. These formats need an OEM standard-video export for analysis.</p>}
       <details className="backup-saved"><summary>Saved videos <span>{items.length ? `· latest ${items.length}` : '· no copies yet'}</span></summary>
         {!items.length && <p>No videos copied yet. Start backup after saving your folders; new files wait for the quiet time first.</p>}
         <div className="backup-list">{items.map(item => <article key={item.id} className={`backup-item backup-item-${item.state}`}><div><strong>{item.name}</strong><span className="backup-item-meta">{storageSize(item.bytes)} · {item.state === 'saved' ? 'Copy saved · not analyzed' : item.state}{Number.isFinite(item.observations) && item.state === 'completed' ? ` · ${item.observations} observations` : ''}</span>{item.copied_at && <small>Copied {new Date(typeof item.copied_at === 'number' ? item.copied_at * 1000 : item.copied_at).toLocaleString()}</small>}{item.state === 'completed' && <small>{libraryCoverage(item)}</small>}{item.analysis_eligible === false && <small>Copy saved; outside local analysis limits.</small>}{item.error && <small className="recognition-error">{item.error}</small>}</div><div className="local-analysis-actions">
-          {item.state === 'completed' && <button className="button" disabled={unavailable || item.bytes > MAX_VIDEO_BYTES} onClick={() => open(item)}>Review backup</button>}
-          {['failed','interrupted'].includes(item.state) && item.analysis_eligible !== false && <button className="button" disabled={unavailable || blocked} onClick={() => act('retry',{id:item.id},'Backup analysis queued again. The saved video is preserved.')}>Retry analysis</button>}
+          {item.state === 'completed' && <button className="button" disabled={unavailable || transferring || item.bytes > MAX_VIDEO_BYTES} onClick={() => open(item)}>Review backup</button>}
+          {['failed','interrupted'].includes(item.state) && item.analysis_eligible !== false && <button className="button" disabled={unavailable || transferring || blocked} onClick={() => act('retry',{id:item.id},'Backup analysis queued again. The saved video is preserved.')}>Retry analysis</button>}
         </div></article>)}</div>
       </details>
     </>}

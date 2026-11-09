@@ -35,6 +35,10 @@ controls. Verify the selection and original evidence before a bulk decision.
 Possible enrolled-person suggestions have a separate Confirm/Not this person
 flow; they do not reach Events or exports automatically.
 
+State announcements describe changes such as analysis starting, finishing or
+losing contact with the service. Frequently refreshed sample, storage and queue
+counts remain readable in place without being announced on every poll.
+
 ![Actual review dialog with the generated still, source fingerprints, a note field and human decision controls.](https://raw.githubusercontent.com/wiki/bartytime4life/Intelligent-DVR-Tool/docs/media/guide/review-dialog.jpg)
 
 ## Choose the right export
@@ -50,6 +54,47 @@ flow; they do not reach Events or exports automatically.
 Browser storage can be edited or cleared; it is not a shared, authenticated audit
 trail. Counts across sampled frames can include repeated sightings of the same
 person. Preserve the original recording and context when sharing a report.
+
+## Resolve a browser save conflict
+
+Reviews and browser rules are saved separately. If another tab changes a workspace
+while this tab has unsaved edits, the app keeps this tab's version in memory and
+pauses saving. This includes edits left unsaved by a quota or permission failure.
+Further edits do not silently replace the other tab's saved version. A tab with
+no unsaved edits can adopt a valid save from another tab.
+
+1. In **Reviews save conflict** or **Rules save conflict**, choose **Download this
+   version** and **Download other version**. Inspect both files before deciding.
+   An unreadable other version is offered as raw text so it can be preserved.
+2. Choose **Keep this tab’s version** to save the in-memory version, or **Use other
+   tab’s version** to adopt the saved one. The displaced version must be backed up
+   in this browser first. An unreadable version cannot be adopted. If another tab
+   removed the saved entry, the choice explicitly offers an empty review queue or
+   default browser rules.
+3. If either version changed while the choice was waiting, review the refreshed
+   versions and choose again. A storage error leaves both versions available for
+   download and keeps saving paused. Reloading or closing can discard the version
+   held only in memory; heed the unfinished-work warning.
+
+Each workspace has room for **ten saved conflict copies**. Existing copies are
+never replaced automatically. In **Saved conflict copies**, use **Download copy**,
+inspect the downloaded file, then explicitly choose **Remove this copy** only when
+you no longer need its browser copy. Removal is enabled after that exact copy's
+download starts, and removes only the rechecked copy. It does not clear the current
+queue, current rules, source recordings or OEM backups. If all ten slots are
+occupied, make room this way before retrying the unresolved choice. Downloads
+remain separate from browser storage and do not remove a copy by themselves.
+Saved-copy downloads preserve the stored backup archive, including its raw
+snapshot; damaged copies retain their original bytes. These archives are for
+inspection and recovery, and are not accepted directly by **Import reviews**.
+Use **Download this version** or **Download other version** for the ordinary
+portable review export.
+
+Browser saves and conflict choices use a shared browser save lock. If this feature
+is unavailable, the app reports that changes are in memory and keeps export
+available. Preserve downloads before changing browser or origin. Unreadable
+startup data keeps its separate recovery download; do not clear storage to force
+a save.
 
 ---
 

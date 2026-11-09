@@ -95,9 +95,9 @@ checks source/model/labels/rules hashes again before publishing a review run.
 This catches persistent input changes, not hostile mutation-and-restoration.
 
 - Review file: 32 MiB; at most 10,000 sampled frames and 100,000 detections.
-- Original recording in the browser: 512 MiB. Hashing uses a bounded full-file
-  buffer and requires a secure context (localhost or HTTPS). Split larger sources
-  before analysis. Outputs hold metadata only; recordings/models are not copied.
+- Original recording in the browser: 512 MiB. Hashing reads 4 MiB slices and uses a
+  worker when available, with a bounded-slice fallback. Split larger sources before
+  analysis. Outputs hold metadata only; recordings/models are not copied.
 - Rendered boxes/score rows: first 200 per selected frame; a visible notice
   reports truncation while counts include all detections above the display score.
 - Outputs are exclusively created and cleaned up after a normal write failure.
@@ -153,6 +153,14 @@ recognition imports preserve existing decisions and notes for matching evidence.
 A reused ID with different source/model/observation fields is rejected. Queue
 capacity is 1,000 records across model and sample observations. Every insertion
 refuses overflow without truncating older records.
+
+OEM-backup review and LAN-segment review, Event handoff and timing downloads each
+allow one review transfer per panel, with a two-minute deadline. Use **Cancel
+backup opening** or **Cancel review transfer** to release the controls and retain
+the current review. A cancelled or timed-out LAN handoff adds nothing to Events.
+While connected, the active recorder's or backup's Stop control remains available
+during these transfers. Cancelling a transfer does not stop background recording
+or copying. See [LAN recording](lan-recording.md) and [OEM backup](oem-backup.md).
 
 ## Zones from camera images
 
@@ -216,3 +224,10 @@ Sample reset keeps imported observations and all reviewed samples. Save failures
 produce a persistent banner with export actions. Success toasts say “updated”
 rather than claiming durable storage. Workspace URLs support bookmarks and browser
 Back/Forward; recognition metadata and footage are not encoded in URLs.
+
+If another tab saves while reviews or browser rules have unsaved edits, both
+versions remain available in a save-conflict panel and ordinary saves pause.
+Download both versions before making the explicit choice. The app preserves up
+to ten displaced conflict copies per workspace, with separate download and removal
+controls. Follow [save-conflict recovery](review-and-events.md#resolve-a-browser-save-conflict)
+before closing or clearing browser storage.

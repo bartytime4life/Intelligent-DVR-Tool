@@ -1,13 +1,39 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
-import {openSegment, recorderRequest} from '../src/lan-recorder.mjs';
+import {openSegment, recorderRequest, recorderSession} from '../src/lan-recorder.mjs';
 import {recognitionFixture} from './fixtures/recognition.mjs';
 
 const bytes = Buffer.from('controlled segment bytes');
 const sha = createHash('sha256').update(bytes).digest('hex');
 const row = {id:'a'.repeat(32), state:'completed', sha256:sha, source:'dock'};
 const serve = (hash = sha, source = bytes) => async path => new Response(path.endsWith('/result') ? JSON.stringify(recognitionFixture(hash)) : source);
+
+test('a stalled recorder session times out and a later explicit connection can succeed', {timeout:1000}, async () => {
+  let cancelled = false;
+  await assert.rejects(recorderSession({timeout:20, fetcher:async (path, options) => {
+    assert.equal(path, '/api/analysis/session');
+    assert.equal(options.method, 'GET');
+    return new Promise((resolve, reject) => {
+      // Keep the test alive and fail independently if cancellation does not arrive.
+      const guard = setTimeout(() => reject(Error('Session remained stalled')), 500);
+      options.signal.addEventListener('abort', () => {
+        clearTimeout(guard); cancelled = true; reject(options.signal.reason);
+      }, {once:true});
+    });
+  }}), /did not respond in time/);
+  assert.equal(cancelled, true);
+  const response = await recorderSession({fetcher:async () => new Response('{"token":"next-session"}')});
+  assert.equal((await response.json()).token, 'next-session');
+});
+
+test('closing a recorder session preserves explicit cancellation', async () => {
+  const controller = new AbortController(); controller.abort();
+  await assert.rejects(recorderSession({signal:controller.signal, fetcher:async (path, {signal}) => {
+    assert.equal(signal.aborted, true);
+    throw signal.reason;
+  }}), error => error.name === 'AbortError');
+});
 
 test('retained segment uses existing review parser and exact source matching', async () => {
   const opened = await openSegment(row, 'token', undefined, serve());

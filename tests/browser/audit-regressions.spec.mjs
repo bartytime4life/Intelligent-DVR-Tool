@@ -26,7 +26,7 @@ test('conflicting recording imports leave the original reviewed thumbnail untouc
   const buffer=Buffer.from(bytes),bundle=recognitionFixture(createHash('sha256').update(buffer).digest('hex'));
   await page.getByLabel('Open recognition results').setInputFiles(upload(bundle));
   await page.getByLabel('Match original recording').setInputFiles({name:'generated.webm',mimeType:'video/webm',buffer});
-  await expect(page.getByRole('status')).toContainText('fingerprint matched');
+  await expect(page.locator('.recognition-status')).toContainText('fingerprint matched');
   await page.getByRole('button',{name:'Send 1 observations to Events'}).click();
   await expect(page.locator('.toast')).toContainText('conflicts');
   const images=await page.evaluate(async({old,changed})=>{

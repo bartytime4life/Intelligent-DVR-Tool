@@ -1,11 +1,13 @@
-import React, { lazy, Suspense, useEffect, useId, useRef, useState } from "react";
+import React, { lazy, Suspense, useCallback, useEffect, useId, useRef, useState } from "react";
+import WorkspaceConflict from './WorkspaceConflict.jsx';
 const FacilityBuilder = lazy(() => import("./FacilityBuilder.jsx").then(m => ({default:m.FacilityBuilder})));
 const SystemSetup = lazy(() => import("./SystemSetup.jsx"));
 import LiveMonitor from "./LiveMonitor.jsx";
 const RecognitionReview = lazy(() => import("./RecognitionReview.jsx"));
 const TrainingWorkspace = lazy(() => import("./TrainingWorkspace.jsx"));
 import { mergeRecognitionEvents } from './recognition.mjs';
-import { workspaceFromHash, readWorkspace, writeWorkspace, preserveUnreadable, reviewExport, parseReviewExport, pauseHiddenPlayback } from './workspace-state.mjs';
+import { workspaceFromHash, preserveUnreadable, reviewExport, parseReviewExport, pauseHiddenPlayback } from './workspace-state.mjs';
+import { createWorkspaceSave } from './workspace-save.mjs';
 import { backdropDismiss } from './dialog-dismiss.mjs';
 import { getImage, putImage, deleteImage, pruneImages, imageFileFrame, observationImageKey } from './local-images.mjs';
 import { ANALYZER_CLASSES, DEFAULT_MAX_GAP, analyzerRules, analyzerFilename } from './zone-rules.mjs';
@@ -68,36 +70,25 @@ function downloadText(text, name, type = "text/plain") {
   a.click();
   setTimeout(() => URL.revokeObjectURL(u), 1000);
 }
-const browserStorage = () => ({ getItem: key => localStorage.getItem(key), setItem: (key, value) => localStorage.setItem(key, value) });
+const browserStorage = () => ({ getItem: key => localStorage.getItem(key), setItem: (key, value) => localStorage.setItem(key, value), removeItem: key => localStorage.removeItem(key) });
 function useStored(key, initial) {
-  const [loaded] = useState(() => readWorkspace(browserStorage(), key, initial));
-  const [v, set] = useState(loaded.value);
-  const [saveError, setSaveError] = useState("");
-  const [recoveryOpen, setRecoveryOpen] = useState(Boolean(loaded.error));
-  const adopted = useRef(null);
+  const [session] = useState(() => createWorkspaceSave(browserStorage(), key, initial));
+  const [saved, setSaved] = useState(() => session.snapshot());
+  const [recoveryOpen, setRecoveryOpen] = useState(Boolean(session.loaded.error));
+  useEffect(() => session.subscribe(() => setSaved(session.snapshot())), [session]);
   useEffect(() => {
-    if ((loaded.error && v === loaded.value) || v === adopted.current) return;
-    if (loaded.raw != null && !preserveUnreadable(browserStorage(), key, loaded.raw)) {
-      setSaveError("Changes are only in memory. The unreadable saved entry could not be backed up, so it was not replaced. Export before closing this page.");
-      return;
-    }
-    setSaveError(writeWorkspace(browserStorage(), key, v));
-  }, [key, v, loaded]);
+    void session.flush();
+  }, [session, saved.editVersion]);
   useEffect(() => {
-    // Another tab saved newer data. Adopt it instead of overwriting it with this tab's older copy.
     const changed = e => {
-      if (e.storageArea !== localStorage || e.key !== key || e.newValue === null) return;
-      const next = readWorkspace({ getItem: () => e.newValue }, key, null);
-      if (next.error || !next.value) return;
-      adopted.current = next.value;
-      set(next.value);
-      setSaveError("");
+      if (e.storageArea !== localStorage || (e.key !== key && e.key !== null)) return;
+      session.receive();
     };
     window.addEventListener("storage", changed);
     return () => window.removeEventListener("storage", changed);
-  }, [key]);
-  const recovery = recoveryOpen ? { message: loaded.error, raw: loaded.raw, dismiss: () => setRecoveryOpen(false) } : null;
-  return [v, set, saveError || recovery?.message || "", recovery];
+  }, [key, session]);
+  const recovery = recoveryOpen ? { message: session.loaded.error, raw: session.loaded.raw, dismiss: () => setRecoveryOpen(false) } : null;
+  return [saved.value, session.update, saved.error || saved.conflict?.message || recovery?.message || "", recovery, saved.conflict, saved.hasUnsavedChanges];
 }
 class WorkspaceBoundary extends React.Component {
   state = { error: null };
@@ -303,8 +294,8 @@ function EventRow({ event, review, zone }) {
 export function App() {
   const [tab, updateTab] = useState(() => workspaceFromHash(window.location.hash) || "Monitor"),
     [selected, setSelected] = useState(1),
-    [events, setEvents, eventsStorageError, eventsRecovery] = useStored("dvr.events.v1", []),
-    [rules, setRules, rulesStorageError, rulesRecovery] = useStored("dvr.rules.v1", initialRules),
+    [events, setEvents, eventsStorageError, eventsRecovery, eventsConflict, eventsUnsaved] = useStored("dvr.events.v1", []),
+    [rules, setRules, rulesStorageError, rulesRecovery, rulesConflict, rulesUnsaved] = useStored("dvr.rules.v1", initialRules),
     [modal, setModal] = useState(null),
     [toast, setToast] = useState(""),
     [query, setQuery] = useState(""),
@@ -334,7 +325,10 @@ export function App() {
   const eventsRef = useRef(events);
   eventsRef.current = events;
   // Leaving Facility unmounts the builder, so unsaved drafts and its undo history would be lost silently.
-  const tabRef = useRef(tab), facilityDirty = useRef(false), systemDirty = useRef(false), zoneDirty = useRef(false);
+  const tabRef = useRef(tab), facilityDirty = useRef(false), systemDirty = useRef(false), zoneDirty = useRef(false), trainingDirty = useRef(false);
+  const pendingBrowserSave = useRef(false);
+  pendingBrowserSave.current = eventsUnsaved || rulesUnsaved;
+  const reportTrainingDirty = useCallback(dirty => { trainingDirty.current = dirty; }, []);
   tabRef.current = tab;
   // Unsaved zone rules are a draft, not the separately persisted analyzer rules.
   // The history listener was installed on mount; refs ensure it sees fresh values.
@@ -344,6 +338,7 @@ export function App() {
     const blockers = {
       Facility: [facilityDirty, "Leave the facility builder? Unsaved facility edits, drafts and undo history will be discarded."],
       Zones: [zoneDirty, "Leave Zones? Unsaved rule edits will be discarded. Save the review rule before leaving."],
+      Train: [trainingDirty, "Leave Train? Unfinished recordings, checks and unsaved results will be discarded. Session-owned camera capture will stop and analysis cancellation will be requested. Saved settings and face templates stay on this computer."],
       System: [systemDirty, "Leave System? Unapplied machine settings will be discarded. Apply the draft before leaving."]
     };
     const blocker = blockers[tabRef.current];
@@ -356,7 +351,8 @@ export function App() {
     const warn = event => {
       if (tabRef.current === "Facility" && facilityDirty.current ||
           tabRef.current === "Zones" && zoneDirty.current ||
-          tabRef.current === "System" && systemDirty.current) {
+          tabRef.current === "System" && systemDirty.current ||
+          tabRef.current === "Train" && trainingDirty.current || pendingBrowserSave.current) {
         event.preventDefault();
         event.returnValue = "";
       }
@@ -660,20 +656,32 @@ export function App() {
         </button>
       </nav>
       <main id="workspace" className={`workspace tab-${tab.toLowerCase()}`}>
-        {(eventsStorageError || rulesStorageError) && <div className="workspace-storage-warning" role="alert">
+        {((eventsStorageError && !eventsConflict) || (rulesStorageError && !rulesConflict) || eventsRecovery || rulesRecovery) && <div className="workspace-storage-warning" role="alert">
           <WarningCircle size={22} /><div><strong>Browser save needs attention</strong>
-          {eventsStorageError && <p>Reviews: {eventsStorageError}</p>}
-          {rulesStorageError && <p>Rules: {rulesStorageError}</p>}</div>
+          {eventsStorageError && !eventsConflict && <p>Reviews: {eventsStorageError}</p>}
+          {rulesStorageError && !rulesConflict && <p>Rules: {rulesStorageError}</p>}</div>
+          {eventsConflict && eventsRecovery && <p>The original unreadable reviews are also preserved. Download them before dismissing this recovery notice.</p>}
+          {rulesConflict && rulesRecovery && <p>The original unreadable rules are also preserved. Download them before dismissing this recovery notice.</p>}
           <button className="button" onClick={exportReviews}>Export reviews</button>
           <button className="button" onClick={() => download({schema:"intelligent-dvr.rules.v1", rules}, "dvr-rules.json")}>Export rules</button>
           {eventsRecovery?.raw != null && <button className="button" onClick={() => downloadText(eventsRecovery.raw, "dvr-unreadable-reviews.json")}>Download unreadable reviews</button>}
           {rulesRecovery?.raw != null && <button className="button" onClick={() => downloadText(rulesRecovery.raw, "dvr-unreadable-rules.json")}>Download unreadable rules</button>}
           {(eventsRecovery || rulesRecovery) && <button className="text-button" onClick={() => { eventsRecovery?.dismiss(); rulesRecovery?.dismiss(); }}>Dismiss</button>}
         </div>}
+        {eventsConflict && <WorkspaceConflict kind="reviews" localCount={events.length} conflict={eventsConflict}
+          exportLocal={exportReviews}
+          exportRemote={() => eventsConflict.remoteValid
+            ? download(reviewExport(eventsConflict.remoteValue), 'dvr-reviews-other-tab.json')
+            : downloadText(eventsConflict.remoteRaw ?? 'null', 'dvr-unreadable-reviews-other-tab.json')} />}
+        {rulesConflict && <WorkspaceConflict kind="rules" localCount={rules.length} conflict={rulesConflict}
+          exportLocal={() => download({schema:'intelligent-dvr.rules.v1', rules}, 'dvr-rules.json')}
+          exportRemote={() => rulesConflict.remoteValid
+            ? download({schema:'intelligent-dvr.rules.v1', rules:rulesConflict.remoteValue}, 'dvr-rules-other-tab.json')
+            : downloadText(rulesConflict.remoteRaw ?? 'null', 'dvr-unreadable-rules-other-tab.json')} />}
         {recognitionOpened && <div hidden={tab !== "Recognition"}><WorkspaceBoundary name="Recognition"><Suspense fallback={<div className="content-page"><h1>Opening recognition review…</h1></div>}>
           <RecognitionReview active={tab === "Recognition" && !pageHidden} onImport={addObservations} onValidateImport={added => addObservations(added, false, true)} clip={capturedClip} onClip={setCapturedClip} reviews={events} evidence={evidence} onRecorderStatus={setRecorderStatus} onZoneStill={offerZoneStill} />
         </Suspense></WorkspaceBoundary></div>}
-        {tab === "Train" && <WorkspaceBoundary name="Train"><Suspense fallback={<div className="content-page"><h1>Opening training…</h1></div>}><TrainingWorkspace onOpenRecognition={() => setTab("Recognition")} /></Suspense></WorkspaceBoundary>}
+        {tab === "Train" && <WorkspaceBoundary name="Train"><Suspense fallback={<div className="content-page"><h1>Opening training…</h1></div>}><TrainingWorkspace onOpenRecognition={() => setTab("Recognition")} onDirtyChange={reportTrainingDirty} /></Suspense></WorkspaceBoundary>}
         {tab === "Facility" && <WorkspaceBoundary name="Facility"><Suspense fallback={<div className="content-page"><h1>Opening facility builder…</h1></div>}><FacilityBuilder onPreviewCount={setLiveCount} onDirtyChange={(dirty) => { facilityDirty.current = dirty; }} /></Suspense></WorkspaceBoundary>}
         {tab === "System" && <WorkspaceBoundary name="System"><Suspense fallback={<div className="content-page"><h1>Opening machine setup…</h1></div>}><SystemSetup setup={resources}
           onApply={setup => setResourceState(s => ({ ...s, setup, error: "" }))}

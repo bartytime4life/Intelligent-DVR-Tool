@@ -1,5 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { trainingHasPendingWork, personHasPendingWork } from '../src/training-lifecycle.mjs';
 import { TRAINING_SCRIPT, CHECK_SCRIPT, scriptTimeline, scriptSeconds, labelFrames, countObservations, evaluate, recommendThreshold, compareTrainingCheck,
   frameMoments, plural, readHistory, ENROLL_SCRIPT, BASELINE_SCRIPT, CONSENT_TEXT, baselineText, appendHistory, readDefaultRules, writeDefaultRules, HISTORY_KEY, percent } from '../src/training.mjs';
 
@@ -129,4 +130,55 @@ test('the default rule set id is validated before use', () => {
   storage.setItem('dvr.analysis.defaultRules', '../x'); assert.equal(readDefaultRules(storage), '');
   assert.equal(writeDefaultRules(memory(true), 'x'), false);
   assert.equal(percent(.876), '88%'); assert.equal(percent(null), '—');
+});
+
+test('training navigation is unguarded before recording or editing enrollment', () => {
+  assert.equal(trainingHasPendingWork(), false);
+  assert.equal(trainingHasPendingWork({step:null, saving:false}), false);
+  assert.equal(trainingHasPendingWork({step:'camera'}), false);
+  assert.equal(personHasPendingWork(), false);
+  assert.equal(personHasPendingWork({stage:'consent', name:'   '}), false);
+  assert.equal(personHasPendingWork({stage:'baseline', capture:'camera'}), false);
+});
+
+test('unfinished captures, analysis, calibration and fresh checks remain protected before a decision', () => {
+  for (const step of ['record', 'analyze', 'results', 'check-camera', 'check-record', 'check-analyze', 'confirm']) {
+    assert.equal(trainingHasPendingWork({step}), true, step);
+  }
+  for (const retained of [{clip:{name:'generated.webm'}}, {outcome:{sourceHash:'generated'}}, {check:{confirmed:true}}]) {
+    assert.equal(trainingHasPendingWork({step:'camera', ...retained}), true);
+  }
+  assert.equal(trainingHasPendingWork({saving:true}), true);
+  assert.equal(trainingHasPendingWork({personPending:true}), true);
+});
+
+test('completed decisions release navigation only when requested browser saves succeeded', () => {
+  const completed = {step:'done', outcome:{sourceHash:'generated'}, check:{confirmed:true},
+    saved:{historySaved:true, evidenceSaved:false, selected:false}};
+  assert.equal(trainingHasPendingWork(completed), false, 'Kept setting with saved history and no requested evidence');
+  assert.equal(trainingHasPendingWork({...completed, includeSession:true}), true, 'Requested evidence was not saved');
+  assert.equal(trainingHasPendingWork({...completed, includeSession:true,
+    saved:{...completed.saved, evidenceSaved:true}}), false);
+  assert.equal(trainingHasPendingWork({...completed, saved:{...completed.saved, historySaved:false}}), true);
+  assert.equal(trainingHasPendingWork({...completed,
+    saved:{...completed.saved, evidenceError:'Browser storage is full'}}), true);
+  const applied = {...completed, saved:{...completed.saved, rule:{id:'trained-setting'}, selected:true}};
+  assert.equal(trainingHasPendingWork(applied), false);
+  assert.equal(trainingHasPendingWork({...applied, saved:{...applied.saved, selected:false}}), true,
+    'Saved rule is not proof that the requested Recognition selection was remembered');
+  assert.equal(trainingHasPendingWork({...completed, saved:null}), true, 'An incomplete decision cannot release retained results');
+  assert.equal(trainingHasPendingWork({...completed, saving:true}), true);
+});
+
+test('person sessions protect edited consent and active work while respecting already saved templates', () => {
+  assert.equal(personHasPendingWork({stage:'consent', name:'Generated Person'}), true);
+  assert.equal(personHasPendingWork({stage:'consent', agreed:true}), true);
+  assert.equal(personHasPendingWork({stage:'enroll', capture:'camera'}), true);
+  assert.equal(personHasPendingWork({stage:'enroll', capture:'record'}), true);
+  assert.equal(personHasPendingWork({stage:'baseline', capture:'record'}), true);
+  assert.equal(personHasPendingWork({stage:'baseline', capture:'intro', name:'Generated Person', agreed:true}), false,
+    'Enrollment is saved before the optional baseline intro');
+  assert.equal(personHasPendingWork({stage:'baseline', capture:'camera', busy:true}), true);
+  assert.equal(personHasPendingWork({stage:'done', name:'Generated Person', agreed:true}), false);
+  assert.equal(personHasPendingWork({stage:'done', busy:true}), true);
 });

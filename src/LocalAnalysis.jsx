@@ -2,6 +2,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import { activeJob, analysisBackendLabel, analysisRequest, localAnalysisOrigin, openJobResult, importRecording, refused } from './local-analysis.mjs';
 import { downloadBlob } from './clip-capture.mjs';
 import { loopbackAddress } from './live-feeds.mjs';
+import { analysisAnnouncement } from './status-announcements.mjs';
+import { createReviewTransfer } from './review-transfer.mjs';
 import { DEFAULT_RULES_KEY, TRAINING_SELECTION_EVENT, readTrainingSelection, resolveTrainingSelection } from './training.mjs';
 
 export default function LocalAnalysis({ onResult, onBusy, clip, onClip, recorderBusy = false, currentRun = null }) {
@@ -13,6 +15,8 @@ export default function LocalAnalysis({ onResult, onBusy, clip, onClip, recorder
   const [selectionChanged, setSelectionChanged] = useState(false);
   const explicitSelection = useRef(null), savedSelection = useRef(null);
   const token = useRef(''), version = useRef(0), opened = useRef(''), controller = useRef(null);
+  const transfers = useRef(null);
+  if (!transfers.current) transfers.current = createReviewTransfer();
   // Results open automatically when nothing is loaded, or for a job started here while the same review stayed loaded.
   // They never silently replace a different review.
   const autoOpen = useRef(''), runAtStart = useRef(null), runRef = useRef(currentRun); runRef.current = currentRun;
@@ -22,7 +26,7 @@ export default function LocalAnalysis({ onResult, onBusy, clip, onClip, recorder
   const busy = Boolean(working || opening || activeJob(job) || recorderActive);
   const local = localAnalysisOrigin(globalThis.location), loopback = loopbackAddress(globalThis.location);
   useEffect(() => { onBusy(Boolean(working || opening || activeJob(job))); }, [working, opening, job, onBusy]);
-  useEffect(() => () => { version.current++; controller.current?.abort(); }, []);
+  useEffect(() => () => { version.current++; controller.current?.abort(); transfers.current.cancel(); }, []);
   useEffect(() => {
     const changed = event => {
       if (event.type === TRAINING_SELECTION_EVENT || event.key === DEFAULT_RULES_KEY) setSelectionChanged(true);
@@ -126,7 +130,7 @@ export default function LocalAnalysis({ onResult, onBusy, clip, onClip, recorder
     else if (activeJob(job)) setMessage('Processing on this computer. Your current review remains available below.');
   }, [job?.state]);
   useEffect(() => {
-    if (!connected || !activeJob(job)) return;
+    if (!connected || working || !activeJob(job)) return;
     let disposed = false;
     const timeout = setTimeout(async () => {
       try { const next = await request(`/jobs/${job.id}`); pollMisses.current = 0; if (!disposed) setJob(next); }
@@ -138,7 +142,7 @@ export default function LocalAnalysis({ onResult, onBusy, clip, onClip, recorder
       }
     }, 500);
     return () => { disposed = true; clearTimeout(timeout); };
-  }, [connected, job]);
+  }, [connected, job, working]);
 
   useEffect(() => {
     if (!connected || job?.state !== 'completed' || opened.current === job.id) return;
@@ -146,19 +150,33 @@ export default function LocalAnalysis({ onResult, onBusy, clip, onClip, recorder
       setMessage(`Analysis of ${job.recording} is complete. Choose Open results to review it; the review shown below stays open until then.`);
       return;
     }
-    opened.current = job.id;
     const ticket = version.current;
-    let disposed = false;
+    const operation = transfers.current.begin(controller.current?.signal, reason => {
+      if (ticket !== version.current) return;
+      setOpening(false);
+      setMessage(reason?.name === 'TimeoutError'
+        ? 'Opening timed out. Your current review is preserved. Refresh choices or choose Open results again when ready.'
+        : 'Opening cancelled. Your current review is preserved. Refresh choices or choose Open results again when ready.');
+    });
+    if (!operation) return;
+    opened.current = job.id;
     setOpening(true); setError(''); setMessage('Opening results and verifying the recording fingerprint…');
-    openJobResult(job, token.current, controller.current?.signal).then(value => {
-      if (disposed || ticket !== version.current) return;
+    openJobResult(job, token.current, operation.signal).then(value => {
+      if (!transfers.current.isCurrent(operation) || ticket !== version.current) return;
       // The job id lets Recognition ask this service for enrolled-people suggestions on these frames.
       resultHandler.current({ ...value, local: { job: job.id, token: token.current, people: catalog?.people || null } });
       setMessage('Analysis opened. Recording fingerprint matched; review the sampled detections below.');
     }).catch(err => {
-      if (!disposed && ticket === version.current) setError(`${err.message} Your previous review has been preserved. Use Open results again to retry.`);
-    }).finally(() => { if (!disposed && ticket === version.current) setOpening(false); });
-    return () => { disposed = true; };
+      if (transfers.current.isCurrent(operation) && ticket === version.current) setError(`${err.message} Your previous review has been preserved. Use Open results again to retry.`);
+    }).finally(() => {
+      if (transfers.current.finish(operation) && ticket === version.current) setOpening(false);
+    });
+    return () => {
+      if (transfers.current.finish(operation)) {
+        operation.controller.abort(new DOMException('Result opening replaced', 'AbortError'));
+        if (ticket === version.current) setOpening(false);
+      }
+    };
   }, [connected, job]);
 
   const compatible = catalog?.rules.find(r => r.id === rules)?.models.includes(model);
@@ -169,6 +187,7 @@ export default function LocalAnalysis({ onResult, onBusy, clip, onClip, recorder
     {!local && <p>Analysis is available in the local application. This hosted preview can still open exported recognition results below.{loopback && <> <a href={loopback}>Open this page at 127.0.0.1</a></>}</p>}
     <div className="local-analysis-actions">
       <button className="button" disabled={!local || working || opening || (connected && Boolean(activeJob(job)))} onClick={connect}>{connected ? 'Refresh choices' : 'Connect local analysis'}</button>
+      {opening && <button className="button" onClick={() => transfers.current.cancel()}>Cancel result opening</button>}
       {!catalog && <a href="https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/local-analysis-service.md" target="_blank" rel="noreferrer">Local setup guide</a>}
     </div>
     {clip && <div className="recording-import">
@@ -205,7 +224,8 @@ export default function LocalAnalysis({ onResult, onBusy, clip, onClip, recorder
         {job?.state === 'completed' && !busy && <button className="button" disabled={!connected} onClick={() => { opened.current = ''; autoOpen.current = job.id; runAtStart.current = runRef.current; setJob({...job}); }}>{opened.current === job.id ? 'Open results again' : 'Open results'}</button>}
       </div>
     </>}
-    {job && <div className="local-analysis-job" aria-live="polite">
+    <p className="local-analysis-announcement" role="status" aria-live="polite" aria-atomic="true">{analysisAnnouncement(job, connected)}</p>
+    {job && <div className="local-analysis-job">
       <p>{analysisBackendLabel(job, catalog?.backend)}</p>
       <strong>{job.recording}</strong><span>{job.phase} · {job.elapsed_seconds}s</span>
       {job.recovered && <p>Recovered from local storage after a service restart. No analysis was rerun.</p>}
