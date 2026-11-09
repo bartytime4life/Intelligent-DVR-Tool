@@ -43,6 +43,37 @@ test('Facility Studio focus map and navigation are reversible and keyboard acces
   expect(errors).toEqual([]);
 });
 
+test('intermediate window widths keep the full map and every map-layer choice reachable', async({page})=>{
+  await page.setViewportSize({width:662,height:900});
+  await openStudio(page);
+  await expect(page.getByRole('button',{name:'Grid',exact:true})).toBeEnabled();
+  for (const width of [662,800]) {
+    await page.setViewportSize({width,height:900});
+    const workspace=await page.locator('.facility-workspace').boundingBox();
+    const stage=await page.locator('.facility-stage').boundingBox();
+    const inspector=await page.locator('.facility-properties').boundingBox();
+    expect(Math.abs(stage.width-workspace.width)).toBeLessThan(2);
+    expect(inspector.y).toBeGreaterThanOrEqual(stage.y+stage.height-1);
+    const layers=page.locator('.facility-stage').getByRole('group',{name:'Map layer',exact:true});
+    const bounds=await layers.boundingBox();
+    await expect(layers.getByRole('button')).toHaveCount(4);
+    for (const button of await layers.getByRole('button').all()) {
+      const box=await button.boundingBox();
+      expect(box.x).toBeGreaterThanOrEqual(stage.x-1);
+      expect(box.x+box.width).toBeLessThanOrEqual(stage.x+stage.width+1);
+      expect(box.y).toBeGreaterThanOrEqual(bounds.y-1);
+      expect(box.y+box.height).toBeLessThanOrEqual(bounds.y+bounds.height+1);
+      expect(box.height).toBeGreaterThanOrEqual(38);
+      await button.focus();await expect(button).toBeFocused();
+    }
+    expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBe(true);
+  }
+  await page.getByRole('button',{name:'Focus facility map'}).click();
+  await expect(page.locator('.facility-properties')).toBeHidden();
+  await page.getByRole('button',{name:'Show facility panels'}).click();
+  await expect(page.locator('.facility-properties')).toBeVisible();
+});
+
 test('image laboratory imports only on request, reports ROI and compares two local frames',async({page})=>{
   await openStudio(page);
   const errors=[];page.on('pageerror',err=>errors.push(err.message));

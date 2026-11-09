@@ -42,6 +42,7 @@ test('pointer area and site pin suggest changes without saving the plan',async({
   for(const [x,y] of points)await canvas.click({position:{x:rect.width*x,y:rect.height*y}});
   await expect(page.getByLabel('Area shape',{exact:true})).toHaveValue('polygon');await expect(page.getByLabel('Area vertices',{exact:true})).toBeVisible();
   expect(await saved(page)).toEqual(before);
+  await page.getByRole('button',{name:'Discard map draft',exact:true}).click();
   await page.getByRole('button',{name:'Pick site on map',exact:true}).click();await canvas.click({position:{x:rect.width*.6,y:rect.height*.5}});
   await expect(page.getByText('Map pin suggestion. Review coordinates, then Save site.',{exact:true})).toBeVisible();expect(await saved(page)).toEqual(before);
 });

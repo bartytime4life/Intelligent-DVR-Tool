@@ -105,7 +105,18 @@ const STEP_KINDS = [[], ["building"], ["building", "room", "doorway", "window", 
 const HOME_STEP = { building: 1, room: 2, doorway:2, window:2, label: 2, opening: 2, path: 2, stair: 2, camera: 3, zone: 6 };
 const SOLID_KINDS = { room: "Room", opening: "Floor opening", "floor-path": "Floor pathway" };
 // onDirtyChange(true) while leaving would discard unsaved edits, drafts or memory-only facilities.
-function FacilityBuilder({onDirtyChange,...props}){return <FacilityLibrary onDirtyChange={onDirtyChange}>{libraryProps=><FacilityEditor key={libraryProps.facilityId} {...props} {...libraryProps}/>}</FacilityLibrary>;}
+function FacilityBuilder({onDirtyChange,...props}) {
+  const [libraryDirty,setLibraryDirty]=useState(false),[importDraft,setImportDraft]=useState(false);
+  const dirtyCallback=useRef(onDirtyChange);dirtyCallback.current=onDirtyChange;
+  useEffect(()=>{dirtyCallback.current?.(libraryDirty || importDraft);},[libraryDirty,importDraft]);
+  useEffect(()=>()=>dirtyCallback.current?.(false),[]);
+  useEffect(()=>{
+    if(!importDraft)return;
+    const warn=event=>{event.preventDefault();event.returnValue='';};
+    window.addEventListener('beforeunload',warn);return()=>window.removeEventListener('beforeunload',warn);
+  },[importDraft]);
+  return <FacilityLibrary onDirtyChange={setLibraryDirty}>{libraryProps=><FacilityEditor key={libraryProps.facilityId} {...props} {...libraryProps} onImportDraftChange={setImportDraft}/>}</FacilityLibrary>;
+}
 // After a map drag, mobile browsers can omit the compatibility click on an
 // external form button. Submit a completed tap directly and suppress that click.
 function MapFormSubmit({form,label,disabled,children}) {
@@ -122,9 +133,10 @@ function MapFormSubmit({form,label,disabled,children}) {
     }}>{children}</button>;
 }
 
-function FacilityEditor({onPreviewCount,initialPlan,facilityControls,onPersist,onDraftChange,onImportFacilities,onOpenImport}) {
+function FacilityEditor({onPreviewCount,initialPlan,facilityControls,persistencePending=false,persistenceSaved=true,onPersist,onDraftChange,onImportFacilities,onOpenImport,onImportDraftChange}) {
   const initial=useRef({plan:initialPlan,status:'Ready to edit',error:''});
   const [siteDirty,setSiteDirty]=useState(false),[shapePending,setShapePending]=useState(false),[linePending,setLinePending]=useState(false);
+  const [routePointsPending,setRoutePointsPending]=useState(false),[pathPointsPending,setPathPointsPending]=useState(false),[starterPending,setStarterPending]=useState(false);
   const [shapeOpen,setShapeOpen] = useState(false), [shapePreview,setShapePreview] = useState(null);
   const positionPick = useRef(null), newBuildingFocus = useRef(null), properties = useRef(null);
   const [zoneDirty, setZoneDirty] = useState(false);
@@ -168,7 +180,8 @@ function FacilityEditor({onPreviewCount,initialPlan,facilityControls,onPersist,o
   const directPlacement=['window','doorway','stair'].includes(selected.kind);
   const propertyDirty = selected.kind!=='zone' && !!(draft && draft.id === selected.id && (selectedItem || directPlacement) && JSON.stringify(draft) !== JSON.stringify(selectedItem));
   const dirty = propertyDirty || zoneDirty ||  siteDirty;
-  const editingDirty=dirty || shapePending || linePending;
+  const pointListPending=routePointsPending || pathPointsPending;
+  const editingDirty=dirty || shapePending || linePending || pointListPending || starterPending;
   const navigationDirty=sketchOpen || !!wallRoomId || editingDirty || mapDrafts.length>0 || tool!=='select';
   useEffect(()=>{onDraftChange(navigationDirty);return()=>onDraftChange(false);},[navigationDirty,onDraftChange]);
   useEffect(() => {
@@ -231,7 +244,7 @@ function FacilityEditor({onPreviewCount,initialPlan,facilityControls,onPersist,o
       setFuture([]);
       setPlan(clean);
       setError("");
-      setStatus(result.saved ? (message || 'Saved in this browser') : 'Changes applied in memory — export a backup');
+      setStatus(result.saved || result.pending ? (message || 'Saved in this browser') : 'Changes applied in memory — export a backup');
       return true;
     } catch (e) {
       setError(e.message);
@@ -609,6 +622,10 @@ function FacilityEditor({onPreviewCount,initialPlan,facilityControls,onPersist,o
   }, []);
   function go(n) {
     mapCalibrationRequest.current=null;
+    if(tool==='search-area'){
+      setError('Finish or cancel the search-area drawing before changing tasks.');
+      return;
+    }
     if (editingDirty) {
       setError("Save or discard your preview before changing steps.");
       return;
@@ -702,7 +719,7 @@ function FacilityEditor({onPreviewCount,initialPlan,facilityControls,onPersist,o
     setPlan(prev);
     setHistory((h) => h.slice(0, -1));
     setError("");
-    setStatus(result.saved?'Previous edit restored · Redo available':'Restored in memory — export a backup');
+    setStatus(result.saved || result.pending?'Previous edit restored · Redo available':'Restored in memory — export a backup');
   }
   function redo() {
     if (navigationDirty) {setError(busyMessage("redoing"));return;}
@@ -714,7 +731,7 @@ function FacilityEditor({onPreviewCount,initialPlan,facilityControls,onPersist,o
     setPlan(next);
     setFuture((f) => f.slice(0, -1));
     setError("");
-    setStatus(result.saved?'Edit redone':'Redone in memory — export a backup');
+    setStatus(result.saved || result.pending?'Edit redone':'Redone in memory — export a backup');
   }
 
   function downloadInstallerSheet() {
@@ -816,7 +833,7 @@ label. Inside the active building it belongs to the current level; elsewhere it 
       </div>
       <div className="facility-file-actions"><button disabled={navigationDirty} onClick={() => download(plan)}><DownloadSimple />Export plan</button><button disabled={navigationDirty} onClick={() => input.
   current.click()}><UploadSimple />Import plan</button><button disabled={navigationDirty} onClick={() => setPasteOpen(true)}><UploadSimple />Paste JSON</button><button onClick={undo} disabled={!history.length || navigationDirty} title="Undo (Ctrl/⌘+Z)" aria-keyshortcuts="Control+Z Meta+Z"><ArrowCounterClockwise />Undo edit</button><button onClick={redo} disabled={!future.length || navigationDirty} title="Redo (Ctrl/⌘+Shift+Z or Ctrl+Y)" aria-keyshortcuts="Control+Shift+Z Meta+Shift+Z Control+Y"><ArrowClockwise />Redo edit</button></div>
-      <p className="facility-save-state" role="status">{status}</p>
+      <p className="facility-save-state" role="status">{persistencePending?'Saving in this browser…':!persistenceSaved?'Facilities are only in memory — export a backup':status}</p>
     </aside>
     <div className={'facility-stage'+(view==='floors' && (tool==='stair' || stairEditor)?' is-editing-stairs':'')}>
       {helpOpen && <section id="facility-shortcuts" className="facility-workbench-help" role="region" aria-label="Facility keyboard and map help">
@@ -836,7 +853,7 @@ label. Inside the active building it belongs to the current level; elsewhere it 
         <div className="facility-layer-switch" role="group" aria-label="Map layer">{BASEMAPS.map(option => <button key={option.id} type="button" aria-pressed={layer.id === option.id} disabled={!ready} title={option.disclosure} onClick={() => chooseLayer(option.id)}>{option.id !== 'grid' && <MapTrifold size={15} aria-hidden="true"/>}{option.label}</button>)}</div>
         {layer.external && <select className="facility-layer-strength" aria-label="Map picture strength" value={mapLayer.fade} onChange={e => chooseLayer(layer.id, Number(e.target.value))}>{fadeChoices().map(v => <option key={v} value={v}>Map {Math.round(v * 100)}%</option>)}</select>}
         <label><input type="checkbox" checked={measurements} onChange={e=>setMeasurements(e.target.checked)}/>Dimensions</label>
-        <select aria-label="Measurement units" disabled={linePending} value={units} onChange={e=>setUnits(e.target.value)}><option value="metric">Meters · m / m²</option><option value="imperial">Feet · ft / ft²</option></select>
+        <select aria-label="Measurement units" disabled={linePending || pointListPending || starterPending} value={units} onChange={e=>setUnits(e.target.value)}><option value="metric">Meters · m / m²</option><option value="imperial">Feet · ft / ft²</option></select>
       </div>
       <div className="facility-map-context"><span className={`facility-local-dot${layer.external ? ' is-online' : ''}`} />{plan.name}<small>{layer.id === 'grid' ? `Local grid · ${formatDistance(20,units)} spacing · no map pictures requested` :
         layerStatus.tiles === 'blocked' ? 'Streets unavailable · showing the local grid' :
@@ -904,13 +921,16 @@ pect its modeled view.", "Draw a route and review proposed camera transitions.",
       {step === 0 && <fieldset className="facility-layer-choice"><legend>Map layer</legend>
         <div>{BASEMAPS.map(option => <label key={option.id}><input type="radio" name="facility-map-layer" value={option.id} checked={layer.id === option.id} disabled={!ready} onChange={() => chooseLayer(option.id)}/>{option.title}</label>)}</div>
         <small>{layer.disclosure}{layer.external ? ' Plans, cameras and recordings are never sent. This choice is remembered in this browser.' : ' Choose Satellite for a regional view and U.S. roof detail, or choose Streets or Aerial.'}</small></fieldset>}
-      {step === 0 && <SiteForm onDirtyChange={setSiteDirty} onPreview={setSitePreview} addressFocus={addressFocus} focusAddress={()=>setAddressFocus(n=>n+1)} pickedOrigin={pickedOrigin} onPin={()=>startTool("site-pin")} ready={ready} plan={plan} commit={commit} center={() => api.current?.center()} />}
+      {step === 0 && <SiteForm onDirtyChange={setSiteDirty} onPreview={setSitePreview} addressFocus={addressFocus} focusAddress={()=>setAddressFocus(n=>n+1)} pickedOrigin={pickedOrigin} onPin={()=>startTool("site-pin")} ready={ready} plan={plan} commit={(next,message)=>{
+        if(starterPending){setError('Apply or discard the map draft before saving site changes.');return false;}
+        return commit(next,message);
+      }} center={() => api.current?.center()} />}
       {step === 0 && !plan.buildings.length && !draftCandidates.length && <div className="facility-next-callout"><MapTrifold size={20} aria-hidden="true"/><div><strong>Next: outline your buildings</strong>
         <p>Start from buildings already mapped around your site, then keep the ones that are yours. Or trace each roof yourself{layer.external ? '' : ' (turn on Streets or Aerial to see your real site)'}. You can adjust every corner and dimension afterwards.</p>
         <div className="facility-next-actions"><button type="button" className="facility-primary" disabled={!ready || navigationDirty} onClick={() => {setView('2d');setDraftLoad(n => n + 1);}}><Buildings aria-hidden="true"/>Find mapped buildings</button>
         <button type="button" className="facility-secondary" disabled={!ready || navigationDirty} onClick={() => {go(1);setShapeOpen(false);startTool('building');}}><Polygon aria-hidden="true"/>Trace a building</button></div>
         <small>Finding sends only the search area outlined on the map to the OpenStreetMap building service chosen below. Outlines are volunteer-mapped and may be missing or out of date.</small></div></div>}
-      {step === 0 && <OpenMapStarter units={units} drawnArea={drawnArea} onDrawArea={()=>startTool("search-area")} onCancelArea={()=>{api.current?.setTool("select");setTool("select");}} ready={ready} plan={plan} commit={commit} onPreview={(buildings,replace,candidates=[]) => {setMapDrafts(buildings);setReplaceDrafts(!!replace);setDraftCandidates(candidates);}} onArea={setSearchArea} disabled={dirty} loadSignal={draftLoad} toggle={draftToggle} />}
+      {step === 0 && <OpenMapStarter units={units} drawnArea={drawnArea} onDrawArea={()=>startTool("search-area")} onCancelArea={()=>{api.current?.setTool("select");setTool("select");}} ready={ready} plan={plan} commit={commit} onPendingChange={setStarterPending} onPreview={(buildings,replace,candidates=[]) => {setMapDrafts(buildings);setReplaceDrafts(!!replace);setDraftCandidates(candidates);}} onArea={setSearchArea} disabled={dirty} loadSignal={draftLoad} toggle={draftToggle} />}
       {step === 0 && <div className="facility-section-note"><MapPin/><p>Find your site, then trace buildings over the real map. Map pictures are a drawing guide, not a survey: verify dimensions on site. Imported files and examples open as separate facilities.</p></div>}
       {step === 1 && <>
         <BuildingShapePicker open={shapeOpen} onOpen={open=>{setShapeOpen(open);if(open)setView('2d');}} buildings={plan.buildings} near={selected.kind === 'building' ? selectedItem : undefined} units={units} onUnits={setUnits}
@@ -1047,13 +1067,13 @@ nabled", e.target.checked)} />Include in coverage estimates</label>
         <button type="button" className="facility-secondary facility-installer-button" disabled={navigationDirty || !plan.cameras.length} title={navigationDirty ? 'Save or discard edits first' : undefined} onClick={downloadInstallerSheet}><Printer />Download installer sheet</button>
         <p className="facility-caption">Printable offline page of the saved plan: mounts, angles, lenses and DORI distances. {DORI_NOTE}.</p>
       </>}
-      {step === 2 && <><FloorGeometry pending={linePending} onPendingChange={setLinePending} plan={plan} building={b} floor={floor} selected={selected} draft={draft} onDraft={setDraft} onSelect={select} commit={commit} onDraw={startTool} disabled={dirty} ready={ready} units={units}/></>}
+      {step === 2 && <><FloorGeometry pending={linePending} onPendingChange={setLinePending} pointDraftPending={pathPointsPending} onPointDraftChange={setPathPointsPending} plan={plan} building={b} floor={floor} selected={selected} draft={draft} onDraft={setDraft} onSelect={select} commit={commit} onDraw={startTool} disabled={dirty} ready={ready} units={units}/></>}
       {step === 5 && <><div className="facility-action-row"><button className="facility-primary" disabled={!ready} onClick={() => startTool(
     "route"
   )}><Path />Draw route</button><button className="facility-secondary" disabled={plan.route.length < 2} onClick={() => {
     setSeconds(0);
     setPlaying(true);
-  }}><Play />Run rehearsal</button></div><p className="facility-caption">Follow the route in the map and scrub the timeline. Coverage changes produce proposals for review; no identity matching is running.</p>{plan.route.length>1 && <><LineDimensions onDirtyChange={setLinePending} points={plan.route} onChange={route=>commit({...plan,route},'Route dimensions saved — Undo available')} units={units}/><p className="facility-caption">Route dimension edits save immediately. Undo restores the previous geometry.</p></>}<PointListEntry label="Route points" units={units} disabled={linePending} submitLabel={plan.route.length>1?'Replace route with these points':'Save route points'} onSubmit={route=>commit({...plan,route},'Route saved from point list — Undo available')}/><h3 className="facility-subheading">Proposed transitions</h3>{proposals.
+  }}><Play />Run rehearsal</button></div><p className="facility-caption">Follow the route in the map and scrub the timeline. Coverage changes produce proposals for review; no identity matching is running.</p>{plan.route.length>1 && <><LineDimensions disabled={routePointsPending} onDirtyChange={setLinePending} points={plan.route} onChange={route=>commit({...plan,route},'Route dimensions saved — Undo available')} units={units}/><p className="facility-caption">Route dimension edits save immediately. Undo restores the previous geometry.</p></>}<PointListEntry label="Route points" units={units} disabled={linePending} submitLabel={plan.route.length>1?'Replace route with these points':'Save route points'} onSubmit={route=>commit({...plan,route},'Route saved from point list — Undo available')} onDirtyChange={setRoutePointsPending}/><h3 className="facility-subheading">Proposed transitions</h3>{proposals.
   length ? proposals.map((p) => <div className="facility-proposal" key={p.key}><strong>{p.from}<CaretRight />{p.to}</strong><small>At {p.
   seconds.toFixed(1)} s · simulated, unverified</small><div><button aria-pressed={decisions[p.key] === "link"} onClick={() => setDecisions(
     (d) => ({ ...d, [p.key]: "link" })
@@ -1081,7 +1101,7 @@ Kept as separate tracks."} This does not verify identity.</p>}</div>) : <p class
     plan
   )}>Export plan<DownloadSimple /></button>}</div>}</div>
     </aside>{wallRoom && <RoomWallEditor plan={plan} building={b} level={floor} initialRoom={wallRoom} units={units} onUnits={setUnits} onClose={closeWalls} commit={commit}/>}
-    {sketchOpen && b && <RoomSketch plan={plan} building={b} level={floor} units={units} onUnits={setUnits} onSave={saveSketch} error={error} onClose={closeSketch}/>}<>{pasteOpen && <PlanPasteDialog close={() => setPasteOpen(false)} onImport={text=>onImportFacilities(text)} />}</><input ref={input} hidden type="file" accept=".json,application/json" aria-label="Import facility plan" onChange={importFile} />
+    {sketchOpen && b && <RoomSketch plan={plan} building={b} level={floor} units={units} onUnits={setUnits} onSave={saveSketch} error={error} onClose={closeSketch}/>}<>{pasteOpen && <PlanPasteDialog close={() => setPasteOpen(false)} onImport={text=>onImportFacilities(text)} onDirtyChange={onImportDraftChange} />}</><input ref={input} hidden type="file" accept=".json,application/json" aria-label="Import facility plan" onChange={importFile} />
   </section></MeasurementUnits.Provider>;
 }
 const percent = v => `${(Math.round(v * 1000) / 10).toFixed(1)}%`;
@@ -1194,16 +1214,20 @@ function SiteForm({ plan, commit, center, pickedOrigin, onPin, ready, onDirtyCha
   {!!hasGeometry && <label className="facility-checkbox"><input type="checkbox" checked={keep} onChange={e=>setKeep(e.target.checked)} />Keep buildings at their map positions<small>{mapped ? 'On by default because this plan has map-sourced buildings.' : 'Off by default for hand-drawn plans.'}</small></label>}
   <p className="facility-caption">Building and camera positions are meters east and north of this origin. {hasGeometry && keep ? 'Saving a new origin re-centres the local grid; buildings, cameras, zones and routes keep their map positions and dimensions.' : 'Changing the origin moves the whole plan geographically.'} This is a local planning coordinate system, not a surveyed model.</p>{formError && <p className="error" role="alert">{formError}</p>}<button className="facility-primary" type="submit" disabled={locating || chooseLocation}>Save site<Check /></button>{changed && <button type="button" className="facility-secondary" onClick={()=>{stopLocating();setChooseLocation(false);setName(plan.name);setLng(plan.origin[0]);setLat(plan.origin[1]);setLocationNote('');setFormError('');onPreview(null);}}>Discard site edits</button>}</form></>;
 }
-function PlanPasteDialog({ close, onImport }) {
+function PlanPasteDialog({ close, onImport, onDirtyChange }) {
   const ref = useRef();
   const [text, setText] = useState("");
   const [error, setError] = useState("");
+  const dirty=!!text.trim(),dirtyCallback=useRef(onDirtyChange);dirtyCallback.current=onDirtyChange;
+  useEffect(()=>{dirtyCallback.current?.(dirty);},[dirty]);
+  useEffect(()=>()=>dirtyCallback.current?.(false),[]);
+  function requestClose(){if(!dirty || window.confirm('Discard pasted facility JSON? It has not been imported.'))close();}
   useEffect(() => {
     const before = document.activeElement;
     ref.current.showModal();
     return () => before?.focus();
   }, []);
-  return <dialog aria-labelledby="facility-import-title" className="modal facility-paste-modal" ref={ref} onCancel={close} {...backdropDismiss(close)}><div className="modal-heading"><h2 id="facility-import-title">Import facility JSON</h2><button className="icon-button" onClick={close} aria-label="Close JSON import"><X /></button></div><p>Paste an exported facility plan. Only validated geometry and labels are retained. Maximum 4 MB for a facility collection, 2 MB per facility. Import adds separate facilities and keeps existing work.</p><form onSubmit={(e) => {
+  return <dialog aria-labelledby="facility-import-title" className="modal facility-paste-modal" ref={ref} onCancel={e=>{e.preventDefault();requestClose();}} {...backdropDismiss(requestClose)}><div className="modal-heading"><h2 id="facility-import-title">Import facility JSON</h2><button className="icon-button" onClick={requestClose} aria-label="Close JSON import"><X /></button></div><p>Paste an exported facility plan. Only validated geometry and labels are retained. Maximum 4 MB for a facility collection, 2 MB per facility. Import adds separate facilities and keeps existing work.</p><form onSubmit={(e) => {
     e.preventDefault();
     try {
       if (onImport(text)) close();
@@ -1211,7 +1235,7 @@ function PlanPasteDialog({ close, onImport }) {
       setError(e2.message);
     }
   }}><label className="facility-field"><span>Facility plan JSON</span><textarea autoFocus aria-label="Facility plan JSON" value={text} onChange={(e) => setText(
-  e.target.value)} maxLength={4e6} required rows={9} spellCheck={false} /></label>{error && <p className="error" role="alert">{error}</p>}<div className="facility-paste-actions"><button className="facility-secondary" type="button" onClick={close}>Cancel</button><button className="facility-primary" type="submit">Import pasted plan<UploadSimple /></button></div></form></dialog>;
+  e.target.value)} maxLength={4e6} required rows={9} spellCheck={false} /></label>{error && <p className="error" role="alert">{error}</p>}<div className="facility-paste-actions"><button className="facility-secondary" type="button" onClick={close}>{dirty?'Discard pasted JSON':'Cancel'}</button><button className="facility-primary" type="submit">Import pasted plan<UploadSimple /></button></div></form></dialog>;
 }
 export {
   FacilityBuilder

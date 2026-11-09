@@ -45,3 +45,9 @@
 .facility-library-backups button.facility-library-danger{border-color:#a5604f;background:#4a2722;color:#ffd9cf}.facility-library-backups button.facility-library-danger svg{color:#ff9f8a}
 .facility-library-backups button.facility-library-cancel{border-color:transparent;background:transparent}
 .facility-library-error{font-size:11px;line-height:1.6;background:#472e28;border:1px solid #806044;border-radius:8px;padding:10px;margin-bottom:14px;color:#ffe2c7}.facility-library-error button{font-size:11px;padding:6px;margin-top:5px}
+.facility-save-recovery{margin-bottom:16px;min-width:0}
+.facility-save-recovery>.workspace-conflict{margin:0;padding:12px}
+.facility-save-recovery .workspace-conflict-versions{grid-template-columns:1fr}
+.facility-save-recovery .workspace-conflict h2{font-size:16px}
+.facility-save-recovery .workspace-conflict .button{white-space:normal;font-size:11px;min-height:36px}
+.facility-save-recovery>p{color:#f2d2ac;font-size:11px;line-height:1.6}

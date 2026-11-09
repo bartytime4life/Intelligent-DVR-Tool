@@ -2,16 +2,16 @@ import React, { useId, useState } from 'react';
 import { DownloadSimple, WarningCircle } from '@phosphor-icons/react';
 import './workspace-conflict.css';
 
-export default function WorkspaceConflict({ kind, localCount, conflict, exportLocal, exportRemote }) {
+export default function WorkspaceConflict({ kind, localCount, conflict, exportLocal, exportRemote, disabled=false }) {
   const titleId = useId();
   const [working, setWorking] = useState(false);
   const [unexpected, setUnexpected] = useState('');
   const [copyNotice, setCopyNotice] = useState('');
   if (!conflict) return null;
-  const title = kind === 'reviews' ? 'Reviews' : 'Rules';
-  const noun = count => `${kind === 'reviews' ? 'review' : 'rule'}${count === 1 ? '' : 's'}`;
+  const title = kind === 'reviews' ? 'Reviews' : kind === 'facilities' ? 'Facilities' : 'Rules';
+  const noun = count => kind === 'facilities' ? count===1?'facility':'facilities' : `${kind === 'reviews' ? 'review' : 'rule'}${count === 1 ? '' : 's'}`;
   async function choose(method) {
-    if (working) return;
+    if (working || disabled) return;
     setWorking(true); setUnexpected('');
     try { await conflict[method](); }
     catch { setUnexpected('The choice could not be saved. Both versions are still available below; download them before closing.'); }
@@ -21,7 +21,7 @@ export default function WorkspaceConflict({ kind, localCount, conflict, exportLo
     setUnexpected(''); setCopyNotice('');
     let url;
     try {
-      url = URL.createObjectURL(new Blob([copy.raw], {type:'application/json'}));
+      url = URL.createObjectURL(new Blob([copy.downloadRaw ?? copy.raw], {type:'application/json'}));
       const anchor = document.createElement('a');
       anchor.href=url; anchor.download=`dvr-${kind}-saved-copy-${copy.slot}.json`;
       anchor.click();
@@ -50,8 +50,8 @@ export default function WorkspaceConflict({ kind, localCount, conflict, exportLo
     <p>The version you replace is backed up in this browser first. Downloads give you a separate copy.</p>
     {(conflict.error || unexpected) && <p className="workspace-conflict-error" role="alert">{unexpected || conflict.error}</p>}
     <div className="workspace-conflict-actions">
-      <button className="button amber" disabled={working} onClick={() => choose('keepLocal')}>{working ? 'Saving your choice…' : "Keep this tab’s version"}</button>
-      <button className="button" disabled={working || !conflict.remoteValid} onClick={() => choose('useRemote')}>{conflict.remoteDeleted ? kind === 'reviews' ? 'Use empty review queue' : 'Use default rules' : "Use other tab’s version"}</button>
+      <button className="button amber" disabled={working || disabled} onClick={() => choose('keepLocal')}>{working ? 'Saving your choice…' : "Keep this tab’s version"}</button>
+      <button className="button" disabled={working || disabled || !conflict.remoteValid} onClick={() => choose('useRemote')}>{conflict.remoteDeleted ? kind === 'reviews' ? 'Use empty review queue' : kind === 'facilities' ? 'Start a blank facility' : 'Use default rules' : "Use other tab’s version"}</button>
     </div>
     <details className="workspace-conflict-copies">
       <summary>Saved conflict copies{conflict.savedCopies?.copies.length ? ` (${conflict.savedCopies.copies.length}/10)` : ''}</summary>

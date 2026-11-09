@@ -1390,3 +1390,19 @@
 @media(max-width:620px){.facility-layer-strength{display:none}.facility-layer-switch button{padding:0 8px;font-size:10px}.facility-layer-notice{left:12px;right:12px;max-width:none;bottom:40px}}
 .facility-next-actions{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:9px}
 .facility-next-callout small{display:block;font-size:10px;line-height:1.5;color:#8daabd}
+
+/* A fixed inspector leaves too little map at intermediate window widths. Keep
+   the same stacked editing flow used on phones, with a full-width canvas. */
+@media (min-width:621px) and (max-width:900px) {
+  .facility-workspace {display:flex;flex-direction:column;min-height:0;}
+  .facility-guide {flex:0 0 auto;}
+  .facility-stage {flex:none;height:550px;min-height:550px;border-bottom:1px solid #2c4755;}
+  .facility-properties {max-height:none;overflow:visible;border-left:0;}
+  .facility-property-body {overflow:visible;}
+  .facility-workspace.is-map-focused .facility-stage {height:calc(100dvh - 205px);min-height:460px;flex:1;}
+}
+@media (max-width:900px) {
+  .facility-map-tools {right:12px;max-width:none;}
+  .facility-layer-switch {min-width:0;max-width:100%;flex-wrap:wrap;}
+  .facility-layer-switch button {flex:1 0 auto;min-height:38px;}
+}
