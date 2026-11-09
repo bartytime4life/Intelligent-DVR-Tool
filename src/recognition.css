@@ -9,6 +9,21 @@
 .recognition-empty a { color: #8be9d9; text-underline-offset: 3px; }
 @media(max-width: 600px) { .recognition-progress { flex-direction: column; gap: 14px; } }
 .recognition-intro { max-width: 800px; color: #b4c1cb; line-height: 1.6; }
+.recognition-task-heading { margin-top: 26px; display: flex; align-items: baseline; flex-wrap: wrap; gap: 8px 18px; }
+.recognition-task-heading h2 { font-size: 15px; }
+.recognition-task-heading p { color: #aabac5; font-size: 12px; line-height: 1.6; }
+.recognition-tasks { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-top: 14px; }
+.recognition-task { display: grid; align-content: start; gap: 10px; min-width: 0; text-align: left; padding: 18px; border: 1px solid #344957; border-radius: 9px; background: #101f2b; color: #c4d2dd; }
+.recognition-task svg { color: #9cb5c4; }
+.recognition-task strong { font-size: 13px; line-height: 1.5; font-weight: 600; }
+.recognition-task span { font-size: 12px; color: #afc0cb; line-height: 1.6; }
+.recognition-task small { color: #ffce77; line-height: 1.5; }
+.recognition-task:hover { border-color: #65878d; background: #152b37; }
+.recognition-task[aria-pressed="true"] { border-color: #62d6c7; background: #143133; box-shadow: inset 0 2px #62d6c7; }
+.recognition-task[aria-pressed="true"] svg { color: #86edda; }
+.recognition-task-panel[hidden] { display: none !important; }
+@media(max-width: 1000px) { .recognition-tasks { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media(max-width: 540px) { .recognition-task { padding: 14px; gap: 8px; } .recognition-task strong { font-size: 12px; } .recognition-task span { font-size: 11px; } }
 .recognition-page h1 { margin: 10px 0 14px; }
 .recognition-page p + p { margin-top: 12px; }
 .recognition-status { margin: 14px 0; }

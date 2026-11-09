@@ -53,29 +53,48 @@ export async function analysisRequest(path, { token, method = 'GET', body, signa
 // The service answered and refused the request, so nothing started. Only a lost response or a rejected session is ambiguous.
 export const refused = error => Number.isInteger(error?.status) && error.status !== 403;
 
-export async function boundedBody(response, limit) {
-  if (Number(response.headers.get('content-length')) > limit) throw Error('The local result exceeds its size limit. Try a shorter recording.');
+export async function boundedBody(response, limit, {signal} = {}) {
+  const abortReason = () => signal.reason ?? new DOMException('Result reading cancelled', 'AbortError');
+  // Refuse an oversized response without leaving its download running in the background.
+  if (signal?.aborted || Number(response.headers.get('content-length')) > limit) {
+    void response.body?.cancel().catch(() => {});
+    if (signal?.aborted) throw abortReason();
+    throw Error('The local result exceeds its size limit. Try a shorter recording.');
+  }
+  if (!response.body) throw Error('The local result has no content. Reconnect and try opening it again.');
   const reader = response.body.getReader(), parts = [];
+  const cancel = () => { void reader.cancel(abortReason()).catch(() => {}); };
+  signal?.addEventListener('abort', cancel, {once: true});
   let size = 0;
   try {
     while (true) {
+      if (signal?.aborted) throw abortReason();
       const { done, value } = await reader.read();
+      if (signal?.aborted) throw abortReason();
       if (done) break;
       size += value.length;
       if (size > limit) throw Error('The local result exceeds its size limit. Try a shorter recording.');
       parts.push(value);
     }
-  } catch (error) { await reader.cancel(); throw error; }
+  } catch (error) {
+    // Cleanup failure must not mask the original read/size error or delay cancellation.
+    void reader.cancel(error).catch(() => {});
+    throw error;
+  } finally {
+    signal?.removeEventListener('abort', cancel);
+    reader.releaseLock();
+  }
   return new Blob(parts, { type: response.headers.get('content-type') || 'application/octet-stream' });
 }
 
 export async function openJobResult(job, token, signal, fetcher = fetch) {
   if (job?.state !== 'completed' || !/^[a-f0-9]{32}$/.test(job.id)) throw Error('This job has no completed result.');
+  if (signal?.aborted) throw new DOMException('Result opening cancelled', 'AbortError');
   const result = await analysisRequest(`/jobs/${job.id}/result`, { token, signal, fetcher });
-  const bundle = parseRecognition(JSON.parse(await (await boundedBody(result, MAX_REVIEW_BYTES)).text()));
+  const bundle = parseRecognition(JSON.parse(await (await boundedBody(result, MAX_REVIEW_BYTES, {signal})).text()));
   const response = await analysisRequest(`/jobs/${job.id}/source`, { token, signal, fetcher });
-  const file = await boundedBody(response, MAX_VIDEO_BYTES);
-  await matchRecording(file, bundle.receipt.source_sha256);
+  const file = await boundedBody(response, MAX_VIDEO_BYTES, {signal});
+  await matchRecording(file, bundle.receipt.source_sha256, {signal});
   if (signal?.aborted) throw new DOMException('Result opening cancelled', 'AbortError');
   return { bundle, file, name: job.recording };
 }

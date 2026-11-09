@@ -33,10 +33,11 @@ async function fixture(page,{status=emptyStatus(),pickerDisabled=false}={}) {
     return reply({error:{message:'Fixture endpoint is not configured.'}},503);
   });
   await page.goto('/#recognition');
+  await page.getByRole('button',{name:'Use my existing DVR Keep a verified copy of finished videos',exact:true}).click();
   return state;
 }
 const panel=page=>page.getByRole('region',{name:'Existing DVR backup'});
-async function connect(page) {await panel(page).getByRole('button',{name:'Connect to this computer'}).click();await expect(panel(page).getByRole('button',{name:'Refresh backup connection'})).toBeVisible();}
+async function connect(page) {await page.getByRole('button',{name:/^Use my existing DVR Keep a verified copy/}).click();await panel(page).getByRole('button',{name:'Connect to this computer'}).click();await expect(panel(page).getByRole('button',{name:'Refresh backup connection'})).toBeVisible();}
 
 test('novice setup saves folders, starts backup only, stops explicitly and survives reconnect',async({page})=>{
   const state=await fixture(page);
@@ -79,15 +80,21 @@ test('local folder validation and native picker failure give an actionable fallb
 test('explicit automatic analysis blocks competing manual actions while copy-only does not',async({page})=>{
   const status={...emptyStatus(),configured:true,state:'paused',config:savedConfig};
   const state=await fixture(page,{status});await connect(page);
+  await page.getByRole('button',{name:/^Record a LAN camera/}).click();
   await page.getByRole('region',{name:'LAN camera recorder'}).getByRole('button',{name:'Connect LAN recorder'}).click();
   await expect(page.getByRole('button',{name:'Start recording & analysis',exact:true})).toBeEnabled();
+  await page.getByRole('button',{name:/^Use my existing DVR/}).click();
   await panel(page).getByLabel('Analyze copied videos automatically').check();
   await expect(panel(page).getByLabel('Backup analysis model')).toBeVisible();
   await panel(page).getByRole('button',{name:'Start backup',exact:true}).click();
   expect(state.requests.find(r=>r.path==='/api/library/start').body.analyze).toBe(true);
+  await page.getByRole('button',{name:/^Open saved results/}).click();
   await expect(page.getByLabel('Open recognition results')).toBeDisabled();
+  await page.getByRole('button',{name:/^Record a LAN camera/}).click();
   await expect(page.getByRole('button',{name:'Start recording & analysis',exact:true})).toBeDisabled();
+  await page.getByRole('button',{name:/^Use my existing DVR/}).click();
   await panel(page).getByRole('button',{name:'Stop backup',exact:true}).click();
+  await page.getByRole('button',{name:/^Open saved results/}).click();
   await expect(page.getByLabel('Open recognition results')).toBeEnabled();
 });
 
@@ -107,7 +114,7 @@ test('completed backup opens only its matched result, partial coverage stays cle
   const status={...emptyStatus(),configured:true,config:savedConfig,active:true,items:[{...item,coverage:'partial'},{...item,id:'c'.repeat(32),name:'back-door.mp4',state:'failed',error:'Check recording integrity.'}],counters:{copied:2,duplicates:1}};
   const state=await fixture(page,{status});await connect(page);
   await panel(page).getByText('Saved videos', {exact:false}).click();
-  await expect(panel(page).getByText('Partial analysis — recording limits reached')).toBeVisible();
+  await expect(panel(page).getByText('Partial analysis · recording coverage unverified')).toBeVisible();
   await panel(page).getByRole('button',{name:'Retry analysis',exact:true}).click();
   expect(state.requests.find(r=>r.path==='/api/library/retry').body).toEqual({id:'c'.repeat(32)});
   await panel(page).getByRole('button',{name:'Review backup',exact:true}).click();
@@ -203,4 +210,22 @@ test('storage fields share their input baseline at tablet width',async({page})=>
   const tops=await panel(page).locator('.backup-settings-grid input').evaluateAll(inputs=>inputs.map(input=>input.getBoundingClientRect().top));
   expect(Math.max(...tops)-Math.min(...tops)).toBeLessThanOrEqual(1);
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBe(true);
+});
+
+test('task switching keeps unsaved folders and reports background backup separately from analyzer use',async({page})=>{
+  const state=await fixture(page,{status:{...emptyStatus(),configured:true,config:savedConfig}});await connect(page);
+  await panel(page).getByRole('textbox',{name:'DVR source folder',exact:true}).fill('/local/pending-folder-edit');
+  await page.getByRole('button',{name:/^Open saved results/}).click();
+  await expect(panel(page)).not.toBeVisible();
+  await expect(page.getByRole('heading',{name:'Open previously exported results'})).toBeVisible();
+  await page.getByRole('button',{name:/^Use my existing DVR/}).click();
+  await expect(panel(page).getByRole('textbox',{name:'DVR source folder',exact:true})).toHaveValue('/local/pending-folder-edit');
+  await expect(panel(page).getByText('Unsaved folder settings')).toBeVisible();
+  state.status={...state.status,active:true,state:'running'};
+  await expect(page.getByRole('button',{name:/^Use my existing DVR/})).toContainText('Backup running');
+  await page.getByRole('button',{name:/^Analyze a recording/}).click();
+  await expect(page.getByRole('button',{name:/^Use my existing DVR/})).toContainText('Backup running');
+  state.statusLost=true;
+  await expect(page.getByRole('button',{name:/^Use my existing DVR/})).toContainText('Status unknown',{timeout:7000});
+  expect(state.requests.filter(r=>r.path==='/api/library/start'||r.path==='/api/library/stop')).toHaveLength(0);
 });

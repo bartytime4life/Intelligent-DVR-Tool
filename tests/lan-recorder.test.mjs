@@ -33,7 +33,18 @@ test('status and storage failures remain actionable', async () => {
 });
 test('cancelled opening never replaces the current review', async () => {
   const ctl = new AbortController(); ctl.abort();
-  await assert.rejects(openSegment(row,'token',ctl.signal,serve()), /cancelled/);
+  await assert.rejects(openSegment(row,'token',ctl.signal,async()=>assert.fail('Cancelled opening must not fetch')), /cancelled/);
+});
+test('cancelling segment verification terminates its hashing worker', {timeout:1000}, async () => {
+  const originalWorker=globalThis.Worker, controller=new AbortController(); let terminated=false;
+  globalThis.Worker=class {
+    postMessage() { queueMicrotask(()=>controller.abort()); }
+    terminate() { terminated=true; }
+  };
+  try {
+    await assert.rejects(openSegment(row,'token',controller.signal,serve()),error=>error.name==='AbortError');
+    assert.equal(terminated,true);
+  } finally {globalThis.Worker=originalWorker;}
 });
 
 test('recorder codes are explained and unknown text is never echoed as an explanation', async () => {

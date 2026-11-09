@@ -6,6 +6,7 @@ const upload = value => ({name:'review.json',mimeType:'application/json',buffer:
 
 test('recognition keeps evidence separate, rejects wrong files, and sends observations to review', async ({page}) => {
   await page.goto('/#recognition');
+  await page.getByRole('button',{name:/^Open saved results/}).click();
   await expect(page.getByRole('heading', {name:'Recognition', exact:true})).toBeVisible();
   await page.getByLabel('Open recognition results').setInputFiles(upload(recognitionFixture()));
   await expect(page.getByText('No recording attached. Results alone are unverified metadata.')).toBeVisible();
@@ -25,6 +26,7 @@ test('recognition keeps evidence separate, rejects wrong files, and sends observ
 test('recognition rejects mixed provenance and displays partial coverage on a narrow screen', async ({page}) => {
   await page.setViewportSize({width:390,height:844});
   await page.goto('/#recognition');
+  await page.getByRole('button',{name:/^Open saved results/}).click();
   const mixed = recognitionFixture(); mixed.trace.source_sha256 = 'f'.repeat(64);
   await page.getByLabel('Open recognition results').setInputFiles(upload(mixed));
   await expect(page.getByRole('alert')).toContainText('provenance');
@@ -37,6 +39,7 @@ test('recognition rejects mixed provenance and displays partial coverage on a na
 
 test('matching synthetic recording enables boxes only at paused analyzed samples', async ({page}) => {
   await page.goto('/#recognition');
+  await page.getByRole('button',{name:/^Open saved results/}).click();
   // Generated pixels only; this browser contract does not test recognition accuracy.
   const bytes = await page.evaluate(async () => {
     const canvas = document.createElement('canvas'); canvas.width=320; canvas.height=240;

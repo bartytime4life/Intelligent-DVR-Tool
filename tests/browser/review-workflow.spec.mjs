@@ -55,6 +55,7 @@ test('events sort, export shown rows as CSV, and bulk dismissal can be undone', 
 
 test('observations sent from a matched recording keep a local still in Events', async ({page}) => {
   await page.goto('/#recognition');
+  await page.getByRole('button',{name:/^Open saved results/}).click();
   // Generated pixels only; this checks still capture and storage, not recognition quality.
   const bytes = await page.evaluate(async () => {
     const canvas = document.createElement('canvas'); canvas.width=320; canvas.height=240;

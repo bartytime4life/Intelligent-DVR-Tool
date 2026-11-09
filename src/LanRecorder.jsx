@@ -9,6 +9,7 @@ const mib = bytes => Number.isFinite(bytes) ? `${(bytes / 1024**2).toFixed(1)} M
 
 export default function LanRecorder({onResult, onBusy, blocked, onImport, onValidateImport, onStatus}) {
   const [status, setStatus] = useState(null), [catalog, setCatalog] = useState(null);
+  const [lastCheckedAt, setLastCheckedAt] = useState(null);
   const [model, setModel] = useState(''), [rules, setRules] = useState('');
   const [error, setError] = useState(''), [working, setWorking] = useState(false), [connected, setConnected] = useState(false);
   const token = useRef(''), lifetime = useRef(null), misses = useRef(0);
@@ -16,7 +17,13 @@ export default function LanRecorder({onResult, onBusy, blocked, onImport, onVali
   const local = localAnalysisOrigin(globalThis.location);
   useEffect(() => { lifetime.current = new AbortController(); return () => lifetime.current.abort(); }, []);
   useEffect(() => { onBusy(Boolean(working || status?.active || status?.state === 'stopping')); }, [working, status?.active, status?.state, onBusy]);
-  useEffect(() => { onStatus?.(connected && status ? {active: Boolean(status.active), name: status.name} : null); }, [connected, status?.active, status?.name, onStatus]);
+  // Losing contact does not stop the background recorder. Keep its last known
+  // state visible across workspace switches until an explicit refresh confirms it.
+  useEffect(() => { onStatus?.(status ? {
+    active: connected && Boolean(status.active), name: status.name,
+    unknown: !connected, lastKnownActive: Boolean(status.active), lastCheckedAt,
+  } : null); }, [connected, status?.active, status?.name, lastCheckedAt, onStatus]);
+  const acceptStatus = next => { setStatus(next); setLastCheckedAt(Date.now()); };
   const request = (path, body) => recorderRequest(path, {token: token.current, body,
     signal: AbortSignal.any([lifetime.current.signal, AbortSignal.timeout(15000)])});
   async function connect() {
@@ -26,7 +33,7 @@ export default function LanRecorder({onResult, onBusy, blocked, onImport, onVali
       token.current = data.token; setCatalog(data);
       setModel(v => data.models.some(m => m.id === v) ? v : data.models[0]?.id || '');
       setRules(v => data.rules.some(r => r.id === v) ? v : data.rules[0]?.id || '');
-      setStatus(await (await request('/status')).json()); setConnected(true);
+      acceptStatus(await (await request('/status')).json()); setConnected(true);
     } catch (err) { setConnected(false); setError(err.message); }
     finally { setWorking(false); }
   }
@@ -39,7 +46,7 @@ export default function LanRecorder({onResult, onBusy, blocked, onImport, onVali
     if (!connected) return;
     let disposed = false;
     const timer = setTimeout(async () => {
-      try { const next = await (await request('/status')).json(); misses.current = 0; if (!disposed) setStatus(next); }
+      try { const next = await (await request('/status')).json(); misses.current = 0; if (!disposed) acceptStatus(next); }
       catch (err) {
         if (disposed) return;
         if (!refused(err) && ++misses.current < 3) { setStatus(s => s && {...s}); return; }
@@ -50,7 +57,7 @@ export default function LanRecorder({onResult, onBusy, blocked, onImport, onVali
   }, [connected, status]);
   async function action(name) {
     setWorking(true); setError('');
-    try { setStatus(await (await request('/' + name, name === 'start' ? {model, rules} : {})).json()); }
+    try { acceptStatus(await (await request('/' + name, name === 'start' ? {model, rules} : {})).json()); }
     catch (err) {
       if (refused(err)) setError(err.message);
       else { setConnected(false); setError(`${err.message} Refresh status to confirm whether the action completed.`); }
@@ -85,13 +92,14 @@ export default function LanRecorder({onResult, onBusy, blocked, onImport, onVali
   const compatible = catalog?.rules.find(r => r.id === rules)?.models.includes(model);
   return <section className="local-analysis lan-recorder" aria-label="LAN camera recorder">
     <div className="local-analysis-heading"><div><p className="eyebrow">ONE AUTHORIZED LAN CAMERA</p><h2>Record & analyze</h2></div>
-      <span className="local-analysis-badge">{connected ? status?.state.replaceAll('_', ' ') : 'Status not connected'}</span></div>
+      <span className="local-analysis-badge">{connected ? status?.state.replaceAll('_', ' ') : status ? 'Status unknown · reconnect' : 'Status not connected'}</span></div>
     <p>Record bounded video-only segments and analyze them on this computer. Recording starts only when you press Start recording & analysis. It continues when you leave this page, until Stop or service shutdown.</p>
     <div className="local-analysis-actions"><button className="button" disabled={!local || working} onClick={connect}>{status ? 'Refresh recorder status' : 'Connect LAN recorder'}</button>
       <a href="https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/lan-recording.md" target="_blank" rel="noreferrer">LAN recording guide</a></div>
     {!local && <p>Use the configured local application on this computer for LAN recording.{loopbackAddress(globalThis.location) && <> <a href={loopbackAddress(globalThis.location)}>Open this page at 127.0.0.1</a></>}</p>}
     {status && <>
       <h3>{status.name}</h3>
+      {!connected && <p className="recognition-error" role="status">Recording status is unknown. The details below were last checked{lastCheckedAt ? ` at ${new Date(lastCheckedAt).toLocaleTimeString()}` : ''}; recording may still be running. Refresh recorder status to confirm.</p>}
       <p>{status.limits.segment_seconds}s segments · up to 10 fps / 960px · retention {status.limits.retention_minutes} minutes / {status.limits.max_segments} segments / {status.limits.max_storage_mib} MiB. Oldest retained files, including pending work, can expire. Export evidence you need to keep.</p>
       <fieldset className="local-analysis-fields" disabled={working || !connected || status.active || blocked}>
         <label>Recorder model<select aria-label="Recorder model" value={model} onChange={e => setModel(e.target.value)}>{catalog?.models.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}</select></label>

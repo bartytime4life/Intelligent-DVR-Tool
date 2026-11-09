@@ -1,4 +1,5 @@
 import { csvCell } from './recognition-report.mjs';
+import { createReviewRevision } from './data.mjs';
 
 // Older saved events keep clip time only in their "Clip +12.3s" label.
 export function eventSeconds(e) {
@@ -50,9 +51,10 @@ export function nextPending(list, id, step = 1) {
 }
 
 export function queueCSV(events) {
-  const rows = [['event_id', 'status', 'source', 'clip_seconds', 'label', 'rule', 'model_score', 'mode', 'source_sha256', 'model_sha256', 'reviewed_at', 'review_note']];
+  const rows = [['event_id', 'status', 'source', 'clip_seconds', 'label', 'rule', 'model_score', 'mode', 'source_sha256', 'model_sha256', 'reviewed_at', 'review_note', 'analysis_state', 'live_session', 'captured_at']];
   for (const e of events) rows.push([e.id, e.status, eventSource(e), eventSeconds(e) ?? '', e.label, e.rule, e.score, e.mode,
-    eventRecording(e), e.provenance?.model_sha256 || '', e.reviewedAt || '', e.note || '']);
+    eventRecording(e), e.provenance?.model_sha256 || '', e.reviewedAt || '', e.note || '', e.provenance?.state || '',
+    e.provenance?.session || '', e.provenance?.captured_at || '']);
   return rows.map(row => row.map(csvCell).join(',')).join('\r\n') + '\r\n';
 }
 
@@ -62,13 +64,22 @@ export function dismissPending(events, ids, note = '', at = new Date().toISOStri
   const next = events.map(e => {
     if (!chosen.has(e.id) || e.status !== 'pending') return e;
     previous.push(e);
-    return {...e, status: 'dismissed', note: note.slice(0, 2000) || e.note, reviewedAt: at};
+    return {...e, status: 'dismissed', note: note.slice(0, 2000) || e.note, reviewedAt: at, reviewRevision: createReviewRevision()};
   });
   return {events: next, previous, at};
 }
 
-export function restorePending(events, {previous, at}) {
+export function restorePending(events, {previous, events: applied, at}) {
   const byId = new Map(previous.map(e => [e.id, e]));
-  // Only entries still carrying that bulk decision return to pending; later decisions win.
-  return events.map(e => byId.has(e.id) && e.status === 'dismissed' && e.reviewedAt === at ? byId.get(e.id) : e);
+  const decisions = new Map(applied.map(e => [e.id, e]));
+  // Match persisted decision identity rather than JS references: another browser
+  // tab can save and restore unchanged events while this Undo remains available.
+  return events.map(e => {
+    const decision = decisions.get(e.id);
+    const sameEvidence = decision && ['id', 'sourceId', 'mode', 'camera', 'cameraName', 'title', 'label', 'time', 'seconds', 'score', 'rule'].every(key => e[key] === decision[key]) &&
+      ['source_sha256', 'model_sha256', 'state', 'session', 'captured_at'].every(key => e.provenance?.[key] === decision.provenance?.[key]);
+    // Field checks also protect edits by older clients that preserve unknown tokens.
+    return byId.has(e.id) && sameEvidence && typeof decision.reviewRevision === 'string' && e.reviewRevision === decision.reviewRevision &&
+      e.status === 'dismissed' && e.reviewedAt === at && e.note === decision.note ? byId.get(e.id) : e;
+  });
 }

@@ -4,9 +4,10 @@ import { DEFAULT_LIBRARY_CONFIG, libraryRequest, libraryConfig, cameraConfig, op
 import { MAX_VIDEO_BYTES } from './recognition.mjs';
 import './backup-library.css';
 
-export default function BackupLibrary({onResult, onBusy, blocked = false}) {
+export default function BackupLibrary({onResult, onBusy, onStatus, blocked = false}) {
   const [status, setStatus] = useState(null), [catalog, setCatalog] = useState(null), [config, setConfig] = useState({...DEFAULT_LIBRARY_CONFIG});
   const [connected, setConnected] = useState(false), [working, setWorking] = useState(false), [dirty, setDirty] = useState(false);
+  const [checkedAt, setCheckedAt] = useState(null);
   const [error, setError] = useState(''), [message, setMessage] = useState(''), [pickerNote, setPickerNote] = useState('');
   const [analyze, setAnalyze] = useState(false), [model, setModel] = useState(''), [rules, setRules] = useState('');
   const [cameras, setCameras] = useState(null), [cameraError, setCameraError] = useState(''), [cameraMessage, setCameraMessage] = useState('');
@@ -17,7 +18,9 @@ export default function BackupLibrary({onResult, onBusy, blocked = false}) {
   useEffect(() => { lifetime.current = new AbortController(); return () => lifetime.current.abort(); }, []);
   // Copying alone does not reserve the analyzer. A disconnected status stays visible until refreshed.
   useEffect(() => { onBusy(Boolean(status?.analyzing)); }, [status?.analyzing, onBusy]);
+  useEffect(() => { onStatus?.({active: Boolean(connected && status?.active), unknown: Boolean(status && !connected), error: Boolean(error || status?.error)}); }, [connected, status?.active, status?.error, error, onStatus]);
   const request = (path, body, setup = false) => libraryRequest(path, {token: token.current, body, setup, signal: lifetime.current.signal});
+  const receivedStatus = next => { setStatus(next); setCheckedAt(Date.now()); };
   async function loadCameras() {
     setCameraError('');
     try {
@@ -36,7 +39,7 @@ export default function BackupLibrary({onResult, onBusy, blocked = false}) {
       setModel(v => data.models.some(m => m.id === v) ? v : data.models[0]?.id || '');
       setRules(v => data.rules.some(r => r.id === v) ? v : data.rules[0]?.id || '');
       const next = await (await request('/status')).json();
-      setStatus(next); if (next.config && !dirty) setConfig(next.config); setConnected(true);
+      receivedStatus(next); if (next.config && !dirty) setConfig(next.config); setConnected(true);
       setMessage(next.active ? 'Backup is already running. Review its status below.' : 'Connected. Save your folders, then explicitly start backup.');
       await loadCameras();
     } catch (err) { if (!lifetime.current.signal.aborted) {setConnected(false); setError(`${err.message} Background backup may continue if it was already started.`);} }
@@ -47,7 +50,7 @@ export default function BackupLibrary({onResult, onBusy, blocked = false}) {
     let disposed = false;
     const timer = setTimeout(async () => {
       if (pending.current) { if (!disposed) setStatus(s => s && {...s}); return; }
-      try { const next = await (await request('/status')).json(); if (!disposed) setStatus(next); }
+      try { const next = await (await request('/status')).json(); if (!disposed) receivedStatus(next); }
       catch (err) { if (!disposed) {setConnected(false); setError(`Status unavailable. Background backup may continue. ${err.message} Reconnect before starting again.`);} }
     }, 2000);
     return () => {disposed = true; clearTimeout(timer);};
@@ -70,7 +73,7 @@ export default function BackupLibrary({onResult, onBusy, blocked = false}) {
     }
     pending.current = true; setWorking(true); setError(''); setMessage('');
     try {
-      const next = await (await request('/' + action, payload)).json(); setStatus(next);
+      const next = await (await request('/' + action, payload)).json(); receivedStatus(next);
       if (action === 'configure') {setDirty(false); if (next.config) setConfig(next.config);}
       setMessage(success);
     } catch (err) {
@@ -112,10 +115,12 @@ export default function BackupLibrary({onResult, onBusy, blocked = false}) {
   const copyDone = Number.isFinite(copying?.copied_bytes) ? Math.max(0, Math.min(copying.copied_bytes, copyTotal ?? Infinity)) : null;
   return <section className="local-analysis backup-library" aria-label="Existing DVR backup">
     <div className="local-analysis-heading"><div><p className="eyebrow">LOCAL BACKUP &amp; ANALYSIS</p><h2>Use my existing DVR</h2></div>
-      <span className={`local-analysis-badge ${connected && status?.active ? 'backup-running' : ''}`}>{connected ? stopping ? 'Stopping backup' : status?.analyzing ? 'Analyzing locally' : status?.active ? 'Backup running' : 'Backup paused' : 'Not connected'}</span></div>
+      <span className={`local-analysis-badge ${connected && status?.active ? 'backup-running' : !connected && status ? 'backup-stale' : ''}`}>{connected ? stopping ? 'Stopping backup' : status?.analyzing ? 'Analyzing locally' : status?.active ? 'Backup running' : 'Backup paused' : status ? 'Status unknown' : 'Not connected'}</span></div>
     <p className="backup-intro">Keep your OEM DVR software recording. Save another copy of its finished videos here, with optional analysis on this computer.</p>
-    <ol className="backup-steps" aria-label="DVR companion setup"><li className={!status?.configured ? 'current' : 'complete'}><span>1</span><strong>Choose folders</strong><small>Your DVR → your backup</small></li><li className={status?.active ? 'current' : ''}><span>2</span><strong>Keep another copy</strong><small>Start when you are ready</small></li><li className={status?.analyzing ? 'current' : ''}><span>3</span><strong>Analyze locally</strong><small>Optional · review every result</small></li></ol>
+    <ol className="backup-steps" aria-label="DVR companion setup"><li className={connected ? !status?.configured ? 'current' : 'complete' : ''}><span>1</span><strong>Choose folders</strong><small>Your DVR → your backup</small></li><li className={connected && status?.active ? 'current' : ''}><span>2</span><strong>Keep another copy</strong><small>Start when you are ready</small></li><li className={connected && status?.analyzing ? 'current' : ''}><span>3</span><strong>Analyze locally</strong><small>Optional · review every result</small></li></ol>
     <div className="local-analysis-actions"><button className="button" onClick={connect} disabled={!local || working}>{status ? 'Refresh backup connection' : 'Connect to this computer'}</button><span className="backup-local-note">Files and analysis stay on this computer.</span></div>
+    {!connected && !status && <p className="backup-connection-hint">Start here: connect to the local app to unlock folder setup. Connecting checks availability; backup starts only when you choose Start backup.</p>}
+    {!connected && status && <p className="backup-notice" role="status">Last checked {new Date(checkedAt).toLocaleTimeString()}. Saved-video details, storage and progress below are from that check. Backup may still be running. Refresh the connection to check its current state.</p>}
     {!local && <p>Open the installed local app at 127.0.0.1 to use local backup and camera setup.</p>}
     <fieldset className="backup-folder-fields" disabled={unavailable || status?.active || status?.analyzing || stopping}>
       <legend>1. Choose your folders</legend>
@@ -145,7 +150,7 @@ export default function BackupLibrary({onResult, onBusy, blocked = false}) {
     {status && <>
       {status.analysis_job && <p role="status">{analysisBackendLabel(status.analysis_job, catalog?.backend)} · {status.analysis_job.frames_analyzed} samples analyzed</p>}
       <div className="backup-storage" aria-label="Backup storage status"><span><strong>{storageSize(status.storage_bytes)}</strong> saved / {status.config?.max_storage_gib ?? config.max_storage_gib} GiB budget</span><span><strong>{storageSize(status.disk_free_bytes)}</strong> disk free</span><span><strong>{status.waiting ?? 0}</strong> files waiting for quiet time</span><span><strong>{status.counters?.copied ?? 0}</strong> copied · {status.counters?.duplicates ?? 0} duplicates skipped</span></div>
-      {copying && <div className="backup-copy-progress" role="status"><strong>Saving another copy: {copying.name}</strong><span>{storageSize(copyDone)} of {storageSize(copyTotal)}</span><progress aria-label={`Copy progress for ${copying.name}`} max={copyTotal ?? 1} value={copyTotal !== null && copyDone !== null ? copyDone : undefined} /></div>}
+      {copying && <div className="backup-copy-progress" role="status"><strong>{connected ? 'Saving another copy' : 'Last reported copy'}: {copying.name}</strong><span>{storageSize(copyDone)} of {storageSize(copyTotal)}{!connected && ' · progress unavailable'}</span>{connected && <progress aria-label={`Copy progress for ${copying.name}`} max={copyTotal ?? 1} value={copyTotal !== null && copyDone !== null ? copyDone : undefined} />}</div>}
       {status.scan_limited && <p className="backup-notice">The source scan is incomplete because of an entry/depth limit or an inaccessible folder. Choose a narrower source folder or check folder access.</p>}
       {!!status.unsupported?.length && <p className="backup-notice">Backup only: {status.unsupported.map(item => `${item.extension || 'no extension'} (${item.count})`).join(', ')}. These formats need an OEM standard-video export for analysis.</p>}
       <details className="backup-saved"><summary>Saved videos <span>{items.length ? `· latest ${items.length}` : '· no copies yet'}</span></summary>

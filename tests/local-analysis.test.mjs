@@ -33,6 +33,32 @@ test('bounded reading checks declared and streaming size', async () => {
   await assert.rejects(boundedBody(new Response('x',{headers:{'content-length':'1000'}}), 10), /size limit/);
   await assert.rejects(boundedBody(new Response('xxxxxxxxxxx'), 10), /size limit/);
 });
+test('bounded reading cancels rejected downloads and releases the stream lock', async () => {
+  let cancelled = 0;
+  const oversized = new Response(new ReadableStream({cancel() { cancelled++; }}), {headers:{'content-length':'1000'}});
+  await assert.rejects(boundedBody(oversized, 10), /size limit/);
+  assert.equal(cancelled, 1);
+  const streamed = new Response(new ReadableStream({
+    start(controller) { controller.enqueue(new Uint8Array(11)); },
+    cancel() { cancelled++; throw Error('cleanup failed'); },
+  }));
+  await assert.rejects(boundedBody(streamed, 10), /size limit/);
+  assert.equal(cancelled, 2);
+  assert.equal(streamed.body.locked, false);
+  const unreadable = new Response(new ReadableStream({start(controller) { controller.error(Error('read failed')); }}));
+  await assert.rejects(boundedBody(unreadable, 10), /read failed/);
+  assert.equal(unreadable.body.locked, false);
+  await assert.rejects(boundedBody(new Response(null), 10), /no content/);
+});
+test('cancelling a pending bounded read stops it even when the fetcher ignores its signal', {timeout:1000}, async () => {
+  const controller = new AbortController(); let cancelled = false;
+  const response = new Response(new ReadableStream({cancel() { cancelled = true; }}));
+  const reading = boundedBody(response, 10, {signal:controller.signal});
+  controller.abort();
+  await assert.rejects(reading, error => error.name === 'AbortError');
+  assert.equal(cancelled, true);
+  assert.equal(response.body.locked, false);
+});
 test('API keeps token in header, refuses redirects and surfaces actionable failure', async () => {
   await assert.rejects(analysisRequest('/jobs', {token:'secret', method:'POST', body:{recording:'id'}, fetcher:async (path, options) => {
     assert.equal(path, '/api/analysis/jobs'); assert.equal(options.headers['X-DVR-Token'],'secret');
@@ -42,7 +68,18 @@ test('API keeps token in header, refuses redirects and surfaces actionable failu
 });
 test('abandoned result opening cannot publish', async () => {
   const controller = new AbortController(); controller.abort();
-  await assert.rejects(openJobResult(job, 'token', controller.signal, serve()), /cancelled/);
+  await assert.rejects(openJobResult(job, 'token', controller.signal, async () => assert.fail('Cancelled opening must not fetch')), /cancelled/);
+});
+test('cancelling job verification terminates its hashing worker', {timeout:1000}, async () => {
+  const originalWorker = globalThis.Worker, controller = new AbortController(); let terminated = false;
+  globalThis.Worker = class {
+    postMessage() { queueMicrotask(() => controller.abort()); }
+    terminate() { terminated = true; }
+  };
+  try {
+    await assert.rejects(openJobResult(job, 'token', controller.signal, serve()), error => error.name === 'AbortError');
+    assert.equal(terminated, true);
+  } finally { globalThis.Worker = originalWorker; }
 });
 
 test('recording backend labels distinguish preference, verified execution and CPU fallback',async()=>{

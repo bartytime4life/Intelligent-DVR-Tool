@@ -1,0 +1,53 @@
+{
+  "date": "2026-11-09",
+  "base_revision": "4c2e59d4e0900b8ce6bc7ea81b1ea33121f98e56",
+  "branch": "codex/dvr-improvements-20261109",
+  "status": "local-source-and-controlled-browser-checks",
+  "sources": {
+    "edge/backup_library.py": "3c99d3e6fe93a9952bb983685574f3566135f6e54cabbdaf6dfb438636aee2ff",
+    "src/App.jsx": "7182c47bbfc8658a6373043db88f58005cfefaeffaae301eb86256e1955c2cf3",
+    "src/BackupLibrary.jsx": "64c56390c64619360e0e6f38429d9e7074c4b325bdee212ddc10331884f2935f",
+    "src/LanRecorder.jsx": "7c44d645ff597258ec92fab13b1e37488505cb11abe7a8239e9536a6dbffed25",
+    "src/RecognitionReview.jsx": "895ddcc57182c5a131b4c84e9b52aa08d17006abdf1dc60bdb30a8a3e1c4c63c",
+    "src/backup-library.css": "27ec1e756fa847ecf6c93b8a8bcd6ba371a2d19f946e79ae119dbb13ee821bfd",
+    "src/backup-library.mjs": "918f87361884cdc6777d1ecf045a85af1b045226a4fe9237ea4c4cc49b115133",
+    "src/data.mjs": "1fb6a0e982b7f643d1b47002d27f3ce2c0d298ab1ddfb3010f586ad97514d507",
+    "src/lan-recorder.mjs": "b1330d0efac5b56747352114dee1c1cc72018f68505f0a1a178e0c6b9e759b91",
+    "src/local-analysis.mjs": "717cde4363eb5f33f18bf6a20ece81a2fc5b6c34e03f9dac15f996c8885eb1ad",
+    "src/recognition.css": "a0d3ec939d3c8238d500ab2f96c5830018cecc8b152610132477e21e481e3420",
+    "src/review-queue.mjs": "141ec96183229faf310b1e75ea436feee214305aa7e924b42e39738c240dc106"
+  },
+  "pinned_sources_unchanged": [
+    "edge/inference.py",
+    "edge/journal.py",
+    "edge/supervision.py",
+    "edge/scheduler.py",
+    "edge/profiling.py"
+  ],
+  "checks": {
+    "frontend": {
+      "passed": 375,
+      "skipped": 0,
+      "loopback_socket_checks": true
+    },
+    "python": {
+      "discovered": 510,
+      "passed": 498,
+      "skipped": 12
+    },
+    "sites_packaging": {
+      "passed": 4
+    },
+    "production_build": "passed",
+    "documentation": "passed",
+    "browser": "in-app walkthrough with generated local status; full automated browser suites not run",
+    "responsive_css_widths": [
+      390,
+      320
+    ]
+  },
+  "physical_acceptance": "not established",
+  "device_activation": false,
+  "private_footage_used": false,
+  "deployed": false
+}

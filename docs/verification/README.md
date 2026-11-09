@@ -1,5 +1,9 @@
 # Verification index
 
+[Recognition usability and backup recovery, November 9](experience-2026-11-09/README.md)
+records task selection, retained drafts, explicit lost-status warnings, corrupt
+receipt recovery, cancellation, review Undo and generated-browser checks.
+
 [Repository checks and repairs, November 3](repository-checks-2026-11-03/README.md) covers cross-platform backup fixes, private-file and review-image boundaries, live provenance, browser regressions and qualification limits.
 
 [GPU-first default, November 3](gpu-default-2026-11-03/README.md) records actual RTX 5080 CUDA execution, recorded-video and OEM-copy analysis, shared GPU-slot policy and explicit CPU fallback.

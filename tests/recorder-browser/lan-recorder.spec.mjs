@@ -2,6 +2,7 @@ import {test, expect} from '@playwright/test';
 
 test('explicit native RTSP recording, existing CPU analysis, source-matched review and stop', async ({page}) => {
   await page.goto('/#recognition');
+  await page.getByRole('button',{name:/^Record a LAN camera/}).click();
   const panel = page.getByRole('region',{name:'LAN camera recorder'});
   await panel.getByRole('button',{name:'Connect LAN recorder'}).click();
   await expect(panel.locator('.local-analysis-badge')).toHaveText('stopped');
@@ -23,6 +24,7 @@ test('explicit native RTSP recording, existing CPU analysis, source-matched revi
   if (await panel.locator('.local-analysis-message').textContent().then(t=>/sent to Events/.test(t))) expect(sent).toBeGreaterThan(0);
   await page.screenshot({path:'test-results/recorder/desktop.png',fullPage:true});
   await page.reload();
+  await page.getByRole('button',{name:/^Record a LAN camera/}).click();
   await panel.getByRole('button',{name:'Connect LAN recorder'}).click();
   await expect(panel.getByRole('button',{name:'Stop recording & analysis'})).toBeEnabled();
   await panel.getByRole('button',{name:'Stop recording & analysis'}).click();
@@ -35,13 +37,20 @@ test('explicit native RTSP recording, existing CPU analysis, source-matched revi
 
 test('lost status is visible and never starts recording by retry', async ({page}) => {
   await page.goto('/#recognition');
+  await page.getByRole('button',{name:/^Record a LAN camera/}).click();
   const panel = page.getByRole('region',{name:'LAN camera recorder'});
   await panel.getByRole('button',{name:'Connect LAN recorder'}).click();
   await expect(panel.locator('.local-analysis-badge')).toHaveText('stopped');
   await page.route('**/api/recorder/status', route=>route.abort());
   await expect(panel.getByRole('alert')).toContainText('recording may still be running');
+  await expect(panel.locator('.local-analysis-badge')).toHaveText('Status unknown · reconnect');
+  await expect(page.locator('.footer-recording')).toContainText('Recording status unknown');
+  await page.getByRole('navigation',{name:'Main navigation'}).getByRole('button',{name:'Events',exact:true}).click();
+  await expect(page.locator('.footer-recording')).toContainText('Recording status unknown');
+  await page.getByRole('navigation',{name:'Main navigation'}).getByRole('button',{name:'Recognition',exact:true}).click();
   await expect(panel.getByRole('button',{name:'Start recording & analysis'})).toBeDisabled();
   await page.unroute('**/api/recorder/status');
   await panel.getByRole('button',{name:'Refresh recorder status'}).click();
   await expect(panel.locator('.local-analysis-badge')).toHaveText('stopped');
+  await expect(page.locator('.footer-recording')).toHaveCount(0);
 });

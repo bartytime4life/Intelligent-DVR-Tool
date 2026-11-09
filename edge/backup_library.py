@@ -7,6 +7,7 @@ import contextlib
 import hashlib
 import itertools
 import json
+import math
 import os
 from pathlib import Path
 import re
@@ -114,6 +115,7 @@ class BackupLibrary:
         self.analysis = None
         self.copying = None
         self.error = None
+        self.recovery_warning = None
         self.finished = False
         self.waiting = 0
         self.scan_limited = False
@@ -209,15 +211,23 @@ class BackupLibrary:
     def _recover_receipts(self):
         # A crash between file publication and the SQLite commit leaves a complete
         # receipt. Rebuild only from hash-verified pairs; never remove unknown files.
+        self.recovery_warning = None
         for directory in itertools.islice(self.store.iterdir(), MAX_ITEMS + 100):
             if not re.fullmatch('[a-f0-9]{32}', directory.name): continue
-            ordinary_directory(directory)
-            if self.db.execute('SELECT 1 FROM items WHERE id=?', (directory.name,)).fetchone(): continue
             try:
+                ordinary_directory(directory)
+                if self.db.execute('SELECT 1 FROM items WHERE id=?', (directory.name,)).fetchone(): continue
                 row = read_json(directory / 'receipt.json', 8192)
-                if (row.get('id') != directory.name or row.get('extension') not in BACKUP_EXTENSIONS
-                        or not isinstance(row.get('name'), str) or type(row.get('bytes')) is not int
-                        or not re.fullmatch('[a-f0-9]{64}', row.get('sha256', ''))):
+                # Validate every SQLite-bound field before importing one receipt.
+                # A damaged optional entry must not make all other copies unavailable.
+                if (not isinstance(row, dict) or row.get('id') != directory.name
+                        or not isinstance(row.get('extension'), str) or row['extension'] not in BACKUP_EXTENSIONS
+                        or not isinstance(row.get('name'), str) or not 1 <= len(row['name']) <= 200
+                        or '\0' in row['name'] or Path(row['name']).name != row['name'] or row['name'] in ('.', '..')
+                        or type(row.get('bytes')) is not int or not 0 < row['bytes'] <= MAX_FILE_BYTES
+                        or not isinstance(row.get('sha256'), str) or not re.fullmatch('[a-f0-9]{64}', row['sha256'])
+                        or type(row.get('copied_at')) not in (int, float)
+                        or not 0 <= row['copied_at'] <= 2**63 - 1 or not math.isfinite(row['copied_at'])):
                     raise ValueError('receipt')
                 source = self._source_path(row)
                 if source.stat().st_size != row['bytes'] or fingerprint(source) != row['sha256']:
@@ -226,7 +236,7 @@ class BackupLibrary:
                 self.db.execute('INSERT OR IGNORE INTO items (id,name,extension,bytes,sha256,copied_at,state) VALUES (:id,:name,:extension,:bytes,:sha256,:copied_at,:state)', row)
                 self.db.commit()
             except (OSError, ValueError, TypeError, LibraryError):
-                self.error = 'An unfinished or unverified backup remains in the library. Inspect storage; no saved files were deleted.'
+                self.recovery_warning = 'An unfinished or unverified backup remains in the library. Inspect storage; no saved files were deleted.'
 
     def configure(self, body):
         config = validate_config(body)
@@ -331,7 +341,7 @@ class BackupLibrary:
                     'copying': dict(self.copying) if self.copying else None,
                     'analysis_job': self.jobs.snapshot(self.analysis['job']) if self.analysis else None,
                     'state': 'stopping' if (self.analysis or self.scanning) and not self.active else 'running' if self.active else 'paused',
-                    'error': self.error, 'items': rows, 'storage_bytes': size, 'disk_free_bytes': free,
+                    'error': self.error or self.recovery_warning, 'items': rows, 'storage_bytes': size, 'disk_free_bytes': free,
                     'waiting': self.waiting, 'scan_limited': self.scan_limited,
                     'unsupported': [{'extension': k, 'count': v} for k, v in sorted(self.unsupported.items())],
                     'limits': {'analysis_max_bytes': VIDEO_BYTES, 'max_items': MAX_ITEMS, 'max_file_bytes': MAX_FILE_BYTES},
