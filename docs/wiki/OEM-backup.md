@@ -150,6 +150,14 @@ Prefer completed exports/closed-file folders and verify one real clip before
 relying on unattended backup. Continuous recording, camera timestamps, all-file
 coverage, novice usability and 100-camera capacity remain unqualified.
 
+## Read saved byte-check receipts
+
+In the same Recognition backup task, open **Check backup receipts**. Load the
+verifier's current JSON receipt and optionally its earlier receipt. This browser-
+local view needs no model, recording or service connection. It keeps byte
+correspondence, reported review/coverage/backend and field acceptance separate;
+see the [acceptance procedure](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/OEM-field-acceptance#read-byte-check-receipts-in-the-app).
+
 ---
 
 [Canonical source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/oem-backup.md) · Generated companion; dated evidence, examples and illustrations retain their labels.
