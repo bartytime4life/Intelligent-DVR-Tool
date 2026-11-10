@@ -1,5 +1,16 @@
 # Product status and evidence
 
+**Merged software baseline verified November 9, 2026:**
+[PR #93](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/93), merged
+as `9ae03ce`, passed all four PR workflows at the identical source tree `fd7b600`.
+Each platform passed 451 frontend and four Sites checks. Python results were
+510 passed on Linux, 424 passed/86 skipped on Windows, and 395 passed/115 skipped
+on Apple silicon. The full 151-case general/Facility browser run and separate
+generated analysis, feed, recorder and backup suites passed. See the
+[revision-bound CI record](verification/merged-baseline-2026-11-09/README.md).
+CI installation and generated runtime checks remain separate from owner-device,
+recognition-quality and capacity acceptance.
+
 **Current source workflow updates:** **Find a task** opens common jobs directly
 from any workspace. Note drafts remain accessible across navigation and can be
 saved without changing a verdict. Machine plans join reviews/rules in locked
@@ -38,7 +49,7 @@ physical-camera tracking accuracy and multi-camera capacity remain unqualified.
 
 ![Conceptual overview of local camera, recording, review and facility planning.](media/guide/overview.jpg)
 
-**Software baseline verified November 1, 2026 (America/Chicago):** [`main` at `2566d845`](https://github.com/bartytime4life/Intelligent-DVR-Tool/commit/2566d845fbbc7b9f54f98441009a604f2fa513ce), through [PR #71](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/71). Its final tested head `89bf2fca` passed 16 checks, including [Mac installation](https://github.com/bartytime4life/Intelligent-DVR-Tool/actions/runs/41346718983), [Linux/Windows validation](https://github.com/bartytime4life/Intelligent-DVR-Tool/actions/runs/41346718991), [browser regression](https://github.com/bartytime4life/Intelligent-DVR-Tool/actions/runs/41346718947) and [PC install kit](https://github.com/bartytime4life/Intelligent-DVR-Tool/actions/runs/41346719085). These are software checks, not physical-camera, biometric-accuracy or 100-camera qualification. [Mac source/setup evidence](verification/mac-setup-2026-11-01/README.md).
+**Historical software baseline verified November 1, 2026 (America/Chicago):** [`main` at `2566d845`](https://github.com/bartytime4life/Intelligent-DVR-Tool/commit/2566d845fbbc7b9f54f98441009a604f2fa513ce), through [PR #71](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/71). Its final tested head `89bf2fca` passed 16 checks, including [Mac installation](https://github.com/bartytime4life/Intelligent-DVR-Tool/actions/runs/41346718983), [Linux/Windows validation](https://github.com/bartytime4life/Intelligent-DVR-Tool/actions/runs/41346718991), [browser regression](https://github.com/bartytime4life/Intelligent-DVR-Tool/actions/runs/41346718947) and [PC install kit](https://github.com/bartytime4life/Intelligent-DVR-Tool/actions/runs/41346719085). These are software checks, not physical-camera, biometric-accuracy or 100-camera qualification. [Mac source/setup evidence](verification/mac-setup-2026-11-01/README.md).
 
 | Recent merged work | Operator-visible change | Boundary |
 | --- | --- | --- |

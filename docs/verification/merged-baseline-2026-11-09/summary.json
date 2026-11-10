@@ -1,0 +1,709 @@
+{
+  "schema": "intelligent-dvr.merged-baseline.v1",
+  "recorded_on": "2026-11-09",
+  "pull_request": "https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/93",
+  "tested_revision": "fd7b60023df894d69f397635ae117cb1901c3730",
+  "merged_revision": "9ae03ce597f2688d8c4f5a2fce0d13954617e0f4",
+  "merged_at": "2026-11-10T02:56:05Z",
+  "source_tree_identical": true,
+  "workflows": [
+    {
+      "id": 42729058818,
+      "name": "PC install kit",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/bartytime4life/Intelligent-DVR-Tool/actions/runs/42729058818",
+      "jobs": [
+        {
+          "id": 129542101514,
+          "name": "package",
+          "status": "completed",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/setup-node@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/setup-python@v5",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run npm ci",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run npm run build",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run python scripts/build-pc-kit.py --output kit/Intelligent-DVR-PC.zip --revision \"$(git rev-parse HEAD)\"",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/upload-artifact@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/setup-python@v5",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/setup-node@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Complete job",
+              "conclusion": "success"
+            }
+          ]
+        },
+        {
+          "id": 129542289220,
+          "name": "install (ubuntu-24.04)",
+          "status": "completed",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/setup-python@v5",
+              "conclusion": "success"
+            },
+            {
+              "name": "Installer contracts",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/download-artifact@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Clean extracted kit install, repeat install, doctor and real HTTP launch",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/upload-artifact@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/setup-python@v5",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Complete job",
+              "conclusion": "success"
+            }
+          ]
+        },
+        {
+          "id": 129542289366,
+          "name": "install (windows-latest)",
+          "status": "completed",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/setup-python@v5",
+              "conclusion": "success"
+            },
+            {
+              "name": "Installer contracts",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/download-artifact@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Clean extracted kit install, repeat install, doctor and real HTTP launch",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/upload-artifact@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/setup-python@v5",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Complete job",
+              "conclusion": "success"
+            }
+          ]
+        },
+        {
+          "id": 129542836890,
+          "name": "tested-kit",
+          "status": "completed",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/download-artifact@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/upload-artifact@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Complete job",
+              "conclusion": "success"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 42729059073,
+      "name": "Cross-platform checks",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/bartytime4life/Intelligent-DVR-Tool/actions/runs/42729059073",
+      "jobs": [
+        {
+          "id": 129542105639,
+          "name": "validate (ubuntu-latest)",
+          "status": "completed",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/setup-node@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run npm ci",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run npm run build",
+              "conclusion": "success"
+            },
+            {
+              "name": "Frontend and actual loopback geo delivery",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run npm run test:sites",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/setup-python@v5",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run python -m pip install -r edge/requirements-qualification.txt",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run python -m unittest discover -s tests -p 'test_*.py'",
+              "conclusion": "success"
+            },
+            {
+              "name": "Check out pinned PR 20 for synthetic comparison",
+              "conclusion": "success"
+            },
+            {
+              "name": "Matched synthetic durable probes",
+              "conclusion": "success"
+            },
+            {
+              "name": "Retain synthetic durable receipts",
+              "conclusion": "success"
+            },
+            {
+              "name": "Actual source launcher local geo delivery",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run python scripts/check-docs.py",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run python scripts/build-wiki.py --check",
+              "conclusion": "success"
+            },
+            {
+              "name": "Linux launcher syntax",
+              "conclusion": "success"
+            },
+            {
+              "name": "Windows launcher syntax",
+              "conclusion": "skipped"
+            },
+            {
+              "name": "Post Check out pinned PR 20 for synthetic comparison",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/setup-python@v5",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/setup-node@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Complete job",
+              "conclusion": "success"
+            }
+          ]
+        },
+        {
+          "id": 129542106053,
+          "name": "validate (windows-latest)",
+          "status": "completed",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/setup-node@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run npm ci",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run npm run build",
+              "conclusion": "success"
+            },
+            {
+              "name": "Frontend and actual loopback geo delivery",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run npm run test:sites",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/setup-python@v5",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run python -m pip install -r edge/requirements-qualification.txt",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run python -m unittest discover -s tests -p 'test_*.py'",
+              "conclusion": "success"
+            },
+            {
+              "name": "Check out pinned PR 20 for synthetic comparison",
+              "conclusion": "skipped"
+            },
+            {
+              "name": "Matched synthetic durable probes",
+              "conclusion": "skipped"
+            },
+            {
+              "name": "Retain synthetic durable receipts",
+              "conclusion": "skipped"
+            },
+            {
+              "name": "Actual source launcher local geo delivery",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run python scripts/check-docs.py",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run python scripts/build-wiki.py --check",
+              "conclusion": "success"
+            },
+            {
+              "name": "Linux launcher syntax",
+              "conclusion": "skipped"
+            },
+            {
+              "name": "Windows launcher syntax",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/setup-python@v5",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/setup-node@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Complete job",
+              "conclusion": "success"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 42729058775,
+      "name": "Mac source install",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/bartytime4life/Intelligent-DVR-Tool/actions/runs/42729058775",
+      "jobs": [
+        {
+          "id": 129542101129,
+          "name": "apple-silicon",
+          "status": "completed",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/setup-node@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/setup-python@v5",
+              "conclusion": "success"
+            },
+            {
+              "name": "Install the same pinned runtime as the Mac entry point",
+              "conclusion": "success"
+            },
+            {
+              "name": "Test-only ONNX fixture generator",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run npm test",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run npm run test:sites",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run .venv/bin/python -m unittest discover -s tests -p 'test_*.py'",
+              "conclusion": "success"
+            },
+            {
+              "name": "Fresh source with spaces, repeat install, real analysis, duplicate start and restart",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run python scripts/check-docs.py",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run python scripts/build-wiki.py --check",
+              "conclusion": "success"
+            },
+            {
+              "name": "Mac entry point syntax",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/upload-artifact@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/setup-python@v5",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/setup-node@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Complete job",
+              "conclusion": "success"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 42729059154,
+      "name": "Facility browser regression",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/bartytime4life/Intelligent-DVR-Tool/actions/runs/42729059154",
+      "jobs": [
+        {
+          "id": 129542106084,
+          "name": "facility-browser",
+          "status": "completed",
+          "conclusion": "success",
+          "steps": [
+            {
+              "name": "Set up job",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/checkout@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/setup-node@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run npm ci",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run npm install --no-save --package-lock=false @playwright/test@1.56.1",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run npx playwright install --with-deps chromium",
+              "conclusion": "success"
+            },
+            {
+              "name": "Review saves and unfinished training preflight",
+              "conclusion": "success"
+            },
+            {
+              "name": "Interrupted review and status recovery preflight",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run npx playwright test --config=playwright.facility.config.mjs",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/setup-python@v5",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run python -m pip install -r edge/requirements-qualification.txt",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run npm run build",
+              "conclusion": "success"
+            },
+            {
+              "name": "Local service with real synthetic CPU inference and browser recovery",
+              "conclusion": "success"
+            },
+            {
+              "name": "Webcam and synthetic RTSP end-to-end feed checks",
+              "conclusion": "success"
+            },
+            {
+              "name": "One-camera recorder with controlled RTSP, CPU analysis and browser review",
+              "conclusion": "success"
+            },
+            {
+              "name": "OEM backup setup and browser status/error checks",
+              "conclusion": "success"
+            },
+            {
+              "name": "OEM copied recording through real local CPU analysis and review",
+              "conclusion": "success"
+            },
+            {
+              "name": "Run actions/upload-artifact@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/setup-python@v5",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/setup-node@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Post Run actions/checkout@v4",
+              "conclusion": "success"
+            },
+            {
+              "name": "Complete job",
+              "conclusion": "success"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "platform_checks": [
+    {
+      "platform": "Linux",
+      "job_id": 129542105639,
+      "frontend": {
+        "discovered": 451,
+        "passed": 451,
+        "failed": 0,
+        "skipped": 0
+      },
+      "sites": {
+        "discovered": 4,
+        "passed": 4,
+        "failed": 0,
+        "skipped": 0
+      },
+      "python": {
+        "discovered": 510,
+        "passed": 510,
+        "failed": 0,
+        "skipped": 0
+      }
+    },
+    {
+      "platform": "Windows",
+      "job_id": 129542106053,
+      "frontend": {
+        "discovered": 451,
+        "passed": 451,
+        "failed": 0,
+        "skipped": 0
+      },
+      "sites": {
+        "discovered": 4,
+        "passed": 4,
+        "failed": 0,
+        "skipped": 0
+      },
+      "python": {
+        "discovered": 510,
+        "passed": 424,
+        "failed": 0,
+        "skipped": 86
+      }
+    },
+    {
+      "platform": "macOS Apple silicon",
+      "job_id": 129542101129,
+      "frontend": {
+        "discovered": 451,
+        "passed": 451,
+        "failed": 0,
+        "skipped": 0
+      },
+      "sites": {
+        "discovered": 4,
+        "passed": 4,
+        "failed": 0,
+        "skipped": 0
+      },
+      "python": {
+        "discovered": 510,
+        "passed": 395,
+        "failed": 0,
+        "skipped": 115
+      }
+    }
+  ],
+  "browser_checks": {
+    "job_id": 129542106084,
+    "suites": [
+      {
+        "name": "Review/training preflight",
+        "passed": 13
+      },
+      {
+        "name": "Interrupted review/status preflight",
+        "passed": 10
+      },
+      {
+        "name": "General/Facility full suite",
+        "passed": 151
+      },
+      {
+        "name": "Generated CPU analysis and training",
+        "passed": 19
+      },
+      {
+        "name": "Generated webcam/RTSP feeds",
+        "passed": 13
+      },
+      {
+        "name": "Controlled LAN recorder",
+        "passed": 2
+      },
+      {
+        "name": "OEM backup browser/status",
+        "passed": 23
+      },
+      {
+        "name": "Generated copied-recording native analysis",
+        "passed": 1
+      }
+    ],
+    "counts_are_separate_suites": true,
+    "preflight_overlap": true
+  },
+  "limits": [
+    "Generated CI sources; no physical camera/owner PC acceptance",
+    "No representative recognition quality, tracking quality, sustained endurance or 100-camera qualification",
+    "CI installer smoke tests are separate from owner workstation installation",
+    "Repository Wiki mirrors do not publish the native GitHub Wiki",
+    "Historical local partial-run receipts remain unchanged"
+  ]
+}

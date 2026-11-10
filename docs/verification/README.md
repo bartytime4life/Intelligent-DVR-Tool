@@ -1,5 +1,9 @@
 # Verification index
 
+[Merged software baseline, November 9](merged-baseline-2026-11-09/README.md)
+records PR #93's four successful workflows, exact platform skips, a complete
+151-case browser run, generated runtime checks and CI installer smoke tests.
+
 [Workspace navigation, recovery and runtime continuity, November 9](workspace-experience-2026-11-09/README.md)
 records searchable task paths, keyboard handoffs, protected note drafts and
 machine-plan saves, interrupted person sessions and pending webcam cancellation.
