@@ -1,0 +1,21 @@
+{
+  "sourceCommit": "1c9203875be1372bb1abcc1f431d258f16f020f0",
+  "base": "3f783022bd7d4aeda4b775228e9ddffac16fa312",
+  "sha256": {
+    "package.json": "a1b014b9615c4d1cfa652ad7bf1b3e6159429cb3282f022aebc4848b8bb6acd0",
+    "src/App.jsx": "f4b12d99e4af90e7a957c743519dde56b49275f23b33627d9b909c747133b75c",
+    "src/recognition.mjs": "be2d668821677c0b1734ac359fdb39b51bcb5be63dac2468caf11cd508a0b328",
+    "src/thumbnail-retention.mjs": "ae7e3f246b459f217d295ec6e4a7792b7f02087009df1fbcaf224ff72cd09770",
+    "src/zone-images.mjs": "2553312866dd85a49d7a4cc793cf062820cc6ee2b9df2dc9ae83f85c919c095b",
+    "tests/browser/bulk-note-preservation.spec.mjs": "2ee1035b054cd4ee2bc1e54625c4dcf71ed10051dbbf39580d3d25fcd475ac14",
+    "tests/browser/exact-observation-evidence.spec.mjs": "a3eafa47216b6ae4c98e0e425fffea63d3b2fc2642b12d855e5dfb84d75f6365",
+    "tests/browser/thumbnail-retention.spec.mjs": "c44a712453fa32076c76efc698e9d7021f38597b51282b7e2fa775daeb7f4e0a",
+    "tests/browser/zone-image-recovery.spec.mjs": "4cd2b8bb1ef388f53aa50d34f8b9f4c9d36ec5271734591e2544dc52447c3ce3",
+    "tests/browser/zone-pointer-preservation.spec.mjs": "7dbc9710888ce0696b731f7731770ac05d66c8c5bcae1e3bd6b99cc982cf734b",
+    "tests/fixtures/recognition.mjs": "d6d861f68b56bc358f9250c967620849840ebd5e6938f6a8f84c467601bfb704",
+    "tests/recognition-report.test.mjs": "ebda52f76cf171b711df9b9d9c41880434090801460f32130bc3ccdfe76974a2",
+    "tests/recognition.test.mjs": "efc5e1e38f1031e6127b16c2a3d41b30854732f7db52a1c950a9283e4e645fe6",
+    "tests/thumbnail-retention.test.mjs": "dcd6fcb6897f421c1ebb5b6fb17f3b74e97326e524363baadaeae308b7f07c4c",
+    "tests/zone-images.test.mjs": "913fc1b1d114ddb5ee03506ef65f5bee4a720610575ee2f772ccb2688d2a18f0"
+  }
+}

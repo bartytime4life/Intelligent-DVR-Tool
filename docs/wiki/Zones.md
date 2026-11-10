@@ -8,6 +8,18 @@
 
 *No real camera image or successful detection is implied.*
 
+Draw with the primary pointer and left mouse button, or use the numeric fields.
+Escape, a cancelled touch or lost pointer capture abandons only the tentative
+draw; it keeps the current rectangle and other rule edits. Right-button drags and
+secondary touches do not change the zone.
+
+Each saved still belongs to its selected plan. The planning grid and a loading
+message appear while that plan's image opens, so another plan's pixels are never
+shown underneath its rule. A submitted image save finishes for the named plan
+even if you switch plans; any newer image offer stays available for its own
+explicit **Use for Plan …** action. Failed removal keeps the saved image and
+reports the storage error.
+
 ## Make one useful zone
 
 1. Capture a still deliberately from Monitor, choose a matched Recognition frame,

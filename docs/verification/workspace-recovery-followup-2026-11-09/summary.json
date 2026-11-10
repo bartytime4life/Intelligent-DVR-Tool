@@ -1,0 +1,106 @@
+{
+  "recordedAt": "2026-11-10T04:15:58.646328+00:00",
+  "sourceCommit": "1c9203875be1372bb1abcc1f431d258f16f020f0",
+  "baseCommit": "3f783022bd7d4aeda4b775228e9ddffac16fa312",
+  "basePR": 95,
+  "node": {
+    "passed": 496,
+    "failed": 0,
+    "skipped": 0,
+    "testSocketsEnabled": true
+  },
+  "browser": {
+    "distinctPassed": 98,
+    "attempts": [
+      {
+        "name": "general",
+        "stats": {
+          "startTime": "2026-11-10T04:07:40.974Z",
+          "duration": 200746.15000000002,
+          "expected": 90,
+          "skipped": 0,
+          "unexpected": 2,
+          "flaky": 0
+        }
+      },
+      {
+        "name": "focused",
+        "stats": {
+          "startTime": "2026-11-10T04:12:23.806Z",
+          "duration": 34046.871,
+          "expected": 16,
+          "skipped": 0,
+          "unexpected": 0,
+          "flaky": 0
+        }
+      }
+    ],
+    "initialFailures": "Two test assertions: capitalized Confirmed instead of underlying confirmed status; expected an empty zero-size planning-grid marker to be visible instead of the actual canvas. Refined to status definition and visible fallback canvas; focused rerun16/16 passed. Runtime assertions were retained.",
+    "coverage": "All92 non-Facility general cases and six Facility smoke cases; the other86 Facility geometry cases were not rerun in this pass.",
+    "wordingFollowup": "Final singular/plural copy followed broad batch; focused16-case run and final captures verified it. Functional logic unchanged."
+  },
+  "sites": {
+    "passed": 4,
+    "failed": 0
+  },
+  "build": {
+    "passed": true,
+    "remainingWarning": "Large Facility chunk remains"
+  },
+  "nativeCodeChanged": false,
+  "nativeModelOrOwnerDeviceRun": false,
+  "deployment": false,
+  "nativeWikiPublication": false,
+  "screenshots": {
+    "06-bulk-mobile-after.jpg": {
+      "sha256": "4c5f95e9541d7bd73410d7f163a57c120a0922316b920c95922934bec6707dfd",
+      "actualLocalUI": true,
+      "generatedMetadataOnly": true,
+      "realCameraFootage": false
+    },
+    "04-bulk-confirmation-after.jpg": {
+      "sha256": "cbc5f6afee445ca8d5dd1e5eb210c1c15238e651e31490ebea7f7b8e37693e0f",
+      "actualLocalUI": true,
+      "generatedMetadataOnly": true,
+      "realCameraFootage": false
+    },
+    "03-note-replaced-before-fix.jpg": {
+      "sha256": "324b19e89a946e374ff919cde57fcc854950af01b15c70cf0255fca6de8bd3de",
+      "actualLocalUI": true,
+      "generatedMetadataOnly": true,
+      "realCameraFootage": false
+    },
+    "02-note-before-bulk.jpg": {
+      "sha256": "a1eeb8696fb2092f8d7c3d3bc7daadb66d417d41e58bcf874e6639855892e5a8",
+      "actualLocalUI": true,
+      "generatedMetadataOnly": true,
+      "realCameraFootage": false
+    },
+    "05-note-preserved-after.jpg": {
+      "sha256": "e55ca16d510bd9b67ae9092c19b5394de65642f5da72c0ce9ccf39a81ddd8fda",
+      "actualLocalUI": true,
+      "generatedMetadataOnly": true,
+      "realCameraFootage": false
+    }
+  },
+  "manualNarrowCheck": {
+    "viewport": [
+      390,
+      844
+    ],
+    "dialogHeight": 375.734375,
+    "horizontalPageOverflow": false
+  },
+  "compatibilityLimits": [
+    "Shared image protection requires this version in every participating tab. Preserve/export unfinished work in older pages before reload.",
+    "Without Web Locks or readable review references, automatic thumbnail cleanup is skipped; images may be retained longer."
+  ],
+  "rebaseVerification": {
+    "testedSourceCommit": "f05fb27ca79f7590fbb1620cfa332df7e29606e0",
+    "publishedSourceCommit": "1c9203875be1372bb1abcc1f431d258f16f020f0",
+    "identicalSourceTree": "08f67f61560c20cc7dcf9c8d101a19a17a584717",
+    "testedBaseHead": "84e6ca809c29672eca1b3e8976d9e32b9cc8b6e0",
+    "mergedBase": "3f783022bd7d4aeda4b775228e9ddffac16fa312",
+    "baseTreesIdentical": true
+  }
+}
