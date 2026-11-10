@@ -35,7 +35,7 @@ for (const scenario of cases) test(`${scenario.name} ignores an older failed sta
   const state = {poll:null,command:null,polls:0,current:scenario.initial};
   await page.route('**/api/**', async route => {
     const path = new URL(route.request().url()).pathname;
-    if (path === '/api/analysis/session') return route.fulfill({json:{
+    if ((path === '/api/analysis/session' || path === '/api/library/session')) return route.fulfill({json:{
       token:'generated-session',ready:true,recordings:[{id:'video',name:'generated.webm',bytes:100}],
       models:[{id:'model',name:'Generated model'}],rules:[{id:'rules',name:'Presence',models:['model'],summary:[]}],
       job:scenario.poll.startsWith('/api/analysis/jobs/') ? job : null,recorder_active:false,
@@ -91,7 +91,7 @@ for (const scenario of transferCases) test(`${scenario.name} can be cancelled wh
   const state = {current:scenario.initial,results:[],stops:0};
   await page.route('**/api/**', async route => {
     const path = new URL(route.request().url()).pathname;
-    if (path === '/api/analysis/session') return route.fulfill({json:{token:'generated-session',ready:true,recordings:[],
+    if ((path === '/api/analysis/session' || path === '/api/library/session')) return route.fulfill({json:{token:'generated-session',ready:true,recordings:[],
       models:[{id:'model',name:'Generated model'}],rules:[{id:'rules',name:'Presence',models:['model'],summary:[]}],job:null,recorder_active:false}});
     if (path === `${scenario.prefix}/status`) return route.fulfill({json:state.current});
     if (path === `${scenario.prefix}/stop`) {state.stops++;state.current=scenario.stopped;return route.fulfill({json:state.current});}

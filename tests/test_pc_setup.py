@@ -44,6 +44,63 @@ class PcSetupTest(unittest.TestCase):
         with self.assertRaises(pc.SetupError): pc.verify_kit(self.root)
         (self.root / 'pc-kit.json').unlink()
         with self.assertRaises(pc.SetupError): pc.verify_kit(self.root)
+
+    def test_companion_without_model_launches_only_copy_library_on_both_platforms(self):
+        feeds = self.write('local-feeds.json', b'{"sources":[]}')
+        for platform in ('linux', 'win32'):
+            with self.subTest(platform=platform), patch.dict(os.environ, {}, clear=True), \
+                    patch.object(pc, 'ROOT', self.root), patch.object(pc, 'host_check'), \
+                    patch.object(pc.sys, 'platform', platform), patch.object(pc, 'verify_kit'), \
+                    patch.object(pc, 'built_interface'), patch.object(pc, 'validate_environment', return_value=Path('/python')), \
+                    patch('os.execv', side_effect=SystemExit(0)) as execute, patch('subprocess.call', return_value=0) as call:
+                options = ['--companion', '--feeds-config', str(feeds), '--no-browser']
+                if platform == 'linux':
+                    with self.assertRaises(SystemExit): pc.main(options)
+                    args = execute.call_args.args[1]
+                else:
+                    self.assertEqual(pc.main(options), 0)
+                    args = call.call_args.args[0]
+                self.assertEqual(args[args.index('--backup-state-dir') + 1], str(self.root / '.backup-library'))
+                self.assertNotIn('--config', args); self.assertNotIn('--recordings', args)
+                self.assertNotIn('--allow-recording-import', args)
+                self.assertFalse((self.root / '.backup-library').exists())
+
+    def test_companion_uses_prepared_model_but_preserves_existing_library_location(self):
+        self.write('local-analysis/catalog.json', b'{}')
+        self.assertEqual(pc.companion_settings(self.root, self.root / 'local-analysis/catalog.json'), self.root / 'local-analysis/.backup-library')
+        (self.root / '.backup-library').mkdir()
+        self.assertEqual(pc.companion_settings(self.root, self.root / 'local-analysis/catalog.json'), self.root / '.backup-library')
+        feeds = self.write('local-feeds.json', b'{"sources":[]}')
+        with patch.dict(os.environ, {}, clear=True), patch.object(pc, 'ROOT', self.root), patch.object(pc, 'host_check'), \
+                patch.object(pc.sys, 'platform', 'linux'), patch.object(pc, 'verify_kit'), patch.object(pc, 'built_interface'), \
+                patch.object(pc, 'validate_environment', return_value=Path('/python')), patch('os.execv', side_effect=SystemExit(0)) as execute:
+            with self.assertRaises(SystemExit): pc.main(['--companion', '--feeds-config', str(feeds), '--no-browser'])
+        args = execute.call_args.args[1]
+        self.assertEqual(args[args.index('--backup-state-dir') + 1], str(self.root / '.backup-library'))
+        self.assertEqual(args[args.index('--config') + 1], str(self.root / 'local-analysis/catalog.json'))
+
+    def test_companion_readiness_never_creates_settings_and_reports_no_analysis(self):
+        self.kit(); pc.create_settings(self.root)
+        state = self.root / '.backup-library'
+        with patch.object(pc, 'host_check'), patch.object(pc, 'validate_environment', return_value=sys.executable), patch.object(pc, 'command', return_value='{}'):
+            result = pc.check(root=self.root, bind=False, backup_state_dir=state)
+        check = next(row for row in result['checks'] if row['check'] == 'backup_library')
+        self.assertEqual(check['status'], 'pass')
+        self.assertEqual(check['detail'], {'settings_present':False, 'analysis_configured':False, 'work_started':False})
+        self.assertFalse(state.exists())
+        self.assertNotIn(str(state), json.dumps(result))
+
+    def test_companion_readiness_handles_invalid_settings_with_a_remedy(self):
+        from io import StringIO
+        with patch.object(pc, 'host_check'), patch.object(pc, 'check', return_value={'ready':False, 'checks':[{'check':'backup_library', 'status':'fail'}]}), redirect_stdout(StringIO()) as output:
+            self.assertEqual(pc.main(['--companion', '--check']), 1)
+        self.assertIn('owner-writable', output.getvalue())
+
+    def test_companion_rejects_install_training_and_facility_mode_without_starting(self):
+        with patch.dict(os.environ, {}, clear=True), patch.object(pc, 'ROOT', self.root), patch.object(pc, 'host_check'), patch.object(pc, 'install') as install, patch('os.execv') as execute, redirect_stderr(StringIO()):
+            for option in ('--install', '--facility'):
+                self.assertEqual(pc.main(['--companion', option]), 1)
+            install.assert_not_called(); execute.assert_not_called()
     def test_manifest_path_escape_and_invalid_structure_refused(self):
         self.kit()
         path = self.root / 'pc-kit.json'

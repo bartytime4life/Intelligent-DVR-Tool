@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { analysisRequest, analysisBackendLabel, localAnalysisOrigin, refused } from './local-analysis.mjs';
+import { analysisBackendLabel, localAnalysisOrigin, refused } from './local-analysis.mjs';
 import { DEFAULT_LIBRARY_CONFIG, libraryRequest, libraryConfig, cameraConfig, openLibraryItem, libraryCoverage, storageSize } from './backup-library.mjs';
 import { MAX_VIDEO_BYTES } from './recognition.mjs';
 import { backupAnnouncement, analysisAnnouncement } from './status-announcements.mjs';
@@ -38,9 +38,10 @@ export default function BackupLibrary({onResult, onBusy, onStatus, blocked = fal
     if (!local || pending.current) return;
     pending.current = true; setWorking(true); setError('');
     try {
-      const data = await (await analysisRequest('/session', {signal: AbortSignal.any([lifetime.current.signal, AbortSignal.timeout(15000)])})).json();
+      const data = await (await request('/session')).json();
       if (!data.token || !Array.isArray(data.models) || !Array.isArray(data.rules)) throw Error('Open the configured local application on this computer, then reconnect.');
       token.current = data.token; setCatalog(data);
+      if (data.analysis_enabled === false) setAnalyze(false);
       setModel(v => data.models.some(m => m.id === v) ? v : data.models[0]?.id || '');
       setRules(v => data.rules.some(r => r.id === v) ? v : data.rules[0]?.id || '');
       const next = await (await request('/status')).json();
@@ -153,7 +154,8 @@ export default function BackupLibrary({onResult, onBusy, onStatus, blocked = fal
     <p className="backup-format-note">Finished MP4, MOV, M4V, AVI, MKV and WebM videos can be copied and analyzed. Common proprietary DVR and legacy video formats are copied as backup only; export a standard video from the OEM software for analysis. Files must stop changing before they are copied; quiet time cannot confirm a recording has finished.</p>
     <fieldset className="backup-analysis-fields" disabled={unavailable || transferring || status?.active || status?.analyzing || stopping}>
       <legend>2. Keep another copy · 3. Analyze locally</legend>
-      <label className="backup-checkbox"><input type="checkbox" checked={analyze} onChange={e => setAnalyze(e.target.checked)} />Analyze copied videos automatically</label>
+      <label className="backup-checkbox"><input type="checkbox" checked={analyze} disabled={catalog?.analysis_enabled === false} onChange={e => setAnalyze(e.target.checked)} />Analyze copied videos automatically</label>
+      {catalog?.analysis_enabled === false && <p className="backup-notice">Copy-only mode: no recognition model is configured. You can save verified copies now. Prepare your existing approved model and restart the companion to enable analysis; no model is downloaded automatically.</p>}
       <span className="backup-local-note">Off by default. Selecting this starts local analysis when you start backup.</span>
       {analyze && <div className="backup-model-fields"><label>Backup analysis model<select value={model} onChange={e => setModel(e.target.value)}>{catalog?.models.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}</select></label><label>Backup analysis rules<select value={rules} onChange={e => setRules(e.target.value)}>{catalog?.rules.map(r => <option key={r.id} value={r.id}>{r.name}</option>)}</select></label></div>}
       {analyze && blocked && <p className="backup-notice">Another recording or analysis is using the analyzer. You can start backup with automatic analysis turned off.</p>}

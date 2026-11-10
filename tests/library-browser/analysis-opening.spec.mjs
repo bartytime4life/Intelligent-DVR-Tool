@@ -15,7 +15,7 @@ async function setup(page, stallAt, retainReview = true) {
   await page.route('**/api/**', route => {
     const request = route.request(), path = new URL(request.url()).pathname;
     if (request.method() === 'POST') state.writes.push(path);
-    if (path === '/api/analysis/session') {
+    if ((path === '/api/analysis/session' || path === '/api/library/session')) {
       state.sessions++;
       return route.fulfill({json:{token:'generated-opening-token', ready:true, recordings:[],
         models:[{id:'model', name:'Generated model'}], rules:[{id:'rules', name:'Generated rules', models:['model'], summary:[]}],

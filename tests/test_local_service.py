@@ -391,11 +391,47 @@ class ServiceTest(unittest.TestCase):
             with self.subTest(token=token):
                 h = self.handler('/api/analysis/jobs/' + '0' * 32, **{'X-DVR-Token': token}); h.do_GET()
                 self.assertEqual(h.responses, [(403, 'SESSION')])
+
+    def test_copy_only_library_session_issues_token_without_an_analysis_service(self):
+        h = self.handler('/api/library/session')
+        h.server.library = SimpleNamespace()
+        h._json = lambda value, status=200: h.responses.append((status, value))
+        h.do_GET()
+        status, data = h.responses[0]
+        self.assertEqual(status, 200)
+        self.assertEqual(data, {'token':'secret', 'ready':False, 'models':[], 'rules':[], 'analysis_enabled':False})
+        h = self.handler('/api/analysis/session')
+        h.server.library = SimpleNamespace()
+        h.do_GET(); self.assertEqual(h.responses, [(503, 'ANALYSIS_DISABLED')])
+
+    def test_copy_only_library_endpoints_keep_token_and_origin_guards(self):
+        for headers, code in [({}, 'SESSION'), ({'X-DVR-Token':'wrong'}, 'SESSION'),
+                              ({'X-DVR-Token':'secret','Origin':'https://other.test'}, 'ORIGIN')]:
+            h = self.handler('/api/library/status', **headers)
+            h.server.library = SimpleNamespace(status=lambda: {'active':False})
+            h.do_GET(); self.assertEqual(h.responses, [(403, code)])
+        h = self.handler('/api/library/status', **{'X-DVR-Token':'secret'})
+        h.server.library = SimpleNamespace(status=lambda: {'active':False})
+        h._json = lambda value, status=200: h.responses.append((status, value))
+        h.do_GET(); self.assertEqual(h.responses, [(200, {'active':False})])
+
+    def test_copy_only_main_never_creates_jobs_or_live_inference(self):
+        from edge import local_service
+        static = self.root / 'dist/client'; static.mkdir(parents=True)
+        (static / 'index.html').write_text('generated test shell')
+        with patch.object(local_service, 'ROOT', self.root), patch.object(local_service, 'Jobs') as jobs, \
+                patch.object(local_service, 'Live') as live, patch.object(local_service, 'LocalServer') as server:
+            local_service.main(['--backup-state-dir', str(self.root / 'private-library')])
+        jobs.assert_not_called(); live.assert_not_called()
+        library = server.call_args.kwargs.get('library') or server.call_args.args[6]
+        self.assertIsNone(library.jobs)
+        self.assertTrue(library.finished)
+        self.assertFalse(library.active)
     @unittest.skipUnless(sys.platform == 'linux', 'Same-account peer check uses Linux socket tables')
     def test_api_and_token_session_refuse_another_accounts_socket(self):
         (self.root / 'index.html').write_text('app')
         service = self.service()
-        for path in ('/api/analysis/session', '/api/feeds/session', '/api/analysis/jobs/' + '0' * 32):
+        for path in ('/api/analysis/session', '/api/feeds/session', '/api/library/session', '/api/analysis/jobs/' + '0' * 32):
             for owner in (os.getuid() + 1, None):  # Another account, or no visible socket: fail closed.
                 with self.subTest(path=path, owner=owner):
                     h = self.handler(path, **{'X-DVR-Token': 'secret'}); h.server.jobs = service

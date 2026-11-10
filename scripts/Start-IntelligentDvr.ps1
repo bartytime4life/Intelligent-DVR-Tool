@@ -4,6 +4,7 @@ param(
     [switch]$Install,
     [switch]$Check,
     [switch]$Analysis,
+    [switch]$Companion,
     [switch]$Train,
     [ValidateSet('opencv-cpu', 'cuda-preferred')][string]$LiveBackend = 'cuda-preferred',
     [ValidateSet('opencv-cpu', 'cuda-preferred')][string]$AnalysisBackend = 'cuda-preferred',
@@ -35,6 +36,7 @@ try {
     if ($Install) { $TaskArgs += '--install' }
     if ($Check) { $TaskArgs += '--check' }
     if ($Analysis) { $TaskArgs += '--analysis' }
+    if ($Companion) { $TaskArgs += '--companion' }
     if ($Train) { $TaskArgs += '--train' }
     if ($PSBoundParameters.ContainsKey('LiveBackend')) { $TaskArgs += @('--live-backend', $LiveBackend) }
     if ($PSBoundParameters.ContainsKey('AnalysisBackend')) { $TaskArgs += @('--analysis-backend', $AnalysisBackend) }

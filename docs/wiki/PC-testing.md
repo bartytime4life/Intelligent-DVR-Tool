@@ -183,6 +183,26 @@ request. See the [public-webcam guide](https://github.com/bartytime4life/Intelli
 Snapshots show retrieval age, not verified capture time. Local footage is not
 uploaded. Public providers, logins, HTML players and HLS formats are not bundled.
 
+## OEM backups without a recognition model
+
+After Install, use **Start-DVR-Companion-Linux.sh** or
+**Start-DVR-Companion-Windows.cmd**. Open **Recognition → Use my existing DVR →
+Connect to this computer**. Without a prepared analysis catalog, the app reports
+**Copy-only mode**: choose otherwise empty approved source and separate backup
+folders, save settings, then explicitly start backup. No trained weights are
+required, and analysis cannot be enabled through the UI or API in this mode.
+Use only generated input until a particular completed OEM export is approved.
+
+Readiness: `bash scripts/run-linux.sh --companion --check` or PowerShell
+`.\scripts\Start-IntelligentDvr.ps1 -Companion -Check`. Check examines settings
+folder readiness without creating it or starting any work. The existing Python
+3.12/CPU dependency installation still applies. A copied file is not a decode,
+recognition-quality, CUDA or physical-device pass.
+
+Prepare your approved existing model later with the commands below, then restart
+the companion. Existing copy-only library settings and items stay in their
+original location. Automatic analysis still requires an explicit choice.
+
 ## Optional recording recognition
 
 Previews do **not** record or run live AI. Recognition analyzes a deliberately

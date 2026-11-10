@@ -280,6 +280,8 @@ class BackupLibrary:
                     self._close_store()
                     raise LibraryError('STORAGE', 'Backup storage is unavailable. Reconnect the disk or save accessible folders.', 409) from None
             if body['analyze']:
+                if self.jobs is None:
+                    raise LibraryError('ANALYSIS_DISABLED', 'Copying is available. Prepare a recording model and restart the companion before enabling analysis.', 409)
                 model = self.jobs.catalog['models'].get(body['model'])
                 rules = self.jobs.catalog['rules'].get(body['rules'])
                 if not model or not rules or not set(rules['classes']) <= set(model['classes']):
@@ -340,6 +342,7 @@ class BackupLibrary:
                     'active': self.active, 'analyzing': self.analysis is not None,
                     'copying': dict(self.copying) if self.copying else None,
                     'analysis_job': self.jobs.snapshot(self.analysis['job']) if self.analysis else None,
+                    'analysis_configured': self.jobs is not None,
                     'state': 'stopping' if (self.analysis or self.scanning) and not self.active else 'running' if self.active else 'paused',
                     'error': self.error or self.recovery_warning, 'items': rows, 'storage_bytes': size, 'disk_free_bytes': free,
                     'waiting': self.waiting, 'scan_limited': self.scan_limited,
@@ -519,6 +522,8 @@ class BackupLibrary:
 
     def retry(self, body):
         with self.lock:
+            if self.jobs is None:
+                raise LibraryError('ANALYSIS_DISABLED', 'Prepare a recording model and restart the companion before retrying analysis.', 409)
             if not isinstance(body, dict) or set(body) != {'id'} or not isinstance(body['id'], str):
                 raise LibraryError('SELECTION', 'Choose a saved backup to analyze.')
             if not self.active or not self.analyze:
@@ -532,6 +537,8 @@ class BackupLibrary:
 
     def _analysis_tick(self):
         with self.lock:
+            if self.jobs is None:
+                return
             if self.analysis:
                 current = self.analysis
                 job = self.jobs.snapshot(current['job'])
