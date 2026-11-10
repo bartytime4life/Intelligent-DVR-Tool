@@ -59,6 +59,7 @@ export default function LiveMonitor({onZoneStill, queue, visibleTiles=4, onCount
     detectors.current.delete(tile.id);
     const detector = liveDetector({token:aiInfo.token, model:aiInfo.live.models[0].id, rules:aiRule.id, camera:tile.name,
       observations:(aiStates[tile.id]?.observations || []).filter(o => !o.sent),
+      observationsDropped:aiStates[tile.id]?.observationsDropped || 0,
       capture: () => captureJpeg(pictures.current.get(tile.id)),
       onChange: snapshot => { if (alive.current && detectors.current.get(tile.id) === detector) setAiStates(states => ({...states, [tile.id]:snapshot})); }});
     detectors.current.set(tile.id, detector); void detector.start();
@@ -283,11 +284,11 @@ export default function LiveMonitor({onZoneStill, queue, visibleTiles=4, onCount
             {t.id !== 'webcam' && t.image && <img ref={el => { if (el) pictures.current.set(t.id, el); else pictures.current.delete(t.id); }} src={t.image} alt={`${t.name} current preview frame`} onError={() => {const s=sessions.current.get(t.id); if(s){s.state='failed';s.error={message:'The browser could not display this frame. Disconnect and retry.'};URL.revokeObjectURL(s.image);s.image='';sync();}}} />}
             {((t.id === 'webcam' && t.state !== 'live') || (t.id !== 'webcam' && !t.image)) && <div className="feed-placeholder"><Camera size={34}/><h3>{t.state === 'connecting' ? 'Connecting…' : t.state === 'failed' ? 'Connection needs attention' : t.state === 'interrupted' ? 'Frames interrupted' : t.state === 'live' ? 'Waiting for frames' : 'Preview stopped'}</h3>
               <p>{t.message || t.error?.message || 'Waiting for the first image from this source…'}</p></div>}
-            {aiStates[t.id] && <LiveOverlay ai={aiStates[t.id]} now={clock || performance.now()} />}
+            {aiStates[t.id] && <LiveOverlay ai={aiStates[t.id]} now={performance.now()} />}
             <div className="live-tile-heading"><strong>{t.name}</strong><span className={`feed-status ${t.state}${t.state === 'live' && frameDelayed(t) ? ' delayed' : ''}`}>{t.state === 'live' ? frameDelayed(t) ? 'Delayed' : 'Receiving' : t.state}</span></div>
           </div>
           {t.kind?.startsWith('public-') && <div className="public-source-credit"><a href={t.provider_url} target="_blank" rel="noreferrer noopener">{t.provider} ↗</a><span>{t.kind === 'public-jpeg' ? `Snapshot · refresh ${t.refresh_seconds}s` : 'Public MJPEG · preview ≤ 4 fps'}{t.frame_age_seconds != null ? ` · retrieved ${Math.floor(t.frame_age_seconds)}s ago` : ''}</span><small>Provider capture time and freshness unverified</small></div>}
-          {(t.state === 'live' || aiStates[t.id]?.state === 'failed' || aiStates[t.id]?.observations?.length > 0) && <LiveTileAI ai={aiStates[t.id]} available={aiReady && t.state === 'live'} now={clock || performance.now()}
+          {(t.state === 'live' || aiStates[t.id]?.state === 'failed' || aiStates[t.id]?.observations?.length > 0) && <LiveTileAI ai={aiStates[t.id]} available={aiReady && t.state === 'live'} now={performance.now()}
             onStart={() => startAi(t)} onStop={() => stopAi(t.id)} onSend={i => sendObservation(t.id, i)} onDismiss={i => dismissObservation(t.id, i)} />}
           <div className="live-tile-controls" onClick={e => e.stopPropagation()}><span>{t.id === 'webcam' ? 'Webcam · video only' : t.kind?.startsWith('public-') ? 'Internet source · local preview' : `DVR · sampled preview ≤ 4 fps${Number.isFinite(t.frame_age_seconds) ? ` · frame ${t.frame_age_seconds < 1 ? '<1' : Math.floor(t.frame_age_seconds)}s ago` : ''}`}</span>
             {onZoneStill && t.state === 'live' && <button className="text-button" onClick={async e => {
