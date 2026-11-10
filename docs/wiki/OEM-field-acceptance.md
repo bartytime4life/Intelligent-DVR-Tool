@@ -144,6 +144,24 @@ byte checks passed, exit 1 means failed checks; command/output errors are nonzer
 Receipts explicitly leave field acceptance unestablished. They are editable local
 records, not signed attestations; even hashes may identify known footage.
 
+### Read byte-check receipts in the app
+
+Open **Recognition → Use my existing DVR → Check backup receipts**. Choose the
+current verifier receipt and optionally its earlier receipt. The browser checks
+record shape, source/backup correspondence and compatible revision, verifier and
+input kind. It fingerprints the selected JSON files and checks an included
+previous-receipt link against the exact earlier file. It never opens video or
+contacts the local service for this view; files are held in memory until cleared
+or the page closes. A failed import preserves the last loaded receipt visibly.
+
+Read each decision separately: reported byte matching, review correspondence,
+coverage and backend. Partial coverage stays partial. CPU is not a CUDA result;
+reported CUDA metadata still needs independent execution evidence. Generated
+input remains labeled. No field, accuracy, separate-disk or capacity acceptance
+is assigned. These unsigned records can be edited. The view does not rehash
+recordings or authenticate the operator's labels. Use the terminal verifier above
+to produce the receipts; a recognition-review JSON is a different file type.
+
 ## 4. Decode, analyze and review the same source on CPU and CUDA
 
 For each backend use a **fresh test backup folder**, so existing completed/deduplicated

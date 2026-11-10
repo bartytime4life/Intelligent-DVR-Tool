@@ -1,0 +1,24 @@
+.acceptance-receipts { margin-top:16px; border:1px solid #304450; border-radius:12px; background:#101d27; }
+.acceptance-receipts > summary { display:flex; align-items:center; flex-wrap:wrap; gap:10px; padding:18px 22px; color:#dce7ed; cursor:pointer; font-size:14px; }
+.acceptance-receipts > summary::after { content:'+'; margin-left:auto; color:#8be9d9; }
+.acceptance-receipts[open] > summary::after { content:'−'; }
+.acceptance-receipts > summary span { font-size:12px; color:#b4c1cb; }
+.acceptance-receipts-body { padding:0 22px 20px; }
+.acceptance-receipts h3 { margin:8px 0; font-size:18px; }
+.acceptance-receipts p { color:#b4c1cb; font-size:13px; line-height:1.6; }
+.acceptance-receipt-loaders { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px; margin:20px 0; }
+.acceptance-receipt-loaders .button { position:relative; display:inline-flex; align-items:center; gap:8px; min-height:44px; cursor:pointer; }
+.acceptance-receipt-loaders input { position:absolute; inset:0; opacity:0; width:100%; cursor:pointer; }
+.acceptance-receipt-loaders .button:focus-within { outline:2px solid #8be9d9; outline-offset:3px; }
+.acceptance-result,.acceptance-comparison { border-left:3px solid #7cb8b1; padding:12px 16px; background:#152932; margin:16px 0; }
+.acceptance-result p,.acceptance-comparison p { margin:6px 0 0; }
+.acceptance-decisions { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1px; background:#304450; border:1px solid #304450; border-radius:8px; overflow:hidden; }
+.acceptance-decisions > div { background:#101d27; padding:16px; }
+.acceptance-decisions dt { color:#b4c1cb; font-size:12px; margin-bottom:7px; }
+.acceptance-decisions dd { margin:0; font-size:14px; line-height:1.5; }
+.acceptance-fingerprints { margin:18px 0; font-size:13px; }
+.acceptance-fingerprints summary { cursor:pointer; padding:8px 0; }
+.acceptance-fingerprints code { overflow-wrap:anywhere; }
+.acceptance-different,.acceptance-incompatible,.acceptance-blocked { border-left-color:#efb75b; }
+.acceptance-privacy { border-top:1px solid #304450; padding-top:16px; }
+@media(max-width:600px) { .acceptance-receipt-loaders,.acceptance-decisions { grid-template-columns:minmax(0,1fr); } .acceptance-receipts > summary { padding:16px; } .acceptance-receipts-body { padding:0 16px 16px; } }
