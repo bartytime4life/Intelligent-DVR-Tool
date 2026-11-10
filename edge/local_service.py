@@ -511,8 +511,10 @@ class Jobs:
         with self.lock:  # Shared with identify, verify and confirm, so none can restore what this removes.
             try:
                 store.delete(person_id)
-            except (KeyError, OSError):
+            except (KeyError, FileNotFoundError):
                 raise JobError('NOT_FOUND', 'This person is no longer enrolled.', 404) from None
+            except OSError:
+                raise JobError('PEOPLE_DELETE', 'Face template deletion could not be confirmed. The file may still be saved on this computer. Check storage permissions and free space, then refresh saved people.', 500) from None
             if self.suggestions:  # Their pending suggestions go too.
                 self.suggestions['views'] = {k: v for k, v in self.suggestions['views'].items() if v['person'] != person_id}
         self.diagnostics.event('PERSON_DELETED')

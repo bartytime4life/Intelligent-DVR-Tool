@@ -19,7 +19,7 @@ const tasks = [
   {id: 'import', title: 'Open saved results', detail: 'Match an export to its original video', Icon: FolderOpen},
 ];
 
-export default function RecognitionReview({ onImport, onValidateImport, active = true, clip, onClip, reviews = [], evidence = null, onRecorderStatus, onZoneStill, taskRequest }) {
+export default function RecognitionReview({ onImport, onValidateImport, active = true, clip, onClip, reviews = [], evidence = null, onClearEvidence, onRecorderStatus, onZoneStill, taskRequest }) {
   const [run, setRun] = useState(null), [index, setIndex] = useState(0);
   const [source, setSource] = useState(null), [media, setMedia] = useState({});
   const [threshold, setThreshold] = useState(0.5), [status, setStatus] = useState(''), [error, setError] = useState('');
@@ -30,6 +30,8 @@ export default function RecognitionReview({ onImport, onValidateImport, active =
   const [task, setTask] = useState('recording');
   const [taskNotice, setTaskNotice] = useState('');
   const recorderPanel = useRef(), focusRecorder = useRef(false);
+  const importPanel = useRef(), recordingInput = useRef(), sourceReview = useRef();
+  const evidenceProgress = useRef({request:null, phase:null});
   const [detectionInput, setDetectionInput] = useState('original');
   const [sending, setSending] = useState(false);
   // Suggestions exist only for results from this computer's own analysis jobs with enrollment on.
@@ -116,6 +118,9 @@ export default function RecognitionReview({ onImport, onValidateImport, active =
   const visibleMatches = (matches?.items || []).filter(m => matches.decided[matchKey(m)] !== 'dismissed');
   const frameMatches = frame ? visibleMatches.filter(m => m.frame_index === frame.frame_index) : [];
   const boxMatch = d => frameMatches.find(m => sameBox(m.box, d.box));
+  const requestedEvent = evidence && run && run.receipt.source_sha256 === evidence.sha && run.receipt.model_sha256 === evidence.model
+    ? run.receipt.events.findIndex(event => event.id === evidence.sourceId) : -1;
+  const evidencePhase = requestedEvent < 0 ? 'results' : source ? 'review' : 'recording';
   // An Events observation opens its frame only in the run with the same source and model fingerprints.
   useEffect(() => {
     if (!evidence) return;
@@ -127,11 +132,36 @@ export default function RecognitionReview({ onImport, onValidateImport, active =
     }
     // A user may follow an Event before loading its matching run. Revisit the
     // pending deep link when the receipt or exact-source recording arrives.
+    setDetectionInput('original');
     seek(run.eventFrames[i]);
     setStatus(source
       ? `Showing the source-matched sampled frame for the observation at ${evidence.time}.`
       : `The matching results contain the observation at ${evidence.time}. Match its original recording to verify the sampled frame.`);
   }, [evidence, run, source]);
+  useEffect(() => {
+    if (!evidence) { evidenceProgress.current = {request:null, phase:null}; return; }
+    if (!active) {
+      // Background completion must not compete with the main landmark focus
+      // when the operator later returns through ordinary workspace navigation.
+      if (evidenceProgress.current.request === evidence) evidenceProgress.current.phase = evidencePhase;
+      return;
+    }
+    if (evidenceProgress.current.request === evidence && evidenceProgress.current.phase === evidencePhase) return;
+    if (task !== 'import') { setTask('import'); setTaskNotice(''); return; }
+    // Run after the selected panel has committed. A scheduled animation frame
+    // can arrive before that commit, and must not consume the pending handoff.
+    if (document.querySelector('dialog[open]')) { evidenceProgress.current = {request:evidence, phase:evidencePhase}; return; }
+    const target = evidencePhase === 'review' ? sourceReview.current : evidencePhase === 'recording' && !recordingInput.current?.disabled ? recordingInput.current : importPanel.current;
+    target?.focus({preventScroll:true});
+    (evidencePhase === 'recording' ? importPanel.current : target)?.scrollIntoView({block:'start'});
+    if (document.activeElement === target) evidenceProgress.current = {request:evidence, phase:evidencePhase};
+  }, [evidence, evidencePhase, active, task]);
+  function clearSourceRequest() {
+    onClearEvidence?.();
+    setStatus(run ? source ? 'Recording fingerprint matched. Review sampled frames and observations below.'
+      : 'Results loaded. Choose the original recording to verify and view the detections.' : '');
+    importPanel.current?.focus({preventScroll:true});
+  }
   // Keep a small still per observation from the verified recording, then hand the observations to Events.
   async function sendToEvents() {
     const sent = run, from = source;
@@ -177,11 +207,12 @@ export default function RecognitionReview({ onImport, onValidateImport, active =
     <div id="recognition-task-recording" className="recognition-task-panel" hidden={task !== 'recording'}>
       <LocalAnalysis onResult={openLocalResult} onBusy={setAnalysisBusy} clip={clip} onClip={onClip} recorderBusy={recorderBusy || libraryBusy} currentRun={run} />
     </div>
-    <div id="recognition-task-import" className="recognition-task-panel" hidden={task !== 'import'}>
+    <div id="recognition-task-import" className="recognition-task-panel recognition-evidence-target" ref={importPanel} role="region" aria-label="Open saved recognition results" aria-describedby="recognition-review-status" tabIndex={-1} hidden={task !== 'import'}>
     <h2 className="recognition-import-heading">Open previously exported results</h2>
+    {evidence && <div className="recognition-evidence-request"><div><strong>Review the source observation</strong><p>{evidence.camera ? `${evidence.camera} · ` : ''}{evidence.time}. {evidencePhase === 'results' ? 'Open its results file, then match its original recording. Any other loaded review stays available below.' : evidencePhase === 'recording' ? 'The matching results are loaded. Choose the original recording to verify and view this observation.' : 'The original recording is matched. The requested sampled frame is ready below.'}</p><details><summary>Recording and model fingerprints</summary><p>Recording: <code>{evidence.sha}</code></p><p>Model: <code>{evidence.model}</code></p></details></div><button className="text-button" onClick={clearSourceRequest}>Close source request</button></div>}
     <div className="recognition-loaders">
       <label className="button">1. Open recognition results<input type="file" accept=".json,application/json" onChange={loadRun} disabled={analysisBusy || libraryBusy} aria-label="Open recognition results" /></label>
-      <label className={`button ${!run ? 'disabled' : ''}`}>2. Match original recording<input type="file" accept="video/*,.avi,.mkv" disabled={!run || analysisBusy || libraryBusy} onChange={loadVideo} aria-label="Match original recording" /></label>
+      <label className={`button ${!run ? 'disabled' : ''}`}>2. Match original recording<input ref={recordingInput} type="file" accept="video/*,.avi,.mkv" disabled={!run || analysisBusy || libraryBusy} onChange={loadVideo} aria-label="Match original recording" /></label>
     </div>
     </div>
     {(run || task === 'import') && <ol className="recognition-progress" aria-label="Recording review progress">
@@ -189,7 +220,7 @@ export default function RecognitionReview({ onImport, onValidateImport, active =
       <li className={source ? 'complete' : run ? 'current' : ''}><span>2</span><div>Match recording<small>{source ? source.name : 'Verify original file'}</small></div></li>
       <li><span>3</span><div>Review observations<small>Inspect, then send to Events</small></div></li>
     </ol>}
-    <p className="recognition-status" role="status">{status || 'Video stays on this computer. Start a local analysis above or open an exported result.'}</p>
+    <p id="recognition-review-status" className="recognition-status" role="status">{status || 'Video stays on this computer. Start a local analysis above or open an exported result.'}</p>
     {error && <p className="recognition-error" role="alert">{error}</p>}
     {!run && <div className="recognition-empty">
       <h2>Start with one approved recording</h2>
@@ -226,7 +257,7 @@ export default function RecognitionReview({ onImport, onValidateImport, active =
         <p>Current sample at score ≥ {threshold.toFixed(2)}: original {frameSummary(frame,threshold).detections.length} · sharpened {frameSummary({...frame,detections:frame.comparison.detections},threshold).detections.length} detections.</p>
         <p>Sample processing: original {frame.comparison.original_processing_ms.toFixed(1)} ms · sharpened {frame.comparison.enhanced_processing_ms.toFixed(1)} ms. Includes preprocessing and inference; excludes media reads and pixel hashing.</p>
       </div>}
-      <div className="recognition-layout">
+      <div ref={sourceReview} className="recognition-layout recognition-evidence-target" role="region" aria-label="Source observation review" aria-describedby="recognition-review-status" tabIndex={-1}>
         <div>
           <div className="recognition-stage" style={{ aspectRatio: `${frame.width}/${frame.height}` }}>
             {source ? <>

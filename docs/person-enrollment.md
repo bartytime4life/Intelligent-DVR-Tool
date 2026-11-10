@@ -127,6 +127,15 @@ jobs, not for imported result files or LAN-recorder segments.
 Filesystems and backups may still hold old copies; manage those with your
 retention policy. Up to 50 people.
 
+Deletion runs once at a time. Its row and other template controls stay disabled
+while the request and list refresh finish. A matching deletion reply followed by
+a verified list confirms completion. A lost reply or storage error instead
+reports an unconfirmed outcome; that template stays blocked in this Train
+session. **Refresh saved people** preserves the last verified list if refreshing
+fails. A missing entry alone does not prove its file was deleted, because damaged
+or unreadable template files are omitted from the list. Inspect the local app and
+storage before attempting another template operation.
+
 ## Limits
 
 Results describe your sessions and camera only: no accuracy, demographic-fairness
