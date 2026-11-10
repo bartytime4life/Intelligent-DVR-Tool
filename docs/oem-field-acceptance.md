@@ -140,7 +140,10 @@ The utility is read-only except for creating a new receipt (never overwrites).
 It exports hashes, sizes and limited metadata, not input paths, filenames or frames.
 Use an existing account-private receipt folder; on Windows its ACL controls privacy.
 `--input-kind generated` must label any generated-file comparison. Exit 0 means
-byte checks passed, exit 1 means failed checks; command/output errors are nonzero.
+byte checks passed, exit 1 means failed checks, and exit 2 means a command or output error.
+The revision must be the exact 40-character lowercase commit from Git or
+`pc-kit.json`; names, paths and descriptive notes are refused. Output failures
+explain how to choose a new receipt without printing private paths.
 Receipts explicitly leave field acceptance unestablished. They are editable local
 records, not signed attestations; even hashes may identify known footage.
 
@@ -201,8 +204,15 @@ or edit the production SQLite database. A test too short to interrupt is **NOT R
 | Backup unavailable | Stop service; rename only disposable backup root. Relaunch: paused error, no silently recreated root or lost settings. Stop, restore root, restart and verify saved item. | Root existence, status and matching receipt |
 | Storage pressure | Reuse automated quota/reserve regressions above. A physical drill requires a separately approved disposable volume; never fill a production disk. | Test output or physical observation marked separately |
 
-Repeat independent original/backup hashing after the drills into `after.json`.
-Verify unchanged hashes against `before.json`. Check review fingerprint, coverage,
+Repeat independent original/backup hashing after the drills into `after.json`,
+adding `--previous /absolute/private/receipts/before.json` to the verifier command.
+This checks that the original hash and byte count are unchanged from the earlier
+passing receipt, even if both current files have been replaced with the same new
+bytes. The input kind, operator-supplied revision and verifier source hash must
+also match. Missing, failed, changed, oversized or incompatible earlier receipts
+fail the check. Keep the earlier receipt immutable and choose a new output name.
+A reported `previous_binding: MATCHED` compares unsigned local records; it does
+not authenticate them or establish physical recovery. Check review fingerprint, coverage,
 backend, item ID and count after restart: SQLite persistence is observed through
 retained items, not merely the presence of `library.sqlite3`. Keep the whole backup
 tree together. Stop service before copying the index and SQLite sidecars. Browser

@@ -81,26 +81,94 @@ class FieldAcceptanceTests(unittest.TestCase):
         output = self.root / 'receipt.json'
         args = ['--source', str(self.source), '--backup', str(self.backup),
                 '--approved-completed-recording', '--input-kind', 'generated',
-                '--revision', 'test', '--output', str(output)]
+                '--revision', 'a' * 40, '--output', str(output)]
         self.assertEqual(main(args), 0)
         raw = output.read_text()
         self.assertNotIn(str(self.root), raw)
         self.assertNotIn(self.source.name, raw)
         self.assertEqual(json.loads(raw)['field_acceptance'], 'NOT_ESTABLISHED')
-        with self.assertRaises(FileExistsError):
-            main(args)
+        self.assertEqual(main(args), 2)
         self.assertEqual(output.read_text(), raw)
         self.backup.write_bytes(b'bad')
         args[-1] = str(self.root / 'failure.json')
         self.assertEqual(main(args), 1)
         self.assertEqual(json.loads(Path(args[-1]).read_text())['check'], 'FAIL')
 
+    def arguments(self, output):
+        return ['--source', str(self.source), '--backup', str(self.backup),
+                '--approved-completed-recording', '--input-kind', 'generated',
+                '--revision', 'a' * 40, '--output', str(output)]
+
+    def test_previous_detects_both_files_replaced_with_matching_new_bytes(self):
+        before = self.root / 'before.json'
+        self.assertEqual(main(self.arguments(before)), 0)
+        self.source.write_bytes(b'a new matching pair')
+        self.backup.write_bytes(self.source.read_bytes())
+        after = self.root / 'after.json'
+        self.assertEqual(main(self.arguments(after) + ['--previous', str(before)]), 1)
+        self.assertEqual(json.loads(after.read_text())['error_code'], 'SOURCE_CHANGED_SINCE_PREVIOUS')
+
+    def test_previous_retains_hash_binding_without_private_paths(self):
+        import hashlib
+        before, after = self.root / 'before.json', self.root / 'after.json'
+        self.assertEqual(main(self.arguments(before)), 0)
+        self.assertEqual(main(self.arguments(after) + ['--previous', str(before)]), 0)
+        data = json.loads(after.read_text())
+        self.assertEqual(data['previous_binding'], 'MATCHED')
+        self.assertEqual(data['previous_receipt_sha256'], hashlib.sha256(before.read_bytes()).hexdigest())
+        self.assertNotIn(str(self.root), after.read_text())
+
+    def test_previous_rejects_wrong_scope_failed_and_malformed_receipts(self):
+        before = self.root / 'before.json'
+        self.assertEqual(main(self.arguments(before)), 0)
+        original = json.loads(before.read_text())
+        changes = [('check', 'FAIL'), ('field_acceptance', 'PASS'), ('independent_file', False),
+                   ('bytes', True), ('input_kind', 'oem'), ('operator_supplied_revision', 'b' * 40),
+                   ('verifier_sha256', '0' * 64), ('backup_sha256', '0' * 64)]
+        for index, (key, value) in enumerate(changes):
+            with self.subTest(key=key):
+                before.write_text(json.dumps({**original, key: value}))
+                output = self.root / f'invalid-{index}.json'
+                self.assertEqual(main(self.arguments(output) + ['--previous', str(before)]), 1)
+        before.write_text('[]')
+        self.assertEqual(main(self.arguments(self.root / 'malformed.json') + ['--previous', str(before)]), 1)
+
+    def test_previous_bound_and_symlink_are_rejected(self):
+        before = self.root / 'oversize.json'
+        before.write_bytes(b' ' * (1024 * 1024 + 1))
+        self.assertEqual(main(self.arguments(self.root / 'large.json') + ['--previous', str(before)]), 1)
+        linked = self.root / 'linked.json'
+        linked.symlink_to(before)
+        self.assertEqual(main(self.arguments(self.root / 'link.json') + ['--previous', str(linked)]), 1)
+
+    def test_revision_rejects_private_text_without_creating_output(self):
+        from contextlib import redirect_stderr
+        from io import StringIO
+        output = self.root / 'private.json'
+        args = self.arguments(output)
+        args[args.index('--revision') + 1] = '/private/operator/file'
+        diagnostic = StringIO()
+        with redirect_stderr(diagnostic), self.assertRaises(SystemExit) as raised:
+            main(args)
+        self.assertEqual(raised.exception.code, 2)
+        self.assertNotIn('/private/operator/file', diagnostic.getvalue())
+        self.assertFalse(output.exists())
+
+    def test_output_failure_is_actionable_and_path_free(self):
+        from contextlib import redirect_stderr
+        from io import StringIO
+        diagnostic = StringIO()
+        with redirect_stderr(diagnostic):
+            self.assertEqual(main(self.arguments(self.root / 'private-missing' / 'receipt.json')), 2)
+        self.assertIn('Choose a new output name', diagnostic.getvalue())
+        self.assertNotIn(str(self.root), diagnostic.getvalue())
+
     def test_empty_file_exports_failure(self):
         self.source.write_bytes(b'')
         output = self.root / 'empty.json'
         result = main(['--source', str(self.source), '--backup', str(self.backup),
                        '--approved-completed-recording', '--input-kind', 'generated',
-                       '--revision', 'test', '--output', str(output)])
+                       '--revision', 'a' * 40, '--output', str(output)])
         self.assertEqual(result, 1)
         self.assertEqual(json.loads(output.read_text())['check'], 'FAIL')
 

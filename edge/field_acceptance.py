@@ -11,9 +11,43 @@ import os
 from pathlib import Path
 import platform
 import re
+import sys
 
 from .backup_library import LibraryError, fingerprint, signature
 from .fileops import open_regular
+
+
+def commit_revision(value):
+    if not re.fullmatch('[a-f0-9]{40}', value):
+        raise argparse.ArgumentTypeError('Use the exact 40-character lowercase commit from Git or pc-kit.json.')
+    return value
+
+
+def previous_check(path, current):
+    """Compare unsigned local records; this does not authenticate either record."""
+    with open_regular(path) as stream:
+        before = signature(os.fstat(stream.fileno()))
+        raw = stream.read(1024 * 1024 + 1)
+        if len(raw) > 1024 * 1024 or signature(os.fstat(stream.fileno())) != before:
+            raise ValueError('PREVIOUS_CHANGED_OR_TOO_LARGE')
+    previous = json.loads(raw)
+    if (previous['schema'] != 'intelligent-dvr.field-byte-check.v1'
+            or previous['check'] != 'PASS'
+            or previous['field_acceptance'] != 'NOT_ESTABLISHED'
+            or previous['independent_file'] is not True
+            or type(previous['bytes']) is not int
+            or previous['bytes'] <= 0
+            or not re.fullmatch('[a-f0-9]{64}', previous['source_sha256'])
+            or previous['source_sha256'] != previous['backup_sha256']):
+        raise ValueError('PREVIOUS_RECEIPT_INVALID')
+    for key, code in (('input_kind', 'PREVIOUS_INPUT_KIND_MISMATCH'),
+                      ('operator_supplied_revision', 'PREVIOUS_REVISION_MISMATCH'),
+                      ('verifier_sha256', 'PREVIOUS_VERIFIER_MISMATCH')):
+        if previous[key] != current[key]:
+            raise ValueError(code)
+    if previous['source_sha256'] != current['source_sha256'] or previous['bytes'] != current['bytes']:
+        raise ValueError('SOURCE_CHANGED_SINCE_PREVIOUS')
+    return {'previous_binding': 'MATCHED', 'previous_receipt_sha256': hashlib.sha256(raw).hexdigest()}
 
 
 def compare(source, backup, review=None):
@@ -66,9 +100,10 @@ def main(argv=None):
     parser.add_argument('--source', type=Path, required=True)
     parser.add_argument('--backup', type=Path, required=True)
     parser.add_argument('--review', type=Path)
+    parser.add_argument('--previous', type=Path, help='Earlier passing byte receipt from this same revision/verifier and input kind')
     parser.add_argument('--approved-completed-recording', action='store_true', required=True)
     parser.add_argument('--input-kind', choices=('generated', 'oem'), required=True)
-    parser.add_argument('--revision', required=True, help='Tested app commit or kit revision (operator supplied)')
+    parser.add_argument('--revision', type=commit_revision, required=True, help='Exact 40-character app commit or kit revision (operator supplied)')
     parser.add_argument('--output', type=Path, required=True, help='New receipt in an existing private folder')
     args = parser.parse_args(argv)
     receipt = {'schema': 'intelligent-dvr.field-byte-check.v1',
@@ -77,18 +112,26 @@ def main(argv=None):
                'operator_supplied_revision': args.revision,
                'platform': platform.system(), 'python': platform.python_version(),
                'verifier_sha256': hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+               'previous_binding': 'NOT_RUN',
                'field_acceptance': 'NOT_ESTABLISHED',
                'limits': 'Byte matching and reported review metadata only; not authenticity, decoding, runtime attestation, accuracy, recovery or capacity.'}
     try:
-        receipt.update(compare(args.source, args.backup, args.review), check='PASS')
+        receipt.update(compare(args.source, args.backup, args.review))
+        if args.previous is not None:
+            receipt.update(previous_check(args.previous, receipt))
+        receipt['check'] = 'PASS'
     except (OSError, ValueError, KeyError, TypeError, AttributeError, RuntimeError, LibraryError) as error:
         # Do not export file paths, names or private exception messages.
         code = str(error) if type(error) is ValueError and re.fullmatch('[A-Z_]+', str(error)) else 'INPUT_OR_REVIEW_INVALID'
         receipt.update(check='FAIL', error_type=type(error).__name__, error_code=code)
-    fd = os.open(args.output, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
-    with os.fdopen(fd, 'w', encoding='utf-8') as stream:
-        json.dump(receipt, stream, indent=2, allow_nan=False)
-        stream.write('\n')
+    try:
+        fd = os.open(args.output, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+        with os.fdopen(fd, 'w', encoding='utf-8') as stream:
+            json.dump(receipt, stream, indent=2, allow_nan=False)
+            stream.write('\n')
+    except OSError:
+        print('Receipt could not be created. Choose a new output name in an existing private folder.', file=sys.stderr)
+        return 2
     print('Byte check: ' + receipt['check'] + '; field acceptance NOT_ESTABLISHED')
     return 0 if receipt['check'] == 'PASS' else 1
 
