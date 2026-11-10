@@ -45,9 +45,20 @@ labeled footage (see [measure it](#measure-before-relying-on-it)).
    **Start AI** again on the same tile; unsent observations are kept.
 7. Press **Stop AI**, disconnect the camera, leave Monitor or hide the page to stop.
 
-The tile reports what the AI is doing: counts of what it currently sees, analyzed
+The tile reports class counts from its most recent analyzed frame, analyzed
 frames per second, the time this computer took for the last frame, still frames
-skipped by the motion gate, frames dropped while busy, and tracks seen so far.
+skipped by the motion gate, frames dropped while busy, rejected frames, and tracks
+seen so far. Before the first result it says it is waiting; a missing reply is
+never labeled as an empty scene. Counts and boxes both disappear when that
+frame is more than 1.5 seconds old, and return with a fresh reply.
+
+Each tile keeps at most 20 recent observations in memory. New observations can
+replace older ones; a visible counter reports how many **unsent** observations
+were replaced, including across AI restarts on that tile. Copies already sent to
+Events do not count as lost. Send important observations to Events promptly.
+Stopping AI keeps retained observations, but leaving Monitor or closing the page
+clears this temporary list and its replacement counter. Events retains only the
+observations you explicitly sent.
 
 ### Limits
 

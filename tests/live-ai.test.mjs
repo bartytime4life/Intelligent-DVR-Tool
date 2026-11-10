@@ -1,7 +1,7 @@
 import test from 'node:test';
 import { liveBackendLabel } from '../src/live-ai.mjs';
 import assert from 'node:assert/strict';
-import { liveCounts, liveBoxLabel, boxesFresh, liveObservationEvent, liveDetector, liveRequest, LIVE_BOX_MAX_AGE_MS } from '../src/live-ai.mjs';
+import { liveCounts, liveBoxLabel, boxesFresh, liveFrameStatus, liveObservationEvent, liveDetector, liveRequest, LIVE_BOX_MAX_AGE_MS } from '../src/live-ai.mjs';
 import { restoreSnapshot } from '../src/data.mjs';
 import { parseRecognition, validateTracking, trackRows, boxLabel, mergeRecognitionEvents } from '../src/recognition.mjs';
 import { filterEvents, queueCSV } from '../src/review-queue.mjs';
@@ -235,4 +235,71 @@ test('late startup from a cancelled run cannot replace a newer live AI session',
   assert.equal(detector.snapshot.state, 'live'); assert.equal(detector.snapshot.session.id, newer.id);
   assert.ok(stopped.includes(`/api/live/${session.id}/stop`));
   detector.stop();
+});
+
+
+test('live results distinguish waiting, stale and fresh frames, including a zero clock', () => {
+  assert.equal(liveFrameStatus(null, 100), 'waiting');
+  assert.equal(liveFrameStatus({result:null}, 100), 'waiting');
+  const ai = {result:{detections:[]}, resultAt:0};
+  assert.equal(liveFrameStatus(ai, 0), 'fresh');
+  assert.equal(liveFrameStatus(ai, LIVE_BOX_MAX_AGE_MS), 'fresh');
+  assert.equal(liveFrameStatus(ai, LIVE_BOX_MAX_AGE_MS + 1), 'stale');
+  for (const now of [-1, NaN, Infinity]) assert.equal(boxesFresh(ai, now), false);
+  assert.equal(boxesFresh({result:{}, resultAt:NaN}, 100), false);
+});
+
+async function waitForLive(check) {
+  const until = Date.now() + 1000;
+  while (!check() && Date.now() < until) await new Promise(resolve => setTimeout(resolve, 0));
+  assert.ok(check(), 'expected live detector state arrived');
+}
+
+test('busy and rejected-frame counters publish even when the next reply stalls', async () => {
+  const snapshots = [];
+  const {fetcher} = service({frames:[
+    {error:{code:'BUSY', message:'busy'}, status:429},
+    {error:{code:'FRAME_INVALID', message:'invalid'}, status:400},
+    {error:{code:'FRAME_SIZE', message:'large'}, status:400},
+  ]});
+  const detector = liveDetector({token:'t', model:'m', rules:'r', camera:'c', capture:async () => new Blob(['frame']),
+    fetcher, onChange:snapshot => snapshots.push(snapshot), wait:async () => {}});
+  try {
+    await detector.start();
+    await waitForLive(() => snapshots.at(-1)?.frameErrors === 2);
+    assert.ok(snapshots.some(snapshot => snapshot.skippedBusy === 1 && snapshot.frameErrors === 0));
+    assert.equal(snapshots.at(-1).skippedBusy, 1);
+  } finally { detector.stop(); }
+});
+
+test('bounded live observations count unsent replacements but not already-sent copies', async () => {
+  const retained = Array.from({length:20}, (_, index) => ({
+    observation:{...observation, id:index.toString(16).padStart(32,'0')},
+    still:new Blob(['retained']), capturedAt:5, session, ...(index === 19 ? {sent:true} : {}),
+  }));
+  const {fetcher} = service({frames:[
+    {observations:[{...observation,id:'e'.repeat(32)}], detections:[]},
+    {observations:[{...observation,id:'f'.repeat(32)}], detections:[]},
+  ]});
+  const snapshots = [];
+  const detector = liveDetector({token:'t', model:'m', rules:'r', camera:'c', capture:async () => new Blob(['frame']),
+    observations:retained, observationsDropped:2, fetcher,
+    onChange:snapshot => snapshots.push(snapshot), wait:async () => {}});
+  try {
+    await detector.start();
+    await waitForLive(() => detector.snapshot.observationsDropped === 3);
+    assert.equal(detector.snapshot.observations.length, 20);
+    assert.equal(detector.snapshot.observations[0].observation.id, 'f'.repeat(32));
+    assert.equal(snapshots.find(snapshot => snapshot.result)?.observationsDropped, 2);
+    detector.markSent('f'.repeat(32));
+    detector.dismiss('e'.repeat(32));
+    assert.equal(detector.snapshot.observationsDropped, 3);
+  } finally { detector.stop(); }
+});
+
+test('initial live observation bounds also account for discarded unsent input', () => {
+  const observations = Array.from({length:23}, (_, index) => ({observation, sent:index === 22}));
+  const detector = liveDetector({observations, observationsDropped:4, fetcher:async () => {}, capture:async () => null});
+  assert.equal(detector.snapshot.observations.length, 20);
+  assert.equal(detector.snapshot.observationsDropped, 6);
 });

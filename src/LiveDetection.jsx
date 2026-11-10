@@ -1,6 +1,6 @@
 import React from 'react';
 import { Brain, PaperPlaneTilt, X } from '@phosphor-icons/react';
-import { LIVE_DISPLAY_SCORE, liveBoxLabel, liveCounts, boxesFresh, liveBackendLabel } from './live-ai.mjs';
+import { LIVE_DISPLAY_SCORE, LIVE_OBSERVATIONS, liveBoxLabel, liveCounts, boxesFresh, liveFrameStatus, liveBackendLabel } from './live-ai.mjs';
 
 // Boxes are drawn in the analyzed frame's own pixel space; "meet" matches the tile's object-fit: contain.
 export function LiveOverlay({ ai, now }) {
@@ -23,8 +23,9 @@ export function LiveOverlay({ ai, now }) {
 
 export function LiveTileAI({ ai, available, onStart, onStop, onSend, onDismiss, now }) {
   const active = ['starting', 'live'].includes(ai?.state);
-  const counts = liveCounts(ai?.result?.detections);
-  const session = ai?.session, stale = ai?.state === 'live' && ai.result && !boxesFresh(ai, now);
+  const frameStatus = liveFrameStatus(ai, now);
+  const counts = frameStatus === 'fresh' ? liveCounts(ai?.result?.detections) : [];
+  const session = ai?.session;
   const idle = ai?.result?.detector === 'skipped-still';
   return <div className="live-ai" onClick={e => e.stopPropagation()}>
     <div className="live-ai-row">
@@ -32,15 +33,22 @@ export function LiveTileAI({ ai, available, onStart, onStop, onSend, onDismiss, 
         onClick={() => active ? onStop() : onStart()} title={available ? '' : 'Live AI needs the local app on this computer'}>
         <Brain aria-hidden="true" />{ai?.state === 'starting' ? 'Starting AI…' : active ? 'Stop AI' : 'Start AI'}</button>
       {ai?.state === 'live' && <span className="live-ai-status" role="status">
-        {counts.length ? counts.map(([label, n]) => <span key={label} className="live-ai-count">{n} {label}</span>) : <span>{idle ? 'Still scene · detector resting' : 'Nothing detected'}</span>}
-        <small>{stale ? 'AI delayed · boxes hidden' : `${ai.fps ? ai.fps.toFixed(1) : '–'} fps · ${ai.result?.timing?.inference_ms ?? ai.result?.timing?.total_ms ?? '–'} ms on this computer`}</small>
+        {frameStatus === 'waiting' ? <span>Waiting for the first analyzed frame…</span>
+          : frameStatus === 'stale' ? <span>Waiting for a recent analyzed frame…</span>
+          : counts.length ? counts.map(([label, n]) => <span key={label} className="live-ai-count">{n} {label}</span>)
+          : <span>{idle ? 'Still scene · detector resting' : 'Nothing detected in the analyzed frame'}</span>}
+        <small>{frameStatus === 'stale' ? 'AI delayed · counts and boxes hidden' : frameStatus === 'waiting' ? 'No detection result yet' : `${ai.fps ? ai.fps.toFixed(1) : '–'} fps · ${ai.result?.timing?.inference_ms ?? ai.result?.timing?.total_ms ?? '–'} ms on this computer`}</small>
       </span>}
       {ai?.state === 'failed' && <span className="live-ai-error" role="alert">{ai.error}</span>}
       {ai?.state === 'stopped' && ai.error && <span className="live-ai-note">{ai.error}</span>}
     </div>
     {ai?.state === 'live' && session && <p className="live-ai-meta">
-      {liveBackendLabel(session)} · {session.model} · {session.rules} · {session.analyzed} analyzed{session.skipped_still ? ` · ${session.skipped_still} still frames skipped` : ''}{ai.skippedBusy ? ` · ${ai.skippedBusy} dropped while busy` : ''}
+      {liveBackendLabel(session)} · {session.model} · {session.rules} · {session.analyzed} analyzed{session.skipped_still ? ` · ${session.skipped_still} still frames skipped` : ''}{ai.skippedBusy ? ` · ${ai.skippedBusy} dropped while busy` : ''}{ai.frameErrors ? ` · ${ai.frameErrors} rejected ${ai.frameErrors === 1 ? 'frame' : 'frames'}` : ''}
       {Object.keys(session.tracks_by_label || {}).length > 0 && <> · tracks so far: {Object.entries(session.tracks_by_label).map(([l, n]) => `${n} ${l}`).join(', ')}</>}
+    </p>}
+    {ai?.observationsDropped > 0 && <p className="live-ai-error" role="status">
+      {ai.observationsDropped} unsent {ai.observationsDropped === 1 ? 'observation was' : 'observations were'} replaced by newer observations.
+      {' '}Only the latest {LIVE_OBSERVATIONS} are kept on this tile. Send important observations to Events before they are replaced.
     </p>}
     {ai?.observations?.length > 0 && <ul className="live-ai-observations" aria-label="Live AI observations">
       {ai.observations.map((o, i) => <li key={o.observation.id}>

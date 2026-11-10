@@ -56,7 +56,15 @@ export function liveBoxLabel(d) {
   return `${d.label}${Number.isInteger(d.track) ? ` #${d.track}` : ''} ${d.score.toFixed(2)}`;
 }
 
-export const boxesFresh = (state, now) => Boolean(state?.result && state.resultAt && now - state.resultAt <= LIVE_BOX_MAX_AGE_MS);
+export const boxesFresh = (state, now) => Boolean(state?.result && Number.isFinite(state.resultAt)
+  && Number.isFinite(now) && now >= state.resultAt && now - state.resultAt <= LIVE_BOX_MAX_AGE_MS);
+
+// Counts and empty-scene messages expire with the boxes; no reply is not a
+// negative detection. Keep this separate from historical rule observations.
+export function liveFrameStatus(state, now) {
+  if (!state?.result) return 'waiting';
+  return boxesFresh(state, now) ? 'fresh' : 'stale';
+}
 
 // A rule observation from live AI as a pending review-queue entry. There is no
 // recording behind it: the still frame saved in this browser is the only image.
@@ -87,11 +95,12 @@ export async function captureJpeg(element, { maxWidth = 960, quality = 0.8, docu
 // Drives one live session. capture() returns the current frame as a JPEG Blob (or
 // null while no picture is shown). onChange receives a fresh snapshot after every step.
 export function liveDetector({ token, model, rules, camera, capture, onChange, fetcher = fetch,
-  now = () => performance.now(), wall = () => Date.now(), wait = ms => new Promise(r => setTimeout(r, ms)), maxFps = 5, observations = [], timeouts = {} }) {
+  now = () => performance.now(), wall = () => Date.now(), wait = ms => new Promise(r => setTimeout(r, ms)), maxFps = 5, observations = [], observationsDropped = 0, timeouts = {} }) {
   let running = false, controller = null, generation = 0;
   // A restarted detector keeps a previous run's unsent observations so they can still be sent.
   const state = { state: 'idle', session: null, result: null, resultAt: 0, error: '', observations: observations.slice(0, LIVE_OBSERVATIONS),
-    fps: 0, latencyMs: null, skippedBusy: 0, frameErrors: 0 };
+    fps: 0, latencyMs: null, skippedBusy: 0, frameErrors: 0,
+    observationsDropped: observationsDropped + observations.slice(LIVE_OBSERVATIONS).filter(o => !o.sent).length };
   const emit = patch => { Object.assign(state, patch); onChange?.({ ...state, observations: [...state.observations] }); };
   async function loop(ticket, signal) {
     let previous = null;
@@ -111,11 +120,13 @@ export function liveDetector({ token, model, rules, camera, capture, onChange, f
         // Exponential moving average of analyzed frames per second, from actual reply spacing.
         const fps = interval ? (state.fps ? state.fps * 0.8 + 200 / interval : 1000 / interval) : state.fps;
         const added = (result.observations || []).map(o => ({ observation: o, still: blob, capturedAt, session: {...result.session} }));
+        const combined = [...added.reverse(), ...state.observations];
+        const dropped = combined.slice(LIVE_OBSERVATIONS).filter(o => !o.sent).length;
         emit({ state: 'live', session: result.session, result, resultAt: capturedMonotonic, fps, latencyMs: finished - began, error: '',
-          observations: [...added.reverse(), ...state.observations].slice(0, LIVE_OBSERVATIONS) });
+          observations: combined.slice(0, LIVE_OBSERVATIONS), observationsDropped: state.observationsDropped + dropped });
       } catch (error) {
         if (!running || ticket !== generation || error.name === 'AbortError') break;
-        if (error.code === 'BUSY') { state.skippedBusy++; }
+        if (error.code === 'BUSY') { emit({ skippedBusy: state.skippedBusy + 1 }); }
         else if (['FRAME_INVALID', 'FRAME_SIZE'].includes(error.code)) { emit({ frameErrors: state.frameErrors + 1 }); }
         else { running = false; emit({ state: 'failed', error: error.message, result: null }); break; }
       }
