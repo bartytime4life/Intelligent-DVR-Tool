@@ -158,6 +158,14 @@ A completed decision releases the warning only after its requested browser saves
 succeed. A rule saved by the local service does not establish that this browser
 remembered its selection, history or requested combined evidence. Read each save
 message and **Download measurement (JSON)** before leaving if a save failed.
+
+If the detector's analysis-start reply is lost, **Save training recording** keeps
+a copy of the captured clip. **Check local analysis status** only reads the local
+app's retained job; it cannot establish that a reported job belongs to this
+recording and never cancels it automatically. A retry becomes available only
+after that check reports an idle or finished job. Starting another run can replace
+the retained result, so inspect it in Recognition first. Save your recording
+before leaving Train, because the captured clip is held in memory.
 That summary does not restore the full scored evidence library or video.
 
 ## How frames are counted

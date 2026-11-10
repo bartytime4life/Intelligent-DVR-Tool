@@ -162,6 +162,26 @@ class ServiceTest(unittest.TestCase):
                 self.assertEqual(self.error(lambda: self.enroll(service)).code, code)
         self.assertEqual(service.people_list()['people'], [])
         self.assertFalse(service.face_busy)
+    def test_delete_storage_failures_never_claim_a_retained_template_is_absent(self):
+        service = self.service()
+        self.results = [{'checked': 20, 'usable': 6, 'reasons': {}, 'embeddings': [[.1] * faces.EMBEDDING] * 6}]
+        person = self.enroll(service)['person']['id']
+        path = self.root / 'people' / f'{person}.json'
+        original = path.read_bytes()
+        service.suggestions = {'views': {(0, 0): {'person': person}}}
+        for problem in (PermissionError('generated permission refusal'), OSError('generated storage failure')):
+            with self.subTest(problem=type(problem).__name__), patch.object(service.people, 'delete', side_effect=problem):
+                error = self.error(lambda: service.people_delete(person, {}))
+                self.assertEqual((error.status, error.code), (500, 'PEOPLE_DELETE'))
+                self.assertIn('could not be confirmed', str(error))
+                self.assertEqual(path.read_bytes(), original)
+                self.assertEqual(service.people_list()['people'][0]['id'], person)
+                self.assertEqual(service.suggestions['views'], {(0, 0): {'person': person}})
+        self.assertEqual(service.people_delete(person, {}), {'deleted': person})
+        self.assertFalse(path.exists())
+        self.assertEqual(service.suggestions['views'], {})
+        error = self.error(lambda: service.people_delete(person, {}))
+        self.assertEqual((error.status, error.code), (404, 'NOT_FOUND'))
     def identify_fixture(self, service):
         review = {'trace': {'frames': [
             {'frame_index': 0, 'detections': [{'label': 'person', 'score': .9, 'box': [.1, .1, .3, .6]},

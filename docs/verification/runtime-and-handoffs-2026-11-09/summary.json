@@ -1,0 +1,115 @@
+{
+  "recordedAt": "2026-11-10T03:50:39.412127+00:00",
+  "baseCommit": "9ae03ce597f2688d8c4f5a2fce0d13954617e0f4",
+  "sourceCommit": "69044459a92ff6e366b9cea57a281c76eb88fbd7",
+  "node": {
+    "passed": 476,
+    "failed": 0,
+    "skipped": 0,
+    "testSocketsEnabled": true
+  },
+  "nativePeople": {
+    "passed": 19,
+    "failed": 0,
+    "skipped": 0,
+    "environment": "existing isolated OEM-backup Python"
+  },
+  "sites": {
+    "passed": 4,
+    "failed": 0
+  },
+  "build": {
+    "passed": true,
+    "requiredSitesFilesPresent": true,
+    "remainingWarning": "Facility chunk exceeds 500 kB"
+  },
+  "browser": {
+    "distinctExpected": 169,
+    "distinctPassed": 169,
+    "failed": 0,
+    "skipped": 0,
+    "flaky": 0,
+    "batches": [
+      {
+        "batch": "facility-a",
+        "stats": {
+          "startTime": "2026-11-10T03:44:51.316Z",
+          "duration": 191003.70299999998,
+          "expected": 56,
+          "skipped": 0,
+          "unexpected": 0,
+          "flaky": 0
+        }
+      },
+      {
+        "batch": "facility-b",
+        "stats": {
+          "startTime": "2026-11-10T03:48:12.937Z",
+          "duration": 113209.93699999999,
+          "expected": 36,
+          "skipped": 0,
+          "unexpected": 0,
+          "flaky": 0
+        }
+      },
+      {
+        "batch": "app",
+        "stats": {
+          "startTime": "2026-11-10T03:45:12.252Z",
+          "duration": 180155.579,
+          "expected": 77,
+          "skipped": 0,
+          "unexpected": 0,
+          "flaky": 0
+        }
+      }
+    ],
+    "earlierAttempts": [
+      {
+        "name": "initial source handoffs",
+        "stats": {
+          "startTime": "2026-11-10T03:35:02.123Z",
+          "duration": 69645.513,
+          "expected": 1,
+          "skipped": 0,
+          "unexpected": 6,
+          "flaky": 0
+        },
+        "acceptedAsFinal": false,
+        "cause": "Post-commit focus timing plus inconsistent unrelated-result fixture; corrected before accepted checks"
+      },
+      {
+        "name": "long Facility attempt",
+        "observedPassingCases": 84,
+        "exitCode": 143,
+        "acceptedAsCompleteRun": false,
+        "resolution": "Replaced by two completed batches, 56 + 36, covering all 92 Facility cases"
+      }
+    ]
+  },
+  "bundleSnapshotSha256": "7074f36c149f7afd828697aa52ac6394b9196b07e84a2c703a079378a27a73e1",
+  "protectedSourcesByteIdentical": true,
+  "productionDependencyChanges": false,
+  "fieldOrModelQualification": false,
+  "ownerDeviceInstallation": false,
+  "deployment": false,
+  "nativeWikiPublication": false,
+  "hostedCI": "Separate pending PR checks; no current-branch hosted result claimed by this local record",
+  "screenshots": {
+    "03-handoff-before.jpg": {
+      "sha256": "8f7f099aafede5fb29408d5ffb6af3ce227cbd5e05de40920e9290fde0eead61",
+      "kind": "actual local UI with generated metadata only",
+      "realCameraFootage": false
+    },
+    "04-handoff-after.jpg": {
+      "sha256": "6283e49dc5e2e01f36ad71ec502bcf841bc55ecae09dc4d9d4085854cfe95118",
+      "kind": "actual local UI with generated metadata only",
+      "realCameraFootage": false
+    },
+    "05-handoff-mobile.jpg": {
+      "sha256": "aa9e7a118e8f4b88897499f6ea6d6624412629bd6bcfb71cb67635fa06a82745",
+      "kind": "actual local UI with generated metadata only",
+      "realCameraFootage": false
+    }
+  }
+}

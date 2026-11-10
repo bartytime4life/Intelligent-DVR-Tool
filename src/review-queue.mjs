@@ -1,4 +1,4 @@
-import { csvCell } from './recognition-report.mjs';
+import { csvCell } from './csv.mjs';
 import { createReviewRevision } from './data.mjs';
 
 // Older saved events keep clip time only in their "Clip +12.3s" label.

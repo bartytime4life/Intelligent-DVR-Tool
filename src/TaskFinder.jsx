@@ -28,6 +28,7 @@ export default function TaskFinder({ onChoose, onClose }) {
     else input.current?.focus();
   };
   function keydown(event) {
+    if (event.isComposing || event.nativeEvent?.isComposing || event.keyCode === 229) return;
     if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
       event.preventDefault();
       if (results.length) setSelected(index => (index + (event.key === 'ArrowDown' ? 1 : -1) + results.length) % results.length);

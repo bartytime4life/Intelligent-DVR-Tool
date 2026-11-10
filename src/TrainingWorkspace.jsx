@@ -17,6 +17,7 @@ import { readTrainingLibrary, compatibleTrainingSessions, trainingSessionEvidenc
 import { trainingHasPendingWork, personHasPendingWork } from './training-lifecycle.mjs';
 import { createReviewTransfer } from './review-transfer.mjs';
 import { submitPersonRecording, personWriteRefused } from './person-session.mjs';
+import { createPeopleOperations, initialPeopleState } from './people-operation.mjs';
 import './training.css';
 
 const STEPS = [['camera', 'Camera check'], ['record', 'Guided recording'], ['analyze', 'Analysis'], ['results', 'Compare'], ['check', 'Fresh check'], ['done', 'Decision']];
@@ -40,35 +41,40 @@ export default function TrainingWorkspace({ onOpenRecognition, onDirtyChange }) 
   const [saving, setSaving] = useState(false);
   const saveLock = useRef(false);
   const [error, setError] = useState('');
-  const [peopleError, setPeopleError] = useState('');
-  const [people, setPeople] = useState([]), [personFlow, setPersonFlow] = useState(null);
+  const [peopleState, setPeopleState] = useState(initialPeopleState);
+  const peopleOperations = useRef(null), connection = useRef(null);
+  const [personFlow, setPersonFlow] = useState(null);
   const [personPending, setPersonPending] = useState(false);
   const local = localAnalysisOrigin(globalThis.location);
-  const pending = trainingHasPendingWork({ step, clip, outcome, check, saved, saving, includeSession, personPending });
+  const pending = trainingHasPendingWork({ step, clip, outcome, check, saved, saving, includeSession,
+    personPending: personPending || Boolean(peopleState.deleting) });
   const dirtyHandler = useRef(onDirtyChange); dirtyHandler.current = onDirtyChange;
   useEffect(() => { onDirtyChange?.(pending); }, [pending, onDirtyChange]);
   useEffect(() => () => dirtyHandler.current?.(false), []);
 
-  async function loadPeople(value) {
-    setPeopleError('');
-    if (!value?.people?.enabled) { setPeople([]); return; }
-    try { setPeople((await (await analysisRequest('/people', { token: value.token })).json()).people); }
-    catch { setPeopleError('Enrolled people could not be loaded. Check the connection and try again.'); }
-  }
+  useEffect(() => {
+    const operations = createPeopleOperations(setPeopleState);
+    peopleOperations.current = operations;
+    return () => { operations.close(); peopleOperations.current = null; connection.current?.abort(); };
+  }, []);
+  const loadPeople = value => peopleOperations.current?.load(value);
 
   async function connect() {
+    connection.current?.abort();
+    const controller = new AbortController(); connection.current = controller;
     if (!local) { setService({ state: 'unavailable', message: 'Open the installed local app on this computer to start a training session.' }); return; }
     setService({ state: 'connecting', message: 'Checking this computer…' });
     try {
-      const response = await analysisRequest('/session', { signal: AbortSignal.timeout(10000) });
+      const response = await analysisRequest('/session', { signal: AbortSignal.any([controller.signal, AbortSignal.timeout(10000)]) });
       // A static preview answers with its page instead of the service's JSON.
       const value = await response.json().catch(() => { throw Error('This preview needs the installed local app. Start it with analysis and recording import enabled, then check again.'); });
+      if (controller.signal.aborted) return;
       if (!value.token || !Array.isArray(value.models) || !value.models.length) throw Error('The local app has no detection model configured.');
       const problems = [!value.ready && 'Analysis dependencies are missing; run the installer, then restart the app.',
         !value.recording_import?.enabled && 'Recording import is off; restart the app with recording import enabled.'].filter(Boolean);
       setService({ state: problems.length ? 'blocked' : 'ready', message: problems.join(' '), ...value });
       loadPeople(value);
-    } catch (error) { setService({ state: 'unavailable', message: error.message }); }
+    } catch (error) { if (!controller.signal.aborted) setService({ state: 'unavailable', message: error.message }); }
   }
   useEffect(() => { connect(); }, []);
 
@@ -227,7 +233,7 @@ export default function TrainingWorkspace({ onOpenRecognition, onDirtyChange }) 
   if (personFlow) return <PersonSession service={service} flow={personFlow} onPendingChange={setPersonPending}
     onExit={() => { setPersonFlow(null); loadPeople(service); }} onChanged={() => loadPeople(service)} />;
 
-  if (!step) return <TrainingHome service={service} history={history}
+  if (!step) return <TrainingHome service={service} history={history} busy={Boolean(peopleState.deleting)}
     inUse={inUse}
     onStart={() => reset('camera')} onEnroll={() => setPersonFlow({ kind: 'enroll' })} onRetry={connect}>
     <TrainingLibrary library={library} busy={saving} onRemove={async source => {
@@ -238,10 +244,19 @@ export default function TrainingWorkspace({ onOpenRecognition, onDirtyChange }) 
     }} />
     {service.people?.enabled && <section className="training-people" aria-label="Enrolled people">
       <h2>Enrolled people</h2>
-      {peopleError ? <div role="alert"><p>{peopleError}</p><button className="button" onClick={() => loadPeople(service)}>Try again</button></div>
-        : people.length ? <ul>{people.map(p => <PersonRow key={p.id} person={p} service={service} disabled={service.state !== 'ready'}
-          onCheck={() => setPersonFlow({ kind: 'baseline', person: p })} onDeleted={() => loadPeople(service)} />)}</ul>
-        : <p>No one is enrolled. Enrollment starts with the person’s agreement.</p>}
+      <button className="text-button" disabled={peopleState.loading || Boolean(peopleState.deleting)} onClick={() => loadPeople(service)}>
+        <ArrowClockwise size={16} /> {peopleState.loading ? 'Refreshing saved people…' : 'Refresh saved people'}</button>
+      {peopleState.error && <p role="alert">{peopleState.error}</p>}
+      {peopleState.error && peopleState.people && <p>Showing the last verified list. Its current status could not be checked.</p>}
+      {peopleState.deleting && <p role="status">A template deletion was submitted. It may finish even if you leave Train.</p>}
+      {peopleState.notice && !Object.values(peopleState.unresolved).includes(peopleState.notice) && <p role="status">{peopleState.notice}</p>}
+      {Object.entries(peopleState.unresolved).map(([id, notice]) => <p role="status" key={id}>{notice}</p>)}
+      {peopleState.people?.length ? <ul>{peopleState.people.map(p => <PersonRow key={p.id} person={p}
+        disabled={service.state !== 'ready' || Boolean(peopleState.deleting)} removing={peopleState.deleting === p.id}
+        unverified={peopleState.blocked.includes(p.id)} onRemove={() => peopleOperations.current?.remove(p, service)}
+        onCheck={() => setPersonFlow({ kind: 'baseline', person: p })} />)}</ul>
+        : peopleState.people ? <p>No saved people were listed. Enrollment starts with the person’s agreement.</p>
+        : <p>{peopleState.loading ? 'Loading saved people…' : 'Saved people have not been verified. Refresh the list before checking a baseline.'}</p>}
     </section>}
   </TrainingHome>;
 
@@ -279,7 +294,7 @@ export default function TrainingWorkspace({ onOpenRecognition, onDirtyChange }) 
     {(step === 'camera' || step === 'record') && selection.rulesId && viewName.trim() && <CaptureSteps step={step} onStep={setStep}
       onClip={c => { setClip(c); setStep('analyze'); }} />}
     {step === 'camera' && <OllamaCoach />}
-    {step === 'analyze' && <AnalyzeStep selection={selection} clip={clip} script={TRAINING_SCRIPT}
+    {step === 'analyze' && <AnalyzeStep selection={selection} clip={clip} script={TRAINING_SCRIPT} onOpenRecognition={onOpenRecognition}
       onSession={session => setService({ ...session, state: 'ready' })}
       onRetry={() => reset('camera')} onDone={result => { setOutcome(result); setClip(null); setStep('results'); }} />}
     {(step === 'check-camera' || step === 'check-record') && <>
@@ -290,7 +305,7 @@ export default function TrainingWorkspace({ onOpenRecognition, onDirtyChange }) 
         onStep={next => setStep('check-' + next)} onClip={c => { setClip(c); setStep('check-analyze'); }} />
       {step === 'check-camera' && <button className="text-button" onClick={discardCheck}>Back to calibration</button>}
     </>}
-    {step === 'check-analyze' && <AnalyzeStep selection={outcome} clip={clip} script={CHECK_SCRIPT}
+    {step === 'check-analyze' && <AnalyzeStep selection={outcome} clip={clip} script={CHECK_SCRIPT} onOpenRecognition={onOpenRecognition}
       onSession={session => setService({ ...session, state: 'ready' })}
       onDone={finishCheck} onRetry={() => startCheck(check.value)} onBack={discardCheck} />}
     {step === 'confirm' && <ConfirmCheck source={check.context.source} onRetry={() => startCheck(check.value)}
@@ -381,26 +396,21 @@ function Moments({ source, moments, threshold }) {
   </section>;
 }
 
-function PersonRow({ person, service, disabled, onCheck, onDeleted }) {
-  const [confirming, setConfirming] = useState(false), [error, setError] = useState('');
-  async function remove() {
-    setError('');
-    try { await analysisRequest(`/people/${person.id}/delete`, { token: service.token, method: 'POST', body: {} }); onDeleted(); }
-    catch (e) { setError(e.message); }
-  }
+function PersonRow({ person, disabled, removing, unverified, onCheck, onRemove }) {
+  const [confirming, setConfirming] = useState(false);
   return <li>
     <div><strong>{person.name}</strong><span>Enrolled {new Date(person.created).toLocaleDateString()} · {plural(person.views, 'face view')}</span>
       <span>{baselineText(person.baseline)}</span></div>
     <div className="training-actions">
       {confirming ? <>
-        <button className="button amber" onClick={remove}><Trash size={16} /> Delete {person.name}’s face template</button>
-        <button className="text-button" onClick={() => setConfirming(false)}>Cancel</button>
+        <button className="button amber" disabled={disabled || unverified} onClick={onRemove}><Trash size={16} /> {removing ? 'Deleting face template…' : `Delete ${person.name}’s face template`}</button>
+        <button className="text-button" disabled={removing} onClick={() => setConfirming(false)}>Cancel</button>
       </> : <>
-        <button className="button" disabled={disabled} onClick={onCheck}>Check baseline</button>
-        <button className="text-button" onClick={() => setConfirming(true)}>Delete</button>
+        <button className="button" disabled={disabled || unverified} onClick={onCheck}>Check baseline</button>
+        <button className="text-button" disabled={disabled || unverified} onClick={() => setConfirming(true)}>Delete</button>
       </>}
     </div>
-    {error && <p role="alert">{error}</p>}
+    {unverified && !removing && <p>Template deletion needs verification. These controls stay blocked for this Train visit. Refresh saved people and check the local app.</p>}
   </li>;
 }
 
