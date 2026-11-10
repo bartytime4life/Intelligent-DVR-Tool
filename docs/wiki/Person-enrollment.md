@@ -63,6 +63,26 @@ Linux add `--allow-face-enrollment`; on Windows `-AllowFaceEnrollment`.
 | Enrollment | The clip is imported and a bounded local worker keeps up to 40 distinct face views. At least 5 clear views are required; otherwise nothing is saved and the most common problem is named (too dark, too small, blurry, more than one face…). |
 | Baseline check | Optional, 12 seconds of everyday views. Reports *recognized in N of M face views* and adds the matched views to the template, so each check also refines it. Run it again any time from the people list. |
 
+## Interrupted imports or uncertain results
+
+If you confirm leaving while the clip is being imported, the session cancels its
+import path and does not submit a later enrollment or baseline-template change.
+The local recording copy may already exist; leaving does not delete imported
+recordings or saved templates.
+
+After submission, a timeout, lost connection, server error or unverifiable reply
+does not prove that the template write failed. The app warns that it may still
+finish, keeps the clip in **Your recording is still here**, and offers **Save
+person recording**. Keep that copy before leaving. **Retry this recording** is
+withheld for an uncertain outcome; return to Train and check the saved people
+before submitting again, so you do not create a duplicate enrollment or repeat a
+baseline refinement. When the service confirms a refusal before writing a
+template, the retained recording can be retried without recapturing it.
+
+Retained clips are in-memory session recovery, not a permanent browser backup.
+Closing or leaving the session releases them. A late response from an exited
+session does not reopen it or start another template operation.
+
 ## How matching works
 
 YuNet finds faces on a copy reduced to 640 px (it detects faces of about

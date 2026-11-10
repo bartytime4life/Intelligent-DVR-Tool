@@ -24,6 +24,30 @@ Choose the job you want to finish:
 | Budget the machine | [10. Plan resources](#10-plan-resources) | A resource plan and supported limits |
 | Update or move computers | [11. Preserve and update](#11-preserve-and-update) | Separate backups of browser and service data |
 
+## Find the next task
+
+Choose **Find a task** in the header, or press **Ctrl+K** on Windows/Linux or
+**Cmd+K** on macOS; close any other open dialog first. Search for a job such as
+“video”, “notes”, “floor plan” or “GPU”; use Up/Down and Enter to open it, or
+Escape to close the finder.
+Choosing a task opens its workspace and relevant panel. Camera connections,
+recording and analysis still require their own explicit start controls.
+Cancel a leave warning to keep the current editor and search open.
+
+| Find a task | Exact destination |
+| --- | --- |
+| Watch cameras | Monitor |
+| Record a LAN camera | Recognition → Record a LAN camera |
+| Back up saved DVR videos | Recognition → Use my existing DVR |
+| Analyze a recording | Recognition → Analyze a recording |
+| Open saved results | Recognition → Open saved results |
+| Review observations | Events |
+| Design facility coverage | Facility |
+| Set review zones | Zones |
+| Train recognition | Train; choose Start session or Enroll a person there |
+| Plan this machine | System |
+| Connections and local evidence | Settings |
+
 ## 1. Get ready
 
 ![Three illustrated steps: Install dependencies, Check software readiness, then Start the local app.](https://raw.githubusercontent.com/wiki/bartytime4life/Intelligent-DVR-Tool/docs/media/guide/start.svg)
@@ -64,8 +88,8 @@ the tile, and you choose which observations to send to Events.
 1. In Monitor, explicitly **Record webcam clip**, then **Stop recording** and
    **Open clip in Recognition**. Or begin with an approved recording already on
    this computer.
-2. In **Recognition**, **Connect local analysis**. Import the selected file if
-   needed, then choose the recording, model and rule set.
+2. In **Recognition → Analyze a recording**, **Connect local analysis**. Import
+   the selected file if needed, then choose the recording, model and rule set.
 3. Press **Analyze recording**. Read progress and any complete/partial label;
    **Cancel analysis** stops an unwanted job.
 4. Successful results open with the matching analyzed recording. A decoding,
@@ -90,9 +114,15 @@ recognition of a person in this image.*
 
 Inspect sampled frames and boxes before sending observations to **Events**.
 Review the original source, make a confirm/dismiss decision and add a useful
-note. Use the queue filters and review shortcuts when helpful; keep **Undo**
-available when correcting a decision. Return to Recognition to export a printable
+note. Use the queue filters and review shortcuts when helpful. Reopen an
+observation to correct its decision; bulk dismissal and queue clearing have their
+own **Undo** controls. Return to Recognition to export a printable
 report, JSON or CSV with the current review state.
+
+Use **Save note** to keep an explanation without changing the observation's
+decision. Unfinished notes stay available through **Review note drafts** while
+you move around this tab; save or download them before closing it. Removed or
+changed evidence leaves a read-only draft for recovery.
 
 ![Actual sampled-count report with explicit download and save controls for the generated example.](https://raw.githubusercontent.com/wiki/bartytime4life/Intelligent-DVR-Tool/docs/media/guide/recognition-report.jpg)
 
