@@ -77,7 +77,7 @@ function SessionHistory({ history }) {
   </section>;
 }
 
-export default function TrainingHome({ service, history, inUse, onStart, onEnroll, onRetry, children }) {
+export default function TrainingHome({ service, history, inUse, onStart, onEnroll, onRetry, busy = false, children }) {
   const latest = history.at(-1);
   const ready = service.state === 'ready';
   return <section className="content-page training-page train-home" aria-label="Guided training">
@@ -97,7 +97,7 @@ export default function TrainingHome({ service, history, inUse, onStart, onEnrol
             <li><span>02</span><b>Choose a setting</b><small>Review sampled frames</small></li>
             <li><span>03</span><b>Check it again</b><small>{scriptSeconds(CHECK_SCRIPT)} seconds</small></li>
           </ol>
-          <button className="button amber train-home-launch" disabled={!ready} onClick={onStart}>
+          <button className="button amber train-home-launch" disabled={!ready || busy} onClick={onStart}>
             Start session <ArrowRight size={17} weight="bold" aria-hidden="true" /></button>
           <details className="train-home-script"><summary>Preview the recording prompts</summary>
             <ol>{TRAINING_SCRIPT.map(item => <li key={item.id}><span>{item.prompt}</span><b>{item.seconds}s</b></li>)}</ol>
@@ -121,7 +121,7 @@ export default function TrainingHome({ service, history, inUse, onStart, onEnrol
       <span className="train-enroll-icon"><UserFocus size={29} aria-hidden="true" /></span>
       <div><p className="train-kicker">PERSON ENROLLMENT</p><h2>Build a personal baseline</h2>
         <p>With the person’s agreement, capture face views for possible-match suggestions. Review each suggestion in Recognition.</p></div>
-      <button className="button" disabled={!ready} onClick={onEnroll}>Enroll a person</button>
+      <button className="button" disabled={!ready || busy} onClick={onEnroll}>Enroll a person</button>
     </section>}
     <TrainingAssistant />
     {children}

@@ -1,0 +1,42 @@
+
+> intelligent-dvr@0.0.0 build
+> vite build && node scripts/prepare-sites-build.mjs
+
+vite v6.4.5 building for production...
+transforming...
+✓ 4716 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/client/index.html                                             0.63 kB │ gzip:   0.38 kB
+dist/client/assets/sha256-worker-BrkydZ5H.js                       2.77 kB
+dist/client/assets/inter-latin-wght-normal-Dx4kXJAl.woff2         48.26 kB
+dist/client/assets/inter-latin-ext-wght-normal-DO1Apj_S.woff2     85.07 kB
+dist/client/assets/maplibre-gl-worker-PcuQ6pji.js                508.52 kB
+dist/client/assets/SystemSetup-B3PUJx65.css                        5.45 kB │ gzip:   1.43 kB
+dist/client/assets/LiveMonitor-BNF3sdHr.css                       11.27 kB │ gzip:   3.03 kB
+dist/client/assets/RecognitionReview-D9vq6aDq.css                 18.66 kB │ gzip:   4.28 kB
+dist/client/assets/TrainingWorkspace-DxvqxLZu.css                 25.73 kB │ gzip:   5.83 kB
+dist/client/assets/index-D8qA8Ea9.css                             29.83 kB │ gzip:   7.15 kB
+dist/client/assets/FacilityBuilder-YxLM1CKn.css                  164.38 kB │ gzip:  27.22 kB
+dist/client/assets/Plus.es-_Qd_mvBV.js                             1.53 kB │ gzip:   0.55 kB
+dist/client/assets/ArrowClockwise.es-DKV1_Sfi.js                   1.99 kB │ gzip:   0.77 kB
+dist/client/assets/VideoCamera.es-CBtG_nbe.js                      2.38 kB │ gzip:   0.87 kB
+dist/client/assets/HardDrives.es-IElDYZs0.js                       2.85 kB │ gzip:   0.76 kB
+dist/client/assets/FolderOpen.es-D-lJ3JLf.js                       2.91 kB │ gzip:   0.99 kB
+dist/client/assets/live-feeds-Cm_TwTJn.js                          3.66 kB │ gzip:   1.73 kB
+dist/client/assets/Trash.es-BXyNbpMY.js                            4.82 kB │ gzip:   1.14 kB
+dist/client/assets/local-analysis-Ft7_MVQ_.js                      7.31 kB │ gzip:   3.29 kB
+dist/client/assets/training-DXhzBZzu.js                            8.60 kB │ gzip:   3.66 kB
+dist/client/assets/SystemSetup-BlMzDGpR.js                        29.62 kB │ gzip:   9.04 kB
+dist/client/assets/LiveMonitor-B1Hiu_T_.js                        57.84 kB │ gzip:  18.31 kB
+dist/client/assets/RecognitionReview-CR6pQa6d.js                  98.51 kB │ gzip:  29.23 kB
+dist/client/assets/TrainingWorkspace-CwECF8e5.js                 129.98 kB │ gzip:  41.48 kB
+dist/client/assets/index-CsVIXDRd.js                             367.39 kB │ gzip: 112.19 kB
+dist/client/assets/FacilityBuilder-CIrDAfr5.js                 2,171.38 kB │ gzip: 597.97 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 5.11s
+Prepared Sites build: dist/server/index.js and dist/.openai/hosting.json

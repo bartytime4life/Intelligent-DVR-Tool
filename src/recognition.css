@@ -23,6 +23,13 @@
 .recognition-task[aria-pressed="true"] { border-color: #62d6c7; background: #143133; box-shadow: inset 0 2px #62d6c7; }
 .recognition-task[aria-pressed="true"] svg { color: #86edda; }
 .recognition-task-panel[hidden] { display: none !important; }
+.recognition-evidence-target:focus { outline: 2px solid #62d6c7; outline-offset: 5px; }
+.recognition-evidence-request { display: flex; align-items: start; gap: 16px; padding: 18px; margin-top: 16px; border: 1px solid #39776e; border-radius: 9px; background: #143133; }
+.recognition-evidence-request > div { min-width: 0; flex: 1; }
+.recognition-evidence-request p { color: #c1d4d2; font-size: 13px; line-height: 1.6; margin-top: 8px; }
+.recognition-evidence-request details { margin-top: 10px; color: #b4c9c8; font-size: 12px; }
+.recognition-evidence-request code { overflow-wrap: anywhere; }
+@media(max-width: 540px) { .recognition-evidence-request { flex-direction: column; } }
 @media(max-width: 1000px) { .recognition-tasks { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media(max-width: 540px) { .recognition-task { padding: 14px; gap: 8px; } .recognition-task strong { font-size: 12px; } .recognition-task span { font-size: 11px; } }
 .recognition-page h1 { margin: 10px 0 14px; }

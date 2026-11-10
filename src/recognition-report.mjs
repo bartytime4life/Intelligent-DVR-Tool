@@ -1,6 +1,8 @@
 import { parseRecognition, mergeRecognitionEvents } from './recognition.mjs';
 import { comparisonSummary } from './enhancement.mjs';
 import { coverageLabel } from './media-coverage.mjs';
+import { csvCell } from './csv.mjs';
+export { csvCell } from './csv.mjs';
 
 export const validateReportRun = run => parseRecognition({ schema:'intelligent-dvr.recognition-review.v1', receipt:run.receipt, trace:run.trace });
 
@@ -55,7 +57,6 @@ export function summarizeReport(parsed, { threshold = .5, reviews = [], sourceMa
 }
 
 const escapeHTML = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-export const csvCell = v => { let s=String(v ?? ''); if (/^[\s]*[=+\-@]/.test(s)) s="'"+s; return '"'+s.replaceAll('"','""')+'"'; };
 export function reportCSV(report) {
   const rows = [['source_sha256','analysis_state','seconds','label','rule','model_score','review_status','review_note','recording_coverage_status','analysis_termination']];
   for (const e of report.observations) rows.push([report.source.sha256,report.analysis.state,e.seconds,e.label,e.rule,e.score,e.status,e.note,report.coverage.declaration?.status || 'legacy-unverified',report.coverage.declaration?.termination || 'unspecified']);

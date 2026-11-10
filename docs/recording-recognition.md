@@ -154,6 +154,16 @@ A reused ID with different source/model/observation fields is rejected. Queue
 capacity is 1,000 records across model and sample observations. Every insertion
 refuses overflow without truncating older records.
 
+In an Events review, **Open in Recognition** opens **Open saved results** and
+focuses the next source-review step. The request shows the camera, clip time and
+recording/model fingerprints. Open the matching results file, then choose its
+original recording; the app never finds or analyzes files automatically. Other
+loaded results remain available until you explicitly replace them. When both
+files already match, the requested sampled frame opens with the original
+detections selected. **Close source request** clears this guidance while keeping
+the loaded review. Ordinary workspace navigation preserves your subsequent sample
+and task choices.
+
 OEM-backup review and LAN-segment review, Event handoff and timing downloads each
 allow one review transfer per panel, with a two-minute deadline. Use **Cancel
 backup opening** or **Cancel review transfer** to release the controls and retain

@@ -3,7 +3,7 @@ import WorkspaceConflict from './WorkspaceConflict.jsx';
 import TaskFinder from './TaskFinder.jsx';
 const FacilityBuilder = lazy(() => import("./FacilityBuilder.jsx").then(m => ({default:m.FacilityBuilder})));
 const SystemSetup = lazy(() => import("./SystemSetup.jsx"));
-import LiveMonitor from "./LiveMonitor.jsx";
+const LiveMonitor = lazy(() => import("./LiveMonitor.jsx"));
 const RecognitionReview = lazy(() => import("./RecognitionReview.jsx"));
 const TrainingWorkspace = lazy(() => import("./TrainingWorkspace.jsx"));
 import { mergeRecognitionEvents } from './recognition.mjs';
@@ -334,13 +334,13 @@ export function App() {
   const [routeAnnouncement, setRouteAnnouncement] = useState('');
   useEffect(() => {
     document.title = `${tab} · Intelligent DVR`;
+    if (navigationVersion) setRouteAnnouncement(`${tab} workspace opened.`);
     if (!focusWorkspace.current) return;
     focusWorkspace.current = false;
     const frame = requestAnimationFrame(() => {
       workspaceElement.current?.focus({preventScroll:true});
       workspaceElement.current?.scrollTo({top:0});
       window.scrollTo({top:0,left:0});
-      setRouteAnnouncement(`${tab} workspace opened.`);
     });
     return () => cancelAnimationFrame(frame);
   },[tab,navigationVersion]);
@@ -377,7 +377,7 @@ export function App() {
     const blockers = {
       Facility: [facilityDirty, "Leave the facility builder? Unsaved facility edits, drafts and undo history will be discarded."],
       Zones: [zoneDirty, "Leave Zones? Unsaved rule edits will be discarded. Save the review rule before leaving."],
-      Train: [trainingDirty, "Leave Train? Unfinished recordings, checks and unsaved results will be discarded. Session-owned camera capture will stop and analysis cancellation will be requested. Saved settings and face templates stay on this computer."],
+      Train: [trainingDirty, "Leave Train? Unfinished recordings, checks and unsaved results will be discarded. Session-owned camera capture will stop and analysis cancellation will be requested. A submitted template operation may still finish. Saved settings stay on this computer."],
       System: [systemDirty, "Leave System? Unapplied machine settings will be discarded. Apply the draft before leaving."]
     };
     const blocker = blockers[tabRef.current];
@@ -399,10 +399,10 @@ export function App() {
     window.addEventListener("beforeunload", warn);
     return () => window.removeEventListener("beforeunload", warn);
   }, []);
-  function setTab(next) {
+  function setTab(next, {focus = true} = {}) {
     if (!mayLeave(next)) return false;
     if (next === "Recognition") setRecognitionOpened(true);
-    focusWorkspace.current = true;
+    focusWorkspace.current = focus;
     tabRef.current = next;
     updateTab(next);
     setNavigationVersion(version => version + 1);
@@ -755,14 +755,14 @@ export function App() {
               : downloadText(setupConflict.remoteRaw ?? 'null', 'dvr-unreadable-machine-setup-other-tab.json')} />
         </div>}
         {recognitionOpened && <div hidden={tab !== "Recognition"}><WorkspaceBoundary name="Recognition"><Suspense fallback={<div className="content-page"><h1>Opening recognition review…</h1></div>}>
-          <RecognitionReview taskRequest={recognitionTask} active={tab === "Recognition" && !pageHidden} onImport={addObservations} onValidateImport={added => addObservations(added, false, true)} clip={capturedClip} onClip={setCapturedClip} reviews={events} evidence={evidence} onRecorderStatus={setRecorderStatus} onZoneStill={offerZoneStill} />
+          <RecognitionReview taskRequest={recognitionTask} active={tab === "Recognition" && !pageHidden} onImport={addObservations} onValidateImport={added => addObservations(added, false, true)} clip={capturedClip} onClip={setCapturedClip} reviews={events} evidence={evidence} onClearEvidence={() => setEvidence(null)} onRecorderStatus={setRecorderStatus} onZoneStill={offerZoneStill} />
         </Suspense></WorkspaceBoundary></div>}
         {tab === "Train" && <WorkspaceBoundary name="Train"><Suspense fallback={<div className="content-page"><h1>Opening training…</h1></div>}><TrainingWorkspace onOpenRecognition={() => setTab("Recognition")} onDirtyChange={reportTrainingDirty} /></Suspense></WorkspaceBoundary>}
         {tab === "Facility" && <WorkspaceBoundary name="Facility"><Suspense fallback={<div className="content-page"><h1>Opening facility builder…</h1></div>}><FacilityBuilder onPreviewCount={setLiveCount} onDirtyChange={(dirty) => { facilityDirty.current = dirty; }} /></Suspense></WorkspaceBoundary>}
         {tab === "System" && <WorkspaceBoundary name="System"><Suspense fallback={<div className="content-page"><h1>Opening machine setup…</h1></div>}><SystemSetup setup={resources}
           onApply={setResources} onDirtyChange={reportSystemDirty}
           storageError={setupSaveError} storagePending={setupUnsaved && !setupSaveError && !setupConflict} storageConflict={Boolean(setupConflict)} download={download} /></Suspense></WorkspaceBoundary>}
-        {tab === "Monitor" && <WorkspaceBoundary name="Monitor"><LiveMonitor onZoneStill={offerZoneStill} visibleTiles={resources.browser.visibleTiles} onCount={setLiveCount} pageHidden={pageHidden} clip={capturedClip} onClip={setCapturedClip} capturePending={capturePending} onCaptureBusy={setCapturePending} onReviewClip={() => setTab('Recognition')} onLiveObservation={addLiveObservation} queue={
+        {tab === "Monitor" && <WorkspaceBoundary name="Monitor"><Suspense fallback={<div className="content-page"><h1>Opening Monitor…</h1></div>}><LiveMonitor onZoneStill={offerZoneStill} visibleTiles={resources.browser.visibleTiles} onCount={setLiveCount} pageHidden={pageHidden} clip={capturedClip} onClip={setCapturedClip} capturePending={capturePending} onCaptureBusy={setCapturePending} onReviewClip={() => setTab('Recognition')} onLiveObservation={addLiveObservation} queue={
               <aside className="review-queue">
                 <div className="queue-heading">
                   <h2>
@@ -819,7 +819,7 @@ export function App() {
                   </p>
                 </div>
               </aside>
-        } /></WorkspaceBoundary>}
+        } /></Suspense></WorkspaceBoundary>}
         {tab === "Events" && (
           <section className="content-page">
             <div className="page-heading">
@@ -1259,8 +1259,9 @@ export function App() {
                   : `Open the source recording at ${modal.event.time} in Recognition to verify this observation.`}</p>
                 {modal.event.provenance?.source_sha256 && <button className="button" onClick={() => {
                   const e = modal.event;
-                  setEvidence({ sourceId: e.sourceId, sha: e.provenance.source_sha256, model: e.provenance.model_sha256, time: e.time, nonce: Date.now() });
-                  setModal(null); setTab("Recognition");
+                  if (!setTab("Recognition", {focus:false})) return;
+                  setEvidence({ sourceId: e.sourceId, sha: e.provenance.source_sha256, model: e.provenance.model_sha256, time: e.time, camera: e.cameraName || cameraOf(e)?.name || '', nonce: Date.now() });
+                  setModal(null);
                 }}>Open in Recognition<CaretRight size={15} /></button>}
               </div>
               <p className="hint">

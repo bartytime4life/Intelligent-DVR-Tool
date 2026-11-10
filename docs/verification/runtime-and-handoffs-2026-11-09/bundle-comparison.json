@@ -1,0 +1,258 @@
+{
+  "snapshotSha256": "7074f36c149f7afd828697aa52ac6394b9196b07e84a2c703a079378a27a73e1",
+  "sourceHashes": {
+    "src/AddressSearch.jsx": "e94fdc395917b2b667d524dbfa92bcb9e79acbbe8abbbde82f75d1ff054f718b",
+    "src/App.jsx": "4506fa5483f30edbed0f2991edb2e728284ab73b058b3e12e159da15a79d0796",
+    "src/backup-library.css": "27ec1e756fa847ecf6c93b8a8bcd6ba371a2d19f946e79ae119dbb13ee821bfd",
+    "src/backup-library.mjs": "918f87361884cdc6777d1ecf045a85af1b045226a4fe9237ea4c4cc49b115133",
+    "src/BackupLibrary.jsx": "45bba9b412d6ac7c603e3a250304a7bacf368a046ceec92fe94c8508f994c4fe",
+    "src/BuildingShapePicker.jsx": "e44c9dc07737b363540b266c0403704f9681844a5ec3316faf851df3719e1bab",
+    "src/clip-capture.mjs": "91bd5beff0c69e0eea5a8cbf59efc4c749b6da25ed51aed2737e7a7e120d4be5",
+    "src/ClipCapture.jsx": "851909a8ab510e522dc0d5fcbd146295aff324228fa349acffa2bad3254e57fc",
+    "src/csv.mjs": "bc0c595a7aa2d3da56ed555fab576e3be7937f112b362592ba3ecb6c6d486a82",
+    "src/data.mjs": "880813f2567b91cb2c9671ebe2b6c0598f69d582ab3f631a9bcbc5eca89f4555",
+    "src/dialog-dismiss.mjs": "e81b7fa09c78144593c60a0bb25daf68e4d28d1b2a663f428597e4de40d554a5",
+    "src/enhancement.mjs": "0ea7ea86ada14f709be48d7d8879c8c033e0f9c9ecc7dffb3aaa85a475b214be",
+    "src/facility-basemap.mjs": "6e0bb14fa756fcf5fd11e209c8393b723cde695607cd402bca57b8835a97e0b4",
+    "src/facility-calibration.css": "08864ff11b68d3dd1d07c9cae9fd4a1408d603242df58c9917c6bd895cd3039e",
+    "src/facility-calibration.mjs": "4753822ea8850fbd6476f3fcef99358a5f8502e64fd39bd0fcaaa76a8ffa9666",
+    "src/facility-camera-planning.css": "86ffaeac79f1a881dd8c23cffb9478ff350792978a4b91f689e52e3dd028872b",
+    "src/facility-camera-preview.css": "ef62c084b18d476bb76a5ad25420437ebebfbaa574102d65e903367412e0e7c5",
+    "src/facility-camera-preview.mjs": "5865b4087331d08b7d048bdb831b31a87c9201d7875174b88623df0b49ab5d8e",
+    "src/facility-coverage.mjs": "0bf1aa222e06cb30841e72e4147068e761ad08fff181e11560b0f3c0927299a3",
+    "src/facility-doorway-map.mjs": "eed8ebc7ab7fb05b9d2db812ebc3de0922d429e433b04f9a6d73a92859d05001",
+    "src/facility-doorways.mjs": "dee737c4c8bdc7bce497ae7c4d82be0a76e45f2a132804f9b911cfc4d7c994fd",
+    "src/facility-dori.mjs": "ed5c69e046875a1eb69dc6a46674dca5d7d3d10664ae451a93e01ddacf85f098",
+    "src/facility-image-lab.css": "a46b60a9176dbb2506e842fa1126401f35185bbda63d2b32374b291079a1a1e6",
+    "src/facility-installer.mjs": "67228ab59899ec1701d9f9816810b7ef176fd45fab09c169db02a9993482b360",
+    "src/facility-library.css": "de12415b7773220e7d4cfa5255f2f036fbd0302f4ab6b9642e7576ee3f61e39d",
+    "src/facility-library.mjs": "85d193176cddb24eff17d9b4f0b059d3f9fff5e539c0fd8b42277c80c70c142e",
+    "src/facility-line-edit.mjs": "075952b496f3f4a1a25190f80b8d2d43e8e060eb497e29bd6006cac0ac5b3037",
+    "src/facility-location.mjs": "02250bea1582c009a0f96d590cd4826884c94f79d679f37ef4f52f1f77870b86",
+    "src/facility-map-geometry.css": "3274d201fbb9cabf6204d8f7865c8206ec66d93136f98460e38c4be951f872e9",
+    "src/facility-map.mjs": "d3c08c40d612ac55cadf4a3710489e7f94877da07138f78b2ad9a7b43ba9aefb",
+    "src/facility-measurements.mjs": "7045a38a00d2ea17bde5b0b2cc18cc36730bcb15a9f8f733542a738becf682aa",
+    "src/facility-planning.css": "74bf1e75579555fbbd96fe234c58f53110b8613fd3e233f5dd702029ab15f7b2",
+    "src/facility-room-sketch.mjs": "59f42cacbe75019b3bf994e92f27b3113d00d3578ae8cbbc2720f7281f61a74b",
+    "src/facility-room-walls.mjs": "a32b8c0c623fae4332b38df19173a01eacdbea4cf08ab51df1d71e5fb2bf2b7c",
+    "src/facility-save.mjs": "0459f3032e745948e04a96366a8db0e4a6b9a99f7cd29b8def625cbb6d083376",
+    "src/facility-services.mjs": "a00520f0215fd23eb576028882af24a7ee65a190d65ee986f137881bb997c2b7",
+    "src/facility-shape-edit.mjs": "8424931d68ad650ce5148699af57461056a05299061d063a1bbc93b1bebca420",
+    "src/facility-stair-map.mjs": "a49998aeb66bc1bfe1bef2ada74141b1f9c0c076990b506a9a2683034c69221a",
+    "src/facility-stair-placement.mjs": "c4cab8aea847a30cc14c2af8e6dbece4a29cdb1e329addb8f2679bf0a6315be2",
+    "src/facility-stairs.css": "a69c8d2e0e4ac4e4588b7720c1c1059bca5be6ba82ab490941fca06d8967f5e2",
+    "src/facility-stairs.mjs": "4ce62cab36971dd528a4af8667168e6cc39f723e5aecbfc619e091106c05a544",
+    "src/facility-starter.mjs": "23e49d2a15c82f511480773e097834a92c594f715636f6a9a91592f8d8ce23fd",
+    "src/facility-window-map.mjs": "0abc5aa5ae9446d2e47fc72dfe3e3fff113bcc2f4a321b79b32d73cb66364d6a",
+    "src/facility-windows.css": "d6ede18b3af53b43378ea2a8c52addb57415085384a7a44eba9760aad5605c80",
+    "src/facility-windows.mjs": "84cc16197f284680b86edb77b8fd6d49bdc53bb11c316b87332774879cac7ff4",
+    "src/facility-zones.mjs": "14080041069bed6d8eb2ad48ec22c0e004db8b0feaa7c82eabea581898355248",
+    "src/facility.css": "a5c152c39f8ab9499f2ed37fe740ebca7362a8507e28622914259c2cf8f1053a",
+    "src/facility.mjs": "dc6d0a44a608c6c07df92ccff06b64b6ba082c6a574763589ba67c177ae53df6",
+    "src/FacilityBuilder.jsx": "845ff8fd95417fa00650b8496daef910534562eeb6762fe44f94dabe36e65912",
+    "src/FacilityCalibration.jsx": "eaef0e01eae5a19deadc3d3a0384ef93afc436d949abf745996d6bebf5e50317",
+    "src/FacilityCameraPreview.jsx": "d0af31ed8c875590e98c7a04a3588a830e0c800216af060c5753974b731a2ce9",
+    "src/FacilityDoorways.jsx": "b3288da4cecce0e5ae182dfdd9099393f995430d77bc91ee9bd3c1ee2ba3df8b",
+    "src/FacilityImageLab.jsx": "a263be83497a70e7e9c3f6771b3d749a73052e495c3882df7bb42cb3e70fe361",
+    "src/FacilityLevels.jsx": "39cc24237c9c333199878a5dbe554f9a7a8cd2b29640b1a845f6d10fc933452d",
+    "src/FacilityLibrary.jsx": "f0777c557ba1791a43c61739147260f9f830f7537034c8371db3dc31f30bbf18",
+    "src/FacilityStairs.jsx": "b96d1c6806c529b402d646eb2112c719a017174d4b4d9da5670c12895331f0ee",
+    "src/FacilityStarter.jsx": "793585b1002bcacd2f0ad9052edf971db15f09fb14549a9d51bb43709097182c",
+    "src/FacilitySwitcher.jsx": "0e98ef6c2029ddbd249c8f2ee5dbf93265569459bdee1686cf6c54ff735c3c05",
+    "src/FacilityWindows.jsx": "75201f783324fee18ea15e2c4d3f683d742921e521d0eaac33fae438417f0726",
+    "src/FacilityZones.jsx": "202f081e958daf740773935c3f754bb826fe3326d3a707227f5854d7515bdb86",
+    "src/floor-geometry.css": "5e739091676ff31ae143fe15ee2fe07ea646a303a6f0dad000402896639638cc",
+    "src/FloorGeometry.jsx": "b5de38ef38098e55ff0e07450f518bf39b3d31d6bc8284991a8a0b1866d85ef9",
+    "src/image-science.mjs": "6f576c07939b35ed2a479494b1dc1ebdaeba8ba9fc1fe715dff814268124c7f9",
+    "src/lab-receipt.mjs": "3571aaf1ce3b69a80340c8f8f862cabe57de92534023057f2d905a0d0d2eb23b",
+    "src/lan-recorder.mjs": "09ee3f1b98c9942ed12e4f25c3739d8ec5a974ed916c8ecc56291b3e6def244a",
+    "src/LanRecorder.jsx": "b3dc07f12afc2262263065704c05633c51e9e675a5b91674cba19d5de1ba94a0",
+    "src/LineDimensions.jsx": "d6c75402260bf363cbf10e025b4933298a34a2edd4eec3d044daa9e1e160dbbf",
+    "src/live-ai.mjs": "3dfde9f3002ec9703439b5ab87ebd2019c145efb4d63ee6ad4abf47f4507fea4",
+    "src/live-feeds.css": "5b1948192f1fc9cc5d5984dd30ff9e0a470e4fc0ac37737733a0113dc2be6faf",
+    "src/live-feeds.mjs": "317377825e26ae9597eee46b23dbf3156fac43e1eff55f109b30ec4628f138c7",
+    "src/LiveDetection.jsx": "a2edc307157bced484c350e0ad8ccd749d094b2b94e1cef82f6bcab324f5a128",
+    "src/LiveMonitor.jsx": "b24fae10343e2d6e855ffded032bb3b86211d68a0d97df9d77b4067c17f6d296",
+    "src/local-analysis.mjs": "717cde4363eb5f33f18bf6a20ece81a2fc5b6c34e03f9dac15f996c8885eb1ad",
+    "src/local-images.mjs": "c42f5ae349ee81ea6a4f021cb733f3aa5c0f1e15eb178799b672e653bb3c19e1",
+    "src/LocalAnalysis.jsx": "910a55529e5c2644192c63a43566fa94b8cf18f27cdbd1aedefe5308453566a2",
+    "src/main.jsx": "832f752c6b6a454a26dbc4f2654f5bd633f2b103516c8c0abac648308c133a7e",
+    "src/media-coverage.mjs": "d8d13e75d913b135696b93b99340cdca7746935ee42472f0e31f50a3e6f55155",
+    "src/ollama-check.mjs": "dd8722419cdb65e76dd454f41ab20ac2164e4e84b4e61c5fe73d94e11e44dfc1",
+    "src/ollama-scorecard.mjs": "b68a263a016d25c03335d6d6eed26831e4329f886e4aff810c26f07024924dec",
+    "src/ollama.mjs": "b01c4613af2cbbdfa6675da3e31a9ad9e4669d13e93a929a6b617a1773f27cbb",
+    "src/OllamaCheck.jsx": "638075ba162419ffcff2333e05464530e65c52a6cf6382e24fb72782fa1a59cb",
+    "src/OllamaCoach.jsx": "e4bd4dfe9326ceea67cd648129d9ab21369872910e64ee6e37132b17768db18f",
+    "src/people-operation.mjs": "addbb3b5844a5db74050d13695863ebaaf7013e3ab740c7403c61b547f929b4e",
+    "src/person-session.mjs": "0c8e049ca95088a2777dea38665b0ef4d3f60781cca0caca0d00bcc0c53bd7b2",
+    "src/recognition-report.mjs": "d8f4e00444ef261768b44ba254c58990cd7793366ac86f0b4da6c56b4435cde2",
+    "src/recognition.css": "8f4f1c0fc29ad75aadf55bcf0d214fa9621ec7bff4c6c93ec8a12e2c120362f7",
+    "src/recognition.mjs": "bb34ea4615880015ffbcfcf39c322e40ac0bbb83d54155b210bdc796323f852c",
+    "src/RecognitionReport.jsx": "b6a1b3d61f24ec9a8fbdee8feeb93191e2482830abae6ef83d7df1f4cc4ec260",
+    "src/RecognitionReview.jsx": "bed4230aa1815b67cdeaf389be4ac486f42c2216c5e8637b76fe579a36291a1c",
+    "src/resources.mjs": "fe176b58fc29107a53ebf54f20114f9dc721471c70cc4317fba032eea821b6c1",
+    "src/review-queue.mjs": "810418f2eb0163f8a53e808f0235fe088f1d0d3107342a607cb8e4e545d6e00b",
+    "src/review-transfer.mjs": "9809ff459f8c9aacea75900d33a37dae4c1cc8b1bd31b3e27d4ffffa7e63817f",
+    "src/room-sketch-reference.mjs": "9c60a6ec77f969fbb1b2b6d18736fe88c2bdf33e456b77db55b8d80081424e1f",
+    "src/room-sketch.css": "d0ce90cdd2dc21e47c8da09d477707221f11247454ac3437d4b8b34ba47af7a2",
+    "src/RoomSketch.jsx": "aaf69a65ee478126270e43a27cb0e6107ad98591a18bc3a4f7792b0e783a439a",
+    "src/RoomSketchCanvas.jsx": "3ede648deb067c9ca8e8711ad62bd8cfe299a3ed270fac8aef37e30507b37574",
+    "src/RoomSketchReference.jsx": "cc99a183a7d7bb3650d9f6a6d4bb96cbe76ede0ea7ad2f55e25d47d6395f92c3",
+    "src/RoomWallEditor.jsx": "e9f225445c28abbbfc912d57f4b60b41066579cc75afa52bddec54becbd00950",
+    "src/sha256-worker.mjs": "c395decbaba4006c4ae0fa4b352c58a67a317d4112de2c6f3c45780dbc918a16",
+    "src/sha256.mjs": "823de82cf7f806e7ef75e7e86794f711f5eb1fde353c469e308413b7b957832a",
+    "src/ShapeDimensions.jsx": "de773f20a5246c20f214dad007009c7df7553b1070edf69fc7eabc657e5b673d",
+    "src/SketchLengthInput.jsx": "a6eb7c3a8667bc4016f723924281ae98582e8028da3390ddedc2ac676b9d94c8",
+    "src/status-announcements.mjs": "255b938f91f6222b4a080f2324aa43d13e682f4925df61459219e59587f45aac",
+    "src/styles.css": "95a22e0b6c029dd10d3bfb415a6d03906051c58d32423a16c5bc18ddcfcdf8e1",
+    "src/system.css": "01c4060a0c204d46311a916023dd0e6c96a3b8a6ada03b7acb6c8b31b9d78960",
+    "src/SystemSetup.jsx": "be96890192a75d649c98c4c81610aaa8dc765dd2701d036e4c995e4b642462f6",
+    "src/task-finder.css": "0b7c2e7c8dc926904e1f19ea82d0cb9ed725b04e4979cb439eda31efa82c4bdf",
+    "src/TaskFinder.jsx": "0eebcfac8c49e1cd9e90b2500f2a7d533b99e08c09a5f2317f8902e9e35fa103",
+    "src/training-analysis.mjs": "1064f82d08c6b061988960860b5f18485533b8f70111e12015029677e5786fad",
+    "src/training-capture.css": "1c94cb9d4a7d2d762dc99c419dfd7186b677aa7ece7bee616eea661608b1f5d1",
+    "src/training-capture.mjs": "caf8d69afe75556e75f524444afd7be6be4c54d838366a6971e0fb43ae7a2e73",
+    "src/training-evidence.mjs": "b4dc186f2c13ca15af7d8d335c4918ec7e6f2bef498cf2d798a7ff28656f00d2",
+    "src/training-home.css": "9091caf3dd6c7b69b835d4de51a037d95dbe33266c5a35040acc9d0ac3e3ba4e",
+    "src/training-library.css": "fe665590ba21e0f41d2656061868a6f3b5d268dd155ca65a64b3fbd5aa55be5f",
+    "src/training-library.mjs": "a517dd228cfcf9ac8e6b1c5f5274c5f380f3e08d518094ff9fd4dc630440e267",
+    "src/training-lifecycle.mjs": "9a79392470f09418fabf4cf7e6bd81a588f55a7f2a68b002fdbbe1a5dca6c754",
+    "src/training-scorecard.css": "38ae49ff9a32b495d3d37993b89a8f0c2559566076ea9c3f860759cfbebbc80d",
+    "src/training-time.mjs": "4e5ae86780c498d61116d2eba8604984c479bb9aeba268dfa5d6929d37f7eeb5",
+    "src/training.css": "d3522cee98fc39673615f70f7e60a6c08e220b715fa2ae3b74a887d62b763658",
+    "src/training.mjs": "31bbf09068d8f7bb2c84f188e7ed6b1d594b02c5255397680d559a5a5284a6dc",
+    "src/TrainingAnalyze.jsx": "75ab2cebbbc660fd94ac80743cf112108ba271b0f916b277a4a5cb23ee545c0c",
+    "src/TrainingAssistant.jsx": "5ebf0a0d3f25f5da6469578284b757ea3c4980b4d9facbc2df7a91ca16447c09",
+    "src/TrainingCapture.jsx": "cea74e8795f5c5c8dba0ca4f2158c066dc2ee14cd1b4e1a613c7b6160b965b68",
+    "src/TrainingHome.jsx": "8c5767d7cf1f9ec0cde28d0e10944174ad222b2b299d537c60c1fd521b28bc19",
+    "src/TrainingLibrary.jsx": "a6d0fb4e7f6d9a7430da9bbca57d1b8cca25d9e7f9cbef794c5a350dbceb8173",
+    "src/TrainingScorecard.jsx": "c5601c4e5f03f26940af18620282a6def4cd7adb7a11c34d3578da13a6d1d187",
+    "src/TrainingWorkspace.jsx": "7086ed5cfcddf4c7a489f09580064b223350506467888842ea257462b61bf15b",
+    "src/vendor/terra-draw.mjs": "154b067067bceac0a518f818e1840c86ee5059600199c98371c7bf552600e15b",
+    "src/vendor/terra-maplibre.mjs": "091859a5e0ba979bdc9bcac64062d4c81c7877ee31f786e3b632efc8c33a4eac",
+    "src/workspace-conflict.css": "eeefc3065a576c9e8d454245d33a5d35d48f9f4e105a25c2ad776f9d0a6105ff",
+    "src/workspace-save.mjs": "db1165b6b58e185aab154b0e3a2050bb7776490a3bf5275e24f89e64ec4e2b9b",
+    "src/workspace-state.mjs": "d4f467d9141d040f7a9de4c3d2deeeeb685bbc95dcc8e01c88647e2a89283d5d",
+    "src/workspace-tasks.mjs": "f602f5b590eb3b13a72539c363af2332d9729bd63e8a59c02c6bbd4b39eca5c8",
+    "src/WorkspaceConflict.jsx": "f80f489eb87f30db2956e3627deb5be7c2f2c3a7cf2b556ed36e4a1e8376e82a",
+    "src/zone-rules.mjs": "941e49e01a5947c65356da451abbd4f4ddf09c01e773c8f1b2378368c3765209"
+  },
+  "baseline": {
+    "name": "same snapshot with only csv/lazy Monitor patch reversed",
+    "entry": {
+      "files": [
+        {
+          "file": "assets/index-BsO7hhNN.js",
+          "kind": "js",
+          "bytes": 448094,
+          "gzip": 137186
+        },
+        {
+          "file": "assets/index-DOOc07NA.css",
+          "kind": "css",
+          "bytes": 41092,
+          "gzip": 9439
+        }
+      ],
+      "jsBytes": 448094,
+      "jsGzip": 137186
+    },
+    "firstMonitor": {
+      "files": [
+        {
+          "file": "assets/index-BsO7hhNN.js",
+          "kind": "js",
+          "bytes": 448094,
+          "gzip": 137186
+        },
+        {
+          "file": "assets/index-DOOc07NA.css",
+          "kind": "css",
+          "bytes": 41092,
+          "gzip": 9439
+        }
+      ],
+      "jsBytes": 448094,
+      "jsGzip": 137186
+    },
+    "entryHasMonitor": true,
+    "entryHasReport": true
+  },
+  "after": {
+    "name": "current patch",
+    "entry": {
+      "files": [
+        {
+          "file": "assets/index-CsVIXDRd.js",
+          "kind": "js",
+          "bytes": 367387,
+          "gzip": 112190
+        },
+        {
+          "file": "assets/index-D8qA8Ea9.css",
+          "kind": "css",
+          "bytes": 29826,
+          "gzip": 7152
+        }
+      ],
+      "jsBytes": 367387,
+      "jsGzip": 112190
+    },
+    "firstMonitor": {
+      "files": [
+        {
+          "file": "assets/index-CsVIXDRd.js",
+          "kind": "js",
+          "bytes": 367387,
+          "gzip": 112190
+        },
+        {
+          "file": "assets/index-D8qA8Ea9.css",
+          "kind": "css",
+          "bytes": 29826,
+          "gzip": 7152
+        },
+        {
+          "file": "assets/LiveMonitor-B1Hiu_T_.js",
+          "kind": "js",
+          "bytes": 57844,
+          "gzip": 18308
+        },
+        {
+          "file": "assets/ArrowClockwise.es-DKV1_Sfi.js",
+          "kind": "js",
+          "bytes": 1994,
+          "gzip": 766
+        },
+        {
+          "file": "assets/Plus.es-_Qd_mvBV.js",
+          "kind": "js",
+          "bytes": 1526,
+          "gzip": 554
+        },
+        {
+          "file": "assets/live-feeds-Cm_TwTJn.js",
+          "kind": "js",
+          "bytes": 3656,
+          "gzip": 1730
+        },
+        {
+          "file": "assets/local-analysis-Ft7_MVQ_.js",
+          "kind": "js",
+          "bytes": 7314,
+          "gzip": 3293
+        },
+        {
+          "file": "assets/LiveMonitor-BNF3sdHr.css",
+          "kind": "css",
+          "bytes": 11267,
+          "gzip": 3032
+        }
+      ],
+      "jsBytes": 439721,
+      "jsGzip": 136841
+    },
+    "entryHasMonitor": false,
+    "entryHasReport": false
+  }
+}
