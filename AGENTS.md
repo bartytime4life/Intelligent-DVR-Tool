@@ -264,3 +264,8 @@ preference or provider availability alone is not execution evidence. Preserve
 models, footage and existing environments. Do not change the pinned inference,
 journal, supervision, scheduler or profiling sources. No camera or inference
 starts automatically from this preference.
+
+Owner experience priority (2026-11-09): make the existing workspaces easy to find,
+powerful to use and logically organized. Prefer direct task paths, consistent
+keyboard navigation and visible recovery for unfinished work. Preserve the
+selected dark/teal interface and explicit camera, recording and inference starts.

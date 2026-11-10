@@ -7,11 +7,12 @@ const conflictMessage = 'Another tab changed this workspace. This tab’s versio
 
 // Own the save baseline outside React's render/effect timing. A storage event
 // arriving immediately after a local edit must already see that edit as dirty.
-export function createWorkspaceSave(storage, key, initial, {withLock} = {}) {
+export function createWorkspaceSave(storage, key, initial, {withLock, canResolve = () => true} = {}) {
   let initialRaw;
   const loaded = readWorkspace({getItem: name => (initialRaw = storage.getItem(name))}, key, initial);
   let value = loaded.value, committed = JSON.stringify(value), baseline = initialRaw;
   let dirty = false, error = '', conflict = null, editVersion = 0, backupKeys = [];
+  let unreadableNeedsRepair = loaded.raw != null && Boolean(loaded.error);
   const downloadedCopies = new Map();
   const listeners = new Set();
   const emit = () => { for (const listener of listeners) listener(); };
@@ -65,12 +66,14 @@ export function createWorkspaceSave(storage, key, initial, {withLock} = {}) {
   }
   function adopt(raw, remote) {
     value = remote.value; committed = JSON.stringify(value); baseline = raw;
-    dirty = false; error = ''; conflict = null;
+    dirty = false; unreadableNeedsRepair = false; error = ''; conflict = null;
     emit();
   }
   function update(next) {
     value = typeof next === 'function' ? next(value) : next;
-    dirty = JSON.stringify(value) !== committed;
+    // An explicit Apply of fallback defaults must repair unreadable storage too.
+    // The initial read remains untouched until the user makes that choice.
+    dirty = JSON.stringify(value) !== committed || unreadableNeedsRepair;
     if (!dirty && !conflict) error = '';
     editVersion++;
     emit();
@@ -87,7 +90,7 @@ export function createWorkspaceSave(storage, key, initial, {withLock} = {}) {
         protectUnreadable();
         const raw = JSON.stringify(value);
         storage.setItem(key, raw);
-        baseline = raw; committed = raw; dirty = false; error = '';
+        baseline = raw; committed = raw; dirty = false; unreadableNeedsRepair = false; error = '';
         emit(); return true;
       } catch { error = unavailable; emit(); return false; }
     });
@@ -108,6 +111,10 @@ export function createWorkspaceSave(storage, key, initial, {withLock} = {}) {
     return transaction(() => {
       if (!conflict) return false;
       try {
+        if (!canResolve()) {
+          error = 'Apply or discard your draft before choosing a saved version.';
+          emit(); return false;
+        }
         const current = storage.getItem(key);
         if (current !== expectedRaw || editVersion !== expectedEdit) return changedDuringChoice(current);
         if (choice === 'remote') {
@@ -125,7 +132,7 @@ export function createWorkspaceSave(storage, key, initial, {withLock} = {}) {
         if (storage.getItem(key) !== current) return changedDuringChoice(storage.getItem(key));
         const raw = JSON.stringify(value);
         storage.setItem(key, raw);
-        baseline = raw; committed = raw; dirty = false; error = ''; conflict = null;
+        baseline = raw; committed = raw; dirty = false; unreadableNeedsRepair = false; error = ''; conflict = null;
         emit(); return true;
       } catch (problem) {
         error = problem.message?.startsWith('All 10 browser') ? problem.message : unavailable;
@@ -168,13 +175,17 @@ export function createWorkspaceSave(storage, key, initial, {withLock} = {}) {
       for (let slot = 1; slot <= MAX_WORKSPACE_BACKUPS; slot++) {
         const name = workspaceBackupKey(key, slot), raw = storage.getItem(name);
         if (raw === null) continue;
-        let savedAt = null;
+        let savedAt = null, downloadRaw;
         try {
           const record = JSON.parse(raw);
-          if (record.schema === 'intelligent-dvr.workspace-backup.v1' && record.key === key &&
-              typeof record.savedAt === 'string' && Number.isFinite(Date.parse(record.savedAt))) savedAt = record.savedAt;
+          if (record.schema === 'intelligent-dvr.workspace-backup.v1' && record.key === key) {
+            if (typeof record.savedAt === 'string' && Number.isFinite(Date.parse(record.savedAt))) savedAt = record.savedAt;
+            // Machine-plan copies remain importable through the ordinary setup
+            // importer; damaged envelopes remain exact archival downloads.
+            if (key === 'dvr.setup.v1' && typeof record.raw === 'string' && !parse(record.raw).error) downloadRaw = record.raw;
+          }
         } catch { /* Original bytes can still be downloaded and explicitly removed. */ }
-        copies.push({slot, raw, savedAt, downloaded:downloadedCopies.get(name) === raw,
+        copies.push({slot, raw, downloadRaw, savedAt, downloaded:downloadedCopies.get(name) === raw,
           markDownloaded:() => markCopyDownloaded(name, raw), remove:() => removeCopy(name, raw)});
       }
       return {copies, error:''};

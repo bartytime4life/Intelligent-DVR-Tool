@@ -1,18 +1,19 @@
 import React, { lazy, Suspense, useCallback, useEffect, useId, useRef, useState } from "react";
 import WorkspaceConflict from './WorkspaceConflict.jsx';
+import TaskFinder from './TaskFinder.jsx';
 const FacilityBuilder = lazy(() => import("./FacilityBuilder.jsx").then(m => ({default:m.FacilityBuilder})));
 const SystemSetup = lazy(() => import("./SystemSetup.jsx"));
 import LiveMonitor from "./LiveMonitor.jsx";
 const RecognitionReview = lazy(() => import("./RecognitionReview.jsx"));
 const TrainingWorkspace = lazy(() => import("./TrainingWorkspace.jsx"));
 import { mergeRecognitionEvents } from './recognition.mjs';
-import { workspaceFromHash, preserveUnreadable, reviewExport, parseReviewExport, pauseHiddenPlayback } from './workspace-state.mjs';
+import { workspaceFromHash, reviewExport, parseReviewExport, pauseHiddenPlayback } from './workspace-state.mjs';
 import { createWorkspaceSave } from './workspace-save.mjs';
 import { backdropDismiss } from './dialog-dismiss.mjs';
 import { getImage, putImage, deleteImage, pruneImages, imageFileFrame, observationImageKey } from './local-images.mjs';
 import { ANALYZER_CLASSES, DEFAULT_MAX_GAP, analyzerRules, analyzerFilename } from './zone-rules.mjs';
 import { filterEvents, queueChoices, nextPending, queueCSV, dismissPending, restorePending } from './review-queue.mjs';
-import { DEFAULT_SETUP, parseSetup } from "./resources.mjs";
+import { DEFAULT_SETUP } from "./resources.mjs";
 import {
   Monitor,
   Buildings,
@@ -44,6 +45,8 @@ import {
   validateRule,
   parseReceipt,
   reviewEvent,
+  saveReviewNote,
+  reviewEvidenceIdentity,
 } from "./data.mjs";
 const cameraOf = (e) => cameras.find((c) => c.id === e.camera);
 // Observations from different recordings of one camera otherwise look identical.
@@ -71,8 +74,8 @@ function downloadText(text, name, type = "text/plain") {
   setTimeout(() => URL.revokeObjectURL(u), 1000);
 }
 const browserStorage = () => ({ getItem: key => localStorage.getItem(key), setItem: (key, value) => localStorage.setItem(key, value), removeItem: key => localStorage.removeItem(key) });
-function useStored(key, initial) {
-  const [session] = useState(() => createWorkspaceSave(browserStorage(), key, initial));
+function useStored(key, initial, options) {
+  const [session] = useState(() => createWorkspaceSave(browserStorage(), key, initial, options));
   const [saved, setSaved] = useState(() => session.snapshot());
   const [recoveryOpen, setRecoveryOpen] = useState(Boolean(session.loaded.error));
   useEffect(() => session.subscribe(() => setSaved(session.snapshot())), [session]);
@@ -111,11 +114,15 @@ class WorkspaceBoundary extends React.Component {
 }
 function Modal({ title, close, children, wide = false }) {
   const ref = useRef();
+  const previousFocus = useRef(document.activeElement);
   const titleId = useId();
   useEffect(() => {
-    const before = document.activeElement;
-    ref.current.showModal();
-    return () => before?.focus();
+    const element = ref.current;
+    element.showModal();
+    return () => {
+      element.close();
+      if (previousFocus.current?.isConnected) previousFocus.current.focus();
+    };
   }, []);
   return (
     <dialog
@@ -304,6 +311,7 @@ export function App() {
     [error, setError] = useState(""),
     [note, setNote] = useState(""),
     [video, setVideo] = useState(null);
+  const [noteDrafts, setNoteDrafts] = useState(() => new Map());
   const [liveCount, setLiveCount] = useState(0);
   const [capturedClip, setCapturedClip] = useState(null);
   const [evidence, setEvidence] = useState(null);
@@ -319,6 +327,33 @@ export function App() {
     return () => window.removeEventListener('beforeunload', warn);
   }, [capturedClip, capturePending]);
   const [recognitionOpened, setRecognitionOpened] = useState(tab === "Recognition");
+  const [taskFinderOpen, setTaskFinderOpen] = useState(false);
+  const [recognitionTask, setRecognitionTask] = useState(null);
+  const [navigationVersion, setNavigationVersion] = useState(0);
+  const workspaceElement = useRef(), focusWorkspace = useRef(false);
+  const [routeAnnouncement, setRouteAnnouncement] = useState('');
+  useEffect(() => {
+    document.title = `${tab} · Intelligent DVR`;
+    if (!focusWorkspace.current) return;
+    focusWorkspace.current = false;
+    const frame = requestAnimationFrame(() => {
+      workspaceElement.current?.focus({preventScroll:true});
+      workspaceElement.current?.scrollTo({top:0});
+      window.scrollTo({top:0,left:0});
+      setRouteAnnouncement(`${tab} workspace opened.`);
+    });
+    return () => cancelAnimationFrame(frame);
+  },[tab,navigationVersion]);
+  useEffect(() => {
+    const shortcut = event => {
+      if (!(event.ctrlKey || event.metaKey) || event.altKey || event.key.toLowerCase() !== 'k') return;
+      if (document.querySelector('dialog[open]') && !taskFinderOpen) return;
+      event.preventDefault();
+      setTaskFinderOpen(true);
+    };
+    window.addEventListener('keydown',shortcut);
+    return () => window.removeEventListener('keydown',shortcut);
+  },[taskFinderOpen]);
   const [clearedEvents, setClearedEvents] = useState(null);
   const [eventMode, setEventMode] = useState("all");
   // Read the latest queue after asynchronous file reads and rapid consecutive imports.
@@ -326,8 +361,12 @@ export function App() {
   eventsRef.current = events;
   // Leaving Facility unmounts the builder, so unsaved drafts and its undo history would be lost silently.
   const tabRef = useRef(tab), facilityDirty = useRef(false), systemDirty = useRef(false), zoneDirty = useRef(false), trainingDirty = useRef(false);
+  const [systemDraftPending, setSystemDraftPending] = useState(false);
+  const [resources, setResources, setupStorageError, setupRecovery, setupConflict, setupUnsaved] = useStored('dvr.setup.v1', DEFAULT_SETUP, {canResolve:() => !systemDirty.current});
+  const setupSaveError = setupStorageError === setupRecovery?.message ? '' : setupStorageError;
+  const reportSystemDirty = useCallback(dirty => { systemDirty.current = dirty; setSystemDraftPending(dirty); }, []);
   const pendingBrowserSave = useRef(false);
-  pendingBrowserSave.current = eventsUnsaved || rulesUnsaved;
+  pendingBrowserSave.current = eventsUnsaved || rulesUnsaved || setupUnsaved || noteDrafts.size > 0;
   const reportTrainingDirty = useCallback(dirty => { trainingDirty.current = dirty; }, []);
   tabRef.current = tab;
   // Unsaved zone rules are a draft, not the separately persisted analyzer rules.
@@ -361,11 +400,21 @@ export function App() {
     return () => window.removeEventListener("beforeunload", warn);
   }, []);
   function setTab(next) {
-    if (!mayLeave(next)) return;
+    if (!mayLeave(next)) return false;
     if (next === "Recognition") setRecognitionOpened(true);
+    focusWorkspace.current = true;
+    tabRef.current = next;
     updateTab(next);
+    setNavigationVersion(version => version + 1);
     const hash = `#${next.toLowerCase()}`;
     if (window.location.hash !== hash) window.history.pushState(null, "", hash);
+    return true;
+  }
+  function openTask(task) {
+    if (task.workspace === 'Zones') return zone();
+    if (!setTab(task.workspace)) return false;
+    if (task.task) setRecognitionTask(previous => ({id:task.task,version:(previous?.version || 0)+1}));
+    return true;
   }
   useEffect(() => {
     const changed = () => {
@@ -377,7 +426,11 @@ export function App() {
         return;
       }
       if (next === "Recognition") setRecognitionOpened(true);
+      if (next === tabRef.current) return; // popstate and hashchange can describe one transition.
+      tabRef.current = next;
+      focusWorkspace.current = true;
       updateTab(next);
+      setNavigationVersion(version => version + 1);
     };
     window.addEventListener("popstate", changed);
     window.addEventListener("hashchange", changed);
@@ -411,41 +464,12 @@ export function App() {
   function undoClear() {
     if (clearedEvents && addObservations(clearedEvents)) setClearedEvents(null);
   }
-  const [resourceState, setResourceState] = useState(() => {
-    let saved = null;
-    try {
-      saved = localStorage.getItem("dvr.setup.v1");
-      return { setup: saved ? parseSetup(saved) : structuredClone(DEFAULT_SETUP), error: "" };
-    } catch {
-      return { setup: structuredClone(DEFAULT_SETUP), unreadable: saved, error: "Saved machine setup was unavailable or invalid. Defaults are shown; the unreadable entry is kept as a browser backup. Export your plan if storage is unavailable." };
-    }
-  });
-  const loadedSetup = useRef(resourceState.setup), adoptedSetup = useRef(null);
   const [pageHidden, setPageHidden] = useState(document.hidden);
   useEffect(() => pauseHiddenPlayback(document), []);
-  const resources = resourceState.setup;
   useEffect(() => {
     const changed = () => setPageHidden(document.hidden);
     document.addEventListener("visibilitychange", changed);
     return () => document.removeEventListener("visibilitychange", changed);
-  }, []);
-  useEffect(() => {
-    // Nothing changed yet: never replace an unreadable or another tab's entry on load.
-    if (resources === loadedSetup.current || resources === adoptedSetup.current) return;
-    try {
-      if (resourceState.unreadable != null && !preserveUnreadable(localStorage, "dvr.setup.v1", resourceState.unreadable)) throw Error("backup failed");
-      localStorage.setItem("dvr.setup.v1", JSON.stringify(resources));
-    }
-    catch { setResourceState(s => ({ ...s, error: "Machine setup could not be saved in this browser. Export the setup plan to keep it." })); }
-  }, [resources]);
-  useEffect(() => {
-    const changed = (e) => {
-      if (e.storageArea !== localStorage || e.key !== "dvr.setup.v1" || e.newValue === null) return;
-      try { const setup = parseSetup(e.newValue); adoptedSetup.current = setup; setResourceState(s => ({ ...s, setup, error: "" })); }
-      catch { /* Keep this tab's valid setup; the other tab reports its own problem. */ }
-    };
-    window.addEventListener("storage", changed);
-    return () => window.removeEventListener("storage", changed);
   }, []);
   const importRef = useRef(),
     videoRef = useRef(),
@@ -464,12 +488,12 @@ export function App() {
   function zone(id = selected) {
     // Switching the plan inside Zones also discards the current edit draft.
     if (tabRef.current === "Zones" && id !== selected && zoneDirty.current) {
-      if (!window.confirm("Switch zone plans? Unsaved rule edits for this plan will be discarded.")) return;
+      if (!window.confirm("Switch zone plans? Unsaved rule edits for this plan will be discarded.")) return false;
       zoneDirty.current = false;
     }
-    if (!mayLeave("Zones")) return;
+    if (!mayLeave("Zones")) return false;
     setSelected(id);
-    setTab("Zones");
+    return setTab("Zones");
   }
   useEffect(() => {
     if (tab !== "Zones") return;
@@ -515,14 +539,48 @@ export function App() {
     setError("");
   }, [tab, selected]);
   function review(e) {
-    setNote(e.note || "");
+    setNote(noteDrafts.get(reviewEvidenceIdentity(e))?.note ?? e.note ?? "");
     setModal({ type: "review", event: e });
+  }
+  const currentReview = modal?.type === "review" ? events.find(event => event.id === modal.event.id) : null;
+  const reviewIsCurrent = currentReview && reviewEvidenceIdentity(currentReview) === reviewEvidenceIdentity(modal?.event);
+  const reviewChanged = reviewIsCurrent && ['note', 'status', 'reviewedAt', 'reviewRevision'].some(key => currentReview[key] !== modal.event[key]);
+  const noteDraft = modal?.type === "review" ? noteDrafts.get(reviewEvidenceIdentity(modal.event)) : null;
+  function editNote(value) {
+    setNote(value);
+    const event = modal.event, key = reviewEvidenceIdentity(event);
+    setNoteDrafts(drafts => {
+      const next = new Map(drafts);
+      if (value === (event.note ?? '')) next.delete(key);
+      else next.set(key, { event, note: value, savedNote: drafts.get(key)?.savedNote ?? event.note });
+      return next;
+    });
+  }
+  function removeNoteDraft(event) {
+    setNoteDrafts(drafts => { const next = new Map(drafts); next.delete(reviewEvidenceIdentity(event)); return next; });
+  }
+  function discardNoteDraft() {
+    const event = reviewIsCurrent ? currentReview : modal.event;
+    removeNoteDraft(modal.event);
+    setNote(event.note || "");
+    if (reviewIsCurrent) setModal({ type: "review", event });
+  }
+  function saveNote() {
+    try {
+      const updated = saveReviewNote(eventsRef.current, modal.event.id, note, modal.event);
+      eventsRef.current = updated; setEvents(updated);
+      removeNoteDraft(modal.event);
+      setModal({ type: "review", event: updated.find(event => event.id === modal.event.id) });
+      setToast("Note added to this tab’s reviews without changing its decision. Browser save status appears above the workspace.");
+    } catch (problem) { setToast(problem.message); }
   }
   // Review moves through pending items in the order the user is looking at.
   const reviewList = () => (tab === "Events" ? visible : pending);
   function decide(status) {
+    if (!reviewIsCurrent || reviewChanged) { setToast("This observation changed. Your note draft is kept. Review the saved version before deciding."); return; }
     const current = modal.event, next = nextPending(reviewList(), current.id);
     setEvents((es) => reviewEvent(es, current.id, status, note));
+    removeNoteDraft(current);
     if (next) review(next); else setModal(null);
     setToast(`${status === "confirmed" ? "Observation confirmed" : "Event dismissed"}.${next ? " Showing the next one awaiting review." : " Nothing else here awaits review."}`);
   }
@@ -611,6 +669,9 @@ export function App() {
           <GearSix size={14} />
         </button>
         <div className="header-right">
+          <button className="task-trigger" aria-label="Find a task" aria-haspopup="dialog" aria-keyshortcuts="Control+K Meta+K" onClick={() => setTaskFinderOpen(true)}>
+            <MagnifyingGlass size={18} aria-hidden="true" /><span className="task-trigger-label">Find a task</span><kbd aria-hidden="true">⌘ / Ctrl K</kbd>
+          </button>
           <span className="header-date">
             Local <span>· human review</span>
           </span>
@@ -655,18 +716,25 @@ export function App() {
           <ShieldCheck size={23} />
         </button>
       </nav>
-      <main id="workspace" className={`workspace tab-${tab.toLowerCase()}`}>
-        {((eventsStorageError && !eventsConflict) || (rulesStorageError && !rulesConflict) || eventsRecovery || rulesRecovery) && <div className="workspace-storage-warning" role="alert">
+      <span className="sr-only" role="status" aria-live="polite">{routeAnnouncement}</span>
+      {taskFinderOpen && <TaskFinder onChoose={openTask} onClose={() => setTaskFinderOpen(false)} />}
+      <main ref={workspaceElement} id="workspace" tabIndex={-1} aria-label={`${tab} workspace`} className={`workspace tab-${tab.toLowerCase()}`}>
+        {noteDrafts.size > 0 && <div className="workspace-storage-warning" role="status"><Info size={22} /><div><strong>{noteDrafts.size} unsaved review note {noteDrafts.size === 1 ? 'draft' : 'drafts'}</strong><p>Kept in this tab while you inspect sources. Save or download them before closing this page.</p></div><button className="button" onClick={() => setModal({type:'note-drafts'})}>Review note drafts</button></div>}
+        {((eventsStorageError && !eventsConflict) || (rulesStorageError && !rulesConflict) || (setupStorageError && !setupConflict) || eventsRecovery || rulesRecovery || setupRecovery) && <div className="workspace-storage-warning" role="alert">
           <WarningCircle size={22} /><div><strong>Browser save needs attention</strong>
           {eventsStorageError && !eventsConflict && <p>Reviews: {eventsStorageError}</p>}
-          {rulesStorageError && !rulesConflict && <p>Rules: {rulesStorageError}</p>}</div>
+          {rulesStorageError && !rulesConflict && <p>Rules: {rulesStorageError}</p>}
+          {setupStorageError && !setupConflict && <p>Machine plan: {setupStorageError}</p>}</div>
           {eventsConflict && eventsRecovery && <p>The original unreadable reviews are also preserved. Download them before dismissing this recovery notice.</p>}
           {rulesConflict && rulesRecovery && <p>The original unreadable rules are also preserved. Download them before dismissing this recovery notice.</p>}
+          {setupConflict && setupRecovery && <p>The original unreadable machine plan is also preserved. Download it before dismissing this recovery notice.</p>}
           <button className="button" onClick={exportReviews}>Export reviews</button>
           <button className="button" onClick={() => download({schema:"intelligent-dvr.rules.v1", rules}, "dvr-rules.json")}>Export rules</button>
+          <button className="button" onClick={() => download(resources, 'dvr-machine-setup.json')}>Export machine plan</button>
           {eventsRecovery?.raw != null && <button className="button" onClick={() => downloadText(eventsRecovery.raw, "dvr-unreadable-reviews.json")}>Download unreadable reviews</button>}
           {rulesRecovery?.raw != null && <button className="button" onClick={() => downloadText(rulesRecovery.raw, "dvr-unreadable-rules.json")}>Download unreadable rules</button>}
-          {(eventsRecovery || rulesRecovery) && <button className="text-button" onClick={() => { eventsRecovery?.dismiss(); rulesRecovery?.dismiss(); }}>Dismiss</button>}
+          {setupRecovery?.raw != null && <button className="button" onClick={() => downloadText(setupRecovery.raw, 'dvr-unreadable-machine-setup.json')}>Download unreadable machine plan</button>}
+          {(eventsRecovery || rulesRecovery || setupRecovery) && <button className="text-button" onClick={() => { eventsRecovery?.dismiss(); rulesRecovery?.dismiss(); setupRecovery?.dismiss(); }}>Dismiss</button>}
         </div>}
         {eventsConflict && <WorkspaceConflict kind="reviews" localCount={events.length} conflict={eventsConflict}
           exportLocal={exportReviews}
@@ -678,15 +746,22 @@ export function App() {
           exportRemote={() => rulesConflict.remoteValid
             ? download({schema:'intelligent-dvr.rules.v1', rules:rulesConflict.remoteValue}, 'dvr-rules-other-tab.json')
             : downloadText(rulesConflict.remoteRaw ?? 'null', 'dvr-unreadable-rules-other-tab.json')} />}
+        {setupConflict && <div className="system-save-recovery">
+          {systemDraftPending && <p role="status">Apply or discard your machine-plan draft before choosing a saved version. Downloads contain the applied plans.</p>}
+          <WorkspaceConflict kind="setup" localCount={1} conflict={setupConflict} disabled={systemDraftPending}
+            exportLocal={() => download(resources, 'dvr-machine-setup-this-tab.json')}
+            exportRemote={() => setupConflict.remoteValid
+              ? download(setupConflict.remoteValue, 'dvr-machine-setup-other-tab.json')
+              : downloadText(setupConflict.remoteRaw ?? 'null', 'dvr-unreadable-machine-setup-other-tab.json')} />
+        </div>}
         {recognitionOpened && <div hidden={tab !== "Recognition"}><WorkspaceBoundary name="Recognition"><Suspense fallback={<div className="content-page"><h1>Opening recognition review…</h1></div>}>
-          <RecognitionReview active={tab === "Recognition" && !pageHidden} onImport={addObservations} onValidateImport={added => addObservations(added, false, true)} clip={capturedClip} onClip={setCapturedClip} reviews={events} evidence={evidence} onRecorderStatus={setRecorderStatus} onZoneStill={offerZoneStill} />
+          <RecognitionReview taskRequest={recognitionTask} active={tab === "Recognition" && !pageHidden} onImport={addObservations} onValidateImport={added => addObservations(added, false, true)} clip={capturedClip} onClip={setCapturedClip} reviews={events} evidence={evidence} onRecorderStatus={setRecorderStatus} onZoneStill={offerZoneStill} />
         </Suspense></WorkspaceBoundary></div>}
         {tab === "Train" && <WorkspaceBoundary name="Train"><Suspense fallback={<div className="content-page"><h1>Opening training…</h1></div>}><TrainingWorkspace onOpenRecognition={() => setTab("Recognition")} onDirtyChange={reportTrainingDirty} /></Suspense></WorkspaceBoundary>}
         {tab === "Facility" && <WorkspaceBoundary name="Facility"><Suspense fallback={<div className="content-page"><h1>Opening facility builder…</h1></div>}><FacilityBuilder onPreviewCount={setLiveCount} onDirtyChange={(dirty) => { facilityDirty.current = dirty; }} /></Suspense></WorkspaceBoundary>}
         {tab === "System" && <WorkspaceBoundary name="System"><Suspense fallback={<div className="content-page"><h1>Opening machine setup…</h1></div>}><SystemSetup setup={resources}
-          onApply={setup => setResourceState(s => ({ ...s, setup, error: "" }))}
-          onDirtyChange={dirty => { systemDirty.current = dirty; }}
-          storageError={resourceState.error} download={download} /></Suspense></WorkspaceBoundary>}
+          onApply={setResources} onDirtyChange={reportSystemDirty}
+          storageError={setupSaveError} storagePending={setupUnsaved && !setupSaveError && !setupConflict} storageConflict={Boolean(setupConflict)} download={download} /></Suspense></WorkspaceBoundary>}
         {tab === "Monitor" && <WorkspaceBoundary name="Monitor"><LiveMonitor onZoneStill={offerZoneStill} visibleTiles={resources.browser.visibleTiles} onCount={setLiveCount} pageHidden={pageHidden} clip={capturedClip} onClip={setCapturedClip} capturePending={capturePending} onCaptureBusy={setCapturePending} onReviewClip={() => setTab('Recognition')} onLiveObservation={addLiveObservation} queue={
               <aside className="review-queue">
                 <div className="queue-heading">
@@ -725,6 +800,7 @@ export function App() {
                       <Check size={32} />
                       <h3>No observations yet</h3>
                       <p>Analyze a recording in Recognition, or send a live AI observation from a camera tile.</p>
+                      <button className="button primary queue-start" onClick={() => openTask({workspace:'Recognition',task:'recording'})}>Analyze a recording<CaretRight size={15} /></button>
                       <button
                         className="button"
                         onClick={() => setTab("Events")}
@@ -1244,20 +1320,31 @@ export function App() {
               <label>
                 Review note
                 <textarea
+                  aria-label="Review note"
+                  readOnly={!reviewIsCurrent}
                   maxLength="2000"
                   placeholder="What did you observe?"
                   value={note}
-                  onChange={(e) => setNote(e.target.value)}
+                  onChange={(e) => editNote(e.target.value)}
                 />
               </label>
+              {noteDraft && <p className="hint" role="status">Unsaved note draft kept while you move between observations or workspaces. Save it before closing this page.</p>}
+              {noteDraft && noteDraft.savedNote !== modal.event.note && <div className="notice"><div><strong>The saved note changed.</strong><p>{modal.event.note || 'The saved note is empty.'}</p><p>Your earlier draft is kept in the field above. Save note replaces this saved note.</p></div></div>}
+              {!reviewIsCurrent && <p className="notice" role="alert">This observation is no longer in the queue with the same evidence. Your draft is kept. Close this review and choose a current observation.</p>}
+              {reviewChanged && <div className="notice" role="alert"><span>This saved observation changed while you were reviewing it. Your draft is kept.</span><button className="button" onClick={() => review(currentReview)}>Review saved version</button></div>}
+              <div className="review-actions">
+                <button className="button" disabled={!noteDraft || !reviewIsCurrent || reviewChanged} onClick={saveNote}>Save note</button>
+                {noteDraft && <button className="text-button" onClick={discardNoteDraft}>Discard note draft</button>}
+              </div>
               <button
                 className="button amber"
+                disabled={!reviewIsCurrent || reviewChanged}
                 onClick={() => decide("confirmed")}
               >
                 <Check />
                 Confirm observation
               </button>
-              <button className="button" onClick={() => decide("dismissed")}>
+              <button className="button" disabled={!reviewIsCurrent || reviewChanged} onClick={() => decide("dismissed")}>
                 <X />
                 Dismiss event
               </button>
@@ -1267,6 +1354,18 @@ export function App() {
               </p>
             </div>
           </div>
+        </Modal>
+      )}
+      {modal?.type === "note-drafts" && (
+        <Modal title="Unsaved review note drafts" close={() => setModal(null)}>
+          <p>These drafts stay in this tab until you save or discard them. A draft for removed or changed evidence stays read-only.</p>
+          {noteDrafts.size ? <>
+            <button className="button" onClick={() => download({schema:'intelligent-dvr.review-note-drafts.v1', drafts:[...noteDrafts.values()]}, 'dvr-review-note-drafts.json')}><DownloadSimple />Download note drafts</button>
+            {[...noteDrafts].map(([key, draft]) => <section className="notice" key={key}><div><strong>{draft.event.cameraName || cameraOf(draft.event)?.name || 'Observation'} · {draft.event.time}</strong><p>{draft.note || 'Draft clears the saved note.'}</p><div className="review-actions">
+              <button className="button" onClick={() => review(events.find(event => reviewEvidenceIdentity(event) === key) || draft.event)}>Resume note draft</button>
+              <button className="text-button" onClick={() => removeNoteDraft(draft.event)}>Discard note draft</button>
+            </div></div></section>)}
+          </> : <p role="status">No unsaved note drafts remain.</p>}
         </Modal>
       )}
       {modal?.type === "bulk-dismiss" && (

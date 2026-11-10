@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { parseRecognition, frameSummary, canShowBoxes, matchRecording, mergeRecognitionEvents, MAX_VIDEO_BYTES } from '../src/recognition.mjs';
+import { saveReviewNote } from '../src/data.mjs';
 import { Sha256, sha256Blob, sha256File } from '../src/sha256.mjs';
 import { recognitionFixture } from './fixtures/recognition.mjs';
 
@@ -151,4 +152,22 @@ test('repeat import keeps decisions, and queue overflow does not silently discar
   const previous = [{...added[0], status:'confirmed', note:'Reviewed original recording.'}];
   assert.deepEqual(mergeRecognitionEvents(previous, added), previous);
   assert.throws(() => mergeRecognitionEvents(Array.from({length:1000}, (_,i) => ({id:`old-${i}`})), added), /exceed/);
+});
+
+test('repeat imports preserve saved pending notes, including explicit clears, without weakening evidence checks', () => {
+  const added = parseRecognition(recognitionFixture()).events;
+  const importedDecision = [{...added[0], status:'confirmed', note:'A decision from an older export'}];
+  assert.deepEqual(mergeRecognitionEvents(added, importedDecision), importedDecision);
+  const noted = saveReviewNote(added, added[0].id, 'Still checking this observation');
+  assert.deepEqual(mergeRecognitionEvents(noted, importedDecision), noted);
+  assert.deepEqual(mergeRecognitionEvents(noted, added), noted);
+  const cleared = saveReviewNote(noted, added[0].id, '');
+  assert.equal(cleared[0].status, 'pending');
+  assert.equal(cleared[0].note, '');
+  assert.deepEqual(mergeRecognitionEvents(cleared, importedDecision), cleared);
+  // Historical exports can have a human note without a revision token.
+  const historical = [{...added[0], note:'Historical pending note'}];
+  assert.deepEqual(mergeRecognitionEvents(historical, importedDecision), historical);
+  const conflicting = [{...importedDecision[0], score:.1}];
+  assert.throws(() => mergeRecognitionEvents(noted, conflicting), /conflicts with different evidence/);
 });

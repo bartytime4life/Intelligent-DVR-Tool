@@ -184,3 +184,55 @@ test('a restarted detector keeps the previous run’s unsent observations', asyn
   assert.deepEqual(snapshots.at(-1).observations, [kept]);
   detector.stop();
 });
+
+function stalledReply(signal) {
+  return new Promise((resolve, reject) => {
+    const guard = setTimeout(() => reject(Error('AI request remained stalled')), 500);
+    const aborted = () => {clearTimeout(guard); reject(signal.reason);};
+    if (signal.aborted) aborted(); else signal.addEventListener('abort', aborted, {once:true});
+  });
+}
+
+for (const stage of ['headers', 'body']) test(`live AI bounds a stalled response ${stage}`, {timeout:1000}, async () => {
+  await assert.rejects(liveRequest('/start', {token:'t', timeout:20, fetcher:async (path, {signal}) => {
+    if (stage === 'headers') return stalledReply(signal);
+    return {ok:true, json:() => stalledReply(signal)};
+  }}), error => error.name === 'TimeoutError' && /in time/.test(error.message));
+});
+
+for (const stage of ['start', 'frame']) test(`a stalled live AI ${stage} releases active state and keeps unsent observations`, {timeout:1000}, async () => {
+  const kept = {observation, still:new Blob(['kept']), capturedAt:5};
+  const detector = liveDetector({token:'t', model:'m', rules:'r', camera:'c', observations:[kept],
+    capture:async () => new Blob(['generated']), timeouts:{start:20, frame:20},
+    fetcher:async (path, {signal}) => {
+      if (path.endsWith('/start') && stage !== 'start') return {ok:true, json:async () => session};
+      return stalledReply(signal);
+    }});
+  await detector.start();
+  const until = Date.now() + 600;
+  while (detector.snapshot.state !== 'failed' && Date.now() < until) await new Promise(resolve => setTimeout(resolve, 5));
+  assert.equal(detector.snapshot.state, 'failed');
+  assert.match(detector.snapshot.error, /in time/);
+  assert.deepEqual(detector.snapshot.observations, [kept]);
+  if (stage === 'start') assert.match(detector.snapshot.error, /Startup could not be confirmed/);
+  detector.stop();
+});
+
+test('late startup from a cancelled run cannot replace a newer live AI session', async () => {
+  let completeFirst, starts = 0; const stopped = [];
+  const newer = {...session, id:'d'.repeat(32)};
+  const detector = liveDetector({token:'t', model:'m', rules:'r', camera:'c', capture:async () => null,
+    wait:async () => new Promise(resolve => setTimeout(resolve, 0)), fetcher:async path => {
+      if (path.endsWith('/start')) {
+        starts++;
+        if (starts === 1) return new Promise(resolve => {completeFirst = () => resolve({ok:true, json:async () => session});});
+        return {ok:true, json:async () => newer};
+      }
+      stopped.push(path); return {ok:true, json:async () => ({})};
+    }});
+  const first = detector.start(); detector.stop();
+  await detector.start(); completeFirst(); await first;
+  assert.equal(detector.snapshot.state, 'live'); assert.equal(detector.snapshot.session.id, newer.id);
+  assert.ok(stopped.includes(`/api/live/${session.id}/stop`));
+  detector.stop();
+});

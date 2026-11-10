@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { parseReceipt, reviewEvent } from '../src/data.mjs';
+import { parseReceipt, reviewEvent, saveReviewNote, reviewEvidenceIdentity } from '../src/data.mjs';
 import { recognitionFixture } from './fixtures/recognition.mjs';
 import { eventSeconds, filterEvents, queueChoices, nextPending, queueCSV, dismissPending, restorePending } from '../src/review-queue.mjs';
 import { reviewExport, parseReviewExport } from '../src/workspace-state.mjs';
@@ -109,4 +109,45 @@ test('bulk undo keeps field edits even when an older client preserves the decisi
     const later = result.events.map(e => e.id === 'b' ? {...e, ...change} : e);
     assert.deepEqual(restorePending(later, result).find(e => e.id === 'b'), later.find(e => e.id === 'b'));
   }
+});
+
+test('saving a note preserves the pending verdict, evidence, and existing review timestamp', () => {
+  const events = queue(), original = events[0];
+  const updated = saveReviewNote(events, original.id, 'Check the original recording first.', original);
+  const saved = updated[0];
+  assert.equal(saved.status, 'pending');
+  assert.equal(saved.reviewedAt, undefined);
+  assert.equal(saved.note, 'Check the original recording first.');
+  assert.match(saved.reviewRevision, /^[a-f0-9]{32}$/);
+  assert.equal(reviewEvidenceIdentity(saved), reviewEvidenceIdentity(original));
+  assert.equal(events[0].note, '');
+  assert.equal(updated[1], events[1]);
+  const confirmed = reviewEvent(events, original.id, 'confirmed', 'Previously checked');
+  const edited = saveReviewNote(confirmed, original.id, 'More detail', confirmed[0]);
+  assert.equal(edited[0].status, 'confirmed');
+  assert.equal(edited[0].reviewedAt, confirmed[0].reviewedAt);
+  assert.notEqual(edited[0].reviewRevision, confirmed[0].reviewRevision);
+  assert.equal(saveReviewNote(edited, original.id, 'More detail', edited[0])[0], edited[0]);
+  assert.equal(saveReviewNote(events, original.id, 'x'.repeat(2001))[0].note.length, 2000);
+});
+
+test('note saving refuses removed evidence, reused IDs, and concurrently changed human edits', () => {
+  const events = queue(), original = events[0];
+  assert.throws(() => saveReviewNote([], original.id, 'draft', original), /same evidence/);
+  const otherEvidence = [{...original, provenance:{...original.provenance, source_sha256:'f'.repeat(64)}}];
+  assert.throws(() => saveReviewNote(otherEvidence, original.id, 'draft', original), /same evidence/);
+  for (const change of [{note:'Other tab note'}, {status:'confirmed'}, {reviewRevision:'f'.repeat(32)}, {reviewedAt:'2026-11-09T12:00:00.000Z'}]) {
+    assert.throws(() => saveReviewNote([{...original, ...change}], original.id, 'draft', original), /changed while its note was open/);
+  }
+});
+
+test('saved pending notes roundtrip through exports and later note edits survive bulk Undo', () => {
+  const events = queue(), saved = saveReviewNote(events, events[0].id, 'Inspect first');
+  assert.deepEqual(parseReviewExport(JSON.parse(JSON.stringify(reviewExport(saved)))), saved);
+  assert.ok(queueCSV(saved).includes('Inspect first'));
+  const dismissed = dismissPending(saved, [events[0].id], 'Bulk note');
+  const later = saveReviewNote(dismissed.events, events[0].id, '');
+  assert.equal(later[0].status, 'dismissed');
+  assert.notEqual(later[0].reviewRevision, dismissed.events[0].reviewRevision);
+  assert.deepEqual(restorePending(later, dismissed)[0], later[0]);
 });

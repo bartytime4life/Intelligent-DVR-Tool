@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { ArrowClockwise, CheckCircle, DownloadSimple, Trash, WarningCircle, X } from '@phosphor-icons/react';
-import { analysisRequest, importRecording, localAnalysisOrigin } from './local-analysis.mjs';
+import { analysisRequest, localAnalysisOrigin } from './local-analysis.mjs';
 import { CHECK_SCRIPT, TRAINING_SCRIPT, evaluate, frameMoments, compareTrainingCheck, readHistory, appendHistory,
   readTrainingSelection, trainedPreferenceMatches, writeDefaultRules, plural, ENROLL_SCRIPT, BASELINE_SCRIPT, CONSENT_TEXT, baselineText } from './training.mjs';
 import { checkContextError, makeTrainingReceipt } from './training-evidence.mjs';
@@ -15,6 +15,8 @@ import { readTrainingLibrary, compatibleTrainingSessions, trainingSessionEvidenc
   removeTrainingEvidence, compareTrainingLibrary, trainingLibraryReceipt, recommendCumulativeThreshold,
   trainingEvidenceAdditionError, reusedTrainingSource } from './training-library.mjs';
 import { trainingHasPendingWork, personHasPendingWork } from './training-lifecycle.mjs';
+import { createReviewTransfer } from './review-transfer.mjs';
+import { submitPersonRecording, personWriteRefused } from './person-session.mjs';
 import './training.css';
 
 const STEPS = [['camera', 'Camera check'], ['record', 'Guided recording'], ['analyze', 'Analysis'], ['results', 'Compare'], ['check', 'Fresh check'], ['done', 'Decision']];
@@ -411,39 +413,54 @@ function PersonSession({ service, flow, onExit, onChanged, onPendingChange }) {
   const [name, setName] = useState(''), [agreed, setAgreed] = useState(false);
   const [person, setPerson] = useState(flow.person || null);
   const [status, setStatus] = useState(null), [error, setError] = useState('');
+  const [retainedClip, setRetainedClip] = useState(null);
+  const lifetime = useRef(null), operations = useRef(null);
+  // Allow the import plus the native face worker's full 120-second allowance.
+  if (!operations.current) operations.current = createReviewTransfer({timeout:180000});
+  useEffect(() => {
+    lifetime.current = new AbortController();
+    return () => { lifetime.current.abort(); operations.current.cancel(); };
+  }, []);
   const pending = personHasPendingWork({ stage, capture, name, agreed, busy: status?.busy });
   useEffect(() => { onPendingChange?.(pending); }, [pending, onPendingChange]);
   useEffect(() => () => onPendingChange?.(false), [onPendingChange]);
   const exit = () => {
     if (pending && !window.confirm('Leave this unfinished person session? Camera capture will stop and unsaved input will be lost. Templates already saved on this computer stay available; a submitted operation may still finish.')) return;
+    lifetime.current.abort(); operations.current.cancel();
     onExit();
   };
   const steps = enrolling ? [['consent', 'Consent'], ['enroll', 'Face capture'], ['baseline', 'Baseline check'], ['done', 'Done']]
     : [['baseline', 'Baseline check'], ['done', 'Done']];
-  async function importClip(clip) {
-    const file = new File([clip.blob], clip.name, { type: clip.blob.type });
-    return (await importRecording(file, service.token)).recording.id;
-  }
-  async function finishEnroll(clip) {
-    setStatus({ busy: true, text: 'Building the face template on this computer…' }); setError('');
+  async function finishRecording(clip, checking = false) {
+    const progress = {submitted:false};
+    const failed = (message, uncertain) => {
+      setStatus({uncertain}); setError(uncertain
+        ? `${message} The template operation was already submitted and may still finish. Return to Train and check the saved people before trying again.`
+        : `${message} Your recording is still available below; retry it or save a copy before leaving.`);
+    };
+    const operation = operations.current.begin(lifetime.current.signal, reason => {
+      if (lifetime.current.signal.aborted) return;
+      failed(reason?.name === 'TimeoutError' ? 'This computer did not finish the person session in time.' : 'The person session was cancelled.', progress.submitted);
+    });
+    if (!operation) return;
+    setRetainedClip(clip); setError('');
+    setStatus({busy:true, text:checking ? 'Checking how well the template recognizes this person…' : 'Building the face template on this computer…'});
     try {
-      const recording = await importClip(clip);
-      const result = await (await analysisRequest('/people', { token: service.token, method: 'POST',
-        body: { name: name.trim(), consent: { confirmed: true, statement: service.people.statement }, recording } })).json();
-      setPerson(result.person); onChanged();
-      setStatus({ text: `${result.person.name} is enrolled with ${plural(result.person.views, 'clear face view')}.` });
-      setStage('baseline'); setCapture('intro');
-    } catch (e) { setStatus(null); setError(e.message); setCapture('camera'); }
+      const result = await submitPersonRecording({clip, service, person:checking ? person : null, name,
+        signal:operation.signal, onSubmit:() => {progress.submitted = true;}});
+      if (!operations.current.isCurrent(operation)) return;
+      setPerson(result.person); setRetainedClip(null); onChanged();
+      if (checking) {
+        setStatus({text:baselineText(result.baseline), tip:result.tip, baseline:result.baseline}); setStage('done');
+      } else {
+        setStatus({text:`${result.person.name} is enrolled with ${plural(result.person.views, 'clear face view')}.`});
+        setStage('baseline'); setCapture('intro');
+      }
+    } catch (e) { if (operations.current.isCurrent(operation)) failed(e.message, progress.submitted && !personWriteRefused(e)); }
+    finally { operations.current.finish(operation); }
   }
-  async function finishBaseline(clip) {
-    setStatus({ busy: true, text: 'Checking how well the template recognizes this person…' }); setError('');
-    try {
-      const recording = await importClip(clip);
-      const result = await (await analysisRequest(`/people/${person.id}/verify`, { token: service.token, method: 'POST', body: { recording } })).json();
-      setPerson(result.person); onChanged();
-      setStatus({ text: baselineText(result.baseline), tip: result.tip, baseline: result.baseline }); setStage('done');
-    } catch (e) { setStatus(null); setError(e.message); setCapture('camera'); }
-  }
+  const finishEnroll = clip => finishRecording(clip);
+  const finishBaseline = clip => finishRecording(clip, true);
   const current = steps.findIndex(s => s[0] === stage);
   return <section className="content-page training-page" aria-label="Person enrollment">
     <div className="training-session-head">
@@ -453,6 +470,13 @@ function PersonSession({ service, flow, onExit, onChanged, onPendingChange }) {
     <ol className="training-steps">{steps.map(([id, label], i) => <li key={id} aria-current={stage === id ? 'step' : undefined}
       className={current > i ? 'complete' : ''}><b>{i + 1}</b>{label}</li>)}</ol>
     {error && <div className="training-problem" role="alert"><WarningCircle size={18} /><p>{error}</p></div>}
+    {retainedClip && !status?.busy && <section className="training-panel" aria-label="Retained person recording">
+      <h2>Your recording is still here</h2><p>It stays in this tab until you leave. Save a copy if you need to keep it.</p>
+      <div className="training-actions">
+        {!status?.uncertain && <button className="button amber" onClick={() => finishRecording(retainedClip, stage === 'baseline')}>Retry this recording</button>}
+        <button className="button" onClick={() => downloadBlob(retainedClip.blob, retainedClip.name)}>Save person recording</button>
+      </div>
+    </section>}
     {stage === 'consent' && <section className="training-panel training-consent">
       <h2>Consent</h2>
       <label>Person’s name<input aria-label="Person’s name" value={name} maxLength={60} onChange={e => setName(e.target.value)} autoComplete="off" /></label>
@@ -463,7 +487,7 @@ function PersonSession({ service, flow, onExit, onChanged, onPendingChange }) {
       <div className="training-actions"><button className="button amber" disabled={!name.trim() || !agreed}
         onClick={() => { setStage('enroll'); setCapture('camera'); }}>Continue to face capture</button></div>
     </section>}
-    {stage === 'enroll' && !status?.busy && <CaptureSteps step={capture} onStep={setCapture} onClip={finishEnroll}
+    {stage === 'enroll' && !status?.busy && !retainedClip && <CaptureSteps step={capture} onStep={setCapture} onClip={finishEnroll}
       script={ENROLL_SCRIPT} guide="face" startLabel="Start face capture"
       aim={`Only ${name.trim()} should be in view. Sit close enough that the face fills the oval, with light in front.`} />}
     {stage === 'baseline' && capture === 'intro' && <section className="training-panel training-done">
@@ -474,7 +498,7 @@ function PersonSession({ service, flow, onExit, onChanged, onPendingChange }) {
         <button className="text-button" onClick={exit}>Skip for now</button>
       </div>
     </section>}
-    {stage === 'baseline' && capture !== 'intro' && !status?.busy && <CaptureSteps step={capture} onStep={setCapture} onClip={finishBaseline}
+    {stage === 'baseline' && capture !== 'intro' && !status?.busy && !retainedClip && <CaptureSteps step={capture} onStep={setCapture} onClip={finishBaseline}
       script={BASELINE_SCRIPT} guide="frame" startLabel="Start baseline check"
       aim={`Point the camera where it usually watches. Only ${person.name} should be in view.`} />}
     {status?.busy && <section className="training-panel training-analyze"><h2>{status.text}</h2><progress aria-label="Processing" /></section>}

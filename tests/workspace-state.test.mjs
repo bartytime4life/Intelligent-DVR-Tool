@@ -6,6 +6,7 @@ import { recognitionFixture } from './fixtures/recognition.mjs';
 import { workspaceFromHash, readWorkspace, writeWorkspace, preserveUnreadable, unreadableKey, reviewExport, parseReviewExport, resetSamples, pauseHiddenPlayback } from '../src/workspace-state.mjs';
 import { outsideDialog, backdropDismiss } from '../src/dialog-dismiss.mjs';
 import { createWorkspaceSave, MAX_WORKSPACE_BACKUPS, workspaceBackupKey } from '../src/workspace-save.mjs';
+import {DEFAULT_SETUP,parseSetup} from '../src/resources.mjs';
 
 const imported = () => parseReceipt(recognitionFixture().receipt);
 test('receipt reimport preserves human decisions, notes and review time', () => {
@@ -442,4 +443,94 @@ test('zone-rule edits receive the same failed-save conflict protection', async (
   assert.deepEqual(session.snapshot().conflict.remoteValue,remote);
   fail=false; assert.equal(await session.snapshot().conflict.keepLocal(),true);
   assert.deepEqual(JSON.parse(map.get(key)),local);
+});
+
+const setupKey='dvr.setup.v1';
+const setupWithCameras=cameras=>({...structuredClone(DEFAULT_SETUP),workload:{...DEFAULT_SETUP.workload,cameras}});
+function setupHarness(raw=JSON.stringify(DEFAULT_SETUP),options={}) {
+  const map=new Map(raw===null?[]:[[setupKey,raw]]);let fail=false;
+  const storage={getItem:key=>map.get(key)??null,setItem:(key,value)=>{if(fail)throw Error('quota');map.set(key,value);},removeItem:key=>map.delete(key)};
+  return {map,storage,fail:value=>{fail=value;},session:createWorkspaceSave(storage,setupKey,DEFAULT_SETUP,{withLock:work=>work(),...options})};
+}
+test('machine-plan restoration keeps the existing plain JSON format, validation and 64 KiB bound',()=>{
+  const plan=setupWithCameras(123),loaded=restoreSnapshot(setupKey,plan,null);
+  assert.deepEqual(loaded,plan);assert.notEqual(loaded,plan);assert.notEqual(loaded.workload,plan.workload);
+  assert.equal(restoreSnapshot(setupKey,{...plan,unexpected:true},null),null);
+  const raw=' '.repeat(65536)+JSON.stringify(plan),h=setupHarness(raw);
+  assert.deepEqual(h.session.snapshot().value,DEFAULT_SETUP);
+  assert.match(h.session.loaded.error,/could not be loaded/);assert.equal(h.session.loaded.raw,raw);
+  assert.equal(h.map.get(setupKey),raw);assert.equal(h.session.snapshot().hasUnsavedChanges,false);
+});
+test('quota-failed applied machine plans keep their error and edits through a competing tab save',async()=>{
+  const h=setupHarness(),local=setupWithCameras(123),remote=setupWithCameras(234);
+  h.fail(true);h.session.update(local);assert.equal(await h.session.flush(),false);
+  assert.equal(h.session.snapshot().hasUnsavedChanges,true);assert.match(h.session.snapshot().error,/only in memory/);
+  h.map.set(setupKey,JSON.stringify(remote));h.session.receive();
+  assert.deepEqual(h.session.snapshot().value,local);assert.deepEqual(h.session.snapshot().conflict.remoteValue,remote);
+  assert.match(h.session.snapshot().error,/only in memory/);
+  h.fail(false);const later=setupWithCameras(345);h.session.update(later);assert.equal(await h.session.flush(),false);
+  assert.equal(h.map.get(setupKey),JSON.stringify(remote));assert.deepEqual(h.session.snapshot().value,later);
+  assert.equal(await h.session.snapshot().conflict.keepLocal(),true);
+  assert.deepEqual(parseSetup(h.map.get(setupKey)),later);assert.equal(h.session.snapshot().hasUnsavedChanges,false);
+  const [copy]=[...h.map].filter(([key])=>key.startsWith(`${setupKey}.conflict-backup.`));
+  assert.equal(JSON.parse(copy[1]).raw,JSON.stringify(remote));
+});
+test('using another machine plan preserves this tab and valid saved copies import without an archive wrapper',async()=>{
+  const h=setupHarness(),local=setupWithCameras(123),remote=setupWithCameras(234);
+  h.session.update(local);h.map.set(setupKey,JSON.stringify(remote));h.session.receive();
+  h.map.set(workspaceBackupKey(setupKey,1),JSON.stringify({schema:'intelligent-dvr.workspace-backup.v1',key:setupKey,raw:JSON.stringify(local),savedAt:new Date().toISOString()}));
+  h.map.set(workspaceBackupKey(setupKey,2),'preserve damaged archive bytes');
+  const [valid,damaged]=h.session.snapshot().conflict.savedCopies.copies;
+  assert.deepEqual(parseSetup(valid.downloadRaw),local);assert.equal(damaged.downloadRaw,undefined);assert.equal(damaged.raw,'preserve damaged archive bytes');
+  assert.equal(await h.session.snapshot().conflict.useRemote(),true);
+  assert.deepEqual(h.session.snapshot().value,remote);assert.equal(h.map.get(setupKey),JSON.stringify(remote));
+  assert.equal(JSON.parse(h.map.get(workspaceBackupKey(setupKey,1))).raw,JSON.stringify(local));
+});
+test('clean machine plans adopt valid remote changes and removal without writing defaults back',async()=>{
+  const h=setupHarness(),remote=setupWithCameras(234);
+  h.map.set(setupKey,JSON.stringify(remote));h.session.receive();assert.deepEqual(h.session.snapshot().value,remote);
+  h.map.delete(setupKey);h.session.receive();assert.deepEqual(h.session.snapshot().value,DEFAULT_SETUP);
+  assert.equal(h.session.snapshot().hasUnsavedChanges,false);assert.equal(await h.session.flush(),false);assert.equal(h.map.has(setupKey),false);
+  h.map.set(setupKey,'{"invalid":true}');h.session.receive();
+  assert.deepEqual(h.session.snapshot().value,DEFAULT_SETUP);assert.equal(h.session.snapshot().conflict.remoteValid,false);
+  assert.equal(await h.session.snapshot().conflict.useRemote(),false);assert.equal(h.map.get(setupKey),'{"invalid":true}');
+});
+test('corrupt machine plans preserve the original and any earlier unreadable backup before an applied save',async()=>{
+  const raw='{broken machine plan',h=setupHarness(raw),local=setupWithCameras(123);
+  h.map.set(unreadableKey(setupKey),'{earlier unreadable plan');
+  assert.equal(h.session.snapshot().hasUnsavedChanges,false);assert.equal(await h.session.flush(),false);assert.equal(h.map.get(setupKey),raw);
+  h.session.update(local);assert.equal(await h.session.flush(),true);assert.deepEqual(parseSetup(h.map.get(setupKey)),local);
+  assert.equal(h.map.get(unreadableKey(setupKey)),'{earlier unreadable plan');
+  assert.equal(JSON.parse(h.map.get(workspaceBackupKey(setupKey,1))).raw,raw);
+});
+test('explicitly applying unchanged defaults repairs unreadable plans only after preserving the original bytes',async()=>{
+  const raw='{broken defaults',h=setupHarness(raw);
+  assert.equal(await h.session.flush(),false);assert.equal(h.map.get(setupKey),raw);
+  h.fail(true);h.session.update(structuredClone(DEFAULT_SETUP));
+  assert.equal(h.session.snapshot().hasUnsavedChanges,true);
+  assert.equal(await h.session.flush(),false);assert.equal(h.map.get(setupKey),raw);
+  h.fail(false);assert.equal(await h.session.flush(),true);
+  assert.equal(h.map.get(unreadableKey(setupKey)),raw);
+  assert.deepEqual(parseSetup(h.map.get(setupKey)),DEFAULT_SETUP);
+  assert.equal(h.session.snapshot().hasUnsavedChanges,false);
+  h.session.update(structuredClone(DEFAULT_SETUP));assert.equal(await h.session.flush(),false);
+});
+test('machine-plan choices waiting on a shared lock refuse a newly entered unapplied draft',async()=>{
+  for(const choice of ['keepLocal','useRemote']) {
+    let release,draft=false;const held=new Promise(resolve=>{release=resolve;});
+    const h=setupHarness(undefined,{withLock:work=>held.then(work),canResolve:()=>!draft});
+    const local=setupWithCameras(123),remote=setupWithCameras(234);
+    h.session.update(local);h.map.set(setupKey,JSON.stringify(remote));h.session.receive();
+    const choosing=h.session.snapshot().conflict[choice]();draft=true;release();
+    assert.equal(await choosing,false);assert.deepEqual(h.session.snapshot().value,local);
+    assert.equal(h.map.get(setupKey),JSON.stringify(remote));assert.match(h.session.snapshot().error,/Apply or discard your draft/);
+    assert.equal(h.session.snapshot().hasUnsavedChanges,true);draft=false;
+    assert.equal(await h.session.snapshot().conflict[choice](),true);
+  }
+});
+test('machine plans without shared save locks stay in memory and retain an unload-worthy unsaved state',async()=>{
+  const h=setupHarness(undefined,{withLock:null}),local=setupWithCameras(123);
+  h.session.update(local);assert.equal(await h.session.flush(),false);
+  assert.deepEqual(h.session.snapshot().value,local);assert.deepEqual(parseSetup(h.map.get(setupKey)),DEFAULT_SETUP);
+  assert.match(h.session.snapshot().error,/cannot coordinate/);assert.equal(h.session.snapshot().hasUnsavedChanges,true);
 });

@@ -12,7 +12,7 @@ function NumberField({ label, value, min, max, step = 1, change }) {
 function Card({ icon: Icon, title, caption, children, className = "" }) {
   return <section className={`system-card ${className}`}><header><Icon size={24} /><div><h2>{title}</h2>{caption && <p>{caption}</p>}</div></header>{children}</section>;
 }
-export default function SystemSetup({ setup, onApply, onDirtyChange, storageError, download }) {
+export default function SystemSetup({ setup, onApply, onDirtyChange, storageError, storagePending=false, storageConflict=false, download }) {
   const [draft, setDraft] = useState(() => structuredClone(setup));
   const [status, setStatus] = useState("");
   const [fileError, setFileError] = useState("");
@@ -178,8 +178,8 @@ export default function SystemSetup({ setup, onApply, onDirtyChange, storageErro
         <button type="button" className="button" disabled={!!problem} onClick={() => download(validateSetup(draft), "dvr-machine-setup.json")}><DownloadSimple />Export setup plan</button>
         <button type="button" className="text-button" onClick={() => setupFile.current.click()}><UploadSimple />Import setup</button>
         <button type="button" className="text-button" onClick={() => { setDraft(structuredClone(DEFAULT_SETUP)); setDirty(true); setFileError(""); setStatus("Defaults restored in draft. Apply when ready."); }}><ArrowCounterClockwise />Reset draft</button>
-        {dirty && <button type="button" className="text-button" onClick={() => {setDraft(structuredClone(setup)); setDirty(false); setFileError(''); setStatus('Saved setup loaded.');}}>Discard draft & load saved setup</button>}
-      </div><p className="system-save-state" role="status">{status || (dirty ? "Draft changed. Apply browser limits when ready; exported policies are applied separately by local tools." : "Applied setup is stored in this browser. Hardware, retention and power figures are estimates.")}</p>
+        {dirty && <button type="button" className="text-button" onClick={() => {setDraft(structuredClone(setup)); setDirty(false); setFileError(''); setStatus('Applied setup loaded.');}}>Discard draft & use applied setup</button>}
+      </div><p className="system-save-state" role="status">{storageConflict ? 'Machine-plan saving is paused. Apply or discard any draft, then choose a version above.' : storageError ? 'The applied machine plan is only in memory. Export a setup plan before closing, or apply it again to retry saving.' : storagePending ? 'Workspace limits applied · saving the machine plan in this browser…' : status || (dirty ? "Draft changed. Apply browser limits when ready; exported policies are applied separately by local tools." : "Current workspace limits are active. Hardware, retention and power figures are estimates.")}</p>
     </form>
     <div className="system-docs"><div><h2>Build the machine, then prove the workload.</h2><p>The 100-camera target needs actual recording and analytics qualification. Hardware choices alone establish neither.</p></div><div><a href={`${DOCS}hardware-guide.md`} target="_blank" rel="noreferrer">Hardware & drive shortlist ↗</a><a href={`${DOCS}resource-controls.md`} target="_blank" rel="noreferrer">What each limit enforces ↗</a></div></div>
     <input ref={setupFile} type="file" accept="application/json,.json" hidden onChange={e => importFile(e, "setup")} />
