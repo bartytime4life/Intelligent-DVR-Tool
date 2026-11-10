@@ -39,11 +39,18 @@ Windows PowerShell, from the acceptance copy:
 .\Start-DVR-Companion-Windows.cmd
 ```
 
-Preparation requires the already obtained exact model documented in
+For a **copy-only** preliminary trial after installation, the companion no longer
+requires model preparation. Run `bash scripts/run-linux.sh --companion --check`
+(or PowerShell `-Companion -Check`) and then the companion shortcut. It remains
+paused with automatic analysis disabled. Choose only generated input under the
+current authorization. The analysis commands above remain optional and require
+separately approved prerequisites.
+
+Analysis preparation requires the already obtained exact model documented in
 [PC setup](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/PC-testing#prepare-recording-recognition); it does not download weights.
 Open `http://127.0.0.1:4298/`. Record OS, browser, Python, app revision, model hash,
 OEM/version, export/container/codec, duration, dimensions and frame rate privately.
-Missing model or unsupported proprietary video means **BLOCKED** for analysis,
+A missing model means **copy-only**; an unsupported proprietary video means **BLOCKED** for analysis,
 not permission to download or convert the original. Export a standard video using
 the OEM; label the export as a new source with a new hash.
 

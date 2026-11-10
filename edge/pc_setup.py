@@ -244,7 +244,15 @@ def persistence_check(directory):
         store.close()
 
 
-def check(port=DEFAULT_PC_PORT, feeds_config=None, recordings=None, config=None, *, root=ROOT, bind=True, facility=False, state_dir=None, recorder_config=None):
+def companion_settings(root, config=None):
+    """Keep a copy-only library when a model is added; preserve older catalog stores."""
+    primary = Path(root) / '.backup-library'
+    if primary.exists() or primary.is_symlink() or config is None:
+        return primary
+    return Path(config).absolute().parent / '.backup-library'
+
+
+def check(port=DEFAULT_PC_PORT, feeds_config=None, recordings=None, config=None, *, root=ROOT, bind=True, facility=False, state_dir=None, recorder_config=None, backup_state_dir=None):
     host_check()
     checks = []
     def record(name, operation):
@@ -277,6 +285,15 @@ def check(port=DEFAULT_PC_PORT, feeds_config=None, recordings=None, config=None,
         from .local_feeds import load_sources
         return {'configured_sources': len(load_sources(feeds_path))}
     record('dvr_config', sources)
+    if backup_state_dir is not None:
+        def backup_ready():
+            path = Path(backup_state_dir)
+            if path.is_symlink() or (path.exists() and not path.is_dir()) or not path.parent.is_dir():
+                raise ValueError('Use an ordinary backup settings folder in this installation.')
+            if not os.access(path if path.exists() else path.parent, os.W_OK | os.X_OK):
+                raise ValueError('Backup settings need owner write/search access.')
+            return {'settings_present': path.exists(), 'analysis_configured': bool(recordings and config), 'work_started': False}
+        record('backup_library', backup_ready)
     from .local_feeds import shared_config
     if shared_config(feeds_path):  # A warning: readiness still passes, the credentials file is just exposed.
         checks.append({'check': 'dvr_config_permissions', 'status': 'warn'})
@@ -328,6 +345,7 @@ def check(port=DEFAULT_PC_PORT, feeds_config=None, recordings=None, config=None,
 
 
 REMEDIES = {
+    'backup_library': 'Use an ordinary owner-writable backup settings folder in the test installation. Check does not create or change it.',
     'lan_recorder': 'Use --analysis and --recorder-config with exactly one configured LAN RTSP source. Check storage and codec acceptance separately; Check never connects cameras.',
     'facility_preview': 'Use a source checkout with Node.js 22 for local map services; clear DVR_GEO_LOCAL for the PC camera kit.',
     'kit_integrity': 'Extract a complete unmodified kit, or rebuild from a trusted source checkout.',
@@ -352,6 +370,7 @@ def main(argv=None):
     modes.add_argument('--native-probe', action='store_true', help=argparse.SUPPRESS)
     parser.add_argument('--feeds', action='store_true', help='Compatibility alias; the local feed service is the default')
     parser.add_argument('--analysis', action='store_true')
+    parser.add_argument('--companion', action='store_true', help='Open OEM backup without requiring a model; use an existing prepared catalog when present')
     parser.add_argument('--analysis-backend', choices=('opencv-cpu', 'cuda-preferred'), help='Recording analysis preference; default GPU first with CPU fallback')
     parser.add_argument('--live-backend', choices=('opencv-cpu', 'cuda-preferred'),
                         help='Live AI preference; default GPU first with CPU fallback; requires a prepared GPU runtime for actual CUDA use')
@@ -395,6 +414,10 @@ def main(argv=None):
                 prepare = (r'.\Start-Windows.cmd --prepare-analysis "C:\Models\yolox-s.onnx"' if sys.platform == 'win32'
                            else 'bash scripts/run-linux.sh --prepare-analysis /path/to/yolox-s.onnx')
                 raise SetupError(f'Train needs the prepared local model. Use your approved model file with {prepare}, then start Train again.')
+        if args.companion:
+            if args.install or args.facility or args.train or os.environ.get('DVR_GEO_LOCAL') == '1':
+                raise SetupError('Use the companion with Start or Check. Keep installation, training and facility preview separate.')
+            args.analysis = args.analysis or bool(args.recordings or args.config or (ROOT / 'local-analysis/catalog.json').is_file())
         if args.analysis and not args.recordings and not args.config and (ROOT / 'local-analysis/catalog.json').is_file():
             args.recordings = ROOT / 'local-analysis/recordings'
             args.config = ROOT / 'local-analysis/catalog.json'
@@ -414,6 +437,7 @@ def main(argv=None):
             raise SetupError('--recorder-config requires analysis configuration; enable it with Start or Check after installation.')
         if args.report and not args.check:
             raise SetupError('--report is available with --check only.')
+        backup_state_dir = companion_settings(ROOT, args.config) if args.companion or (args.recordings and args.config) else None
         state_dir = None if args.temporary else args.state_dir or (Path(os.environ['DVR_STATE_DIR']) if os.environ.get('DVR_STATE_DIR') and not args.install else None)
         if state_dir is not None:
             if sys.platform != 'linux':
@@ -430,7 +454,7 @@ def main(argv=None):
                          args.feeds_config.absolute() != (ROOT / 'local-feeds.json').absolute()):
             raise SetupError('Local geo preview and the camera/analysis service use separate launch modes. Clear DVR_GEO_LOCAL for camera/analysis testing.')
         if args.check:
-            result = check(args.port, args.feeds_config, args.recordings, args.config, facility=facility, state_dir=state_dir, recorder_config=args.recorder_config)
+            result = check(args.port, args.feeds_config, args.recordings, args.config, facility=facility, state_dir=state_dir, recorder_config=args.recorder_config, backup_state_dir=backup_state_dir)
             print(f'Checking local DVR address http://127.0.0.1:{args.port}/')
             for item in result['checks']:
                 print(f"{item['status'].upper()}: {item['check']}")
@@ -457,6 +481,8 @@ def main(argv=None):
             raise SetupError('DVR config is missing. Run the installer to create an empty local-feeds.json.')
         service = [str(python), '-m', 'edge.local_service', '--feeds-config', str(args.feeds_config),
                    '--camera-setup-config', str(args.feeds_config), '--port', str(args.port)]
+        if backup_state_dir is not None:
+            service += ['--backup-state-dir', str(backup_state_dir)]
         if args.live_backend:
             service += ['--live-backend', args.live_backend]
         if args.analysis_backend:

@@ -14,7 +14,7 @@ async function fixture(page,{status=emptyStatus(),pickerDisabled=false}={}) {
     let body; if(req.method()==='POST') body=req.postDataJSON();
     state.requests.push({path,method:req.method(),body,headers:req.headers()});
     const reply=(value,code=200)=>route.fulfill({status:code,contentType:'application/json',body:JSON.stringify(value)});
-    if(path==='/api/analysis/session') return reply({token:'fixture-owner-token',ready:true,models:[{id:'detector',name:'Local detector'}],rules:[{id:'rules',name:'Default rules',models:['detector']}],recordings:[],job:null,recorder_active:false,recording_import:{enabled:true}});
+    if((path==='/api/analysis/session'||path==='/api/library/session')) return reply({token:'fixture-owner-token',ready:true,models:[{id:'detector',name:'Local detector'}],rules:[{id:'rules',name:'Default rules',models:['detector']}],recordings:[],job:null,recorder_active:false,recording_import:{enabled:true}});
     if(path==='/api/library/status') return state.statusLost?route.abort():reply(state.status);
     if(path==='/api/library/pick-folder') return state.pickerDisabled?reply({error:'Native folder chooser is unavailable.'},503):reply({path:'/local/chosen-source'});
     if(path==='/api/library/configure') {state.status={...state.status,configured:true,state:'paused',config:body};return reply(state.status);}
@@ -38,6 +38,18 @@ async function fixture(page,{status=emptyStatus(),pickerDisabled=false}={}) {
 }
 const panel=page=>page.getByRole('region',{name:'Existing DVR backup'});
 async function connect(page) {await page.getByRole('button',{name:/^Use my existing DVR Keep a verified copy/}).click();await panel(page).getByRole('button',{name:'Connect to this computer'}).click();await expect(panel(page).getByRole('button',{name:'Refresh backup connection'})).toBeVisible();}
+
+test('copy-only setup works without a model and keeps automatic analysis disabled',async({page})=>{
+  const state=await fixture(page);
+  state.status={...state.status,configured:true,config:savedConfig};
+  await page.route('**/api/library/session',route=>route.fulfill({json:{token:'fixture-owner-token',ready:false,models:[],rules:[],analysis_enabled:false}}));
+  await connect(page);
+  await expect(panel(page).getByLabel('Analyze copied videos automatically')).toBeDisabled();
+  await expect(panel(page).getByText('Copy-only mode:',{exact:false})).toBeVisible();
+  await panel(page).getByRole('button',{name:'Start backup',exact:true}).click();
+  expect(state.requests.find(r=>r.path==='/api/library/start').body).toEqual({analyze:false,model:'',rules:''});
+  await expect(panel(page).locator('.local-analysis-badge')).toHaveText('Backup running');
+});
 
 test('novice setup saves folders, starts backup only, stops explicitly and survives reconnect',async({page})=>{
   const state=await fixture(page);

@@ -1027,14 +1027,14 @@ class Handler(BaseHTTPRequestHandler):
             self.send_header('Content-Length', '0')
             self.send_header('Cache-Control', 'no-store')
             return self.end_headers()
-        self._guard(token=api and path not in ('/api/analysis/session', '/api/feeds/session'), account=api)
+        self._guard(token=api and path not in ('/api/analysis/session', '/api/feeds/session', '/api/library/session'), account=api)
         jobs, feeds = self.server.jobs, self.server.feeds
         recorder = getattr(self.server, 'recorder', None)
         live = getattr(self.server, 'live', None)
         library = getattr(self.server, 'library', None)
         setup = getattr(self.server, 'camera_setup', None)
         if path.startswith('/api/library/') and library is None:
-            raise LibraryError('LIBRARY_DISABLED', 'Open the local app with recording analysis configured to use the backup library.', 503)
+            raise LibraryError('LIBRARY_DISABLED', 'Open the local app with the DVR Companion launcher to use the backup library.', 503)
         if path.startswith('/api/setup/') and setup is None:
             raise LibraryError('SETUP_DISABLED', 'Use the PC launcher for guided camera setup, or configure --camera-setup-config on the local service.', 503)
         if path.startswith('/api/live/') and live is None:
@@ -1047,6 +1047,9 @@ class Handler(BaseHTTPRequestHandler):
             raise JobError('FEEDS_DISABLED', 'DVR feeds are not configured. Start the local app with --feeds-config and a local source list.', 503)
         if self.command == 'GET' and path == '/api/feeds/session':
             return self._json({'token': self.server.token, **feeds.available()})
+        if self.command == 'GET' and path == '/api/library/session':
+            catalog = jobs.available() if jobs else {'ready': False, 'models': [], 'rules': []}
+            return self._json({'token': self.server.token, **catalog, 'analysis_enabled': jobs is not None})
         if self.command == 'GET' and path == '/api/analysis/session':
             return self._json({'token': jobs.token, **jobs.available(), 'live': live.available() if live else {'enabled': False}})
         if self.command == 'GET' and path == '/api/analysis/people':
@@ -1219,6 +1222,7 @@ def main(argv=None):
     parser.add_argument('--recordings', type=Path, help='Explicit local folder; direct recordings only')
     parser.add_argument('--config', type=Path, help='Local model/rule allowlist; see edge/local-analysis.example.json')
     parser.add_argument('--state-dir', type=Path, help='Opt-in Linux private last-job storage; no automatic analysis or resume')
+    parser.add_argument('--backup-state-dir', type=Path, help='Enable OEM folder backup with private settings here; works without an analysis model, remains paused')
     parser.add_argument('--allow-recording-import', action='store_true', help='Allow explicit same-origin video imports up to 64 MiB; stored locally until manually moved or deleted')
     parser.add_argument('--allow-training', action='store_true', help='Allow guided training to save tuned rule sets in the catalog folder\'s trained/ folder; never overwrites')
     parser.add_argument('--allow-face-enrollment', action='store_true', help='Allow consent-based face templates in the catalog folder\'s people/ folder; needs the pinned face models')
@@ -1250,8 +1254,8 @@ def main(argv=None):
         parser.error('--camera-setup-config must match --feeds-config')
     if args.recorder_config and (not args.config or not args.feeds_config):
         parser.error('--recorder-config requires recording analysis and feeds configuration')
-    if not args.config and not args.feeds_config:
-        parser.error('Configure recording analysis, DVR feeds, or both')
+    if not args.config and not args.feeds_config and not args.backup_state_dir:
+        parser.error('Configure recording analysis, DVR feeds, or an OEM backup settings folder')
     if not 1024 <= args.port <= 65535:
         parser.error('port must be 1024–65535')
     if not (ROOT / 'dist/client/index.html').is_file():
@@ -1266,9 +1270,11 @@ def main(argv=None):
                         people_dir=args.config.absolute().parent / 'people' if args.allow_face_enrollment else None,
                         backend=args.analysis_backend or DEFAULT_BACKEND, gpu_slot=gpu_slot)
             diagnostics = jobs.diagnostics
-            library = BackupLibrary(jobs, args.config.absolute().parent / '.backup-library')
+            library = BackupLibrary(jobs, args.backup_state_dir or args.config.absolute().parent / '.backup-library')
             # Live AI reuses the reviewed catalog; it runs only after Start AI on a Monitor tile.
             live = Live(jobs.catalog, diagnostics=diagnostics, backend=args.live_backend or DEFAULT_BACKEND, gpu_slot=gpu_slot)
+        if args.backup_state_dir and library is None:
+            library = BackupLibrary(None, args.backup_state_dir)
         if args.feeds_config:
             feeds = Feeds(load_sources(args.feeds_config.absolute()), diagnostics=diagnostics)
             if shared_config(args.feeds_config):

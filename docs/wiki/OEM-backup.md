@@ -17,7 +17,9 @@ Before relying on a real OEM, complete the [one-recording field acceptance proce
 ## Quick setup
 
 1. Open **Start-DVR-Companion-Windows.cmd** or **Start-DVR-Companion-Linux.sh**
-   with your already prepared local model (on Mac use the ordinary Start). Then open
+   after the normal PC installation (on Mac use the ordinary prepared analysis
+   Start). A model is optional on Linux/Windows: without a prepared catalog the
+   companion opens in **Copy-only mode**. Then open
    **Recognition → Use my existing DVR → Connect to this computer**. The ordinary Linux/Windows PC
    launcher exposes guided camera setup. A prepared Mac analysis launch exposes
    the folder backup; its LAN preview/recorder platform limits still apply.
@@ -33,7 +35,8 @@ Before relying on a real OEM, complete the [one-recording field acceptance proce
    free-space reserve, and 60 seconds of unchanged size/timestamps across repeated
    scans. Choose **Save settings**. No copying has started yet.
 5. Optionally check **Analyze copied videos automatically**, choose the prepared
-   model and compatible rules, then choose **Start backup**. Without that checkbox,
+   model and compatible rules, then choose **Start backup**. Without a model,
+   automatic analysis is disabled and verified copying remains available. Without that checkbox,
    the tool copies files without claiming the analyzer. Analysis prefers the GPU, with a visible CPU fallback, and processes one
    copied video at a time and waits while another job owns the analyzer.
 6. Open **Saved videos → Review backup** to inspect a completed source-matched
@@ -51,8 +54,11 @@ backup or analysis active, **Stop backup** remains available during opening.
 Cancelling an opening does not stop background backup or delete a saved video.
 
 To expose camera setup with a direct developer invocation, use matching
-`--feeds-config` and `--camera-setup-config` paths. File backup is available when
-`--recordings` and `--config` are supplied together. No extra server, subscription,
+`--feeds-config` and `--camera-setup-config` paths. File backup can be enabled alone with
+`--backup-state-dir /absolute/private/settings-folder`. Analysis additionally needs
+`--recordings` and `--config` together. The library session has its own
+same-origin, same-account (Linux) token endpoint; it does not enable analysis or
+live AI in copy-only mode. No extra server, subscription,
 cloud account or model download is introduced.
 
 ## Choose the appropriate connection
@@ -92,6 +98,21 @@ archival substitute. See [LAN recording limits](https://github.com/bartytime4lif
 
 GPU preference and CPU overrides follow the [local GPU guide](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Live-GPU).
 
+## Add recognition later
+
+Keep using the same acceptance installation. Stop backup and the local service.
+With a separately approved existing pinned YOLOX-S model, run the existing
+`--prepare-analysis` / `-PrepareAnalysis` command from [PC setup](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/PC-testing#prepare-recording-recognition).
+Restart the companion. It preserves the copy-only library and exposes compatible
+model/rule choices. Analysis stays off until you explicitly enable it and start
+backup. Already copied items are eligible for analysis only under the existing
+size, format and coverage limits. No model is downloaded automatically.
+
+For a copy-only readiness check use `bash scripts/run-linux.sh --companion --check`
+or `.\scripts\Start-IntelligentDvr.ps1 -Companion -Check`. Check does not create
+backup settings, copy files, run inference or connect a camera. The normal CPU
+installation is still required; no trained weights are required for copying.
+
 ## Storage, integrity and recovery
 
 If contact with the service is lost, **Status unknown** labels the last checked
@@ -112,7 +133,10 @@ not clear it. Inspect and preserve those files before any manual repair.
 Copies live under `BACKUP_FOLDER/Intelligent-DVR-Backup/`. Each saved video has
 its own directory containing `source.EXT` and a private `receipt.json`; completed
 analysis adds `review.json`. `library.sqlite3` is the durable index. Local settings
-live in `.backup-library/` beside the configured analysis catalog. Keep the whole
+live in `.backup-library/` in a new copy-only installation; older prepared
+installations retain the catalog-adjacent `.backup-library/`. Adding a model
+keeps the existing copy-only library location, settings and saved items. The
+ordinary analysis launcher also reuses that existing location. Keep the whole
 backup tree, including SQLite files, together; stop the service before making a
 filesystem-level backup of the index. Models, enrollment templates, plans and
 browser review decisions need their existing separate backups.
