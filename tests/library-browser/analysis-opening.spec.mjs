@@ -102,6 +102,9 @@ test('a newer backup review stays open when an older automatic local result tran
   await page.route('**/api/library/**', route => {
     const path = new URL(route.request().url()).pathname;
     if (route.request().method() === 'POST') state.writes.push(path);
+    // This later library route overrides setup's broader API mock. Let its
+    // session handler run so connection reaches the saved-video review below.
+    if (path === '/api/library/session') return route.fallback();
     if (path === '/api/library/status') return route.fulfill({json:{
       configured:true, active:false, analyzing:false, state:'paused', error:null,
       config:{source_folder:'/generated/source', backup_folder:'/generated/backup', max_storage_gib:100,
@@ -116,6 +119,7 @@ test('a newer backup review stays open when an older automatic local result tran
   await page.getByRole('button', {name:/^Use my existing DVR/}).click();
   const backup = page.getByRole('region', {name:'Existing DVR backup'});
   await backup.getByRole('button', {name:'Connect to this computer', exact:true}).click();
+  await expect(backup.locator('.local-analysis-badge')).toHaveText('Backup paused');
   await backup.locator('.backup-saved summary').click();
   await backup.getByRole('button', {name:'Review backup', exact:true}).click();
   await expect(page.locator('.recognition-facts')).toContainText('newer-generated-backup');
