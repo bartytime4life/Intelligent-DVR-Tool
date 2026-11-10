@@ -230,7 +230,7 @@ Running 10 tests using 1 worker
   ✓  10 tests/browser/facility-map-draft-preservation.spec.mjs:198:1 › a newer accepted map lookup supersedes a delayed offline read without being cancelled by it (1.6s)
 
 
-  1) tests/browser/facility-draft-preservation.spec.mjs:95:1 › pasted JSON warns on navigation and accidental close without blocking its own import 
+  1) tests/browser/facility-draft-preservation.spec.mjs:95:1 › pasted JSON warns on navigation and accidental close without blocking its own import
 
     Error: expect(received).toBe(expected) // Object.is equality
 
@@ -260,7 +260,7 @@ Running 10 tests using 1 worker
     ────────────────────────────────────────────────────────────────────────────────────────────────
 
   1 failed
-    tests/browser/facility-draft-preservation.spec.mjs:95:1 › pasted JSON warns on navigation and accidental close without blocking its own import 
+    tests/browser/facility-draft-preservation.spec.mjs:95:1 › pasted JSON warns on navigation and accidental close without blocking its own import
   9 passed (21.6s)
 
 BATCH facility-repeats
