@@ -4,7 +4,7 @@ import { createHash } from 'node:crypto';
 import { parseRecognition, frameSummary, canShowBoxes, matchRecording, mergeRecognitionEvents, MAX_VIDEO_BYTES } from '../src/recognition.mjs';
 import { saveReviewNote } from '../src/data.mjs';
 import { Sha256, sha256Blob, sha256File } from '../src/sha256.mjs';
-import { recognitionFixture } from './fixtures/recognition.mjs';
+import { recognitionFixture, adjacentFrameFixture } from './fixtures/recognition.mjs';
 
 test('recognition review retains real class names, provenance and event-frame association', () => {
   const run = parseRecognition(recognitionFixture());
@@ -152,6 +152,24 @@ test('repeat import keeps decisions, and queue overflow does not silently discar
   const previous = [{...added[0], status:'confirmed', note:'Reviewed original recording.'}];
   assert.deepEqual(mergeRecognitionEvents(previous, added), previous);
   assert.throws(() => mergeRecognitionEvents(Array.from({length:1000}, (_,i) => ({id:`old-${i}`})), added), /exceed/);
+});
+
+test('identical rounded display times cannot transfer reviews to a different sampled frame', () => {
+  const first = parseRecognition(adjacentFrameFixture(0)).events;
+  const next = parseRecognition(adjacentFrameFixture(.04)).events;
+  assert.equal(first[0].time, next[0].time);
+  const reviewed = [{...first[0], status:'confirmed', note:'Inspected the first sample only'}];
+  assert.throws(() => mergeRecognitionEvents(reviewed, next), /conflicts with different evidence/);
+  assert.deepEqual(mergeRecognitionEvents(reviewed, first), reviewed);
+});
+
+test('legacy reviews without numeric times remain readable without borrowing an exact timestamp', () => {
+  const [event] = parseRecognition(adjacentFrameFixture(0)).events;
+  const {seconds, ...legacy} = event;
+  const reviewed = {...legacy, status:'dismissed', note:'Historical review without an exact time'};
+  assert.deepEqual(mergeRecognitionEvents([reviewed], [legacy]), [reviewed]);
+  assert.throws(() => mergeRecognitionEvents([reviewed], [event]), /conflicts with different evidence/);
+  assert.throws(() => mergeRecognitionEvents([event], [reviewed]), /conflicts with different evidence/);
 });
 
 test('repeat imports preserve saved pending notes, including explicit clears, without weakening evidence checks', () => {

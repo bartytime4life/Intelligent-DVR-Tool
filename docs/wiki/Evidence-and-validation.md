@@ -12,6 +12,10 @@ machine-plan saves, interrupted person sessions and pending webcam cancellation.
 records focused observation review, saved-person reconciliation, uncertain
 analysis-start recovery, composition input and measured loading tradeoffs.
 
+[Review and image preservation, November 9](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/workspace-recovery-followup-2026-11-09/README.md)
+records preserved bulk-review notes, exact sample matching, cross-tab thumbnail
+protection, plan-specific stills and interrupted zone-drawing checks.
+
 [Facility draft continuity and browser save recovery, November 9](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/facility-recovery-2026-11-09/README.md)
 records protected coordinate/map/import drafts, locked collection saves, portable
 conflict copies, narrow-window layout and interrupted camera-drag checks.

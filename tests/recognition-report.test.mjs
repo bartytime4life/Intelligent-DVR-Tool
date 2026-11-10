@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { recognitionFixture } from './fixtures/recognition.mjs';
+import { recognitionFixture, adjacentFrameFixture } from './fixtures/recognition.mjs';
 import { parseRecognition } from '../src/recognition.mjs';
 import { recognitionReport, reportCSV, reportHTML } from '../src/recognition-report.mjs';
 
@@ -28,6 +28,14 @@ test('reports refuse conflicting review identities and malformed threshold/prove
   assert.throws(()=>recognitionReport(run,{reviews:[{...run.events[0],rule:'different evidence'}]}),/conflicts/);
   assert.throws(()=>recognitionReport(run,{threshold:NaN}));
   run.trace.source_sha256='f'.repeat(64); assert.throws(()=>recognitionReport(run),/provenance/);
+});
+test('reports refuse a decision from another exact sample even when its displayed time matches',()=>{
+  const first = parseRecognition(adjacentFrameFixture(0));
+  const next = parseRecognition(adjacentFrameFixture(.04));
+  const review = {...first.events[0], status:'confirmed', note:'Reviewed the first sample only'};
+  assert.equal(review.time, next.events[0].time);
+  assert.throws(()=>recognitionReport(next,{reviews:[review]}), /conflicts with different evidence/);
+  assert.equal(recognitionReport(first,{reviews:[review]}).observations[0].note, review.note);
 });
 test('offline HTML escapes text and CSV neutralizes spreadsheet formulas',()=>{
   const run=parseRecognition(recognitionFixture());

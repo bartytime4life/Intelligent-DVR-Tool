@@ -154,6 +154,12 @@ A reused ID with different source/model/observation fields is rejected. Queue
 capacity is 1,000 records across model and sample observations. Every insertion
 refuses overflow without truncating older records.
 
+Matching includes the exact numeric sample time. Two nearby frames can have the
+same rounded display time, such as **Clip +0.0s**, without being the same
+observation. Older reviews without an exact time remain readable but cannot
+transfer their decisions to a result that supplies one. A conflict leaves the
+existing queue intact; export and inspect the older review separately.
+
 In an Events review, **Open in Recognition** opens **Open saved results** and
 focuses the next source-review step. The request shows the camera, clip time and
 recording/model fingerprints. Open the matching results file, then choose its
@@ -203,18 +209,19 @@ stream.
   eight characters of its SHA-256), as well as status, kind and search text.
   Sort by newest added, highest score or clip time.
 - **Bulk dismissal.** **Dismiss N shown awaiting review** applies to the current
-  filters only, after a confirmation. Undo lasts until the page closes and keeps
-  any decision you made afterwards.
+  filters only, after a confirmation, and keeps each saved review note. Unsaved
+  note drafts stay in this tab. Undo lasts until the page closes and keeps any
+  decision or note edit you made afterwards.
 - **CSV export.** **Export shown as CSV** downloads the shown rows with status,
   source, clip time, scores, hashes and notes. Cells that a spreadsheet would
   treat as formulas are neutralized.
 - **Stills.** Sending observations from a matched recording, or with
   **Send to Events** on a completed LAN segment, keeps one small JPEG still
   (160 px wide) per observation in this browser's IndexedDB. Stills are drawn
-  from the verified local recording, are never uploaded, and are removed when
-  their observations leave the queue; they stay while **Undo clear** can restore
-  them. A still is a visual reminder, not evidence: open the recording in
-  Recognition to verify.
+  from the verified local recording and are never uploaded. Cleanup preserves
+  references in the queue, **Undo clear**, note drafts, open reviews and retained
+  conflict copies. A still is a visual reminder: open the recording in Recognition
+  to verify it.
 - **LAN segments.** Each completed segment shows its observation count when the
   service reports it. **Only segments with observations** narrows the list,
   and a badge counts completed segments you have not reviewed or sent yet in this
@@ -229,6 +236,14 @@ run. **Undo clear** lasts until reload/close and merges with current decisions;
 it refuses overflow or conflicting evidence. Clearing again explicitly replaces
 the previous undo copy; the dialog offers its export first. Import a review export
 to restore decisions after a reload. Review file imports are bounded to 8 MiB.
+
+Automatic thumbnail cleanup waits while another tab running this version has the
+workspace open, including hidden tabs. It also skips cleanup when shared browser
+locking is unavailable or saved review references cannot be read. Images may
+therefore remain longer than their visible queue entries. Tabs opened before this
+update do not participate in the protection; export or preserve their unfinished
+work before reloading them. Browser review exports contain metadata and notes,
+not these local images.
 
 Sample reset keeps imported observations and all reviewed samples. Save failures
 produce a persistent banner with export actions. Success toasts say “updated”

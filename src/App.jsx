@@ -9,8 +9,10 @@ const TrainingWorkspace = lazy(() => import("./TrainingWorkspace.jsx"));
 import { mergeRecognitionEvents } from './recognition.mjs';
 import { workspaceFromHash, reviewExport, parseReviewExport, pauseHiddenPlayback } from './workspace-state.mjs';
 import { createWorkspaceSave } from './workspace-save.mjs';
+import { createThumbnailRetention } from './thumbnail-retention.mjs';
 import { backdropDismiss } from './dialog-dismiss.mjs';
-import { getImage, putImage, deleteImage, pruneImages, imageFileFrame, observationImageKey } from './local-images.mjs';
+import { getImage, putImage, imageFileFrame, observationImageKey } from './local-images.mjs';
+import {clearSavedZoneOffer, createZoneImageWriter, loadZoneImage, zoneImageForPlan} from './zone-images.mjs';
 import { ANALYZER_CLASSES, DEFAULT_MAX_GAP, analyzerRules, analyzerFilename } from './zone-rules.mjs';
 import { filterEvents, queueChoices, nextPending, queueCSV, dismissPending, restorePending } from './review-queue.mjs';
 import { DEFAULT_SETUP } from "./resources.mjs";
@@ -170,6 +172,24 @@ function Overlay({
 }) {
   const ref = useRef(),
     start = useRef();
+  function cancelDraw(pointerId) {
+    const drawing = start.current;
+    if (!drawing || pointerId !== undefined && pointerId !== drawing.pointerId) return;
+    start.current = null;
+    if (ref.current?.hasPointerCapture(drawing.pointerId)) ref.current.releasePointerCapture(drawing.pointerId);
+  }
+  useEffect(() => {
+    if (!edit) return;
+    const escape = event => {
+      if (event.key !== 'Escape' || !start.current) return;
+      cancelDraw();
+      if (!event.target?.closest?.('dialog')) event.preventDefault();
+    };
+    const blur = () => cancelDraw();
+    document.addEventListener('keydown', escape);
+    window.addEventListener('blur', blur);
+    return () => { document.removeEventListener('keydown', escape); window.removeEventListener('blur', blur); cancelDraw(); };
+  }, [edit, rule?.camera, aspect]);
   useEffect(() => {
     const el = ref.current,
       ctx = el.getContext("2d");
@@ -217,7 +237,9 @@ function Overlay({
       onPointerDown={
         edit
           ? (e) => {
-              start.current = point(e);
+              if (!e.isPrimary || e.button !== 0 || start.current) return;
+              e.preventDefault();
+              start.current = {pointerId:e.pointerId, origin:point(e)};
               e.currentTarget.setPointerCapture(e.pointerId);
             }
           : undefined
@@ -225,10 +247,10 @@ function Overlay({
       onPointerUp={
         edit
           ? (e) => {
-              if (!start.current) return;
+              if (!e.isPrimary || e.button !== 0 || !start.current || start.current.pointerId !== e.pointerId) return;
               const p = point(e),
-                s = start.current;
-              start.current = null;
+                s = start.current.origin;
+              cancelDraw(e.pointerId);
               const r = [
                 Math.min(p[0], s[0]),
                 Math.min(p[1], s[1]),
@@ -239,6 +261,8 @@ function Overlay({
             }
           : undefined
       }
+      onPointerCancel={edit ? e => cancelDraw(e.pointerId) : undefined}
+      onLostPointerCapture={edit ? e => cancelDraw(e.pointerId) : undefined}
     />
   );
 }
@@ -299,6 +323,22 @@ function EventRow({ event, review, zone }) {
   );
 }
 export function App() {
+  const [retention, setRetention] = useState(null), [startupError, setStartupError] = useState('');
+  useEffect(() => {
+    let mounted = true;
+    const session = createThumbnailRetention({storage:browserStorage()});
+    session.ready.then(result => {
+      if (!mounted) return;
+      if (result.ok) setRetention(session); else setStartupError(result.error);
+    });
+    return () => { mounted = false; session.close(); };
+  }, []);
+  if (startupError) return <section className="content-page" role="alert"><h1>Workspace protection needs attention</h1><p>{startupError}</p><button className="button" onClick={() => window.location.reload()}>Reload page</button></section>;
+  // Read browser work only after the shared lease is actually granted. A tab
+  // opening during an exclusive prune must not create unprotected memory refs.
+  return retention ? <WorkspaceApp thumbnailRetention={retention} /> : <div className="content-page"><h1>Opening workspace…</h1></div>;
+}
+function WorkspaceApp({thumbnailRetention}) {
   const [tab, updateTab] = useState(() => workspaceFromHash(window.location.hash) || "Monitor"),
     [selected, setSelected] = useState(1),
     [events, setEvents, eventsStorageError, eventsRecovery, eventsConflict, eventsUnsaved] = useStored("dvr.events.v1", []),
@@ -318,7 +358,17 @@ export function App() {
   const [sourceFilter, setSourceFilter] = useState("all"), [recordingFilter, setRecordingFilter] = useState("all"), [sort, setSort] = useState("newest");
   const [bulkUndo, setBulkUndo] = useState(null), [stillVersion, setStillVersion] = useState(0), [recorderStatus, setRecorderStatus] = useState(null);
   // A captured camera still waits for an explicit "Use for Plan N"; the saved still is per plan.
-  const [stillOffer, setStillOffer] = useState(null), [zoneStill, setZoneStill] = useState(null), [zoneStillVersion, setZoneStillVersion] = useState(0);
+  const [stillOffer, setStillOffer] = useState(null), [zoneImage, setZoneImage] = useState(null), [zoneStillVersion, setZoneStillVersion] = useState(0);
+  const [zoneImageWrite, setZoneImageWrite] = useState(null);
+  const zoneImageWriter = useRef(null), stillFileVersion = useRef(0), zoneImageContext = useRef(null);
+  zoneImageContext.current = {tab, selected};
+  const zoneStill = zoneImageForPlan(zoneImage, selected);
+  const zoneStillLoading = tab === 'Zones' && (zoneImage?.planId !== selected || zoneImage?.phase === 'loading');
+  useEffect(() => {
+    const writer = createZoneImageWriter(setZoneImageWrite); zoneImageWriter.current = writer;
+    return () => { writer.close(); zoneImageWriter.current = null; };
+  }, []);
+  useEffect(() => () => { stillFileVersion.current++; }, [tab, selected]);
   const [capturePending, setCapturePending] = useState(false);
   useEffect(() => {
     if (!capturedClip && !capturePending) return;
@@ -497,36 +547,37 @@ export function App() {
   }
   useEffect(() => {
     if (tab !== "Zones") return;
-    let live = true, made = "";
-    getImage("zone-stills", `plan-${selected}`).then((blob) => {
-      if (!live) return;
-      if (!blob) { setZoneStill(null); return; }
-      made = URL.createObjectURL(blob);
-      const image = new Image();
-      image.onload = () => { if (live) setZoneStill({ url: made, width: image.naturalWidth, height: image.naturalHeight }); };
-      image.onerror = () => { if (live) setZoneStill(null); };
-      image.src = made;
-    });
-    return () => { live = false; if (made) URL.revokeObjectURL(made); };
+    return loadZoneImage(selected, setZoneImage);
   }, [tab, selected, zoneStillVersion]);
   useEffect(() => () => { if (stillOffer?.url) URL.revokeObjectURL(stillOffer.url); }, [stillOffer]);
   function offerZoneStill(frame, source) {
+    stillFileVersion.current++;
     setStillOffer({ ...frame, source, url: URL.createObjectURL(frame.blob) });
     setTab("Zones");
   }
   async function useOfferedStill() {
-    if (!(await putImage("zone-stills", `plan-${selected}`, stillOffer.blob))) { setToast("This browser could not store the still. Zones still work on the planning grid."); return; }
-    setStillOffer(null); setZoneStillVersion((v) => v + 1);
-    setToast(`Still saved for Plan ${selected}. Draw the zone on the image; rectangles use full-frame coordinates.`);
+    const result = await zoneImageWriter.current?.save(selected, stillOffer);
+    if (!result) return;
+    if (!result.ok) { setToast("This browser could not store the still. Your current offer has not changed; zones still work on the planning grid."); return; }
+    setStillOffer(current => clearSavedZoneOffer(current, result.offer)); setZoneStillVersion((v) => v + 1);
+    setToast(`Still saved for Plan ${result.planId}. Draw the zone on the image; rectangles use full-frame coordinates.`);
   }
   async function removeZoneStill() {
-    await deleteImage("zone-stills", `plan-${selected}`);
+    const result = await zoneImageWriter.current?.remove(selected);
+    if (!result) return;
+    if (!result.ok) { setToast("This browser could not remove the saved still. Its current copy is preserved; check browser storage and try again."); return; }
     setZoneStillVersion((v) => v + 1);
+    setToast(`Camera still removed from Plan ${result.planId}.`);
   }
   async function chooseStillFile(e) {
     const file = e.target.files?.[0]; e.target.value = "";
     if (!file) return;
-    try { offerZoneStill(await imageFileFrame(file), file.name); } catch (err) { setToast(err.message); }
+    const ticket = ++stillFileVersion.current, planId = selected;
+    try {
+      const frame = await imageFileFrame(file);
+      if (ticket !== stillFileVersion.current || zoneImageContext.current.tab !== 'Zones' || zoneImageContext.current.selected !== planId) return;
+      offerZoneStill(frame, file.name);
+    } catch (err) { if (ticket === stillFileVersion.current) setToast(err.message); }
   }
   function exportAnalyzerRules() {
     try { const value = analyzerRules(draft); download(value, analyzerFilename(draft)); setError(""); setToast("Analyzer rules downloaded. List the file in the local app's analysis configuration to use it."); }
@@ -600,9 +651,9 @@ export function App() {
   });
   function clearFilters() { setFilter("all"); setEventMode("all"); setSourceFilter("all"); setRecordingFilter("all"); setSort("newest"); setQuery(""); }
   function dismissShown() {
-    const result = dismissPending(eventsRef.current, visible.filter((e) => e.status === "pending").map((e) => e.id), "Dismissed in bulk from Events.");
+    const result = dismissPending(eventsRef.current, visible.filter((e) => e.status === "pending").map((e) => e.id));
     eventsRef.current = result.events; setEvents(result.events); setBulkUndo(result); setModal(null);
-    setToast(`${result.previous.length} observations dismissed. Undo is available in Events.`);
+    setToast(`${result.previous.length} ${result.previous.length === 1 ? 'observation' : 'observations'} dismissed. Undo is available in Events.`);
   }
   function undoBulk() {
     const restored = restorePending(eventsRef.current, bulkUndo);
@@ -610,10 +661,20 @@ export function App() {
     setToast("Bulk dismissal undone. Later decisions were kept.");
   }
   // Stills follow the queue: removed with their observations, kept while Undo can restore them.
+  const otherImageReferences = useRef([]);
+  otherImageReferences.current = [...(clearedEvents || []), ...[...noteDrafts.values()].map(draft => draft.event), ...(modal?.type === 'review' ? [modal.event] : [])];
   useEffect(() => {
-    const timer = setTimeout(() => { pruneImages("thumbnails", new Set([...events, ...(clearedEvents || [])].flatMap(e => [e.id, observationImageKey(e)]))); }, 2000);
+    let lastEvents, lastOthers, references;
+    const currentReferences = () => {
+      if (lastEvents !== eventsRef.current || lastOthers !== otherImageReferences.current) {
+        lastEvents = eventsRef.current; lastOthers = otherImageReferences.current;
+        references = [...lastEvents, ...lastOthers];
+      }
+      return references;
+    };
+    const timer = setTimeout(() => { void thumbnailRetention.prune(currentReferences); }, 2000);
     return () => clearTimeout(timer);
-  }, [events, clearedEvents]);
+  }, [events, clearedEvents, noteDrafts, modal, thumbnailRetention]);
   function saveRule(e) {
     e.preventDefault();
     const problem = validateRule(draft);
@@ -886,7 +947,7 @@ export function App() {
               <button className="text-button" disabled={!shownPending} onClick={() => setModal({ type: "bulk-dismiss" })}><X size={15} />Dismiss {shownPending} shown awaiting review</button>
               <span className="hint">Shortcuts while reviewing: C confirm · D dismiss · J/K or ←/→ next and previous.</span>
             </div>
-            {bulkUndo && <div className="review-recovery" role="status"><span>{bulkUndo.previous.length} observations were dismissed in bulk.</span><button className="button" onClick={undoBulk}>Undo bulk dismissal</button></div>}
+            {bulkUndo && <div className="review-recovery" role="status"><span>{bulkUndo.previous.length} {bulkUndo.previous.length === 1 ? 'observation was' : 'observations were'} dismissed in bulk.</span><button className="button" onClick={undoBulk}>Undo bulk dismissal</button></div>}
             <div className="event-table">
               {visible.length ? (
                 visible.map((e) => (
@@ -950,12 +1011,14 @@ export function App() {
               <div className="zone-still-offer" role="status">
                 <img src={stillOffer.url} alt={`Captured still from ${stillOffer.source}`} />
                 <div><strong>New camera still</strong><span>{stillOffer.source} · {stillOffer.width}×{stillOffer.height} · stays in this browser</span></div>
-                <button className="button amber" onClick={useOfferedStill}>Use for Plan {selected}</button>
-                <button className="text-button" onClick={() => setStillOffer(null)}>Discard</button>
+                <button className="button amber" disabled={Boolean(zoneImageWrite)} onClick={useOfferedStill}>{zoneImageWrite?.offer === stillOffer ? `Saving still for Plan ${zoneImageWrite.planId}…` : `Use for Plan ${selected}`}</button>
+                <button className="text-button" disabled={zoneImageWrite?.offer === stillOffer} onClick={() => { stillFileVersion.current++; setStillOffer(null); }}>Discard</button>
               </div>
             )}
             <div className="zone-layout">
               <div>
+                {zoneStillLoading && <p role="status">Loading camera still for Plan {selected}… The planning grid is shown until its image is ready.</p>}
+                {zoneImage?.planId === selected && zoneImage.phase === 'failed' && <p role="alert">The camera still for Plan {selected} could not be displayed. Choose another image or keep using the planning grid.</p>}
                 <div className="zone-editor" style={zoneStill ? { aspectRatio: `${zoneStill.width} / ${zoneStill.height}` } : undefined}>
                   {zoneStill ? <img className="zone-still" src={zoneStill.url} alt={`Camera still for Plan ${selected}`} /> : <div className="zone-planning-grid" />}
                   <Overlay
@@ -969,7 +1032,7 @@ export function App() {
                 </div>
                 <div className="zone-still-actions">
                   <label className="text-button">Choose image file<input type="file" accept="image/jpeg,image/png,image/webp" aria-label="Choose a camera still image" onChange={chooseStillFile} /></label>
-                  {zoneStill && <button className="text-button" onClick={removeZoneStill}>Remove still</button>}
+                  {zoneStill && <button className="text-button" disabled={Boolean(zoneImageWrite)} onClick={removeZoneStill}>{zoneImageWrite?.kind === 'remove' ? 'Removing still…' : 'Remove still'}</button>}
                   <span className="hint">Or use <strong>Use for zones</strong> on a Monitor preview or a Recognition frame.</span>
                 </div>
                 <p className="hint">
@@ -1370,8 +1433,9 @@ export function App() {
         </Modal>
       )}
       {modal?.type === "bulk-dismiss" && (
-        <Modal title={`Dismiss ${shownPending} observations?`} close={() => setModal(null)}>
-          <p>This dismisses the {shownPending} shown observations that await review, using your current filters. Confirmed and dismissed items are unchanged.</p>
+        <Modal title={`Dismiss ${shownPending} ${shownPending === 1 ? 'observation' : 'observations'}?`} close={() => setModal(null)}>
+          <p>This dismisses {shownPending === 1 ? 'the shown observation that awaits review' : `the ${shownPending} shown observations that await review`}, using your current filters. Confirmed and dismissed items are unchanged.</p>
+          <p>Saved review notes are kept. Unsaved note drafts stay in this tab.</p>
           <p className="hint">Undo is available in Events until this page closes. Later decisions are kept when you undo.</p>
           <div className="review-actions">
             <button className="button amber" onClick={dismissShown}>Dismiss {shownPending}</button>
