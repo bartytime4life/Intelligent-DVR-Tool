@@ -173,3 +173,11 @@ quiet-time check is a heuristic: an OEM can pause and resume writing later.
 Prefer completed exports/closed-file folders and verify one real clip before
 relying on unattended backup. Continuous recording, camera timestamps, all-file
 coverage, novice usability and 100-camera capacity remain unqualified.
+
+## Read saved byte-check receipts
+
+In the same Recognition backup task, open **Check backup receipts**. Load the
+verifier's current JSON receipt and optionally its earlier receipt. This browser-
+local view needs no model, recording or service connection. It keeps byte
+correspondence, reported review/coverage/backend and field acceptance separate;
+see the [acceptance procedure](oem-field-acceptance.md#read-byte-check-receipts-in-the-app).

@@ -4,6 +4,7 @@ import './recognition.css';
 import LocalAnalysis from './LocalAnalysis.jsx';
 import LanRecorder from './LanRecorder.jsx';
 import BackupLibrary from './BackupLibrary.jsx';
+import AcceptanceReceipts from './AcceptanceReceipts.jsx';
 import RecognitionReport from './RecognitionReport.jsx';
 import { coverageLabel } from './media-coverage.mjs';
 import { saveObservationStills, grabFrame } from './local-images.mjs';
@@ -199,6 +200,7 @@ export default function RecognitionReview({ onImport, onValidateImport, active =
         a pending folder edit, or the status of recording that continues locally. */}
     <div id="recognition-task-backup" className="recognition-task-panel" hidden={task !== 'backup'}>
       <BackupLibrary onResult={openLocalResult} onBusy={setLibraryBusy} onStatus={setLibraryStatus} blocked={analysisBusy || recorderBusy} />
+      <AcceptanceReceipts />
     </div>
     <div id="recognition-task-recorder" className="recognition-task-panel" ref={recorderPanel} tabIndex={-1} role="region" aria-label="LAN recording task" hidden={task !== 'recorder'}>
       {taskNotice && <p className="recognition-status" role="status">{taskNotice}</p>}

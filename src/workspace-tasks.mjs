@@ -2,7 +2,7 @@
 export const WORKSPACE_TASKS = Object.freeze([
   {id:'watch', group:'Watch & record', title:'Watch cameras', detail:'Connect a source and view its preview.', workspace:'Monitor', keywords:'live webcam usb rtsp streams ip camera'},
   {id:'recorder', group:'Watch & record', title:'Record a LAN camera', detail:'Set up one authorized RTSP source.', workspace:'Recognition', task:'recorder', keywords:'dvr ip network stream capture'},
-  {id:'backup', group:'Watch & record', title:'Back up saved DVR videos', detail:'Keep verified copies of finished recordings.', workspace:'Recognition', task:'backup', keywords:'backup library existing recorder folders files storage'},
+  {id:'backup', group:'Watch & record', title:'Back up saved DVR videos', detail:'Keep verified copies and check saved byte receipts.', workspace:'Recognition', task:'backup', keywords:'backup library existing recorder folders files storage byte integrity checksum sha acceptance receipts verification'},
   {id:'recording', group:'Analyze & review', title:'Analyze a recording', detail:'Choose a saved video and inspect detections.', workspace:'Recognition', task:'recording', keywords:'video file clip objects detection model inference ai'},
   {id:'import', group:'Analyze & review', title:'Open saved results', detail:'Match an analysis export to its original video.', workspace:'Recognition', task:'import', keywords:'import receipt json trace recognition evidence'},
   {id:'review', group:'Analyze & review', title:'Review observations', detail:'Filter events, add notes and record decisions.', workspace:'Events', keywords:'history queue alerts human verdict export'},
