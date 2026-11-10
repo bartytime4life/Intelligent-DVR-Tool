@@ -29,3 +29,15 @@ export function sharpeningFixture(source) {
   value.trace.frames[1].comparison.detections=[{label:'truck',score:.8,box:[.1,.2,.2,.3]}];
   return value;
 }
+
+// Distinct sampled frames can have the same one-decimal display time.
+export function adjacentFrameFixture(seconds = 0) {
+  const value = recognitionFixture();
+  for (const part of [value.receipt, value.trace]) {
+    part.frames_read = 2; part.fps_metadata = 25; part.stride = 1;
+    part.events[0].seconds = seconds;
+  }
+  value.trace.frames[1].frame_index = 1;
+  value.trace.frames[1].seconds = .04;
+  return value;
+}

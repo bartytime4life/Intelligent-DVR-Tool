@@ -104,7 +104,9 @@ export function mergeRecognitionEvents(existing, added) {
     const old = previous.get(event.id);
     if (!old) continue;
     // An ID alone is not evidence that two unsigned observations are the same.
-    const keys = ['mode', 'camera', 'cameraName', 'title', 'label', 'time', 'score', 'rule'];
+    // Display times are rounded. Numeric sample times must also match, including
+    // whether an older record has one; never infer exact evidence from its label.
+    const keys = ['mode', 'camera', 'cameraName', 'title', 'label', 'time', 'seconds', 'score', 'rule'];
     require(keys.every(key => old[key] === event[key]) &&
       ['source_sha256', 'model_sha256'].every(key => old.provenance?.[key] === event.provenance?.[key]),
       'An observation ID conflicts with different evidence already in the queue. Export and clear the queue before reviewing this file separately.');
