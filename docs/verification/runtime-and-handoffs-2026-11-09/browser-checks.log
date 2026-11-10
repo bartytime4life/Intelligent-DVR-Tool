@@ -1,0 +1,192 @@
+Batch facility-a
+[WebServer] (node:560518) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 56 tests using 1 worker
+
+  ✓   1 tests/browser/facility-basemap.spec.mjs:25:1 › a blank facility requests no map pictures until a real layer is chosen, then remembers it (5.7s)
+  ✓   2 tests/browser/facility-basemap.spec.mjs:49:1 › a chosen address is previewed on the map before Save site commits it (3.1s)
+  ✓   3 tests/browser/facility-basemap.spec.mjs:67:1 › unavailable map pictures leave the plan editable and offer a way back (2.1s)
+  ✓   4 tests/browser/facility-basemap.spec.mjs:81:1 › Streets sends only the app origin and stops on an HTTP 200 policy tile (3.3s)
+  ✓   5 tests/browser/facility-basemap.spec.mjs:112:1 › aerial photos are not requested outside their coverage (2.2s)
+  ✓   6 tests/browser/facility-basemap.spec.mjs:125:1 › returning to Aerial reuses the loaded site photo; Grid discards it (2.6s)
+  ✓   7 tests/browser/facility-basemap.spec.mjs:140:1 › Find mapped buildings loads drafts in one click; map clicks include or exclude them before adding (3.6s)
+  ✓   8 tests/browser/facility-basemap.spec.mjs:177:1 › the start card steps aside once a site is suggested or saved without using it (2.1s)
+  ✓   9 tests/browser/facility-basemap.spec.mjs:189:1 › a coarse device position keeps the site in place until a precise fix arrives and is saved (3.8s)
+  ✓  10 tests/browser/facility-basemap.spec.mjs:222:1 › a failed device fix cannot save the default as GPS or overwrite a manual correction (1.7s)
+  ✓  11 tests/browser/facility-basemap.spec.mjs:245:1 › Satellite loads georeferenced roof tiles as the operator pans, with a working grid fallback (5.6s)
+  ✓  12 tests/browser/facility-basemap.spec.mjs:272:1 › Satellite keeps overseas views on Sentinel-2 and reports a U.S. roof outage (2.5s)
+  ✓  13 tests/browser/facility-buildings.spec.mjs:18:1 › first building previews a template, picks a snapped center and saves only on Add (4.4s)
+  ✓  14 tests/browser/facility-buildings.spec.mjs:50:1 › moving, rotating and copying a courtyard building preserves its rooms and source (3.5s)
+  ✓  15 tests/browser/facility-buildings.spec.mjs:91:1 › mobile building picker accepts precise dimensions without map input (2.1s)
+  ✓  16 tests/browser/facility-camera-planning.spec.mjs:38:1 › drag, rotate handle and keyboard edits change only the camera draft until Save camera (4.8s)
+  ✓  17 tests/browser/facility-camera-planning.spec.mjs:88:1 › touch drag moves the selected camera draft (3.6s)
+  ✓  18 tests/browser/facility-camera-planning.spec.mjs:104:1 › losing window focus cancels a camera drag without leaving a stale release handler (4.0s)
+  ✓  19 tests/browser/facility-camera-planning.spec.mjs:126:1 › coverage step reports zone and route coverage, marks indoor zones and toggles blind spots (2.6s)
+  ✓  20 tests/browser/facility-camera-planning.spec.mjs:152:1 › pixel density table, lens preset and installer sheet download use the saved plan (2.9s)
+  ✓  21 tests/browser/facility-doorways.spec.mjs:21:1 › click a shared map wall, drag the doorway, save, reload and undo without changing room outlines (6.7s)
+  ✓  22 tests/browser/facility-doorways.spec.mjs:59:1 › numeric fallback, feet and floor copying preserve door records and reject narrowing away the opening (4.6s)
+  ✓  23 tests/browser/facility-doorways.spec.mjs:83:1 › touch dragging and keyboard nudges move only the preview until Save (3.2s)
+  ✓  24 tests/browser/facility-doorways.spec.mjs:106:1 › numeric doorway placement works without WebGL, and converting its room removes the doorway atomically (1.9s)
+  ✓  25 tests/browser/facility-draft-preservation.spec.mjs:36:1 › route coordinate drafts keep their units and text until saved or explicitly discarded (2.5s)
+  ✓  26 tests/browser/facility-draft-preservation.spec.mjs:65:1 › pathway coordinate drafts stay bound to their original floor and remain saveable (2.7s)
+  ✓  27 tests/browser/facility-draft-preservation.spec.mjs:95:1 › pasted JSON warns on navigation and accidental close without blocking its own import (2.3s)
+  ✓  28 tests/browser/facility-geometry.spec.mjs:14:1 › courtyard apply, transform, base edits and Undo preserve the complete advanced plan (4.7s)
+  ✓  29 tests/browser/facility-geometry.spec.mjs:24:1 › keyboard polygon editing excludes bbox-only shells and invalidates stale drafts (3.7s)
+  ✓  30 tests/browser/facility-geometry.spec.mjs:34:1 › pointer area and site pin suggest changes without saving the plan (4.7s)
+  ✓  31 tests/browser/facility-geometry.spec.mjs:49:1 › missing WebGL preserves keyboard polygon and offline review recovery (2.0s)
+  ✓  32 tests/browser/facility-library.spec.mjs:25:1 › new installs start with one blank facility and no sample map features (3.1s)
+  ✓  33 tests/browser/facility-library.spec.mjs:41:1 › named facilities keep independent geometry and the active facility survives reload (6.9s)
+  ✓  34 tests/browser/facility-library.spec.mjs:73:1 › named save files and collection backups import as additional facilities without replacing originals (3.6s)
+  ✓  35 tests/browser/facility-library.spec.mjs:108:1 › a full 30-facility backup restores on a fresh install without a spare starter record (3.6s)
+  ✓  36 tests/browser/facility-library.spec.mjs:124:1 › an existing saved plan migrates once and the original legacy save stays intact (4.1s)
+  ✓  37 tests/browser/facility-library.spec.mjs:139:84 › corrupt collection data stays untouched and is downloadable for recovery (1.9s)
+  ✓  38 tests/browser/facility-library.spec.mjs:139:84 › corrupt legacy plan data stays untouched and is downloadable for recovery (2.0s)
+  ✓  39 tests/browser/facility-library.spec.mjs:154:1 › unsaved site and shape edits block facility switching and creation (3.6s)
+  ✓  40 tests/browser/facility-library.spec.mjs:175:1 › file reads recheck current drafts before selecting an imported facility (1.8s)
+  ✓  41 tests/browser/facility-library.spec.mjs:196:1 › custom shape drafts survive collapsed controls and block navigation until applied or discarded (3.1s)
+  ✓  42 tests/browser/facility-library.spec.mjs:217:1 › unapplied line measurements protect navigation while Apply and Discard remain available (2.9s)
+  ✓  43 tests/browser/facility-library.spec.mjs:237:1 › pending floor-path measurements protect levels, units and surfaces until Apply and Save (3.4s)
+  ✓  44 tests/browser/facility-library.spec.mjs:274:1 › selecting a zone on the map preserves a pending shape draft (4.0s)
+  ✓  45 tests/browser/facility-library.spec.mjs:304:1 › example layouts are opt-in and keep the existing blank facility (2.5s)
+  ✓  46 tests/browser/facility-map-draft-preservation.spec.mjs:66:1 › unreviewed map JSON and area edits block task changes and remain available until explicit discard (2.1s)
+  ✓  47 tests/browser/facility-map-draft-preservation.spec.mjs:96:1 › collapsed or fully excluded map candidates keep their review choices and can still be applied (2.1s)
+  ✓  48 tests/browser/facility-map-draft-preservation.spec.mjs:121:1 › collapsing the map-draft panel keeps a partial pointer area until it is finished or explicitly cancelled (3.9s)
+  ✓  49 tests/browser/facility-map-draft-preservation.spec.mjs:146:1 › site changes require explicit map-draft discard instead of silently dropping reviewed outlines (2.7s)
+  ✓  50 tests/browser/facility-map-draft-preservation.spec.mjs:164:1 › discard aborts a pending map lookup and ignores even a late result from that lookup (2.6s)
+  ✓  51 tests/browser/facility-map-draft-preservation.spec.mjs:183:1 › discard invalidates an unfinished offline-file read without restoring its candidates later (2.4s)
+  ✓  52 tests/browser/facility-map-draft-preservation.spec.mjs:198:1 › a newer accepted map lookup supersedes a delayed offline read without being cancelled by it (2.1s)
+  ✓  53 tests/browser/facility-recovery.spec.mjs:26:75 › two facility tabs recover with Keep this tab’s version and preserve both collections (5.1s)
+  ✓  54 tests/browser/facility-recovery.spec.mjs:26:75 › two facility tabs recover with Use other tab’s version and preserve both collections (5.6s)
+  ✓  55 tests/browser/facility-recovery.spec.mjs:52:1 › unreadable facility storage can be explicitly recovered with the original bytes preserved (4.6s)
+  ✓  56 tests/browser/facility-recovery.spec.mjs:65:1 › new previews entered while a conflict choice waits for the lock are kept (4.3s)
+
+  56 passed (3.2m)
+
+Batch facility-b
+[WebServer] (node:577135) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 36 tests using 1 worker
+
+  ✓   1 tests/browser/facility-room-sketch.spec.mjs:20:1 › one click starts a preview; hall, units and names update the same undoable layout (3.6s)
+  ✓   2 tests/browser/facility-room-sketch.spec.mjs:42:1 › tap corners, drag a second group, protect pending work and undo both groups together (3.2s)
+  ✓   3 tests/browser/facility-room-sketch.spec.mjs:70:1 › mobile-size sketch accepts keyboard and exact dimensions without WebGL; discard leaves the floor untouched (1.7s)
+  ✓   4 tests/browser/facility-room-sketch.spec.mjs:94:1 › sketching upstairs preserves the occupied floor, existing openings, and other rooms (2.1s)
+  ✓   5 tests/browser/facility-room-sketch.spec.mjs:114:3 › tracing with a touch screen › match a private floor image to two landmarks, trace a room and save only the geometry (2.9s)
+  ✓   6 tests/browser/facility-room-walls.spec.mjs:18:1 › a room split preserves named previews across tools, accepts exact feet and saves as one undoable edit (2.7s)
+  ✓   7 tests/browser/facility-room-walls.spec.mjs:47:3 › touch wall editing › move the shared divider on the plan, merge, and restore each operation independently (2.7s)
+  ✓   8 tests/browser/facility-stair-placement.spec.mjs:30:1 › click the start, choose a floor, drag and rotate around the landing, save one edit and reopen it (6.9s)
+  ✓   9 tests/browser/facility-stair-placement.spec.mjs:55:1 › a one-floor plan can add a destination and position stairs without graphics; invalid fit blocks save (1.7s)
+  ✓  10 tests/browser/facility-stair-placement.spec.mjs:68:3 › touch stairs › tap on the top floor, choose downstairs, rotate by touch and save on the map (3.2s)
+  ✓  11 tests/browser/facility-studio.spec.mjs:22:1 › Facility Studio focus map and navigation are reversible and keyboard accessible (2.3s)
+  ✓  12 tests/browser/facility-studio.spec.mjs:46:1 › intermediate window widths keep the full map and every map-layer choice reachable (1.8s)
+  ✓  13 tests/browser/facility-studio.spec.mjs:77:1 › image laboratory imports only on request, reports ROI and compares two local frames (2.0s)
+  ✓  14 tests/browser/facility-studio.spec.mjs:101:1 › transparent local PNGs are composited before analysis and lossless frame export (1.9s)
+  ✓  15 tests/browser/facility-studio.spec.mjs:142:1 › calibrated map ruler requires withheld check and independent measured reference declaration (2.3s)
+  ✓  16 tests/browser/facility-studio.spec.mjs:177:1 › a chosen ground reference accepts an explicit local map pick, without activating recording (2.3s)
+  ✓  17 tests/browser/facility-studio.spec.mjs:198:1 › image reference numbering follows full row positions even when earlier markers are blank (1.8s)
+  ✓  18 tests/browser/facility-studio.spec.mjs:213:1 › Facility Studio has one compact task selector plus descriptive sidebar steps (1.9s)
+  ✓  19 tests/browser/facility-windows.spec.mjs:23:1 › click an exterior wall, move and resize both ends, set elevation, save, export and undo (7.6s)
+  ✓  20 tests/browser/facility-windows.spec.mjs:58:1 › without graphics, place on an empty upper floor and edit width and sill in feet (2.0s)
+  ✓  21 tests/browser/facility-windows.spec.mjs:75:3 › touch window editing › touch-resize a window, nudge its center, then place a second one (3.1s)
+  ✓  22 tests/browser/facility-workspace.spec.mjs:12:1 › dimensions follow selected polygon, switch units, and hide without altering geometry (2.8s)
+  ✓  23 tests/browser/facility-workspace.spec.mjs:27:1 › copy rooms upstairs, add a level, and undo preserve lower floor elevations (3.3s)
+  ✓  24 tests/browser/facility-workspace.spec.mjs:57:1 › centering right after a view switch settles at that view's pitch (5.7s)
+  ✓  25 tests/browser/facility-workspace.spec.mjs:78:1 › camera edits retain unsaved changes across center and aim tools (3.5s)
+  ✓  26 tests/browser/facility-workspace.spec.mjs:94:1 › zone configuration is saved, exported as a real rule, and pending edits block navigation (3.7s)
+  ✓  27 tests/browser/facility-workspace.spec.mjs:121:1 › narrow layout keeps map controls and zone setup reachable (2.0s)
+  ✓  28 tests/browser/facility-workspace.spec.mjs:138:1 › stair length entry converts feet to metres and unsaved stair edits protect navigation (3.9s)
+  ✓  29 tests/browser/facility-workspace.spec.mjs:160:1 › stair cutout becomes a ceiling opening below and supports exact dimensions with dirty protection (4.8s)
+  ✓  30 tests/browser/facility-workspace.spec.mjs:190:1 › whole-floor toggle removes only its slab, retains partial openings, and Undo restores it (4.1s)
+  ✓  31 tests/browser/facility.spec.mjs:29:1 › submitted address search is keyboard accessible and does not send text while typing (2.5s)
+SCRIPTED_FACILITY_EFFORT {"draftMs":1609,"correctionMs":937,"scriptedCorrectionFields":1,"scriptedCorrectionSaves":1,"noviceStudy":false,"accuracyMeasured":false}
+(node:577179) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  32 tests/browser/facility.spec.mjs:47:1 › real pinned shells review, select, append, edit and undo without changing camera plans (4.8s)
+  ✓  33 tests/browser/facility.spec.mjs:81:1 › courtyard and malformed imports never add invented buildings or retain old drafts (3.1s)
+  ✓  34 tests/browser/facility.spec.mjs:93:1 › file import, boundary changes and replacement remain explicit and undoable (3.6s)
+  ✓  35 tests/browser/facility.spec.mjs:107:1 › partial service failure and cancellation preserve the saved plan (2.4s)
+  ✓  36 tests/browser/facility.spec.mjs:126:1 › narrow screen keeps numeric area and offline review controls reachable (2.1s)
+
+  36 passed (1.9m)
+
+Batch app: compact rows from the preserved Playwright JSON receipt
+{"startTime": "2026-11-10T03:45:12.252Z", "duration": 180155.579, "expected": 77, "skipped": 0, "unexpected": 0, "flaky": 0}
+PASS audit-regressions.spec.mjs:7 conflicting recording imports leave the original reviewed thumbnail untouched
+PASS audit-regressions.spec.mjs:40 another tab saving System preserves a dirty draft until explicit adoption
+PASS monitor-cancellation.spec.mjs:28 switching to Local DVR / IP camera cancels a pending webcam permission result
+PASS monitor-cancellation.spec.mjs:28 switching to Public internet webcam cancels a pending webcam permission result
+PASS monitor-cancellation.spec.mjs:39 changing setup source leaves an already connected generated webcam running
+PASS people-operation-recovery.spec.mjs:34 a malformed first people reply stays unknown and a later verified refresh recovers the list
+PASS people-operation-recovery.spec.mjs:45 delete is single-flight and a failed follow-up read keeps its stale row blocked until verified refresh
+PASS people-operation-recovery.spec.mjs:68 500 delete reply stays uncertain even when the next list omits the person
+PASS people-operation-recovery.spec.mjs:68 malformed delete reply stays uncertain even when the next list omits the person
+PASS person-session-recovery.spec.mjs:79 enroll: Exit during import aborts the request before any new template write
+PASS person-session-recovery.spec.mjs:79 enroll: Events during import aborts the request before any new template write
+PASS person-session-recovery.spec.mjs:79 baseline: Exit during import aborts the request before any new template write
+PASS person-session-recovery.spec.mjs:79 baseline: Events during import aborts the request before any new template write
+PASS person-session-recovery.spec.mjs:87 a timed-out person import keeps the same recording available for a successful retry
+PASS person-session-recovery.spec.mjs:99 a timed-out submitted template operation stays uncertain and preserves its recording without offering a duplicate write
+PASS person-session-recovery.spec.mjs:109 a submitted template response 500 stays uncertain without duplicate retry
+PASS person-session-recovery.spec.mjs:109 a submitted template response 409 keeps the refused recording retryable
+PASS person-session-recovery.spec.mjs:109 a submitted template response 422 keeps the refused recording retryable
+PASS recognition.spec.mjs:8 recognition keeps evidence separate, rejects wrong files, and sends observations to review
+PASS recognition.spec.mjs:28 recognition rejects mixed provenance and displays partial coverage on a narrow screen
+PASS recognition.spec.mjs:42 matching synthetic recording enables boxes only at paused analyzed samples
+PASS review-notes.spec.mjs:40 note drafts survive queue steps, every dialog close, and source inspection before a separate save
+PASS review-notes.spec.mjs:67 discard releases only its draft and saved pending note survives an older reviewed export
+PASS review-notes.spec.mjs:88 storage failure keeps the saved-in-memory note exportable and warns before closing
+PASS review-notes.spec.mjs:110 another tab human edit is shown before a retained draft can replace it
+PASS review-notes.spec.mjs:127 reused observation ID with changed evidence makes the old draft read-only
+PASS review-notes.spec.mjs:144 orphaned drafts stay reachable, downloadable, and explicitly discardable after closing their review
+PASS review-workflow.spec.mjs:17 keyboard review confirms, dismisses and advances through pending observations
+PASS review-workflow.spec.mjs:41 events sort, export shown rows as CSV, and bulk dismissal can be undone
+PASS review-workflow.spec.mjs:58 observations sent from a matched recording keep a local still in Events
+PASS review-workspace.spec.mjs:9 maximum recognition run has an explicit clear, export, undo and successful handoff path
+PASS review-workspace.spec.mjs:45 receipt import preserves review decisions and review exports restore an emptied queue
+PASS review-workspace.spec.mjs:78 recognition session survives workspace changes and browser Back/Forward
+PASS review-workspace.spec.mjs:95 save failures stay visible and never report a review as saved
+PASS review-workspace.spec.mjs:122 narrow-screen queue controls, source filters and empty states remain usable
+PASS review-workspace.spec.mjs:133 Back to the root URL restores Monitor and Forward restores Events
+PASS source-handoffs.spec.mjs:40 a source request reveals and focuses imports after Backup, without starting or replacing anything
+PASS source-handoffs.spec.mjs:55 a first visit from Events focuses its source step after the lazy workspace mounts
+PASS source-handoffs.spec.mjs:62 unrelated loaded results remain intact until the operator opens the matching receipt
+PASS source-handoffs.spec.mjs:85 a matched source opens its original observation frame, then ordinary navigation preserves further review
+PASS source-handoffs.spec.mjs:119 closing a source request keeps loaded results and releases the pending handoff
+PASS source-handoffs.spec.mjs:129 a background analysis keeps its controller and directs a blocked recording step to readable guidance
+PASS source-handoffs.spec.mjs:156 results that finish opening while hidden do not steal focus on an ordinary workspace return
+PASS system-save-preservation.spec.mjs:52 failed applied machine plans survive another tab, export both plain versions and persist an explicit local choice
+PASS system-save-preservation.spec.mjs:71 an unapplied System draft disables conflict adoption until discarded and then loads the selected version
+PASS system-save-preservation.spec.mjs:88 a clean remote save updates the applied plan while preserving unfinished System form edits
+PASS system-save-preservation.spec.mjs:98 unreadable machine plans remain downloadable without a false unsaved warning and are backed up before an applied save
+PASS system-save-preservation.spec.mjs:113 explicit Apply repairs an unreadable plan with unchanged defaults and preserves the unreadable original
+PASS task-composition.spec.mjs:3 task search composition commits text before Enter or arrow keys can select a destination
+PASS task-navigation.spec.mjs:13 keyboard task search opens the exact Recognition path without starting a service
+PASS task-navigation.spec.mjs:35 finder supports arrow selection, empty search recovery, Escape and focus return
+PASS task-navigation.spec.mjs:62 canceling a task handoff keeps the editor and search intact
+PASS task-navigation.spec.mjs:82 workspace handoffs and browser history update title, landmark focus and announcements
+PASS task-navigation.spec.mjs:107 task navigator stays reachable and scrolls at 320px
+PASS task-navigation.spec.mjs:107 task navigator stays reachable and scrolls at 390px
+PASS task-navigation.spec.mjs:107 task navigator stays reachable and scrolls at 662px
+PASS task-navigation.spec.mjs:107 task navigator stays reachable and scrolls at 1024px
+PASS task-navigation.spec.mjs:107 task navigator stays reachable and scrolls at 1440px
+PASS training-preservation.spec.mjs:47 edited enrollment survives cancelled navigation and Exit, then leaves only after explicit confirmation
+PASS training-preservation.spec.mjs:66 initial camera setup can exit or change workspaces without an abandonment prompt or camera access
+PASS training-start-recovery.spec.mjs:54 500 analysis start reply preserves the recording without blindly retrying or cancelling an unknown job
+PASS training-start-recovery.spec.mjs:54 lost analysis start reply preserves the recording without blindly retrying or cancelling an unknown job
+PASS training-start-recovery.spec.mjs:54 malformed analysis start reply preserves the recording without blindly retrying or cancelling an unknown job
+PASS training-start-recovery.spec.mjs:70 only a verified inactive local status exposes an explicit retry and warns before replacing a retained result
+PASS work-preservation.spec.mjs:62 a failed local review survives another tab save and both versions remain exportable before choosing
+PASS work-preservation.spec.mjs:77 keeping this tab refuses a failed write, preserves the other saved version, and succeeds after storage recovers
+PASS workspace-audit.spec.mjs:41 every-workspace desktop navigation, visible headings, overflow and screenshots
+PASS workspace-audit.spec.mjs:41 every-workspace mobile navigation, visible headings, overflow and screenshots
+PASS workspace-audit.spec.mjs:61 Monitor source dialog and Settings navigation stay keyboard-usable without connecting cameras
+PASS workspace-audit.spec.mjs:85 unsaved Zones and System drafts require explicit permission to navigate or switch plans
+PASS workspace-audit.spec.mjs:119 deferred Events deep link resolves when matching recording results arrive
+PASS workspace-audit.spec.mjs:140 Browser Back respects the active dirty editor instead of jumping to Facility
+PASS workspace-audit.spec.mjs:160 mobile first-run camera choice and Facility contextual task navigation stay reachable
+PASS workspace-loading.spec.mjs:4 direct Settings loads Monitor only when chosen and starts no capture
+PASS workspace-loading.spec.mjs:4 direct System loads Monitor only when chosen and starts no capture
+PASS zones-stills.spec.mjs:4 a camera still sets exact full-frame zone coordinates and exports analyzer rules
+PASS zones-stills.spec.mjs:49 legacy object rules load but must choose a model class before analyzer export

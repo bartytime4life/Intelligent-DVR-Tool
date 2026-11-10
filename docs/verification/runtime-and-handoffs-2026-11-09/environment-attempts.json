@@ -1,0 +1,27 @@
+{
+  "generatedPeopleTestsOnly": true,
+  "noEnvironmentChanges": true,
+  "attempts": [
+    {
+      "interpreter": "system Python 3.12",
+      "discovered": 19,
+      "passed": 17,
+      "errors": 2,
+      "cause": "Installed system NumPy 2.3.5 lacks its matching C extension"
+    },
+    {
+      "interpreter": "default Python 3.10.9",
+      "discovered": 19,
+      "passed": 15,
+      "skipped": 4,
+      "cause": "Optional NumPy unavailable"
+    },
+    {
+      "interpreter": "existing isolated OEM-backup environment",
+      "discovered": 19,
+      "passed": 19,
+      "failed": 0,
+      "skipped": 0
+    }
+  ]
+}

@@ -4,6 +4,10 @@
 records searchable task paths, keyboard handoffs, protected note drafts and
 machine-plan saves, interrupted person sessions and pending webcam cancellation.
 
+[Source handoffs and runtime recovery, November 9](runtime-and-handoffs-2026-11-09/README.md)
+records focused observation review, saved-person reconciliation, uncertain
+analysis-start recovery, composition input and measured loading tradeoffs.
+
 [Facility draft continuity and browser save recovery, November 9](facility-recovery-2026-11-09/README.md)
 records protected coordinate/map/import drafts, locked collection saves, portable
 conflict copies, narrow-window layout and interrupted camera-drag checks.
