@@ -1,0 +1,51 @@
+JOB 129542105639
+2026-11-10T00:33:02.5875956Z # tests 451
+2026-11-10T00:33:02.5876273Z # pass 451
+2026-11-10T00:33:02.5876429Z # fail 0
+2026-11-10T00:33:02.5876746Z # skipped 0
+2026-11-10T00:33:02.7563966Z # tests 4
+2026-11-10T00:33:02.7564513Z # pass 4
+2026-11-10T00:33:02.7564816Z # fail 0
+2026-11-10T00:33:02.7565320Z # skipped 0
+2026-11-10T00:34:17.2397591Z Ran 510 tests in 66.274s
+2026-11-10T00:34:17.2397820Z OK
+2026-11-10T00:34:38.8309874Z Documentation checks passed: 1255 local links, 14 historical media hashes, 11 current visual blobs, 2,381,700 historical + 185,432 PR61 + 1,626,214 guide media bytes, test-count consistency.
+2026-11-10T00:34:38.9624480Z Wiki checked: 64 pages/navigation files.
+
+JOB 129542106053
+2026-11-10T00:33:24.1479807Z # tests 451
+2026-11-10T00:33:24.1480068Z # pass 451
+2026-11-10T00:33:24.1480198Z # fail 0
+2026-11-10T00:33:24.1480534Z # skipped 0
+2026-11-10T00:33:24.9242308Z # tests 4
+2026-11-10T00:33:24.9243834Z # pass 4
+2026-11-10T00:33:24.9244025Z # fail 0
+2026-11-10T00:33:24.9245124Z # skipped 0
+2026-11-10T00:35:23.4737063Z Ran 510 tests in 94.046s
+2026-11-10T00:35:23.4737323Z OK (skipped=86)
+2026-11-10T00:35:26.2299587Z Documentation checks passed: 1255 local links, 14 historical media hashes, 11 current visual blobs, 2,381,700 historical + 185,432 PR61 + 1,626,214 guide media bytes, test-count consistency.
+2026-11-10T00:35:26.8004605Z Wiki checked: 64 pages/navigation files.
+
+JOB 129542101129
+2026-11-10T00:33:18.2807610Z # tests 451
+2026-11-10T00:33:18.2808250Z # pass 451
+2026-11-10T00:33:18.2808420Z # fail 0
+2026-11-10T00:33:18.2808700Z # skipped 0
+2026-11-10T00:33:18.6944290Z # tests 4
+2026-11-10T00:33:18.6945180Z # pass 4
+2026-11-10T00:33:18.6945580Z # fail 0
+2026-11-10T00:33:18.6946480Z # skipped 0
+2026-11-10T00:34:39.1763070Z Ran 510 tests in 79.847s
+2026-11-10T00:34:39.1763440Z OK (skipped=115)
+2026-11-10T00:36:56.3104660Z Documentation checks passed: 1255 local links, 14 historical media hashes, 11 current visual blobs, 2,381,700 historical + 185,432 PR61 + 1,626,214 guide media bytes, test-count consistency.
+2026-11-10T00:36:56.5868800Z Wiki checked: 64 pages/navigation files.
+
+JOB 129542106084
+2026-11-10T00:33:52.9476943Z   13 passed (46.5s)
+2026-11-10T00:34:28.8328266Z   10 passed (34.7s)
+2026-11-10T00:51:59.0249130Z   151 passed (17.5m)
+2026-11-10T00:57:01.7184792Z   19 passed (4.7m)
+2026-11-10T00:57:26.7806846Z   13 passed (23.9s)
+2026-11-10T00:57:45.4617700Z   2 passed (17.6s)
+2026-11-10T00:59:09.7994218Z   23 passed (1.4m)
+2026-11-10T00:59:21.4917341Z   1 passed (10.6s)
