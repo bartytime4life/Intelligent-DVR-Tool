@@ -11,7 +11,7 @@ test('a camera still sets exact full-frame zone coordinates and exports analyzer
     return Array.from(new Uint8Array(await (await new Promise(resolve => canvas.toBlob(resolve, 'image/png'))).arrayBuffer()));
   });
   await page.getByLabel('Choose a camera still image').setInputFiles({name:'gate.png', mimeType:'image/png', buffer:Buffer.from(png)});
-  await expect(page.getByRole('status')).toContainText('640×360');
+  await expect(page.locator('.zone-still-offer')).toContainText('640×360');
   await page.getByRole('button', {name:'Use for Plan 1'}).click();
   const editor = page.locator('.zone-editor');
   await expect(editor.locator('img.zone-still')).toBeVisible();

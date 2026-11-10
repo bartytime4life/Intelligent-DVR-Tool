@@ -50,7 +50,7 @@ export default function LiveMonitor({onZoneStill, queue, visibleTiles=4, onCount
   function stopAi(id, message = '') {
     const detector = detectors.current.get(id);
     if (!detector) return;
-    detectors.current.delete(id); detector.stop(message);
+    detector.stop(message); detectors.current.delete(id);
   }
   function startAi(tile) {
     const previous = detectors.current.get(tile.id);
@@ -60,7 +60,7 @@ export default function LiveMonitor({onZoneStill, queue, visibleTiles=4, onCount
     const detector = liveDetector({token:aiInfo.token, model:aiInfo.live.models[0].id, rules:aiRule.id, camera:tile.name,
       observations:(aiStates[tile.id]?.observations || []).filter(o => !o.sent),
       capture: () => captureJpeg(pictures.current.get(tile.id)),
-      onChange: snapshot => { if (alive.current) setAiStates(states => ({...states, [tile.id]:snapshot})); }});
+      onChange: snapshot => { if (alive.current && detectors.current.get(tile.id) === detector) setAiStates(states => ({...states, [tile.id]:snapshot})); }});
     detectors.current.set(tile.id, detector); void detector.start();
   }
   async function sendObservation(id, observationId) {
@@ -228,7 +228,10 @@ export default function LiveMonitor({onZoneStill, queue, visibleTiles=4, onCount
     setSetup('');
   }
   function openSetup(kind = 'webcam') { setError(''); setSetup(kind); }
-  function switchSetup(kind) { generation.current++; busy.current=false; setWorking(false); setError(''); setSource(''); setSetup(kind); }
+  function switchSetup(kind) {
+    if (kind !== setup && webcam.state === 'connecting') controller.current.stop('Camera connection cancelled.');
+    generation.current++; busy.current=false; setWorking(false); setError(''); setSource(''); setSetup(kind);
+  }
   const tiles = [
     ...(webcam.state !== 'disconnected' || webcam.message !== 'No webcam connected' ? [{id:'webcam', name:'This computer’s webcam', state:webcam.state, message:webcam.message}] : []),
     ...feeds,

@@ -1,0 +1,197 @@
+{
+  "schema": "intelligent-dvr.workspace-experience-verification.v1",
+  "date": "2026-11-09",
+  "base_revision": "4a105a162f43b984ff82eb13e499ee3272c3272d",
+  "implementation_revision": "94534e253cb7ecfb311089945848c6e598982683",
+  "source_and_test_sha256": {
+    "AGENTS.md": "68f01fe0c6ded03cc91e5021116a00200b182c0a132ab450efee01bdbba4ebc7",
+    "package.json": "2465bea4d85c0607b540a6b0e7c344cc9edd5f6d3edd289dc8b54f4d32b7e5ad",
+    "src/App.jsx": "41bf9b63ab0d448ca58bc847d6ed9ceb3b85150c84a936e50fb9c725382e1319",
+    "src/LiveMonitor.jsx": "b24fae10343e2d6e855ffded032bb3b86211d68a0d97df9d77b4067c17f6d296",
+    "src/RecognitionReview.jsx": "9c7590e3e4733d324419d6a74b2fbbe72b2d83f51494d1ef4dd4918c891551b5",
+    "src/SystemSetup.jsx": "be96890192a75d649c98c4c81610aaa8dc765dd2701d036e4c995e4b642462f6",
+    "src/TaskFinder.jsx": "09b36e5ffd286e86ec4ae64e68945c42e9c2efc74478274b019898db40c3a473",
+    "src/TrainingAnalyze.jsx": "9985130961697d8142b7bb35f97729adc1ffb2b525477d0334a8d3997a6443c7",
+    "src/TrainingWorkspace.jsx": "aa7c5287f51e10db3b5c08a95f6533509a38d4084c443e65b7ace044e0db5700",
+    "src/WorkspaceConflict.jsx": "f80f489eb87f30db2956e3627deb5be7c2f2c3a7cf2b556ed36e4a1e8376e82a",
+    "src/data.mjs": "880813f2567b91cb2c9671ebe2b6c0598f69d582ab3f631a9bcbc5eca89f4555",
+    "src/live-ai.mjs": "3dfde9f3002ec9703439b5ab87ebd2019c145efb4d63ee6ad4abf47f4507fea4",
+    "src/person-session.mjs": "0c8e049ca95088a2777dea38665b0ef4d3f60781cca0caca0d00bcc0c53bd7b2",
+    "src/recognition.mjs": "bb34ea4615880015ffbcfcf39c322e40ac0bbb83d54155b210bdc796323f852c",
+    "src/styles.css": "95a22e0b6c029dd10d3bfb415a6d03906051c58d32423a16c5bc18ddcfcdf8e1",
+    "src/task-finder.css": "0b7c2e7c8dc926904e1f19ea82d0cb9ed725b04e4979cb439eda31efa82c4bdf",
+    "src/workspace-save.mjs": "db1165b6b58e185aab154b0e3a2050bb7776490a3bf5275e24f89e64ec4e2b9b",
+    "src/workspace-state.mjs": "d4f467d9141d040f7a9de4c3d2deeeeb685bbc95dcc8e01c88647e2a89283d5d",
+    "src/workspace-tasks.mjs": "f602f5b590eb3b13a72539c363af2332d9729bd63e8a59c02c6bbd4b39eca5c8",
+    "tests/browser/audit-regressions.spec.mjs": "6aa592ccfd3bdc6f2aa338ca9d407df17caecccd115735608417889fb3ff096b",
+    "tests/browser/facility-draft-preservation.spec.mjs": "1af72edf14ef31e2769197e7a90e0d21ef724e2dee105777937741172d69bf4c",
+    "tests/browser/monitor-cancellation.spec.mjs": "8d12b99ed525851ddd3f545bcae5bb16df8c1a49c1ea7203d5d4392cfa9a8815",
+    "tests/browser/person-session-recovery.spec.mjs": "26bd391354a30acf686e5407738ec52c4cccef7337e071477c5e8cd871426782",
+    "tests/browser/review-notes.spec.mjs": "6a091ff06f4523ad36fe78ab637a4e8776d0bf53a68c0417a55d5c609e8bdb72",
+    "tests/browser/system-save-preservation.spec.mjs": "4e6d310cd8fcac2f452837be22e9a0bef0973789972d2ec4260eaea4f1dc4574",
+    "tests/browser/task-navigation.spec.mjs": "91db0499a02f8f1fbe10faba08460d00f643e40dbd7d90a5f01234d6602fdb96",
+    "tests/browser/zones-stills.spec.mjs": "b8b7d220d481392d731ea9a635a9fe128032b05d178d317c01e10d374812d3c5",
+    "tests/feeds-browser/live-feeds.spec.mjs": "ec8a5f5d03e0d0771017193d989c565d81684deec816ada1a41eca323ad378d9",
+    "tests/live-ai.test.mjs": "e203be8c4127f4ccb198ff1b11242239a01bf12db19b633218f846ada63c2ab9",
+    "tests/person-session.test.mjs": "b20e16b189571fdb2ac720d5b67adcc7f74af678193a3a8506651c9b1183a6e5",
+    "tests/recognition.test.mjs": "973a20c0e7c5f1b5bcdc4331a7112aac9198786e998dd8e33cdf0352666e3a64",
+    "tests/review-queue.test.mjs": "8ad8e9770c85e2630c28a6c42e9c69331cd73bdea24d396996a99fdf4a569cb8",
+    "tests/workspace-state.test.mjs": "5c65215cb66339647402eb01f24b93598af1c28ecffb7ada1dda4b117b963b27",
+    "tests/workspace-tasks.test.mjs": "69a601448839d2af7481fa6792648284f1268eeca22125b07cf70a98034c95f3"
+  },
+  "protected_sources_and_packaging": {
+    "edge/inference.py": {
+      "sha256": "7e95beb9e25dd67ac5d8d977ec6c466874371d12d112119a85a619124687b2f1",
+      "unchanged_from_base": true
+    },
+    "edge/journal.py": {
+      "sha256": "70f7a3419d05d76380ea32ad5de20ee440bc17256e25baf0f2289a86e46a495a",
+      "unchanged_from_base": true
+    },
+    "edge/supervision.py": {
+      "sha256": "03f334d5fa072e5f3ad02bd90536fd2c00fc97ebfaa54ca1ef1c10b64b80a9cf",
+      "unchanged_from_base": true
+    },
+    "edge/scheduler.py": {
+      "sha256": "8639b46d3ba2e1a14efaa7ff647f412e6be437685ec7be5717a00983835b9019",
+      "unchanged_from_base": true
+    },
+    "edge/profiling.py": {
+      "sha256": "f7c0a3e4b831d7f996840aec51a73e3fe68e06627cdce854716c576068f80f91",
+      "unchanged_from_base": true
+    },
+    ".openai/hosting.json": {
+      "sha256": "d532abb65cf9ae20634b464d954cb4a08a0de9f3cd3cdf7f9c3ec8948826d947",
+      "unchanged_from_base": true
+    },
+    "worker/index.js": {
+      "sha256": "2dd0615a445143933d88d4271f54f5d63ee951421fcd08c5a7617bb09c564389",
+      "unchanged_from_base": true
+    },
+    "scripts/prepare-sites-build.mjs": {
+      "sha256": "b6a6adaa4fab3234676116dd1c9cb6611275ab9d92dd26f5bf402393e3744bf6",
+      "unchanged_from_base": true
+    },
+    "tests/sites-worker.test.mjs": {
+      "sha256": "96af7b48906c6460c793356d7b6952f7d5026dbf5a502bec0d9297ff04201c26",
+      "unchanged_from_base": true
+    }
+  },
+  "local_checks": {
+    "frontend": {
+      "discovered": 451,
+      "passed": 451,
+      "failed": 0,
+      "skipped": 0,
+      "command": "DVR_TEST_SOCKETS=1 npm test"
+    },
+    "sites": {
+      "passed": 4,
+      "failed": 0,
+      "skipped": 0,
+      "command": "npm run test:sites"
+    },
+    "build": {
+      "passed": true,
+      "warning": "Existing Facility chunk exceeds 500 kB minified; no performance claim."
+    },
+    "browser": {
+      "discovered": 151,
+      "unique_passed_at_completion": 151,
+      "unresolved_failures": 0,
+      "skipped_at_completion": 0,
+      "passing_executions": 169,
+      "batches": [
+        {
+          "name": "primary",
+          "completed_passes": 139,
+          "failed_assertions": [
+            "tests/browser/facility-draft-preservation.spec.mjs:95:1 \u203a pasted JSON warns on navigation and accidental close without blocking its own import",
+            "tests/browser/facility-map-draft-preservation.spec.mjs:164:1 \u203a discard aborts a pending map lookup and ignores even a late result from that lookup"
+          ],
+          "process_exit_code": 143,
+          "interrupted": true
+        },
+        {
+          "name": "completion",
+          "completed_passes": 9,
+          "failed_assertions": [],
+          "process_exit_code": 0,
+          "interrupted": false
+        },
+        {
+          "name": "zones",
+          "completed_passes": 2,
+          "failed_assertions": [],
+          "process_exit_code": 0,
+          "interrupted": false
+        },
+        {
+          "name": "facility-recheck",
+          "completed_passes": 9,
+          "failed_assertions": [
+            "tests/browser/facility-draft-preservation.spec.mjs:95:1 \u203a pasted JSON warns on navigation and accidental close without blocking its own import"
+          ],
+          "process_exit_code": 1,
+          "interrupted": false
+        },
+        {
+          "name": "facility-repeats",
+          "completed_passes": 10,
+          "failed_assertions": [],
+          "process_exit_code": 0,
+          "interrupted": false
+        }
+      ],
+      "command": "DVR_BROWSER_CHANNEL=chrome npm run test:facility:browser",
+      "coverage": "browser-cases.json",
+      "log": "browser-checks.log",
+      "note": "Primary process interrupted after 141 attempted cases: 139 passed and two failed. Remaining cases completed in short batches. Pasted-JSON unload assertion now waits for cascading effects; it and the map-abort case each passed five repeats. The initial map-abort timing failure was not reproduced on six reruns. A stale global status selector in the Zones test was scoped before its final pass.",
+      "known_flakiness": "The initial map-abort failure did not reproduce on six reruns; its original cause is unconfirmed."
+    },
+    "webcam_permission": {
+      "passed": 1,
+      "failed": 0,
+      "scope": "Existing denied-permission/recovery case, Vite frontend plus Chrome generated camera device; no native service/RTSP/inference."
+    }
+  },
+  "screenshots": [
+    {
+      "path": "01-recognition-before.jpg",
+      "sha256": "6bb366bd706b57e4623d25dc95998fd2391ae451dcd0885a6d951d7060b3b601",
+      "format": "JPEG",
+      "source_revision": "4a105a162f43b984ff82eb13e499ee3272c3272d",
+      "scope": "Pinned baseline, no camera/service activation"
+    },
+    {
+      "path": "02-task-finder-desktop.jpg",
+      "sha256": "66ad7c9c5542fb87cbf205b9257317658ea6429ea5c6f228ab75baa5fe000319",
+      "format": "JPEG",
+      "source_revision": "94534e253cb7ecfb311089945848c6e598982683",
+      "scope": "Actual local task finder, no camera/service activation"
+    },
+    {
+      "path": "03-task-finder-mobile.jpg",
+      "sha256": "1aba0d1d094fea3bc4bed78945caaef639919ef8222e6ce564d3412a87f148c2",
+      "format": "JPEG",
+      "source_revision": "94534e253cb7ecfb311089945848c6e598982683",
+      "scope": "Actual local task finder, no camera/service activation"
+    }
+  ],
+  "review": {
+    "independent_reviews": 3,
+    "fixed_findings": [
+      "Route scroll reset and canceled-search focus",
+      "Submitted person-write 5xx is uncertain",
+      "Explicit unchanged-default recovery after unreadable setup"
+    ]
+  },
+  "evidence_limits": [
+    "Generated browser inputs and mocked service responses",
+    "No physical camera, real recording, model or installed-service activation",
+    "No recognition-quality, sustained-capacity or 100-camera qualification",
+    "No full assistive-technology compliance claim",
+    "No installation, deployment or native Wiki publication"
+  ],
+  "supplemental_scope": "Full native Python/RTSP/inference suites are left to CI; local checks here use generated browser sources and mocked service responses."
+}

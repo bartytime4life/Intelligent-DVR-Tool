@@ -19,7 +19,7 @@ const tasks = [
   {id: 'import', title: 'Open saved results', detail: 'Match an export to its original video', Icon: FolderOpen},
 ];
 
-export default function RecognitionReview({ onImport, onValidateImport, active = true, clip, onClip, reviews = [], evidence = null, onRecorderStatus, onZoneStill }) {
+export default function RecognitionReview({ onImport, onValidateImport, active = true, clip, onClip, reviews = [], evidence = null, onRecorderStatus, onZoneStill, taskRequest }) {
   const [run, setRun] = useState(null), [index, setIndex] = useState(0);
   const [source, setSource] = useState(null), [media, setMedia] = useState({});
   const [threshold, setThreshold] = useState(0.5), [status, setStatus] = useState(''), [error, setError] = useState('');
@@ -36,6 +36,11 @@ export default function RecognitionReview({ onImport, onValidateImport, active =
   const [local, setLocal] = useState(null), [matches, setMatches] = useState(null);
   const video = useRef(), generation = useRef(0), sourceGeneration = useRef(0);
   useEffect(() => { if (clip) setTask('recording'); }, [clip]);
+  useEffect(() => {
+    if (!tasks.some(candidate => candidate.id === taskRequest?.id)) return;
+    setTask(taskRequest.id);
+    setTaskNotice('');
+  },[taskRequest]);
   useEffect(() => {
     const configured = () => { focusRecorder.current = true; setTask('recorder'); setTaskNotice('LAN recorder source saved. Check its settings below; recording starts only when you explicitly choose Start recording & analysis.'); };
     window.addEventListener('dvr-recorder-configured', configured);

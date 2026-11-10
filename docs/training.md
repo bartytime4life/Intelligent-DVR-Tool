@@ -143,6 +143,17 @@ cancellation of its own analysis job. A submitted enrollment or baseline operati
 may still finish; already saved templates, rule files and imported recordings stay
 on this computer.
 
+For enrollment and face-baseline checks, leaving during the recording import
+cancels that session's import path and prevents it from submitting the later
+template change. An imported recording may already remain on this computer.
+Once the template operation was submitted, a timeout, lost reply or server error
+can leave its outcome unknown. The app keeps the clip in **Your recording is
+still here** and offers **Save person recording**. It withholds **Retry this
+recording** while the outcome is uncertain, so a retry cannot blindly repeat a
+possibly completed template write. Save the clip, return to Train and inspect the
+saved people before starting another enrollment or baseline operation. A confirmed
+pre-write refusal can offer a retry of the retained recording.
+
 A completed decision releases the warning only after its requested browser saves
 succeed. A rule saved by the local service does not establish that this browser
 remembered its selection, history or requested combined evidence. Read each save

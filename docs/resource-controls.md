@@ -32,7 +32,9 @@ Open **System** in the main navigation, or use `/#system`. The page combines wor
 
 ## Save, import and export
 
-**Apply workspace limits** validates and stores the setup as `dvr.setup.v1` in this browser's localStorage. A save failure is visible; export to preserve work. **Reset draft** does not change applied settings until Apply. The sample-workspace reset is separate from the hardware plan.
+**Apply workspace limits** validates the draft and applies its supported browser limits. The machine plan is then saved as plain `intelligent-dvr.setup.v1` JSON under `dvr.setup.v1`, using a shared browser save lock. Read the saving/error message: applying limits in memory does not by itself establish that the browser saved the plan. If saving fails, export the setup plan before closing; applying it again retries the save. Browsers without shared save locking keep changes in memory and report that saving is unavailable.
+
+**Reset draft** changes only the form until Apply. **Discard draft & use applied setup** restores the currently applied plan, which may itself still need saving. The legacy sample reset is separate from the machine plan.
 
 - **Export setup plan:** all numerical planning inputs, selected platform and browser preferences, schema `intelligent-dvr.setup.v1`. It contains no cameras, credentials or host snapshot.
 - **Import setup:** bounded to 64 KiB and checked for exact fields/ranges, array consistency, thread budget and reserves. Import creates a reviewable draft; it does not immediately apply settings.
@@ -40,6 +42,16 @@ Open **System** in the main navigation, or use `/#system`. The page combines wor
 - **Import host snapshot:** schema `intelligent-dvr.host-snapshot.v1`, at most 64 KiB, eight selected volumes and sixteen GPU records. Extra fields, paths and serials are not retained. Snapshot state is session-only. Reported data is untrusted input, not authenticated hardware attestation.
 
 An imported snapshot never silently overwrites a plan. The explicit copy buttons put reported CPU/RAM or first-GPU VRAM into the draft; review and Apply. Duplicate volume selections may refer to the same filesystem and must not be summed blindly.
+
+### Recover a machine-plan save
+
+A clean tab can adopt a valid plan saved by another tab. Unapplied form edits stay in the form; the message explains that the applied plan changed. Discarding that draft loads the applied version. A failed save also keeps the applied plan in memory: another tab cannot silently replace it or clear its error.
+
+1. At **Machine plan save conflict**, choose **Download this version** and **Download other version** before choosing. These downloads contain the applied plans; **Export setup plan** in System instead exports the current valid form draft. Valid plan downloads can be opened with **Import setup**, which creates a draft for review.
+2. Apply or discard any unfinished System draft before choosing **Keep this tab’s version** or **Use other tab’s version**. The displaced plan must be backed up first. Storage failures or a version/draft change while the choice waits leave the choice unresolved. If the other tab removed its save, **Use default machine plan** is an explicit reset choice.
+3. Each machine-plan workspace has ten saved conflict-copy slots. Existing copies are never replaced automatically. In **Saved conflict copies**, choose **Download copy**, check the file, then explicitly **Remove this copy** to free a slot. Removal becomes available after that exact copy's download starts and rechecks its stored bytes before deleting it. A valid plan copy is directly importable; a damaged copy remains an archival recovery download.
+
+Unreadable startup data remains available through **Download unreadable machine plan**. Opening System leaves it untouched. Explicitly applying even the unchanged defaults preserves the original bytes before saving the plan; an earlier recovery copy is not silently replaced. Keep that download rather than clearing storage to force a save. Unapplied drafts and unsaved applied plans trigger the browser's unfinished-work warning on reload/close. Browser storage and its conflict copies are not a permanent filesystem backup.
 
 ## Local policy contract
 

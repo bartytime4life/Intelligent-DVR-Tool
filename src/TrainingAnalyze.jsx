@@ -34,7 +34,7 @@ export default function AnalyzeStep({ clip, script, selection, onSession, onDone
         const rules = compatible.find(r => r.id === selection.rulesId);
         if (!rules) throw Error('The local app needs a person rule for this detector. Check the model and rules in Recognition.');
         const file = new File([clip.blob], clip.name, { type: clip.blob.type });
-        const imported = await importRecording(file, token, abort.signal);
+        const imported = await importRecording(file, token, AbortSignal.any([abort.signal, AbortSignal.timeout(35000)]));
         if (abort.signal.aborted) return;
         setStatus({ text: 'Checking the recording with the local detector…', checked: 0 });
         // Obtain the ID even if the operator exits while the start is in
@@ -52,7 +52,7 @@ export default function AnalyzeStep({ clip, script, selection, onSession, onDone
             checked: job.frames_analyzed || 0 });
         }
         if (job.state !== 'completed') throw Error(job.error?.message || 'Analysis did not finish. You can retry this recording.');
-        const { bundle, file: source } = await openJobResult(job, token, abort.signal);
+        const { bundle, file: source } = await openJobResult(job, token, AbortSignal.any([abort.signal, AbortSignal.timeout(120000)]));
         const context = trainingContext(bundle, model, rules, clip);
         if (context.sourceHash !== imported.sha256) throw Error('The analyzed recording differs from the captured file. Record again.');
         const { frames, timing } = timedTrainingFrames(bundle.trace, clip.elapsed);

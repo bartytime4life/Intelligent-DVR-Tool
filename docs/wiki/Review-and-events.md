@@ -25,8 +25,9 @@ frame position. A box or score is an observation to investigate, not a verdict.
    it **Live AI** and shows no Open in Recognition button.
 3. In **Events**, use filters to focus the queue, open an observation, make the
    appropriate confirm/dismiss decision and add a note explaining the evidence.
-4. Use **Undo** when correcting a decision. The review state stays through
-   workspace changes; storage errors are visible and need attention.
+4. Reopen an observation to correct its decision. Bulk dismissal and queue clearing
+   have their own **Undo** controls. Review state stays through workspace changes;
+   storage errors are visible and need attention.
 5. Return to Recognition for a report with the current decisions matched to this
    source. Save the recognition results and analyzed recording as a pair.
 
@@ -40,6 +41,32 @@ losing contact with the service. Frequently refreshed sample, storage and queue
 counts remain readable in place without being announced on every poll.
 
 ![Actual review dialog with the generated still, source fingerprints, a note field and human decision controls.](https://raw.githubusercontent.com/wiki/bartytime4life/Intelligent-DVR-Tool/docs/media/guide/review-dialog.jpg)
+
+## Keep notes without making a verdict
+
+Edit **Review note**, then choose **Save note** to add it to the current reviews
+without changing the observation's pending, confirmed or dismissed status.
+Confirm/dismiss also records the note with that decision. Browser saving can still
+be pending or fail; use the save warning and conflict controls below when needed.
+**Discard note draft** drops the unsaved edit and restores the observation's
+current note; it does not reverse a review decision.
+
+Unfinished note drafts stay in this tab when you use Next/Previous, close the
+review dialog, inspect the source in Recognition or change workspaces. The
+**Review note drafts** banner opens the recovery list. Use **Resume note draft**
+to continue, **Download note drafts** to keep a separate JSON copy, or explicitly
+**Discard note draft**. Reloading or closing releases these in-memory drafts and
+triggers the browser's unfinished-work warning. The draft download is a recovery
+record, not an ordinary review export or an automatically importable backup.
+
+Drafts remain bound to their original evidence. If an observation was removed or
+its evidence changed, its retained draft is read-only; download it before
+discarding it. It is not attached to a replacement observation with the same ID.
+If the saved note or decision changed while you were reviewing the same evidence,
+choose **Review saved version** before saving or deciding. Your draft stays
+available, and the dialog shows a changed saved note before you replace it.
+Ordinary review exports and reports include notes added to reviews; unsaved note
+drafts need their separate download.
 
 ## Choose the right export
 

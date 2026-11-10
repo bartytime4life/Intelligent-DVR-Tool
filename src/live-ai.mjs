@@ -20,23 +20,29 @@ export function liveBackendLabel(session) {
 
 const hex = (v, n) => typeof v === 'string' && new RegExp(`^[a-f0-9]{${n}}$`).test(v);
 
-export async function liveRequest(path, { token, body, jpeg, signal, fetcher = fetch } = {}) {
+export async function liveRequest(path, { token, body, jpeg, signal, fetcher = fetch, timeout = 15000 } = {}) {
+  const boundedSignal = AbortSignal.any([signal, AbortSignal.timeout(timeout)].filter(Boolean));
   let response;
   try {
     response = await fetcher(`/api/live${path}`, {
-      method: body === undefined && !jpeg ? 'GET' : 'POST', signal, cache: 'no-store', credentials: 'omit', redirect: 'error',
+      method: body === undefined && !jpeg ? 'GET' : 'POST', signal:boundedSignal, cache: 'no-store', credentials: 'omit', redirect: 'error',
       headers: { 'X-DVR-Token': token, ...(jpeg ? { 'Content-Type': 'image/jpeg' } : body !== undefined ? { 'Content-Type': 'application/json' } : {}) },
       ...(jpeg ? { body: jpeg } : body !== undefined ? { body: JSON.stringify(body) } : {}),
     });
   } catch (error) {
-    if (error.name === 'AbortError' || error.name === 'TimeoutError') throw error;
+    if (error.name === 'AbortError') throw error;
+    if (error.name === 'TimeoutError') throw Object.assign(Error('The local AI service did not respond in time. Check that the local app is running, then try again.'), {name:'TimeoutError'});
     throw Error('The local AI service is unavailable. Open the local app on this computer and retry.');
   }
   if (!response.ok) {
     let value; try { value = await response.json(); } catch { /* no detail */ }
     throw Object.assign(Error(value?.error?.message || 'Local AI request failed.'), { status: response.status, code: value?.error?.code });
   }
-  return response.json();
+  try { return await response.json(); }
+  catch (error) {
+    if (error.name === 'TimeoutError') throw Object.assign(Error('The local AI reply did not finish in time. Check that the local app is running, then try again.'), {name:'TimeoutError'});
+    throw error;
+  }
 }
 
 // Per-label counts of what the AI currently sees, e.g. [['person', 2], ['car', 1]].
@@ -81,25 +87,25 @@ export async function captureJpeg(element, { maxWidth = 960, quality = 0.8, docu
 // Drives one live session. capture() returns the current frame as a JPEG Blob (or
 // null while no picture is shown). onChange receives a fresh snapshot after every step.
 export function liveDetector({ token, model, rules, camera, capture, onChange, fetcher = fetch,
-  now = () => performance.now(), wall = () => Date.now(), wait = ms => new Promise(r => setTimeout(r, ms)), maxFps = 5, observations = [] }) {
-  let running = false, controller = null;
+  now = () => performance.now(), wall = () => Date.now(), wait = ms => new Promise(r => setTimeout(r, ms)), maxFps = 5, observations = [], timeouts = {} }) {
+  let running = false, controller = null, generation = 0;
   // A restarted detector keeps a previous run's unsent observations so they can still be sent.
   const state = { state: 'idle', session: null, result: null, resultAt: 0, error: '', observations: observations.slice(0, LIVE_OBSERVATIONS),
     fps: 0, latencyMs: null, skippedBusy: 0, frameErrors: 0 };
   const emit = patch => { Object.assign(state, patch); onChange?.({ ...state, observations: [...state.observations] }); };
-  async function loop() {
+  async function loop(ticket, signal) {
     let previous = null;
-    while (running) {
+    while (running && ticket === generation) {
       const began = now();
       let blob = null;
       try { blob = await capture(); } catch { blob = null; }
-      if (!running) break;
+      if (!running || ticket !== generation) break;
       if (!blob) { await wait(250); continue; }
       const capturedAt = wall();
       const capturedMonotonic = now();
       try {
-        const result = await liveRequest(`/${state.session.id}/frame`, { token, jpeg: blob, signal: controller.signal, fetcher });
-        if (!running) break;
+        const result = await liveRequest(`/${state.session.id}/frame`, { token, jpeg: blob, signal, fetcher, timeout:timeouts.frame ?? 15000 });
+        if (!running || ticket !== generation) break;
         const finished = now(), interval = previous === null ? null : finished - previous;
         previous = finished;
         // Exponential moving average of analyzed frames per second, from actual reply spacing.
@@ -108,7 +114,7 @@ export function liveDetector({ token, model, rules, camera, capture, onChange, f
         emit({ state: 'live', session: result.session, result, resultAt: capturedMonotonic, fps, latencyMs: finished - began, error: '',
           observations: [...added.reverse(), ...state.observations].slice(0, LIVE_OBSERVATIONS) });
       } catch (error) {
-        if (!running || error.name === 'AbortError') break;
+        if (!running || ticket !== generation || error.name === 'AbortError') break;
         if (error.code === 'BUSY') { state.skippedBusy++; }
         else if (['FRAME_INVALID', 'FRAME_SIZE'].includes(error.code)) { emit({ frameErrors: state.frameErrors + 1 }); }
         else { running = false; emit({ state: 'failed', error: error.message, result: null }); break; }
@@ -121,23 +127,32 @@ export function liveDetector({ token, model, rules, camera, capture, onChange, f
     get snapshot() { return { ...state }; },
     async start() {
       if (running) return;
+      const ticket = ++generation;
       running = true; controller = new AbortController();
-      emit({ state: 'starting', error: '', result: null, fps: 0, latencyMs: null });
+      const signal = controller.signal;
+      emit({ state: 'starting', session:null, error: '', result: null, fps: 0, latencyMs: null });
       try {
-        const session = await liveRequest('/start', { token, body: { model, rules, camera }, signal: controller.signal, fetcher });
-        if (!running) { void liveRequest(`/${session.id}/stop`, { token, body: {}, fetcher }).catch(() => {}); return; }
+        // A GPU startup can use its 30 s allowance, then retry once on CPU.
+        const session = await liveRequest('/start', { token, body: { model, rules, camera }, signal, fetcher, timeout:timeouts.start ?? 75000 });
+        if (!running || ticket !== generation) { void liveRequest(`/${session.id}/stop`, { token, body: {}, fetcher, timeout:timeouts.stop ?? 5000 }).catch(() => {}); return; }
         if (session.state !== 'live') { running = false; emit({ state: 'failed', session, error: session.error?.message || 'Local AI did not start.' }); return; }
         emit({ state: 'live', session });
-        void loop();
+        void loop(ticket, signal);
       } catch (error) {
-        if (running) { running = false; emit({ state: 'failed', error: error.message }); }
+        if (running && ticket === generation) { running = false; emit({ state: 'failed', error: error.name === 'TimeoutError'
+          ? `${error.message} Startup could not be confirmed. If it started locally, its lease expires without frames.` : error.message }); }
       }
     },
     stop(message = '') {
       const id = state.session?.id, wasRunning = running;
+      const ticket = ++generation;
       running = false; controller?.abort();
-      if (id && (wasRunning || state.state === 'live')) void liveRequest(`/${id}/stop`, { token, body: {}, fetcher }).catch(() => {});
-      emit({ state: 'stopped', result: null, error: message });
+      if (id && (wasRunning || state.state === 'live')) void liveRequest(`/${id}/stop`, { token, body: {}, fetcher, timeout:timeouts.stop ?? 5000 }).catch(() => {
+        if (!running && ticket === generation) emit({error:'AI stop could not be confirmed. This page has stopped sending frames; the local session expires after its 15-second lease.'});
+      });
+      emit({ state: 'stopped', result: null, error: message || (wasRunning
+        ? id ? 'AI stopped in this page. If Stop could not reach the local service, its session expires after its 15-second lease.'
+          : 'AI startup cancelled in this page. A start already submitted locally may still finish; its lease expires without frames.' : '') });
     },
     dismiss(id) { state.observations = state.observations.filter(o => o.observation.id !== id); emit({}); },
     markSent(id) { state.observations = state.observations.map(o => o.observation.id === id ? {...o, sent:true} : o); emit({}); },

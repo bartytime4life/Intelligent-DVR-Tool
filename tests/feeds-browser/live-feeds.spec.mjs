@@ -52,7 +52,7 @@ test('explicit webcam preview receives frames, stops on leaving, and reconnects'
 test('denied webcam permission reports recovery instead of placeholder footage',async({page,context})=>{
   await context.grantPermissions([], {origin:'http://127.0.0.1:4184'});await page.goto('/');await page.getByRole('button',{name:'Connect source',exact:true}).first().click();
   await page.getByRole('button',{name:'Connect webcam',exact:true}).click();
-  await expect(page.getByRole('status')).toContainText('Camera access was denied');
+  await expect(page.getByRole('dialog',{name:'Connect a camera source'}).getByRole('status')).toContainText('Camera access was denied');
   await expect(page.getByLabel('Webcam video')).toHaveCount(0);
   await context.grantPermissions(['camera'], {origin:'http://127.0.0.1:4184'});await page.getByRole('button',{name:'Connect webcam',exact:true}).click();
   await expect(page.getByRole('button',{name:'View camera wall'})).toBeVisible();

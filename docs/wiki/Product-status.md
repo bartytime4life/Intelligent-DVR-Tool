@@ -1,6 +1,14 @@
 # Product status and evidence
 
-**Current source workflow updates:** Train warns before leaving unfinished work
+**Current source workflow updates:** **Find a task** opens common jobs directly
+from any workspace. Note drafts remain accessible across navigation and can be
+saved without changing a verdict. Machine plans join reviews/rules in locked
+multi-tab save recovery. Interrupted person imports cannot start later template
+writes; uncertain submitted outcomes retain a downloadable clip and withhold
+duplicate retries. See the [workspace verification](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/workspace-experience-2026-11-09/README.md)
+and [task guide](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-handbook#find-the-next-task).
+
+Train warns before leaving unfinished work
 and retains the warning after a requested browser save fails. Reviews and browser
 rules keep both versions when another tab saves over unsaved local work; operators
 can download both, choose a version and manage up to ten preserved conflict copies

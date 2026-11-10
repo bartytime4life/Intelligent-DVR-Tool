@@ -8,8 +8,9 @@ export default function WorkspaceConflict({ kind, localCount, conflict, exportLo
   const [unexpected, setUnexpected] = useState('');
   const [copyNotice, setCopyNotice] = useState('');
   if (!conflict) return null;
-  const title = kind === 'reviews' ? 'Reviews' : kind === 'facilities' ? 'Facilities' : 'Rules';
-  const noun = count => kind === 'facilities' ? count===1?'facility':'facilities' : `${kind === 'reviews' ? 'review' : 'rule'}${count === 1 ? '' : 's'}`;
+  const title = kind === 'reviews' ? 'Reviews' : kind === 'facilities' ? 'Facilities' : kind === 'setup' ? 'Machine plan' : 'Rules';
+  const noun = count => kind === 'facilities' ? count===1?'facility':'facilities' : `${kind === 'reviews' ? 'review' : kind === 'setup' ? 'machine plan' : 'rule'}${count === 1 ? '' : 's'}`;
+  const remoteCount = kind === 'setup' ? 1 : conflict.remoteValue?.length;
   async function choose(method) {
     if (working || disabled) return;
     setWorking(true); setUnexpected('');
@@ -45,13 +46,13 @@ export default function WorkspaceConflict({ kind, localCount, conflict, exportLo
     </div>
     <div className="workspace-conflict-versions">
       <div><h3>This tab</h3><p>{localCount} {noun(localCount)} in memory</p><button className="button" onClick={exportLocal}><DownloadSimple size={17} aria-hidden="true" />Download this version</button></div>
-      <div><h3>Other tab</h3><p>{conflict.remoteDeleted ? 'The saved version was removed.' : conflict.remoteValid ? `${conflict.remoteValue.length} saved ${noun(conflict.remoteValue.length)}` : 'The saved version cannot be read.'}</p><button className="button" onClick={exportRemote} disabled={conflict.remoteRaw == null && !conflict.remoteValid}><DownloadSimple size={17} aria-hidden="true" />Download other version</button></div>
+      <div><h3>Other tab</h3><p>{conflict.remoteDeleted ? 'The saved version was removed.' : conflict.remoteValid ? `${remoteCount} saved ${noun(remoteCount)}` : 'The saved version cannot be read.'}</p><button className="button" onClick={exportRemote} disabled={conflict.remoteRaw == null && !conflict.remoteValid}><DownloadSimple size={17} aria-hidden="true" />Download other version</button></div>
     </div>
     <p>The version you replace is backed up in this browser first. Downloads give you a separate copy.</p>
     {(conflict.error || unexpected) && <p className="workspace-conflict-error" role="alert">{unexpected || conflict.error}</p>}
     <div className="workspace-conflict-actions">
       <button className="button amber" disabled={working || disabled} onClick={() => choose('keepLocal')}>{working ? 'Saving your choice…' : "Keep this tab’s version"}</button>
-      <button className="button" disabled={working || disabled || !conflict.remoteValid} onClick={() => choose('useRemote')}>{conflict.remoteDeleted ? kind === 'reviews' ? 'Use empty review queue' : kind === 'facilities' ? 'Start a blank facility' : 'Use default rules' : "Use other tab’s version"}</button>
+      <button className="button" disabled={working || disabled || !conflict.remoteValid} onClick={() => choose('useRemote')}>{conflict.remoteDeleted ? kind === 'reviews' ? 'Use empty review queue' : kind === 'facilities' ? 'Start a blank facility' : kind === 'setup' ? 'Use default machine plan' : 'Use default rules' : "Use other tab’s version"}</button>
     </div>
     <details className="workspace-conflict-copies">
       <summary>Saved conflict copies{conflict.savedCopies?.copies.length ? ` (${conflict.savedCopies.copies.length}/10)` : ''}</summary>

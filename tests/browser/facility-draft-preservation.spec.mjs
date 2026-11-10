@@ -115,5 +115,7 @@ test('pasted JSON warns on navigation and accidental close without blocking its 
   await dialog.getByLabel('Facility plan JSON',{exact:true}).fill('Generated unfinished JSON');
   await dialog.getByRole('button',{name:'Discard pasted JSON',exact:true}).click();
   await expect(dialog).toHaveCount(0);
-  expect(await unloadBlocked(page)).toBe(false);
+  // Dialog unmount clears its draft, then the builder reports the combined
+  // dirty state to the app. Wait for those effects before checking the guard.
+  await expect.poll(()=>unloadBlocked(page)).toBe(false);
 });

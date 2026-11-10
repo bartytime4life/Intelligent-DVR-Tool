@@ -25,6 +25,7 @@ export function readWorkspace(storage, key, fallback) {
   try {
     raw = storage.getItem(key);
     if (raw === null) return { value: fallback, error: '' };
+    if (key === 'dvr.setup.v1' && (typeof raw !== 'string' || new TextEncoder().encode(raw).length > 65536)) throw Error('Setup exceeds the 64 KiB limit.');
     const value = restoreSnapshot(key, JSON.parse(raw), null);
     if (!value) throw Error('Invalid saved data');
     return { value, error: '' };

@@ -37,7 +37,7 @@ test('conflicting recording imports leave the original reviewed thumbnail untouc
   expect(await page.evaluate(()=>JSON.parse(localStorage.getItem('dvr.events.v1')))).toEqual([old]);
 });
 
-test('another tab saving System preserves a dirty draft until explicit reload',async({page,context})=>{
+test('another tab saving System preserves a dirty draft until explicit adoption',async({page,context})=>{
   await page.goto('/#system');
   await page.getByLabel('Planned cameras',{exact:true}).fill('111');
   const other=await context.newPage();
@@ -47,7 +47,7 @@ test('another tab saving System preserves a dirty draft until explicit reload',a
     await other.getByRole('button',{name:'Apply workspace limits',exact:true}).click();
     await expect(page.getByText('Saved setup changed in another tab.',{exact:false})).toBeVisible();
     await expect(page.getByLabel('Planned cameras',{exact:true})).toHaveValue('111');
-    await page.getByRole('button',{name:'Discard draft & load saved setup',exact:true}).click();
+    await page.getByRole('button',{name:'Discard draft & use applied setup',exact:true}).click();
     await expect(page.getByLabel('Planned cameras',{exact:true})).toHaveValue('123');
   }finally{await other.close();}
 });

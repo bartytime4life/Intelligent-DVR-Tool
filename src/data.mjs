@@ -1,3 +1,5 @@
+import {validateSetup} from './resources.mjs';
+
 // Legacy plan IDs remain readable so existing rules and reviewed samples survive.
 // These are not connected cameras and contain no generated imagery.
 export const cameras = [
@@ -126,6 +128,7 @@ export function parseReceipt(v) {
 
 export function restoreSnapshot(key, value, fallback) {
   try {
+    if (key === 'dvr.setup.v1') return validateSetup(value);
     if (!Array.isArray(value) || value.length > 1000) return fallback;
     if (key === "dvr.rules.v1") {
       if (
@@ -198,10 +201,30 @@ export function restoreSnapshot(key, value, fallback) {
     return fallback;
   }
 }
-// This decision token survives browser saves/exports and distinguishes actions
+// This human-edit token survives browser saves/exports and distinguishes actions
 // made with identical notes and timestamps. It is not an authenticity signature.
 export function createReviewRevision() {
   return [...globalThis.crypto.getRandomValues(new Uint8Array(16))].map(value => value.toString(16).padStart(2, '0')).join('');
+}
+
+// Bind note drafts to their evidence, never an observation ID alone.
+export function reviewEvidenceIdentity(event) {
+  if (!event) return null;
+  return JSON.stringify(['id', 'sourceId', 'mode', 'camera', 'cameraName', 'title', 'label', 'time', 'seconds', 'score', 'rule']
+    .map(key => event[key]).concat(['source_sha256', 'model_sha256', 'state', 'session', 'captured_at'].map(key => event.provenance?.[key])));
+}
+
+export function saveReviewNote(events, id, note, expected) {
+  const current = events.find(event => event.id === id);
+  if (!current || expected && reviewEvidenceIdentity(current) !== reviewEvidenceIdentity(expected))
+    throw Error('This observation is no longer in the queue with the same evidence. Your note draft is kept; no saved review was changed.');
+  if (expected && ['note', 'status', 'reviewedAt', 'reviewRevision'].some(key => current[key] !== expected[key]))
+    throw Error('This observation changed while its note was open. Your draft is kept. Review the saved version before saving your note.');
+  if (typeof note !== 'string') throw Error('Use a text review note.');
+  const text = note.slice(0, 2000);
+  return events.map(event => event.id !== id || event.note === text ? event : {
+    ...event, note: text, reviewRevision: createReviewRevision(),
+  });
 }
 
 export function reviewEvent(events, id, status, note) {
