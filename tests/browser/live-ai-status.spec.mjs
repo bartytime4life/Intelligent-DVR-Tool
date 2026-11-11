@@ -1,19 +1,15 @@
 import {test, expect} from '@playwright/test';
 
+// Chromium's built-in generated video is stable across headless CI. No physical
+// webcam or camera permission dialog is involved.
+test.use({permissions:['camera'], launchOptions:{args:[
+  '--use-fake-ui-for-media-stream', '--use-fake-device-for-media-stream',
+]}});
+
 const session = {id:'a'.repeat(32), state:'live', camera:'Generated webcam', model:'Generated detector',
   rules:'Generated rules', model_sha256:'b'.repeat(64), analyzed:1};
 
 async function generatedMonitor(page) {
-  await page.addInitScript(() => {
-    Object.defineProperty(navigator, 'mediaDevices', {configurable:true, value:{
-      enumerateDevices:async () => [],
-      getUserMedia:async () => {
-        const canvas = document.createElement('canvas'); canvas.width = canvas.height = 64;
-        canvas.getContext('2d').fillRect(0, 0, 64, 64);
-        return canvas.captureStream(5);
-      },
-    }});
-  });
   let starts = 0;
   const frames = [];
   await page.route('**/api/analysis/session', route => route.fulfill({json:{
@@ -26,6 +22,7 @@ async function generatedMonitor(page) {
   await page.goto('/#monitor');
   await page.getByRole('button', {name:'Connect source', exact:true}).click();
   await page.getByRole('button', {name:'Connect webcam', exact:true}).click();
+  await expect(page.locator('.feed-setup-body [role="status"]')).toContainText('Webcam preview · audio off');
   await page.getByRole('button', {name:'View camera wall', exact:true}).click();
   await expect(page.getByRole('button', {name:'Start AI', exact:true})).toBeEnabled();
   expect(starts).toBe(0);
