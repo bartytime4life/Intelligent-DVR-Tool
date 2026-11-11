@@ -7,6 +7,10 @@ preserved; implementation is on `codex/mathematical-upgrades-20261111` in
 tested tracker, regression tests and comparison script. This record does not
 establish hosted CI, merge, installation, deployment or field acceptance.
 
+[Follow-up review](review.md) records integration with PR #106, sixteen paired
+source-bound evaluator probes, and the explicit identity/confirmation tradeoff
+at track expiry. Its later validation supplements the initial checks below.
+
 ## Reproduced defects and resulting behavior
 
 The original tracker already used a Kalman filter and Hungarian assignment. The

@@ -133,6 +133,20 @@ class TrackingEvaluationTest(unittest.TestCase):
         self.assertEqual(report['aggregate']['IDSW'], 1)
         self.assertEqual(report['errors'][0]['frame_index'], 6)
 
+    def test_expiry_separates_visitors_but_the_first_returning_hit_is_untracked(self):
+        truth = [[obj('A')], [], [obj('B')], [obj('B')]]
+        predictions = [[prediction(o) for o in frame] for frame in truth]
+        report = self.build(truth, predictions, fps=2 / 3, stride=1)
+        result = report['aggregate']
+        # Avoiding an expired-ID join has a deliberate confirmation delay: the
+        # new visitor's first detection is tentative and counts as a missed track.
+        self.assertEqual((result['TP'], result['FN'], result['IDFP']), (2, 1, 0))
+        self.assertEqual(report['untracked_detection_count'], 1)
+        self.assertAlmostEqual(result['MOTA'], 2 / 3)
+        self.assertAlmostEqual(result['IDF1'], .8)
+        self.assertAlmostEqual(result['HOTA'], 2**-.5)
+        self.assertEqual(report['qualification']['physical_camera_tracking_accuracy'], 'unqualified')
+
     def test_fractional_fps_and_stride_use_source_frame_index(self):
         report = self.build(fps=30000/1001, stride=5)
         clip = report['clips'][0]
