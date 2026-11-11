@@ -187,6 +187,84 @@ test('a slow Send blocks overlapping saves and Dismiss while camera Stop stays a
   await expect(page.locator('.review-summary')).toContainText('2 live observations');
 });
 
+test('a stalled still save releases Send without a late Event handoff, then permits retry', async ({page}) => {
+  await page.addInitScript(() => {
+    const put = IDBObjectStore.prototype.put;
+    let held = false;
+    IDBObjectStore.prototype.put = function(...args) {
+      if (this.name === 'thumbnails' && !held) {
+        held = true;
+        const tx = this.transaction;
+        // The real write completes; withhold the browser completion notification.
+        Object.defineProperty(tx,'oncomplete',{set(handler) {
+          tx.addEventListener('complete',event => {window.completeGeneratedStall = () => handler(event);},{once:true});
+        }});
+      }
+      return put.apply(this,args);
+    };
+  });
+  const calls = await localSources(page);
+  await connect(page,1); await observe(page,1);
+  await tile(page,1).getByRole('button',{name:'Send to Events',exact:true}).click();
+  await expect(tile(page,1).getByRole('button',{name:'Saving still…',exact:true})).toBeDisabled();
+  await tile(page,1).getByRole('button',{name:'Disconnect',exact:true}).click();
+  await expect.poll(() => calls.stops.length).toBe(1);
+  await expect.poll(() => calls.disconnects.length).toBe(1);
+  await expect(page.locator('.toast')).toContainText('could not save the observation’s still',{timeout:9000});
+  await expect(tile(page,1).getByRole('button',{name:'Send to Events',exact:true})).toBeEnabled();
+  await expect(tile(page,1).getByRole('button',{name:'Dismiss this live observation',exact:true})).toBeEnabled();
+  await page.screenshot({path:'qa-local/workspace-audit/still-save-timeout.png',fullPage:true});
+  await expect.poll(() => page.evaluate(() => typeof window.completeGeneratedStall)).toBe('function');
+  await page.evaluate(() => window.completeGeneratedStall());
+  expect(await page.evaluate(() => JSON.parse(localStorage.getItem('dvr.events.v1') || '[]'))).toEqual([]);
+  await expect(tile(page,1).getByRole('button',{name:'Send to Events',exact:true})).toBeEnabled();
+  await tile(page,1).getByRole('button',{name:'Send to Events',exact:true}).click();
+  await expect(tile(page,1)).toHaveCount(0);
+  await nav(page,'Events').click();
+  await expect(page.locator('.review-summary')).toContainText('1 live observations');
+});
+
+test('a stalled database open stays bounded and closes its late connection before retry', async ({page}) => {
+  await page.addInitScript(() => {
+    const open = IDBFactory.prototype.open, close = IDBDatabase.prototype.close;
+    let hold = true;
+    window.generatedImageOpens = 0; window.generatedImageCloses = 0;
+    window.resumeGeneratedImageOpen = () => {hold = false; window.completeGeneratedOpen();};
+    IDBDatabase.prototype.close = function() {
+      if (this.name === 'intelligent-dvr') window.generatedImageCloses++;
+      return close.call(this);
+    };
+    IDBFactory.prototype.open = function(name,...args) {
+      const request = open.call(this,name,...args);
+      if (name === 'intelligent-dvr') {
+        window.generatedImageOpens++;
+        if (hold) Object.defineProperty(request,'onsuccess',{set(handler) {
+          request.addEventListener('success',event => {window.completeGeneratedOpen = () => handler(event);},{once:true});
+        }});
+      }
+      return request;
+    };
+  });
+  await localSources(page); await connect(page,1); await observe(page,1);
+  await tile(page,1).getByRole('button',{name:'Send to Events',exact:true}).click();
+  await expect(page.locator('.toast')).toContainText('could not save the observation’s still',{timeout:9000});
+  await expect(tile(page,1).getByRole('button',{name:'Send to Events',exact:true})).toBeEnabled();
+  await tile(page,1).getByRole('button',{name:'Send to Events',exact:true}).click();
+  await expect(tile(page,1).getByRole('button',{name:'Send to Events',exact:true})).toBeEnabled();
+  expect(await page.evaluate(() => window.generatedImageOpens)).toBe(1);
+  expect(await page.evaluate(() => JSON.parse(localStorage.getItem('dvr.events.v1') || '[]'))).toEqual([]);
+  await expect.poll(() => page.evaluate(() => typeof window.completeGeneratedOpen)).toBe('function');
+  await page.evaluate(() => window.resumeGeneratedImageOpen());
+  expect(await page.evaluate(() => window.generatedImageCloses)).toBe(1);
+  await tile(page,1).getByRole('button',{name:'Send to Events',exact:true}).click();
+  await expect(tile(page,1).getByText('In Events',{exact:true})).toBeVisible();
+  expect(await page.evaluate(() => window.generatedImageOpens)).toBe(2);
+  await nav(page,'Events').click();
+  await expect(page.locator('.review-summary')).toContainText('1 live observations');
+  await page.locator('.event-table-row').first().click();
+  await expect(page.getByRole('dialog').getByAltText('Analyzed live frame for this observation')).toBeVisible();
+});
+
 test('four retained review sessions bound admission without blocking camera preview', async ({page}) => {
   await page.setViewportSize({width:390,height:844});
   const calls = await localSources(page);

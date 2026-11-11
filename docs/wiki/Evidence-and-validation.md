@@ -1,5 +1,9 @@
 # Verification index
 
+[Bounded browser image storage, November 11](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/bounded-image-storage-2026-11-11/README.md)
+records a reproduced stalled live handoff, five-second operation budgets, safe
+late completion, bounded database opens and explicit retry recovery.
+
 [Live AI reply validation, November 11](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/live-reply-validation-2026-11-11/README.md)
 records a reproduced Monitor crash, session-bound frame validation, preserved
 preview/review, trusted Stop requests and explicit restart recovery.

@@ -41,6 +41,12 @@ review. Invalid metadata or mismatched run provenance stops that AI run while
 preserving camera preview and earlier observations. See the
 [reply-validation record](verification/live-reply-validation-2026-11-11/README.md).
 
+Browser still operations also have a shared open/transaction deadline. A stalled
+live still save releases Send and Dismiss, keeps the observation unsent, and cannot
+queue it from a late callback. Outstanding database opens remain bounded and
+late handles close before retry. See the
+[storage recovery record](verification/bounded-image-storage-2026-11-11/README.md).
+
 **GPU preference:** live AI and recorded-video analysis now default to GPU first with visible CPU fallback and an explicit CPU override. Actual controlled RTX 5080 checks are recorded in the [GPU-default verification](verification/gpu-default-2026-11-03/README.md); physical-device accuracy and capacity remain separate.
 
 **November 3 source follow-up:** [OEM companion backup](oem-backup.md) adds
