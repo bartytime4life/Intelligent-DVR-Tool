@@ -163,22 +163,31 @@ change, nothing is being tracked and the detector ran within the last 2 seconds,
 it skips the detector for that frame and reports "Still scene · detector resting".
 Any motion or any tracked object runs the detector on every frame.
 
-**Tracking.** Tracks follow ByteTrack (Zhang et al., 2022) on the constant-velocity
-Kalman filter of SORT (Bewley et al., 2016), with the reference implementation's
-noise weights:
+**Tracking.** Tracks follow the two-stage association approach of ByteTrack
+(Zhang et al., 2022) on a constant-velocity Kalman filter as in SORT (Bewley et al.,
+2016). Tracker method `bytetrack-style-iou-kalman-v2` adapts the reference noise
+weights as continuous diffusion rates for irregular sample intervals; it is not
+an exact reproduction of the reference per-frame filter:
 
 1. Predict each track's box with a Kalman filter over centre, aspect ratio, height
    and their velocities. ByteTrack tunes noise per 30 FPS frame; sampled and live
-   frames advance by the elapsed time measured in those reference frames.
+   frames advance by the elapsed time measured in those reference frames. Integrate
+   velocity noise into position uncertainty over that interval, and use the Joseph
+   covariance update to reduce cancellation error. Noise rates stay fixed at the
+   predicted interval's starting height.
 2. Match confirmed and recently lost tracks to confident boxes (score ≥ 0.5) by
    IoU × score, using the Hungarian method (Kuhn, 1955) for the optimal
-   assignment.
+   assignment. Classes form independent assignment groups, so no cross-class
+   matrix entries need to be computed. This preserves the optimal feasible match
+   count and cost; a single-class scene retains the original matrix dimensions.
 3. Match tracks still unmatched to low-score boxes (0.1–0.5) by IoU ≥ 0.5. This is
    ByteTrack's key idea: a partly hidden or blurred person keeps their track
    instead of disappearing and returning with a new number.
 4. Confirm a new track when its box is matched again in the next frame (boxes on
    the very first frame are confirmed at once). Start candidates from unmatched
-   boxes scoring ≥ 0.6. Drop tracks unseen for 2 seconds.
+   boxes scoring ≥ 0.6. Retire tracks unseen for more than 2 seconds **before**
+   matching the next frame, including after a sampling pause. A returning box must
+   establish a new track; the exact 2-second boundary remains eligible.
 
 Matching is class-aware: a person box never continues a car track. A run numbers at most
 2,000 tracks; later ones are still followed but unnumbered and counted as not
@@ -186,6 +195,19 @@ retained, so every number in a result has a summary. Each track
 records when it was first and last seen, its scores, a path of up to 32 points,
 and its time inside each rule zone of its class (centre point inside the zone,
 counting gaps up to the rule's `max_gap`).
+
+Long paths retain at most 2,000 regularly spaced hits plus the latest observed
+point. When full, the tracker keeps every other stored hit and doubles the sample
+stride. The reported path includes both observed endpoints and spans the whole
+run. It is a coarse history of sampled detections, not an exact route or evidence
+of movement between samples. Median duration averages the middle two durations
+when the class has an even number of tracks.
+
+The schema remains `intelligent-dvr.tracks.v1`; the method version and tracker
+SHA-256 distinguish the changed algorithm. Existing results remain readable,
+but current-version tracking evaluation requires re-analysis with this source.
+See [algorithm checks and formulas](verification/tracking-algorithms-2026-11-11/README.md)
+for generated comparisons and qualification limits.
 
 **Rules.** Observations still come from the existing class-presence rule engine,
 so live and recording observations mean the same thing: a class was present in a

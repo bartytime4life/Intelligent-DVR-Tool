@@ -17,6 +17,27 @@ export function recognitionFixture(source = 'a'.repeat(64)) {
   };
 }
 
+// Generated metadata for two first-frame-confirmed person tracks. One remains
+// for the second sample; the other ends at time zero. No recording is attached.
+export function trackingRecognitionFixture(method = 'bytetrack-style-iou-kalman-v2') {
+  const value = recognitionFixture();
+  const first = { label: 'person', score: .9, box: [.1, .2, .2, .5], track: 1 };
+  const second = { label: 'person', score: .8, box: [.6, .2, .2, .5], track: 2 };
+  value.trace.frames[0].detections = [first, second];
+  value.trace.frames[1].detections = [{ ...first }];
+  value.trace.tracking = {
+    schema: 'intelligent-dvr.tracks.v1', method, tracks_dropped: 0,
+    classes: { person: { tracks: 2, median_duration_seconds: method.endsWith('-v2') ? .25 : .5, longest_duration_seconds: .5 } },
+    tracks: [
+      { id: 1, label: 'person', first_seconds: 0, last_seconds: .5, duration_seconds: .5,
+        hits: 2, path: [[0, .2, .45], [.5, .2, .45]], zones: {} },
+      { id: 2, label: 'person', first_seconds: 0, last_seconds: 0, duration_seconds: 0,
+        hits: 1, path: [[0, .7, .45]], zones: {} },
+    ],
+  };
+  return value;
+}
+
 export function sharpeningFixture(source) {
   const value=recognitionFixture(source);
   const declaration={schema:'intelligent-dvr.enhancement-comparison.v1',profile:'mild-unsharp-v1',

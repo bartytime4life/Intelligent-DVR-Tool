@@ -1,0 +1,24 @@
+{
+  "integration_base": "dfa0f3b6d7283842612718447d007b6dd949a592",
+  "files": {
+    "edge/tracking.py": "9547d190c7ff4245efa731371a77b2725e8e986d9c9a3995b5cbcbd0bda5338a",
+    "tests/test_tracking.py": "ef804311eb53f4537e5b3ae76603c90a12ad76ddcaef633c8dd9e0069bf01ea4",
+    "tests/test_tracking_evaluation.py": "0329495c31a5800f289b2c8e9b3f529fefcb4a9c4fb1447bee3557fa464f4adf",
+    "docs/verification/tracking-algorithms-2026-11-11/run-regression-probes.py": "99357e7c9d41217989623d1184fa0b4cb79545e642c2aa6021c8b1b007f5322b",
+    "src/recognition.mjs": "8401070ad0a93a6b801efedff9fec574bb49e84b335ec5e1d72444224d9da86a",
+    "tests/fixtures/recognition.mjs": "ceff6e6b2a4f49cbacdf9ffdc9a8dc6bdc5dcea1a46a7b4f5cb3e983122ae296",
+    "tests/recognition.test.mjs": "017ec18c78860fd17c349de2d889a6558609db50c7f492db9023010638c7a18a",
+    "tests/browser/recognition.spec.mjs": "619e828d5853c4be1960358e3f4249e1c8e0c1e4e973ff4daa9067f53ec6c21d"
+  },
+  "protected_unchanged": {
+    "edge/inference.py": "7e95beb9e25dd67ac5d8d977ec6c466874371d12d112119a85a619124687b2f1",
+    "edge/journal.py": "70f7a3419d05d76380ea32ad5de20ee440bc17256e25baf0f2289a86e46a495a",
+    "edge/supervision.py": "03f334d5fa072e5f3ad02bd90536fd2c00fc97ebfaa54ca1ef1c10b64b80a9cf",
+    "edge/scheduler.py": "8639b46d3ba2e1a14efaa7ff647f412e6be437685ec7be5717a00983835b9019",
+    "edge/profiling.py": "f7c0a3e4b831d7f996840aec51a73e3fe68e06627cdce854716c576068f80f91"
+  },
+  "images": {
+    "median-before.png": "e09a1df7452dff4e0bf455494283062c2f7505ea04f4459e133cdabd9918d25d",
+    "median-after.png": "936ee152e7948a576dc1731117d736e58f53a02098dfbeaa3b2f74210bb38852"
+  }
+}

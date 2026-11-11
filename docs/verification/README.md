@@ -1,5 +1,10 @@
 # Verification index
 
+[Tracking mathematics and bounded association, November 11](tracking-algorithms-2026-11-11/README.md)
+records elapsed-time noise integration, stable covariance updates, expiry before
+matching, whole-run path sampling, median correction and class-partitioned
+optimal assignment. Comparisons use generated boxes, not recognition accuracy.
+
 [Cancellable Recognition handoff, November 11](recognition-transfer-2026-11-11/README.md)
 records single-flight Send, explicit cancellation, replaced-source protection,
 preserved review across navigation and interrupted still-capture cleanup.

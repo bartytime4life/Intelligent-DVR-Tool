@@ -4,7 +4,7 @@ import { createHash } from 'node:crypto';
 import { parseRecognition, frameSummary, canShowBoxes, matchRecording, mergeRecognitionEvents, MAX_VIDEO_BYTES } from '../src/recognition.mjs';
 import { saveReviewNote } from '../src/data.mjs';
 import { Sha256, sha256Blob, sha256File } from '../src/sha256.mjs';
-import { recognitionFixture, adjacentFrameFixture } from './fixtures/recognition.mjs';
+import { recognitionFixture, adjacentFrameFixture, trackingRecognitionFixture } from './fixtures/recognition.mjs';
 
 test('recognition review retains real class names, provenance and event-frame association', () => {
   const run = parseRecognition(recognitionFixture());
@@ -15,6 +15,17 @@ test('recognition review retains real class names, provenance and event-frame as
   assert.deepEqual(frameSummary(run.trace.frames[0], .95).counts, []);
   assert.deepEqual(frameSummary(run.trace.frames[1]).counts, []);
   assert.equal(run.receipt.events.length, 1);
+});
+
+test('v2 tracking imports the conventional even median and preserves v1 history', () => {
+  const current = trackingRecognitionFixture();
+  assert.equal(parseRecognition(current).tracking.classes.person.median_duration_seconds, .25);
+  const historical = trackingRecognitionFixture('bytetrack-style-iou-kalman-v1');
+  assert.equal(parseRecognition(historical).tracking.classes.person.median_duration_seconds, .5);
+  for (const value of [current, historical]) {
+    value.trace.tracking.classes.person.median_duration_seconds = value === current ? .5 : .25;
+    assert.throws(() => parseRecognition(value), /Invalid tracking class summary/);
+  }
 });
 
 test('mixed-source/model/settings/observation bundles fail closed', () => {
