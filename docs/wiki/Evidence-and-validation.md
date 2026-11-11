@@ -1,5 +1,9 @@
 # Verification index
 
+[Track continuity across frame resizing, November 11](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/tracking-frame-size-2026-11-11/README.md)
+records a reproduced ID loss and out-of-frame track box, fixed tracking units,
+normalized-input equivalence and generated native CPU worker checks.
+
 [Tracking mathematics and bounded association, November 11](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/tracking-algorithms-2026-11-11/README.md)
 records elapsed-time noise integration, stable covariance updates, expiry before
 matching, whole-run path sampling, median correction and class-partitioned
