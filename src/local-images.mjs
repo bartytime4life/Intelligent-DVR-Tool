@@ -41,40 +41,58 @@ export async function pruneImages(store, keep, now = Date.now()) {
   } catch { return 0; }
 }
 
-function once(target, ok, timeout) {
+function once(target, ok, timeout, signal, start) {
   return new Promise((resolve, reject) => {
-    const done = error => { clearTimeout(timer); target.removeEventListener(ok, pass); target.removeEventListener('error', fail); error ? reject(error) : resolve(); };
+    if (signal?.aborted) {reject(signal.reason); return;}
+    const done = error => { clearTimeout(timer); target.removeEventListener(ok, pass); target.removeEventListener('error', fail); signal?.removeEventListener('abort',abort); error ? reject(error) : resolve(); };
     const pass = () => done(), fail = () => done(Error('The recording could not be read for stills.'));
+    const abort = () => done(signal.reason);
     const timer = setTimeout(() => done(Error('Reading stills timed out.')), timeout);
     target.addEventListener(ok, pass); target.addEventListener('error', fail);
+    signal?.addEventListener('abort',abort,{once:true});
+    try {start();} catch (error) {done(error);}
+  });
+}
+
+// Canvas encoding cannot be cancelled, but its late result must not hold up
+// cleanup or continue an abandoned capture batch.
+function encodeStill(canvas, quality, signal) {
+  return new Promise((resolve,reject) => {
+    if (signal?.aborted) {reject(signal.reason); return;}
+    let settled = false;
+    const done = (error,blob) => {
+      if (settled) return;
+      settled = true; signal?.removeEventListener('abort',abort); error ? reject(error) : resolve(blob);
+    };
+    const abort = () => done(signal.reason);
+    signal?.addEventListener('abort',abort,{once:true});
+    try {canvas.toBlob(blob => done(null,blob),'image/jpeg',quality);} catch (error) {done(error);}
   });
 }
 
 // Draw small JPEG stills at the given recording times from a verified local Blob or blob: URL.
-export async function captureStills(source, times, {width = 160, quality = .7, limit = 200, signal} = {}) {
-  const url = typeof source === 'string' ? source : URL.createObjectURL(source), video = document.createElement('video');
+export async function captureStills(source, times, {width = 160, quality = .7, limit = 200, signal, documentRef = globalThis.document, urls = URL} = {}) {
+  signal?.throwIfAborted();
+  const url = typeof source === 'string' ? source : urls.createObjectURL(source), video = documentRef.createElement('video');
   const stills = new Map();
   video.muted = true; video.preload = 'auto'; video.playsInline = true;
   try {
-    const ready = once(video, 'loadeddata', 15000);
-    video.src = url;
-    await ready;
+    await once(video,'loadeddata',15000,signal,() => {video.src = url;});
     if (!video.videoWidth || !video.videoHeight) return stills;
-    const canvas = document.createElement('canvas');
+    const canvas = documentRef.createElement('canvas');
     canvas.width = width; canvas.height = Math.max(1, Math.round(width * video.videoHeight / video.videoWidth));
     const context = canvas.getContext('2d');
     for (const seconds of [...new Set(times)].filter(Number.isFinite).slice(0, limit)) {
       if (signal?.aborted) break;
-      const seeked = once(video, 'seeked', 5000);
-      video.currentTime = Math.max(0, Math.min(seconds, (video.duration || seconds) - 0.001));
-      await seeked;
+      await once(video,'seeked',5000,signal,() => {video.currentTime = Math.max(0, Math.min(seconds, (video.duration || seconds) - 0.001));});
+      if (signal?.aborted) break;
       context.drawImage(video, 0, 0, canvas.width, canvas.height);
-      const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', quality));
+      const blob = await encodeStill(canvas, quality, signal);
       if (blob) stills.set(seconds, blob);
     }
   } finally {
     video.removeAttribute('src'); video.load();
-    if (url !== source) URL.revokeObjectURL(url);
+    if (url !== source) urls.revokeObjectURL(url);
   }
   return stills;
 }
@@ -86,6 +104,7 @@ export async function saveObservationStills(source, run, options) {
   try { stills = await captureStills(source, times, options); } catch { return 0; }
   let saved = 0;
   for (const [i, event] of run.events.entries()) {
+    if (options?.signal?.aborted) break;
     const blob = stills.get(times[i]);
     if (blob && await putImage('thumbnails', observationImageKey(event), blob)) saved++;
   }

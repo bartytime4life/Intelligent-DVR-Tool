@@ -9,6 +9,7 @@ import RecognitionReport from './RecognitionReport.jsx';
 import { coverageLabel } from './media-coverage.mjs';
 import { saveObservationStills, grabFrame } from './local-images.mjs';
 import { analysisRequest } from './local-analysis.mjs';
+import {createReviewTransfer} from './review-transfer.mjs';
 import { FileVideo, HardDrives, VideoCamera, FolderOpen } from '@phosphor-icons/react';
 
 const sameBox = (a, b) => a.length === 4 && a.every((v, i) => v === b[i]);
@@ -38,6 +39,9 @@ export default function RecognitionReview({ onImport, onValidateImport, active =
   // Suggestions exist only for results from this computer's own analysis jobs with enrollment on.
   const [local, setLocal] = useState(null), [matches, setMatches] = useState(null);
   const video = useRef(), generation = useRef(0), sourceGeneration = useRef(0);
+  const activeRef = useRef(active); activeRef.current = active;
+  const lifetime = useRef(null), transfer = useRef(null);
+  if (!transfer.current) transfer.current = createReviewTransfer();
   useEffect(() => { if (clip) setTask('recording'); }, [clip]);
   useEffect(() => {
     if (!tasks.some(candidate => candidate.id === taskRequest?.id)) return;
@@ -52,10 +56,13 @@ export default function RecognitionReview({ onImport, onValidateImport, active =
   useEffect(() => {
     if (task === 'recorder' && focusRecorder.current) { recorderPanel.current?.focus(); focusRecorder.current = false; }
   }, [task]);
-  useEffect(() => () => { generation.current++; sourceGeneration.current++; }, []);
+  useEffect(() => {
+    lifetime.current = new AbortController();
+    return () => {lifetime.current.abort(); transfer.current.cancel(); generation.current++; sourceGeneration.current++;};
+  }, []);
   useEffect(() => () => { if (source) URL.revokeObjectURL(source.url); }, [source]);
   useEffect(() => {
-    if (!active) { video.current?.pause(); setMedia({}); }
+    if (!active) { transfer.current.cancel(); video.current?.pause(); setMedia({}); }
     else readMedia();
   }, [active]);
   const frame = run?.trace.frames[index];
@@ -66,12 +73,14 @@ export default function RecognitionReview({ onImport, onValidateImport, active =
   async function loadRun(event) {
     const file = event.target.files?.[0]; event.target.value = '';
     if (!file) return;
+    transfer.current.cancel();
     const ticket = ++generation.current; sourceGeneration.current++;
     setError(''); setStatus('Reading recognition results…');
     try {
       if (file.size > MAX_REVIEW_BYTES) throw Error('Recognition results exceed 32 MiB. Split the recording before analysis.');
       const parsed = parseRecognition(JSON.parse(await file.text()));
       if (ticket !== generation.current) return;
+      transfer.current.cancel(); // Also invalidate a Send begun while file.text() was pending.
       setRun(parsed); setDetectionInput('original'); setSource(null); setMedia({}); setIndex(0); setLocal(null); setMatches(null);
       setStatus('Results loaded. Choose the original recording to verify and view the detections.');
     } catch (err) { if (ticket === generation.current) { setError(err.message); setStatus(''); } }
@@ -79,11 +88,13 @@ export default function RecognitionReview({ onImport, onValidateImport, active =
   async function loadVideo(event) {
     const file = event.target.files?.[0]; event.target.value = '';
     if (!file || !run) return;
+    transfer.current.cancel();
     const ticket = generation.current, sourceTicket = ++sourceGeneration.current;
     setSource(null); setMedia({}); setError(''); setStatus('Verifying recording fingerprint…');
     try {
       await matchRecording(file, run.receipt.source_sha256);
       if (ticket !== generation.current || sourceTicket !== sourceGeneration.current) return;
+      transfer.current.cancel();
       setSource({ url: URL.createObjectURL(file), name: file.name });
       setStatus('Recording fingerprint matched. Review sampled frames and observations below.');
     } catch (err) {
@@ -91,6 +102,7 @@ export default function RecognitionReview({ onImport, onValidateImport, active =
     }
   }
   function openLocalResult({ bundle, file, name, local: origin = null }) {
+    transfer.current.cancel();
     generation.current++; sourceGeneration.current++;
     setRun(bundle); setDetectionInput('original'); setIndex(0); setSource({ url: URL.createObjectURL(file), name });
     setMedia({}); setError(''); setLocal(origin?.people?.enabled ? origin : null); setMatches(null);
@@ -165,15 +177,28 @@ export default function RecognitionReview({ onImport, onValidateImport, active =
   }
   // Keep a small still per observation from the verified recording, then hand the observations to Events.
   async function sendToEvents() {
+    if (!active || !run) return;
     const sent = run, from = source;
-    setSending(true);
+    const ticket = generation.current, sourceTicket = sourceGeneration.current;
+    const operation = transfer.current.begin(lifetime.current.signal, reason => {
+      if (lifetime.current.signal.aborted) return;
+      setSending(false);
+      setStatus(reason?.name === 'TimeoutError'
+        ? 'Sending timed out; nothing was sent to Events. Your loaded review is preserved. Try again when ready.'
+        : 'Sending cancelled; nothing was sent to Events. Your loaded review is preserved.');
+    });
+    if (!operation) return;
+    setSending(true); setStatus('Preparing observations and local stills for Events…');
     try {
-      if (onValidateImport?.(sent.events) === false) return;
+      if (onValidateImport?.(sent.events) === false) {setStatus('Nothing was sent. Check the Events queue warning, then try again.'); return;}
       mergeRecognitionEvents(reviews, sent.events);
-      if (from) await saveObservationStills(from.url, sent);
-      onImport(sent.events);
-    } catch (err) { setStatus(err.message); }
-    finally { setSending(false); }
+      if (from) await saveObservationStills(from.url, sent, {signal:operation.signal});
+      if (!transfer.current.isCurrent(operation) || ticket !== generation.current || sourceTicket !== sourceGeneration.current) return;
+      // Navigation can render before its cancellation effect runs.
+      if (!activeRef.current) {transfer.current.cancel(); return;}
+      if (onImport(sent.events) === false) setStatus('Nothing was sent. Check the Events queue warning, then try again.');
+    } catch (err) { if (transfer.current.isCurrent(operation)) setStatus(err.message); }
+    finally { if (transfer.current.finish(operation) && !lifetime.current.signal.aborted) setSending(false); }
   }
   function readMedia() {
     const el = video.current;
@@ -313,7 +338,8 @@ export default function RecognitionReview({ onImport, onValidateImport, active =
         <h2>Rule observations <small>{run.events.length}</small></h2>
         <p>Presence and dwell follow the configured zones and class labels. They do not establish intent, an anomaly or continuity of the same person.</p>
         {run.events.length > 0 ? <>
-          <button className="button amber" disabled={sending} onClick={sendToEvents}>{sending ? 'Saving stills…' : `Send ${run.events.length} observations to Events`}</button>
+          <div className="review-actions recognition-transfer"><button className="button amber" disabled={sending} onClick={sendToEvents}>{sending ? 'Saving stills…' : `Send ${run.events.length} observations to Events`}</button>
+            {sending && <button className="button" onClick={() => transfer.current.cancel()}>Cancel sending to Events</button>}</div>
           {source && <p className="hint">Each observation keeps a small still from this verified recording in this browser. Stills are cleared with the queue and never uploaded.</p>}
           <div className="recognition-event-list">{run.receipt.events.map((e, i) => <button key={e.id} className="recognition-event" onClick={() => {setDetectionInput('original'); seek(run.eventFrames[i]);}}><span>+{e.seconds.toFixed(2)}s · {e.rule}</span><span>score {e.score.toFixed(2)} · View frame</span></button>)}</div>
         </> : <p>No configured rules emitted an observation in the analyzed portion. Inspect detections and rule settings before drawing conclusions.</p>}

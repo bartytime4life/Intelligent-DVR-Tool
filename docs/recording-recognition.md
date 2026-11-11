@@ -154,6 +154,20 @@ A reused ID with different source/model/observation fields is rejected. Queue
 capacity is 1,000 records across model and sample observations. Every insertion
 refuses overflow without truncating older records.
 
+While **Saving stills…** appears, **Cancel sending to Events** stops the handoff
+and keeps your loaded review available. Repeated Send clicks cannot start a
+second transfer. Replacing the results or matching recording, leaving Recognition
+or hiding the page also cancels the active Send. Returning keeps the loaded
+recording and samples; sending again is explicit. A transfer that cannot finish
+within two minutes releases its controls and reports that nothing was sent.
+
+Cancellation stops waiting for still loading, seeking or encoding, and stops
+the remaining image-save loop. A browser encode or image write already submitted
+may finish locally; it cannot queue observations from a cancelled transfer or change
+the controls of a newer transfer. Saved stills keep the existing browser cleanup
+and cross-tab retention rules. Background analysis, backup and LAN recording keep
+their own explicit controls.
+
 Matching includes the exact numeric sample time. Two nearby frames can have the
 same rounded display time, such as **Clip +0.0s**, without being the same
 observation. Older reviews without an exact time remain readable but cannot

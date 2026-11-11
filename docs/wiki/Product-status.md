@@ -47,6 +47,11 @@ queue it from a late callback. Outstanding database opens remain bounded and
 late handles close before retry. See the
 [storage recovery record](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/bounded-image-storage-2026-11-11/README.md).
 
+Recognition's Send-to-Events handoff can now be cancelled while keeping its loaded
+review. Replaced results/recordings, workspace departure and hidden pages cancel
+the old transfer; late still work cannot queue old observations or clear a newer
+transfer. See [handoff verification](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/recognition-transfer-2026-11-11/README.md).
+
 **GPU preference:** live AI and recorded-video analysis now default to GPU first with visible CPU fallback and an explicit CPU override. Actual controlled RTX 5080 checks are recorded in the [GPU-default verification](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/gpu-default-2026-11-03/README.md); physical-device accuracy and capacity remain separate.
 
 **November 3 source follow-up:** [OEM companion backup](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/OEM-backup) adds
