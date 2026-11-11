@@ -50,6 +50,10 @@ test('live counts wait for a reply, expire with boxes and recover on a fresh fra
   await expect(ai).toContainText('AI delayed · counts and boxes hidden');
   await expect(ai.locator('.live-ai-count')).toHaveCount(0);
   await expect(page.getByRole('img', {name:'Live AI detections on the analyzed frame'})).toHaveCount(0);
+  // This outstanding frame was captured before we waited for expiry. Its late
+  // reply must stay stale; only a newly captured frame can restore fresh counts.
+  await reply({});
+  await expect(ai).toContainText('AI delayed · counts and boxes hidden');
   await reply({});
   await expect(ai).toContainText('Nothing detected in the analyzed frame');
   await reply({error:{code:'FRAME_INVALID',message:'Generated rejected frame'}},400);
