@@ -1,0 +1,11 @@
+{
+  "base_commit": "914f0649b671e31879e5870808959a393dd004db",
+  "sha256": {
+    "src/RecognitionReview.jsx": "bd66df3c74d50714ff25c6212a4e7407940fa7f15b15243248824ca33857f102",
+    "src/local-images.mjs": "bcc7d9a19d17be275bbd2d99dac9416828b78f652b85e9e77dfe2c206dc47edd",
+    "src/review-transfer.mjs": "9809ff459f8c9aacea75900d33a37dae4c1cc8b1bd31b3e27d4ffffa7e63817f",
+    "tests/local-images.test.mjs": "4876efa8131f2d58dac36eb800a26a8dc87a2b613c8d15a98253c40b2c1758f7",
+    "tests/browser/recognition-transfer.spec.mjs": "f5cda1a822c485aa8865dbc10c5733326d27d616c52cb8636067d8f031316adf",
+    ".github/workflows/facility-browser.yml": "139ac445e24941fc0e821994afb1eb76885d9d3fb9f8ece4590dba442669cb2e"
+  }
+}

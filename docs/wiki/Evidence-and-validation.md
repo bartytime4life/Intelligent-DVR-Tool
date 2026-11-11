@@ -1,5 +1,9 @@
 # Verification index
 
+[Cancellable Recognition handoff, November 11](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/recognition-transfer-2026-11-11/README.md)
+records single-flight Send, explicit cancellation, replaced-source protection,
+preserved review across navigation and interrupted still-capture cleanup.
+
 [Bounded browser image storage, November 11](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/bounded-image-storage-2026-11-11/README.md)
 records a reproduced stalled live handoff, five-second operation budgets, safe
 late completion, bounded database opens and explicit retry recovery.

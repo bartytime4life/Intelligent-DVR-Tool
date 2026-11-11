@@ -21,7 +21,7 @@ jobs:
         id: review_preflight
         run: >-
           npx playwright test --config=playwright.facility.config.mjs
-          review-workflow.spec.mjs review-workspace.spec.mjs
+          review-workflow.spec.mjs review-workspace.spec.mjs recognition-transfer.spec.mjs
           work-preservation.spec.mjs training-preservation.spec.mjs
           live-ai-status.spec.mjs live-ai-catalogue.spec.mjs live-review-retention.spec.mjs
       - name: Interrupted review and status recovery preflight
