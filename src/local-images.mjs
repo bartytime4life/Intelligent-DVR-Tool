@@ -1,6 +1,6 @@
 // Small stills kept in this browser only (IndexedDB). Every call fails soft: no storage means no image.
-const DB = 'intelligent-dvr', VERSION = 1;
-export const STORES = ['thumbnails', 'zone-stills'];
+import {createImageDatabase} from './image-database.mjs';
+export {STORES} from './image-database.mjs';
 // An unsigned observation ID alone cannot bind an image to its evidence.
 // Human decisions/notes are deliberately excluded so reviewing keeps the still.
 export function observationImageKey(event) {
@@ -9,30 +9,7 @@ export function observationImageKey(event) {
 }
 // A still written moments ago may belong to observations that are still being added to the queue.
 const GRACE_MS = 60_000;
-let opening = null;
-
-function open() {
-  if (!globalThis.indexedDB) return Promise.reject(Error('IndexedDB is unavailable'));
-  opening ||= new Promise((resolve, reject) => {
-    const request = indexedDB.open(DB, VERSION);
-    request.onupgradeneeded = () => { for (const name of STORES) if (!request.result.objectStoreNames.contains(name)) request.result.createObjectStore(name); };
-    request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(request.error);
-    request.onblocked = () => reject(Error('Image storage is blocked by another tab'));
-  }).catch(error => { opening = null; throw error; });
-  return opening;
-}
-
-async function transact(store, mode, work) {
-  const db = await open();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(store, mode);
-    let value;
-    work(tx.objectStore(store), result => { value = result; });
-    tx.oncomplete = () => resolve(value);
-    tx.onerror = tx.onabort = () => reject(tx.error || Error('Image storage failed'));
-  });
-}
+const transact = createImageDatabase();
 
 export async function putImage(store, key, blob) {
   try { await transact(store, 'readwrite', s => s.put({blob, at: Date.now()}, key)); return true; } catch { return false; }

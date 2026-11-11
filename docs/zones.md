@@ -17,8 +17,13 @@ Each saved still belongs to its selected plan. The planning grid and a loading
 message appear while that plan's image opens, so another plan's pixels are never
 shown underneath its rule. A submitted image save finishes for the named plan
 even if you switch plans; any newer image offer stays available for its own
-explicit **Use for Plan …** action. Failed removal keeps the saved image and
-reports the storage error.
+explicit **Use for Plan …** action. A refused or unconfirmed removal keeps the
+current image displayed and reports the storage error. Image reads, saves and
+removals share a five-second budget per operation, so a stalled browser database
+releases the controls for an explicit retry. A timeout cannot undo a write or
+removal that the browser already committed; check the still after storage
+recovers. Other tabs' database version changes close this page's cached image
+connection so they can finish.
 
 ## Make one useful zone
 

@@ -80,6 +80,15 @@ Disconnect remain available. A submitted Send can finish even after you confirm
 leaving Monitor. If another live still is still saving when you return, wait for
 it to finish before retrying Send. A failed save leaves the observation unsent.
 
+Each browser image operation has a five-second budget for opening storage and
+finishing its transaction together. If it cannot finish, **Saving still…** ends,
+Send and Dismiss become available again, and the observation stays unsent. Free
+browser storage, close other app tabs or check private-browsing restrictions,
+then retry. A late completion cannot send it automatically. If the browser is
+still finishing an old database open, retries fail promptly until that open ends;
+they do not pile up more requests. Camera Stop and Disconnect stay available.
+Browser suspension can delay timer delivery until the page runs again.
+
 If Monitor says **Live AI setup needs attention**, camera preview stays available
 and **Start AI** remains disabled. Run the platform's **Check** command, restart
 the local app if needed, then choose **Check again** in Monitor. A successful

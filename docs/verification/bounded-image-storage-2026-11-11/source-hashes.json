@@ -1,0 +1,11 @@
+{
+  "base_commit": "1d4be3365b5efbf35ef5a22ba7bf56e1afb1b677",
+  "sha256": {
+    "src/image-database.mjs": "04de62faf2d88f409edfdd3f8eda66e8e42306ca21a5d40ad5bd88cf3236f0e2",
+    "src/local-images.mjs": "6769dde8adf0c4637ab839d13f5679006342c490b858da9547c7c09dd6f5dfd0",
+    "src/App.jsx": "06265d39a442c3b7bc885d7818749235e5e5c1af4ac95b6623226483ec06b122",
+    "tests/image-database.test.mjs": "b002cc9baf44484c595d68e4a6df624542a3296334fdb716376e6e3aef5894c5",
+    "tests/browser/live-review-retention.spec.mjs": "5ad654e0a1e0262f9f956971d416e4ce461feabff3da3158c9df604351f41687",
+    "package.json": "6c2faaed10aa5369df1db66f340e738b75ac4edc00feba90ccf24bc179d7c09a"
+  }
+}
