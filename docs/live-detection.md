@@ -88,6 +88,21 @@ starting analysis. If restarting the local service ended a network preview,
 reconnect that source separately. Replies from replaced checks cannot replace
 newer choices.
 
+If a tile reports **Local AI sent an invalid or mismatched reply**, only that
+AI run stops in this page. The camera preview and earlier unsent observations
+remain available. Run the platform's **Check** command, restart the local service
+if needed, then press **Start AI** explicitly to retry. You can still send an
+earlier observation to Events; an invalid reply never replaces its analyzed still.
+Monitor requests Stop for the accepted AI session, and an unconfirmed local
+session expires after its existing 15-second lease.
+
+Startup and frame replies are validated before displaying metadata, boxes,
+counts or new observations. Frames must belong to the accepted camera, session
+and model fingerprint, with the same model/rule selections when supplied.
+Malformed, oversized or duplicate observation data rejects the whole reply.
+This checks consistency of local service data; it does not establish recognition
+accuracy or authenticate a physical camera.
+
 ### Limits
 
 | Limit | Value | Why |

@@ -1,5 +1,9 @@
 # Verification index
 
+[Live AI reply validation, November 11](live-reply-validation-2026-11-11/README.md)
+records a reproduced Monitor crash, session-bound frame validation, preserved
+preview/review, trusted Stop requests and explicit restart recovery.
+
 [Live review after disconnect, November 11](live-review-retention-2026-11-11/README.md)
 records temporary stopped-source review, bounded admission, explicit discard
 warnings, storage retry and one live still save at a time.

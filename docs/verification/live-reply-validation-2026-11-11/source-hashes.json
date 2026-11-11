@@ -1,0 +1,12 @@
+{
+  "base_commit": "8f6d3d58d132cf136b08e027d2a23200d771e579",
+  "sha256": {
+    "src/live-reply.mjs": "14889eebab9fca66f9f660b55fe84d1f827bcd38095ada8b2a65e341944c20ff",
+    "src/live-ai.mjs": "05702d127535daf2ccc2e4d2a7cfcfd960a7e4e849245a59e13b2fdba542b18a",
+    "src/live-feeds.css": "accdbb5d07f1c24204dab423b1fad8ce8f267a311d17c2027a327c6679a45baa",
+    "tests/live-reply.test.mjs": "c5931362b876b5a96fee43da56044f02010e9c5cdb9feae70ed6b4fd8c643edd",
+    "tests/live-ai.test.mjs": "e46b54013404642816b03601185a314c3fa60a7e184d9f5275502703cd9dbc07",
+    "tests/browser/live-ai-status.spec.mjs": "d211dd974bfa5b7d1126f6a13f4eb44fb72cfb81d303a43d6b1bc8d9df557fb3",
+    "package.json": "c81b18145157456404377262e599e04c1634a768ec75f2b10880543d10173d75"
+  }
+}
