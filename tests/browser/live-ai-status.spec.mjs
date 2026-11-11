@@ -13,8 +13,9 @@ async function generatedMonitor(page) {
   let starts = 0;
   const frames = [];
   await page.route('**/api/analysis/session', route => route.fulfill({json:{
-    token:'generated-token', live:{enabled:true, models:[{id:'generated-model'}],
-      rules:[{id:'generated-rule', models:['generated-model']}]},
+    token:'generated-token', live:{enabled:true, limits:{active_sessions:2},
+      models:[{id:'generated-model',name:'Generated detector'}],
+      rules:[{id:'generated-rule',name:'Generated rules',models:['generated-model']}]},
   }}));
   await page.route('**/api/live/start', route => {starts++; return route.fulfill({json:session});});
   await page.route('**/api/live/*/stop', route => route.fulfill({json:{...session,state:'stopped'}}));
