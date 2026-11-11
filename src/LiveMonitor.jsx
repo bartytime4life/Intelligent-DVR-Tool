@@ -6,7 +6,7 @@ import ClipCapture from './ClipCapture.jsx';
 import {backdropDismiss} from './dialog-dismiss.mjs';
 import {grabFrame} from './local-images.mjs';
 import {LiveOverlay, LiveTileAI} from './LiveDetection.jsx';
-import {liveDetector, captureJpeg, liveObservationEvent} from './live-ai.mjs';
+import {liveDetector, captureJpeg, liveObservationEvent, liveSetupInfo} from './live-ai.mjs';
 import {analysisRequest} from './local-analysis.mjs';
 
 const guide = 'https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/local-camera-feeds.md';
@@ -24,6 +24,8 @@ export default function LiveMonitor({onZoneStill, queue, visibleTiles=4, onCount
   const controller = useRef(null), shown = useRef(new Set());
   // Live AI: one explicit detector per tile, created only by Start AI.
   const [aiInfo, setAiInfo] = useState({state:'unknown'}), [aiStates, setAiStates] = useState({}), [, setClock] = useState(0);
+  const [aiChecking, setAiChecking] = useState(false);
+  const aiRequest = useRef(null);
   const [aiRules, setAiRules] = useState(() => { try { return localStorage.getItem(AI_RULES_KEY) || ''; } catch { return ''; } });
   const detectors = useRef(new Map()), pictures = useRef(new Map());
   if (!controller.current) controller.current = webcamController(navigator.mediaDevices, state => { if (alive.current) setWebcam(state); });
@@ -41,11 +43,20 @@ export default function LiveMonitor({onZoneStill, queue, visibleTiles=4, onCount
   const aiReady = aiInfo.state === 'ready' && Boolean(aiRule);
   async function loadAi() {
     if (!local) { setAiInfo({state:'unavailable', message:'Live AI runs in the local app at http://127.0.0.1.'}); return; }
+    aiRequest.current?.abort();
+    const request = new AbortController(); aiRequest.current = request;
+    setAiChecking(true);
     try {
-      const value = await (await analysisRequest('/session', {signal:AbortSignal.timeout(4000)})).json();
-      if (!alive.current) return;
-      setAiInfo(value.live?.enabled ? {state:'ready', token:value.token, live:value.live} : {state:'unavailable', message:'Live AI needs a configured local model. Run Check, then Start.'});
-    } catch { if (alive.current) setAiInfo({state:'unavailable', message:'Live AI needs the local analysis service. Start the app with Start-Mac.command or the PC launcher.'}); }
+      const signal = AbortSignal.any([request.signal, AbortSignal.timeout(4000)]);
+      const value = await (await analysisRequest('/session', {signal})).json();
+      if (!alive.current || aiRequest.current !== request || request.signal.aborted) return;
+      setAiInfo(liveSetupInfo(value));
+    } catch {
+      if (alive.current && aiRequest.current === request && !request.signal.aborted)
+        setAiInfo({state:'unavailable', message:'Live AI needs the local analysis service. Start the app with Start-Mac.command or the PC launcher.'});
+    } finally {
+      if (alive.current && aiRequest.current === request) setAiChecking(false);
+    }
   }
   function stopAi(id, message = '') {
     const detector = detectors.current.get(id);
@@ -98,7 +109,7 @@ export default function LiveMonitor({onZoneStill, queue, visibleTiles=4, onCount
     alive.current = true;
     const leave = () => stopAll('Preview stopped because this page closed.');
     window.addEventListener('pagehide', leave);
-    return () => { alive.current = false; stopAll(); onCount(0); window.removeEventListener('pagehide', leave); };
+    return () => { alive.current = false; aiRequest.current?.abort(); aiRequest.current = null; stopAll(); onCount(0); window.removeEventListener('pagehide', leave); };
   }, []);
   useEffect(() => { onCount(live); }, [live, onCount]);
   useEffect(() => { void loadAi(); }, []);
@@ -249,12 +260,12 @@ export default function LiveMonitor({onZoneStill, queue, visibleTiles=4, onCount
     {tiles.length > 0 && <div className="live-ai-settings" aria-label="Live AI settings">
       <span className={`connection-dot ${aiRunning ? 'receiving' : ''}`} />
       {aiInfo.state === 'ready' ? <>
-        <span>Live AI · {aiInfo.live.models[0]?.name} · runs on this computer, up to {aiInfo.live.limits.active_sessions} cameras</span>
+        <span role="status">Live AI · {aiInfo.live.models[0]?.name} · runs on this computer, up to {aiInfo.live.limits.active_sessions} cameras</span>
         {aiChoices.length > 1 && <label>Rules<select aria-label="Live AI rules" value={aiRule?.id || ''} disabled={aiRunning} onChange={e => { setAiRules(e.target.value); try { localStorage.setItem(AI_RULES_KEY, e.target.value); } catch { /* convenience only */ } }}>
           {aiChoices.map(r => <option key={r.id} value={r.id}>{r.name}</option>)}</select></label>}
         {aiChoices.length === 1 && <span className="live-ai-rule">Rules: {aiRule.name}</span>}
-      </> : <span>{aiInfo.state === 'unknown' ? 'Checking for local AI…' : aiInfo.message}</span>}
-      {aiInfo.state === 'unavailable' && local && <button className="text-button" onClick={loadAi}><ArrowClockwise/>Check again</button>}
+      </> : <span role="status">{aiInfo.state === 'unknown' || aiChecking ? 'Checking for local AI…' : aiInfo.message}</span>}
+      {aiInfo.state === 'unavailable' && local && <button className="text-button" disabled={aiChecking} onClick={loadAi}><ArrowClockwise/>{aiChecking ? 'Checking…' : 'Check again'}</button>}
       <a href={aiGuide} target="_blank" rel="noreferrer">How live AI works</a>
     </div>}
     <ClipCapture stream={webcam.stream} hidden={pageHidden} clip={clip} onClip={onClip} onReview={onReviewClip} capturePending={capturePending} onCaptureBusy={onCaptureBusy} />

@@ -60,6 +60,14 @@ Stopping AI keeps retained observations, but leaving Monitor or closing the page
 clears this temporary list and its replacement counter. Events retains only the
 observations you explicitly sent.
 
+If Monitor says **Live AI setup needs attention**, camera preview stays available
+and **Start AI** remains disabled. Run the platform's **Check** command, restart
+the local app if needed, then choose **Check again** in Monitor. A successful
+check restores the listed model and rules without reconnecting the camera or
+starting analysis. If restarting the local service ended a network preview,
+reconnect that source separately. Replies from replaced checks cannot replace
+newer choices.
+
 ### Limits
 
 | Limit | Value | Why |

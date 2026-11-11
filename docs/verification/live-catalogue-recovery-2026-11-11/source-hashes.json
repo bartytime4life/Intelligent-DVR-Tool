@@ -1,0 +1,10 @@
+{
+  "base_commit": "7f69d02c90da2fd9c46be237ea2285272a9ec2b4",
+  "sha256": {
+    "src/LiveMonitor.jsx": "4006746350c31a538d36784df4dc80698026acaa12a5784dd10961bc0a91676d",
+    "src/live-ai.mjs": "fcff61d3e1022a95b77062e380bcedf5a176e52a783e5a13cac0716de9cfb4ae",
+    "src/live-feeds.css": "a71c904a1c4f23cb503030ce20fc6f4cefa94674855ff8f2e712c6d7a89e54e6",
+    "tests/live-ai.test.mjs": "378e487342571409e5a8ddd79ffd45d13fef74daaaee9b9621fc7a8a52261fa5",
+    "tests/browser/live-ai-catalogue.spec.mjs": "2fe599f333ffacc820ca526f9728c2163b713f236dfc7d3ecaa1df6eee7401e4"
+  }
+}
