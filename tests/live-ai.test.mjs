@@ -7,7 +7,7 @@ import { parseRecognition, validateTracking, trackRows, boxLabel, mergeRecogniti
 import { filterEvents, queueCSV } from '../src/review-queue.mjs';
 import { recognitionFixture } from './fixtures/recognition.mjs';
 
-const session = { id: 'a'.repeat(32), camera: 'Front door', model_sha256: 'b'.repeat(64), state: 'live' };
+const session = { id: 'a'.repeat(32), camera: 'Front door', model:'Generated detector', rules:'Generated rules', model_sha256: 'b'.repeat(64), state: 'live' };
 const observation = { id: 'c'.repeat(32), camera: 'Front door', label: 'person', score: .91, seconds: 3.2, started_seconds: 3.2,
   rule: 'person present in door for 0s', review_required: true };
 
@@ -107,7 +107,7 @@ function service({ frames = [], startState = 'live' } = {}) {
     const next = frames.shift();
     if (!next) return new Promise(() => {}); // Hold the loop until stop() aborts.
     if (next.error) return { ok: false, status: next.status || 409, json: async () => ({ error: next.error }) };
-    return json({ ...next, session });
+    return json({width:640,height:360,detector:'ran',detections:[],observations:[],...next,session});
   };
   return { calls, fetcher };
 }
@@ -147,13 +147,13 @@ test('the detector starts explicitly, sends one frame at a time and keeps observ
 test('start and frame failures stop the detector with the service message', async () => {
   let snapshots = [];
   let { fetcher } = service({ startState: 'failed' });
-  let detector = liveDetector({ token: 't', model: 'm', rules: 'r', camera: 'c', capture: async () => new Blob(['x']), onChange: s => snapshots.push(s), fetcher, wait: async () => {} });
+  let detector = liveDetector({ token: 't', model: 'm', rules: 'r', camera: session.camera, capture: async () => new Blob(['x']), onChange: s => snapshots.push(s), fetcher, wait: async () => {} });
   await detector.start();
   assert.equal(snapshots.at(-1).state, 'failed');
   assert.equal(snapshots.at(-1).error, 'Model missing.');
   snapshots = [];
   ({ fetcher } = service({ frames: [{ error: { code: 'WORKER_TIMEOUT', message: 'Local AI took too long.' } }] }));
-  detector = liveDetector({ token: 't', model: 'm', rules: 'r', camera: 'c', capture: async () => new Blob(['x']), onChange: s => snapshots.push(s), fetcher, wait: async () => {} });
+  detector = liveDetector({ token: 't', model: 'm', rules: 'r', camera: session.camera, capture: async () => new Blob(['x']), onChange: s => snapshots.push(s), fetcher, wait: async () => {} });
   await detector.start();
   for (let i = 0; i < 10 && snapshots.at(-1).state !== 'failed'; i++) await new Promise(r => setTimeout(r, 0));
   assert.equal(snapshots.at(-1).state, 'failed');
@@ -164,7 +164,7 @@ test('start and frame failures stop the detector with the service message', asyn
 test('retained live observations keep their original session and stable completion ID after prepend',async()=>{
   const older={observation:{...observation,id:'d'.repeat(32)},still:new Blob(['old']),capturedAt:1000,session:{...session,id:'e'.repeat(32)}};
   const {fetcher}=service({frames:[{observations:[observation],detections:[]}]});
-  const detector=liveDetector({token:'t',model:'m',rules:'r',camera:'c',observations:[older],capture:async()=>new Blob(['new']),fetcher,wait:async()=>{}});
+  const detector=liveDetector({token:'t',model:'m',rules:'r',camera:session.camera,observations:[older],capture:async()=>new Blob(['new']),fetcher,wait:async()=>{}});
   await detector.start();
   for(let i=0;i<20&&detector.snapshot.observations.length<2;i++)await new Promise(r=>setTimeout(r,0));
   detector.markSent(older.observation.id);
@@ -179,7 +179,7 @@ test('retained live observations keep their original session and stable completi
 test('slow inference does not make already-stale capture boxes fresh',async()=>{
   let clock=100;
   const serviceMock=service({frames:[{observations:[],detections:[]}]});
-  const detector=liveDetector({token:'t',model:'m',rules:'r',camera:'c',capture:async()=>new Blob(['jpeg']),now:()=>clock,
+  const detector=liveDetector({token:'t',model:'m',rules:'r',camera:session.camera,capture:async()=>new Blob(['jpeg']),now:()=>clock,
     fetcher:async(url,options)=>{if(url.includes('/frame'))clock+=2000;return serviceMock.fetcher(url,options);},wait:async()=>{}});
   await detector.start();
   for(let i=0;i<20&&!detector.snapshot.result;i++)await new Promise(r=>setTimeout(r,0));
@@ -223,7 +223,7 @@ test('a restarted detector keeps the previous run’s unsent observations', asyn
   const kept = { observation, still: new Blob(['x']), capturedAt: 5 };
   const snapshots = [];
   const { fetcher } = service();
-  const detector = liveDetector({ token: 't', model: 'm', rules: 'r', camera: 'c', capture: async () => null, observations: [kept],
+  const detector = liveDetector({ token: 't', model: 'm', rules: 'r', camera: session.camera, capture: async () => null, observations: [kept],
     onChange: s => snapshots.push(s), fetcher, wait: async () => {} });
   assert.deepEqual(detector.snapshot.observations, [kept]);
   await detector.start();
@@ -249,7 +249,7 @@ for (const stage of ['headers', 'body']) test(`live AI bounds a stalled response
 
 for (const stage of ['start', 'frame']) test(`a stalled live AI ${stage} releases active state and keeps unsent observations`, {timeout:1000}, async () => {
   const kept = {observation, still:new Blob(['kept']), capturedAt:5};
-  const detector = liveDetector({token:'t', model:'m', rules:'r', camera:'c', observations:[kept],
+  const detector = liveDetector({token:'t', model:'m', rules:'r', camera:session.camera, observations:[kept],
     capture:async () => new Blob(['generated']), timeouts:{start:20, frame:20},
     fetcher:async (path, {signal}) => {
       if (path.endsWith('/start') && stage !== 'start') return {ok:true, json:async () => session};
@@ -268,7 +268,7 @@ for (const stage of ['start', 'frame']) test(`a stalled live AI ${stage} release
 test('late startup from a cancelled run cannot replace a newer live AI session', async () => {
   let completeFirst, starts = 0; const stopped = [];
   const newer = {...session, id:'d'.repeat(32)};
-  const detector = liveDetector({token:'t', model:'m', rules:'r', camera:'c', capture:async () => null,
+  const detector = liveDetector({token:'t', model:'m', rules:'r', camera:session.camera, capture:async () => null,
     wait:async () => new Promise(resolve => setTimeout(resolve, 0)), fetcher:async path => {
       if (path.endsWith('/start')) {
         starts++;
@@ -302,6 +302,62 @@ async function waitForLive(check) {
   assert.ok(check(), 'expected live detector state arrived');
 }
 
+test('invalid frame replies stop only the accepted session and preserve earlier review atomically', async () => {
+  for (const problem of ['malformed','mismatched','duplicate','invalid JSON']) {
+    const kept = {observation,session,still:new Blob(['kept']),capturedAt:5};
+    const paths = [], snapshots = [];
+    const frame = {width:640,height:360,detector:'ran',session,detections:[],observations:[{...observation,id:'d'.repeat(32)}]};
+    if (problem === 'malformed') frame.detections = {};
+    if (problem === 'mismatched') frame.session = {...session,id:'e'.repeat(32)};
+    if (problem === 'duplicate') frame.observations = [observation];
+    const detector = liveDetector({token:'t',model:'m',rules:'r',camera:session.camera,observations:[kept],
+      capture:async () => new Blob(['generated']),wait:async () => {},onChange:s => snapshots.push(s),
+      fetcher:async path => {
+        paths.push(path);
+        return {ok:true,json:async () => {
+          if (path.endsWith('/start')) return session;
+          if (problem === 'invalid JSON' && path.endsWith('/frame')) throw new SyntaxError('generated parse failure');
+          return path.endsWith('/stop') ? {} : frame;
+        }};
+      }});
+    await detector.start();
+    await waitForLive(() => detector.snapshot.state === 'failed');
+    assert.match(detector.snapshot.error,/invalid or mismatched reply/);
+    assert.deepEqual(detector.snapshot.observations,[kept]);
+    assert.equal(detector.snapshot.result,null);
+    assert.ok(snapshots.every(s => s.result === null));
+    assert.equal(paths.filter(p => p.endsWith('/frame')).length,1);
+    assert.deepEqual(paths.filter(p => p.endsWith('/stop')),[`/api/live/${session.id}/stop`]);
+    detector.stop();
+  }
+});
+
+test('malformed startup replies cannot submit frames or interpolate untrusted session paths', async () => {
+  for (const bad of [{...session,id:'../another'},{...session,camera:'Other source'},{...session,model:{}},null]) {
+    const paths = [];
+    const detector = liveDetector({token:'t',model:'m',rules:'r',camera:session.camera,
+      capture:async () => {throw Error('capture must not run');},
+      fetcher:async path => {paths.push(path); return {ok:true,json:async () => bad};}});
+    await detector.start();
+    assert.equal(detector.snapshot.state,'failed');
+    assert.match(detector.snapshot.error,/invalid or mismatched reply/);
+    assert.deepEqual(paths,['/api/live/start']);
+    detector.stop();
+  }
+});
+
+test('a cancelled startup reply cannot choose another camera session to stop', async () => {
+  let complete; const paths = [];
+  const detector = liveDetector({token:'t',model:'m',rules:'r',camera:session.camera,
+    fetcher:async path => {
+      paths.push(path);
+      return new Promise(resolve => {complete = () => resolve({ok:true,json:async () => ({...session,camera:'Other camera'})});});
+    }});
+  const starting = detector.start(); detector.stop(); complete(); await starting;
+  assert.deepEqual(paths,['/api/live/start']);
+  assert.equal(detector.snapshot.state,'stopped');
+});
+
 test('busy and rejected-frame counters publish even when the next reply stalls', async () => {
   const snapshots = [];
   const {fetcher} = service({frames:[
@@ -309,7 +365,7 @@ test('busy and rejected-frame counters publish even when the next reply stalls',
     {error:{code:'FRAME_INVALID', message:'invalid'}, status:400},
     {error:{code:'FRAME_SIZE', message:'large'}, status:400},
   ]});
-  const detector = liveDetector({token:'t', model:'m', rules:'r', camera:'c', capture:async () => new Blob(['frame']),
+  const detector = liveDetector({token:'t', model:'m', rules:'r', camera:session.camera, capture:async () => new Blob(['frame']),
     fetcher, onChange:snapshot => snapshots.push(snapshot), wait:async () => {}});
   try {
     await detector.start();
@@ -329,7 +385,7 @@ test('bounded live observations count unsent replacements but not already-sent c
     {observations:[{...observation,id:'f'.repeat(32)}], detections:[]},
   ]});
   const snapshots = [];
-  const detector = liveDetector({token:'t', model:'m', rules:'r', camera:'c', capture:async () => new Blob(['frame']),
+  const detector = liveDetector({token:'t', model:'m', rules:'r', camera:session.camera, capture:async () => new Blob(['frame']),
     observations:retained, observationsDropped:2, fetcher,
     onChange:snapshot => snapshots.push(snapshot), wait:async () => {}});
   try {

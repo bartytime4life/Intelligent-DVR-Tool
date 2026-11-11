@@ -41,6 +41,7 @@
 .live-ai-observations{list-style:none;margin:0;padding:0;display:grid;gap:5px;max-height:132px;overflow:auto}.live-ai-observations li{display:flex;align-items:center;gap:8px;background:#1c2620;border:1px solid #4a3d23;border-radius:6px;padding:6px 8px;font-size:11px;color:#e6d6b5}.live-ai-observations li>span:first-child{flex:1;min-width:0}.live-ai-observations small{display:block;color:#a99f88;font-size:10px;margin-top:2px}.live-ai-observations .text-button{color:#ffcf7a;font-size:11px;display:inline-flex;align-items:center;gap:4px}.live-ai-observations .icon-button{padding:2px}.live-ai-sent{color:#76ddbb;font-size:11px}
 /* Live controls and AI status must fit beyond the old fixed mobile tile height. */
 @media(max-width:700px){.live-monitor .live-tile{height:auto}}
+@media(max-width:700px){.live-ai-row>.live-ai-error{flex-basis:100%}}
 .live-review-summary{font-size:12px;line-height:1.5;color:#a9babe;margin:10px 0 16px}
 .live-tile>.live-review-summary{padding:0 12px;margin:12px 0}
 .retained-live-heading{padding:14px 12px;font-size:13px}

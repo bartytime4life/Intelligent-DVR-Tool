@@ -1,6 +1,7 @@
 // Explicit live AI on one Monitor tile: the browser sends the frame it is already
 // showing to this computer's local service and draws the returned detections.
 // One frame is in flight per camera, so analysis never builds a backlog.
+import {parseLiveSession, parseLiveFrame, LIVE_REPLY_ERROR} from './live-reply.mjs';
 
 export const LIVE_DISPLAY_SCORE = 0.4;
 // Boxes belong to the frame they were computed on. Hide them once that frame is old.
@@ -67,6 +68,7 @@ export async function liveRequest(path, { token, body, jpeg, signal, fetcher = f
   try { return await response.json(); }
   catch (error) {
     if (error.name === 'TimeoutError') throw Object.assign(Error('The local AI reply did not finish in time. Check that the local app is running, then try again.'), {name:'TimeoutError'});
+    if (error.name === 'SyntaxError') throw Object.assign(Error(LIVE_REPLY_ERROR),{code:'LIVE_REPLY_INVALID'});
     throw error;
   }
 }
@@ -139,8 +141,11 @@ export function liveDetector({ token, model, rules, camera, capture, onChange, f
       const capturedAt = wall();
       const capturedMonotonic = now();
       try {
-        const result = await liveRequest(`/${state.session.id}/frame`, { token, jpeg: blob, signal, fetcher, timeout:timeouts.frame ?? 15000 });
+        const reply = await liveRequest(`/${state.session.id}/frame`, { token, jpeg: blob, signal, fetcher, timeout:timeouts.frame ?? 15000 });
         if (!running || ticket !== generation) break;
+        const result = parseLiveFrame(reply,state.session);
+        if (result.observations.some(o => state.observations.some(kept => kept.observation.id === o.id)))
+          throw Object.assign(Error(LIVE_REPLY_ERROR),{code:'LIVE_REPLY_INVALID'});
         const finished = now(), interval = previous === null ? null : finished - previous;
         previous = finished;
         // Exponential moving average of analyzed frames per second, from actual reply spacing.
@@ -154,7 +159,13 @@ export function liveDetector({ token, model, rules, camera, capture, onChange, f
         if (!running || ticket !== generation || error.name === 'AbortError') break;
         if (error.code === 'BUSY') { emit({ skippedBusy: state.skippedBusy + 1 }); }
         else if (['FRAME_INVALID', 'FRAME_SIZE'].includes(error.code)) { emit({ frameErrors: state.frameErrors + 1 }); }
-        else { running = false; emit({ state: 'failed', error: error.message, result: null }); break; }
+        else {
+          // Reject the whole reply before publishing it. Stop the trusted session,
+          // never an identifier supplied by a mismatched frame reply.
+          if (error.code === 'LIVE_REPLY_INVALID') void liveRequest(`/${state.session.id}/stop`,
+            {token,body:{},fetcher,timeout:timeouts.stop ?? 5000}).catch(() => {});
+          running = false; emit({ state: 'failed', error: error.message, result: null }); break;
+        }
       }
       const spare = 1000 / maxFps - (now() - began);
       if (running && spare > 0) await wait(spare);
@@ -170,9 +181,18 @@ export function liveDetector({ token, model, rules, camera, capture, onChange, f
       emit({ state: 'starting', session:null, error: '', result: null, fps: 0, latencyMs: null });
       try {
         // A GPU startup can use its 30 s allowance, then retry once on CPU.
-        const session = await liveRequest('/start', { token, body: { model, rules, camera }, signal, fetcher, timeout:timeouts.start ?? 75000 });
-        if (!running || ticket !== generation) { void liveRequest(`/${session.id}/stop`, { token, body: {}, fetcher, timeout:timeouts.stop ?? 5000 }).catch(() => {}); return; }
-        if (session.state !== 'live') { running = false; emit({ state: 'failed', session, error: session.error?.message || 'Local AI did not start.' }); return; }
+        const reply = await liveRequest('/start', { token, body: { model, rules, camera }, signal, fetcher, timeout:timeouts.start ?? 75000 });
+        if (!running || ticket !== generation) {
+          try {
+            const late = parseLiveSession(reply,{camera,model_id:model,rules_id:rules});
+            void liveRequest(`/${late.id}/stop`, { token, body: {}, fetcher, timeout:timeouts.stop ?? 5000 }).catch(() => {});
+          } catch { /* Untrusted replies never choose a Stop path; the unused lease expires. */ }
+          return;
+        }
+        if (['failed','stopped'].includes(reply?.state)) {
+          running = false; emit({state:'failed',error:typeof reply.error?.message === 'string' ? reply.error.message.slice(0,1000) : 'Local AI did not start.'}); return;
+        }
+        const session = parseLiveSession(reply,{camera,model_id:model,rules_id:rules});
         emit({ state: 'live', session });
         void loop(ticket, signal);
       } catch (error) {
