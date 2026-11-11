@@ -1,6 +1,34 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {createReviewTransfer} from '../src/review-transfer.mjs';
+import {createReviewOpening, createReviewTransfer} from '../src/review-transfer.mjs';
+
+test('review intent spans independent panels and a rejected newer request still supersedes the old one', async () => {
+  const opening = createReviewOpening(), recorder = createReviewTransfer(), backup = createReviewTransfer();
+  const oldTransfer = recorder.begin(), oldIntent = opening.begin();
+  const newerTransfer = backup.begin(), newerIntent = opening.begin();
+  assert.equal(opening.isCurrent(oldIntent), false);
+  assert.equal(opening.isCurrent(newerIntent), true);
+  // Rejecting a file leaves the displayed review alone, but does not revive an
+  // earlier segment download when its transport eventually finishes.
+  opening.begin();
+  let replaced = false;
+  await Promise.resolve();
+  if (recorder.isCurrent(oldTransfer) && opening.isCurrent(oldIntent)) replaced = true;
+  if (backup.isCurrent(newerTransfer) && opening.isCurrent(newerIntent)) replaced = true;
+  assert.equal(replaced, false);
+  recorder.finish(oldTransfer); backup.finish(newerTransfer);
+});
+
+test('hidden Recognition refuses completions and returning does not revive an older intent', () => {
+  let visible = true;
+  const opening = createReviewOpening({available:() => visible}), old = opening.begin();
+  visible = false;
+  assert.equal(opening.isCurrent(old), false);
+  assert.equal(opening.begin(), null);
+  opening.invalidate(); visible = true;
+  assert.equal(opening.isCurrent(old), false);
+  assert.equal(opening.isCurrent(opening.begin()), true);
+});
 
 test('a panel refuses duplicate transfers and accepts another after completion', () => {
   const transfers = createReviewTransfer(), first = transfers.begin();

@@ -310,7 +310,7 @@ export default function TrainingWorkspace({ onOpenRecognition, onDirtyChange }) 
       onDone={finishCheck} onRetry={() => startCheck(check.value)} onBack={discardCheck} />}
     {step === 'confirm' && <ConfirmCheck source={check.context.source} onRetry={() => startCheck(check.value)}
       onConfirm={() => { setCheck(s => ({ ...s, confirmed: true })); setStep('results'); }} onBack={discardCheck} />}
-    {step === 'results' && outcome && <><TrainingScorecard key={`${check?.context?.sourceHash || outcome.sourceHash}-${includeSession}`}
+    {step === 'results' && outcome && <><TrainingScorecard key={check?.context?.sourceHash || outcome.sourceHash}
       service={service} outcome={outcome} check={check} onCheck={startCheck} onSave={saveDecision} onPreview={setPreview}
       pastSessions={compatibleTrainingSessions(library.sessions, viewName, outcome)} viewName={viewName}
       includeSession={includeSession} onInclude={setIncludeSession} libraryError={library.error}

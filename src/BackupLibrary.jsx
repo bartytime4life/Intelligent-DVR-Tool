@@ -6,7 +6,7 @@ import { backupAnnouncement, analysisAnnouncement } from './status-announcements
 import { createReviewTransfer } from './review-transfer.mjs';
 import './backup-library.css';
 
-export default function BackupLibrary({onResult, onBusy, onStatus, blocked = false}) {
+export default function BackupLibrary({onResult, onBusy, onStatus, blocked = false, reviewOpening, active = true, cameraSetupRequest = null}) {
   const [status, setStatus] = useState(null), [catalog, setCatalog] = useState(null), [config, setConfig] = useState({...DEFAULT_LIBRARY_CONFIG});
   const [connected, setConnected] = useState(false), [working, setWorking] = useState(false), [dirty, setDirty] = useState(false);
   const [transferring, setTransferring] = useState(false);
@@ -17,10 +17,27 @@ export default function BackupLibrary({onResult, onBusy, onStatus, blocked = fal
   const [camera, setCamera] = useState({name:'',host:'',port:554,path:'',username:'',password:''}), [cameraWorking, setCameraWorking] = useState(false);
   const [recorderSource, setRecorderSource] = useState('');
   const token = useRef(''), lifetime = useRef(null), pending = useRef(false);
+  const connectButton = useRef(), cameraSetupPanel = useRef(), cameraSetupForm = useRef();
+  const setupFocus = useRef({request:null, phase:null});
   const transfers = useRef(null);
   if (!transfers.current) transfers.current = createReviewTransfer();
   const local = localAnalysisOrigin(globalThis.location);
+  useEffect(() => {
+    if (!cameraSetupRequest || !active || working || transferring) return;
+    const progress = setupFocus.current;
+    if (progress.request === cameraSetupRequest && progress.phase === 'form') return;
+    const phase = connected && cameras ? 'form' : 'connect';
+    if (progress.request === cameraSetupRequest && progress.phase === phase) return;
+    if (cameraSetupPanel.current) cameraSetupPanel.current.open = true;
+    const target = phase === 'form'
+      ? cameras.enabled === false ? cameraSetupPanel.current : cameraSetupForm.current?.querySelector('input:not(:disabled)') || cameraSetupForm.current
+      : local && !connectButton.current?.disabled ? connectButton.current : cameraSetupPanel.current;
+    if (document.querySelector('dialog[open]')) return;
+    target?.focus({preventScroll:true}); target?.scrollIntoView({block:'center'});
+    if (document.activeElement === target) setupFocus.current = {request:cameraSetupRequest, phase};
+  }, [cameraSetupRequest, active, working, transferring, connected, cameras, local]);
   useEffect(() => { lifetime.current = new AbortController(); return () => { lifetime.current.abort(); transfers.current.cancel(); }; }, []);
+  useEffect(() => { if (!active) transfers.current.cancel(); }, [active]);
   // Copying alone does not reserve the analyzer. A disconnected status stays visible until refreshed.
   useEffect(() => { onBusy(Boolean(transferring || status?.analyzing)); }, [transferring, status?.analyzing, onBusy]);
   useEffect(() => { onStatus?.({active: Boolean(connected && status?.active), unknown: Boolean(status && !connected), error: Boolean(error || status?.error)}); }, [connected, status?.active, status?.error, error, onStatus]);
@@ -95,11 +112,16 @@ export default function BackupLibrary({onResult, onBusy, onStatus, blocked = fal
       setMessage(reason?.name === 'TimeoutError' ? 'Opening timed out. Your current review is preserved. Try again when ready.' : 'Opening cancelled. Your current review is preserved.');
     });
     if (!operation) return;
+    const intent = reviewOpening.begin();
     setTransferring(true); setError(''); setMessage('');
     try {
       const result = await openLibraryItem(item, token.current, operation.signal);
       if (!transfers.current.isCurrent(operation)) return;
-      onResult(result); setMessage(`Opened ${item.name}. Review its sampled frames below.`);
+      if (!reviewOpening.isCurrent(intent) || onResult(result, intent) === false) {
+        setMessage('A newer review was requested. Your newer review stays open. Choose Review backup again when ready.');
+        return;
+      }
+      setMessage(`Opened ${item.name}. Review its sampled frames below.`);
     } catch (err) {if (transfers.current.isCurrent(operation)) setError(`${err.message} Your current review is preserved.`);}
     finally {if (transfers.current.finish(operation) && !lifetime.current.signal.aborted) setTransferring(false);}
   }
@@ -135,7 +157,7 @@ export default function BackupLibrary({onResult, onBusy, onStatus, blocked = fal
       <span className={`local-analysis-badge ${connected && status?.active ? 'backup-running' : !connected && status ? 'backup-stale' : ''}`}>{connected ? stopping ? 'Stopping backup' : status?.analyzing ? 'Analyzing locally' : status?.active ? 'Backup running' : 'Backup paused' : status ? 'Status unknown' : 'Not connected'}</span></div>
     <p className="backup-intro">Keep your OEM DVR software recording. Save another copy of its finished videos here, with optional analysis on this computer.</p>
     <ol className="backup-steps" aria-label="DVR companion setup"><li className={connected ? !status?.configured ? 'current' : 'complete' : ''}><span>1</span><strong>Choose folders</strong><small>Your DVR → your backup</small></li><li className={connected && status?.active ? 'current' : ''}><span>2</span><strong>Keep another copy</strong><small>Start when you are ready</small></li><li className={connected && status?.analyzing ? 'current' : ''}><span>3</span><strong>Analyze locally</strong><small>Optional · review every result</small></li></ol>
-    <div className="local-analysis-actions"><button className="button" onClick={connect} disabled={!local || working || transferring}>{status ? 'Refresh backup connection' : 'Connect to this computer'}</button><span className="backup-local-note">Files and analysis stay on this computer.</span></div>
+    <div className="local-analysis-actions"><button ref={connectButton} className="button" onClick={connect} disabled={!local || working || transferring}>{status ? 'Refresh backup connection' : 'Connect to this computer'}</button><span className="backup-local-note">Files and analysis stay on this computer.</span></div>
     {!connected && !status && <p className="backup-connection-hint">Start here: connect to the local app to unlock folder setup. Connecting checks availability; backup starts only when you choose Start backup.</p>}
     {!connected && status && <p className="backup-notice" role="status">Last checked {new Date(checkedAt).toLocaleTimeString()}. Saved-video details, storage and progress below are from that check. Backup may still be running. Refresh the connection to check its current state.</p>}
     {!local && <p>Open the installed local app at 127.0.0.1 to use local backup and camera setup.</p>}
@@ -187,12 +209,12 @@ export default function BackupLibrary({onResult, onBusy, onStatus, blocked = fal
       <p className="local-analysis-footnote">Files above 512 MiB are excluded from analysis. The per-file backup limit is {storageSize(status?.limits?.max_file_bytes ?? 64 * 1024 ** 3)}; larger files are not copied.</p>
       <p className="local-analysis-footnote">Each analysis is bounded to 6,000 decoded frames. Results describe the analyzed portion only.</p>
     </div>
-    <details className="backup-camera-setup"><summary>Connect an IP camera or LAN DVR</summary>
+    <details className="backup-camera-setup" ref={cameraSetupPanel} tabIndex={-1}><summary>Connect an IP camera or LAN DVR</summary>
       <p>Add an authorized standard RTSP channel using its documented address. Use Monitor to explicitly connect afterward. Saving a source does not start recording; the LAN recorder supports one configured source. Automatic discovery and ONVIF setup are not available.</p>
       {!connected && <p>Connect to this computer above to load or save camera sources.</p>}
       {cameras?.sources?.length > 0 && <p className="backup-existing-sources">Saved sources: {cameras.sources.map(s => s.name).join(', ')}.</p>}
       {cameras?.enabled === false && <p className="backup-notice">Camera setup is disabled in this local service. Existing sources remain available in Monitor.</p>}
-      <form onSubmit={saveCamera} autoComplete="off"><fieldset disabled={!connected || cameraWorking || cameras?.enabled === false} className="backup-camera-fields"><legend>Camera or DVR channel details</legend>
+      <form ref={cameraSetupForm} tabIndex={-1} onSubmit={saveCamera} autoComplete="off"><fieldset disabled={!connected || cameraWorking || cameras?.enabled === false} className="backup-camera-fields"><legend>Camera or DVR channel details</legend>
         <label>Name<input value={camera.name} onChange={e => setCamera(c => ({...c,name:e.target.value}))} placeholder="Front entrance" required /></label>
         <label>Private IPv4 address<input value={camera.host} onChange={e => setCamera(c => ({...c,host:e.target.value}))} placeholder="192.168.1.20" inputMode="decimal" required /></label>
         <label>RTSP port<input type="number" min="1" max="65535" value={camera.port} onChange={e => setCamera(c => ({...c,port:e.target.value}))} required /></label>

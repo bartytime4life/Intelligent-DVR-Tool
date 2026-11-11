@@ -1,6 +1,8 @@
 import React, { lazy, Suspense, useCallback, useEffect, useId, useRef, useState } from "react";
 import WorkspaceConflict from './WorkspaceConflict.jsx';
 import TaskFinder from './TaskFinder.jsx';
+import GoalGuide from './GoalGuide.jsx';
+import { workspaceGuidance } from './goal-guide.mjs';
 const FacilityBuilder = lazy(() => import("./FacilityBuilder.jsx").then(m => ({default:m.FacilityBuilder})));
 const SystemSetup = lazy(() => import("./SystemSetup.jsx"));
 const LiveMonitor = lazy(() => import("./LiveMonitor.jsx"));
@@ -381,19 +383,58 @@ function WorkspaceApp({thumbnailRetention}) {
   const [recognitionTask, setRecognitionTask] = useState(null);
   const [navigationVersion, setNavigationVersion] = useState(0);
   const workspaceElement = useRef(), focusWorkspace = useRef(false);
+  const navigationIdentity = useRef(0), cameraFocusRequest = useRef(null), monitorConnectControl = useRef(null);
+  const completeCameraFocus = useCallback(() => {
+    const request = cameraFocusRequest.current;
+    if (!request?.owner) return; // The navigation landmark must receive focus first.
+    if (request.navigation !== navigationIdentity.current || tabRef.current !== 'Monitor' || document.activeElement !== request.owner) {
+      cameraFocusRequest.current = null;
+      return;
+    }
+    const control = monitorConnectControl.current;
+    if (!control?.isConnected) return; // One readiness callback completes a cold lazy load.
+    cameraFocusRequest.current = null;
+    if (!control.disabled) control.focus({preventScroll:true});
+  }, []);
+  const reportMonitorConnectControl = useCallback(control => {
+    monitorConnectControl.current = control;
+    if (control) completeCameraFocus();
+  }, [completeCameraFocus]);
+  useEffect(() => {
+    // A pending shortcut may finish after a module arrives, but never after the
+    // operator chooses another control or begins another interaction.
+    const cancel = () => { cameraFocusRequest.current = null; };
+    const moved = event => {
+      const request = cameraFocusRequest.current;
+      if (request?.owner && event.target !== request.owner) cancel();
+    };
+    window.addEventListener('pointerdown', cancel, true);
+    window.addEventListener('keydown', cancel, true);
+    window.addEventListener('focusin', moved);
+    return () => {
+      window.removeEventListener('pointerdown', cancel, true);
+      window.removeEventListener('keydown', cancel, true);
+      window.removeEventListener('focusin', moved);
+    };
+  }, []);
   const [routeAnnouncement, setRouteAnnouncement] = useState('');
   useEffect(() => {
     document.title = `${tab} · Intelligent DVR`;
     if (navigationVersion) setRouteAnnouncement(`${tab} workspace opened.`);
     if (!focusWorkspace.current) return;
     focusWorkspace.current = false;
+    const navigation = navigationIdentity.current;
     const frame = requestAnimationFrame(() => {
+      if (navigation !== navigationIdentity.current) return;
+      const request = cameraFocusRequest.current;
+      if (request?.navigation === navigation && tab === 'Monitor') request.owner = workspaceElement.current;
       workspaceElement.current?.focus({preventScroll:true});
+      completeCameraFocus();
       workspaceElement.current?.scrollTo({top:0});
       window.scrollTo({top:0,left:0});
     });
     return () => cancelAnimationFrame(frame);
-  },[tab,navigationVersion]);
+  },[tab,navigationVersion,completeCameraFocus]);
   useEffect(() => {
     const shortcut = event => {
       if (!(event.ctrlKey || event.metaKey) || event.altKey || event.key.toLowerCase() !== 'k') return;
@@ -452,8 +493,10 @@ function WorkspaceApp({thumbnailRetention}) {
     window.addEventListener("beforeunload", warn);
     return () => window.removeEventListener("beforeunload", warn);
   }, []);
-  function setTab(next, {focus = true} = {}) {
+  function setTab(next, {focus = true, cameraConnection = false} = {}) {
     if (!mayLeave(next)) return false;
+    const navigation = ++navigationIdentity.current;
+    cameraFocusRequest.current = cameraConnection ? {navigation, owner:null} : null;
     if (next === "Recognition") setRecognitionOpened(true);
     focusWorkspace.current = focus;
     tabRef.current = next;
@@ -465,7 +508,7 @@ function WorkspaceApp({thumbnailRetention}) {
   }
   function openTask(task) {
     if (task.workspace === 'Zones') return zone();
-    if (!setTab(task.workspace)) return false;
+    if (!setTab(task.workspace, {focus:task.task !== 'camera-setup', cameraConnection:task.id === 'watch'})) return false;
     if (task.task) setRecognitionTask(previous => ({id:task.task,version:(previous?.version || 0)+1}));
     return true;
   }
@@ -480,6 +523,8 @@ function WorkspaceApp({thumbnailRetention}) {
       }
       if (next === "Recognition") setRecognitionOpened(true);
       if (next === tabRef.current) return; // popstate and hashchange can describe one transition.
+      navigationIdentity.current++;
+      cameraFocusRequest.current = null;
       tabRef.current = next;
       focusWorkspace.current = true;
       updateTab(next);
@@ -834,7 +879,7 @@ function WorkspaceApp({thumbnailRetention}) {
         {tab === "System" && <WorkspaceBoundary name="System"><Suspense fallback={<div className="content-page"><h1>Opening machine setup…</h1></div>}><SystemSetup setup={resources}
           onApply={setResources} onDirtyChange={reportSystemDirty}
           storageError={setupSaveError} storagePending={setupUnsaved && !setupSaveError && !setupConflict} storageConflict={Boolean(setupConflict)} download={download} /></Suspense></WorkspaceBoundary>}
-        {tab === "Monitor" && <WorkspaceBoundary name="Monitor"><Suspense fallback={<div className="content-page"><h1>Opening Monitor…</h1></div>}><LiveMonitor onZoneStill={offerZoneStill} visibleTiles={resources.browser.visibleTiles} onCount={setLiveCount} pageHidden={pageHidden} clip={capturedClip} onClip={setCapturedClip} capturePending={capturePending} onCaptureBusy={setCapturePending} onReviewClip={() => setTab('Recognition')} onLiveObservation={addLiveObservation} onPendingLiveChange={reportPendingLive} queue={
+        {tab === "Monitor" && <WorkspaceBoundary name="Monitor"><GoalGuide onChoose={openTask} /><Suspense fallback={<div className="content-page"><h1>Opening Monitor…</h1></div>}><LiveMonitor onConnectControlReady={reportMonitorConnectControl} onConfigureCamera={() => openTask({workspace:'Recognition',task:'camera-setup'})} onZoneStill={offerZoneStill} visibleTiles={resources.browser.visibleTiles} onCount={setLiveCount} pageHidden={pageHidden} clip={capturedClip} onClip={setCapturedClip} capturePending={capturePending} onCaptureBusy={setCapturePending} onReviewClip={() => setTab('Recognition')} onLiveObservation={addLiveObservation} onPendingLiveChange={reportPendingLive} queue={
               <aside className="review-queue">
                 <div className="queue-heading">
                   <h2>
@@ -1290,7 +1335,7 @@ function WorkspaceApp({thumbnailRetention}) {
         <strong>{liveCount ? `${liveCount} receiving` : 'No camera preview active'}</strong>
         {(recorderStatus?.active || recorderStatus?.unknown) && <><span className="footer-divider" /><strong className="footer-recording" role="status">{recorderStatus.unknown ? 'Recording status unknown' : 'LAN recording active'}{recorderStatus.name ? ` · ${recorderStatus.name}` : ''}{recorderStatus.unknown && ' · reconnect in Recognition'}</strong></>}
         <span className="footer-divider" />
-        <span>Record a clip for Recognition, or choose Start AI on a connected Monitor tile.</span>
+        <span>{workspaceGuidance(tab)}</span>
         <span className="footer-end">Edge-first. Human-reviewed.</span>
       </footer>
       <input

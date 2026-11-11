@@ -14,7 +14,7 @@ const guide = 'https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/
 const publicGuide = 'https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/public-webcams.md';
 const aiGuide = 'https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/live-detection.md';
 const AI_RULES_KEY = 'dvr.live.rules';
-export default function LiveMonitor({onZoneStill, queue, visibleTiles=4, onCount, pageHidden, clip, onClip, onReviewClip, capturePending, onCaptureBusy, onLiveObservation, onPendingLiveChange}) {
+export default function LiveMonitor({onZoneStill, queue, visibleTiles=4, onCount, pageHidden, clip, onClip, onReviewClip, capturePending, onCaptureBusy, onLiveObservation, onPendingLiveChange, onConfigureCamera, onConnectControlReady}) {
   const [webcam, setWebcam] = useState({state:'disconnected', message:'No webcam connected'});
   const [devices, setDevices] = useState([]), [device, setDevice] = useState(() => { try { return localStorage.getItem(WEBCAM_KEY) || ''; } catch { return ''; } });
   const [catalog, setCatalog] = useState(null), [source, setSource] = useState('');
@@ -85,13 +85,22 @@ export default function LiveMonitor({onZoneStill, queue, visibleTiles=4, onCount
     if (!aiReady || ['starting','live'].includes(previous?.snapshot.state)) return;
     if (!canStartLiveReview(aiStatesRef.current,tile.id)) {setError(LIVE_REVIEW_LIMIT_MESSAGE); return;}
     setError('');
+    const sessionToken = aiInfo.token;
     // A failed or stopped detector is replaced; its unsent observations carry over.
     detectors.current.delete(tile.id);
-    const detector = liveDetector({token:aiInfo.token, model:aiInfo.live.models[0].id, rules:aiRule.id, camera:tile.name,
+    const detector = liveDetector({token:sessionToken, model:aiInfo.live.models[0].id, rules:aiRule.id, camera:tile.name,
       observations:(aiStatesRef.current[tile.id]?.observations || []).filter(o => !o.sent),
       observationsDropped:aiStatesRef.current[tile.id]?.observationsDropped || 0,
       capture: () => captureJpeg(pictures.current.get(tile.id)),
-      onChange: snapshot => { if (alive.current && detectors.current.get(tile.id) === detector) updateAi(tile.id,{...snapshot,cameraName:tile.name}); }});
+      onChange: snapshot => {
+        if (!alive.current || detectors.current.get(tile.id) !== detector) return;
+        updateAi(tile.id,{...snapshot,cameraName:tile.name});
+        if (snapshot.state === 'failed' && snapshot.errorCode === 'SESSION') {
+          // Another tile may report an old session after a successful recheck.
+          // Only the setup that supplied this detector's token can be expired.
+          setAiInfo(current => current.token === sessionToken ? {state:'unavailable', message:'The local AI session expired. Choose Check again, then Start AI when ready. Your preview and unsent observations are preserved.'} : current);
+        }
+      }});
     detectors.current.set(tile.id, detector); void detector.start();
   }
   async function sendObservation(id, observationId) {
@@ -289,7 +298,7 @@ export default function LiveMonitor({onZoneStill, queue, visibleTiles=4, onCount
   return <div className="live-monitor">
     <div className="live-heading"><div><p className="eyebrow">YOUR CAMERAS · LOCAL PREVIEW</p><h1>Monitor <span>{live} receiving</span></h1></div>
       <div className="review-actions"><button className="button" disabled={!active} onClick={() => stopAll()}>Disconnect all</button>
-        <button className="button amber" onClick={() => openSetup()} disabled={active >= 4}><Plus />Connect source</button></div></div>
+        <button ref={onConnectControlReady} className="button amber" onClick={() => openSetup()} disabled={active >= 4}><Plus />Connect source</button></div></div>
     <div className="live-boundary"><span className={`connection-dot ${live ? 'receiving' : ''}`} />
       <span>{live ? 'Receiving source images' : 'Connect a webcam, local DVR or approved public webcam'}</span><span className="live-scope">Audio off · clip recording and live AI start only when you choose</span></div>
     {tiles.length > 0 && <div className="live-ai-settings" aria-label="Live AI settings">
@@ -370,10 +379,11 @@ export default function LiveMonitor({onZoneStill, queue, visibleTiles=4, onCount
         {!local && <p className="feed-error">Network source access needs the local app at http://127.0.0.1. {loopbackUrl ? <a href={loopbackUrl}>Open this page at 127.0.0.1</a> : 'Open the installed app to connect.'}</p>}
         <button className="button" disabled={!local || working} onClick={refreshDvr}><ArrowClockwise/>{publicMode ? 'Load approved public webcams' : catalog ? 'Refresh DVR sources' : 'Load configured DVR sources'}</button>
         {catalog && <><label>{publicMode ? 'Public webcam' : 'DVR channel'}<select aria-label={publicMode ? 'Public webcam' : 'DVR channel'} value={source} onChange={e=>setSource(e.target.value)} disabled={working}><option value="">Choose a source…</option>{choices.map(s=><option key={s.id} value={s.id}>{s.name}</option>)}</select></label>
-          {!choices.length && <p>{publicMode ? 'No public webcams approved yet. Add a permitted direct HTTPS source, attribution and provider page to local-feeds.json, then restart the app. Loading this list does not contact providers.' : 'No DVR channels configured. Add the channel’s private IPv4 address, RTSP port, path and credentials to the local source file, then restart the local app.'}</p>}
+          {!choices.length && <p>{publicMode ? 'No public webcams approved yet. Add a permitted direct HTTPS source, attribution and provider page to local-feeds.json, then restart the app. Loading this list does not contact providers.' : 'No DVR channels configured. Use guided source setup, then return here to load the saved channel. Saving a source does not connect or record.'}</p>}
           {publicMode && chosen && <p className="public-source-credit"><a href={chosen.provider_url} target="_blank" rel="noreferrer noopener">{chosen.provider} · provider page ↗</a><span>{chosen.kind === 'public-jpeg' ? `Periodic JPEG snapshots · refresh ${chosen.refresh_seconds}s; provider capture time unverified.` : 'MJPEG motion preview · at most 4 displayed frames per second.'}</span></p>}
           {!catalog.ready && <p className="feed-error">OpenCV is unavailable. Install the local edge requirements on Linux or Windows and restart the app.</p>}
           <button className="button amber" disabled={!chosen || working || !catalog.ready || active >= 4} onClick={connectDvr}><PlugsConnected/>{working ? 'Connecting…' : publicMode ? 'Connect public webcam' : 'Connect DVR channel'}</button></>}
+        {!publicMode && onConfigureCamera && (!catalog || !choices.length) && <button className="button" onClick={() => {if (onConfigureCamera() === true) closeSetup();}}>Add camera or DVR source</button>}
         <p className="hint">{publicMode ? 'Use only intentionally published, permitted webcams. Public visibility alone does not grant reuse permission. HTTPS port 443 only; no logins, redirects, HTML players or HLS playlists. Previews stop on hidden pages and expire after 15 minutes.' : 'Use a read-only viewer account and a substream at or below 1080p. Credentials stay in the local source file; the browser receives channel names only.'}</p>
         <a href={publicMode ? publicGuide : guide} target="_blank" rel="noreferrer">{publicMode ? 'Public webcam guide and approval checklist' : 'DVR setup guide and supported connection format'}</a>
       </div>}

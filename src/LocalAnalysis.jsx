@@ -6,7 +6,7 @@ import { analysisAnnouncement } from './status-announcements.mjs';
 import { createReviewTransfer } from './review-transfer.mjs';
 import { DEFAULT_RULES_KEY, TRAINING_SELECTION_EVENT, readTrainingSelection, resolveTrainingSelection } from './training.mjs';
 
-export default function LocalAnalysis({ onResult, onBusy, clip, onClip, recorderBusy = false, currentRun = null }) {
+export default function LocalAnalysis({ onResult, onBusy, clip, onClip, recorderBusy = false, currentRun = null, reviewOpening, active = true }) {
   const [catalog, setCatalog] = useState(null), [job, setJob] = useState(null);
   const [recording, setRecording] = useState(''), [model, setModel] = useState(''), [rules, setRules] = useState('');
   const [error, setError] = useState(''), [message, setMessage] = useState(''), [working, setWorking] = useState(false);
@@ -20,6 +20,7 @@ export default function LocalAnalysis({ onResult, onBusy, clip, onClip, recorder
   // Results open automatically when nothing is loaded, or for a job started here while the same review stayed loaded.
   // They never silently replace a different review.
   const autoOpen = useRef(''), runAtStart = useRef(null), runRef = useRef(currentRun); runRef.current = currentRun;
+  const jobIntent = useRef(null);
   const pollMisses = useRef(0);
   const resultHandler = useRef(onResult); resultHandler.current = onResult;
   const recorderActive = Boolean(recorderBusy || catalog?.recorder_active);
@@ -27,6 +28,7 @@ export default function LocalAnalysis({ onResult, onBusy, clip, onClip, recorder
   const local = localAnalysisOrigin(globalThis.location), loopback = loopbackAddress(globalThis.location);
   useEffect(() => { onBusy(Boolean(working || opening || activeJob(job))); }, [working, opening, job, onBusy]);
   useEffect(() => () => { version.current++; controller.current?.abort(); transfers.current.cancel(); }, []);
+  useEffect(() => { if (!active) transfers.current.cancel(); }, [active]);
   useEffect(() => {
     const changed = event => {
       if (event.type === TRAINING_SELECTION_EVENT || event.key === DEFAULT_RULES_KEY) setSelectionChanged(true);
@@ -54,6 +56,9 @@ export default function LocalAnalysis({ onResult, onBusy, clip, onClip, recorder
   }
   async function connect(options = {}) {
     if (!local) return;
+    // Recovery may discover a completed job. Reserve its intent before the
+    // session reply, so a file selected during that request still wins.
+    const intent = options.selectionOnly === true ? null : reviewOpening.begin();
     setSelectionChanged(false);
     const ticket = ++version.current;
     controller.current?.abort(); controller.current = new AbortController();
@@ -64,7 +69,7 @@ export default function LocalAnalysis({ onResult, onBusy, clip, onClip, recorder
       if (ticket !== version.current) return;
       token.current = value.token; setCatalog(value); setConnected(true);
       // An automatic choice refresh must never open the training job's video.
-      if (options.selectionOnly !== true) setJob(value.job);
+      if (options.selectionOnly !== true) { jobIntent.current = intent; setJob(value.job); }
       setRecording(previous => value.recordings.some(r => r.id === previous) ? previous : '');
       try { savedSelection.current = readTrainingSelection(globalThis.localStorage); }
       catch { savedSelection.current = null; }
@@ -87,6 +92,7 @@ export default function LocalAnalysis({ onResult, onBusy, clip, onClip, recorder
     setRules(rulesId);
   }
   async function start() {
+    jobIntent.current = reviewOpening.begin();
     setWorking(true); setError(''); setMessage('Starting the selected recording…');
     opened.current = '';
     try {
@@ -145,9 +151,14 @@ export default function LocalAnalysis({ onResult, onBusy, clip, onClip, recorder
   }, [connected, job, working]);
 
   useEffect(() => {
-    if (!connected || job?.state !== 'completed' || opened.current === job.id) return;
+    if (!active || !connected || job?.state !== 'completed' || opened.current === job.id) return;
     if (runRef.current && (autoOpen.current !== job.id || runRef.current !== runAtStart.current)) {
       setMessage(`Analysis of ${job.recording} is complete. Choose Open results to review it; the review shown below stays open until then.`);
+      return;
+    }
+    const intent = jobIntent.current;
+    if (!reviewOpening.isCurrent(intent)) {
+      setMessage('A newer review was requested. Your newer review stays open. Choose Open results to review this completed job when ready.');
       return;
     }
     const ticket = version.current, reviewAtOpening = runRef.current;
@@ -163,12 +174,12 @@ export default function LocalAnalysis({ onResult, onBusy, clip, onClip, recorder
     setOpening(true); setError(''); setMessage('Opening results and verifying the recording fingerprint…');
     openJobResult(job, token.current, operation.signal).then(value => {
       if (!transfers.current.isCurrent(operation) || ticket !== version.current) return;
-      if (runRef.current !== reviewAtOpening) {
+      if (runRef.current !== reviewAtOpening || !reviewOpening.isCurrent(intent)) {
         setMessage('A different review was opened while these results were loading. Your newer review stays open. Choose Open results again to replace it when ready.');
         return;
       }
       // The job id lets Recognition ask this service for enrolled-people suggestions on these frames.
-      resultHandler.current({ ...value, local: { job: job.id, token: token.current, people: catalog?.people || null } });
+      if (resultHandler.current({ ...value, local: { job: job.id, token: token.current, people: catalog?.people || null } }, intent) === false) return;
       setMessage('Analysis opened. Recording fingerprint matched; review the sampled detections below.');
     }).catch(err => {
       if (transfers.current.isCurrent(operation) && ticket === version.current) setError(`${err.message} Your previous review has been preserved. Use Open results again to retry.`);
@@ -181,7 +192,7 @@ export default function LocalAnalysis({ onResult, onBusy, clip, onClip, recorder
         if (ticket === version.current) setOpening(false);
       }
     };
-  }, [connected, job]);
+  }, [active, connected, job]);
 
   const compatible = catalog?.rules.find(r => r.id === rules)?.models.includes(model);
   return <section className="local-analysis" aria-label="Local recording analysis">
@@ -225,7 +236,7 @@ export default function LocalAnalysis({ onResult, onBusy, clip, onClip, recorder
       <div className="local-analysis-actions">
         <button className="button amber" disabled={busy || !connected || !catalog.ready || !recording || !compatible} onClick={start}>Analyze recording</button>
         {activeJob(job) && <button className="button" disabled={working || !connected} onClick={cancel}>Cancel analysis</button>}
-        {job?.state === 'completed' && !busy && <button className="button" disabled={!connected} onClick={() => { opened.current = ''; autoOpen.current = job.id; runAtStart.current = runRef.current; setJob({...job}); }}>{opened.current === job.id ? 'Open results again' : 'Open results'}</button>}
+        {job?.state === 'completed' && !busy && <button className="button" disabled={!connected} onClick={() => { jobIntent.current = reviewOpening.begin(); opened.current = ''; autoOpen.current = job.id; runAtStart.current = runRef.current; setJob({...job}); }}>{opened.current === job.id ? 'Open results again' : 'Open results'}</button>}
       </div>
     </>}
     <p className="local-analysis-announcement" role="status" aria-live="polite" aria-atomic="true">{analysisAnnouncement(job, connected)}</p>

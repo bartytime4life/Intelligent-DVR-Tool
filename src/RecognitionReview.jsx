@@ -9,7 +9,7 @@ import RecognitionReport from './RecognitionReport.jsx';
 import { coverageLabel } from './media-coverage.mjs';
 import { saveObservationStills, grabFrame } from './local-images.mjs';
 import { analysisRequest } from './local-analysis.mjs';
-import {createReviewTransfer} from './review-transfer.mjs';
+import {createReviewOpening, createReviewTransfer} from './review-transfer.mjs';
 import { FileVideo, HardDrives, VideoCamera, FolderOpen } from '@phosphor-icons/react';
 
 const sameBox = (a, b) => a.length === 4 && a.every((v, i) => v === b[i]);
@@ -30,6 +30,7 @@ export default function RecognitionReview({ onImport, onValidateImport, active =
   const [libraryBusy, setLibraryBusy] = useState(false);
   const [libraryStatus, setLibraryStatus] = useState(null);
   const [task, setTask] = useState('recording');
+  const [cameraSetupRequest, setCameraSetupRequest] = useState(null);
   const [taskNotice, setTaskNotice] = useState('');
   const recorderPanel = useRef(), focusRecorder = useRef(false);
   const importPanel = useRef(), recordingInput = useRef(), sourceReview = useRef();
@@ -40,10 +41,15 @@ export default function RecognitionReview({ onImport, onValidateImport, active =
   const [local, setLocal] = useState(null), [matches, setMatches] = useState(null);
   const video = useRef(), generation = useRef(0), sourceGeneration = useRef(0);
   const activeRef = useRef(active); activeRef.current = active;
+  const reviewOpening = useRef(null);
+  if (!reviewOpening.current) reviewOpening.current = createReviewOpening({available:() => activeRef.current});
   const lifetime = useRef(null), transfer = useRef(null);
   if (!transfer.current) transfer.current = createReviewTransfer();
   useEffect(() => { if (clip) setTask('recording'); }, [clip]);
   useEffect(() => {
+    if (taskRequest?.id === 'camera-setup') {
+      setTask('backup'); setCameraSetupRequest(taskRequest); setTaskNotice(''); return;
+    }
     if (!tasks.some(candidate => candidate.id === taskRequest?.id)) return;
     setTask(taskRequest.id);
     setTaskNotice('');
@@ -58,11 +64,15 @@ export default function RecognitionReview({ onImport, onValidateImport, active =
   }, [task]);
   useEffect(() => {
     lifetime.current = new AbortController();
-    return () => {lifetime.current.abort(); transfer.current.cancel(); generation.current++; sourceGeneration.current++;};
+    return () => {lifetime.current.abort(); transfer.current.cancel(); reviewOpening.current.invalidate(); generation.current++; sourceGeneration.current++;};
   }, []);
   useEffect(() => () => { if (source) URL.revokeObjectURL(source.url); }, [source]);
   useEffect(() => {
-    if (!active) { transfer.current.cancel(); video.current?.pause(); setMedia({}); }
+    if (!active) {
+      reviewOpening.current.invalidate(); transfer.current.cancel(); video.current?.pause(); setMedia({});
+      setStatus(previous => ['Reading recognition results…', 'Verifying recording fingerprint…'].includes(previous)
+        ? 'Opening cancelled while Recognition was hidden. Your loaded review is preserved. Choose the file again when ready.' : previous);
+    }
     else readMedia();
   }, [active]);
   const frame = run?.trace.frames[index];
@@ -73,40 +83,46 @@ export default function RecognitionReview({ onImport, onValidateImport, active =
   async function loadRun(event) {
     const file = event.target.files?.[0]; event.target.value = '';
     if (!file) return;
+    const intent = reviewOpening.current.begin();
+    if (!intent) return;
     transfer.current.cancel();
     const ticket = ++generation.current; sourceGeneration.current++;
     setError(''); setStatus('Reading recognition results…');
     try {
       if (file.size > MAX_REVIEW_BYTES) throw Error('Recognition results exceed 32 MiB. Split the recording before analysis.');
       const parsed = parseRecognition(JSON.parse(await file.text()));
-      if (ticket !== generation.current) return;
+      if (ticket !== generation.current || !reviewOpening.current.isCurrent(intent)) return;
       transfer.current.cancel(); // Also invalidate a Send begun while file.text() was pending.
       setRun(parsed); setDetectionInput('original'); setSource(null); setMedia({}); setIndex(0); setLocal(null); setMatches(null);
       setStatus('Results loaded. Choose the original recording to verify and view the detections.');
-    } catch (err) { if (ticket === generation.current) { setError(err.message); setStatus(''); } }
+    } catch (err) { if (ticket === generation.current && reviewOpening.current.isCurrent(intent)) { setError(err.message); setStatus(''); } }
   }
   async function loadVideo(event) {
     const file = event.target.files?.[0]; event.target.value = '';
     if (!file || !run) return;
+    const intent = reviewOpening.current.begin();
+    if (!intent) return;
     transfer.current.cancel();
     const ticket = generation.current, sourceTicket = ++sourceGeneration.current;
     setSource(null); setMedia({}); setError(''); setStatus('Verifying recording fingerprint…');
     try {
       await matchRecording(file, run.receipt.source_sha256);
-      if (ticket !== generation.current || sourceTicket !== sourceGeneration.current) return;
+      if (ticket !== generation.current || sourceTicket !== sourceGeneration.current || !reviewOpening.current.isCurrent(intent)) return;
       transfer.current.cancel();
       setSource({ url: URL.createObjectURL(file), name: file.name });
       setStatus('Recording fingerprint matched. Review sampled frames and observations below.');
     } catch (err) {
-      if (ticket === generation.current && sourceTicket === sourceGeneration.current) { setError(err.message); setStatus(''); }
+      if (ticket === generation.current && sourceTicket === sourceGeneration.current && reviewOpening.current.isCurrent(intent)) { setError(err.message); setStatus(''); }
     }
   }
-  function openLocalResult({ bundle, file, name, local: origin = null }) {
+  function openLocalResult({ bundle, file, name, local: origin = null }, intent) {
+    if (!reviewOpening.current.isCurrent(intent)) return false;
     transfer.current.cancel();
     generation.current++; sourceGeneration.current++;
     setRun(bundle); setDetectionInput('original'); setIndex(0); setSource({ url: URL.createObjectURL(file), name });
     setMedia({}); setError(''); setLocal(origin?.people?.enabled ? origin : null); setMatches(null);
     setStatus('Recording fingerprint matched. Analysis is ready for human review.');
+    return true;
   }
   async function checkPeople() {
     const ticket = generation.current;
@@ -224,15 +240,15 @@ export default function RecognitionReview({ onImport, onValidateImport, active =
     {/* Keep each controller mounted: choosing another task must not forget a job,
         a pending folder edit, or the status of recording that continues locally. */}
     <div id="recognition-task-backup" className="recognition-task-panel" hidden={task !== 'backup'}>
-      <BackupLibrary onResult={openLocalResult} onBusy={setLibraryBusy} onStatus={setLibraryStatus} blocked={analysisBusy || recorderBusy} />
+      <BackupLibrary onResult={openLocalResult} onBusy={setLibraryBusy} onStatus={setLibraryStatus} blocked={analysisBusy || recorderBusy} reviewOpening={reviewOpening.current} active={active} cameraSetupRequest={task === 'backup' ? cameraSetupRequest : null} />
       <AcceptanceReceipts />
     </div>
     <div id="recognition-task-recorder" className="recognition-task-panel" ref={recorderPanel} tabIndex={-1} role="region" aria-label="LAN recording task" hidden={task !== 'recorder'}>
       {taskNotice && <p className="recognition-status" role="status">{taskNotice}</p>}
-      <LanRecorder onResult={openLocalResult} onBusy={setRecorderBusy} blocked={analysisBusy || libraryBusy} onImport={onImport} onValidateImport={onValidateImport} onStatus={onRecorderStatus} />
+      <LanRecorder onResult={openLocalResult} onBusy={setRecorderBusy} blocked={analysisBusy || libraryBusy} onImport={onImport} onValidateImport={onValidateImport} onStatus={onRecorderStatus} reviewOpening={reviewOpening.current} active={active} />
     </div>
     <div id="recognition-task-recording" className="recognition-task-panel" hidden={task !== 'recording'}>
-      <LocalAnalysis onResult={openLocalResult} onBusy={setAnalysisBusy} clip={clip} onClip={onClip} recorderBusy={recorderBusy || libraryBusy} currentRun={run} />
+      <LocalAnalysis onResult={openLocalResult} onBusy={setAnalysisBusy} clip={clip} onClip={onClip} recorderBusy={recorderBusy || libraryBusy} currentRun={run} reviewOpening={reviewOpening.current} active={active} />
     </div>
     <div id="recognition-task-import" className="recognition-task-panel recognition-evidence-target" ref={importPanel} role="region" aria-label="Open saved recognition results" aria-describedby="recognition-review-status" tabIndex={-1} hidden={task !== 'import'}>
     <h2 className="recognition-import-heading">Open previously exported results</h2>

@@ -197,11 +197,17 @@ recognition-quality claim.
   the view. Lens presets (2.8–12 mm) fill a **typical** horizontal view only;
   vertical view is unchanged, and a datasheet value always wins.
 - **Coverage metrics.** The Coverage step grid-samples each enabled outdoor
-  zone (at most 20,000 cells, minimum 0.25 m) and the handoff route (about every
+  zone (at most 20,000 cells, target spacing at least 0.25 m) and the handoff route (about every
   0.5 m, at most 20,000 samples) against the same cached fans the map draws,
   with a camera bounding-box prefilter and no polygon-union library. It reports
   coverage (≥1 camera) and overlap (≥2 cameras), includes any unsaved camera
   preview, and can overlay one zone's uncovered cells as merged row rectangles.
+  The grid fits the zone's bounding box, so narrow zones still receive an
+  interior row or column; actual cells can be smaller than the target spacing.
+  An irregular zone with no interior sample centers shows **Not estimated**,
+  rather than 0% coverage or a claim that no blind areas exist. The overlay uses
+  the actual rectangular cell dimensions. These are sampled estimates, not an
+  exact area union or calibrated visibility.
   Indoor and level zones show "not estimated" because coverage is ground-plane only.
 - **Direct manipulation.** Dragging the selected camera (mouse or touch) or its
   round heading handle previews the move live on the map; release, Alt+Arrow and

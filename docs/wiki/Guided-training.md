@@ -35,6 +35,12 @@ To use a run from the separate **Training Lab**, open **Reports** there and expo
 
 The app tests suggested thresholds from **0.40 through 0.90** in steps of 0.05. It considers a change only when it still finds someone during the in-view prompts, improves one count and holds or improves the other. It gives the in-view and empty-room conditions equal weight when ranking those choices. Ties favor a setting close to a safety margin above the strongest empty-room score. The fresh recording tests whichever threshold you chose.
 
+While the trial is automatic, changing combined evidence updates its suggestion.
+A threshold you choose under **Advanced sensitivity** stays selected when you
+toggle combined evidence, and the expanded controls stay open. **Reset to
+suggested** returns to automatic selection. After a fresh recording has been
+scored, its tested current/trial pair remains fixed.
+
 ## Check the setting on new footage
 
 Select **Check on a new recording** to fix the trial threshold before recording. With the same camera and view, walk through the frame for **10 seconds**, then leave the frame empty for **10 seconds**. The app scores the current and trial settings on the same new samples, using the same detector and rule configuration as the first recording.
