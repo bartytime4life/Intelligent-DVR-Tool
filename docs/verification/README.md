@@ -5,6 +5,10 @@ records elapsed-time noise integration, stable covariance updates, expiry before
 matching, whole-run path sampling, median correction and class-partitioned
 optimal assignment. Comparisons use generated boxes, not recognition accuracy.
 
+[Cancellable Recognition handoff, November 11](recognition-transfer-2026-11-11/README.md)
+records single-flight Send, explicit cancellation, replaced-source protection,
+preserved review across navigation and interrupted still-capture cleanup.
+
 [Bounded browser image storage, November 11](bounded-image-storage-2026-11-11/README.md)
 records a reproduced stalled live handoff, five-second operation budgets, safe
 late completion, bounded database opens and explicit retry recovery.
