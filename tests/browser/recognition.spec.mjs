@@ -1,9 +1,25 @@
 import { test, expect } from '@playwright/test';
 import { createHash } from 'node:crypto';
-import { recognitionFixture } from '../fixtures/recognition.mjs';
+import { recognitionFixture, trackingRecognitionFixture } from '../fixtures/recognition.mjs';
 import { parseReceipt } from '../../src/data.mjs';
 
 const upload = value => ({name:'review.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(value))});
+
+test('Recognition opens v2 even-track summaries and historical v1 results', async ({page}, testInfo) => {
+  await page.goto('/#recognition');
+  await page.getByRole('button',{name:/^Open saved results/}).click();
+  await page.getByLabel('Open recognition results').setInputFiles(upload(trackingRecognitionFixture()));
+  await expect(page.getByText('No recording attached. Results alone are unverified metadata.')).toBeVisible();
+  await expect(page.getByRole('heading', {name:/^Tracks /})).toBeVisible();
+  await expect(page.locator('.recognition-tracks .recognition-counts')).toContainText('median 0.3 s');
+  await page.screenshot({path:testInfo.outputPath('v2-tracks.png'),fullPage:true});
+  await page.getByLabel('Open recognition results').setInputFiles(upload(trackingRecognitionFixture('bytetrack-style-iou-kalman-v1')));
+  await expect(page.locator('.recognition-tracks .recognition-counts')).toContainText('median 0.5 s');
+  const malformed = trackingRecognitionFixture();
+  malformed.trace.tracking.classes.person.median_duration_seconds = .5;
+  await page.getByLabel('Open recognition results').setInputFiles(upload(malformed));
+  await expect(page.getByRole('alert')).toContainText('Invalid tracking class summary');
+});
 
 test('recognition keeps evidence separate, rejects wrong files, and sends observations to review', async ({page}) => {
   await page.goto('/#recognition');

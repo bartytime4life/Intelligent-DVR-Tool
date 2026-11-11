@@ -1,0 +1,665 @@
+{
+  "data_kind": "synthetic",
+  "qualification": "NOT_ESTABLISHED",
+  "source_revision": "433a4e7f904951286ce77649111dce8d22597497",
+  "probe_sha256": "99357e7c9d41217989623d1184fa0b4cb79545e642c2aa6021c8b1b007f5322b",
+  "metric_implementation": {
+    "name": "TrackEval",
+    "repository": "https://github.com/JonathonLuiten/TrackEval",
+    "commit": "12c8791b303e0a0b50f753af204249e622d0281a",
+    "upstream_sha256": {
+      "_timing.py": "62e60638efc675bccc35c7da65158f0f19ce31f332121efe7cc748bd92ad2b30",
+      "LICENSE": "f7e548c5729e464d878dd4abf691e323bbea028a756d08395d88b83e43dd2d86",
+      "utils.py": "c082ecfbb5061619642b82a034454022806f8e870f774e54dbfbdacaaf097132",
+      "metrics/_base_metric.py": "dac8b87bf3801269aa280b1cf91184f483de4f4e5c158bd07a4b1733b1a5722b",
+      "metrics/hota.py": "c582255c3d36bdb49c3ceeb2a5bd912cee009190dfcfe465b4173d03aaa97d6a",
+      "metrics/identity.py": "e76b1bdcbf5b193662431596a984cf70a5be32e903eb5f2a3d9921b4762f93ba",
+      "metrics/clear.py": "ab3963eac401073fe1b2957c734af1e531368f42fca49627c14422350b2744f0"
+    },
+    "adapted_sha256": {
+      "__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "_timing.py": "62e60638efc675bccc35c7da65158f0f19ce31f332121efe7cc748bd92ad2b30",
+      "assignment.py": "20a5739b5297b2112800e45eca5feaf0604d69eaceb6623be3ec5b993a0ddb4a",
+      "metrics/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "metrics/_base_metric.py": "dac8b87bf3801269aa280b1cf91184f483de4f4e5c158bd07a4b1733b1a5722b",
+      "metrics/clear.py": "3660a3d497c2d095043e5fa2fa8b004676cfb80a6fc6c78154fff5c36218294f",
+      "metrics/hota.py": "dfe6aad6cf6bb43be7912a4b79202ce9377f2c2f7a137c17e5e84baed3b9192f",
+      "metrics/identity.py": "892c0b9d00572dc39c41c3aa478c0532310ccee5fc4d0de4bff55c695670891e",
+      "utils.py": "c082ecfbb5061619642b82a034454022806f8e870f774e54dbfbdacaaf097132"
+    },
+    "local_sha256": {
+      "_vendor/trackeval/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "_vendor/trackeval/_timing.py": "62e60638efc675bccc35c7da65158f0f19ce31f332121efe7cc748bd92ad2b30",
+      "_vendor/trackeval/assignment.py": "20a5739b5297b2112800e45eca5feaf0604d69eaceb6623be3ec5b993a0ddb4a",
+      "_vendor/trackeval/metrics/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "_vendor/trackeval/metrics/_base_metric.py": "dac8b87bf3801269aa280b1cf91184f483de4f4e5c158bd07a4b1733b1a5722b",
+      "_vendor/trackeval/metrics/clear.py": "3660a3d497c2d095043e5fa2fa8b004676cfb80a6fc6c78154fff5c36218294f",
+      "_vendor/trackeval/metrics/hota.py": "dfe6aad6cf6bb43be7912a4b79202ce9377f2c2f7a137c17e5e84baed3b9192f",
+      "_vendor/trackeval/metrics/identity.py": "892c0b9d00572dc39c41c3aa478c0532310ccee5fc4d0de4bff55c695670891e",
+      "_vendor/trackeval/utils.py": "c082ecfbb5061619642b82a034454022806f8e870f774e54dbfbdacaaf097132",
+      "tracking_evaluation.py": "4d3c9d5fe467a546a90977902c6b33d99494e58bcb6b3f9e88695b73d66ddce8",
+      "evaluate_tracking.py": "3ad1d02abad20b7b399781b2eed0917ec079988c3a813b49b83666679aaeb3a3",
+      "tracking.py": "9547d190c7ff4245efa731371a77b2725e8e986d9c9a3995b5cbcbd0bda5338a",
+      "evaluation.py": "942996df422bb274bf98358b740adc58d6c21c656fea92e2e972e1b7843c407c"
+    },
+    "patches": [
+      "Hungarian adapter reuses edge.tracking.assign; deterministic input-order ties.",
+      "np.int/np.float replaced with np.int64/np.float64 for NumPy 2.",
+      "CLEAR match callback records error locations without changing formulas."
+    ],
+    "runtime": {
+      "python": "3.12.3",
+      "numpy": "2.5.4"
+    }
+  },
+  "cases": {
+    "crossing-5hz": {
+      "input_sha256": "c96b90cdc0f43c4d3ffd18d339e65d385f256de57be81e702a27b49eeb002580",
+      "frames_scored": 21,
+      "sample_interval_seconds": 0.2,
+      "source_sha256": "014a814495d4d55f89951933fdf737c12e5c70fa5a2bb989bd36e71551304ffa",
+      "trace_sha256": "4729fea7dd17889169d0b7ea14ac6e9132a1016e1ac00754912595b4e852974b",
+      "manifest_sha256": "84779b0d2cb78444a31428359d7533388df67da8a51c850c4cb9674b78300ecd",
+      "tracker": {
+        "method": "bytetrack-style-iou-kalman-v2",
+        "tracker_sha256": "9547d190c7ff4245efa731371a77b2725e8e986d9c9a3995b5cbcbd0bda5338a",
+        "parameters": {
+          "high_score": 0.5,
+          "new_track_score": 0.6,
+          "low_score": 0.1,
+          "first_match_min_iou_x_score": 0.2,
+          "low_score_match_min_iou": 0.5,
+          "confirm_min_iou_x_score": 0.3,
+          "max_lost_seconds": 2.0,
+          "reference_fps": 30.0
+        },
+        "tracks_dropped": 0
+      },
+      "metrics": {
+        "TP": 42,
+        "FP": 0,
+        "FN": 0,
+        "IDSW": 0,
+        "IDTP": 42,
+        "IDFP": 0,
+        "IDFN": 0,
+        "MOTA": 1.0,
+        "IDF1": 1.0,
+        "HOTA": 1.0,
+        "DetA": 1.0,
+        "AssA": 1.0
+      },
+      "untracked_detections": 0
+    },
+    "crossing-2hz": {
+      "input_sha256": "aba8b2100da4fbd42680166bd67424acc278dd045f908573b786575953b3201c",
+      "frames_scored": 21,
+      "sample_interval_seconds": 0.5,
+      "source_sha256": "2ada6788d8c3529d3df3dfa293f7e735faa97cd03f994049cfd8cc690e90d8c7",
+      "trace_sha256": "a980560360d290d85471cb603a3cf9a0ba50bf2f5b45aa73a3be8749079aead1",
+      "manifest_sha256": "e320389bf460c351b2f55243337954013c694ea7e6edb82dafba52e9e916ec5d",
+      "tracker": {
+        "method": "bytetrack-style-iou-kalman-v2",
+        "tracker_sha256": "9547d190c7ff4245efa731371a77b2725e8e986d9c9a3995b5cbcbd0bda5338a",
+        "parameters": {
+          "high_score": 0.5,
+          "new_track_score": 0.6,
+          "low_score": 0.1,
+          "first_match_min_iou_x_score": 0.2,
+          "low_score_match_min_iou": 0.5,
+          "confirm_min_iou_x_score": 0.3,
+          "max_lost_seconds": 2.0,
+          "reference_fps": 30.0
+        },
+        "tracks_dropped": 0
+      },
+      "metrics": {
+        "TP": 42,
+        "FP": 0,
+        "FN": 0,
+        "IDSW": 0,
+        "IDTP": 42,
+        "IDFP": 0,
+        "IDFN": 0,
+        "MOTA": 1.0,
+        "IDF1": 1.0,
+        "HOTA": 1.0,
+        "DetA": 1.0,
+        "AssA": 1.0
+      },
+      "untracked_detections": 0
+    },
+    "crossing-1hz": {
+      "input_sha256": "3b7a68d20f09016727c5f74a9f56c9a8ca6282f8758129dc24f9495e57d7234b",
+      "frames_scored": 21,
+      "sample_interval_seconds": 1.0,
+      "source_sha256": "c133eb53ff9dc26b2b15d4f4daf77efd8828cf53cf6a8d717becf1662013fc13",
+      "trace_sha256": "87324e334bc209df3f45444c7589a3a30af9053ff7e9a7eea38b420c2c41cf0c",
+      "manifest_sha256": "1fbbd58050f3be8707a5965d2c895e2b7b3536d6c234a5c8fa911966ec2f1d22",
+      "tracker": {
+        "method": "bytetrack-style-iou-kalman-v2",
+        "tracker_sha256": "9547d190c7ff4245efa731371a77b2725e8e986d9c9a3995b5cbcbd0bda5338a",
+        "parameters": {
+          "high_score": 0.5,
+          "new_track_score": 0.6,
+          "low_score": 0.1,
+          "first_match_min_iou_x_score": 0.2,
+          "low_score_match_min_iou": 0.5,
+          "confirm_min_iou_x_score": 0.3,
+          "max_lost_seconds": 2.0,
+          "reference_fps": 30.0
+        },
+        "tracks_dropped": 0
+      },
+      "metrics": {
+        "TP": 42,
+        "FP": 0,
+        "FN": 0,
+        "IDSW": 0,
+        "IDTP": 42,
+        "IDFP": 0,
+        "IDFN": 0,
+        "MOTA": 1.0,
+        "IDF1": 1.0,
+        "HOTA": 1.0,
+        "DetA": 1.0,
+        "AssA": 1.0
+      },
+      "untracked_detections": 0
+    },
+    "temporary-occlusion-5hz": {
+      "input_sha256": "5dfc63ce99ea16e27265c8a499d61ebd8f58777991f861956180a8d781e968ab",
+      "frames_scored": 10,
+      "sample_interval_seconds": 0.2,
+      "source_sha256": "4add4df1c02ce8c74c90daa2d6394200b292af0ab6887b4cdd7f8472f502422a",
+      "trace_sha256": "9324159f6b558a0f89cd78504ba5aee9242bcc82be664a8959bb97e8e7540a69",
+      "manifest_sha256": "130b3ce5ece6c9995251314de0e8d1ceccd3869c854d737159eb85b3effb4340",
+      "tracker": {
+        "method": "bytetrack-style-iou-kalman-v2",
+        "tracker_sha256": "9547d190c7ff4245efa731371a77b2725e8e986d9c9a3995b5cbcbd0bda5338a",
+        "parameters": {
+          "high_score": 0.5,
+          "new_track_score": 0.6,
+          "low_score": 0.1,
+          "first_match_min_iou_x_score": 0.2,
+          "low_score_match_min_iou": 0.5,
+          "confirm_min_iou_x_score": 0.3,
+          "max_lost_seconds": 2.0,
+          "reference_fps": 30.0
+        },
+        "tracks_dropped": 0
+      },
+      "metrics": {
+        "TP": 7,
+        "FP": 0,
+        "FN": 3,
+        "IDSW": 0,
+        "IDTP": 7,
+        "IDFP": 0,
+        "IDFN": 3,
+        "MOTA": 0.7,
+        "IDF1": 0.8235294117647058,
+        "HOTA": 0.6999999999999998,
+        "DetA": 0.6999999999999998,
+        "AssA": 0.6999999999999998
+      },
+      "untracked_detections": 0
+    },
+    "temporary-occlusion-2hz": {
+      "input_sha256": "c6769790374254027500e6cbb4a9dc5a1bff40602e92bc84665d445892b03e40",
+      "frames_scored": 10,
+      "sample_interval_seconds": 0.5,
+      "source_sha256": "b533ffef4a5d602736ff6b05550e129e2fae583a64dfac19a4ab86f455988a6d",
+      "trace_sha256": "3ecf809cb7116b39a84faab9b372eaaa20fb50261684d5896645c67b428acbcf",
+      "manifest_sha256": "049ddac350a2704c6e427dac932dfa7ddc8c8f8030786b6a074ad79f7177d96e",
+      "tracker": {
+        "method": "bytetrack-style-iou-kalman-v2",
+        "tracker_sha256": "9547d190c7ff4245efa731371a77b2725e8e986d9c9a3995b5cbcbd0bda5338a",
+        "parameters": {
+          "high_score": 0.5,
+          "new_track_score": 0.6,
+          "low_score": 0.1,
+          "first_match_min_iou_x_score": 0.2,
+          "low_score_match_min_iou": 0.5,
+          "confirm_min_iou_x_score": 0.3,
+          "max_lost_seconds": 2.0,
+          "reference_fps": 30.0
+        },
+        "tracks_dropped": 0
+      },
+      "metrics": {
+        "TP": 7,
+        "FP": 0,
+        "FN": 3,
+        "IDSW": 0,
+        "IDTP": 7,
+        "IDFP": 0,
+        "IDFN": 3,
+        "MOTA": 0.7,
+        "IDF1": 0.8235294117647058,
+        "HOTA": 0.6999999999999998,
+        "DetA": 0.6999999999999998,
+        "AssA": 0.6999999999999998
+      },
+      "untracked_detections": 0
+    },
+    "temporary-occlusion-1hz": {
+      "input_sha256": "f62e1861969758177327ca58c9a1f5bf00096edf0a8b8c4602441bb3779581cf",
+      "frames_scored": 10,
+      "sample_interval_seconds": 1.0,
+      "source_sha256": "23425b12ea94a83335ff36ae40652c46327480c3743f2a45fd2fbc03b98b7acc",
+      "trace_sha256": "a9a353f32b4b2345076949950e5f927044314c04f88434d721047c07d3e5a19a",
+      "manifest_sha256": "c86b0822fd0f24d12876632e141ae7b16160fa603f495b4f3298ab9cbf895a34",
+      "tracker": {
+        "method": "bytetrack-style-iou-kalman-v2",
+        "tracker_sha256": "9547d190c7ff4245efa731371a77b2725e8e986d9c9a3995b5cbcbd0bda5338a",
+        "parameters": {
+          "high_score": 0.5,
+          "new_track_score": 0.6,
+          "low_score": 0.1,
+          "first_match_min_iou_x_score": 0.2,
+          "low_score_match_min_iou": 0.5,
+          "confirm_min_iou_x_score": 0.3,
+          "max_lost_seconds": 2.0,
+          "reference_fps": 30.0
+        },
+        "tracks_dropped": 0
+      },
+      "metrics": {
+        "TP": 6,
+        "FP": 0,
+        "FN": 4,
+        "IDSW": 1,
+        "IDTP": 3,
+        "IDFP": 3,
+        "IDFN": 7,
+        "MOTA": 0.5,
+        "IDF1": 0.375,
+        "HOTA": 0.4242640687119285,
+        "DetA": 0.6,
+        "AssA": 0.3
+      },
+      "untracked_detections": 1
+    },
+    "disappearance-reappearance-5hz": {
+      "input_sha256": "e3b12901cfe73b5fe6fb6fb271271a93bd9e7ae564b5889565d765fe9f2523fe",
+      "frames_scored": 22,
+      "sample_interval_seconds": 0.2,
+      "source_sha256": "3c7c9bddf1a0b296b6f2b55999d85386968989e3d2efe4b701231dcac4018fab",
+      "trace_sha256": "c34be9436bbf381bd983765b6dbeb53991b4a8c09224f533d50c7e8733886e26",
+      "manifest_sha256": "45ccd45b0da57e0fa5f69d2c705d3c94a42cd7627f7efc6f1f8ecb12493e7bdb",
+      "tracker": {
+        "method": "bytetrack-style-iou-kalman-v2",
+        "tracker_sha256": "9547d190c7ff4245efa731371a77b2725e8e986d9c9a3995b5cbcbd0bda5338a",
+        "parameters": {
+          "high_score": 0.5,
+          "new_track_score": 0.6,
+          "low_score": 0.1,
+          "first_match_min_iou_x_score": 0.2,
+          "low_score_match_min_iou": 0.5,
+          "confirm_min_iou_x_score": 0.3,
+          "max_lost_seconds": 2.0,
+          "reference_fps": 30.0
+        },
+        "tracks_dropped": 0
+      },
+      "metrics": {
+        "TP": 6,
+        "FP": 0,
+        "FN": 1,
+        "IDSW": 1,
+        "IDTP": 3,
+        "IDFP": 3,
+        "IDFN": 4,
+        "MOTA": 0.7142857142857143,
+        "IDF1": 0.46153846153846156,
+        "HOTA": 0.6060915267313264,
+        "DetA": 0.8571428571428571,
+        "AssA": 0.42857142857142855
+      },
+      "untracked_detections": 1
+    },
+    "disappearance-reappearance-2hz": {
+      "input_sha256": "fbacec04f85327fe730f2d19809be7cd48d2ce2f724caec3ef567ef9cb6f15a0",
+      "frames_scored": 22,
+      "sample_interval_seconds": 0.5,
+      "source_sha256": "1794704cf9cbafde8b59d3b796ff7b69c4f70756b2ebdfece941f0f70a975672",
+      "trace_sha256": "53597c4fc305e1a7aea6fa92cc6e3f9545b142bd4131e117126bde22fb6c51ec",
+      "manifest_sha256": "3773b9019f63f80986797beade3c62fb333b0d2e2de47a1ce0ef95e84c96ca9b",
+      "tracker": {
+        "method": "bytetrack-style-iou-kalman-v2",
+        "tracker_sha256": "9547d190c7ff4245efa731371a77b2725e8e986d9c9a3995b5cbcbd0bda5338a",
+        "parameters": {
+          "high_score": 0.5,
+          "new_track_score": 0.6,
+          "low_score": 0.1,
+          "first_match_min_iou_x_score": 0.2,
+          "low_score_match_min_iou": 0.5,
+          "confirm_min_iou_x_score": 0.3,
+          "max_lost_seconds": 2.0,
+          "reference_fps": 30.0
+        },
+        "tracks_dropped": 0
+      },
+      "metrics": {
+        "TP": 6,
+        "FP": 0,
+        "FN": 1,
+        "IDSW": 1,
+        "IDTP": 3,
+        "IDFP": 3,
+        "IDFN": 4,
+        "MOTA": 0.7142857142857143,
+        "IDF1": 0.46153846153846156,
+        "HOTA": 0.6060915267313264,
+        "DetA": 0.8571428571428571,
+        "AssA": 0.42857142857142855
+      },
+      "untracked_detections": 1
+    },
+    "disappearance-reappearance-1hz": {
+      "input_sha256": "abf5bd4a73f985dad1c6677550ea8a8163c8460a1766a5785796a754e49b52c1",
+      "frames_scored": 22,
+      "sample_interval_seconds": 1.0,
+      "source_sha256": "df06ea079ff3c0bae2ade7a279b5801b16611d0fa0c62b732600fc09bfa5961a",
+      "trace_sha256": "cfa26449c8c21d58ddb9cc6a8ddf359feece731259d159eda318307521967fd0",
+      "manifest_sha256": "1d5098e4fd368e687e933049739a2664f15006c5cbcb90afcaeb5b50e0247f98",
+      "tracker": {
+        "method": "bytetrack-style-iou-kalman-v2",
+        "tracker_sha256": "9547d190c7ff4245efa731371a77b2725e8e986d9c9a3995b5cbcbd0bda5338a",
+        "parameters": {
+          "high_score": 0.5,
+          "new_track_score": 0.6,
+          "low_score": 0.1,
+          "first_match_min_iou_x_score": 0.2,
+          "low_score_match_min_iou": 0.5,
+          "confirm_min_iou_x_score": 0.3,
+          "max_lost_seconds": 2.0,
+          "reference_fps": 30.0
+        },
+        "tracks_dropped": 0
+      },
+      "metrics": {
+        "TP": 6,
+        "FP": 0,
+        "FN": 1,
+        "IDSW": 1,
+        "IDTP": 3,
+        "IDFP": 3,
+        "IDFN": 4,
+        "MOTA": 0.7142857142857143,
+        "IDF1": 0.46153846153846156,
+        "HOTA": 0.6060915267313264,
+        "DetA": 0.8571428571428571,
+        "AssA": 0.42857142857142855
+      },
+      "untracked_detections": 1
+    },
+    "confidence-changes-5hz": {
+      "input_sha256": "0b0080f4b834555d3bfe4c3d95a8b17d38700067842441814b3ddf6cc3315423",
+      "frames_scored": 10,
+      "sample_interval_seconds": 0.2,
+      "source_sha256": "86665ef5360047bf5a4bcb15b4b18387acf98123c6c83796c1404ed32fd897ab",
+      "trace_sha256": "4aee46a8cd8e86043a742c0498653fb4d7f22903fd817f8eef31e16bc8765883",
+      "manifest_sha256": "48f58c6ef5933ba03ff6c06a78849c448938b9c5784dd035829274eb94f5b71d",
+      "tracker": {
+        "method": "bytetrack-style-iou-kalman-v2",
+        "tracker_sha256": "9547d190c7ff4245efa731371a77b2725e8e986d9c9a3995b5cbcbd0bda5338a",
+        "parameters": {
+          "high_score": 0.5,
+          "new_track_score": 0.6,
+          "low_score": 0.1,
+          "first_match_min_iou_x_score": 0.2,
+          "low_score_match_min_iou": 0.5,
+          "confirm_min_iou_x_score": 0.3,
+          "max_lost_seconds": 2.0,
+          "reference_fps": 30.0
+        },
+        "tracks_dropped": 0
+      },
+      "metrics": {
+        "TP": 10,
+        "FP": 0,
+        "FN": 0,
+        "IDSW": 0,
+        "IDTP": 10,
+        "IDFP": 0,
+        "IDFN": 0,
+        "MOTA": 1.0,
+        "IDF1": 1.0,
+        "HOTA": 1.0,
+        "DetA": 1.0,
+        "AssA": 1.0
+      },
+      "untracked_detections": 0
+    },
+    "confidence-changes-2hz": {
+      "input_sha256": "3bb5504385c33acf713bf506b725ac3a11db3edc7df84d324536634baa4f9c1e",
+      "frames_scored": 10,
+      "sample_interval_seconds": 0.5,
+      "source_sha256": "26a4f18bbada521e285ca8982483c16e236c73554259d2edfcb82e67a06b2242",
+      "trace_sha256": "f6835e6610b067046264924489e22720387f11e888d130b1e8e5168061858304",
+      "manifest_sha256": "cb4c8132094d4393f0142d7d2670b71400fde4e7ce3ef2bd9b096ffdcbd87008",
+      "tracker": {
+        "method": "bytetrack-style-iou-kalman-v2",
+        "tracker_sha256": "9547d190c7ff4245efa731371a77b2725e8e986d9c9a3995b5cbcbd0bda5338a",
+        "parameters": {
+          "high_score": 0.5,
+          "new_track_score": 0.6,
+          "low_score": 0.1,
+          "first_match_min_iou_x_score": 0.2,
+          "low_score_match_min_iou": 0.5,
+          "confirm_min_iou_x_score": 0.3,
+          "max_lost_seconds": 2.0,
+          "reference_fps": 30.0
+        },
+        "tracks_dropped": 0
+      },
+      "metrics": {
+        "TP": 10,
+        "FP": 0,
+        "FN": 0,
+        "IDSW": 0,
+        "IDTP": 10,
+        "IDFP": 0,
+        "IDFN": 0,
+        "MOTA": 1.0,
+        "IDF1": 1.0,
+        "HOTA": 1.0,
+        "DetA": 1.0,
+        "AssA": 1.0
+      },
+      "untracked_detections": 0
+    },
+    "confidence-changes-1hz": {
+      "input_sha256": "ac80d2cb5024fa7a8a9b999fcd54707cfc61fafb2765259e0016c6fc48079b48",
+      "frames_scored": 10,
+      "sample_interval_seconds": 1.0,
+      "source_sha256": "2f74eba6bb4a636cb283b28dfb85f84355f511aed8c2375f97bbc57f5fddb5b0",
+      "trace_sha256": "0039da742ce9c8be19e99963aa36228328957dc73ae99176abb176d06f912a8e",
+      "manifest_sha256": "b260c4149a0037701e3b42f4572cde07d2f1b744a09033b6934142ac353825ba",
+      "tracker": {
+        "method": "bytetrack-style-iou-kalman-v2",
+        "tracker_sha256": "9547d190c7ff4245efa731371a77b2725e8e986d9c9a3995b5cbcbd0bda5338a",
+        "parameters": {
+          "high_score": 0.5,
+          "new_track_score": 0.6,
+          "low_score": 0.1,
+          "first_match_min_iou_x_score": 0.2,
+          "low_score_match_min_iou": 0.5,
+          "confirm_min_iou_x_score": 0.3,
+          "max_lost_seconds": 2.0,
+          "reference_fps": 30.0
+        },
+        "tracks_dropped": 0
+      },
+      "metrics": {
+        "TP": 10,
+        "FP": 0,
+        "FN": 0,
+        "IDSW": 0,
+        "IDTP": 10,
+        "IDFP": 0,
+        "IDFN": 0,
+        "MOTA": 1.0,
+        "IDF1": 1.0,
+        "HOTA": 1.0,
+        "DetA": 1.0,
+        "AssA": 1.0
+      },
+      "untracked_detections": 0
+    },
+    "scale-jitter-5hz": {
+      "input_sha256": "255ebf2ec3234b8288f50150333f4e5cdaeaf1f88f9fef0e0556b7f12e9578a2",
+      "frames_scored": 40,
+      "sample_interval_seconds": 0.2,
+      "source_sha256": "6a62f984e66f9c3b21a859a88dfc06b62d33e1b6c7bb421608f9a4f589ef0b8d",
+      "trace_sha256": "f0f3c580c808b09e6b4f10b9f447bf5e525fcc5363744d687bb0e0cad3a37cb4",
+      "manifest_sha256": "4752a19312b60d660b1ccf990c3c0b517c4399ee5be43f0ad8ec2be4c46c887a",
+      "tracker": {
+        "method": "bytetrack-style-iou-kalman-v2",
+        "tracker_sha256": "9547d190c7ff4245efa731371a77b2725e8e986d9c9a3995b5cbcbd0bda5338a",
+        "parameters": {
+          "high_score": 0.5,
+          "new_track_score": 0.6,
+          "low_score": 0.1,
+          "first_match_min_iou_x_score": 0.2,
+          "low_score_match_min_iou": 0.5,
+          "confirm_min_iou_x_score": 0.3,
+          "max_lost_seconds": 2.0,
+          "reference_fps": 30.0
+        },
+        "tracks_dropped": 0
+      },
+      "metrics": {
+        "TP": 40,
+        "FP": 0,
+        "FN": 0,
+        "IDSW": 0,
+        "IDTP": 40,
+        "IDFP": 0,
+        "IDFN": 0,
+        "MOTA": 1.0,
+        "IDF1": 1.0,
+        "HOTA": 0.9595141700404858,
+        "DetA": 0.9595141700404858,
+        "AssA": 0.9595141700404858
+      },
+      "untracked_detections": 0
+    },
+    "scale-jitter-2hz": {
+      "input_sha256": "0f59a2606400baa376631e1350f9b55dc30b9387f0e3f2be119e5d88d83527d2",
+      "frames_scored": 40,
+      "sample_interval_seconds": 0.5,
+      "source_sha256": "240b289c3b4e88f9c51b4813aa6bd8520840ea3efe44e5d2b8f857bc94f86ae3",
+      "trace_sha256": "6f936c80cdbc706b7785703f7915f0105a34fd5ca11757b227af08d6661ac7d2",
+      "manifest_sha256": "a700d08afafa96fbb422c4c4d4890b46e3cef3e4a37d68f40730f25df8900ab0",
+      "tracker": {
+        "method": "bytetrack-style-iou-kalman-v2",
+        "tracker_sha256": "9547d190c7ff4245efa731371a77b2725e8e986d9c9a3995b5cbcbd0bda5338a",
+        "parameters": {
+          "high_score": 0.5,
+          "new_track_score": 0.6,
+          "low_score": 0.1,
+          "first_match_min_iou_x_score": 0.2,
+          "low_score_match_min_iou": 0.5,
+          "confirm_min_iou_x_score": 0.3,
+          "max_lost_seconds": 2.0,
+          "reference_fps": 30.0
+        },
+        "tracks_dropped": 0
+      },
+      "metrics": {
+        "TP": 40,
+        "FP": 0,
+        "FN": 0,
+        "IDSW": 0,
+        "IDTP": 40,
+        "IDFP": 0,
+        "IDFN": 0,
+        "MOTA": 1.0,
+        "IDF1": 1.0,
+        "HOTA": 0.9595141700404858,
+        "DetA": 0.9595141700404858,
+        "AssA": 0.9595141700404858
+      },
+      "untracked_detections": 0
+    },
+    "scale-jitter-1hz": {
+      "input_sha256": "dbfdbca5ed7614d7aa910887201843323669b62811ce3b0fa20a471db29be6f8",
+      "frames_scored": 40,
+      "sample_interval_seconds": 1.0,
+      "source_sha256": "5e19034aa41d1213c55686f707e1b3afdd4cf9efc17275047c00f6fd2111093f",
+      "trace_sha256": "cede2e2fce83f4a4ba17ac94fe8f696168724988a35349b8da0e5c991f5e171f",
+      "manifest_sha256": "6f34b611054c22ff176de895f588494df9b8cd064572b4e428865de53dbab0ca",
+      "tracker": {
+        "method": "bytetrack-style-iou-kalman-v2",
+        "tracker_sha256": "9547d190c7ff4245efa731371a77b2725e8e986d9c9a3995b5cbcbd0bda5338a",
+        "parameters": {
+          "high_score": 0.5,
+          "new_track_score": 0.6,
+          "low_score": 0.1,
+          "first_match_min_iou_x_score": 0.2,
+          "low_score_match_min_iou": 0.5,
+          "confirm_min_iou_x_score": 0.3,
+          "max_lost_seconds": 2.0,
+          "reference_fps": 30.0
+        },
+        "tracks_dropped": 0
+      },
+      "metrics": {
+        "TP": 40,
+        "FP": 0,
+        "FN": 0,
+        "IDSW": 0,
+        "IDTP": 40,
+        "IDFP": 0,
+        "IDFN": 0,
+        "MOTA": 1.0,
+        "IDF1": 1.0,
+        "HOTA": 0.9595141700404858,
+        "DetA": 0.9595141700404858,
+        "AssA": 0.9595141700404858
+      },
+      "untracked_detections": 0
+    },
+    "new-visitor-after-expiry": {
+      "input_sha256": "83f99f201fe2291443f7b4205f5d67afc98446358d642de1fd31538aaff0056e",
+      "frames_scored": 4,
+      "sample_interval_seconds": 1.5,
+      "source_sha256": "cfeba028a13047a68b48506a1f4ba3af282ee9a1defba4a943746272b152a977",
+      "trace_sha256": "adf6d9ec8c9fa10aeab3b3985d8ecc1519983a91d497758495762a690bfaf459",
+      "manifest_sha256": "f982421f535aa848f24d7bcc6c75c4501e3250f29ea9f6f0871ae4e0f87e7d3f",
+      "tracker": {
+        "method": "bytetrack-style-iou-kalman-v2",
+        "tracker_sha256": "9547d190c7ff4245efa731371a77b2725e8e986d9c9a3995b5cbcbd0bda5338a",
+        "parameters": {
+          "high_score": 0.5,
+          "new_track_score": 0.6,
+          "low_score": 0.1,
+          "first_match_min_iou_x_score": 0.2,
+          "low_score_match_min_iou": 0.5,
+          "confirm_min_iou_x_score": 0.3,
+          "max_lost_seconds": 2.0,
+          "reference_fps": 30.0
+        },
+        "tracks_dropped": 0
+      },
+      "metrics": {
+        "TP": 2,
+        "FP": 0,
+        "FN": 1,
+        "IDSW": 0,
+        "IDTP": 2,
+        "IDFP": 0,
+        "IDFN": 1,
+        "MOTA": 0.6666666666666666,
+        "IDF1": 0.8,
+        "HOTA": 0.7071067811865476,
+        "DetA": 0.6666666666666665,
+        "AssA": 0.75
+      },
+      "untracked_detections": 1
+    }
+  }
+}

@@ -71,9 +71,14 @@ export function validateTracking(t) {
   require(Object.keys(value.classes).length === durations.size, 'Invalid tracking class summary.');
   for (const [label, times] of durations) {
     const summary = value.classes[label]; times.sort((a,b) => a-b);
+    const middle = Math.floor(times.length / 2);
+    // v1 receipts used the upper middle duration. Preserve that historical
+    // contract; v2 reports the conventional average for an even-sized group.
+    const median = value.method === 'bytetrack-style-iou-kalman-v2' && times.length % 2 === 0
+      ? (times[middle - 1] + times[middle]) / 2 : times[middle];
     require(summary && summary.tracks === times.length && finite(summary.longest_duration_seconds) && finite(summary.median_duration_seconds) &&
       Math.abs(summary.longest_duration_seconds - times.at(-1)) <= .001 &&
-      Math.abs(summary.median_duration_seconds - times[Math.floor(times.length / 2)]) <= .001, 'Invalid tracking class summary.');
+      Math.abs(summary.median_duration_seconds - median) <= .001, 'Invalid tracking class summary.');
   }
   for (const frame of t.frames) {
     const seen = new Set();

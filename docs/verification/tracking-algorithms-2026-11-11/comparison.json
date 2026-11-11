@@ -1,0 +1,66 @@
+{
+  "data_kind": "synthetic",
+  "qualification": "NOT_ESTABLISHED",
+  "baseline_revision": "914f0649b671e31879e5870808959a393dd004db",
+  "python": "3.12.3",
+  "numpy": "2.5.4",
+  "platform": "Linux-7.0.0-42-generic-x86_64-with-glibc2.43",
+  "baseline_sha256": "0fecb3aa8519e18e875a4f147fa41424cc2105235cdc16290586f7e29049c48d",
+  "candidate_sha256": "9547d190c7ff4245efa731371a77b2725e8e986d9c9a3995b5cbcbd0bda5338a",
+  "baseline": {
+    "method": "bytetrack-style-iou-kalman-v1",
+    "expired_gap_returned_ids": [
+      1
+    ],
+    "path_end_seconds": 199.9,
+    "last_observation_seconds": 210.0,
+    "median_of_1_and_9_seconds": 9,
+    "max_abs_covariance_partition_error": 225.0,
+    "association": {
+      "1": {
+        "objects": 300,
+        "classes": 1,
+        "matrix_cells": 90000,
+        "largest_matrix_cells": 90000,
+        "samples": 7,
+        "median_update_ms": 11.59524405375123
+      },
+      "10": {
+        "objects": 300,
+        "classes": 10,
+        "matrix_cells": 90000,
+        "largest_matrix_cells": 90000,
+        "samples": 7,
+        "median_update_ms": 11.603730032220483
+      }
+    }
+  },
+  "candidate": {
+    "method": "bytetrack-style-iou-kalman-v2",
+    "expired_gap_returned_ids": [
+      null
+    ],
+    "path_end_seconds": 210.0,
+    "last_observation_seconds": 210.0,
+    "median_of_1_and_9_seconds": 5.0,
+    "max_abs_covariance_partition_error": 3.637978807091713e-12,
+    "association": {
+      "1": {
+        "objects": 300,
+        "classes": 1,
+        "matrix_cells": 90000,
+        "largest_matrix_cells": 90000,
+        "samples": 7,
+        "median_update_ms": 10.487628052942455
+      },
+      "10": {
+        "objects": 300,
+        "classes": 10,
+        "matrix_cells": 9000,
+        "largest_matrix_cells": 900,
+        "samples": 7,
+        "median_update_ms": 9.620012016966939
+      }
+    }
+  }
+}

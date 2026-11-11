@@ -1,0 +1,15 @@
+{
+  "baseline_revision": "914f0649b671e31879e5870808959a393dd004db",
+  "files": {
+    "edge/tracking.py": "9547d190c7ff4245efa731371a77b2725e8e986d9c9a3995b5cbcbd0bda5338a",
+    "tests/test_tracking.py": "ef804311eb53f4537e5b3ae76603c90a12ad76ddcaef633c8dd9e0069bf01ea4",
+    "scripts/compare-tracking-algorithms.py": "6a54eb234dd152dd9cc6bac2ad2779afdb4bd1f6a56c05cad02a5c0ebfac1f48"
+  },
+  "protected_unchanged": {
+    "edge/inference.py": "7e95beb9e25dd67ac5d8d977ec6c466874371d12d112119a85a619124687b2f1",
+    "edge/journal.py": "70f7a3419d05d76380ea32ad5de20ee440bc17256e25baf0f2289a86e46a495a",
+    "edge/supervision.py": "03f334d5fa072e5f3ad02bd90536fd2c00fc97ebfaa54ca1ef1c10b64b80a9cf",
+    "edge/scheduler.py": "8639b46d3ba2e1a14efaa7ff647f412e6be437685ec7be5717a00983835b9019",
+    "edge/profiling.py": "f7c0a3e4b831d7f996840aec51a73e3fe68e06627cdce854716c576068f80f91"
+  }
+}

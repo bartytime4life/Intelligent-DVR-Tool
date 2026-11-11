@@ -22,11 +22,12 @@ tracks (CLEAR MOT/IDF1/HOTA) on representative footage.
 """
 from dataclasses import dataclass
 import math
+import statistics
 
 import numpy as np
 
 SCHEMA = 'intelligent-dvr.tracks.v1'
-METHOD = 'bytetrack-style-iou-kalman-v1'
+METHOD = 'bytetrack-style-iou-kalman-v2'
 # ByteTrack's filter is tuned per frame at 30 FPS. Sampled or live frames arrive at
 # other intervals, so motion and noise advance in units of that reference frame.
 REFERENCE_FPS = 30.0
@@ -140,8 +141,15 @@ def iou(a, b):
 
 
 class Kalman:
-    """Constant-velocity filter over [cx, cy, aspect, height] and their rates."""
+    """Constant velocity with elapsed-time diffusion over box coordinates/rates.
+
+    The reference noise weights set diffusion rates, frozen at the starting
+    height during each prediction. Integrating F(t) D F(t)^T accounts for the
+    position uncertainty introduced by velocity noise between observations.
+    """
     H = np.hstack((np.eye(4), np.zeros((4, 4))))
+    AXES = np.arange(4)
+    VELOCITIES = AXES + 4
 
     @staticmethod
     def measure(box):
@@ -167,31 +175,44 @@ class Kalman:
         h = max(mean[3], 1e-6)
         std = [WEIGHT_POSITION * h, WEIGHT_POSITION * h, 1e-2, WEIGHT_POSITION * h,
                WEIGHT_VELOCITY * h, WEIGHT_VELOCITY * h, 1e-5, WEIGHT_VELOCITY * h]
-        # Independent per-frame noise accumulates linearly over the elapsed reference frames.
-        noise = np.diag(np.square(std)) * steps
+        rates = np.square(std)
+        velocity_rate = rates[4:]
+        # For each (position, velocity) axis, Q(dt) is
+        # [[qp*dt + qv*dt^3/3, qv*dt^2/2], [qv*dt^2/2, qv*dt]].
+        # At fixed height this composes exactly across arbitrary time partitions.
+        noise = np.diag(rates * steps)
+        noise[self.AXES, self.AXES] += velocity_rate * steps**3 / 3
+        noise[self.AXES, self.VELOCITIES] = noise[self.VELOCITIES, self.AXES] = velocity_rate * steps**2 / 2
         mean = motion @ mean
         mean[3] = max(mean[3], 1e-6)
         return mean, motion @ cov @ motion.T + noise
 
     def update(self, mean, cov, z):
         h = max(mean[3], 1e-6)
-        innovation_cov = self.H @ cov @ self.H.T + np.diag(np.square(
+        measurement_cov = np.diag(np.square(
             [WEIGHT_POSITION * h, WEIGHT_POSITION * h, 1e-1, WEIGHT_POSITION * h]))
-        gain = np.linalg.solve(innovation_cov, self.H @ cov).T
-        mean = mean + gain @ (z - self.H @ mean)
-        cov = cov - gain @ innovation_cov @ gain.T
+        # H selects the first four coordinates; slicing avoids multiplying by
+        # its fixed identity/zero blocks on every object in every frame.
+        innovation_cov = cov[:4, :4] + measurement_cov
+        gain = np.linalg.solve(innovation_cov, cov[:4]).T
+        mean = mean + gain @ (z - mean[:4])
+        # Joseph form avoids subtracting nearly equal covariance matrices.
+        residual = np.eye(8)
+        residual[:, :4] -= gain
+        cov = residual @ cov @ residual.T + gain @ measurement_cov @ gain.T
         return mean, (cov + cov.T) / 2
 
 
 class _Track:
     __slots__ = ('id', 'label', 'mean', 'cov', 'state', 'first', 'last', 'hits', 'score_max',
-                 'score_sum', 'path', 'box', 'zones', 'zone_last')
+                 'score_sum', 'path', 'path_stride', 'path_last', 'box', 'zones', 'zone_last')
 
     def __init__(self, label, mean, cov, seconds, score, box, state):
         self.id, self.label, self.mean, self.cov, self.state = None, label, mean, cov, state
         self.first = self.last = seconds
         self.hits, self.score_max, self.score_sum = 1, score, score
         self.path, self.box, self.zones, self.zone_last = [], box, {}, {}
+        self.path_stride, self.path_last = 1, None
 
 
 class Tracker:
@@ -223,14 +244,26 @@ class Tracker:
             box, score = d.get('box', []), d.get('score')
             if len(box) != 4 or not all(finite(v) for v in box) or not finite(score) or not 0 <= score <= 1:
                 raise ValueError('Invalid detection')
+            label = d.get('label')
+            if not isinstance(label, str) or not label.strip() or len(label) > 80:
+                raise ValueError('Invalid detection label')
             boxes.append([box[0] * width, box[1] * height, max(box[2] * width, 1e-6), max(box[3] * height, 1e-6)])
-            scores.append(float(score)); labels.append(d.get('label'))
+            scores.append(float(score)); labels.append(label)
         first_frame = self.previous is None
         steps = 0 if first_frame else (seconds - self.previous) * REFERENCE_FPS
         self.previous, self.size = seconds, (width, height)
+        cfg = self.config
+        # Retire every stale state before matching or admitting new tracks. A
+        # matching box after a long sampling gap must not revive an expired ID.
+        kept = []
+        for t in self.tracks:
+            if seconds - t.last > cfg.max_lost_seconds:
+                self._finish(t)
+            else:
+                kept.append(t)
+        self.tracks = kept
         for t in self.tracks:
             t.mean, t.cov = self.kalman.predict(t.mean, t.cov, steps)
-        cfg = self.config
         result = [None] * len(boxes)
         high = [i for i, s in enumerate(scores) if s >= cfg.high]
         low = [i for i, s in enumerate(scores) if cfg.low <= s < cfg.high]
@@ -238,11 +271,28 @@ class Tracker:
         def match(tracks, indices, minimum, fused):
             if not tracks or not indices:
                 return [], list(tracks), list(indices)
-            overlap = iou([self.kalman.box(t.mean) for t in tracks], [boxes[i] for i in indices])
-            similarity = overlap * np.array([scores[i] for i in indices])[None] if fused else overlap
-            same = np.array([[t.label == labels[i] for i in indices] for t in tracks])
-            cost = np.where(same, 1 - similarity, 2.)
-            pairs, free_tracks, free_dets = assign(cost, 1 - minimum)
+            track_classes, detection_classes = {}, {}
+            for r, track in enumerate(tracks):
+                track_classes.setdefault(track.label, []).append(r)
+            for c, i in enumerate(indices):
+                detection_classes.setdefault(labels[i], []).append(c)
+            pairs = []
+            # Cross-class edges are forbidden, so the assignment graph separates
+            # exactly by class. Solve only those blocks: sum(n_c*m_c) IoUs and
+            # smaller Hungarian problems, with the same cardinality/cost objective.
+            for label, rows in track_classes.items():
+                cols = detection_classes.get(label, [])
+                if not cols:
+                    continue
+                overlap = iou([self.kalman.box(tracks[r].mean) for r in rows],
+                              [boxes[indices[c]] for c in cols])
+                similarity = overlap * np.array([scores[indices[c]] for c in cols])[None] if fused else overlap
+                matches, _, _ = assign(1 - similarity, 1 - minimum)
+                pairs.extend((rows[r], cols[c]) for r, c in matches)
+            pairs.sort()
+            matched_rows, matched_cols = {r for r, _ in pairs}, {c for _, c in pairs}
+            free_tracks = [r for r in range(len(tracks)) if r not in matched_rows]
+            free_dets = [c for c in range(len(indices)) if c not in matched_cols]
             for r, c in pairs:
                 self._hit(tracks[r], indices[c], seconds, boxes, scores, width, height)
             return ([(tracks[r], indices[c]) for r, c in pairs],
@@ -274,15 +324,7 @@ class Tracker:
             self._record(track, i, seconds, boxes, width, height)
             if first_frame:  # As in ByteTrack, the first frame's confident boxes are confirmed at once.
                 self._confirm(track); track.state = 'tracked'; result[i] = track.id
-        kept = []
-        for t in self.tracks:
-            if id(t) in removed:
-                continue
-            if t.state == 'lost' and seconds - t.last > cfg.max_lost_seconds:
-                self._finish(t)
-                continue
-            kept.append(t)
-        self.tracks = kept
+        self.tracks = [t for t in self.tracks if id(t) not in removed]
         return result
 
     def _confirm(self, track):
@@ -305,8 +347,17 @@ class Tracker:
     def _record(self, track, i, seconds, boxes, width, height):
         x, y, w, h = boxes[i]
         cx, cy = (x + w / 2) / width, (y + h / 2) / height
-        if len(track.path) < MAX_PATH:
-            track.path.append((seconds, cx, cy))
+        track.path_last = (seconds, cx, cy)
+        # Deterministic dyadic sampling: coarsen the entire history when full,
+        # instead of freezing at the first MAX_PATH hits. Keep the newest point
+        # separately so every reported path includes both observed endpoints.
+        index = track.hits - 1
+        if index % track.path_stride == 0:
+            if len(track.path) >= MAX_PATH:
+                track.path = track.path[::2]
+                track.path_stride *= 2
+            if index % track.path_stride == 0:
+                track.path.append(track.path_last)
         for name, label, rect, gap in self.zones:
             if label != track.label:
                 continue
@@ -330,6 +381,8 @@ class Tracker:
     @staticmethod
     def _summary(t):
         path = t.path
+        if t.path_last is not None and (not path or path[-1] != t.path_last):
+            path = [*path, t.path_last]
         if len(path) > REPORTED_PATH:
             step = (len(path) - 1) / (REPORTED_PATH - 1)
             path = [path[round(k * step)] for k in range(REPORTED_PATH)]
@@ -378,7 +431,7 @@ def class_summary(tracks):
     summary = {}
     for label, entry in sorted(out.items()):
         ordered = sorted(entry['durations'])
-        summary[label] = {'tracks': entry['tracks'], 'median_duration_seconds': round(ordered[len(ordered) // 2], 3),
+        summary[label] = {'tracks': entry['tracks'], 'median_duration_seconds': round(statistics.median(ordered), 3),
                           'longest_duration_seconds': round(ordered[-1], 3)}
     return summary
 
