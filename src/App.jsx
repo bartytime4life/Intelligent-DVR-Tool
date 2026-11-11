@@ -410,14 +410,15 @@ function WorkspaceApp({thumbnailRetention}) {
   const eventsRef = useRef(events);
   eventsRef.current = events;
   // Leaving Facility unmounts the builder, so unsaved drafts and its undo history would be lost silently.
-  const tabRef = useRef(tab), facilityDirty = useRef(false), systemDirty = useRef(false), zoneDirty = useRef(false), trainingDirty = useRef(false);
+  const tabRef = useRef(tab), facilityDirty = useRef(false), systemDirty = useRef(false), zoneDirty = useRef(false), trainingDirty = useRef(false), monitorPending = useRef(0);
   const [systemDraftPending, setSystemDraftPending] = useState(false);
   const [resources, setResources, setupStorageError, setupRecovery, setupConflict, setupUnsaved] = useStored('dvr.setup.v1', DEFAULT_SETUP, {canResolve:() => !systemDirty.current});
   const setupSaveError = setupStorageError === setupRecovery?.message ? '' : setupStorageError;
   const reportSystemDirty = useCallback(dirty => { systemDirty.current = dirty; setSystemDraftPending(dirty); }, []);
-  const pendingBrowserSave = useRef(false);
+  const pendingBrowserSave = useRef(false), liveSendPending = useRef(false);
   pendingBrowserSave.current = eventsUnsaved || rulesUnsaved || setupUnsaved || noteDrafts.size > 0;
   const reportTrainingDirty = useCallback(dirty => { trainingDirty.current = dirty; }, []);
+  const reportPendingLive = useCallback(count => { monitorPending.current = count; }, []);
   tabRef.current = tab;
   // Unsaved zone rules are a draft, not the separately persisted analyzer rules.
   // The history listener was installed on mount; refs ensure it sees fresh values.
@@ -425,6 +426,7 @@ function WorkspaceApp({thumbnailRetention}) {
   const mayLeave = (next) => {
     if (tabRef.current === next) return true;
     const blockers = {
+      Monitor: [monitorPending, `Leave Monitor? ${monitorPending.current} unsent live observations will be discarded. Send them to Events or dismiss them before leaving. Camera preview and AI will stop. A submitted Send may still finish.`],
       Facility: [facilityDirty, "Leave the facility builder? Unsaved facility edits, drafts and undo history will be discarded."],
       Zones: [zoneDirty, "Leave Zones? Unsaved rule edits will be discarded. Save the review rule before leaving."],
       Train: [trainingDirty, "Leave Train? Unfinished recordings, checks and unsaved results will be discarded. Session-owned camera capture will stop and analysis cancellation will be requested. A submitted template operation may still finish. Saved settings stay on this computer."],
@@ -441,7 +443,8 @@ function WorkspaceApp({thumbnailRetention}) {
       if (tabRef.current === "Facility" && facilityDirty.current ||
           tabRef.current === "Zones" && zoneDirty.current ||
           tabRef.current === "System" && systemDirty.current ||
-          tabRef.current === "Train" && trainingDirty.current || pendingBrowserSave.current) {
+          tabRef.current === "Train" && trainingDirty.current ||
+          tabRef.current === "Monitor" && monitorPending.current || pendingBrowserSave.current || liveSendPending.current) {
         event.preventDefault();
         event.returnValue = "";
       }
@@ -500,15 +503,23 @@ function WorkspaceApp({thumbnailRetention}) {
     } catch (err) { setToast(err.message); return false; }
   }
   async function addLiveObservation(event, still) {
-    try { mergeRecognitionEvents(eventsRef.current, [event]); }
-    catch (err) { setToast(err.message); return false; }
-    // The still is a live observation's only image evidence: never queue it without one.
-    if (!still || !(await putImage("thumbnails", observationImageKey(event), still))) {
-      setToast("This browser could not save the observation’s still, so it was not sent. Free browser storage or leave private browsing, then send it again.");
+    // Keep one still transfer in flight, including across a Monitor remount.
+    if (liveSendPending.current) {
+      setToast("Another live still is being saved. Wait for it to finish, then send this observation again.");
       return false;
     }
-    // On refusal (a full queue), the unreferenced still is pruned with the queue's stills.
-    return addObservations([event], false);
+    liveSendPending.current = true;
+    try {
+      try { mergeRecognitionEvents(eventsRef.current, [event]); }
+      catch (err) { setToast(err.message); return false; }
+      // The still is a live observation's only image evidence: never queue it without one.
+      if (!still || !(await putImage("thumbnails", observationImageKey(event), still))) {
+        setToast("This browser could not save the observation’s still, so it was not sent. Free browser storage or leave private browsing, then send it again.");
+        return false;
+      }
+      // On refusal (a full queue), the unreferenced still is pruned with the queue's stills.
+      return addObservations([event], false);
+    } finally { liveSendPending.current = false; }
   }
   function exportReviews() { download(reviewExport(eventsRef.current), "dvr-reviews.json"); }
   function undoClear() {
@@ -823,7 +834,7 @@ function WorkspaceApp({thumbnailRetention}) {
         {tab === "System" && <WorkspaceBoundary name="System"><Suspense fallback={<div className="content-page"><h1>Opening machine setup…</h1></div>}><SystemSetup setup={resources}
           onApply={setResources} onDirtyChange={reportSystemDirty}
           storageError={setupSaveError} storagePending={setupUnsaved && !setupSaveError && !setupConflict} storageConflict={Boolean(setupConflict)} download={download} /></Suspense></WorkspaceBoundary>}
-        {tab === "Monitor" && <WorkspaceBoundary name="Monitor"><Suspense fallback={<div className="content-page"><h1>Opening Monitor…</h1></div>}><LiveMonitor onZoneStill={offerZoneStill} visibleTiles={resources.browser.visibleTiles} onCount={setLiveCount} pageHidden={pageHidden} clip={capturedClip} onClip={setCapturedClip} capturePending={capturePending} onCaptureBusy={setCapturePending} onReviewClip={() => setTab('Recognition')} onLiveObservation={addLiveObservation} queue={
+        {tab === "Monitor" && <WorkspaceBoundary name="Monitor"><Suspense fallback={<div className="content-page"><h1>Opening Monitor…</h1></div>}><LiveMonitor onZoneStill={offerZoneStill} visibleTiles={resources.browser.visibleTiles} onCount={setLiveCount} pageHidden={pageHidden} clip={capturedClip} onClip={setCapturedClip} capturePending={capturePending} onCaptureBusy={setCapturePending} onReviewClip={() => setTab('Recognition')} onLiveObservation={addLiveObservation} onPendingLiveChange={reportPendingLive} queue={
               <aside className="review-queue">
                 <div className="queue-heading">
                   <h2>

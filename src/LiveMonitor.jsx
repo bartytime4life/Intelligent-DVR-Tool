@@ -8,12 +8,13 @@ import {grabFrame} from './local-images.mjs';
 import {LiveOverlay, LiveTileAI} from './LiveDetection.jsx';
 import {liveDetector, captureJpeg, liveObservationEvent, liveSetupInfo} from './live-ai.mjs';
 import {analysisRequest} from './local-analysis.mjs';
+import {pendingLiveReviews, canStartLiveReview, pruneLiveReviews, retainedLiveTiles, LIVE_REVIEW_LIMIT_MESSAGE} from './live-review.mjs';
 
 const guide = 'https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/local-camera-feeds.md';
 const publicGuide = 'https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/public-webcams.md';
 const aiGuide = 'https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/live-detection.md';
 const AI_RULES_KEY = 'dvr.live.rules';
-export default function LiveMonitor({onZoneStill, queue, visibleTiles=4, onCount, pageHidden, clip, onClip, onReviewClip, capturePending, onCaptureBusy, onLiveObservation}) {
+export default function LiveMonitor({onZoneStill, queue, visibleTiles=4, onCount, pageHidden, clip, onClip, onReviewClip, capturePending, onCaptureBusy, onLiveObservation, onPendingLiveChange}) {
   const [webcam, setWebcam] = useState({state:'disconnected', message:'No webcam connected'});
   const [devices, setDevices] = useState([]), [device, setDevice] = useState(() => { try { return localStorage.getItem(WEBCAM_KEY) || ''; } catch { return ''; } });
   const [catalog, setCatalog] = useState(null), [source, setSource] = useState('');
@@ -28,6 +29,8 @@ export default function LiveMonitor({onZoneStill, queue, visibleTiles=4, onCount
   const aiRequest = useRef(null);
   const [aiRules, setAiRules] = useState(() => { try { return localStorage.getItem(AI_RULES_KEY) || ''; } catch { return ''; } });
   const detectors = useRef(new Map()), pictures = useRef(new Map());
+  const aiStatesRef = useRef({}), liveSourceIds = useRef([]);
+  const sending = useRef(new Set()), [sendingIds, setSendingIds] = useState(new Set());
   if (!controller.current) controller.current = webcamController(navigator.mediaDevices, state => { if (alive.current) setWebcam(state); });
   const local = localFeedOrigin(window.location), loopbackUrl = loopbackAddress(window.location);
   const publicMode = setup === 'public';
@@ -37,7 +40,21 @@ export default function LiveMonitor({onZoneStill, queue, visibleTiles=4, onCount
   const networkActive = feeds.filter(f => ['connecting','live'].includes(f.state)).length;
   const active = networkActive + (webcamActive ? 1 : 0);
   const live = feeds.filter(f => f.state === 'live').length + (webcam.state === 'live' ? 1 : 0);
+  const sourceTiles = [
+    ...(webcam.state !== 'disconnected' || webcam.message !== 'No webcam connected' ? [{id:'webcam', name:'This computer’s webcam', state:webcam.state, message:webcam.message}] : []),
+    ...feeds,
+  ];
+  liveSourceIds.current = sourceTiles.map(source => source.id);
   function sync() { if (alive.current) setFeeds([...sessions.current.values()].map(({abort, ...s}) => s)); }
+  function publishAi(states) {
+    if (!alive.current) return;
+    const next = pruneLiveReviews(states, liveSourceIds.current);
+    if (next === aiStatesRef.current) return;
+    aiStatesRef.current = next; setAiStates(next);
+    onPendingLiveChange?.(pendingLiveReviews(next));
+  }
+  function updateAi(id, state) { publishAi({...aiStatesRef.current,[id]:state}); }
+  useEffect(() => { publishAi(aiStatesRef.current); }, [feeds,webcam.state,webcam.message]);
   const aiChoices = aiInfo.live?.rules?.filter(r => r.models.includes(aiInfo.live.models[0]?.id)) || [];
   const aiRule = aiChoices.find(r => r.id === aiRules) || aiChoices[0];
   const aiReady = aiInfo.state === 'ready' && Boolean(aiRule);
@@ -66,29 +83,43 @@ export default function LiveMonitor({onZoneStill, queue, visibleTiles=4, onCount
   function startAi(tile) {
     const previous = detectors.current.get(tile.id);
     if (!aiReady || ['starting','live'].includes(previous?.snapshot.state)) return;
+    if (!canStartLiveReview(aiStatesRef.current,tile.id)) {setError(LIVE_REVIEW_LIMIT_MESSAGE); return;}
+    setError('');
     // A failed or stopped detector is replaced; its unsent observations carry over.
     detectors.current.delete(tile.id);
     const detector = liveDetector({token:aiInfo.token, model:aiInfo.live.models[0].id, rules:aiRule.id, camera:tile.name,
-      observations:(aiStates[tile.id]?.observations || []).filter(o => !o.sent),
-      observationsDropped:aiStates[tile.id]?.observationsDropped || 0,
+      observations:(aiStatesRef.current[tile.id]?.observations || []).filter(o => !o.sent),
+      observationsDropped:aiStatesRef.current[tile.id]?.observationsDropped || 0,
       capture: () => captureJpeg(pictures.current.get(tile.id)),
-      onChange: snapshot => { if (alive.current && detectors.current.get(tile.id) === detector) setAiStates(states => ({...states, [tile.id]:snapshot})); }});
+      onChange: snapshot => { if (alive.current && detectors.current.get(tile.id) === detector) updateAi(tile.id,{...snapshot,cameraName:tile.name}); }});
     detectors.current.set(tile.id, detector); void detector.start();
   }
   async function sendObservation(id, observationId) {
-    const item = aiStates[id]?.observations?.find(o => o.observation.id === observationId);
-    if (!item || !onLiveObservation) return;
+    const item = aiStatesRef.current[id]?.observations?.find(o => o.observation.id === observationId);
+    if (!item || item.sent || !onLiveObservation || sending.current.size) return;
+    sending.current.add(observationId); setSendingIds(new Set(sending.current));
     try {
       if (!await onLiveObservation(liveObservationEvent(item.observation, item.session, item.capturedAt), item.still)) return;
       const detector = detectors.current.get(id);
       if (detector) detector.markSent(observationId);
-      else setAiStates(states => ({...states, [id]:{...states[id], observations:states[id].observations.map(o => o.observation.id === observationId ? {...o, sent:true} : o)}}));
-    } catch (err) { setError(err.message); }
+      else {
+        const state = aiStatesRef.current[id];
+        if (state) updateAi(id,{...state,observations:state.observations.map(o => o.observation.id === observationId ? {...o,sent:true,still:null} : o)});
+      }
+    } catch (err) { if (alive.current) setError(err.message); }
+    finally {
+      sending.current.delete(observationId);
+      if (alive.current) setSendingIds(new Set(sending.current));
+    }
   }
   function dismissObservation(id, observationId) {
+    if (sending.current.has(observationId)) return;
     const detector = detectors.current.get(id);
     if (detector) detector.dismiss(observationId);
-    else setAiStates(states => ({...states, [id]:{...states[id], observations:states[id].observations.filter(o => o.observation.id !== observationId)}}));
+    else {
+      const state = aiStatesRef.current[id];
+      if (state) updateAi(id,{...state,observations:state.observations.filter(o => o.observation.id !== observationId)});
+    }
   }
   async function disconnect(id) {
     stopAi(id);
@@ -109,7 +140,12 @@ export default function LiveMonitor({onZoneStill, queue, visibleTiles=4, onCount
     alive.current = true;
     const leave = () => stopAll('Preview stopped because this page closed.');
     window.addEventListener('pagehide', leave);
-    return () => { alive.current = false; aiRequest.current?.abort(); aiRequest.current = null; stopAll(); onCount(0); window.removeEventListener('pagehide', leave); };
+    return () => {
+      alive.current = false; aiRequest.current?.abort(); aiRequest.current = null; stopAll();
+      // A submitted Send may outlive this view. Keep only its one still alive.
+      aiStatesRef.current = {}; pictures.current.clear();
+      onCount(0); onPendingLiveChange?.(0); window.removeEventListener('pagehide', leave);
+    };
   }, []);
   useEffect(() => { onCount(live); }, [live, onCount]);
   useEffect(() => { void loadAi(); }, []);
@@ -244,10 +280,9 @@ export default function LiveMonitor({onZoneStill, queue, visibleTiles=4, onCount
     if (kind !== setup && webcam.state === 'connecting') controller.current.stop('Camera connection cancelled.');
     generation.current++; busy.current=false; setWorking(false); setError(''); setSource(''); setSetup(kind);
   }
-  const tiles = [
-    ...(webcam.state !== 'disconnected' || webcam.message !== 'No webcam connected' ? [{id:'webcam', name:'This computer’s webcam', state:webcam.state, message:webcam.message}] : []),
-    ...feeds,
-  ];
+  const tiles = [...sourceTiles, ...retainedLiveTiles(aiStates,liveSourceIds.current)];
+  const pendingReviews = pendingLiveReviews(aiStates);
+  const reviewFull = !canStartLiveReview(aiStates,null);
   const displayed = visibleFeedTiles(tiles, selected, visibleTiles);
   shown.current = new Set(displayed.map(t => t.id));
   const renderNow = performance.now();
@@ -268,6 +303,8 @@ export default function LiveMonitor({onZoneStill, queue, visibleTiles=4, onCount
       {aiInfo.state === 'unavailable' && local && <button className="text-button" disabled={aiChecking} onClick={loadAi}><ArrowClockwise/>{aiChecking ? 'Checking…' : 'Check again'}</button>}
       <a href={aiGuide} target="_blank" rel="noreferrer">How live AI works</a>
     </div>}
+    {pendingReviews > 0 && <p className="live-review-summary" role="status">{pendingReviews} unsent live {pendingReviews === 1 ? 'observation' : 'observations'} · temporary in this tab. Send to Events or dismiss before leaving Monitor.</p>}
+    {reviewFull && <p className="live-ai-error" role="status">{LIVE_REVIEW_LIMIT_MESSAGE}</p>}
     <ClipCapture stream={webcam.stream} hidden={pageHidden} clip={clip} onClip={onClip} onReview={onReviewClip} capturePending={capturePending} onCaptureBusy={onCaptureBusy} />
     {error && !setup && <p className="feed-error" role="alert"><WarningCircle />{error}</p>}
     <div className="monitor-layout">
@@ -290,19 +327,19 @@ export default function LiveMonitor({onZoneStill, queue, visibleTiles=4, onCount
           </div>
           <small className="monitor-welcome-footnote">No sample feeds · no microphone · no automatic streaming · connect only when ready</small>
         </div>}
-        {displayed.map(t => <article key={t.id} className={`camera-tile live-tile ${selected === t.id ? 'selected' : ''}`} onClick={() => setSelected(t.id)} aria-label={`${t.name} preview`}>
-          <div className="live-picture">
+        {displayed.map(t => <article key={t.id} className={`camera-tile live-tile ${selected === t.id ? 'selected' : ''}`} onClick={() => setSelected(t.id)} aria-label={`${t.name} ${t.reviewOnly ? 'retained observations' : 'preview'}`}>
+          {t.reviewOnly ? <div className="retained-live-heading"><strong>{t.name}</strong><p>Preview stopped. Unsent analyzed stills stay available for review.</p></div> : <div className="live-picture">
             {t.id === 'webcam' && webcam.stream && <video ref={attachVideo} autoPlay muted playsInline aria-label="Webcam video" />}
             {t.id !== 'webcam' && t.image && <img ref={el => { if (el) pictures.current.set(t.id, el); else pictures.current.delete(t.id); }} src={t.image} alt={`${t.name} current preview frame`} onError={() => {const s=sessions.current.get(t.id); if(s){s.state='failed';s.error={message:'The browser could not display this frame. Disconnect and retry.'};URL.revokeObjectURL(s.image);s.image='';sync();}}} />}
             {((t.id === 'webcam' && t.state !== 'live') || (t.id !== 'webcam' && !t.image)) && <div className="feed-placeholder"><Camera size={34}/><h3>{t.state === 'connecting' ? 'Connecting…' : t.state === 'failed' ? 'Connection needs attention' : t.state === 'interrupted' ? 'Frames interrupted' : t.state === 'live' ? 'Waiting for frames' : 'Preview stopped'}</h3>
               <p>{t.message || t.error?.message || 'Waiting for the first image from this source…'}</p></div>}
             {aiStates[t.id] && <LiveOverlay ai={aiStates[t.id]} now={renderNow} />}
             <div className="live-tile-heading"><strong>{t.name}</strong><span className={`feed-status ${t.state}${t.state === 'live' && frameDelayed(t) ? ' delayed' : ''}`}>{t.state === 'live' ? frameDelayed(t) ? 'Delayed' : 'Receiving' : t.state}</span></div>
-          </div>
+          </div>}
           {t.kind?.startsWith('public-') && <div className="public-source-credit"><a href={t.provider_url} target="_blank" rel="noreferrer noopener">{t.provider} ↗</a><span>{t.kind === 'public-jpeg' ? `Snapshot · refresh ${t.refresh_seconds}s` : 'Public MJPEG · preview ≤ 4 fps'}{t.frame_age_seconds != null ? ` · retrieved ${Math.floor(t.frame_age_seconds)}s ago` : ''}</span><small>Provider capture time and freshness unverified</small></div>}
-          {(t.state === 'live' || aiStates[t.id]?.state === 'failed' || aiStates[t.id]?.observations?.length > 0) && <LiveTileAI ai={aiStates[t.id]} available={aiReady && t.state === 'live'} now={renderNow}
+          {(t.state === 'live' || aiStates[t.id]?.state === 'failed' || aiStates[t.id]?.observations?.length > 0) && <LiveTileAI ai={aiStates[t.id]} available={aiReady && t.state === 'live' && canStartLiveReview(aiStates,t.id)} reviewOnly={t.reviewOnly} disabledReason={reviewFull ? LIVE_REVIEW_LIMIT_MESSAGE : ''} sending={sendingIds} now={renderNow}
             onStart={() => startAi(t)} onStop={() => stopAi(t.id)} onSend={i => sendObservation(t.id, i)} onDismiss={i => dismissObservation(t.id, i)} />}
-          <div className="live-tile-controls" onClick={e => e.stopPropagation()}><span>{t.id === 'webcam' ? 'Webcam · video only' : t.kind?.startsWith('public-') ? 'Internet source · local preview' : `DVR · sampled preview ≤ 4 fps${Number.isFinite(t.frame_age_seconds) ? ` · frame ${t.frame_age_seconds < 1 ? '<1' : Math.floor(t.frame_age_seconds)}s ago` : ''}`}</span>
+          {t.reviewOnly ? <p className="live-review-summary">Temporary review only · preview and AI stopped in this page</p> : <div className="live-tile-controls" onClick={e => e.stopPropagation()}><span>{t.id === 'webcam' ? 'Webcam · video only' : t.kind?.startsWith('public-') ? 'Internet source · local preview' : `DVR · sampled preview ≤ 4 fps${Number.isFinite(t.frame_age_seconds) ? ` · frame ${t.frame_age_seconds < 1 ? '<1' : Math.floor(t.frame_age_seconds)}s ago` : ''}`}</span>
             {onZoneStill && t.state === 'live' && <button className="text-button" onClick={async e => {
               const picture = e.currentTarget.closest('article')?.querySelector('.live-picture video, .live-picture > img');
               try { if (!picture) throw Error('No frame is shown yet.'); onZoneStill(await grabFrame(picture), t.name); } catch (err) { setError(err.message); }
@@ -310,12 +347,12 @@ export default function LiveMonitor({onZoneStill, queue, visibleTiles=4, onCount
             <button className="text-button" onClick={() => t.id === 'webcam'
               ? controller.current.stop(['failed','disconnected'].includes(t.state) ? 'No webcam connected' : 'Disconnected')
               : disconnect(t.id)}>{t.state === 'connecting' ? 'Cancel' : ['failed','disconnected'].includes(t.state) ? 'Remove' : 'Disconnect'}</button>
-            {t.id === 'webcam' && ['failed','disconnected'].includes(t.state) && <button className="text-button" onClick={() => openSetup()}>Reconnect</button>}</div>
+            {t.id === 'webcam' && ['failed','disconnected'].includes(t.state) && <button className="text-button" onClick={() => openSetup()}>Reconnect</button>}</div>}
         </article>)}
       </section>{queue}
     </div>
     <section className="sources live-sources" aria-label="Camera sources"><div className="source-heading"><h2>Camera sources <span>{tiles.length}</span></h2><span>Up to 4 preview connections · disconnect on leaving Monitor</span></div>
-      <div className="live-source-strip">{tiles.map(t => <button key={t.id} className={`live-source ${selected === t.id ? 'active' : ''}`} onClick={() => setSelected(t.id)} aria-pressed={selected === t.id}><Camera/><span>{t.name}<small>{t.state === 'live' ? 'Receiving frames' : t.state}</small></span></button>)}
+      <div className="live-source-strip">{tiles.map(t => <button key={t.id} className={`live-source ${selected === t.id ? 'active' : ''}`} onClick={() => setSelected(t.id)} aria-pressed={selected === t.id}><Camera/><span>{t.name}<small>{t.reviewOnly ? 'Unsent observations' : t.state === 'live' ? 'Receiving frames' : t.state}</small></span></button>)}
         {!tiles.length && <p>No saved footage is being presented as a camera feed.</p>}
         <button className="text-button" onClick={() => openSetup('dvr')}><Plug/>Set up local DVR</button><button className="text-button" onClick={() => openSetup('public')}><Globe/>Public webcams</button></div>
     </section>

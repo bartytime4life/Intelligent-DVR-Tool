@@ -1,5 +1,9 @@
 # Verification index
 
+[Live review after disconnect, November 11](live-review-retention-2026-11-11/README.md)
+records temporary stopped-source review, bounded admission, explicit discard
+warnings, storage retry and one live still save at a time.
+
 [Monitor setup recovery, November 11](live-catalogue-recovery-2026-11-11/README.md)
 records catalogue validation, preserved previews, late-reply protection, visible
 mobile Disconnect controls and inspected generated-camera captures.

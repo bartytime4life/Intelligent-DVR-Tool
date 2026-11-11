@@ -22,7 +22,10 @@ frame position. A box or score is an observation to investigate, not a verdict.
    its own explicit send action; it is not queued automatically. A
    [live AI](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Live-AI-and-tracking) observation is sent one at a time from its Monitor
    tile, with the analyzed still; there is no recording behind it, so Events labels
-   it **Live AI** and shows no Open in Recognition button.
+   it **Live AI** and shows no Open in Recognition button. Unsent live observations
+   remain reviewable after disconnecting their source. They are temporary:
+   Monitor warns before navigation discards them. Send or dismiss them explicitly;
+   [live review limits](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Live-AI-and-tracking#use-live-ai) keep preview and Stop available.
 3. In **Events**, use filters to focus the queue, open an observation, make the
    appropriate confirm/dismiss decision and add a note explaining the evidence.
 4. Reopen an observation to correct its decision. Bulk dismissal and queue clearing

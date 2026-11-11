@@ -1,0 +1,18 @@
+{
+  "base_commit": "19682dd0c5ca48c9d6c8d84ca923c3fa1ac1bc13",
+  "sha256": {
+    "src/App.jsx": "f6d6fa61d84314ca713d0b7fae183b34ab6ede9f14da42f9819fdd8cf94b3e7d",
+    "src/LiveMonitor.jsx": "3d339b43a30c0422417490b435a0e2a4c901c124336128fb8f94b33d407d0dff",
+    "src/LiveDetection.jsx": "5dedf5e64c595fbba0d8fdda71ceb6c24b0448bf125fc7b4b6470c45a95e5d7b",
+    "src/live-review.mjs": "a1747c09973c5ddd38d65d1d932f7209376e682247e054928becaeb1e536d877",
+    "src/live-ai.mjs": "1c8c4f5b54105fdb7f46eb62d8eb321b9b88b7a2e1100ed24901387382f3c64c",
+    "src/live-feeds.css": "64abb4a4f0e73a45cee3eb70dbe69f22c274e6be93bb17f5eab0abe1f015a18b",
+    "tests/live-review.test.mjs": "631e256b37cf364b82011082ec7b223bc71ada834564bfce858c717f418948b7",
+    "tests/live-ai.test.mjs": "00b87c32a5aad68ca28d5161d672c67c25b7c20c119361a9c4514458f733077a",
+    "tests/browser/live-review-retention.spec.mjs": "c15d5538444f681565a81a7c7ac7e560ff1cb0dee26bfe8a5943301cec9dea03",
+    "tests/analysis-browser/live-ai.spec.mjs": "1f09381dea6919612c7c120efe4603eb23150b165750bd8d01122076fceac0e5",
+    "tests/fixtures/live-preview.mjs": "3cd23a18f6d6011addf60375fe1c93f130d2eeb0c27d83c58c9c858dcc5966af",
+    ".github/workflows/facility-browser.yml": "b349d92d9f7317ef4ca1a0905254d6ffbeb35b5ae6194d99be296fb84d3d3e49",
+    "package.json": "98ee58b91d3ad9615dee8283821e21de4e3a050a373f0002eb5085c7f19fb2da"
+  }
+}
