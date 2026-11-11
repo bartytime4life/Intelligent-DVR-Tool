@@ -1,0 +1,17 @@
+{
+  "baseline_revision": "c0aee35c5e634e5bb2949f1002336c2cc3c71078",
+  "files": {
+    "edge/tracking.py": "da07c7bd6134e9d74c3fb3f40e1e0db32c4b5c6ee7a31d777b725038a6bb7a6c",
+    "tests/test_tracking.py": "02f3ada22632f4e49d3dc3bdd47d335bf589630d59f5e86ee11e5ad7c76cfd6e",
+    "tests/test_live_analysis.py": "9d7745d8b869acf01f479f7d88fe1d37a56b4e62f25c35482e1f4941442c1a32",
+    "docs/verification/tracking-frame-size-2026-11-11/compare.py": "5d146b8ef5a263c4e5a0bbbd5e3e948122cba61e91d92907413a9ed45bcdec0a"
+  },
+  "unchanged": {
+    "edge/inference.py": "7e95beb9e25dd67ac5d8d977ec6c466874371d12d112119a85a619124687b2f1",
+    "edge/journal.py": "70f7a3419d05d76380ea32ad5de20ee440bc17256e25baf0f2289a86e46a495a",
+    "edge/supervision.py": "03f334d5fa072e5f3ad02bd90536fd2c00fc97ebfaa54ca1ef1c10b64b80a9cf",
+    "edge/scheduler.py": "8639b46d3ba2e1a14efaa7ff647f412e6be437685ec7be5717a00983835b9019",
+    "edge/profiling.py": "f7c0a3e4b831d7f996840aec51a73e3fe68e06627cdce854716c576068f80f91",
+    "edge/live_worker.py": "75159d80248ab01c5f38206f8e8aafb1fe158e58cb25d1ab9f14b3d89d14e609"
+  }
+}

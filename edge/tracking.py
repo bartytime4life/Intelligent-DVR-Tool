@@ -239,6 +239,11 @@ class Tracker:
             raise ValueError('Frame times must be finite, non-negative and strictly increasing')
         if type(width) is not int or type(height) is not int or not 0 < width <= 16384 or not 0 < height <= 16384:
             raise ValueError('Frame dimensions must be positive integers')
+        # Detections arrive normalized. Keep the first accepted frame's units
+        # for every box, Kalman state and covariance in this run; a later JPEG
+        # resize must not change that coordinate system. Validate actual input
+        # dimensions above even after these internal units have been fixed.
+        width, height = self.size or (width, height)
         boxes, scores, labels = [], [], []
         for d in detections:
             box, score = d.get('box', []), d.get('score')

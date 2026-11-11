@@ -333,6 +333,19 @@ class LiveWorkerTest(unittest.TestCase):
         self.assertEqual([r['detector'] for r in lines[1:]], ['ran', 'skipped-still', 'skipped-still', 'ran', 'skipped-still'])
         self.assertTrue(all(r['detections'] == [] for r in lines[1:]))
 
+    def test_native_worker_keeps_ids_and_normalized_boxes_across_jpeg_resizes(self):
+        import numpy as np
+        sizes = [(320, 240), (640, 480), (160, 120), (960, 720)]
+        frames = [np.full((height, width, 3), 80, dtype=np.uint8) for width, height in sizes]
+        results = self.run_worker(self.root / 'fixture.onnx', frames)[1:]
+        self.assertEqual([(r['width'], r['height']) for r in results], sizes)
+        self.assertEqual([r['detector'] for r in results], ['ran'] * len(sizes))
+        self.assertEqual([len(r['detections']) for r in results], [1] * len(sizes))
+        self.assertEqual([r['detections'][0].get('track') for r in results], [1] * len(sizes))
+        self.assertEqual([len(r['tracks']) for r in results], [1] * len(sizes))
+        for result in results:
+            np.testing.assert_allclose(result['tracks'][0]['box'], result['detections'][0]['box'], atol=1e-5)
+
     def test_worker_outlives_the_request_thread_that_started_it(self):
         # On Linux a worker dies with the thread that spawned it; HTTP request threads are short-lived.
         import cv2

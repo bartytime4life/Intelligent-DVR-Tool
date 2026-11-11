@@ -111,6 +111,49 @@ class TrackerTest(unittest.TestCase):
         self.assertEqual(tracker.update(.2, [box(500, 300, label='dog')], W, H), [None])
         self.assertEqual(tracker.update(.4, [box(500, 300, label='dog'), box(500, 300)], W, H), [2, 1])
 
+    def test_resized_frames_match_the_same_normalized_input_in_a_fixed_size_run(self):
+        reference, resized = Tracker(), Tracker()
+        sizes = [(W, H), (640, 360), (1920, 1080), (640, 480), (960, 540)]
+        for k in range(60):
+            detections = [box(120 + 3 * k, 200, score=.3 if k == 11 else .9),
+                          box(900 - 2 * k, 100, label='car', w=120, h=80)]
+            if k == 10:
+                detections.pop(0)
+            if k >= 16:
+                detections.append(box(600, 400, label='dog', w=50, h=70))
+            expected = reference.update(k / 10, detections, W, H)
+            self.assertEqual(resized.update(k / 10, detections, *sizes[k % len(sizes)]), expected)
+            self.assertEqual(resized.active(), reference.active())
+            for a, b in zip(resized.tracks, reference.tracks):
+                np.testing.assert_array_equal(a.mean, b.mean)
+                np.testing.assert_array_equal(a.cov, b.cov)
+        self.assertEqual(resized.finish(), reference.finish())
+
+    def test_lost_box_stays_normalized_when_an_empty_frame_has_a_new_size(self):
+        tracker = Tracker()
+        detection = {'label': 'person', 'score': .9, 'box': [.6, .2, .1, .3]}
+        tracker.update(0, [detection], W, H)
+        tracker.update(.1, [], 640, 360)
+        self.assertEqual(tracker.active()[0]['box'], detection['box'])
+        self.assertEqual(tracker.active()[0]['state'], 'lost')
+        self.assertEqual(tracker.update(.2, [detection], 1920, 1080), [1])
+
+    def test_empty_first_frame_establishes_coordinates_without_confirming_later_tracks(self):
+        tracker = Tracker()
+        tracker.update(0, [], 640, 360)
+        detection = {'label': 'person', 'score': .9, 'box': [.6, .2, .1, .3]}
+        self.assertEqual(tracker.update(.1, [detection], W, H), [None])
+        self.assertEqual(tracker.update(.2, [detection], 320, 240), [1])
+        self.assertEqual(tracker.active()[0]['box'], detection['box'])
+
+    def test_resize_does_not_revive_an_expired_track(self):
+        tracker = Tracker(TrackerConfig(max_lost_seconds=1))
+        detection = box(768, 144, w=128, h=216)
+        tracker.update(0, [detection], W, H)
+        self.assertEqual(tracker.update(2, [detection], 640, 360), [None])
+        self.assertEqual(tracker.update(2.1, [detection], W, H), [2])
+        self.assertEqual(len(tracker.finish()['tracks']), 2)
+
     def test_mixed_classes_use_independent_assignment_blocks_in_all_stages(self):
         from unittest.mock import patch
         tracker = Tracker()

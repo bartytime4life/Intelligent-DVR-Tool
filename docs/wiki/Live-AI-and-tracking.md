@@ -175,6 +175,11 @@ an exact reproduction of the reference per-frame filter:
    velocity noise into position uncertainty over that interval, and use the Joseph
    covariance update to reduce cancellation error. Noise rates stay fixed at the
    predicted interval's starting height.
+   Normalized detections use the first accepted frame's dimensions as fixed
+   tracking units throughout the run. Resizing a later image therefore does not
+   change stored coordinates, motion uncertainty or normalized track boxes.
+   Actual incoming dimensions remain validated. This preserves coordinates under
+   resizing; it does not compensate for a cropped, rotated or changed camera view.
 2. Match confirmed and recently lost tracks to confident boxes (score ≥ 0.5) by
    IoU × score, using the Hungarian method (Kuhn, 1955) for the optimal
    assignment. Classes form independent assignment groups, so no cross-class

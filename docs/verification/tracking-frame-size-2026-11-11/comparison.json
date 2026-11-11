@@ -1,0 +1,360 @@
+{
+  "data_kind": "synthetic",
+  "qualification": "NOT_ESTABLISHED",
+  "baseline_revision": "c0aee35c5e634e5bb2949f1002336c2cc3c71078",
+  "baseline_tracker_sha256": "9547d190c7ff4245efa731371a77b2725e8e986d9c9a3995b5cbcbd0bda5338a",
+  "candidate_tracker_sha256": "da07c7bd6134e9d74c3fb3f40e1e0db32c4b5c6ee7a31d777b725038a6bb7a6c",
+  "worker_sha256": "75159d80248ab01c5f38206f8e8aafb1fe158e58cb25d1ab9f14b3d89d14e609",
+  "probe_sha256": "5d146b8ef5a263c4e5a0bbbd5e3e948122cba61e91d92907413a9ed45bcdec0a",
+  "baseline": {
+    "method": "bytetrack-style-iou-kalman-v2",
+    "direct": {
+      "ids": [
+        [
+          1
+        ],
+        [
+          null
+        ]
+      ],
+      "active": [
+        {
+          "id": 1,
+          "label": "person",
+          "state": "lost",
+          "first_seconds": 0,
+          "last_seconds": 0,
+          "duration_seconds": 0,
+          "box": [
+            1.2,
+            0.4,
+            0.2,
+            0.6
+          ],
+          "zones": {}
+        }
+      ]
+    },
+    "model_sha256": "76ef87502988d4bc9c1ef0e855fe9f05201d28c476d97baad4d5c768fcbaa919",
+    "runtime": {
+      "opencv": "4.13.0",
+      "backend": "OpenCV CPU",
+      "backend_id": "opencv-cpu",
+      "threads": 2,
+      "fallback": "none"
+    },
+    "native": [
+      {
+        "width": 320,
+        "height": 240,
+        "detector": "ran",
+        "detections": [
+          {
+            "label": "person",
+            "score": 0.9,
+            "box": [
+              0.375,
+              0.33333,
+              0.25,
+              0.33333
+            ],
+            "track": 1
+          }
+        ],
+        "tracks": [
+          {
+            "id": 1,
+            "label": "person",
+            "state": "tracked",
+            "first_seconds": 0.5,
+            "last_seconds": 0.5,
+            "duration_seconds": 0.0,
+            "box": [
+              0.375,
+              0.333333,
+              0.25,
+              0.333333
+            ],
+            "zones": {
+              "all": 0.0
+            }
+          }
+        ]
+      },
+      {
+        "width": 640,
+        "height": 480,
+        "detector": "ran",
+        "detections": [
+          {
+            "label": "person",
+            "score": 0.9,
+            "box": [
+              0.375,
+              0.33333,
+              0.25,
+              0.33333
+            ]
+          }
+        ],
+        "tracks": [
+          {
+            "id": 1,
+            "label": "person",
+            "state": "lost",
+            "first_seconds": 0.5,
+            "last_seconds": 0.5,
+            "duration_seconds": 0.0,
+            "box": [
+              0.1875,
+              0.166667,
+              0.125,
+              0.166667
+            ],
+            "zones": {
+              "all": 0.0
+            }
+          }
+        ]
+      },
+      {
+        "width": 160,
+        "height": 120,
+        "detector": "skipped-still",
+        "detections": [],
+        "tracks": [
+          {
+            "id": 1,
+            "label": "person",
+            "state": "lost",
+            "first_seconds": 0.5,
+            "last_seconds": 0.5,
+            "duration_seconds": 0.0,
+            "box": [
+              0.1875,
+              0.166667,
+              0.125,
+              0.166667
+            ],
+            "zones": {
+              "all": 0.0
+            }
+          }
+        ]
+      },
+      {
+        "width": 960,
+        "height": 720,
+        "detector": "skipped-still",
+        "detections": [],
+        "tracks": [
+          {
+            "id": 1,
+            "label": "person",
+            "state": "lost",
+            "first_seconds": 0.5,
+            "last_seconds": 0.5,
+            "duration_seconds": 0.0,
+            "box": [
+              0.1875,
+              0.166667,
+              0.125,
+              0.166667
+            ],
+            "zones": {
+              "all": 0.0
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "candidate": {
+    "method": "bytetrack-style-iou-kalman-v2",
+    "direct": {
+      "ids": [
+        [
+          1
+        ],
+        [
+          1
+        ]
+      ],
+      "active": [
+        {
+          "id": 1,
+          "label": "person",
+          "state": "tracked",
+          "first_seconds": 0,
+          "last_seconds": 0.1,
+          "duration_seconds": 0.1,
+          "box": [
+            0.6,
+            0.2,
+            0.1,
+            0.3
+          ],
+          "zones": {}
+        }
+      ]
+    },
+    "model_sha256": "76ef87502988d4bc9c1ef0e855fe9f05201d28c476d97baad4d5c768fcbaa919",
+    "runtime": {
+      "opencv": "4.13.0",
+      "backend": "OpenCV CPU",
+      "backend_id": "opencv-cpu",
+      "threads": 2,
+      "fallback": "none"
+    },
+    "native": [
+      {
+        "width": 320,
+        "height": 240,
+        "detector": "ran",
+        "detections": [
+          {
+            "label": "person",
+            "score": 0.9,
+            "box": [
+              0.375,
+              0.33333,
+              0.25,
+              0.33333
+            ],
+            "track": 1
+          }
+        ],
+        "tracks": [
+          {
+            "id": 1,
+            "label": "person",
+            "state": "tracked",
+            "first_seconds": 0.5,
+            "last_seconds": 0.5,
+            "duration_seconds": 0.0,
+            "box": [
+              0.375,
+              0.333333,
+              0.25,
+              0.333333
+            ],
+            "zones": {
+              "all": 0.0
+            }
+          }
+        ]
+      },
+      {
+        "width": 640,
+        "height": 480,
+        "detector": "ran",
+        "detections": [
+          {
+            "label": "person",
+            "score": 0.9,
+            "box": [
+              0.375,
+              0.33333,
+              0.25,
+              0.33333
+            ],
+            "track": 1
+          }
+        ],
+        "tracks": [
+          {
+            "id": 1,
+            "label": "person",
+            "state": "tracked",
+            "first_seconds": 0.5,
+            "last_seconds": 1.0,
+            "duration_seconds": 0.5,
+            "box": [
+              0.375,
+              0.333333,
+              0.25,
+              0.333333
+            ],
+            "zones": {
+              "all": 0.5
+            }
+          }
+        ]
+      },
+      {
+        "width": 160,
+        "height": 120,
+        "detector": "ran",
+        "detections": [
+          {
+            "label": "person",
+            "score": 0.9,
+            "box": [
+              0.375,
+              0.33333,
+              0.25,
+              0.33333
+            ],
+            "track": 1
+          }
+        ],
+        "tracks": [
+          {
+            "id": 1,
+            "label": "person",
+            "state": "tracked",
+            "first_seconds": 0.5,
+            "last_seconds": 1.5,
+            "duration_seconds": 1.0,
+            "box": [
+              0.375,
+              0.333333,
+              0.25,
+              0.333333
+            ],
+            "zones": {
+              "all": 1.0
+            }
+          }
+        ]
+      },
+      {
+        "width": 960,
+        "height": 720,
+        "detector": "ran",
+        "detections": [
+          {
+            "label": "person",
+            "score": 0.9,
+            "box": [
+              0.375,
+              0.33333,
+              0.25,
+              0.33333
+            ],
+            "track": 1
+          }
+        ],
+        "tracks": [
+          {
+            "id": 1,
+            "label": "person",
+            "state": "tracked",
+            "first_seconds": 0.5,
+            "last_seconds": 2.0,
+            "duration_seconds": 1.5,
+            "box": [
+              0.375,
+              0.333333,
+              0.25,
+              0.333333
+            ],
+            "zones": {
+              "all": 1.5
+            }
+          }
+        ]
+      }
+    ]
+  }
+}
