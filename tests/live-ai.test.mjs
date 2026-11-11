@@ -136,6 +136,7 @@ test('the detector starts explicitly, sends one frame at a time and keeps observ
   assert.equal(detector.snapshot.skippedBusy, 1);
   detector.markSent(observation.id);
   assert.equal(snapshots.at(-1).observations[0].sent, true);
+  assert.equal(snapshots.at(-1).observations[0].still, null);
   detector.stop();
   await new Promise(r => setTimeout(r, 0));
   assert.equal(snapshots.at(-1).state, 'stopped');

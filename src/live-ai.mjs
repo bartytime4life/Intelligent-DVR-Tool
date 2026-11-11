@@ -192,6 +192,7 @@ export function liveDetector({ token, model, rules, camera, capture, onChange, f
           : 'AI startup cancelled in this page. A start already submitted locally may still finish; its lease expires without frames.' : '') });
     },
     dismiss(id) { state.observations = state.observations.filter(o => o.observation.id !== id); emit({}); },
-    markSent(id) { state.observations = state.observations.map(o => o.observation.id === id ? {...o, sent:true} : o); emit({}); },
+    // Events now owns the locally saved still; release the tile's Blob reference.
+    markSent(id) { state.observations = state.observations.map(o => o.observation.id === id ? {...o, sent:true, still:null} : o); emit({}); },
   };
 }

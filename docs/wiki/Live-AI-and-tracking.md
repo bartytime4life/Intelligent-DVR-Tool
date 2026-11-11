@@ -38,7 +38,10 @@ labeled footage (see [measure it](#measure-before-relying-on-it)).
    track number; dashed grey boxes are detections not yet confirmed as a track.
 5. When a rule fires, an amber observation appears under the tile. **Send to
    Events** puts it in the review queue with the analyzed still frame. Nothing
-   reaches Events automatically. Observations stay sendable after **Stop AI**. If
+   reaches Events automatically. Observations stay sendable after **Stop AI** or
+   disconnecting the preview. A disconnected source with unsent observations stays
+   on the wall and in **Camera sources** as a temporary review card, without a
+   camera image or active analysis. If
    this browser cannot store the still (private browsing, full storage), the
    observation is not sent and stays on the tile so you can retry.
 6. If AI stops with an error (for example, the worker took too long), press
@@ -56,9 +59,26 @@ Each tile keeps at most 20 recent observations in memory. New observations can
 replace older ones; a visible counter reports how many **unsent** observations
 were replaced, including across AI restarts on that tile. Copies already sent to
 Events do not count as lost. Send important observations to Events promptly.
-Stopping AI keeps retained observations, but leaving Monitor or closing the page
-clears this temporary list and its replacement counter. Events retains only the
-observations you explicitly sent.
+Up to four sources can hold unsent live review at once (at most 80 unsent
+observations). Starting or running AI reserves a slot before its first result.
+When slots are full, another source can still connect for preview, but its
+**Start AI** waits until you stop a source's AI and send or dismiss its unsent
+observations. Empty disconnected cards disappear and release their stills;
+successfully sent stills also leave the tile's memory.
+
+**Stop AI**, **Disconnect**, **Disconnect all** and hiding the page keep the
+temporary review available in Monitor and stop camera/AI activity immediately in
+this page. Returning to the page never reconnects or starts AI automatically.
+Leaving Monitor warns before discarding unsent observations; closing or reloading
+the tab requests the browser's leave warning. Confirming departure clears the
+temporary list and its replacement counter. Events retains only the observations
+you explicitly sent. This temporary review does not survive a reload or app restart.
+
+Only one live still is saved to Events at a time. While **Saving still…** appears,
+other Send buttons and that observation's Dismiss button wait; camera Stop and
+Disconnect remain available. A submitted Send can finish even after you confirm
+leaving Monitor. If another live still is still saving when you return, wait for
+it to finish before retrying Send. A failed save leaves the observation unsent.
 
 If Monitor says **Live AI setup needs attention**, camera preview stays available
 and **Start AI** remains disabled. Run the platform's **Check** command, restart
@@ -80,6 +100,7 @@ newer choices.
 | Frame deadline | 6 s for transfer and reply together; a worker that stops reading is stopped | No request or session can hang |
 | Worker | CPU memory/CPU-time caps; optional CUDA has a separate bounded policy | See [GPU resource policy](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Live-GPU#resource-policy-and-limits); macOS has no memory cap |
 | Boxes | hidden 1.5 s after their frame | Old boxes never sit over newer video |
+| Temporary live review | 4 sources × 20 observations, plus at most 1 submitted still save | Full review slots refuse another AI start; preview and Stop remain available |
 
 On the owner's Apple M4 Mac, the pinned YOLOX-S CPU model took about 80–90 ms per
 frame with two threads in development checks on one 960×540 test clip. That is a

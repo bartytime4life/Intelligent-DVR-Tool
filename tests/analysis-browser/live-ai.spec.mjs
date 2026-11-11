@@ -81,6 +81,7 @@ test('an observation whose still cannot be stored is not sent',async({page})=>{
   await expect(page.locator('.toast')).toContainText('could not save the observation’s still, so it was not sent');
   await expect(observation.getByRole('button',{name:'Send to Events',exact:true})).toBeVisible();
   await page.getByRole('button',{name:'Stop AI',exact:true}).click();
+  page.once('dialog',dialog=>dialog.accept()); // Explicitly discard the still that could not be saved.
   await page.goto('/#events');
   await expect(page.locator('.review-summary')).toContainText('0 live observations');
 });

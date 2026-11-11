@@ -30,6 +30,12 @@ changes. See [review recovery](review-and-events.md#resolve-a-browser-save-confl
 [LAN recording](lan-recording.md). These describe source behavior; the dated
 verification records below keep their original revisions and qualification limits.
 
+Monitor preserves unsent analyzed stills after a source disconnects, with four
+temporary review slots and explicit Send/Dismiss controls. Navigation and tab
+closure warn about pending review; camera Stop and hidden-page shutdown remain
+immediate. See [live review and its limits](live-detection.md#use-live-ai) and the
+[scoped verification](verification/live-review-retention-2026-11-11/README.md).
+
 **GPU preference:** live AI and recorded-video analysis now default to GPU first with visible CPU fallback and an explicit CPU override. Actual controlled RTX 5080 checks are recorded in the [GPU-default verification](verification/gpu-default-2026-11-03/README.md); physical-device accuracy and capacity remain separate.
 
 **November 3 source follow-up:** [OEM companion backup](oem-backup.md) adds

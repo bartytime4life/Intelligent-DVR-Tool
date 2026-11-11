@@ -21,16 +21,16 @@ export function LiveOverlay({ ai, now }) {
   </svg>;
 }
 
-export function LiveTileAI({ ai, available, onStart, onStop, onSend, onDismiss, now }) {
+export function LiveTileAI({ ai, available, onStart, onStop, onSend, onDismiss, now, reviewOnly = false, disabledReason = '', sending = new Set() }) {
   const active = ['starting', 'live'].includes(ai?.state);
   const frameStatus = liveFrameStatus(ai, now);
   const counts = frameStatus === 'fresh' ? liveCounts(ai?.result?.detections) : [];
   const session = ai?.session;
   const idle = ai?.result?.detector === 'skipped-still';
   return <div className="live-ai" onClick={e => e.stopPropagation()}>
-    <div className="live-ai-row">
+    {!reviewOnly && <div className="live-ai-row">
       <button className={`button live-ai-toggle ${active ? 'active' : ''}`} disabled={!available && !active} aria-pressed={active}
-        onClick={() => active ? onStop() : onStart()} title={available ? '' : 'Live AI needs the local app on this computer'}>
+        onClick={() => active ? onStop() : onStart()} title={available ? '' : disabledReason || 'Live AI needs the local app on this computer'}>
         <Brain aria-hidden="true" />{ai?.state === 'starting' ? 'Starting AI…' : active ? 'Stop AI' : 'Start AI'}</button>
       {ai?.state === 'live' && <span className="live-ai-status" role="status">
         {frameStatus === 'waiting' ? <span>Waiting for the first analyzed frame…</span>
@@ -41,8 +41,8 @@ export function LiveTileAI({ ai, available, onStart, onStop, onSend, onDismiss, 
       </span>}
       {ai?.state === 'failed' && <span className="live-ai-error" role="alert">{ai.error}</span>}
       {ai?.state === 'stopped' && ai.error && <span className="live-ai-note">{ai.error}</span>}
-    </div>
-    {ai?.state === 'live' && session && <p className="live-ai-meta">
+    </div>}
+    {!reviewOnly && ai?.state === 'live' && session && <p className="live-ai-meta">
       {liveBackendLabel(session)} · {session.model} · {session.rules} · {session.analyzed} analyzed{session.skipped_still ? ` · ${session.skipped_still} still frames skipped` : ''}{ai.skippedBusy ? ` · ${ai.skippedBusy} dropped while busy` : ''}{ai.frameErrors ? ` · ${ai.frameErrors} rejected ${ai.frameErrors === 1 ? 'frame' : 'frames'}` : ''}
       {Object.keys(session.tracks_by_label || {}).length > 0 && <> · tracks so far: {Object.entries(session.tracks_by_label).map(([l, n]) => `${n} ${l}`).join(', ')}</>}
     </p>}
@@ -53,8 +53,8 @@ export function LiveTileAI({ ai, available, onStart, onStop, onSend, onDismiss, 
     {ai?.observations?.length > 0 && <ul className="live-ai-observations" aria-label="Live AI observations">
       {ai.observations.map((o, i) => <li key={o.observation.id}>
         <span><strong>{o.observation.label}</strong> · {o.observation.rule}<small>{new Date(o.capturedAt).toLocaleTimeString()} · score {o.observation.score.toFixed(2)}</small></span>
-        {o.sent ? <span className="live-ai-sent">In Events</span> : <button className="text-button" onClick={() => onSend(o.observation.id)}><PaperPlaneTilt aria-hidden="true" />Send to Events</button>}
-        <button className="icon-button" aria-label="Dismiss this live observation" onClick={() => onDismiss(o.observation.id)}><X /></button>
+        {o.sent ? <span className="live-ai-sent">In Events</span> : <button className="text-button" disabled={sending.size > 0} onClick={() => onSend(o.observation.id)}><PaperPlaneTilt aria-hidden="true" />{sending.has(o.observation.id) ? 'Saving still…' : 'Send to Events'}</button>}
+        <button className="icon-button" aria-label="Dismiss this live observation" disabled={sending.has(o.observation.id)} onClick={() => onDismiss(o.observation.id)}><X /></button>
       </li>)}
     </ul>}
   </div>;
