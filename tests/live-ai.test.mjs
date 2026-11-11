@@ -1,5 +1,5 @@
 import test from 'node:test';
-import { liveBackendLabel } from '../src/live-ai.mjs';
+import { liveBackendLabel, liveSetupInfo } from '../src/live-ai.mjs';
 import assert from 'node:assert/strict';
 import { liveCounts, liveBoxLabel, boxesFresh, liveFrameStatus, liveObservationEvent, liveDetector, liveRequest, LIVE_BOX_MAX_AGE_MS } from '../src/live-ai.mjs';
 import { restoreSnapshot } from '../src/data.mjs';
@@ -10,6 +10,52 @@ import { recognitionFixture } from './fixtures/recognition.mjs';
 const session = { id: 'a'.repeat(32), camera: 'Front door', model_sha256: 'b'.repeat(64), state: 'live' };
 const observation = { id: 'c'.repeat(32), camera: 'Front door', label: 'person', score: .91, seconds: 3.2, started_seconds: 3.2,
   rule: 'person present in door for 0s', review_required: true };
+
+const catalogue = () => ({token:'generated-token', live:{enabled:true, limits:{active_sessions:2},
+  models:[{id:'model',name:'Generated detector'}], rules:[{id:'rules',name:'Generated rules',models:['model']}]}});
+
+test('live setup uses validated, independent choices without changing the service reply', () => {
+  const value = catalogue(), original = structuredClone(value), info = liveSetupInfo(value);
+  assert.equal(info.state, 'ready');
+  assert.equal(info.token, value.token);
+  assert.deepEqual(info.live, {models:value.live.models, rules:value.live.rules, limits:value.live.limits});
+  info.live.rules[0].models.push('another-model');
+  info.live.models[0].name = 'Changed choice';
+  assert.deepEqual(value, original);
+  value.live.models[0].name = '📷'.repeat(80); // Match Python's character-count limit.
+  assert.equal(liveSetupInfo(value).state, 'ready');
+});
+
+test('incomplete live setup is unavailable instead of reaching rendering or activation', () => {
+  const damage = [
+    value => {delete value.token;}, value => {value.token = ' ';},
+    value => {delete value.live.limits;}, value => {value.live.limits.active_sessions = 0;},
+    value => {value.live.limits.active_sessions = '2';}, value => {value.live.limits.active_sessions = Infinity;},
+    value => {value.live.models = {};}, value => {value.live.models = [null];},
+    value => {delete value.live.models[0].name;}, value => {value.live.models[0].id = '';},
+    value => {value.live.models.push({...value.live.models[0]});}, value => {value.live.rules = {};},
+    value => {value.live.rules[0].models = null;}, value => {value.live.rules[0].models = 'model';},
+    value => {value.live.rules[0].models = ['missing-model'];},
+    value => {value.live.rules.push({...value.live.rules[0]});}, value => {value.live.enabled = 'true';},
+  ];
+  for (const change of damage) {
+    const value = catalogue(); change(value);
+    const info = liveSetupInfo(value);
+    assert.equal(info.state, 'unavailable'); assert.match(info.message, /setup needs attention/);
+    assert.equal(info.live, undefined); assert.equal(info.token, undefined);
+  }
+  for (const value of [null, [], 'reply']) assert.match(liveSetupInfo(value).message, /setup needs attention/);
+});
+
+test('disabled, older and empty live catalogues stay unavailable without invented choices', () => {
+  const empty = catalogue(); empty.live.models = []; empty.live.rules = [];
+  const incompatible = catalogue(); incompatible.live.rules[0].models = [];
+  for (const value of [{}, {live:{enabled:false}}, empty, incompatible]) {
+    const info = liveSetupInfo(value);
+    assert.equal(info.state, 'unavailable'); assert.match(info.message, /configured local model and compatible rules/);
+    assert.equal(info.live, undefined); assert.equal(info.token, undefined);
+  }
+});
 
 test('the tile labels actual execution and each CPU fallback reason', () => {
   assert.equal(liveBackendLabel({ runtime: { backend_id: 'onnxruntime-cuda' } }), 'GPU · CUDA');

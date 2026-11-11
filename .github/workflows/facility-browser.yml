@@ -23,7 +23,7 @@ jobs:
           npx playwright test --config=playwright.facility.config.mjs
           review-workflow.spec.mjs review-workspace.spec.mjs
           work-preservation.spec.mjs training-preservation.spec.mjs
-          live-ai-status.spec.mjs
+          live-ai-status.spec.mjs live-ai-catalogue.spec.mjs
       - name: Interrupted review and status recovery preflight
         # Report independent transfer failures even when a review assertion fails.
         if: ${{ !cancelled() && (steps.review_preflight.outcome == 'success' || steps.review_preflight.outcome == 'failure') }}

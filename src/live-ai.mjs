@@ -7,6 +7,32 @@ export const LIVE_DISPLAY_SCORE = 0.4;
 export const LIVE_BOX_MAX_AGE_MS = 1500;
 export const LIVE_OBSERVATIONS = 20;
 
+// Validate the fields Monitor renders or sends back when the operator starts AI.
+// An incomplete/older service reply must not take the camera preview down.
+export function liveSetupInfo(value) {
+  const unavailable = {state:'unavailable', message:'Live AI needs a configured local model and compatible rules. Run Check, then Start.'};
+  const invalid = {state:'unavailable', message:'Live AI setup needs attention. Run Check, restart the local app, then choose Check again. Camera preview is still available.'};
+  const record = entry => entry !== null && typeof entry === 'object' && !Array.isArray(entry);
+  const choice = entry => record(entry) && typeof entry.id === 'string' && /^[a-z0-9-]{1,40}$/.test(entry.id)
+    && typeof entry.name === 'string' && entry.name.trim().length > 0 && [...entry.name].length <= 80;
+  if (!record(value)) return invalid;
+  const live = value.live;
+  if (live == null || live.enabled === false) return unavailable;
+  if (!record(live) || live.enabled !== true || typeof value.token !== 'string' || !value.token.trim()
+      || !record(live.limits) || !Number.isSafeInteger(live.limits.active_sessions) || live.limits.active_sessions < 1
+      || !Array.isArray(live.models) || !Array.isArray(live.rules)
+      || !live.models.every(choice) || !live.rules.every(choice)) return invalid;
+  const modelIds = new Set(live.models.map(model => model.id));
+  if (modelIds.size !== live.models.length || new Set(live.rules.map(rule => rule.id)).size !== live.rules.length
+      || !live.rules.every(rule => Array.isArray(rule.models) && rule.models.every(id => modelIds.has(id)))) return invalid;
+  if (!live.models.length || !live.rules.some(rule => rule.models.includes(live.models[0].id))) return unavailable;
+  return {state:'ready', token:value.token, live:{
+    models:live.models.map(({id,name}) => ({id,name})),
+    rules:live.rules.map(({id,name,models}) => ({id,name,models:[...models]})),
+    limits:{active_sessions:live.limits.active_sessions},
+  }};
+}
+
 export function liveBackendLabel(session) {
   if (session?.runtime?.backend_id === 'onnxruntime-cuda') return 'GPU · CUDA';
   const code = session?.acceleration?.code;

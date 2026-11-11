@@ -1,5 +1,9 @@
 # Verification index
 
+[Monitor setup recovery, November 11](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/live-catalogue-recovery-2026-11-11/README.md)
+records catalogue validation, preserved previews, late-reply protection, visible
+mobile Disconnect controls and inspected generated-camera captures.
+
 [Merged software baseline, November 9](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/merged-baseline-2026-11-09/README.md)
 records PR #93's four successful workflows, exact platform skips, a complete
 151-case browser run, generated runtime checks and CI installer smoke tests.
