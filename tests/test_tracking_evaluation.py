@@ -210,6 +210,9 @@ class TrackingEvaluationTest(unittest.TestCase):
                         evaluate_tracking(self.root/'manifest.json')
 
     def test_second_stage_json_uses_its_captured_hash_after_the_path_changes(self):
+        self.assert_second_stage_replacement_snapshots()
+
+    def assert_second_stage_replacement_snapshots(self):
         for name in ('manifest.json', 'trace.json'):
             with self.subTest(input=name):
                 reference = self.build()
@@ -223,7 +226,7 @@ class TrackingEvaluationTest(unittest.TestCase):
                 captured = []
                 def capture_then_replace(path, *args, **kwargs):
                     snapshot = read_json_snapshot(path, *args, **kwargs)
-                    if Path(path) == target:
+                    if Path(path).resolve() == target.resolve():
                         captured.append(snapshot[1])
                         write_json(target, replacement)
                     return snapshot
@@ -232,6 +235,13 @@ class TrackingEvaluationTest(unittest.TestCase):
                 self.assertEqual(captured, [original_hash])
                 self.assertNotEqual(digest(target), original_hash)
                 self.assertEqual(report, reference)
+
+    def test_second_stage_replacement_hooks_match_a_parent_alias(self):
+        component = self.root/'normalized-parent'
+        component.mkdir()
+        self.root = component/'..'
+        self.assertNotEqual(self.root, self.root.resolve())
+        self.assert_second_stage_replacement_snapshots()
 
     def test_classes_never_match_and_sequences_keep_separate_id_namespaces(self):
         first = self.build()

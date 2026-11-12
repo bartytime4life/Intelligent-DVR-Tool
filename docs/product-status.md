@@ -1,6 +1,31 @@
 # Product status and evidence
 
-**Merged software baseline verified November 11, 2026 (America/Chicago):**
+**Merged source baseline verified November 11, 2026 (America/Chicago):**
+[PR #112](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/112) merged
+as [`cd6d1566`](https://github.com/bartytime4life/Intelligent-DVR-Tool/commit/cd6d15666beb55a9641068398d82a3d02eaa7769).
+Its source tree matches tested head `ba735298`. Training searches empirical
+score boundaries and preserves the exact selected value. Live sampling includes
+unexpired tentative/lost tracks, and v3 association solves sparse feasible
+components independently. [Mathematics and limits](science-and-algorithms.md).
+
+The [source-bound local record](verification/science-math-2026-11-11/README.md)
+reports 560 Python tests, 559 Node passes with two optional socket cases separately
+verified, four Sites checks and 14 targeted Chrome scenarios. At the documentation
+snapshot, [cross-platform checks](https://github.com/bartytime4life/Intelligent-DVR-Tool/actions/runs/43162852305),
+[PC kit](https://github.com/bartytime4life/Intelligent-DVR-Tool/actions/runs/43162852342)
+and [Mac installation](https://github.com/bartytime4life/Intelligent-DVR-Tool/actions/runs/43162852302)
+passed; [browser CI](https://github.com/bartytime4life/Intelligent-DVR-Tool/actions/runs/43162852319)
+was still running. See the [documentation snapshot](verification/documentation-complete-2026-11-12/README.md)
+for the checked revision and separate documentation validation. Merged source,
+hosted CI, installed-machine state and physical-device qualification are separate.
+
+The optional [local training assistant](training.md#ask-the-local-training-assistant)
+explains checked counts and suggests permitted review steps; it is separate from
+the detector and cannot apply settings. Imported Lab receipts are recounted in
+the browser before their summaries can be used. [Data flow](architecture.md#where-data-goes)
+and [assistant boundary](../SECURITY.md#optional-local-training-assistant).
+
+**Historical merged baseline verified November 11, 2026 (America/Chicago):**
 [PR #110](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/110) merged
 as [`cb91fa40`](https://github.com/bartytime4life/Intelligent-DVR-Tool/commit/cb91fa40d9d388faacca0785075c8b1986b33773).
 Its tree matches tested head `13355e18`. All four final-head workflows passed:

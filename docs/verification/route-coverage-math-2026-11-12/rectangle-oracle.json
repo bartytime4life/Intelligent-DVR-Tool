@@ -1,0 +1,87 @@
+{
+  "data_kind": "synthetic",
+  "qualification": "NOT_ESTABLISHED",
+  "baseline_revision": "c517b438789efbe81d410f23f2a0a173ed72c86c",
+  "integrated_base_revision": "cd6d15666beb55a9641068398d82a3d02eaa7769",
+  "baseline_sha256": "b14dda3586a97724bef7b1b3f806a2c2aed49463000cce49fb3e4d663344e40c",
+  "candidate_sha256": "122dce3ca246afea2cb66f816dae27b40f4baf5ee8bfd9bee1b2b6cac8d5bfad",
+  "oracle": {
+    "method": "Rational slab clipping for rectangles; distinct-camera interval counts weighted by segment length.",
+    "seed": 147,
+    "cases": 500,
+    "max_absolute_error_metres": {
+      "length": 1.1368683772161603e-13,
+      "coveredLength": 5.684341886080802e-14,
+      "overlapLength": 2.842170943040401e-14,
+      "uncoveredLength": 1.1368683772161603e-13,
+      "longestBlindStretch": 1.1368683772161603e-13
+    },
+    "input_sha256": "39cb777d4186f258ec3f707bb182c80be73530c867fff3dfa0f17c81d1d57791"
+  },
+  "valid_narrow_camera_plan": {
+    "baseline": {
+      "samples": 11,
+      "length": 5,
+      "coverage": 1,
+      "overlap": 0
+    },
+    "candidate": {
+      "method": "arclength-intervals-v1",
+      "length": 5,
+      "coveredLength": 0.8732188581702389,
+      "overlapLength": 0,
+      "uncoveredLength": 4.1267811418297615,
+      "longestBlindStretch": 0.4126781141829765,
+      "coverage": 0.1746437716340478,
+      "overlap": 0,
+      "segments": 1,
+      "intersectionTests": 1078
+    },
+    "analytic_covered_length": 0.8732188581702411,
+    "analytic_coverage": 0.17464377163404823
+  },
+  "valid_short_route_plan": {
+    "baseline": {
+      "samples": 2,
+      "length": 0.5,
+      "coverage": 0,
+      "overlap": 0
+    },
+    "candidate": {
+      "method": "arclength-intervals-v1",
+      "length": 0.5,
+      "coveredLength": 0.4433893252858798,
+      "overlapLength": 0,
+      "uncoveredLength": 0.05661067471412021,
+      "longestBlindStretch": 0.028305337357060117,
+      "coverage": 0.8867786505717596,
+      "overlap": 0,
+      "segments": 1,
+      "intersectionTests": 98
+    }
+  },
+  "valid_endpoint_touch_plan": {
+    "baseline": {
+      "samples": 2,
+      "length": 0.25,
+      "coverage": 0.5,
+      "overlap": 0
+    },
+    "candidate": {
+      "method": "arclength-intervals-v1",
+      "length": 0.25,
+      "coveredLength": 0,
+      "overlapLength": 0,
+      "uncoveredLength": 0.25,
+      "longestBlindStretch": 0.25,
+      "coverage": 0,
+      "overlap": 0,
+      "segments": 1,
+      "intersectionTests": 98
+    }
+  },
+  "limits": [
+    "Planar drawn geometry only; no physical-camera visibility, tracking, calibration or capacity qualification.",
+    "Oracle rectangles exercise interval arithmetic, distinct IDs, zero-length vertices and repeated traversal; they are not camera footage."
+  ]
+}

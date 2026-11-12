@@ -90,3 +90,24 @@ suite; they do not exercise private footage or physical cameras.
 The local source integration and generated checks do not establish publication,
 an installed-service change, execution of the pinned production detector,
 recognition quality or field acceptance.
+
+## Portable race-injection follow-up — November 12
+
+The first hosted Windows and Mac runs exposed seven test-harness assertion
+failures: temporary-directory parent aliases were normalized by the production
+reader, so raw-path comparisons did not inject their intended replacements.
+Linux aliased temporary paths reproduced the same failures. The hooks now
+resolve both candidate and target paths; three permanent lexical-alias cases
+retain all original capture/hash/outcome checks, without symlinks or skips.
+The [portable-test record](ci-portability.json) preserves failed run identities,
+reproduction and corrected local results. Production evaluator hashes are
+unchanged. Hosted results for the corrected head are a separate check.
+
+Merged documentation source `65ec81166f7b4c7577e415c757e4696459012d63` is also
+integrated. The original proof and 567-case native validation remain historical;
+the current focused suite has 32 detection/parser and 24 tracking tests.
+
+The follow-up also includes main `2cac2173f1f6b751f23ab1847ce25a3aea40a6b2`,
+which merged the separately validated route-coverage change. Both verification
+index entries and their generated Wiki links are retained. This integration
+does not change either evaluator or its portable regression tests.

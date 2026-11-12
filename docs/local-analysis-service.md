@@ -108,7 +108,7 @@ labeled unverified instead of being retroactively validated.
 | GPU preference | Linux/Windows pinned YOLOX-S; shared one-GPU slot; Linux 128 TiB VA ceiling with sampled 4 GiB parent RSS guard; Windows 4 GiB Job Object; CUDA arena is not a total VRAM quota. [Full policy](live-gpu.md#resource-policy-and-limits) |
 | CPU fallback | Two OpenCV inference and two FFmpeg decoder threads requested; 6,000 decoded frames; sample every five; 4 GiB Linux virtual-address or Windows process-commit limit (macOS refuses address-space limits, so its worker has **no memory cap**); Linux and macOS file-size cap and a summed CPU-time backstop (1,260 s: four threads for the full wall deadline) |
 | Results | Existing 1,000-observation, 100,000-detection, 32 MiB review contract; browser validates full contract before attaching exact source |
-| HTTP | 2 KiB JSON controls; optional explicit same-computer binary import up to 64 MiB; at most 16 concurrent connections (extra ones are closed), five-second socket timeout, 30-second import loop deadline; chunked output; downloads stream outside service locks |
+| HTTP | 2 KiB JSON controls, except 8 KiB for OEM library configuration; optional explicit same-computer binary import up to 64 MiB; at most 16 concurrent connections (extra ones are closed), five-second socket timeout, 30-second import loop deadline; chunked output; downloads stream outside service locks |
 | Retention | Default: one private temporary recording/result snapshot until the next explicit job or graceful shutdown. Opt-in Linux storage retains the last job across service restarts; model/config snapshots are removed after processing |
 
 The retained result can be reopened with **Open results again**. Reloading the
@@ -256,8 +256,9 @@ independently measured recognition quality or sustained 100-camera capacity.
 
 A single Python loopback server serves the built app and manages one isolated recording
 worker. The worker calls the existing analyzer with a progress callback; no new
-inference engine or competing receipt schema is introduced. Read-only folder
-selection avoids browser footage uploads and ambiguous arbitrary-path execution.
+inference engine or competing receipt schema is introduced. Catalog-based selection
+avoids arbitrary client paths. Optional explicit same-computer recording import
+adds a separately bounded local copy; it is disabled unless configured above.
 Serving the app on the same origin avoids a remote-site-to-local-agent bridge.
 
 A Vite-only API would couple operation to the development server. A remotely

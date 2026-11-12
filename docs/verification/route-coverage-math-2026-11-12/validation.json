@@ -1,0 +1,147 @@
+{
+  "schema": "intelligent-dvr.route-arclength-verification.v1",
+  "validated_at": "2026-11-12T06:23:54.200367+00:00",
+  "integrated_base_revision": "cd6d15666beb55a9641068398d82a3d02eaa7769",
+  "data_kind": "synthetic",
+  "qualification": "NOT_ESTABLISHED",
+  "source_sha256": {
+    "src/facility-coverage.mjs": "122dce3ca246afea2cb66f816dae27b40f4baf5ee8bfd9bee1b2b6cac8d5bfad",
+    "src/FacilityBuilder.jsx": "f46073555c8197a89c3a0cf205587a01d668def6239e0d2d9cc00ce1653b86c0",
+    "tests/facility-route-coverage.test.mjs": "c65d9170b6fe876f324ef776c787109261a8a01b5e61167711b68f47387b1355",
+    "tests/facility-planning.test.mjs": "c2875bc6b8d1eaeffd85f3aa9a15e48715ac66ee983fde296a6c35b22c8bd5b0",
+    "tests/browser/facility-camera-planning.spec.mjs": "a4db9a1171679a370b84a4ecaeabd1dd7855d54aafb38be6e3a444340de2a1a7",
+    "scripts/compare-route-coverage.py": "146879e52708dd101f1c0d9734449531d6bd5a3b415c0dd89eed5765020e432c",
+    "scripts/check-route-polygons.py": "5ee2d24e86c286dda3d7e5c586fed30d242f34a88cb45480d8d9a3f48c498f10"
+  },
+  "checks": {
+    "build": {
+      "command": "npm run build",
+      "exit_code": 0,
+      "advisory": "Existing >500 kB bundle-size advisory; build/Sites preparation passed."
+    },
+    "node": {
+      "command": "DVR_TEST_SOCKETS=1 npm test",
+      "discovered": 574,
+      "passed": 574,
+      "failed": 0,
+      "skipped": 0,
+      "log_sha256": "99779a28cdc4f3d6ab56a78695109002a9ed59d2fe050159e97b9ae65fe9cd29"
+    },
+    "sites": {
+      "command": "npm run test:sites",
+      "passed": 4,
+      "failed": 0,
+      "skipped": 0
+    },
+    "focused_route_and_planning": {
+      "passed": 35,
+      "failed": 0
+    },
+    "browser": {
+      "suite": "facility-camera-planning.spec.mjs",
+      "initial_full_passed": 8,
+      "final_metric_imperial_route_cases_passed": 2,
+      "distinct_scenarios": 8,
+      "widths": [
+        1440,
+        375
+      ],
+      "environment": "Existing Chrome 157 with Playwright 1.61.1; distinct from CI pinned Chromium",
+      "log_sha256": "3ed044064b6fe0d966228c062f1bf29c1d188a12b0e83ba90a3900af32567c9a",
+      "units_rerun_log_sha256": "3b2759ac7f920e259749af70c28fcecb82e635279702576b40dc5573f0d6a562",
+      "selector_correction": "An initial anchored grep matched no full test titles; unanchored selection ran and passed both cases."
+    },
+    "documentation": [
+      {
+        "command": [
+          "python3",
+          "scripts/check-docs.py"
+        ],
+        "exit_code": 0,
+        "output": "Host summaries verified: 300 distinct images; reference/queue/rate/parity/source/default invariants checked. No experiments rerun.\nCUDA evidence checks passed: parity, queue accounting, runtime scope and publication bounds.\nWorker evidence checks passed: initial/final trials, parity, queue accounting and publication scope.\nRecovery evidence checks passed: native proof, generations/reaping, fault intervals, outcome/queue accounting and privacy scope.\nJournal evidence checks passed: native proof, interrupted work, acknowledgment/redelivery, replay accounting and measured durability cost.\nBatching evidence checks passed: atomic native exits, version compatibility, indexed delivery, matched medians and honest queue/delivery accounting.\nOwner synthetic record: source/policy bindings, 142 tests per environment, legacy recovery, CUDA block and all loss identities verified.\nDocumentation checks passed: 1456 local links, 14 historical media hashes, 11 PR61 visual blobs, 2,381,700 historical + 185,432 PR61 + 1,626,214 guide + 222,707 guided-experience media bytes, test-count consistency.\n"
+      },
+      {
+        "command": [
+          "python3",
+          "scripts/build-wiki.py",
+          "--check"
+        ],
+        "exit_code": 0,
+        "output": "Wiki checked: 66 pages/navigation files.\n"
+      },
+      {
+        "command": [
+          "python3",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tests",
+          "-p",
+          "test_wiki_docs.py"
+        ],
+        "exit_code": 0,
+        "output": "........\n----------------------------------------------------------------------\nRan 8 tests in 0.051s\n\nOK\n"
+      },
+      {
+        "command": [
+          "git",
+          "diff",
+          "--check"
+        ],
+        "exit_code": 0,
+        "output": ""
+      }
+    ]
+  },
+  "oracles": {
+    "rectangle_cases": 500,
+    "polygon_strict_cases": 454,
+    "retained_boundary_diagnostics": 6,
+    "above_tolerance_offsets_included": 12,
+    "no_universal_error_bound": true
+  },
+  "preservation": {
+    "protected_sha256": {
+      "edge/inference.py": "7e95beb9e25dd67ac5d8d977ec6c466874371d12d112119a85a619124687b2f1",
+      "edge/journal.py": "70f7a3419d05d76380ea32ad5de20ee440bc17256e25baf0f2289a86e46a495a",
+      "edge/supervision.py": "03f334d5fa072e5f3ad02bd90536fd2c00fc97ebfaa54ca1ef1c10b64b80a9cf",
+      "edge/scheduler.py": "8639b46d3ba2e1a14efaa7ff647f412e6be437685ec7be5717a00983835b9019",
+      "edge/profiling.py": "f7c0a3e4b831d7f996840aec51a73e3fe68e06627cdce854716c576068f80f91",
+      ".openai/hosting.json": "d532abb65cf9ae20634b464d954cb4a08a0de9f3cd3cdf7f9c3ec8948826d947",
+      "worker/index.js": "2dd0615a445143933d88d4271f54f5d63ee951421fcd08c5a7617bb09c564389",
+      "scripts/prepare-sites-build.mjs": "b6a6adaa4fab3234676116dd1c9cb6611275ab9d92dd26f5bf402393e3744bf6",
+      "tests/sites-worker.test.mjs": "96af7b48906c6460c793356d7b6952f7d5026dbf5a502bec0d9297ff04201c26",
+      "package-lock.json": "b71d95b16fe76f892c899ad4e832380add9298fed4e6c0973fc44d18b455f480",
+      "src/facility.mjs": "dc6d0a44a608c6c07df92ccff06b64b6ba082c6a574763589ba67c177ae53df6"
+    },
+    "zone_coverage_body_unchanged": true,
+    "dependency_versions_unchanged": true,
+    "package_script_change_only": "Include the new route unit-test file",
+    "simulated_rehearsal_unchanged": true
+  },
+  "review": {
+    "independent_code_review": "PASS",
+    "independent_polygon_oracle": "PASS",
+    "rendered_desktop_mobile": "PASS",
+    "manual_local_browser": "Generated plan imported through UI at loopback; 17.5%, 4.1 m uncovered and 0.4 m longest gap visible; no camera connected."
+  },
+  "local_cropped_browser_evidence": [
+    {
+      "name": "route-coverage-1440.png",
+      "sha256": "8d42a380dc159b7334461aa11597c34c4874463c20bce6756c42e17f02edc60b",
+      "scope": "Generated fixture UI, not field footage; local test artifact."
+    },
+    {
+      "name": "route-coverage-375.png",
+      "sha256": "f772978dc23eb73dc15dc88e053a87ad15c237f5767a8d2a467d282c36827699",
+      "scope": "Generated fixture UI, not field footage; local test artifact."
+    }
+  ],
+  "scope_limits": [
+    "Tolerance-aware drawn ground-fan geometry only; boundary-coincident routes are ill-conditioned under tiny perturbations.",
+    "No camera, inference, private recording, calibration, accuracy or capacity qualification.",
+    "No Python sources changed; full Python suite not repeated for this frontend geometry change.",
+    "Wiki source regenerated, not published; no installed application or deployment changed."
+  ]
+}

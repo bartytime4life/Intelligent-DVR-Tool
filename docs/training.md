@@ -26,6 +26,16 @@ To use a run from the separate **Training Lab**, open **Reports** there and expo
 
 **Compare model settings** runs generated scorecards on installed models after an explicit start. Compare checked counts, next actions and elapsed times, then verify a candidate on fresh cases. **Export answers and timings** saves the test receipt. These timings measure assistant responses. The benchmark does not qualify detector speed or camera accuracy.
 
+Checked scorecard answers and Lab suggestions use locally authored wording after
+their counts and allowed actions pass validation. The setup walkthrough and
+free-text comparisons remain model suggestions. Saved model-check rankings belong
+to this browser’s localStorage and are reused only when discovery reports the
+same model digest. The exported check receipt contains generated cases, answers,
+options and timings, with optional runtime-reported model/GPU residency. That
+telemetry does not prove detector execution or a GPU speedup. Requests ask Ollama
+to release a model after completion; release is not independently verified by the
+DVR. [Data flow](architecture.md#where-data-goes) · [Assistant boundary](../SECURITY.md#optional-local-training-assistant).
+
 ## Make the first recording
 
 1. Select **Start session**. At **Camera check**, open **Detector and reference rule** if you want to choose the local detector and the rule used for the Current column. Select **Connect camera**, grant camera permission, and check the framing and lighting. The microphone stays off.

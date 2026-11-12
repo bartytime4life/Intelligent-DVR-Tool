@@ -1,0 +1,63 @@
+{
+  "integrated_main_revision": "2cac2173f1f6b751f23ab1847ce25a3aea40a6b2",
+  "initial_published_revision": "51e865a9704bb1ccc5b8c736231042e13db10b30",
+  "portable_test_fix_local_revision": "a343fba848fe201ef1f81dbdaac30502f5387a84",
+  "failure": {
+    "cause": "Race-injection hooks compared raw temporary parent aliases against normalized production paths; callbacks were not invoked. Production evaluator code unchanged.",
+    "reported_failures": 7,
+    "affected_test_methods": 4,
+    "hosted_runs": [
+      {
+        "run_id": 43167356344,
+        "job_id": 131012236189,
+        "platform": "Windows",
+        "tests_run": 567,
+        "reported_failures": 7,
+        "skipped": 86
+      },
+      {
+        "run_id": 43167356385,
+        "job_id": 131012236138,
+        "platform": "Mac",
+        "tests_run": 567,
+        "reported_failures": 7,
+        "skipped": 115
+      }
+    ],
+    "linux_parent_alias_reproduction_log_sha256": "44dd9cc2da1b6ee7d7c7d968e06ca09b4ea5638c2e742b8101cec51348e0972d"
+  },
+  "correction": {
+    "path_identity": "Resolve hook candidates and targets before comparison.",
+    "new_regressions": [
+      "EvaluationTest.test_parent_alias_race_hooks_replace_all_json_inputs_and_source",
+      "JsonSnapshotTest.test_bounded_capture_hook_matches_a_normalized_parent_alias",
+      "TrackingEvaluationTest.test_second_stage_replacement_hooks_match_a_parent_alias"
+    ],
+    "assertions_weakened": false,
+    "skips_added": false,
+    "production_changed": false
+  },
+  "tests": {
+    "normal_targeted": {
+      "detection_parser": 32,
+      "tracking": 24,
+      "failed": 0,
+      "skipped": 0
+    },
+    "aliased_temporary_directories": {
+      "discovered": 56,
+      "passed": 56,
+      "failed": 0,
+      "skipped": 0,
+      "log_sha256": "b6bbd1ad83d30a9ed9c8769a2306eff80df6fafb6a3a67409db45f91f031499b"
+    }
+  },
+  "source_sha256": {
+    "edge/evaluation.py": "ec7a766815dae61e0726a2bd858b65288023edf46738d96db2cc8a394a05532c",
+    "edge/tracking_evaluation.py": "9f989169a475f652147372c2ad15730cc9545476f171cb5b2f13025a72ff0d55",
+    "tests/test_evaluation.py": "75bc52518c6ec5d8d46a6c7fad3b45dc6c7762058a2a03b07b4ba81dd9788c89",
+    "tests/test_tracking_evaluation.py": "2395dabb4baecc8b8f4f989fbdead76df7a70a7650f40d81915beb159c6d5b66"
+  },
+  "independent_test_logic_review": "PASS",
+  "hosted_corrected_head": "Not established by this local receipt; inspect current CI."
+}

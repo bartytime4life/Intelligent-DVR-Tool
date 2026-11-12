@@ -155,7 +155,9 @@ test('coverage step reports zone and route coverage, marks indoor zones and togg
   await expect(metrics.getByRole('row',{name:/Yard apron/})).toContainText(percent(yard.coverage));
   await expect(metrics.getByRole('row',{name:/Yard apron/})).toContainText('0.0%');
   await expect(metrics.getByRole('row',{name:/Hall store/})).toContainText('Not estimated · ground-plane only');
-  await expect(metrics.getByRole('row',{name:/Handoff route/})).toContainText(percent(36/61));
+  await expect(metrics.getByRole('row',{name:/Handoff route/})).toContainText(percent((20-4/Math.sqrt(3))/30));
+  await expect(metrics.getByRole('row',{name:/Handoff route/})).toContainText('path length');
+  await expect(metrics.getByLabel('Route coverage details')).toContainText('Longest continuous gap:');
   await expect(page.locator('.blind-spot-key')).toHaveCount(0);
   const toggle=metrics.getByRole('button',{name:'Blind spots for Yard apron',exact:true});
   await toggle.click();
@@ -200,4 +202,28 @@ test('pixel density table, lens preset and installer sheet download use the save
   expect(html).toContain('≤ 38.2 m');
   expect(html).toContain('Planning estimate — assumes ideal focus and no compression');
   expect(html).not.toMatch(/<script|<img|data:/);
+});
+
+for (const width of [1440, 375]) test(`route percentages measure length between narrow camera fans at ${width}px`,async({page},testInfo)=>{
+  await page.setViewportSize({width,height:1000});
+  const errors=[];page.on('pageerror',error=>errors.push(error.message));
+  const plan=validateFacility({...blankFacility(),name:'Coverage fixture',
+    cameras:Array.from({length:11},(_,i)=>({id:`c${i}`,name:`Camera ${i+1}`,x:i*.5,y:-1,z:.5,bearing:0,
+      tilt:45,hfov:5,vfov:60,range:5,enabled:true})),route:[[0,0],[5,0]]});
+  await openFixture(page,plan);
+  await page.getByRole('button',{name:/^5 Coverage/}).click();
+  const metrics=page.getByRole('region',{name:'Estimated coverage metrics'});
+  const route=metrics.getByRole('row',{name:/Handoff route/});
+  await expect(route).toContainText('5.0 m path length');
+  await expect(route).toContainText('17.5%0.0%');
+  await expect(metrics.getByLabel('Route coverage details')).toHaveText('4.1 m of the route is outside the drawn coverage. Longest continuous gap: 0.4 m.');
+  await expect(metrics).toContainText('Planning estimate; verify on site.');
+  expect((await saved(page)).route).toEqual(plan.route);
+  await metrics.screenshot({path:testInfo.outputPath(`route-coverage-${width}.png`)});
+  await page.getByLabel('Measurement units',{exact:true}).selectOption('imperial');
+  await expect(route).toContainText('16.4 ft path length');
+  await expect(route).toContainText('17.5%0.0%');
+  await expect(metrics.getByLabel('Route coverage details')).toHaveText('13.5 ft of the route is outside the drawn coverage. Longest continuous gap: 1.4 ft.');
+  expect((await saved(page)).route).toEqual(plan.route);
+  expect(errors).toEqual([]);
 });

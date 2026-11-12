@@ -1,0 +1,50 @@
+{
+  "integrated_main_revision": "65ec81166f7b4c7577e415c757e4696459012d63",
+  "validated_at": "2026-11-12T06:30:00.517328+00:00",
+  "algorithm_ui_tests_and_oracle_source_hashes_unchanged_from_initial_validation": true,
+  "initial_validation_file": "validation.json",
+  "wiki_files": 68,
+  "checks": [
+    {
+      "command": [
+        "python3",
+        "scripts/check-docs.py"
+      ],
+      "exit_code": 0,
+      "output": "Host summaries verified: 300 distinct images; reference/queue/rate/parity/source/default invariants checked. No experiments rerun.\nCUDA evidence checks passed: parity, queue accounting, runtime scope and publication bounds.\nWorker evidence checks passed: initial/final trials, parity, queue accounting and publication scope.\nRecovery evidence checks passed: native proof, generations/reaping, fault intervals, outcome/queue accounting and privacy scope.\nJournal evidence checks passed: native proof, interrupted work, acknowledgment/redelivery, replay accounting and measured durability cost.\nBatching evidence checks passed: atomic native exits, version compatibility, indexed delivery, matched medians and honest queue/delivery accounting.\nOwner synthetic record: source/policy bindings, 142 tests per environment, legacy recovery, CUDA block and all loss identities verified.\nDocumentation checks passed: 1550 local links, 14 historical media hashes, 11 PR61 visual blobs, 2,381,700 historical + 185,432 PR61 + 1,626,214 guide + 222,707 guided-experience media bytes, test-count consistency.\n"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/build-wiki.py",
+        "--check"
+      ],
+      "exit_code": 0,
+      "output": "Wiki checked: 68 pages/navigation files.\n"
+    },
+    {
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-p",
+        "test_wiki_docs.py"
+      ],
+      "exit_code": 0,
+      "output": "........\n----------------------------------------------------------------------\nRan 8 tests in 0.053s\n\nOK\n"
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exit_code": 0,
+      "output": ""
+    }
+  ],
+  "scope": "Documentation-only main integration. Canonical evidence index keeps both route and documentation records; generated Wiki regenerated. Native/JS/runtime checks remain those bound to unchanged source hashes in initial validation."
+}
