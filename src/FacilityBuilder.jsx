@@ -1112,7 +1112,7 @@ function PixelDensity({ camera, units }) {
   const { near, far } = groundRange(camera), farDensity = far > near ? densityAtGround(camera, far) : null;
   return <div className="facility-dori" role="group" aria-label="Pixel density estimate">
     <p className="facility-dori-note"><WarningCircle size={15} />{DORI_NOTE}</p>
-    <table><thead><tr><th>Band</th><th>≥ px/m</th><th>Centreline ground range</th></tr></thead><tbody>{bands.map(band => <tr key={band.id}><th scope="row"><i style={{ background: band.color }} />{band.name}</th><td>{band.ppm}</td><td>{band.reached ? <>{formatDistanceRange(band.from, band.to, units)}{band.limited && <small> · view limit</small>}</> : 'Not reached'}</td></tr>)}</tbody></table>
+    <table><thead><tr><th scope="col">Band</th><th scope="col">≥ px/m</th><th scope="col">Centreline ground range</th></tr></thead><tbody>{bands.map(band => <tr key={band.id}><th scope="row"><i style={{ background: band.color }} />{band.name}</th><td>{band.ppm}</td><td>{band.reached ? <>{formatDistanceRange(band.from, band.to, units)}{band.limited && <small> · view limit</small>}</> : 'Not reached'}</td></tr>)}</tbody></table>
     <p className="facility-caption">Estimated horizontal detail across the ground, perpendicular to the camera’s bearing. Ranges run from the mount along that bearing within the modeled view, before wall shadows.{farDensity !== null && <> About {Math.round(farDensity)} px/m at the far centreline limit.</>} Colored lines mark thresholds inside the drawn fan and ideal sensor view. IEC 62676-4 figures are planning thresholds; verify detail on site.</p>
   </div>;
 }
