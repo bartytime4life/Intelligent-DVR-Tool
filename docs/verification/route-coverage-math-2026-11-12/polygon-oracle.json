@@ -1,0 +1,253 @@
+{
+  "data_kind": "synthetic",
+  "qualification": "NOT_ESTABLISHED",
+  "result": "PASS",
+  "candidate_sha256": "122dce3ca246afea2cb66f816dae27b40f4baf5ee8bfd9bee1b2b6cac8d5bfad",
+  "checker_sha256": "5ee2d24e86c286dda3d7e5c586fed30d242f34a88cb45480d8d9a3f48c498f10",
+  "oracle": {
+    "method": "Exact Fraction line/edge cuts and independent closed-boundary midpoint classification; distinct camera IDs; arclength traversal.",
+    "seed": 6419,
+    "cases": 460,
+    "strict_comparison_cases": 454,
+    "case_kinds": {
+      "generic-weakly-simple": 300,
+      "small-gap": 4,
+      "production-coverageFan": 144,
+      "production-boundary-offset": 12
+    },
+    "production_geometry": {
+      "partialPinchedFans": 6,
+      "fullyCollapsedFans": 3
+    },
+    "acceptance_tolerance": "1e-10 * max(route length, 1e-12) metres for each scalar; small positive gaps additionally within 1e-4 relative error (absolute floor 1e-26 m).",
+    "max_absolute_error_metres": {
+      "length": 2.2737367544323206e-13,
+      "coveredLength": 8.544276397515205e-12,
+      "overlapLength": 3.552713678800501e-14,
+      "uncoveredLength": 8.540723683836404e-12,
+      "longestBlindStretch": 1.1368683772161603e-13
+    },
+    "input_sha256": "e766e775c090f1c185435214a346e9addddab5429af478552e12de91b8d22850"
+  },
+  "nominal_boundary_diagnostics": [
+    {
+      "case": "coverageFan-0-central-pinch-1",
+      "comparison": "boundary-sensitive; strict raw-IEEE equality is not asserted",
+      "candidate": {
+        "length": 50,
+        "coveredLength": 1.315420693310898,
+        "overlapLength": 0,
+        "uncoveredLength": 48.6845793066891,
+        "longestBlindStretch": 24.34228965334455
+      },
+      "strict_fraction_reference": {
+        "length": 50.0,
+        "coveredLength": 0.09351803511445922,
+        "overlapLength": 0.0,
+        "uncoveredLength": 49.90648196488554,
+        "longestBlindStretch": 24.441882135494648
+      },
+      "arithmetic_tolerance_metres": 8.881784197001252e-14,
+      "near_line_vertices": 66,
+      "max_exact_vertex_distance_within_tolerance_metres": 2.220446049250313e-16
+    },
+    {
+      "case": "coverageFan-0-side-pinch-1",
+      "comparison": "boundary-sensitive; strict raw-IEEE equality is not asserted",
+      "candidate": {
+        "length": 50,
+        "coveredLength": 1.1917535925942104,
+        "overlapLength": 0,
+        "uncoveredLength": 48.80824640740579,
+        "longestBlindStretch": 25
+      },
+      "strict_fraction_reference": {
+        "length": 50.0,
+        "coveredLength": 0.5617778598212374,
+        "overlapLength": 0.0,
+        "uncoveredLength": 49.43822214017876,
+        "longestBlindStretch": 25.072850520717274
+      },
+      "arithmetic_tolerance_metres": 8.881784197001252e-14,
+      "near_line_vertices": 50,
+      "max_exact_vertex_distance_within_tolerance_metres": 2.220446049250313e-16
+    },
+    {
+      "case": "coverageFan-37-central-pinch-1",
+      "comparison": "boundary-sensitive; strict raw-IEEE equality is not asserted",
+      "candidate": {
+        "length": 50.000000000000185,
+        "coveredLength": 1.3154206933108554,
+        "overlapLength": 0,
+        "uncoveredLength": 48.68457930668933,
+        "longestBlindStretch": 24.34228965334467
+      },
+      "strict_fraction_reference": {
+        "length": 50.00000000000019,
+        "coveredLength": 2.0128150144000468e-15,
+        "overlapLength": 0.0,
+        "uncoveredLength": 50.00000000000019,
+        "longestBlindStretch": 25.65771034665559
+      },
+      "arithmetic_tolerance_metres": 3.4116135743544165e-12,
+      "near_line_vertices": 66,
+      "max_exact_vertex_distance_within_tolerance_metres": 1.7933246373748033e-13
+    },
+    {
+      "case": "coverageFan-37-side-pinch-1",
+      "comparison": "boundary-sensitive; strict raw-IEEE equality is not asserted",
+      "candidate": {
+        "length": 50.000000000000185,
+        "coveredLength": 1.1553765334340724,
+        "overlapLength": 0,
+        "uncoveredLength": 48.84462346656611,
+        "longestBlindStretch": 25.036377059159996
+      },
+      "strict_fraction_reference": {
+        "length": 50.00000000000019,
+        "coveredLength": 0.0,
+        "overlapLength": 0.0,
+        "uncoveredLength": 50.00000000000019,
+        "longestBlindStretch": 50.00000000000019
+      },
+      "arithmetic_tolerance_metres": 3.4116135743544165e-12,
+      "near_line_vertices": 48,
+      "max_exact_vertex_distance_within_tolerance_metres": 1.3812079938033096e-13
+    },
+    {
+      "case": "coverageFan-123-central-pinch-1",
+      "comparison": "boundary-sensitive; strict raw-IEEE equality is not asserted",
+      "candidate": {
+        "length": 50.000000000000114,
+        "coveredLength": 1.315420693310923,
+        "overlapLength": 0,
+        "uncoveredLength": 48.68457930668919,
+        "longestBlindStretch": 24.34228965334469
+      },
+      "strict_fraction_reference": {
+        "length": 50.000000000000114,
+        "coveredLength": 1.6216332462915056e-15,
+        "overlapLength": 0.0,
+        "uncoveredLength": 50.000000000000114,
+        "longestBlindStretch": 25.657710346655474
+      },
+      "arithmetic_tolerance_metres": 3.4113549765699614e-12,
+      "near_line_vertices": 66,
+      "max_exact_vertex_distance_within_tolerance_metres": 1.9442592466087004e-13
+    },
+    {
+      "case": "coverageFan-123-side-pinch-1",
+      "comparison": "boundary-sensitive; strict raw-IEEE equality is not asserted",
+      "candidate": {
+        "length": 50.000000000000114,
+        "coveredLength": 1.1553765334341222,
+        "overlapLength": 0,
+        "uncoveredLength": 48.84462346656599,
+        "longestBlindStretch": 25.036377059160074
+      },
+      "strict_fraction_reference": {
+        "length": 50.000000000000114,
+        "coveredLength": 1.0495040543785763e-15,
+        "overlapLength": 0.0,
+        "uncoveredLength": 50.000000000000114,
+        "longestBlindStretch": 25.03637705916007
+      },
+      "arithmetic_tolerance_metres": 3.4113549765699614e-12,
+      "near_line_vertices": 48,
+      "max_exact_vertex_distance_within_tolerance_metres": 1.4671083523081893e-13
+    }
+  ],
+  "boundary_offsets_beyond_tolerance": [
+    {
+      "case": "coverageFan-0-central-pinch-offset--1e-7",
+      "boundary_case": "coverageFan-0-central-pinch-1",
+      "normal_offset_metres": -1e-07,
+      "candidate_covered_length": 0,
+      "strict_fraction_covered_length": 0.0
+    },
+    {
+      "case": "coverageFan-0-central-pinch-offset-1e-7",
+      "boundary_case": "coverageFan-0-central-pinch-1",
+      "normal_offset_metres": 1e-07,
+      "candidate_covered_length": 4.5945540705361054e-09,
+      "strict_fraction_covered_length": 4.5945552723722425e-09
+    },
+    {
+      "case": "coverageFan-0-side-pinch-offset--1e-7",
+      "boundary_case": "coverageFan-0-side-pinch-1",
+      "normal_offset_metres": -1e-07,
+      "candidate_covered_length": 0,
+      "strict_fraction_covered_length": 0.0
+    },
+    {
+      "case": "coverageFan-0-side-pinch-offset-1e-7",
+      "boundary_case": "coverageFan-0-side-pinch-1",
+      "normal_offset_metres": 1e-07,
+      "candidate_covered_length": 1.152471895693452e-09,
+      "strict_fraction_covered_length": 1.1524739261694254e-09
+    },
+    {
+      "case": "coverageFan-37-central-pinch-offset--1e-7",
+      "boundary_case": "coverageFan-37-central-pinch-1",
+      "normal_offset_metres": -1e-07,
+      "candidate_covered_length": 0,
+      "strict_fraction_covered_length": 0.0
+    },
+    {
+      "case": "coverageFan-37-central-pinch-offset-1e-7",
+      "boundary_case": "coverageFan-37-central-pinch-1",
+      "normal_offset_metres": 1e-07,
+      "candidate_covered_length": 4.594557623249784e-09,
+      "strict_fraction_covered_length": 4.594558216986381e-09
+    },
+    {
+      "case": "coverageFan-37-side-pinch-offset--1e-7",
+      "boundary_case": "coverageFan-37-side-pinch-1",
+      "normal_offset_metres": -1e-07,
+      "candidate_covered_length": 0,
+      "strict_fraction_covered_length": 0.0
+    },
+    {
+      "case": "coverageFan-37-side-pinch-offset-1e-7",
+      "boundary_case": "coverageFan-37-side-pinch-1",
+      "normal_offset_metres": 1e-07,
+      "candidate_covered_length": 1.1513847653077391e-09,
+      "strict_fraction_covered_length": 1.1513821126043123e-09
+    },
+    {
+      "case": "coverageFan-123-central-pinch-offset--1e-7",
+      "boundary_case": "coverageFan-123-central-pinch-1",
+      "normal_offset_metres": -1e-07,
+      "candidate_covered_length": 0,
+      "strict_fraction_covered_length": 0.0
+    },
+    {
+      "case": "coverageFan-123-central-pinch-offset-1e-7",
+      "boundary_case": "coverageFan-123-central-pinch-1",
+      "normal_offset_metres": 1e-07,
+      "candidate_covered_length": 4.5945540705361054e-09,
+      "strict_fraction_covered_length": 4.594551775025055e-09
+    },
+    {
+      "case": "coverageFan-123-side-pinch-offset--1e-7",
+      "boundary_case": "coverageFan-123-side-pinch-1",
+      "normal_offset_metres": -1e-07,
+      "candidate_covered_length": 0,
+      "strict_fraction_covered_length": 0.0
+    },
+    {
+      "case": "coverageFan-123-side-pinch-offset-1e-7",
+      "boundary_case": "coverageFan-123-side-pinch-1",
+      "normal_offset_metres": 1e-07,
+      "candidate_covered_length": 1.1513847653077391e-09,
+      "strict_fraction_covered_length": 1.1513825441280465e-09
+    }
+  ],
+  "limits": [
+    "Finite generated cases establish agreement, not a formal proof or physical-camera qualification.",
+    "Positive-area closed polygon boundaries count; isolated tangent contacts and fully collapsed fans have zero visible arclength.",
+    "Generic weakly simple pinches and production coverageFan occlusion outputs are checked; arbitrary self-crossed/cancelling-area rings are outside the camera fan contract.",
+    "Tiny gaps are above arithmetic noise; floating-point distinctions below that scale are not claimed.",
+    "Almost-collinear rounded edges are snapped to the closed route boundary; arclength can differ materially from strict raw-IEEE containment at this discontinuity. No universal small arclength error bound is claimed."
+  ]
+}

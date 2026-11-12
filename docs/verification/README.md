@@ -1,5 +1,10 @@
 # Verification index
 
+[Route coverage by arclength, November 12](route-coverage-math-2026-11-12/README.md)
+records three reproduced sampling errors, covered/overlap distance and longest
+blind stretch, independent rectangle/analytic checks and generated browser cases.
+Zone grids and the simulated handoff rehearsal remain separate.
+
 [Science and mathematical improvements, November 11](science-math-2026-11-11/README.md)
 records empirical threshold selection, lifecycle-aware detector sampling and exact
 sparse association, with generated regressions and primary research references.

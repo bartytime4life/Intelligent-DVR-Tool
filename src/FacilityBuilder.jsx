@@ -562,7 +562,7 @@ function FacilityEditor({onPreviewCount,initialPlan,facilityControls,persistence
     }
   }, [preview, previewError, mapDrafts, replaceDrafts, selected.id, view, floor, ready, measurements, units, b?.id, manipulate, stairEditor, directPlacement, step]);
   useEffect(() => api.current?.setBuildingPreview(step === 1 && shapeOpen ? shapePreview : null), [step,shapeOpen,shapePreview,ready]);
-  // Coverage metrics sample the same cached fans the map draws, from the previewed plan.
+  // Coverage metrics use the same cached fans the map draws, from the previewed plan.
   const coverage = useMemo(() => step === 4 ? coverageMetrics(preview, fans.current(wallObstacles(preview))) : null, [step, preview]);
   const blindSpots = useMemo(() => {
     const zone = step === 4 && (preview.zones || []).find(z => z.id === blindZone && z.enabled && z.buildingId === undefined);
@@ -1121,10 +1121,11 @@ function CoverageMetrics({ metrics, blindZone, onBlindZone, blindSpots, dirty, u
   return <section className="facility-coverage-metrics" aria-label="Estimated coverage metrics"><h3 className="facility-subheading">Estimated coverage</h3>
     {metrics.zones.length || metrics.route ? <table><thead><tr><th>Area</th><th>Coverage<small>≥1 camera</small></th><th>Overlap<small>≥2 cameras</small></th><th aria-label="Blind-spot overlay" /></tr></thead><tbody>
       {metrics.zones.map(z => <tr key={z.id}><th scope="row">{z.name}<small>{z.type === 'object_watch' ? 'Object watch' : 'Restricted'}{z.estimateReason === 'indoor' ? ' · indoor' : ''}</small></th>{z.estimated ? <><td>{percent(z.coverage)}</td><td>{percent(z.overlap)}</td><td><button type="button" className="facility-blind-toggle" aria-pressed={blindZone === z.id} aria-label={`Blind spots for ${z.name}`} onClick={() => onBlindZone(blindZone === z.id ? '' : z.id)}>Blind spots</button></td></> : <td colSpan={3} className="facility-not-estimated">{z.estimateReason === 'no-interior-samples' ? 'Not estimated · this area needs a finer grid' : 'Not estimated · ground-plane only'}</td>}</tr>)}
-      {metrics.route && <tr><th scope="row">Handoff route<small>{formatDistance(metrics.route.length, units)} · {metrics.route.samples} samples</small></th><td>{percent(metrics.route.coverage)}</td><td>{percent(metrics.route.overlap)}</td><td /></tr>}
+      {metrics.route && <tr><th scope="row">Handoff route<small>{formatDistance(metrics.route.length, units)} path length</small></th><td>{percent(metrics.route.coverage)}</td><td>{percent(metrics.route.overlap)}</td><td /></tr>}
     </tbody></table> : <p className="facility-caption">Add an enabled outdoor zone (step 7) or a handoff route (step 6) to estimate coverage.</p>}
     {shown && blindSpots && <p className="facility-caption" role="status">{blindSpots.length ? `Map shows uncovered sample cells in ${shown.name} (cells about ${formatDistance(shown.cellWidth, units)} × ${formatDistance(shown.cellHeight, units)}).` : `No uncovered sample cells in ${shown.name}.`}</p>}
-    <p className="facility-caption">Grid sample of up to {MAX_COVERAGE_CELLS.toLocaleString('en-US')} cells per zone, and about every {formatDistance(.5, units)} along the route, tested against the drawn ground fans of {metrics.cameras} included {metrics.cameras === 1 ? 'camera' : 'cameras'}. {dirty ? 'Includes the unsaved camera preview. ' : ''}Indoor and level zones are not estimated because coverage is ground-plane only. Planning estimate; verify on site.</p>
+    {metrics.route && <p className="facility-caption" aria-label="Route coverage details">{formatDistance(metrics.route.uncoveredLength, units)} of the route is outside the drawn coverage. Longest continuous gap: {formatDistance(metrics.route.longestBlindStretch, units)}.</p>}
+    <p className="facility-caption">Zones use up to {MAX_COVERAGE_CELLS.toLocaleString('en-US')} grid cells each. Route percentages use path length inside the drawn ground fans, including their edges, for {metrics.cameras} included {metrics.cameras === 1 ? 'camera' : 'cameras'}. {dirty ? 'Includes the unsaved camera preview. ' : ''}Indoor and level zones are not estimated because coverage is ground-plane only. Planning estimate; verify on site.</p>
   </section>;
 }
 function SiteForm({ plan, commit, center, pickedOrigin, onPin, ready, onDirtyChange, onPreview, addressFocus, focusAddress }) {

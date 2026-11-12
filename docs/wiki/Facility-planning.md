@@ -196,12 +196,10 @@ recognition-quality claim.
   selected camera's fan mark each limit and break where modeled walls shorten
   the view. Lens presets (2.8–12 mm) fill a **typical** horizontal view only;
   vertical view is unchanged, and a datasheet value always wins.
-- **Coverage metrics.** The Coverage step grid-samples each enabled outdoor
-  zone (at most 20,000 cells, target spacing at least 0.25 m) and the handoff route (about every
-  0.5 m, at most 20,000 samples) against the same cached fans the map draws,
-  with a camera bounding-box prefilter and no polygon-union library. It reports
-  coverage (≥1 camera) and overlap (≥2 cameras), includes any unsaved camera
-  preview, and can overlay one zone's uncovered cells as merged row rectangles.
+- **Coverage metrics.** The Coverage step uses the same cached fans the map
+  draws, including any unsaved camera preview. Outdoor zones use a grid (at most
+  20,000 cells, target spacing at least 0.25 m) for coverage (≥1 camera), overlap
+  (≥2 cameras) and one zone’s uncovered-cell overlay as merged row rectangles.
   The grid fits the zone's bounding box, so narrow zones still receive an
   interior row or column; actual cells can be smaller than the target spacing.
   An irregular zone with no interior sample centers shows **Not estimated**,
@@ -209,6 +207,16 @@ recognition-quality claim.
   the actual rectangular cell dimensions. These are sampled estimates, not an
   exact area union or calibrated visibility.
   Indoor and level zones show "not estimated" because coverage is ground-plane only.
+  The **handoff route** uses covered path length rather than sample-point counts.
+  Each segment is intersected with the drawn positive-area fan polygons; intervals
+  from the same camera count once before coverage and overlap are measured.
+  A boundary segment contributes its length; touching a fan at a single point
+  contributes none. Repeated/backtracking passages count each time. The display
+  includes total uncovered distance and the longest continuous gap across route
+  vertices. Zero-length segments add no distance. Calculations retain gaps above
+  floating-point tolerance, but the result remains an estimate of the drawn
+  ground plane, not calibrated visibility. The separate 61-position rehearsal
+  below is still simulated. [Mathematics and generated checks](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/route-coverage-math-2026-11-12/README.md).
 - **Direct manipulation.** Dragging the selected camera (mouse or touch) or its
   round heading handle previews the move live on the map; release, Alt+Arrow and
   `[` / `]` change only the unsaved draft. Save camera commits, Discard preview

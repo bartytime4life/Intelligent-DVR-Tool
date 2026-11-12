@@ -92,6 +92,49 @@ different valid set of pairs. Method `bytetrack-style-iou-kalman-v3` and the sou
 hash bind the changed tracker; old v1/v2 review results remain readable, but current
 tracking evaluation requires fresh source-matched traces.
 
+## Measure the route by covered distance
+
+Counting regularly spaced points can overestimate or miss narrow coverage.
+Instead, intersect every route segment with the drawn ground-fan polygons and
+measure the resulting intervals. This uses the distinction between a point and
+a positive-length segment described in the
+[CGAL intersection reference](https://doc.cgal.org/latest/Kernel_23/group__intersection__linear__grp.html).
+The [Shapely manual](https://shapely.readthedocs.io/en/stable/manual.html#geometric-objects)
+also distinguishes planar curve length from surface area. Neither library is
+added as a dependency here; the route-specific implementation uses interval
+clipping and an endpoint sweep.
+
+For segment `j`, let `L_j` be its length and `N_j(t)` the number of distinct
+camera footprints covering its normalized position `t`, including their edges:
+
+```text
+route length   = sum_j L_j
+covered length = sum_j L_j * integral_0^1 [N_j(t) >= 1] dt
+overlap length = sum_j L_j * integral_0^1 [N_j(t) >= 2] dt
+coverage       = covered length / route length
+```
+
+Polygon crossings divide each segment into intervals where that count is
+constant. Union intervals belonging to the same camera before counting distinct
+cameras. Shared vertices use half-open crossing parity; collinear polygon edges
+contribute positive boundary length and isolated touches contribute none.
+Fully collapsed zero-area fans are ignored. Repeated/backtracking passages count
+on every visit, preserving the route’s traversal rather than spatially merging
+it. The longest uncovered run continues across route vertices.
+
+The old 0.5 m sample grid reported 100% for eleven narrow fans on a 5 m route.
+Their drawn coverage is `20 * tan(2.5 degrees) = 0.873218858… m`, or about 17.5%.
+The [independent generated checks](verification/route-coverage-math-2026-11-12/README.md)
+compare the implementation with rational rectangle clipping and analytic cases.
+Floating-point tolerance is relative to coordinate scale and capped relative to
+segment length; tiny roundoff-scale gaps can coalesce. A nearly collinear edge
+can be treated as closed boundary even if raw binary vertices sit a few rounding
+units on its opposite side; an exactly coincident route is sensitive to that
+choice. The small errors in ordinary oracle cases are not a universal error bound.
+Outdoor zone percentages
+still use a bounded grid. The 61-position handoff rehearsal remains simulated,
+and exact integration of drawn polygons does not establish physical visibility.
+
 ## Next experiments need independent observations
 
 - Compare v3 with the prior tracker using the existing [CLEAR/IDF1/HOTA evaluator](tracking-evaluation.md)
