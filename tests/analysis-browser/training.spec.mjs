@@ -67,6 +67,23 @@ test('the real synthetic CPU workflow pauses recording, checks a fresh take, and
   await setVisibility(page, 'visible');
   await expect(prompt.locator('.take-phase')).toContainText('Get ready to resume');
   await expect(firstResult(page)).toBeVisible({timeout: 115000});
+  // Switching the evidence used for a suggestion must keep an explicit trial
+  // and its open editor. Only Reset should resume the automatic suggestion.
+  await page.getByText('Advanced sensitivity',{exact:true}).click();
+  // The baseline slider has no accessible name because its label includes an
+  // output before the input. Locate it by region so this regression reaches
+  // the separate evidence-toggle remount rather than failing on that defect.
+  const trial=page.getByRole('region',{name:'Detection scorecard'}).getByRole('slider');
+  const suggested=Number(await trial.inputValue()),manual=suggested===.55?.6:.55;
+  await trial.fill(String(manual));
+  const include=page.getByRole('checkbox',{name:/Add this session to the combined evidence/});
+  await include.check();
+  await expect(trial).toBeVisible();
+  await expect(trial).toHaveValue(String(manual));
+  await include.uncheck();
+  await expect(trial).toHaveValue(String(manual));
+  await page.getByRole('button',{name:`Reset to suggested ${suggested.toFixed(2)}`,exact:true}).click();
+  await expect(trial).toHaveValue(String(suggested));
   await page.getByRole('checkbox', {name: /Add this session to the combined evidence/}).check();
   await expect(apply(page)).toHaveCount(0);
   await page.screenshot({path: testInfo.outputPath('calibration-scorecard.png'), fullPage: true});

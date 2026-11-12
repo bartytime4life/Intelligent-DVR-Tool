@@ -26,6 +26,11 @@ Choose the job you want to finish:
 
 ## Find the next task
 
+On **Monitor**, **What’s next?** offers four direct paths: **Watch cameras**,
+**Analyze saved video**, **Keep DVR copies**, and **Plan coverage**. Watch cameras
+focuses **Connect source**; it does not connect anything. The other choices open
+their existing workspace and task panel.
+
 Choose **Find a task** in the header, or press **Ctrl+K** on Windows/Linux or
 **Cmd+K** on macOS; close any other open dialog first. Search for a job such as
 “video”, “notes”, “floor plan” or “GPU”; use Up/Down and Enter to open it, or

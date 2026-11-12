@@ -52,6 +52,17 @@ review. Replaced results/recordings, workspace departure and hidden pages cancel
 the old transfer; late still work cannot queue old observations or clear a newer
 transfer. See [handoff verification](verification/recognition-transfer-2026-11-11/README.md).
 
+Monitor now offers direct goal shortcuts and a guided camera-source setup
+handoff. System starts with storage and browser controls, with advanced planning
+available on demand and unapplied edits still visible. Shared review-opening
+requests prevent older downloads from replacing newer file choices; expired
+live-AI sessions can be rechecked explicitly. Narrow coverage zones receive
+fitted samples, and unsampled areas remain unestimated. Training preserves manual
+thresholds and expanded controls when evidence changes, while automatic trials
+follow their current suggestion. See the
+[guided-experience verification](verification/guided-experience-2026-11-11/README.md)
+for source hashes, controlled regressions, screenshots and remaining limits.
+
 **GPU preference:** live AI and recorded-video analysis now default to GPU first with visible CPU fallback and an explicit CPU override. Actual controlled RTX 5080 checks are recorded in the [GPU-default verification](verification/gpu-default-2026-11-03/README.md); physical-device accuracy and capacity remain separate.
 
 **November 3 source follow-up:** [OEM companion backup](oem-backup.md) adds

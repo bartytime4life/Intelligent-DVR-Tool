@@ -269,3 +269,11 @@ Owner experience priority (2026-11-09): make the existing workspaces easy to fin
 powerful to use and logically organized. Prefer direct task paths, consistent
 keyboard navigation and visible recovery for unfinished work. Preserve the
 selected dark/teal interface and explicit camera, recording and inference starts.
+
+Owner novice-experience direction (2026-11-11): make the existing app powerful
+without requiring users to understand its engineering internals. Lead with the
+user's goal and a clear next action, explain results in plain language, and reveal
+advanced planning controls when needed. Keep expert controls, calculations and
+unfinished work available. Check recovery, stale responses and numerical edge
+cases alongside visual polish; never imply that easier controls qualify cameras,
+recognition quality, installed hardware or the 100-camera workload.

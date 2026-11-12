@@ -64,11 +64,13 @@ export default function TrainingScorecard({ outcome, service, onCheck, onSave, o
   pastSessions = NO_SESSIONS, viewName, includeSession, onInclude, libraryError }) {
   const recommendation = useMemo(() => includeSession ? recommendCumulativeThreshold(outcome, pastSessions)
     : recommendThreshold(outcome.labeled, { current: outcome.current }), [outcome, pastSessions, includeSession]);
-  const [selection, setSelection] = useState(check?.value ?? recommendation.threshold ?? outcome.current);
+  // Follow the current evidence while the trial is automatic. A manual choice
+  // stays selected across evidence changes; a fresh check always keeps its pair.
+  const [selection, setSelection] = useState(null);
   const [evidenceOpen, setEvidenceOpen] = useState(false);
   // Once a new recording has been scored, its two thresholds stay fixed.
   const fresh = check?.result;
-  const value = fresh ? check.value : selection;
+  const value = fresh ? check.value : selection ?? recommendation.threshold ?? outcome.current;
   useEffect(() => { onPreview?.(value); }, [value, onPreview]);
   const calibration = useMemo(() => evaluate(outcome.labeled, value), [outcome, value]);
   const original = useMemo(() => evaluate(outcome.labeled, outcome.current), [outcome]);
@@ -158,11 +160,11 @@ export default function TrainingScorecard({ outcome, service, onCheck, onSave, o
           {fresh ? <p>The trial threshold was fixed at {value.toFixed(2)} before the fresh check. Start another session to test a different setting.</p>
             : <>
               <label className="train-score-slider">Trial detection threshold <output>{value.toFixed(2)}</output>
-                <input type="range" min={SENSITIVITY.min} max={SENSITIVITY.max} step={SENSITIVITY.step} value={value}
+                <input type="range" aria-label="Trial detection threshold" min={SENSITIVITY.min} max={SENSITIVITY.max} step={SENSITIVITY.step} value={value}
                   disabled={saving} onChange={e => preview(Number(e.target.value))} /></label>
               <p>Lower values admit weaker detections. Higher values require a stronger person signal.</p>
               {recommendation.threshold !== null && value !== recommendation.threshold &&
-                <button className="text-button" disabled={saving} onClick={() => preview(recommendation.threshold)}>Reset to suggested {recommendation.threshold.toFixed(2)}</button>}
+                <button className="text-button" disabled={saving} onClick={() => { setSelection(null); onPreview?.(recommendation.threshold); }}>Reset to suggested {recommendation.threshold.toFixed(2)}</button>}
             </>}
         </div>
       </details>

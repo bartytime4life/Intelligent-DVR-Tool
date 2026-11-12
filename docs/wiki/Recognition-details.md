@@ -19,6 +19,14 @@ The backup card reports running or unavailable status even while another task is
 shown. After a recorder connection fails, **Recording status unknown** remains
 visible across workspaces until a successful refresh confirms its current state.
 
+All result sources share the current review-opening request. A slower LAN,
+backup or local-job download cannot replace a newer results-file choice or
+recording match, including when the newer file is rejected. The previous review
+remains available. Leaving Recognition or hiding the page cancels review
+openings (including pending file reads and downloads); background analysis,
+recording and backup jobs retain their own
+explicit Stop/Cancel controls. Reopen a result deliberately when ready.
+
 [Home](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Home) · [Analyzer](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Edge-CLI) · [Deployment path](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Roadmap#recognition-deployment-path--october-29-2026)
 
 The implemented local milestone is a bounded **one-recording recognition and human

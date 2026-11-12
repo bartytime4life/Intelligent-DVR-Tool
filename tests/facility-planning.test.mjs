@@ -250,6 +250,40 @@ test('coverage metrics list enabled ground zones and the route; indoor zones are
   assert.equal(metrics.route.coverage,1);
 });
 
+test('narrow valid zones sample inside their bounds and use actual rectangular blind-cell extents',()=>{
+  const footprint=rect(0,0,.1,20),enclosing={id:'one',ring:rect(-1,-1,1,21),box:[-1,-1,1,21]};
+  const plan=validateFacility({...blankFacility(),zones:[{...zone(),footprint}]});
+  assert.equal(plan.zones.length,1);
+  const covered=zoneCoverage(footprint,[enclosing],{blindSpots:true});
+  assert.ok(covered.cells>0);assert.equal(covered.estimated,true);
+  assert.equal(covered.coverage,1);assert.equal(covered.overlap,0);assert.deepEqual(covered.blindSpots,[]);
+  const twice=zoneCoverage(footprint,[enclosing,{...enclosing,id:'two'}]);
+  assert.equal(twice.overlap,1);
+  const blind=zoneCoverage(footprint,[],{blindSpots:true});
+  assert.equal(blind.coverage,0);assert.equal(blind.cellWidth,.1);assert.equal(blind.cellHeight,.25);
+  assert.equal(blind.blindSpots.length,80);
+  for(const ring of blind.blindSpots)for(const [x,y]of ring){assert.ok(x>=0&&x<=.1);assert.ok(y>=0&&y<=20);}
+  const area=blind.blindSpots.reduce((sum,r)=>sum+(r[1][0]-r[0][0])*(r[2][1]-r[1][1]),0);
+  near(area,2,1e-9);near(area,blind.cells*blind.cellWidth*blind.cellHeight,1e-9);
+  const fractional=zoneCoverage(rect(-.2,-.3,1.13,2.27),[],{blindSpots:true});
+  const fractionalArea=fractional.blindSpots.reduce((sum,r)=>sum+(r[1][0]-r[0][0])*(r[2][1]-r[1][1]),0);
+  near(fractionalArea,1.33*2.57,1e-9);
+  assert.ok(fractional.blindSpots.flat().every(([x,y])=>x>=-.2-1e-9&&x<=1.13+1e-9&&y>=-.3-1e-9&&y<=2.27+1e-9));
+});
+
+test('valid diagonal areas with no interior samples remain unestimated rather than reporting zero coverage',()=>{
+  const angle=23*Math.PI/180,footprint=rect(0,0,1000,.002).map(([x,y])=>[x*Math.cos(angle)-y*Math.sin(angle),x*Math.sin(angle)+y*Math.cos(angle)]);
+  const plan=validateFacility({...blankFacility(),zones:[{...zone(),footprint}]});
+  const sampled=zoneCoverage(footprint,[],{blindSpots:true});
+  assert.equal(sampled.cells,0);assert.equal(sampled.estimated,false);
+  assert.equal(sampled.estimateReason,'no-interior-samples');assert.equal(sampled.coverage,null);assert.equal(sampled.overlap,null);
+  const metrics=coverageMetrics(plan,()=>[]);
+  assert.equal(metrics.zones[0].estimated,false);assert.equal(metrics.zones[0].estimateReason,'no-interior-samples');
+  const capped=zoneCoverage(rect(-1000,-1000,1000,1000),[],{blindSpots:true});
+  assert.ok(capped.cells<=MAX_COVERAGE_CELLS);
+  assert.ok(Math.ceil(2000/capped.cellWidth)*Math.ceil(2000/capped.cellHeight)<=MAX_COVERAGE_CELLS);
+});
+
 test('installer sheet is offline, escaped, CSP-restricted HTML with an inline SVG plan and closing limits',()=>{
   const plan=exampleFacility();plan.name='Yard <b>&</b>';
   plan.cameras[0]={...plan.cameras[0],pixelsWide:1920,channel:'<script>alert(1)</script>'};

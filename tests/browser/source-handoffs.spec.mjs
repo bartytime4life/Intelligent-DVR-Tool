@@ -153,9 +153,16 @@ test('a background analysis keeps its controller and directs a blocked recording
   expect(writes).toEqual([]);
 });
 
-test('results that finish opening while hidden do not steal focus on an ordinary workspace return', async ({page}) => {
-  const bundle = recognitionFixture(); await setup(page, bundle);
-  await page.goto('/#events'); await followObservation(page);
+test('hiding cancels pending results while preserving the loaded review, source request and ordinary return focus', async ({page}) => {
+  const bundle = recognitionFixture(), writes = await setup(page, bundle);
+  const previous = recognitionFixture('f'.repeat(64));
+  previous.receipt.camera = previous.trace.camera = 'Previously loaded generated review';
+  previous.receipt.events[0].camera = 'Previously loaded generated review';
+  await page.goto('/#recognition');
+  await tasks(page).getByRole('button', {name:/^Open saved results/}).click();
+  await page.getByLabel('Open recognition results', {exact:true}).setInputFiles(upload(previous));
+  await page.getByRole('button', {name:'Next sample', exact:true}).click();
+  await followObservation(page);
   await stableFocus(page, page.getByRole('region', {name:'Open saved recognition results', exact:true}));
   await page.evaluate(text => {
     const original = File.prototype.text;
@@ -168,9 +175,18 @@ test('results that finish opening while hidden do not steal focus on an ordinary
   await expect.poll(() => page.evaluate(() => Boolean(window.releaseGeneratedSourceReceipt))).toBe(true);
   await nav(page, 'Events').click();
   await page.evaluate(() => window.releaseGeneratedSourceReceipt());
-  await expect(page.locator('.recognition-status')).toContainText('matching results contain the observation');
+  await expect(page.locator('.recognition-status')).toContainText('Opening cancelled while Recognition was hidden');
   await nav(page, 'Recognition').click();
   await stableFocus(page, page.getByRole('main', {name:'Recognition workspace', exact:true}));
-  await expect(page.getByLabel('Match original recording', {exact:true})).toBeEnabled();
+  await expect(page.locator('.recognition-facts')).toContainText('Previously loaded generated review');
+  await expect(page.getByLabel('Analyzed sample', {exact:true})).toHaveValue('1');
+  await expect(page.getByRole('region', {name:'Open saved recognition results', exact:true})).toContainText('Open its results file, then match its original recording.');
   await expect(tasks(page).getByRole('button', {name:/^Open saved results/})).toHaveAttribute('aria-pressed', 'true');
+  // The pending source handoff still resolves when the operator explicitly
+  // retries the matching file. That deliberate transition focuses its next step.
+  await page.getByLabel('Open recognition results', {exact:true}).setInputFiles(upload(bundle));
+  await stableFocus(page, page.getByLabel('Match original recording', {exact:true}));
+  await expect(page.locator('.recognition-status')).toContainText('matching results contain the observation');
+  await expect(page.locator('.recognition-facts')).toContainText('test-recording');
+  expect(writes).toEqual([]);
 });

@@ -35,6 +35,13 @@ result. Camera names may be hidden until permission is granted.
 
 ## Local DVR or IP camera
 
+In Monitor's DVR source chooser, **Add camera or DVR source** opens the existing
+guided form in Recognition. If needed, explicitly **Connect to this computer**
+to check availability, then enter and save the authorized source details. This
+handoff preserves unfinished fields and does not save a source, connect a camera,
+or start recording or analysis. Return to Monitor to connect the saved source
+when ready.
+
 This first connection path supports **RTSP over TCP**, with a fixed private IPv4
 address. It does not scan the LAN or implement ONVIF discovery, DVR vendor APIs,
 cloud-camera accounts, public endpoints, hostnames, IPv6, RTSPS or UDP transport.

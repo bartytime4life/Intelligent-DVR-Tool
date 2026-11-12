@@ -16,9 +16,9 @@ const expected = coverageMetrics(fixture, fanCache()(wallObstacles(fixture)));
 const percent = v => `${(Math.round(v*1000)/10).toFixed(1)}%`;
 const value = async (page,label) => Number(await page.getByLabel(label,{exact:true}).inputValue());
 
-async function openFixture(page) {
+async function openFixture(page,plan=fixture) {
   await page.route('**/*', route => new URL(route.request().url()).hostname === '127.0.0.1' ? route.continue() : route.abort());
-  await page.addInitScript(({key,raw})=>{if(localStorage.getItem(key)===null)localStorage.setItem(key,raw);},{key:LIBRARY_KEY,raw:JSON.stringify(createLibrary(fixture))});
+  await page.addInitScript(({key,raw})=>{if(localStorage.getItem(key)===null)localStorage.setItem(key,raw);},{key:LIBRARY_KEY,raw:JSON.stringify(createLibrary(plan))});
   await page.goto('/#facility');
   await expect(page.getByRole('heading',{name:'Locate your facility'})).toBeVisible();
   await expect(page.getByLabel('Facility name',{exact:true})).toHaveValue('Coverage fixture');
@@ -83,6 +83,29 @@ test('drag, rotate handle and keyboard edits change only the camera draft until 
   await expect(page.locator('.facility-library-save')).toContainText('Saved in this browser');
   await expect.poll(()=>saved(page)).toEqual(before);
   expect(errors).toEqual([]);
+});
+
+test('coverage distinguishes narrow covered areas, unsampled areas and unsupported indoor zones',async({page})=>{
+  const angle=23*Math.PI/180,diagonal=rect(0,0,1000,.002).map(([x,y])=>[x*Math.cos(angle)-y*Math.sin(angle),x*Math.sin(angle)+y*Math.cos(angle)]);
+  const plan=validateFacility({...fixture,cameras:[fixture.cameras[0],{...fixture.cameras[0],id:'C2',name:'Second planned camera'}],
+    zones:[...fixture.zones,zone('narrow','Narrow walkway',rect(0,10,.1,30)),zone('diagonal','Fine diagonal area',diagonal)]});
+  await openFixture(page,plan);
+  await page.getByRole('button',{name:/^5 Coverage/}).click();
+  const metrics=page.getByRole('region',{name:'Estimated coverage metrics'});
+  await expect(metrics.getByRole('row',{name:/Narrow walkway/})).toContainText('100.0%100.0%');
+  const narrow=metrics.getByRole('button',{name:'Blind spots for Narrow walkway',exact:true});
+  await narrow.click();
+  await expect(metrics.getByRole('status')).toContainText('No uncovered sample cells in Narrow walkway.');
+  await page.getByLabel('Direction from north',{exact:true}).fill('180');
+  await expect(metrics.getByRole('row',{name:/Narrow walkway/})).toContainText('100.0%0.0%');
+  await page.getByRole('button',{name:'Discard preview',exact:true}).click();
+  const unsampled=metrics.getByRole('row',{name:/Fine diagonal area/});
+  await expect(unsampled).toContainText('Not estimated · this area needs a finer grid');
+  await expect(unsampled).not.toContainText('0.0%');
+  await expect(unsampled).not.toContainText('indoor');
+  await expect(unsampled.getByRole('button')).toHaveCount(0);
+  await expect(metrics.getByRole('row',{name:/Hall store/})).toContainText('indoor');
+  await expect(metrics.getByRole('row',{name:/Hall store/})).toContainText('Not estimated · ground-plane only');
 });
 
 test('touch drag moves the selected camera draft',async({page})=>{

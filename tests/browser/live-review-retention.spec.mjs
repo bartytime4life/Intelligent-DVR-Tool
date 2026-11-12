@@ -7,12 +7,16 @@ const tile = (page, number) => page.locator('.live-tile').filter({hasText:`Gener
 async function localSources(page) {
   const sources = Array.from({length:5}, (_, index) => ({id:`source-${index+1}`,name:`Generated DVR ${index+1}`,kind:'rtsp'}));
   const feeds = new Map(), sessions = new Map();
-  const calls = {starts:[], stops:[], disconnects:[], connects:[]};
-  await page.route('**/api/analysis/session', route => route.fulfill({json:{
-    token:'generated-ai-token', live:{enabled:true, limits:{active_sessions:2},
+  let aiToken = 'generated-ai-token';
+  const pendingFrames = [];
+  const expired = {status:403,json:{error:{code:'SESSION',message:'Reconnect to the local service and retry.'}}};
+  const calls = {starts:[], startTokens:[], stops:[], disconnects:[], connects:[], checks:0,
+    async expireSession() {aiToken = 'generated-ai-token-after-restart'; await Promise.all(pendingFrames.splice(0).map(route => route.fulfill(expired)));}};
+  await page.route('**/api/analysis/session', route => {calls.checks++; return route.fulfill({json:{
+    token:aiToken, live:{enabled:true, limits:{active_sessions:2},
       models:[{id:'generated-model',name:'Generated detector'}],
       rules:[{id:'presence',name:'Generated presence',models:['generated-model']}]},
-  }}));
+  }});});
   await page.route('**/api/feeds/**', route => {
     const path = new URL(route.request().url()).pathname, id = path.split('/')[3];
     if (path.endsWith('/session')) return route.fulfill({json:{token:'generated-feed-token',ready:true,sources}});
@@ -31,16 +35,18 @@ async function localSources(page) {
   });
   await page.route('**/api/live/**', route => {
     const path = new URL(route.request().url()).pathname, id = path.split('/')[3];
+    if (!path.endsWith('/stop') && route.request().headers()['x-dvr-token'] !== aiToken) return route.fulfill(expired);
     if (path.endsWith('/start')) {
       const camera = route.request().postDataJSON().camera;
       calls.starts.push(camera);
+      calls.startTokens.push(route.request().headers()['x-dvr-token']);
       const session = {id:calls.starts.length.toString(16).padStart(32,'a'),state:'live',camera,
         model:'Generated detector',rules:'Generated presence',model_sha256:'b'.repeat(64),analyzed:1};
       sessions.set(session.id,{session,delivered:false}); return route.fulfill({json:session});
     }
     const item = sessions.get(id);
     if (path.endsWith('/stop')) {calls.stops.push(id); return route.fulfill({json:{...item.session,state:'stopped'}});}
-    if (item.delivered) return; // Hold the next frame; Stop aborts it.
+    if (item.delivered) {pendingFrames.push(route); return;} // Hold the next frame; Stop aborts it.
     item.delivered = true;
     return route.fulfill({json:{width:32,height:18,detector:'ran',detections:[],session:item.session,
       observations:[{id:id.replaceAll('a','c'),label:'person',score:.9,seconds:1,rule:'Generated presence'}]}});
@@ -62,6 +68,56 @@ async function observe(page, number) {
   await tile(page,number).getByRole('button', {name:'Start AI',exact:true}).click();
   await expect(tile(page,number).getByRole('button', {name:'Send to Events',exact:true})).toBeVisible();
 }
+
+for (const stage of ['start', 'frame']) test(`an expired AI ${stage} session offers explicit setup recovery without losing the preview or observations`, async ({page}) => {
+  const calls = await localSources(page);
+  await connect(page,1);
+  if (stage === 'frame') await observe(page,1);
+  await calls.expireSession();
+  if (stage === 'start') await tile(page,1).getByRole('button',{name:'Start AI',exact:true}).click();
+  const settings = page.getByLabel('Live AI settings',{exact:true});
+  await expect(settings).toContainText('session expired');
+  await expect(tile(page,1).getByAltText('Generated DVR 1 current preview frame')).toBeVisible();
+  await expect(tile(page,1).getByRole('button',{name:'Start AI',exact:true})).toBeDisabled();
+  if (stage === 'frame') await expect(tile(page,1).getByRole('button',{name:'Send to Events',exact:true})).toBeVisible();
+  const startsBefore = calls.starts.length;
+  // Development StrictMode may perform two initial availability checks. The
+  // explicit retry must add exactly one check, independent of that mount count.
+  const checksBefore = calls.checks;
+  await settings.getByRole('button',{name:'Check again',exact:true}).click();
+  await expect(settings).toContainText('Live AI · Generated detector');
+  expect(calls.checks).toBe(checksBefore + 1);
+  expect(calls.starts).toHaveLength(startsBefore); // Rechecking never starts inference.
+  await tile(page,1).getByRole('button',{name:'Start AI',exact:true}).click();
+  await expect.poll(() => calls.starts.length).toBe(startsBefore + 1);
+  expect(calls.startTokens.at(-1)).toBe('generated-ai-token-after-restart');
+  if (stage === 'frame') await expect(tile(page,1).getByLabel('Live AI observations',{exact:true}).locator('li')).toHaveCount(2);
+  expect(calls.disconnects).toEqual([]);
+  expect(calls.connects).toEqual(['source-1']);
+  await tile(page,1).getByRole('button',{name:'Stop AI',exact:true}).click();
+});
+
+test('declining the guided source setup handoff keeps the Monitor chooser and unsent review intact', async ({page}) => {
+  const calls = await localSources(page);
+  await connect(page,1); await observe(page,1);
+  await page.route('**/api/feeds/session', route => route.fulfill({json:{token:'generated-feed-token', ready:true, sources:[]}}));
+  await page.getByRole('button',{name:'Set up local DVR',exact:true}).click();
+  const dialog = page.getByRole('dialog',{name:'Connect a camera source'});
+  await dialog.getByRole('button',{name:'Refresh DVR sources',exact:true}).click();
+  await expect(dialog).toContainText('No DVR channels configured');
+  const decisions = [];
+  page.once('dialog', async prompt => {decisions.push(prompt.message()); await prompt.dismiss();});
+  await dialog.getByRole('button',{name:'Add camera or DVR source',exact:true}).click();
+  await expect(dialog).toBeVisible();
+  await expect(page).toHaveURL(/#monitor$/);
+  await expect(dialog.getByRole('button',{name:'Add camera or DVR source',exact:true})).toBeFocused();
+  expect(decisions).toHaveLength(1); expect(decisions[0]).toContain('unsent live observations');
+  expect(calls.connects).toEqual(['source-1']); expect(calls.starts).toHaveLength(1);
+  expect(calls.disconnects).toEqual([]); expect(calls.stops).toEqual([]);
+  await dialog.getByRole('button',{name:'Close connection setup',exact:true}).click();
+  await expect(tile(page,1).getByRole('button',{name:'Send to Events',exact:true})).toBeVisible();
+  await tile(page,1).getByRole('button',{name:'Stop AI',exact:true}).click();
+});
 
 test('disconnect stops the source and AI while its unsent still stays reviewable', async ({page}) => {
   const calls = await localSources(page);

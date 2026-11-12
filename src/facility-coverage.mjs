@@ -30,20 +30,27 @@ export function zoneCoverage(footprint, fans, {maxCells = MAX_COVERAGE_CELLS, bl
   let cell = Math.max(MIN_CELL, Math.sqrt(w * h / maxCells));
   while (Math.ceil(w / cell) * Math.ceil(h / cell) > maxCells) cell *= 1.01;
   const nx = Math.ceil(w / cell), ny = Math.ceil(h / cell), near = fans.filter(f => overlaps(f.box, box)), gaps = [];
+  // Fit the grid to the bounds. A zone narrower than the target spacing still
+  // needs an interior column, and edge cells must not extend past its bounds.
+  const cellWidth = w / nx, cellHeight = h / ny;
   let cells = 0, covered = 0, overlap = 0;
   for (let j = 0; j < ny; j++) {
-    const y = box[1] + (j + .5) * cell;
+    const bottom = box[1] + j * cellHeight, top = j === ny - 1 ? box[3] : box[1] + (j + 1) * cellHeight;
+    const y = (bottom + top) / 2;
     let run = null;
-    const close = () => { if (run) gaps.push([[run[0], y - cell / 2], [run[1], y - cell / 2], [run[1], y + cell / 2], [run[0], y + cell / 2], [run[0], y - cell / 2]]); run = null; };
+    const close = () => { if (run) gaps.push([[run[0], bottom], [run[1], bottom], [run[1], top], [run[0], top], [run[0], bottom]]); run = null; };
     for (let i = 0; i < nx; i++) {
-      const x = box[0] + (i + .5) * cell, inside = pointInPolygon([x, y], footprint), n = inside ? seenBy([x, y], near) : 0;
+      const left = box[0] + i * cellWidth, right = i === nx - 1 ? box[2] : box[0] + (i + 1) * cellWidth;
+      const x = (left + right) / 2, inside = pointInPolygon([x, y], footprint), n = inside ? seenBy([x, y], near) : 0;
       if (inside) { cells++; if (n) covered++; if (n > 1) overlap++; }
       // Uncovered cells merge into row runs so the overlay stays a few rectangles, not thousands.
-      if (blindSpots) { if (inside && !n) run = run ? [run[0], x + cell / 2] : [x - cell / 2, x + cell / 2]; else close(); }
+      if (blindSpots) { if (inside && !n) run = run ? [run[0], right] : [left, right]; else close(); }
     }
     if (blindSpots) close();
   }
-  return {cells, cell, cameras:near.length, coverage:cells ? covered / cells : 0, overlap:cells ? overlap / cells : 0, ...(blindSpots ? {blindSpots:gaps} : {})};
+  return {cells, cell, cellWidth, cellHeight, cameras:near.length, estimated:cells > 0,
+    ...(cells ? {} : {estimateReason:'no-interior-samples'}),
+    coverage:cells ? covered / cells : null, overlap:cells ? overlap / cells : null, ...(blindSpots ? {blindSpots:gaps} : {})};
 }
 export function routeCoverage(route, fans, {maxSamples = MAX_COVERAGE_CELLS} = {}) {
   const lengths = route.slice(1).map((p, i) => Math.hypot(p[0] - route[i][0], p[1] - route[i][1])), length = lengths.reduce((a, b) => a + b, 0);
@@ -63,7 +70,7 @@ export function routeCoverage(route, fans, {maxSamples = MAX_COVERAGE_CELLS} = {
 export function coverageMetrics(plan, fanOf) {
   const fans = enabledFans(plan, fanOf);
   return {cameras:fans.length,
-    zones:(plan.zones || []).filter(z => z.enabled).map(z => z.buildingId !== undefined ? {id:z.id, name:z.name, type:z.type, estimated:false} :
-      {id:z.id, name:z.name, type:z.type, estimated:true, ...zoneCoverage(z.footprint, fans)}),
+    zones:(plan.zones || []).filter(z => z.enabled).map(z => z.buildingId !== undefined ? {id:z.id, name:z.name, type:z.type, estimated:false, estimateReason:'indoor'} :
+      {id:z.id, name:z.name, type:z.type, ...zoneCoverage(z.footprint, fans)}),
     route:routeCoverage(plan.route, fans)};
 }

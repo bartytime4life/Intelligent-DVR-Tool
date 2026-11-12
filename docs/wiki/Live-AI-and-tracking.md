@@ -46,6 +46,9 @@ labeled footage (see [measure it](#measure-before-relying-on-it)).
    observation is not sent and stays on the tile so you can retry.
 6. If AI stops with an error (for example, the worker took too long), press
    **Start AI** again on the same tile; unsent observations are kept.
+   If the local service restarted and the session expired, choose **Check again**
+   in Live AI settings first, then explicitly **Start AI**. Rechecking preserves
+   the camera preview and unsent observations; it does not start inference.
 7. Press **Stop AI**, disconnect the camera, leave Monitor or hide the page to stop.
 
 The tile reports class counts from its most recent analyzed frame, analyzed

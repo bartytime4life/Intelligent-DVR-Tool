@@ -14,6 +14,13 @@
 
 Open **System** in the main navigation, or use `/#system`. The page combines workload planning and explicit local limits. It has no privileged host-control API.
 
+Start with **Recording & retention** and **A quieter camera wall**. Expand
+**Advanced planning details** for processing, GPU, memory, power and host-snapshot
+comparison. Collapsing it keeps every entered value. **Unapplied advanced changes**
+remains visible when those values differ from the applied plan, including an
+empty or invalid edit. Validation warnings and save status stay outside the
+disclosure; changing the disclosure does not apply any setting.
+
 ## Controls and their scope
 
 | Setting / action | Enforced now | Limits |

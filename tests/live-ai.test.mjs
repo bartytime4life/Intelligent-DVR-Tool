@@ -161,6 +161,22 @@ test('start and frame failures stop the detector with the service message', asyn
   await assert.rejects(liveRequest('/x', { token: 't', fetcher: async () => { throw TypeError('offline'); } }), /local AI service is unavailable/);
 });
 
+for (const stage of ['start', 'frame']) test(`an expired ${stage} session exposes its recovery code and preserves unsent stills`, async () => {
+  const kept = {observation, still:new Blob(['generated retained still']), capturedAt:5, session};
+  const detector = liveDetector({token:'expired-token', model:'m', rules:'r', camera:session.camera, observations:[kept],
+    capture:async () => new Blob(['generated frame']), wait:async () => {}, fetcher:async path => {
+      if (stage === 'frame' && path.endsWith('/start')) return {ok:true, json:async () => session};
+      return {ok:false, status:403, json:async () => ({error:{code:'SESSION', message:'Reconnect to the local service and retry.'}})};
+    }});
+  await detector.start();
+  for (let i=0; i<20 && detector.snapshot.state !== 'failed'; i++) await new Promise(resolve => setTimeout(resolve,0));
+  assert.equal(detector.snapshot.state, 'failed');
+  assert.equal(detector.snapshot.errorCode, 'SESSION');
+  assert.deepEqual(detector.snapshot.observations, [kept]);
+  assert.equal(detector.snapshot.result, null);
+  detector.stop();
+});
+
 test('retained live observations keep their original session and stable completion ID after prepend',async()=>{
   const older={observation:{...observation,id:'d'.repeat(32)},still:new Blob(['old']),capturedAt:1000,session:{...session,id:'e'.repeat(32)}};
   const {fetcher}=service({frames:[{observations:[observation],detections:[]}]});

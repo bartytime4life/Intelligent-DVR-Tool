@@ -126,7 +126,7 @@ export function liveDetector({ token, model, rules, camera, capture, onChange, f
   now = () => performance.now(), wall = () => Date.now(), wait = ms => new Promise(r => setTimeout(r, ms)), maxFps = 5, observations = [], observationsDropped = 0, timeouts = {} }) {
   let running = false, controller = null, generation = 0;
   // A restarted detector keeps a previous run's unsent observations so they can still be sent.
-  const state = { state: 'idle', session: null, result: null, resultAt: 0, error: '', observations: observations.slice(0, LIVE_OBSERVATIONS),
+  const state = { state: 'idle', session: null, result: null, resultAt: 0, error: '', errorCode: '', observations: observations.slice(0, LIVE_OBSERVATIONS),
     fps: 0, latencyMs: null, skippedBusy: 0, frameErrors: 0,
     observationsDropped: observationsDropped + observations.slice(LIVE_OBSERVATIONS).filter(o => !o.sent).length };
   const emit = patch => { Object.assign(state, patch); onChange?.({ ...state, observations: [...state.observations] }); };
@@ -153,7 +153,7 @@ export function liveDetector({ token, model, rules, camera, capture, onChange, f
         const added = (result.observations || []).map(o => ({ observation: o, still: blob, capturedAt, session: {...result.session} }));
         const combined = [...added.reverse(), ...state.observations];
         const dropped = combined.slice(LIVE_OBSERVATIONS).filter(o => !o.sent).length;
-        emit({ state: 'live', session: result.session, result, resultAt: capturedMonotonic, fps, latencyMs: finished - began, error: '',
+        emit({ state: 'live', session: result.session, result, resultAt: capturedMonotonic, fps, latencyMs: finished - began, error: '', errorCode: '',
           observations: combined.slice(0, LIVE_OBSERVATIONS), observationsDropped: state.observationsDropped + dropped });
       } catch (error) {
         if (!running || ticket !== generation || error.name === 'AbortError') break;
@@ -164,7 +164,7 @@ export function liveDetector({ token, model, rules, camera, capture, onChange, f
           // never an identifier supplied by a mismatched frame reply.
           if (error.code === 'LIVE_REPLY_INVALID') void liveRequest(`/${state.session.id}/stop`,
             {token,body:{},fetcher,timeout:timeouts.stop ?? 5000}).catch(() => {});
-          running = false; emit({ state: 'failed', error: error.message, result: null }); break;
+          running = false; emit({ state: 'failed', error: error.message, errorCode: error.code || '', result: null }); break;
         }
       }
       const spare = 1000 / maxFps - (now() - began);
@@ -178,7 +178,7 @@ export function liveDetector({ token, model, rules, camera, capture, onChange, f
       const ticket = ++generation;
       running = true; controller = new AbortController();
       const signal = controller.signal;
-      emit({ state: 'starting', session:null, error: '', result: null, fps: 0, latencyMs: null });
+      emit({ state: 'starting', session:null, error: '', errorCode: '', result: null, fps: 0, latencyMs: null });
       try {
         // A GPU startup can use its 30 s allowance, then retry once on CPU.
         const reply = await liveRequest('/start', { token, body: { model, rules, camera }, signal, fetcher, timeout:timeouts.start ?? 75000 });
@@ -196,7 +196,7 @@ export function liveDetector({ token, model, rules, camera, capture, onChange, f
         emit({ state: 'live', session });
         void loop(ticket, signal);
       } catch (error) {
-        if (running && ticket === generation) { running = false; emit({ state: 'failed', error: error.name === 'TimeoutError'
+        if (running && ticket === generation) { running = false; emit({ state: 'failed', errorCode: error.code || '', error: error.name === 'TimeoutError'
           ? `${error.message} Startup could not be confirmed. If it started locally, its lease expires without frames.` : error.message }); }
       }
     },

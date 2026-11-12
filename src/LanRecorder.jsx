@@ -9,7 +9,7 @@ import { createReviewTransfer } from './review-transfer.mjs';
 
 const mib = bytes => Number.isFinite(bytes) ? `${(bytes / 1024**2).toFixed(1)} MiB` : 'not available';
 
-export default function LanRecorder({onResult, onBusy, blocked, onImport, onValidateImport, onStatus}) {
+export default function LanRecorder({onResult, onBusy, blocked, onImport, onValidateImport, onStatus, reviewOpening, active = true}) {
   const [status, setStatus] = useState(null), [catalog, setCatalog] = useState(null);
   const [lastCheckedAt, setLastCheckedAt] = useState(null);
   const [model, setModel] = useState(''), [rules, setRules] = useState('');
@@ -21,6 +21,7 @@ export default function LanRecorder({onResult, onBusy, blocked, onImport, onVali
   const [onlyObserved, setOnlyObserved] = useState(false), [handled, setHandled] = useState(() => new Set()), [notice, setNotice] = useState('');
   const local = localAnalysisOrigin(globalThis.location);
   useEffect(() => { lifetime.current = new AbortController(); return () => { lifetime.current.abort(); transfers.current.cancel(); }; }, []);
+  useEffect(() => { if (!active) transfers.current.cancel(); }, [active]);
   useEffect(() => { onBusy(Boolean(working || transferring || status?.active || status?.state === 'stopping')); }, [working, transferring, status?.active, status?.state, onBusy]);
   // Losing contact does not stop the background recorder. Keep its last known
   // state visible across workspace switches until an explicit refresh confirms it.
@@ -88,10 +89,15 @@ export default function LanRecorder({onResult, onBusy, blocked, onImport, onVali
   async function open(row) {
     const operation = beginTransfer('Opening segment and verifying its recording…');
     if (!operation) return;
+    const intent = reviewOpening.begin();
     try {
       const result = await openSegment(row, token.current, operation.signal);
       if (!transfers.current.isCurrent(operation)) return;
-      onResult(result); markHandled(row.id);
+      if (!reviewOpening.isCurrent(intent) || onResult(result, intent) === false) {
+        setNotice('A newer review was requested. Your newer review stays open. Choose Review segment again when ready.');
+        return;
+      }
+      markHandled(row.id);
     } catch (err) { if (transfers.current.isCurrent(operation)) setError(`${err.message} Your current review is preserved.`); }
     finally { finishTransfer(operation); }
   }

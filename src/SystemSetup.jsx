@@ -27,6 +27,10 @@ export default function SystemSetup({ setup, onApply, onDirtyChange, storageErro
     if (dirty) { setStatus('Saved setup changed in another tab. Your draft is kept. Apply it explicitly, or discard it and load the saved setup.'); return; }
     setDraft(structuredClone(setup));
   }, [setup]);
+  // Compare raw draft values: invalid/empty advanced inputs still need a visible
+  // reminder when the disclosure is closed, before a plan can be applied.
+  const advancedChanged = ['compute', 'gpu', 'power'].some(group =>
+    Object.keys(setup[group]).some(key => draft[group][key] !== setup[group][key]));
   let result, problem = "";
   try { result = calculateSetup(draft); } catch (err) { problem = err.message; }
   function change(group, key, value) {
@@ -110,6 +114,15 @@ export default function SystemSetup({ setup, onApply, onDirtyChange, storageErro
             {field("storage", "workloadRating", "HDD annual workload rating (TB/year)", 1, 10000)}
           </div>{result && <p className="hint">Approx. {n(result.perDriveTBYear)} TB/year per HDD including your read allowance. Ideal sequential writes; excludes rebuilds and small-write amplification. RAID is not a backup.</p>}</details>
         </Card>
+        <Card icon={Desktop} title="A quieter camera wall" caption="These controls take effect in this browser when applied.">
+          <label className="system-field"><span>Camera wall tiles</span><select value={draft.browser.visibleTiles} onChange={e => change("browser", "visibleTiles", Number(e.target.value))}><option value="1">1 · Focus</option><option value="2">2 · Balanced</option><option value="4">4 · Camera wall</option></select></label>
+          <label className="system-field system-overlay-field"><span>Zone overlay pixel scale</span><select value={draft.browser.overlayScale} onChange={e => change("browser", "overlayScale", Number(e.target.value))}><option value="1">1× · Lower canvas cost</option><option value="2">2× · Sharper overlay lines</option></select></label>
+          <p className="hint">Reducing wall tiles unmounts the others; selected sources remain visible. 1× uses one quarter of the Zones overlay pixels of 2×, without changing scene images. Camera previews and recording playback always pause while this page is hidden.</p>
+        </Card>
+      </div>
+      <details className="system-advanced">
+        <summary><span><strong>Advanced planning details</strong><small>Processing, GPU, memory, power and host comparison</small></span><span className={`system-advanced-state ${advancedChanged ? 'is-dirty' : ''}`}>{advancedChanged ? 'Unapplied advanced changes' : 'Optional controls'}</span></summary>
+        <div className="system-grid system-advanced-grid">
         <Card icon={Cpu} title="Processing limits" caption="Export these limits for the local analyzer and scheduler adapter.">
           <div className="system-fields">
             {field("compute", "threads", "OpenCV threads per analyzer", 1, 8)}
@@ -144,11 +157,6 @@ export default function SystemSetup({ setup, onApply, onDirtyChange, storageErro
           </div>{result && <p className="system-reading"><strong>{n(result.workingGiB)} GiB</strong> estimated workers + retained queue / <strong>{n(result.availableGiB)} GiB</strong> planning allowance.</p>}
           <p className="hint">Excludes decoder copies, model tensors, filesystem cache, UI and GPU VRAM. A reserve here does not allocate or lock physical RAM.</p>
         </Card>
-        <Card icon={Desktop} title="A quieter camera wall" caption="These controls take effect in this browser when applied.">
-          <label className="system-field"><span>Camera wall tiles</span><select value={draft.browser.visibleTiles} onChange={e => change("browser", "visibleTiles", Number(e.target.value))}><option value="1">1 · Focus</option><option value="2">2 · Balanced</option><option value="4">4 · Camera wall</option></select></label>
-          <label className="system-field system-overlay-field"><span>Zone overlay pixel scale</span><select value={draft.browser.overlayScale} onChange={e => change("browser", "overlayScale", Number(e.target.value))}><option value="1">1× · Lower canvas cost</option><option value="2">2× · Sharper overlay lines</option></select></label>
-          <p className="hint">Reducing wall tiles unmounts the others; selected sources remain visible. 1× uses one quarter of the Zones overlay pixels of 2×, without changing scene images. Camera previews and recording playback always pause while this page is hidden.</p>
-        </Card>
         <Card icon={Lightning} title="Power & startup budget" caption="A simultaneous-load estimate, not a measured wall-power reading." className="system-power">
           <div className="system-fields three">
             {field("power", "cpuW", "CPU allowance (W)", 0, 2000)}
@@ -170,7 +178,8 @@ export default function SystemSetup({ setup, onApply, onDirtyChange, storageErro
             <button type="button" className="text-button" onClick={useObserved}>Use reported CPU count & RAM in draft</button><button type="button" className="text-button" onClick={() => setSnapshot(null)}>Clear snapshot</button>
           </div> : <p className="hint">CPU use, disk health, temperatures, throughput and GPU capacity are unknown. Append --gpu to the command to request a read-only NVIDIA inventory. A snapshot is not a benchmark. Duplicate volume selections may describe the same disk.</p>}
         </Card>
-      </div>
+        </div>
+      </details>
       {result?.warnings.length > 0 && <div className="system-warnings"><h2><WarningCircle size={20} />Review the plan</h2><ul>{result.warnings.map(w => <li key={w}>{w}</li>)}</ul></div>}
       {(problem || fileError || storageError) && <p className="error" role="alert">{problem || fileError || storageError}</p>}
       <div className="system-actions"><button className="button amber" type="submit" disabled={!!problem}><Check />Apply workspace limits</button>

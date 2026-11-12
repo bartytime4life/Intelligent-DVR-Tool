@@ -1,0 +1,216 @@
+{
+  "baseline_revision": "5413ccb36dfc97f5ddd6c1e875e9c55ba3ab280d",
+  "scope": "Local generated-input verification; no physical camera, private recording, installation or field qualification.",
+  "distinct_browser_scenarios": 300,
+  "browser_runs": [
+    {
+      "name": "general_initial",
+      "stats": {
+        "startTime": "2026-11-11T23:23:37.279Z",
+        "duration": 608279.494,
+        "expected": 227,
+        "skipped": 0,
+        "unexpected": 4,
+        "flaky": 0
+      },
+      "local_receipt": "qa-local/facility-browser-initial-full-results.json",
+      "receipt_sha256": "2c8d71327d7730b6e103c6349c095d3439ba17c78698b6bed925b50d7b08c243",
+      "local_log": "/tmp/dvr-seamless-facility-full.log",
+      "log_sha256": "26de33807fc35d28057a4607bb5cdb19a19a5bcaa089a8659394e4918152640a"
+    },
+    {
+      "name": "recovery_system_final",
+      "stats": {
+        "startTime": "2026-11-11T23:35:33.650Z",
+        "duration": 41227.822,
+        "expected": 14,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "local_receipt": "qa-local/facility-browser-recovery-system-final-results.json",
+      "receipt_sha256": "5fdfedc8d7760323b65628f0c85068fa241416060c1f01271eb9fa03c69ff99b",
+      "local_log": "/tmp/dvr-seamless-recovery-system-final.log",
+      "log_sha256": "e5ff945dac5a12154466a5020b975d03ead51987e34cdca7a219acb15a6dfab3"
+    },
+    {
+      "name": "source_handoffs_final",
+      "stats": {
+        "startTime": "2026-11-11T23:36:31.589Z",
+        "duration": 15703.497000000001,
+        "expected": 7,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "local_receipt": "qa-local/source-handoffs-targeted-final.json",
+      "receipt_sha256": "5a9def690930672cad98329b2f39eb193accbf1f8cc519bac9f4a54a48359eaa",
+      "local_log": "/tmp/dvr-seamless-source-handoffs-final.log",
+      "log_sha256": "824e05a3c41250f6bc1a37cb7086be8138814a37c8c7c52e3560c4d23c2c0f11"
+    },
+    {
+      "name": "review_recovery",
+      "stats": {
+        "startTime": "2026-11-11T23:19:57.466Z",
+        "duration": 81478.526,
+        "expected": 34,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "local_receipt": "qa-local/library-browser-results.json",
+      "receipt_sha256": "db1ad3da5be5d7c9e110cd9bddf00e33c47eeddfc34bcd5e30b479f90cf8d29b",
+      "local_log": "/tmp/dvr-seamless-library-candidate.log",
+      "log_sha256": "1ac4d94538b45ef700c8b05d01114be4aa6788f58b392af394ceaa07d5610cae"
+    },
+    {
+      "name": "native_analysis_training",
+      "stats": {
+        "startTime": "2026-11-11T23:25:28.344Z",
+        "duration": 272699.239,
+        "expected": 19,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "local_receipt": "qa-local/analysis-browser-results.json",
+      "receipt_sha256": "c7675ad3a3689092b233b7239a25f9d9dbeaaa5108676e416d2426fae671f7d3",
+      "local_log": "/tmp/dvr-seamless-analysis-full.log",
+      "log_sha256": "6fe7935e8d2908f169b5856cb3fef9b5f0911000606c204b7a99c4b4a80ebc08"
+    },
+    {
+      "name": "feeds",
+      "stats": {
+        "startTime": "2026-11-11T23:31:02.464Z",
+        "duration": 25053.724,
+        "expected": 13,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "local_receipt": "qa-local/feeds-browser-results.json",
+      "receipt_sha256": "40209252038cc520481d8389102f8f4204c48788c0c4188ef82495e70c1dc7a5",
+      "local_log": "/tmp/dvr-seamless-feeds.log",
+      "log_sha256": "c23d3e19cbef137b0f52bbaaf613f02e852fb8c0ee32aa1154f39c71f3a1177a"
+    },
+    {
+      "name": "native_recorder",
+      "stats": {
+        "startTime": "2026-11-11T23:31:02.451Z",
+        "duration": 15789.295,
+        "expected": 2,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "local_receipt": "qa-local/recorder-browser-results.json",
+      "receipt_sha256": "bffbc8331f314c4e1b203794b22e2ef1b5a3ad95366594640f389c9feb1cb39b",
+      "local_log": "/tmp/dvr-seamless-recorder.log",
+      "log_sha256": "74cf7635eb6e17446ba9c601f9919d1c87842c8968cbf827ae0c7d3601d4fe1e"
+    },
+    {
+      "name": "native_copied_backup",
+      "stats": {
+        "startTime": "2026-11-11T23:31:02.456Z",
+        "duration": 9038.322,
+        "expected": 1,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "local_receipt": "qa-local/library-native-browser-results.json",
+      "receipt_sha256": "3ddef004582027bc8c8807d67a360a12de3ef7bc1331ffc377eadb55e9110c38",
+      "local_log": "/tmp/dvr-seamless-library-native.log",
+      "log_sha256": "e30b7e3e8d4e59a6ee778be8560f247a9a3c7bb4396abfcd1a48dc79e0bb124f"
+    }
+  ],
+  "initial_failures": [
+    {
+      "case": "Expired AI start and frame sessions",
+      "count": 2,
+      "cause": "Brittle fixed startup-check count under development StrictMode",
+      "resolution": "Exactly one additional explicit retry check, with preserved-preview/observation, rotated-token and no-automatic-start assertions; recovery_system_final14/14"
+    },
+    {
+      "case": "System basic controls and advanced draft preservation",
+      "count": 1,
+      "cause": "Exact getByLabel selector included option text; accessible combobox name was correct",
+      "resolution": "getByRole combobox by exact accessible name; recovery_system_final14/14"
+    },
+    {
+      "case": "Hidden delayed file import",
+      "count": 1,
+      "cause": "Prior test expected completion; new behavior cancels opening while hidden",
+      "resolution": "Retained prior review/sample/source request, stable return focus, explicit retry and no writes; source_handoffs_final7/7"
+    }
+  ],
+  "other_checks": [
+    {
+      "name": "node",
+      "status": "passed",
+      "passed": 551,
+      "skipped": 0,
+      "local_log": "/tmp/dvr-seamless-node-full.log",
+      "log_sha256": "a33d1048f04f5020f3e01a94bebf8a863f8664d68827e068f5f38b9fd9e2b142"
+    },
+    {
+      "name": "python",
+      "status": "passed",
+      "passed": 545,
+      "skipped": 0,
+      "local_log": "/tmp/dvr-seamless-python-full.log",
+      "log_sha256": "f33ac3cc3c59b48b38a794d87b75d86302a2501217f48795e3fee723248389a9"
+    },
+    {
+      "name": "sites",
+      "status": "passed",
+      "passed": 4,
+      "skipped": 0,
+      "local_log": "/tmp/dvr-seamless-sites-final.log",
+      "log_sha256": "94804a07da75376d86bfd1156335ed216c3f41490bcddd446d8d33cdd40fbcd2"
+    },
+    {
+      "name": "production_build",
+      "status": "passed",
+      "warning": "Existing large Facility Studio chunk",
+      "local_log": "/tmp/dvr-seamless-build-final.log",
+      "log_sha256": "81e83250563a73c03731914a32478977778e6367b154ee7304ac2259adc2d084"
+    }
+  ],
+  "baseline_regressions": [
+    {
+      "name": "coverage",
+      "local_log": "/tmp/dvr-seamless-coverage-baseline-all.log",
+      "log_sha256": "3a0890e48845247e6ff0642d774dc647455f17c578e50535775451cb77f9b19d"
+    },
+    {
+      "name": "session_and_scorecard",
+      "local_log": "/tmp/dvr-seamless-browser-baseline.log",
+      "log_sha256": "bfbce1165555135d4d1e6fa01ae661daed963b7537242cf0973a9aeecb5058d6"
+    },
+    {
+      "name": "review_intent",
+      "local_log": "/tmp/dvr-seamless-intent-baseline.log",
+      "log_sha256": "8d1f96c80abb888d0ac7b5233025260c3b11025aff2969af5aca976e75328714"
+    },
+    {
+      "name": "native_training_revised",
+      "local_log": "/tmp/dvr-seamless-native-training-baseline-revised.log",
+      "log_sha256": "143fc82ac1903cbde9a3a602ab44c8ba632d7797b3d0d98663acd355ad0edd3f"
+    }
+  ],
+  "review": {
+    "available_model_visual": "PASS",
+    "independent_code": "PASS",
+    "different_provider": "Not completed: installed CLI was not logged in; zero API usage; no authentication change"
+  },
+  "screenshots": {
+    "01-monitor-before.jpg": "88588c20e7d69bab645b99370f5a5e00502f20261b3f0f4e5d838416e95decd0",
+    "02-recognition-before.jpg": "f5d8d51e1075aed494e77fb9f6b9c85960ab6ab87c7742efc36a0c1fa70006eb",
+    "03-system-before.jpg": "18ad588c6117cf56d6a375f7d56e6012ce8e5b9542dd8743e8e08b68f20aa4a1",
+    "04-monitor-after.jpg": "65f3a23056f31d61c57d3e9095850ac2464437dff2ee0f13bfe33bd28f10a3f6",
+    "05-monitor-mobile-after.jpg": "cb9a66eff4a38d9fce7611ccfa62f6a589e14a6f3206f984cbbd2692c0a867aa",
+    "06-system-after.jpg": "c5e351d8a3b198a32ddaccf89f7fe75bd448c8251f1169aebdb001b24592a146",
+    "07-system-mobile-advanced-after.jpg": "d09c89cdbf9d78f52cc15072818190a28720cecb30975ed25fd2b888e8cf19c3"
+  }
+}
