@@ -1,5 +1,9 @@
 # Verification index
 
+[Science and mathematical improvements, November 11](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/science-math-2026-11-11/README.md)
+records empirical threshold selection, lifecycle-aware detector sampling and exact
+sparse association, with generated regressions and primary research references.
+
 [Documentation reconciliation, November 11](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/documentation-refresh-2026-11-11/README.md)
 records the merged PR #110 source/CI binding, reviewed guide inventory,
 current task/setup instructions, dated screenshot collections and Wiki checks.

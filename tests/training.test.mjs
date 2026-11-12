@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { trainingHasPendingWork, personHasPendingWork } from '../src/training-lifecycle.mjs';
 import { TRAINING_SCRIPT, CHECK_SCRIPT, scriptTimeline, scriptSeconds, labelFrames, countObservations, evaluate, recommendThreshold, compareTrainingCheck,
-  frameMoments, plural, readHistory, ENROLL_SCRIPT, BASELINE_SCRIPT, CONSENT_TEXT, baselineText, appendHistory, readDefaultRules, writeDefaultRules, HISTORY_KEY, percent } from '../src/training.mjs';
+  frameMoments, plural, readHistory, ENROLL_SCRIPT, BASELINE_SCRIPT, CONSENT_TEXT, baselineText, appendHistory, readDefaultRules, writeDefaultRules, HISTORY_KEY, percent, formatThreshold } from '../src/training.mjs';
 
 const frame = (seconds, ...scores) => ({ seconds, detections: scores.map(score => ({ label: 'person', score, box: [0, 0, .5, .5] })) });
 function memory(fail = false) {
@@ -73,6 +73,41 @@ test('calibration preserves both counts and finds a useful cutoff even when the 
     { threshold: .45, reason: 'keep-current', emptyMax: .45 });
   assert.deepEqual(recommendThreshold([present(.8), empty(.5)], { current: .5 }),
     { threshold: .7, reason: 'ok', emptyMax: .5 });
+});
+
+test('empirical thresholds separate nearby scores without sacrificing person finds', () => {
+  const labeled = personScore => [
+    ...Array.from({ length: 3 }, () => ({ segment: 'check-present', expect: 'present', score: personScore })),
+    ...Array.from({ length: 3 }, () => ({ segment: 'check-empty', expect: 'absent', score: .51 })),
+  ];
+  const narrow = labeled(.53);
+  assert.equal(compareTrainingCheck(narrow, .5, .52).verdict, 'improved');
+  const recommendation = recommendThreshold(narrow, { current: .5 });
+  assert.equal(recommendation.reason, 'ok');
+  assert.ok(recommendation.threshold > .51 && recommendation.threshold <= .53);
+  assert.equal(compareTrainingCheck(narrow, .5, recommendation.threshold).verdict, 'improved');
+  const finer = labeled(.514).map(f => f.expect === 'absent' ? { ...f, score: .512 } : f);
+  assert.equal(compareTrainingCheck(finer, .5, .51).verdict, 'unchanged');
+  assert.equal(compareTrainingCheck(finer, .5, .52).verdict, 'tradeoff');
+  assert.equal(recommendThreshold(finer, { current: .5 }).threshold, .514);
+  assert.deepEqual(recommendThreshold([
+    { expect: 'present', score: .509 }, { expect: 'present', score: .8 },
+    { expect: 'absent', score: .51 },
+  ], { current: .5 }), { threshold: .5, reason: 'keep-current', emptyMax: .51 });
+});
+
+test('threshold text preserves the exact numeric cutoff instead of rounding to the manual grid', () => {
+  assert.equal(formatThreshold(.4), '0.40');
+  assert.equal(formatThreshold(.514), '0.514');
+  for (const value of [.3, .514, .5140000000000001, .9, 1]) assert.equal(Number(formatThreshold(value)), value);
+});
+
+test('computed margin preferences drop arithmetic residue without rounding observed cutoffs', () => {
+  const preferred = recommendThreshold([{ expect: 'present', score: .9 }, { expect: 'absent', score: .56 }], { current: .5 });
+  assert.equal(preferred.threshold, .76);
+  assert.equal(formatThreshold(preferred.threshold), '0.76');
+  const empirical = .5140000000000001;
+  assert.equal(recommendThreshold([{ expect: 'present', score: empirical }, { expect: 'absent', score: .512 }], { current: .5 }).threshold, empirical);
 });
 
 test('fresh-clip comparisons report separate person and empty-view counts for both frozen settings', () => {

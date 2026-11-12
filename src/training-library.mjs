@@ -1,4 +1,4 @@
-import { SENSITIVITY, recommendThreshold } from './training.mjs';
+import { recommendThreshold, fitCalibrationThreshold } from './training.mjs';
 import { checkContextError } from './training-evidence.mjs';
 
 export const TRAINING_LIBRARY_KEY = 'dvr.training.library.v1';
@@ -141,18 +141,8 @@ export function recommendCumulativeThreshold(outcome, sessions) {
   // never optimization samples. Every calibration session gets equal weight.
   const calibration = [...sessions.map(s => s.calibration), samples(outcome)];
   if (calibration.some(s => !scores(s.present) || !scores(s.absent))) return single;
-  const emptyMax = calibration.reduce((largest, s) => s.absent.reduce((a, b) => Math.max(a, b), largest), 0);
-  const preferred = Math.min(SENSITIVITY.max, Math.max(SENSITIVITY.floor, emptyMax + SENSITIVITY.margin));
-  let best = null;
-  for (let threshold = SENSITIVITY.floor; threshold <= SENSITIVITY.max + 1e-8; threshold += SENSITIVITY.step) {
-    threshold = Number(threshold.toFixed(2));
-    const pairs = calibration.map(s => ({ b: measure(s, outcome.current), c: measure(s, threshold) }));
-    if (pairs.some(({ b, c }) => !c.found || c.found < b.found || c.falseAlarms > b.falseAlarms) ||
-        !pairs.some(({ b, c }) => c.found > b.found || c.falseAlarms < b.falseAlarms)) continue;
-    const score = pairs.reduce((n, { c }) => n + c.found / c.presentChecks - c.falseAlarms / c.emptyChecks, 0) / pairs.length;
-    if (!best || score > best.score + 1e-10 || Math.abs(score - best.score) < 1e-10 && Math.abs(threshold - preferred) < Math.abs(best.threshold - preferred)) best = { threshold, score };
-  }
-  return { threshold: best?.threshold ?? outcome.current, reason: best ? 'ok' : 'keep-current', emptyMax };
+  const { threshold, emptyMax } = fitCalibrationThreshold(calibration, outcome.current);
+  return { threshold: threshold ?? outcome.current, reason: threshold !== null ? 'ok' : 'keep-current', emptyMax };
 }
 
 // Receipts contain sample counts and fingerprints, never a camera identifier or

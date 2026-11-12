@@ -1,5 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { recommendThreshold } from '../src/training.mjs';
 import { TRAINING_LIBRARY_KEY, readTrainingLibrary, trainingSessionEvidence, saveTrainingEvidence,
   removeTrainingEvidence, compatibleTrainingSessions, recommendCumulativeThreshold,
   compareTrainingLibrary, trainingLibraryReceipt, withTrainingLibraryDecision } from '../src/training-library.mjs';
@@ -56,9 +57,79 @@ test('saved fresh checks guard changes but are excluded from fitting', () => {
   const past = trainingSessionEvidence('Door', outcome(1), { confirmed: true, context: outcome(2, [.8, .8, .8], [.6, .6, .6]) });
   const next = outcome(3);
   const recommendation = recommendCumulativeThreshold(next, [past]);
+  assert.deepEqual(recommendation, recommendCumulativeThreshold(next, [{ ...past, check: null }]));
   assert.ok(recommendation.threshold < .6); // the check did not train the suggestion
   const result = compareTrainingLibrary([past], next.current, recommendation.threshold, next);
   assert.equal(result.regressions, 1); // nevertheless cannot apply this proposal
+});
+
+test('cumulative empirical search preserves every recording instead of hiding a regression in totals', () => {
+  const next = { ...outcome(3, [.514, .514, .514], [.512, .512, .512]), current: .5 };
+  const past = evidence(1, [.514, .514, .514], [.512, .512, .512]);
+  const recommendation = recommendCumulativeThreshold(next, [past]);
+  assert.equal(recommendation.threshold, .514);
+  const replay = compareTrainingLibrary([past], .5, .514, next);
+  assert.equal(replay.regressions, 0);
+  assert.deepEqual(replay.candidate, { found: 6, presentChecks: 6, falseAlarms: 0, emptyChecks: 6 });
+  const vulnerable = evidence(2, [.511, .8, .8], [.512, .512, .512]);
+  assert.equal(compareTrainingLibrary([vulnerable], .5, .514, next).regressions, 1);
+  assert.equal(recommendCumulativeThreshold(next, [vulnerable]).threshold, .5);
+});
+
+test('identical score distributions use the same margin tie policy alone or across independent recordings', () => {
+  const next = { ...outcome(2, [.9, .9, .9], [.41, .41, .41]), current: .4 };
+  const past = evidence(1, [.9, .9, .9], [.41, .41, .41]);
+  assert.deepEqual(recommendCumulativeThreshold(next, [past]), recommendThreshold(next.labeled, { current: .4 }));
+});
+
+test('a long calibration clip has one session vote and equal weight for each prompt condition', () => {
+  const next = outcome(2, [.6, .6, .95], [.1, .1, .1]);
+  const small = evidence(1, [.95, .95, .95], [.8, .1, .1]);
+  const long = evidence(1, Array(1000).fill([.95, .95, .95]).flat(), Array(1000).fill([.8, .1, .1]).flat());
+  const shortRecommendation = recommendCumulativeThreshold(next, [small]);
+  const longRecommendation = recommendCumulativeThreshold(next, [long]);
+  // Lowering gains 2/3 person finds in the short session; raising removes 1/3
+  // empty flags in the other. Pooling frames would let the long clip reverse it.
+  assert.equal(shortRecommendation.threshold, .6);
+  assert.deepEqual(longRecommendation, shortRecommendation);
+  assert.equal(compareTrainingLibrary([long], next.current, longRecommendation.threshold, next).regressions, 0);
+});
+
+test('empirical sweep matches an exhaustive operating-state oracle on small generated sessions', () => {
+  const alphabet = [.412, .414, .8];
+  const prior = evidence(1, [.414, .8, .8], [.412, .412, .8]);
+  const counts = (sample, threshold) => ({
+    found: sample.present.filter(score => score >= threshold).length,
+    alarms: sample.absent.filter(score => score >= threshold).length,
+  });
+  for (let encoded = 0; encoded < alphabet.length ** 6; encoded++) {
+    let rest = encoded;
+    const scores = Array.from({ length: 6 }, () => { const score = alphabet[rest % alphabet.length]; rest = Math.floor(rest / alphabet.length); return score; });
+    for (const current of [.413, .5, .8]) {
+      const next = { ...outcome(2, scores.slice(0, 3), scores.slice(3)), current };
+      const samples = [prior.calibration, { present: scores.slice(0, 3), absent: scores.slice(3) }];
+      // Endpoints and interval midpoints independently cover every possible
+      // classifier state, including equality and the all-negative state.
+      const endpoints = [...new Set([.4, .9, ...samples.flatMap(s => [...s.present, ...s.absent])])].sort((a, b) => a - b);
+      const oracleCandidates = [...endpoints, ...endpoints.slice(1).map((value, i) => (value + endpoints[i]) / 2)];
+      const baselines = samples.map(sample => counts(sample, current));
+      const admissibleScore = threshold => {
+        const pairs = samples.map((sample, i) => ({ sample, before: baselines[i], after: counts(sample, threshold) }));
+        if (pairs.some(({ before, after }) => !after.found || after.found < before.found || after.alarms > before.alarms) ||
+          !pairs.some(({ before, after }) => after.found > before.found || after.alarms < before.alarms)) return null;
+        return pairs.reduce((sum, { sample, after }) => sum + after.found / sample.present.length - after.alarms / sample.absent.length, 0) / pairs.length;
+      };
+      const attainable = oracleCandidates.map(admissibleScore).filter(score => score !== null);
+      const recommendation = recommendCumulativeThreshold(next, [prior]);
+      const context = `scores=${scores}; current=${current}`;
+      if (!attainable.length) assert.equal(recommendation.threshold, current, context);
+      else {
+        const selectedScore = admissibleScore(recommendation.threshold);
+        assert.notEqual(selectedScore, null, context);
+        assert.ok(Math.abs(selectedScore - Math.max(...attainable)) < 1e-10, context);
+      }
+    }
+  }
 });
 
 test('duplicates never inflate session counts, including cross-use of a saved check', async () => {

@@ -65,6 +65,7 @@
 ### Engineering and evidence
 
 - [Architecture and data](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Architecture-and-data)
+- [Science and algorithms](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Science-and-algorithms)
 - [Edge CLI](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Edge-CLI)
 - [Security boundary](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Security-boundary)
 - [Third party notices](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Third-party-notices)

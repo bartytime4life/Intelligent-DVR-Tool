@@ -143,7 +143,9 @@ def run(stdin, stdout, backend_name='opencv-cpu'):
                 continue
             decoded = time.perf_counter()
             moved = motion.measure(frame)
-            following = any(t['state'] == 'tracked' for t in tracker.active())
+            # Sampling policy includes tentative/lost and unnumbered tracks;
+            # the bounded UI report is not the tracker's association inventory.
+            following = tracker.needs_detection(seconds)
             idle = (config['motion_gate'] and moved < MOTION_IDLE and not following and last_detector is not None
                     and seconds - last_detector < KEYFRAME_SECONDS)
             result = {'type': 'result', 'seconds': round(seconds, 6), 'width': int(width), 'height': int(height),

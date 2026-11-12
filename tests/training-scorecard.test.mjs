@@ -66,6 +66,30 @@ test('calibration allows exploration and the returned check locks the tested set
   assert.match(readOnly, /<button[^>]*disabled=""[^>]*>[^]*?Use checked setting 0\.40/);
 });
 
+test('advanced sensitivity can select the same hundredth precision as the recommendation', () => {
+  const precise = labeled.map(f => ({ ...f, score: f.expect === 'present' ? .53 : .51 }));
+  const html = render({ outcome: { ...outcome, labeled: precise } });
+  assert.match(html, /<input[^>]*aria-label="Trial detection threshold"[^>]*step="0\.01"[^>]*value="0\.53"/);
+  assert.match(html, /Trial 0\.53/);
+});
+
+test('an empirical cutoff is shown exactly and the frozen fresh check does not round it to the slider', () => {
+  const precise = labeled.map(f => ({ ...f, score: f.expect === 'present' ? .514 : .512 }));
+  const preciseOutcome = { ...outcome, labeled: precise };
+  const html = render({ outcome: preciseOutcome });
+  assert.match(html, /Trial <small>0\.514<\/small>/);
+  assert.match(html, /<output>0\.514<\/output>/);
+  assert.match(html, /aria-valuetext="0\.514"/);
+  assert.match(html, /Moving the slider chooses a manual threshold in 0\.01 steps/);
+  const preciseCheck = { value: .514, confirmed: true, result: {
+    baseline: evaluate(precise, .5), candidate: evaluate(precise, .514), verdict: 'improved',
+  } };
+  const frozen = render({ outcome: preciseOutcome, check: preciseCheck });
+  assert.match(frozen, /Use checked setting 0\.514<\/button>/);
+  assert.match(frozen, /fixed at 0\.514 before the fresh check/);
+  assert.doesNotMatch(frozen, /type="range"/);
+});
+
 test('missing empty prompts are disclosed separately from zero person flags', () => {
   const html = render({ outcome: { ...outcome, labeled: labeled.filter(f => f.expect === 'present') } });
   assert.match(html, /No samples/);

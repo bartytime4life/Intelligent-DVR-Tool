@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { ArrowClockwise, CheckCircle, DownloadSimple, Trash, WarningCircle, X } from '@phosphor-icons/react';
 import { analysisRequest, localAnalysisOrigin } from './local-analysis.mjs';
 import { CHECK_SCRIPT, TRAINING_SCRIPT, evaluate, frameMoments, compareTrainingCheck, readHistory, appendHistory,
-  readTrainingSelection, trainedPreferenceMatches, writeDefaultRules, plural, ENROLL_SCRIPT, BASELINE_SCRIPT, CONSENT_TEXT, baselineText } from './training.mjs';
+  readTrainingSelection, trainedPreferenceMatches, writeDefaultRules, plural, ENROLL_SCRIPT, BASELINE_SCRIPT, CONSENT_TEXT, baselineText, formatThreshold } from './training.mjs';
 import { checkContextError, makeTrainingReceipt } from './training-evidence.mjs';
 import { downloadBlob } from './clip-capture.mjs';
 import OllamaCoach from './OllamaCoach.jsx';
@@ -173,7 +173,7 @@ export default function TrainingWorkspace({ onOpenRecognition, onDirtyChange }) 
           const { dwell, max_gap, rect } = outcome.rule;
           // Identical checked rule contents are reusable, including after a lost
           // response. Repeated sessions need not consume another catalog slot.
-          const name = `Person · checked threshold ${value.toFixed(2)}`;
+          const name = `Person · checked threshold ${formatThreshold(value)}`;
           const response = await analysisRequest('/training/rules', { token: currentSession.token, method: 'POST',
             body: { name, label: 'person', threshold: value, rect, dwell, max_gap } });
           ({ rule } = await response.json());
@@ -298,7 +298,7 @@ export default function TrainingWorkspace({ onOpenRecognition, onDirtyChange }) 
       onSession={session => setService({ ...session, state: 'ready' })}
       onRetry={() => reset('camera')} onDone={result => { setOutcome(result); setClip(null); setStep('results'); }} />}
     {(step === 'check-camera' || step === 'check-record') && <>
-      {step === 'check-camera' && <p className="training-intro">Keep the same camera and view. This 20-second recording checks the current setting and your chosen threshold of {check.value.toFixed(2)} side by side.</p>}
+      {step === 'check-camera' && <p className="training-intro">Keep the same camera and view. This 20-second recording checks the current setting and your chosen threshold of {formatThreshold(check.value)} side by side.</p>}
       <CaptureSteps key="fresh-check" step={step === 'check-camera' ? 'camera' : 'record'} script={CHECK_SCRIPT}
         preferredCameraKey={outcome.cameraKey} startLabel="Start check recording"
         aim="Use the same camera, framing and lighting as the first recording."
@@ -388,7 +388,7 @@ function Moments({ source, moments, threshold }) {
     return () => { live = false; URL.revokeObjectURL(url); video.removeAttribute('src'); };
   }, [source, moments.map(m => m.wall).join()]);
   return <section className="training-moments" aria-label="Moments to check">
-    <h3>Moments worth a look at {threshold.toFixed(2)}</h3>
+    <h3>Moments worth a look at {formatThreshold(threshold)}</h3>
     <ul>{moments.map(m => <li key={`${m.kind}${m.wall}`}>
       {stills[m.wall] ? <img src={stills[m.wall]} alt="" /> : <span className="training-still-placeholder" />}
       <strong>{m.kind === 'false-alarm' ? 'Person flag during empty prompt' : 'No person flag during in-view prompt'}</strong>

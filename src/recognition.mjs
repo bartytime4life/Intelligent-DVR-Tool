@@ -73,8 +73,9 @@ export function validateTracking(t) {
     const summary = value.classes[label]; times.sort((a,b) => a-b);
     const middle = Math.floor(times.length / 2);
     // v1 receipts used the upper middle duration. Preserve that historical
-    // contract; v2 reports the conventional average for an even-sized group.
-    const median = value.method === 'bytetrack-style-iou-kalman-v2' && times.length % 2 === 0
+    // contract; v2/v3 report the conventional average for an even-sized group.
+    const conventional = ['bytetrack-style-iou-kalman-v2', 'bytetrack-style-iou-kalman-v3'].includes(value.method);
+    const median = conventional && times.length % 2 === 0
       ? (times[middle - 1] + times[middle]) / 2 : times[middle];
     require(summary && summary.tracks === times.length && finite(summary.longest_duration_seconds) && finite(summary.median_duration_seconds) &&
       Math.abs(summary.longest_duration_seconds - times.at(-1)) <= .001 &&

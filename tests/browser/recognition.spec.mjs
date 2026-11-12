@@ -5,14 +5,16 @@ import { parseReceipt } from '../../src/data.mjs';
 
 const upload = value => ({name:'review.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(value))});
 
-test('Recognition opens v2 even-track summaries and historical v1 results', async ({page}, testInfo) => {
+test('Recognition opens v2/v3 even-track summaries and historical v1 results', async ({page}, testInfo) => {
   await page.goto('/#recognition');
   await page.getByRole('button',{name:/^Open saved results/}).click();
-  await page.getByLabel('Open recognition results').setInputFiles(upload(trackingRecognitionFixture()));
-  await expect(page.getByText('No recording attached. Results alone are unverified metadata.')).toBeVisible();
-  await expect(page.getByRole('heading', {name:/^Tracks /})).toBeVisible();
-  await expect(page.locator('.recognition-tracks .recognition-counts')).toContainText('median 0.3 s');
-  await page.screenshot({path:testInfo.outputPath('v2-tracks.png'),fullPage:true});
+  for(const method of ['bytetrack-style-iou-kalman-v2','bytetrack-style-iou-kalman-v3']){
+    await page.getByLabel('Open recognition results').setInputFiles(upload(trackingRecognitionFixture(method)));
+    await expect(page.getByText('No recording attached. Results alone are unverified metadata.')).toBeVisible();
+    await expect(page.getByRole('heading', {name:/^Tracks /})).toBeVisible();
+    await expect(page.locator('.recognition-tracks .recognition-counts')).toContainText('median 0.3 s');
+  }
+  await page.screenshot({path:testInfo.outputPath('v3-tracks.png'),fullPage:true});
   await page.getByLabel('Open recognition results').setInputFiles(upload(trackingRecognitionFixture('bytetrack-style-iou-kalman-v1')));
   await expect(page.locator('.recognition-tracks .recognition-counts')).toContainText('median 0.5 s');
   const malformed = trackingRecognitionFixture();

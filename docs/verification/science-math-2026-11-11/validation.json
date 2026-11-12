@@ -1,0 +1,127 @@
+{
+  "data_kind": "synthetic",
+  "qualification": "NOT_ESTABLISHED",
+  "baseline_revision": "c517b438789efbe81d410f23f2a0a173ed72c86c",
+  "checks": [
+    {
+      "name": "production build and Sites preparation",
+      "status": "passed",
+      "existing_warning": "Facility chunk exceeds500kB; no bundle splitting changed"
+    },
+    {
+      "name": "full Node suite",
+      "status": "passed",
+      "discovered": 561,
+      "passed": 559,
+      "skipped": 2,
+      "skip_scope": "Opt-in HTTP/socket checks"
+    },
+    {
+      "name": "explicit Node loopback suites",
+      "status": "passed",
+      "discovered": 8,
+      "passed": 8,
+      "skipped": 0,
+      "reconciles_full_suite_skips": true
+    },
+    {
+      "name": "full Python suite with DVR_TEST_SOCKETS=1",
+      "status": "passed",
+      "discovered": 560,
+      "passed": 560,
+      "skipped": 0
+    },
+    {
+      "name": "focused Chrome browser suite",
+      "status": "passed",
+      "passed": 14,
+      "skipped": 0,
+      "scope": [
+        "Recognition v1/v2/v3 imports and provenance",
+        "training exact cutoffs1440px/375px",
+        "training guidance/preservation/start recovery"
+      ],
+      "runner": "Playwright1.61.1 /Google Chrome157.0.8103.50",
+      "initial_environment_failure": "Default Playwright headless shell not installed; used existing Chrome channel without installation",
+      "test_harness_correction": "New exact-cutoff test closed an already-open Advanced panel; removed duplicate click. Application behavior passed."
+    },
+    {
+      "name": "Sites Worker suite",
+      "status": "passed",
+      "passed": 4
+    },
+    {
+      "name": "documentation links and historical/media integrity",
+      "status": "passed",
+      "local_links": 1449
+    },
+    {
+      "name": "generated Wiki freshness",
+      "status": "passed",
+      "files": 66,
+      "published": false
+    },
+    {
+      "name": "independent assignment review",
+      "status": "passed",
+      "scope": "Exact component objective, gates, ties, dense guard, source binding and historical imports"
+    },
+    {
+      "name": "whitespace",
+      "status": "passed"
+    },
+    {
+      "name": "independent training review",
+      "status": "passed",
+      "scope": "Empirical endpoint completeness, equal-session constraints, cursor correctness, fresh-check isolation and exact check/export/application values",
+      "focused_tests": 70,
+      "additional_generated_oracle_cases": 2000
+    }
+  ],
+  "current_source_sha256": {
+    "edge/live_worker.py": "0941314679d91d0387d23ffb7ab34d200519e97aaa01aa634e8d8a6b39c6f8e2",
+    "edge/tracking.py": "882aeb583ae2f92b7112b98fd22851f6c26882a00961b228d25cbf50eb8811c0",
+    "scripts/build-wiki.py": "426ab157cec80df20b07e8bac79a644ff45a8429e6a6d36eec21545e1fc8ac32",
+    "scripts/compare-association-components.py": "b2ff6f478d9ba0a46c45bca11e919496fd25cfe137a00c3ac54810420ba5157f",
+    "src/TrainingScorecard.jsx": "721f872f7dcac0d0307d839b17f9646c2da009af3b2095c41a015fc2f33a31d2",
+    "src/TrainingWorkspace.jsx": "d30f9095d68175dca68b9da585af6411b808fc7888605bc2996f4fbe77cc38d5",
+    "src/recognition.mjs": "46cbbf4db0e48e2664d8374527552e3ee48cceb73258afaab07a016bd1327981",
+    "src/training-library.mjs": "87a9d9a951b98eba5420129f7d700365a909a2b66c91b5c95d249adb722081ea",
+    "src/training.mjs": "c94a042c9c739cf2d4aadb2c97144d820af09f1ae137c0ca75bdb9199f072e59",
+    "tests/browser/recognition.spec.mjs": "728ede56afa4a30618c51e0b3865b0be68a38d73c9b8544c412163e9ad9130bb",
+    "tests/browser/training-guidance.spec.mjs": "39befc8e138fd71abe93ef044da7c31e933a9050183d33c59848e9867afaac01",
+    "tests/fixtures/recognition.mjs": "ca1155233f6e70283def39a0b90a50334c496235dbd5aae0a234390ef0405561",
+    "tests/recognition.test.mjs": "c038ffdab2bb0b56fa2b346a3aba0cd38088a75be4078543ca728fbf29ae1362",
+    "tests/test_live_worker.py": "f07abab3f7beae7c2be2b9a80c1ec4667af627c4afef70f80db75ed54d4849b5",
+    "tests/test_tracking.py": "5d862890332028b4d28a1c062ea49e71f9e4a651ae5e823c7a0d1deca2410f02",
+    "tests/test_tracking_association.py": "f56859ea7850eee85c0071ad4297fcdc560d4481ce3960b99fcb10055ae86ee4",
+    "tests/training-evidence.test.mjs": "79ae4d6fc5c12d312cbe1af035d7d4c546a89977cb03c4c31b92d611d5520602",
+    "tests/training-library.test.mjs": "ba23830da96b78bc158dea800b0b6bf373dfd61bf26ab7468f88ae30cc317933",
+    "tests/training-scorecard.test.mjs": "c0660fb9fbc127e8d1f307b80ae1464ed5756b7af6d80dbfbe0b2a28f3651b04",
+    "tests/training.test.mjs": "3ef05d26790eceb4bd0b87e3260dff33b9ef0e421218d22c11b2d301e2448ac4"
+  },
+  "unchanged_protected_sha256": {
+    "edge/inference.py": "7e95beb9e25dd67ac5d8d977ec6c466874371d12d112119a85a619124687b2f1",
+    "edge/journal.py": "70f7a3419d05d76380ea32ad5de20ee440bc17256e25baf0f2289a86e46a495a",
+    "edge/supervision.py": "03f334d5fa072e5f3ad02bd90536fd2c00fc97ebfaa54ca1ef1c10b64b80a9cf",
+    "edge/scheduler.py": "8639b46d3ba2e1a14efaa7ff647f412e6be437685ec7be5717a00983835b9019",
+    "edge/profiling.py": "f7c0a3e4b831d7f996840aec51a73e3fe68e06627cdce854716c576068f80f91",
+    "package.json": "f461ab9ccfa49f2905fcadf70abdfd674d23b173af474d08ea3c2f585b11a57f",
+    "package-lock.json": "b71d95b16fe76f892c899ad4e832380add9298fed4e6c0973fc44d18b455f480",
+    ".openai/hosting.json": "d532abb65cf9ae20634b464d954cb4a08a0de9f3cd3cdf7f9c3ec8948826d947",
+    "worker/index.js": "2dd0615a445143933d88d4271f54f5d63ee951421fcd08c5a7617bb09c564389",
+    "scripts/prepare-sites-build.mjs": "b6a6adaa4fab3234676116dd1c9cb6611275ab9d92dd26f5bf402393e3744bf6",
+    "tests/sites-worker.test.mjs": "96af7b48906c6460c793356d7b6952f7d5026dbf5a502bec0d9297ff04201c26"
+  },
+  "publication": {
+    "repository_merge": "not_performed",
+    "installed_state": "unchanged",
+    "wiki": "generated source only; published Wiki remains at earlier merged baseline"
+  },
+  "limits": [
+    "No representative-camera recognition/tracking accuracy or hardware/capacity qualification.",
+    "Generated motion tests use prescribed detections and Python backend stub.",
+    "Existing native test environment was reused; no dependency or browser installation.",
+    "Raw local test logs and screenshots are ignored under qa-local/test-results; no private inputs were used."
+  ]
+}

@@ -81,3 +81,18 @@ test('the receipt compares the frozen setting on both clips and only exports cou
   assert.throws(() => makeTrainingReceipt(outcome, { ...check, value: .7 }), /settings changed/);
   assert.throws(() => makeTrainingReceipt(outcome, { ...check, context: outcome }), /fresh check/);
 });
+
+test('exported calibration and frozen fresh-check thresholds retain empirical precision', () => {
+  const calibration = { ...context([{ ...person, threshold: .5 }]),
+    labeled: labelFrames([frame(2, .514), frame(13, .512)]), frames: 2, value: .514 };
+  const labeled = labelFrames([frame(1, .514), frame(2, .514), frame(3, .514),
+    frame(13, .512), frame(14, .512), frame(15, .512)], { script: CHECK_SCRIPT });
+  const check = { value: .514, context: context([{ ...person, threshold: .5 }], '5'),
+    result: compareTrainingCheck(labeled, .5, .514), confirmed: true };
+  const receipt = JSON.parse(JSON.stringify(makeTrainingReceipt(calibration, check)));
+  assert.equal(receipt.calibration.recommended_threshold, .514);
+  assert.equal(receipt.calibration.candidate.threshold, .514);
+  assert.equal(receipt.fresh_check.candidate.threshold, .514);
+  assert.equal(receipt.fresh_check.verdict, 'improved');
+  assert.throws(() => makeTrainingReceipt(calibration, { ...check, value: .51 }), /settings changed/);
+});

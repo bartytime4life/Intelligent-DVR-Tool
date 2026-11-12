@@ -58,6 +58,7 @@ PAGES = {
     'docs/offline-qualification.md': 'Offline-qualification',
     'docs/pilot-scope.md': 'Pilot-scope',
     'docs/architecture.md': 'Architecture-and-data',
+    'docs/science-and-algorithms.md': 'Science-and-algorithms',
     'edge/README.md': 'Edge-CLI',
     'SECURITY.md': 'Security-boundary',
     'docs/third-party-notices.md': 'Third-party-notices',
@@ -84,7 +85,7 @@ GROUPS = {
     'Train': ['Guided-training', 'Person-enrollment', 'Enhancement-comparison'],
     'Plan the facility': ['Facility-planning', 'Saved-facilities', 'Maps-and-shapes', 'Facility-setup-reliability', 'Local-map-services', 'Facility-study-kit', 'Image-diagnostics', 'Planar-calibration'],
     'Plan and qualify the machine': ['Resource-controls', 'Hardware-guide', 'GPU-planning', '100-camera-plan', 'Field-acceptance', 'Offline-evaluation', 'Tracking-evaluation', 'Offline-qualification', 'Pilot-scope'],
-    'Engineering and evidence': ['Architecture-and-data', 'Edge-CLI', 'Security-boundary', 'Third-party-notices', 'Evidence-and-validation', 'Roadmap', 'Visual-provenance', 'Guided-experience-visual-provenance', 'Wiki-publication'],
+    'Engineering and evidence': ['Architecture-and-data', 'Science-and-algorithms', 'Edge-CLI', 'Security-boundary', 'Third-party-notices', 'Evidence-and-validation', 'Roadmap', 'Visual-provenance', 'Guided-experience-visual-provenance', 'Wiki-publication'],
     'Dated records': ['Visual-tour', 'PR61-visual-provenance', 'Historical-visual-provenance', 'Facility-setup-research', 'Facility-upgrades-2026-10-29', 'Experience-review-2026-10-29', 'Review-2026-10-30', 'Assessment-2026-10-30', 'Workspace-audit-2026-10-31', 'Model-qualification-2026-10-26'],
 }
 MEDIA_SUFFIXES = {'.gif', '.webp', '.png', '.jpg', '.svg'}
