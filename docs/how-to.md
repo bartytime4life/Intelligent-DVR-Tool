@@ -6,7 +6,9 @@
 
 *Illustrated overview, created with ImageGen. The instruction screenshots below
 show the actual application in a clean local test session; no private recordings,
-people, camera credentials or real site are pictured. [Visual provenance](media/guide/README.md).*
+people, camera credentials or real site are pictured. Monitor and System images
+come from the [November 11 guided-experience review](media/guided-experience-2026-11-11/README.md);
+other application screenshots are [dated November 1 references](media/guide/README.md).*
 
 Choose the job you want to finish:
 
@@ -16,7 +18,7 @@ Choose the job you want to finish:
 | See a camera | [2. Connect one source](#2-connect-one-source) | A deliberate preview |
 | Review a recording | [3. Analyze a clip](#3-analyze-a-clip) | Results matched to their source |
 | Make review decisions | [4. Review and export](#4-review-and-export) | Decisions, notes and an exported result pair |
-| Tune detection | [5. Improve detection](#5-improve-detection) | A new threshold rule for this view |
+| Tune detection | [5. Improve detection](#5-improve-detection) | A measured comparison, and a checked rule when improved |
 | Set a person's baseline | [6. Enroll with consent](#6-enroll-with-consent) | A local, deletable template |
 | Define an image region | [7. Draw zones](#7-draw-zones) | An analyzer-ready rules file |
 | Plan a site | [8. Build a facility](#8-build-a-facility) | A named, exportable plan |
@@ -38,6 +40,9 @@ Escape to close the finder.
 Choosing a task opens its workspace and relevant panel. Camera connections,
 recording and analysis still require their own explicit start controls.
 Cancel a leave warning to keep the current editor and search open.
+Folder backup and guided source setup need the PC DVR Companion or an
+analysis-enabled local service; the ordinary preview-only Start does not expose
+that service. Copy-only companion setup needs no detector model.
 
 | Find a task | Exact destination |
 | --- | --- |
@@ -71,7 +76,7 @@ tell the difference. A fresh install connects no source automatically.
 
 ![Three source choices: computer webcam, a configured private LAN DVR, or a permitted public HTTPS webcam.](media/guide/sources.svg)
 
-![Actual Monitor start screen showing the three source cards and no receiving camera.](media/guide/monitor.jpg)
+![November 11 Monitor with task shortcuts, three source choices and no receiving camera.](media/guided-experience-2026-11-11/04-monitor-after.jpg)
 
 1. Open **Monitor** and choose **Computer webcam**, **Local DVR / IP camera** or
    **Approved public webcam**. **Connect source** opens the same choices.
@@ -80,10 +85,20 @@ tell the difference. A fresh install connects no source automatically.
 3. Check the receiving status and moving image. Use **Disconnect** when done.
 
 For a first test, use the computer webcam. No microphone is requested. Local DVR
-channels need a reviewed private source configuration; public sources need
-provider permission and attribution. A preview runs live AI only after you press
+channels need an authorized channel configuration. Use the PC DVR Companion or
+an analysis-enabled service with camera setup enabled. If no channel is listed, choose
+**Add camera or DVR source** in Monitor's DVR chooser. It opens
+**Recognition → Use my existing DVR → Connect an IP camera or LAN DVR**.
+Choose **Connect to this computer** if requested, enter the documented channel
+details and **Save camera source**. Return to Monitor, load the saved channel,
+then **Connect DVR channel**. Saving starts no connection or recording.
+For other local launchers, follow the [source configuration guide](local-camera-feeds.md).
+
+Public sources need provider permission and attribution. A preview runs live AI only after you press
 **Start AI** on its tile: boxes, numbered tracks and rule observations appear on
 the tile, and you choose which observations to send to Events.
+If a service restart expires the live AI session, use **Check again**, then choose
+**Start AI** separately; the recheck does not resume inference automatically.
 [Webcam and DVR setup](local-camera-feeds.md) · [Public webcams](public-webcams.md) · [Live AI](live-detection.md).
 
 ## 3. Analyze a clip
@@ -107,8 +122,12 @@ the controls. It demonstrates the workflow, not detector accuracy.*
 
 Importing copies a recording locally; it does not start inference. Save both the
 recognition JSON and its exact analyzed recording for later reopening.
+To preserve finished OEM recordings instead, choose **Keep DVR copies** on
+Monitor or **Recognition → Use my existing DVR** in the companion or prepared
+analysis service. Connect, choose separate source
+and backup folders, save them, then deliberately **Start backup**.
 [Complete recording workflow](recording-workflow.md) · [Coverage labels](recording-coverage.md)
-· [Optional one-camera LAN recorder](lan-recording.md).
+· [OEM backup](oem-backup.md) · [Optional one-camera LAN recorder](lan-recording.md).
 
 ## 4. Review and export
 
@@ -138,9 +157,21 @@ are model outputs, not probabilities or proof of identity. Imported results must
 match the exact source file before overlays attach. See the
 [review desk guide](review-and-events.md) and [Recognition details](recording-recognition.md).
 
+Opening a new file or result cannot let a slower earlier download replace your
+newer choice. Leaving Recognition or hiding the page cancels a pending review
+opening and preserves the loaded review. Return and retry explicitly using
+**Open results again**/**Open results**, **Review backup**, **Review segment**,
+or by selecting the file again, as appropriate. This does not stop background analysis, backup or
+LAN recording; use their own **Cancel analysis**, **Stop backup** or
+**Stop recording & analysis** control when needed.
+
 ## 5. Improve detection
 
 Open **Train → Start session**, connect the camera, and follow the five prompts for 54 seconds. Review how often each setting found a person during the in-view prompts and flagged the empty room. You can preview a different threshold under **Advanced sensitivity**.
+
+Your manually chosen **Trial detection threshold** and expanded controls remain
+when you change whether to include combined evidence. **Reset to suggested …**
+returns to the recommendation. A fresh check keeps its tested threshold fixed.
 
 Give the camera view a name and reuse it for repeat sessions. Select **Add this
 session to the combined evidence** after confirming all five prompts. Saving a
@@ -218,12 +249,18 @@ quality or identity from an image. [Image diagnostics](facility-image-diagnostic
 
 ![Budget camera and retention needs, apply supported limits, then measure on intended hardware in stages.](media/guide/system.svg)
 
-![Actual System workspace with editable planning defaults, not measured hardware results.](media/guide/system.jpg)
+![November 11 System workspace showing recording/storage and camera-wall settings before optional advanced controls.](media/guided-experience-2026-11-11/06-system-after.jpg)
 
-Use **System** to enter recording, retention and processing needs. Review storage,
-RAM/VRAM and power arithmetic. **Apply workspace limits** applies supported
-browser limits; **Export analyzer policy** is a separate action for supported
-offline analyzer controls. Save the setup plan for future review.
+Use **System** to enter recording and retention needs, then choose 1/2/4 visible
+camera-wall tiles and overlay scale. Expand **Advanced planning details** for
+processing limits, GPU/VRAM, memory, power and host comparison. Collapsing keeps
+all entered values; its summary shows **Unapplied advanced changes** when needed.
+Validation errors and planning warnings stay outside that section. Cancel a
+leave warning to retain an unapplied draft.
+
+**Apply workspace limits** applies supported browser limits; **Export analyzer
+policy** is a separate action for supported offline analyzer controls. Use
+**Export setup plan** to preserve the whole plan for future review.
 
 The page does not provision drives, start recording, activate a GPU or benchmark
 your machine. Test one authorized source before advancing toward 5/25/50/100.

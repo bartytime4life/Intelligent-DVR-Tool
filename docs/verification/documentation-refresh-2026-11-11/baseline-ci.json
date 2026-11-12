@@ -1,0 +1,39 @@
+{
+  "schema": "intelligent-dvr.documentation-baseline.v1",
+  "checked_at_utc": "2026-11-12 01:32:12 UTC",
+  "source_commit": "cb91fa40d9d388faacca0785075c8b1986b33773",
+  "tested_pull_request": 110,
+  "tested_head": "13355e18fbac15553bc9092dbadb11bb1deab979",
+  "tree": "3d25c1c73575e2f4e6dcd1f1cc926540c372dac5",
+  "runs": [
+    {
+      "id": 43121401760,
+      "name": "PC install kit",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/bartytime4life/Intelligent-DVR-Tool/actions/runs/43121401760"
+    },
+    {
+      "id": 43121401946,
+      "name": "Cross-platform checks",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/bartytime4life/Intelligent-DVR-Tool/actions/runs/43121401946"
+    },
+    {
+      "id": 43121401882,
+      "name": "Mac source install",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/bartytime4life/Intelligent-DVR-Tool/actions/runs/43121401882"
+    },
+    {
+      "id": 43121401878,
+      "name": "Facility browser regression",
+      "status": "completed",
+      "conclusion": "success",
+      "url": "https://github.com/bartytime4life/Intelligent-DVR-Tool/actions/runs/43121401878"
+    }
+  ],
+  "scope": "Prior application baseline CI, separate from this documentation-only change and field acceptance"
+}

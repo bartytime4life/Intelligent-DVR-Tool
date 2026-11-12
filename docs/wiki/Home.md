@@ -31,26 +31,47 @@ See [local addresses and earlier installations](https://github.com/bartytime4lif
 
 ## See the current workspaces
 
-| Monitor — start with one source | Train — one guided task at a time |
+Monitor's **What’s next?** guide offers **Watch cameras**, **Analyze saved video**,
+**Keep DVR copies** and **Plan coverage**. These open existing controls; they do
+not start a camera, backup, recording or analysis. **Find a task** (**Ctrl+K** /
+**Cmd+K**) reaches the other workflows. [Task map](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-handbook#find-the-next-task).
+
+| Monitor — choose your goal | Train — one guided task at a time |
 | --- | --- |
-| ![Actual Monitor screen with webcam, local DVR and approved public webcam choices; no camera connected.](https://raw.githubusercontent.com/wiki/bartytime4life/Intelligent-DVR-Tool/docs/media/guide/monitor.jpg) | ![Actual Train screen with readiness, detection tuning and consent-based enrollment choices.](https://raw.githubusercontent.com/wiki/bartytime4life/Intelligent-DVR-Tool/docs/media/guide/train.jpg) |
+| ![November 11 Monitor with four task shortcuts above the explicit source chooser; no camera connected.](https://raw.githubusercontent.com/wiki/bartytime4life/Intelligent-DVR-Tool/docs/media/guided-experience-2026-11-11/04-monitor-after.jpg) | ![November 1 Train screen with readiness, detection tuning and consent-based enrollment choices.](https://raw.githubusercontent.com/wiki/bartytime4life/Intelligent-DVR-Tool/docs/media/guide/train.jpg) |
 | [Connect a source](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Camera-sources) | [Tune detection](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Guided-training) · [Enroll with consent](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Person-enrollment) |
 
 | Facility — build an editable plan | System — budget the workload |
 | --- | --- |
-| ![Actual Facility Studio with an explicitly fictional example plan for the guide.](https://raw.githubusercontent.com/wiki/bartytime4life/Intelligent-DVR-Tool/docs/media/guide/facility.jpg) | ![Actual System workspace showing editable planning inputs, not measured host performance.](https://raw.githubusercontent.com/wiki/bartytime4life/Intelligent-DVR-Tool/docs/media/guide/system.jpg) |
+| ![November 1 Facility Studio with an explicitly fictional example plan for the guide.](https://raw.githubusercontent.com/wiki/bartytime4life/Intelligent-DVR-Tool/docs/media/guide/facility.jpg) | ![November 11 System workspace with recording and camera-wall controls first; figures are planning assumptions.](https://raw.githubusercontent.com/wiki/bartytime4life/Intelligent-DVR-Tool/docs/media/guided-experience-2026-11-11/06-system-after.jpg) |
 | [Buildings, rooms, doors, windows and stairs](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Facility-planning) | [Resources and supported controls](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Resource-controls) |
 
-*Controlled local captures from the merged PR #71 application source. The facility is a fictional built-in example. No private footage, enrolled people or surveyed site is pictured. [Full gallery and capture details](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-atlas).*
+*Monitor and System: controlled November 11 guided-experience captures. Train and
+Facility: dated November 1 captures from merged PR #71 source; the facility is a
+fictional built-in example. No private footage, enrolled people or surveyed site
+is pictured. [Full gallery and capture details](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-atlas).*
+
+System keeps storage and camera-wall controls visible. Expand **Advanced planning
+details** for processing, GPU, memory, power and host comparison. Collapsing it
+keeps the draft; **Unapplied advanced changes**, errors and warnings remain visible.
 
 ## Use your existing DVR
+
+On Linux/Windows, use **Start-DVR-Companion-Windows.cmd** or
+**Start-DVR-Companion-Linux.sh** after installation. Copy-only mode needs no
+detector model. Folder backup and guided source setup require this companion or
+an analysis-enabled local service; an ordinary preview-only Start is insufficient.
 
 Keep the OEM software recording and use **Recognition → Use my existing DVR**
 to select its finished-recording/export folder and a separate local backup folder.
 The tool verifies each copied file, preserves originals, avoids duplicate copies,
 and optionally analyzes eligible videos. Local analysis prefers the GPU, with a
 visible CPU fallback and an explicit CPU override. [GPU guide](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Live-GPU). Guided IP-camera/LAN-DVR channel setup
-also saves authorized RTSP sources without JSON editing on the PC launcher.
+also saves authorized RTSP sources without JSON editing when the PC companion
+or analysis-enabled service exposes camera setup.
+In Monitor's **Local DVR / IP camera** chooser, **Add camera or DVR source**
+opens that guided form; choose **Connect to this computer** if requested. Return
+to Monitor, load the saved channel and explicitly connect when ready.
 [Setup, supported formats and limits](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/OEM-backup). This companion path
 has controlled software checks; particular OEMs and physical devices still need acceptance.
 
@@ -66,7 +87,8 @@ has controlled software checks; particular OEMs and physical devices still need 
 
 [Complete walkthrough](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-handbook#3-analyze-a-clip) · [Review desk](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Review-and-events) · [Recording coverage](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Recording-coverage).
 
-**Live AI:** press **Start AI** on a Monitor tile to run the same local detector on that camera, with numbered short-lived tracks and rule observations you can send to Events. It never starts on its own and keeps no footage. [How live AI and tracking work](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Live-AI-and-tracking).
+**Live AI:** press **Start AI** on a Monitor tile to run the same local detector on that camera, with numbered short-lived tracks and rule observations you can send to Events. It never starts on its own and records no video; only analyzed stills explicitly
+sent to Events are kept in this browser. [How live AI and tracking work](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Live-AI-and-tracking).
 
 Detection scores are model outputs. Track numbers follow one box across frames; they are not identities. Reports remain subject to human review.
 
@@ -129,7 +151,7 @@ python3 scripts/check-docs.py
 python3 scripts/build-wiki.py --check
 ```
 
-Use the platform's isolated dependencies for native checks; optional test fixtures require ONNX. [Verification](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Evidence-and-validation) keeps historical and current test scopes separate. PR #71's tested head passed 16 reported GitHub checks, including Mac source installation, Linux/Windows validation, the PC kit and controlled browser regressions; these are software checks, not field acceptance.
+Use the platform's isolated dependencies for native checks; optional test fixtures require ONNX. [Verification](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Evidence-and-validation) keeps historical and current test scopes separate. The [November 11 guided-experience record](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/guided-experience-2026-11-11/README.md) covers the task guide, recovery, System disclosure and planning repairs merged through [PR #110](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/110). Software and CI checks do not establish field acceptance.
 
 [Cumulative training results](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/cumulative-training-2026-11-02/README.md)
 record compatible-session pooling, browser persistence, duplicate-source

@@ -8,9 +8,10 @@
 
 October 28 follow-up: [current workflow/geometry](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Facility-setup-reliability)
 adds map pin/custom AOI selection, v2 courtyards/bases and independent parts.
-The earlier v1 limitations and evidence below describe the original increment;
-overlapping parts, live/installed services, field accuracy and novice acceptance
-remain open. [Local delivery](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Local-map-services) · [Study kit](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Facility-study-kit).
+The workflow below includes those controls; the primary-source check date at the
+end remains the original increment. Overlapping parts, live/installed services,
+field accuracy and novice acceptance remain open.
+[Local delivery](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Local-map-services) · [Study kit](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Facility-study-kit).
 
 
 Implemented 2026-10-27 in the existing MapLibre/Three.js editor. No subscription,
@@ -18,16 +19,19 @@ API key, recording upload or live person tracking is required.
 
 ## Workflow
 
-1. Facility → Locate site → submit an address/place search, use GPS or manual coordinates → review → Save site.
+1. Facility → Locate site → submit an address/place search, use GPS, pick a map pin or enter manual coordinates → review → Save site.
    GPS suggests device location; it does not measure buildings. Changing the
    origin moves the whole local plan geographically.
 2. Open **Draft buildings from OpenStreetMap**. Select a rectangular search area
-   by width/depth and east/north offsets. Its boundary appears in amber. Numeric
-   controls support keyboard input; pointer-drawn AOIs remain future work.
+   by width/depth and east/north offsets, choose **Custom polygon** and edit its
+   east/north vertex pairs, or use **Draw search area** on a ready map. The
+   boundary appears in amber; Escape/Cancel stops pointer drawing. Numeric and
+   polygon fields remain available without WebGL. Selecting an area never
+   commits a plan.
 3. **Load open building drafts** sends selected bounds to the chosen Overpass provider (Private.coffee by default; the main public instance or a configured local service are selectable). It does not send local rooms, cameras, routes or recordings.
    Nothing is requested on page load or merely by opening the panel.
-4. Review map shells, dimensions and height/floor assumptions. Uncheck unwanted
-   buildings. Boundary-crossing footprints are kept whole. Explicitly choose
+4. Review map shells, dimensions, courtyards, base/roof heights and floor
+   assumptions. Uncheck unwanted buildings. Boundary-crossing footprints are kept whole. Explicitly choose
    additive import or a clean replacement site, then **Use selected buildings**.
    Replacement clears the old cameras/rooms/labels/route; Undo restores it.
 5. Buildings → **Common building shapes** offers Rectangle, L, T, U, Cross,
@@ -84,12 +88,20 @@ drafts or facility JSON).
   are linked in the UI. It is not a critical-infrastructure dependency or SLA.
   Private/larger deployments should prepare self-hosted extracts.
 - 20–500 m per search side; area corners within 1,800 m of origin; no date-line
-  crossing. Server/client timeouts: 20/30 seconds. Minimum request interval:
+  crossing. Custom polygons have 3–50 corners, simple topology and at least
+  1 m² area. The provider receives their bounding rectangle; client filtering
+  retains whole intersecting shells and excludes courtyard-only intersections.
+  Server/client timeouts: 20/30 seconds. Minimum request interval:
   15 seconds. Response cap: 300 elements and 2 MB streamed bytes. No auto-retry.
 - Cancel/unmount or changed plan/area invalidates late responses. Partial/runtime
   error responses are rejected. Existing source IDs are excluded on repeat imports.
   Final plans still obey the 100-building and ±2 km limits.
-- Complete simple ways and complete outer-only multipolygon relations are supported. Relation segments may be joined or disjoint outer rings split into editable shells. Courtyards, incomplete/overlapping/nested relations and their members, parts, raised bases and invalid geometry are excluded with reasons.
+- Complete simple ways and supported outer/inner multipolygon relations can
+  import. Relation segments may be joined or disjoint outer rings split into
+  editable shells. Courtyards, raised bases, independent non-overlapping parts
+  and vertically disjoint volumes are retained. Invalid/incomplete topology and
+  overlapping part/envelope volumes remain excluded with reasons. See the
+  [current geometry contract](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Facility-setup-reliability#geometry-contract).
 - Bounded per-building source records preserve OSM provider/way or relation ID, ODbL license,
   retrieval/source timestamps and original height/floor basis through JSON export.
   Unknown fields/media URLs are discarded; labels render as text. Attribution is

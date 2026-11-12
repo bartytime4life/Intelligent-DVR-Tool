@@ -142,20 +142,33 @@ probe retain their separate platform and field-acceptance boundaries.
    webcam. Grant permission for this local app. No microphone is requested.
    Verify moving frames, disconnect and reconnect. Leave Monitor or hide the
    page and confirm capture stops.
-2. **DVR/IP camera:** stop the app and edit local-feeds.json using
-   edge/local-feeds.example.json as the shape. Enter the device's actual private
-   IPv4, RTSP/TCP port, exact substream path and viewer account locally. Restrict
-   this plaintext credentials file to your OS account (on Linux:
-   **chmod 600 local-feeds.json**). Check reports **WARN: dvr_config_permissions**,
-   and Start prints a warning, while group or other accounts can read it. Run Check, Start, then
-   Set up local DVR → Load configured DVR sources → select channel → Connect DVR channel.
+2. **DVR/IP camera:** for guided setup, stop the preview app and launch
+   **Start-DVR-Companion-Linux.sh** or **Start-DVR-Companion-Windows.cmd**.
+   This makes the setup connection available without requiring a recognition
+   model; backup remains paused. In Monitor choose **Local DVR / IP camera →
+   Add camera or DVR source**. Recognition opens **Use my existing DVR**;
+   choose **Connect to this computer**, enter the authorized private IPv4,
+   RTSP/TCP port, exact channel path and viewer account, then **Save camera
+   source**. Saving does not connect or record. Return to Monitor, load/refresh
+   configured DVR sources, select the saved channel and choose **Connect DVR
+   channel**. A guided save updates this running service without a restart.
 3. **Recovery:** disconnect. Try an incorrect channel in a disposable test
    configuration, observe the error, restore the settings, restart and reconnect.
-   Changing the source catalog requires restarting.
+   Manual changes to the source file require restarting; guided additions do not.
 4. **Short soak:** watch one source for several minutes and note freezes/errors.
    DVR previews deliberately end after 15 minutes; reconnect explicitly. Test
    1/2/4 visible tiles. The service has a four-preview cap; 100 configured choices
    do not establish 100 active-source capacity.
+
+For a plain preview-only launch, manual configuration remains available: stop
+the app, edit `local-feeds.json` using `edge/local-feeds.example.json`, run Check
+and restart. The guided form requires the Companion or analysis-enabled launch;
+a plain preview launch does not enable its backup-session connection. Credentials
+stay in this local plaintext file, never in exported plans or public issues.
+Guided saves create a private file; for an existing manually configured file on
+Linux, use `chmod 600 local-feeds.json`. Check reports
+**WARN: dvr_config_permissions**, and Start prints a warning, while group or
+other accounts can read it.
 
 Check never contacts camera endpoints. Passing proves software setup, not device
 availability, firmware/codec compatibility or latency. Use a <=1080p substream.
@@ -205,8 +218,10 @@ original location. Automatic analysis still requires an explicit choice.
 
 ## Optional recording recognition
 
-Previews do **not** record or run live AI. Recognition analyzes a deliberately
-selected existing recording. Bring your own verified compatible model; no weights
+Connecting a preview starts neither recording nor AI. With analysis configured,
+Monitor's separate **Start AI** action enables bounded live detection;
+Recognition analyzes a deliberately selected existing recording. Bring your own
+verified compatible model; no weights
 are downloaded by the installer. Configure paths, labels and rules with
 edge/local-analysis.example.json and the
 [analysis guide](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/local-analysis-service.md).
@@ -356,9 +371,12 @@ model source and license are recorded in
 
 ## Optional GPU for live Monitor detection
 
-The normal installation is CPU-only; analysis launches prefer CUDA with a visible
-CPU fallback. An explicit live CUDA preference is available with analysis: --live-backend cuda-preferred on Linux,
-or -LiveBackend cuda-preferred through the Windows PowerShell launcher.
+The normal installation is CPU-only; analysis launches prefer CUDA for both
+live and recorded inference with a visible CPU fallback. The equivalent explicit
+live preference is `--live-backend cuda-preferred` on Linux or
+`-LiveBackend cuda-preferred` through the Windows PowerShell launcher. Choose
+`opencv-cpu` instead for an explicit CPU override. The direct `edge.analyze` CLI
+separately retains its OpenCV CPU default.
 Prepare the isolated runtime separately and run the generated-input benchmark
 before any camera test. Read [live GPU setup, fallback and resource limits](live-gpu.md);
 its Windows/Linux GPU acceptance and optional GPU installer remain unqualified.

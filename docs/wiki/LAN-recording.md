@@ -19,10 +19,17 @@ camera acceptance, recognition accuracy, continuous archival recording or a
 
 ## Guided source setup
 
-The ordinary Linux/Windows launcher now offers **Recognition → Use my existing
+The analysis-enabled Linux/Windows launcher offers **Recognition → Use my existing
 DVR → Connect an IP camera or LAN DVR**. Save the documented channel, select it,
 and choose **Use for LAN recording**. This prepares the same stopped one-camera
 recorder; explicitly Start below. Existing file-based setup remains available.
+From Monitor's empty DVR chooser, **Add camera or DVR source** opens that same
+guided form; connecting the local service and saving the source are still
+explicit steps. Choosing the handoff never starts a camera or recording.
+Copy-only DVR Companion mode can save source details without a model; the LAN
+recorder itself still needs analysis configuration. Plain preview-only Start
+lacks the form's library connection; use the companion/analysis launch or the
+manual configuration below.
 For full-byte copies from OEM recording/export folders, use the separate
 [OEM backup library](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/OEM-backup), which has no automatic deletion.
 
@@ -70,6 +77,13 @@ Events. **Stop recording & analysis** stays available during a transfer while th
 recorder is connected and active. Use Stop explicitly when you want capture and
 analysis to stop; cancelling a review transfer leaves them running.
 
+Leaving Recognition or hiding the page cancels its active review transfer,
+without stopping the recorder. A slower segment review cannot replace a newer
+recording/result choice or source match, including a rejected newer file. Its
+review badge is not marked handled when that opening is superseded. Choose
+**Review segment** again when ready; retained media remains subject to the
+retention policy below.
+
 Status announcements report transitions such as recording, reconnecting, stopping
 or losing contact. Frequently refreshed counters and elapsed times remain readable
 without repeating them through screen-reader announcements on every poll. If
@@ -94,7 +108,7 @@ also runs on Windows; Linux-only manual `--state-dir` restrictions are unchanged
 | `reserve_mib` | 512 | 256–16384 MiB free-space floor; checked before and during capture and before result retention |
 | Native capture | 1 worker | Existing 2 GiB process bound; input at most 1080p, output at most 960px / 10 sampled fps |
 | Segment | 32 MiB | Video-only VP8/WebM, fully decoded and frame-count checked before completion |
-| Recognition | 1 CPU job | Existing 2 threads, stride 5, 6,000-frame / 300-second / 4 GiB limits; incomplete results are not promoted |
+| Recognition | 1 isolated job | GPU-first service preference with CPU fallback; stride 5, 6,000-frame / 300-second job bounds; CPU and CUDA use their [separate memory policies](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Live-GPU#resource-policy-and-limits); incomplete results are not promoted |
 | Queue policy | FIFO | Oldest unprotected entries expire by age, count, byte budget or free-space reserve, including pending work |
 | Reconnect | 2–60 seconds | Bounded exponential delay after failure while explicitly running; Stop cancels retries |
 

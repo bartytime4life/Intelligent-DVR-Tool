@@ -4,23 +4,41 @@
 
 ![Concept illustration connecting a camera, a saved video, a local review computer and a floor plan.](https://raw.githubusercontent.com/wiki/bartytime4life/Intelligent-DVR-Tool/docs/media/guide/overview.jpg)
 
-**Choose a workspace, then follow its job.** The captures below show merged
-source `2566d845` in a clean local browser on November 1, 2026. No real camera,
-person, private recording or actual site was used. Example detections come from
-a constant-output test model on generated flat-color video. These images explain
-controls; they do not measure recognition quality or operating capacity.
+**Choose a goal, then follow its task.** Monitor and System below use the
+[November 11 guided-experience collection](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Guided-experience-visual-provenance).
+The remaining application captures are dated November 1, 2026, from merged PR #71
+source `2566d845`; they remain useful control references, not an exact picture of
+every current screen. No real camera, person, private recording or actual site
+was used. Example detections come from a constant-output test model on generated
+flat-color video. These images explain controls; they do not measure recognition
+quality or operating capacity.
 
 ## Monitor · connect deliberately
 
-![Actual Monitor start screen with three explicit source choices and no receiving video.](https://raw.githubusercontent.com/wiki/bartytime4life/Intelligent-DVR-Tool/docs/media/guide/monitor.jpg)
+![November 11 Monitor: four goal shortcuts above the existing camera-source chooser and review queue.](https://raw.githubusercontent.com/wiki/bartytime4life/Intelligent-DVR-Tool/docs/media/guided-experience-2026-11-11/04-monitor-after.jpg)
 
-Choose a webcam, configured private DVR channel or permitted public source.
-Check status, then disconnect when done. Preview alone runs no AI.
+**What’s next?** opens **Watch cameras**, **Analyze saved video**, **Keep DVR
+copies** or **Plan coverage**. These shortcuts navigate only. Watch cameras
+focuses **Connect source**, including when Monitor first loads; a later operator
+choice cancels that pending focus handoff.
+
+![November 11 Monitor in a narrow viewport: four contained goal buttons above explicit connection controls.](https://raw.githubusercontent.com/wiki/bartytime4life/Intelligent-DVR-Tool/docs/media/guided-experience-2026-11-11/05-monitor-mobile-after.jpg)
+
+Choose a webcam, configured private DVR channel or permitted public source when
+you need a preview. **Add camera or DVR source** leads to the existing guided
+local setup when a DVR channel is missing. That form requires the PC DVR Companion
+or an analysis-enabled service with camera setup enabled; an ordinary preview-only
+Start does not expose it. Copy-only companion setup needs no detector model.
+Check status, then disconnect when
+done. Preview alone runs no AI.
 [Connect one source](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-handbook#2-connect-one-source) · [Connection details](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Camera-sources).
 
 ## Recognition · inspect the exact clip
 
 ![Actual local analysis configuration with the generated example recording and synthetic test model.](https://raw.githubusercontent.com/wiki/bartytime4life/Intelligent-DVR-Tool/docs/media/guide/recognition-setup.jpg)
+
+*November 1 control reference from PR #71; current Recognition also offers its
+task chooser and interrupted-opening recovery.*
 
 Choose recording, model and rules; start analysis explicitly. Read progress and
 coverage status before using the result. [Recording workflow](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Recording-workflow).
@@ -81,10 +99,17 @@ estimated coverage, and export. [Facility handbook](https://github.com/bartytime
 
 ## System · budget, apply, measure
 
-![Actual System workspace with editable planning defaults and supported processing limits.](https://raw.githubusercontent.com/wiki/bartytime4life/Intelligent-DVR-Tool/docs/media/guide/system.jpg)
+![November 11 System: recording and retention beside camera-wall settings, before the optional advanced section.](https://raw.githubusercontent.com/wiki/bartytime4life/Intelligent-DVR-Tool/docs/media/guided-experience-2026-11-11/06-system-after.jpg)
 
 The values are entered assumptions, not detected hardware or throughput.
-Apply browser limits and export supported analyzer controls separately.
+Storage and camera-wall controls come first. **Advanced planning details** holds
+processing, GPU, memory, power and host comparison; closing it retains the draft.
+Its summary flags **Unapplied advanced changes**, while errors and warnings stay
+visible outside the disclosure. Apply browser limits and export supported
+analyzer controls separately.
+
+![November 11 narrow System viewport with Advanced planning details expanded to show processing inputs.](https://raw.githubusercontent.com/wiki/bartytime4life/Intelligent-DVR-Tool/docs/media/guided-experience-2026-11-11/07-system-mobile-advanced-after.jpg)
+
 [Control scopes](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Resource-controls) · [Hardware plan](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Hardware-guide).
 
 ## Image science · explicit reference, explicit limits
@@ -105,12 +130,14 @@ survey accuracy.
 
 ## Dated collections and reproduction
 
+- [November 11 guided-experience collection](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Guided-experience-visual-provenance):
+  four unchanged controlled Monitor/System captures, with separate provenance.
 - [PR #61 collection](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/PR61-visual-provenance): five controlled desktop/mobile
   screenshots and six schematics, with unchanged original hashes and CI provenance.
 - [October 27 tour](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-tour#historical-prototype-captures): generated camera
   artwork and fictional plan demonstrations, preserved as historical material.
-- [This collection's manifest and procedure](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-provenance): twelve actual
-  browser screenshots, ten editable diagrams and one conceptual ImageGen hero.
+- [November 1 collection manifest and procedure](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-provenance): twelve actual
+  browser screenshots from PR #71, ten editable diagrams and one conceptual ImageGen hero.
 - [Verification index](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Evidence-and-validation): revision-bound software checks,
   including their separate physical-device, quality and capacity limits.
 

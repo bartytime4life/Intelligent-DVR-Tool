@@ -10,7 +10,9 @@
 
 This prototype is for human-reviewed observations. It does not control cameras,
 locks, accounts or enforcement. There is no automatic identification, access decision,
-network scanning, automatic containment, background capture or cloud inference.
+network scanning, automatic containment, automatically started capture or cloud
+inference. Explicitly started LAN recording and OEM backup can continue while
+their browser panel is hidden; preview and live AI stop when Monitor is hidden.
 Optional [person enrollment](docs/person-enrollment.md) (off unless started with
 `--allow-face-enrollment` and the pinned face models) keeps consent-based face
 templates in private local files that the browser never receives, and is deletable.
@@ -66,9 +68,10 @@ The open-map starter sends selected geographic bounds to the chosen fixed
 Private.coffee/OSM public Overpass endpoint or configured same-origin local service
 only after an explicit Load action and disclosure. Cameras, rooms, routes and
 recordings are not sent by the adapter. Responses have a 2 MB streamed cap and
-timeouts. Supported simple ways and complete outer-only relations, plus bounded
-source records, are validated before a reviewed transaction. Unsupported
-courtyards/parts and invalid geometry are excluded; provider HTML/media URLs are
+timeouts. Supported simple ways, complete outer/inner relations, courtyards, raised bases
+and independent parts, plus bounded source records, are validated before a
+reviewed transaction. Overlapping parts/envelopes, incomplete relations and
+invalid geometry are excluded; provider HTML/media URLs are
 not executed. Public map data is not authenticated survey evidence.
 
 Both request paths omit credentials and referrers, reject redirects, and have no
@@ -77,7 +80,8 @@ automatic retries or provider failover. Default local paths are `/geo/search` an
 and logging controls. The Sites Worker does not supply these services. Same-origin
 requests do not certify the operator's downstream routing or egress. Offline JSON
 file/paste review avoids search/footprint-provider requests when coordinates are
-entered manually; online tiles and optional fonts remain separate external paths.
+entered manually; online tiles remain a separate external path. The interface font is bundled,
+so loading it does not require a third-party font request.
 Use prepared local extracts/services when site addresses or bounds must stay local.
 
 System imports setup/host JSON up to 64 KiB and validates numeric bounds before

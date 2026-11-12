@@ -8,7 +8,7 @@
 
 [Home](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Home) · [Product status](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Product-status) · [Verification](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Evidence-and-validation) · [100-camera plan](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/100-camera-plan)
 
-The minimum capacity goal is **100 simultaneously active cameras**. The current Monitor starts empty with an explicit real-source chooser; generated camera scenes remain only in the [historical gallery](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-tour#historical-prototype-captures). The [recent UI/navigation fixes](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/59) and [source/Facility simplification](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/61) are merged and browser-tested, but real-camera endurance, accuracy and 100-camera capacity remain unqualified.
+The minimum capacity goal is **100 simultaneously active cameras**. The current Monitor starts empty with an explicit real-source chooser; generated camera scenes remain only in the [historical gallery](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-tour#historical-prototype-captures). The [goal-based navigation and recovery fixes](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/110) are merged and software-tested, but real-camera endurance, accuracy and 100-camera capacity remain unqualified.
 
 | Lane | Exists now | Next evidence required |
 | --- | --- | --- |
@@ -21,6 +21,20 @@ The minimum capacity goal is **100 simultaneously active cameras**. The current 
 | Delivery | Linux/Windows PC kit and Mac Install/Check/Start with preservation checks | Physical host, codec, camera and recovery acceptance on each intended platform |
 | Performance | Bounded scheduler, budgets, synthetic overload model | Sustained decode/inference/end-to-end rates on intended hardware |
 | 100-camera operation | Owner requirement and staged acceptance design | Ingest/recording/worker implementation and simultaneous-source qualification |
+
+## Delivered through November 11, 2026
+
+[PR #110](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/110), merged
+as `cb91fa40`, adds Monitor goal shortcuts, guided camera-source handoff, basic
+System settings before advanced planning, explicit expired-session recovery,
+shared review-intent protection, retained training choices and fitted coverage
+samples. [PR #107](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/107)
+and [#108](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/108) repair
+tracker time/covariance math and frame-resize continuity. OEM byte receipts,
+copy-only startup, local review recovery and GPU-preferred execution have their
+own [verification records](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Evidence-and-validation). The current
+[capability register](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Product-status) separates these delivered behaviors from
+representative quality, physical-device and 100-camera acceptance.
 
 ## Delivered November 1, 2026
 

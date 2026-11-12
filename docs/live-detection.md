@@ -28,10 +28,11 @@ labeled footage (see [measure it](#measure-before-relying-on-it)).
 ## Use live AI
 
 1. Start the local app (**Start-Mac.command**, or the PC launcher) with analysis
-   configured. Monitor shows **Live AI · YOLOX-S · runs on this computer** when the
-   model is ready. A static or hosted copy of the interface shows why AI is
-   unavailable instead.
-2. Connect a webcam, DVR channel or approved public webcam as usual.
+   configured. Starting the app does not start inference.
+2. Connect a webcam, DVR channel or approved public webcam as usual. Live AI
+   settings list the configured model and rules; that availability check is not
+   proof of model execution. A static or hosted copy explains why local AI is
+   unavailable. The running tile reports the actual backend after explicit Start.
 3. If several rule sets exist (for example ones saved by [Guided training](training.md)
    or exported from [Zones](zones.md)), choose one in **Rules**.
 4. Press **Start AI** on the tile. Teal solid boxes are tracked objects with their
@@ -135,10 +136,13 @@ single-machine development observation, not a qualified latency or capacity figu
 
 ## Optional GPU execution
 
-CPU remains the default. On Windows/Linux, an explicit service preference can
-try the existing pinned ONNX Runtime CUDA backend for YOLOX-S. GPU startup must
+The local service defaults to a GPU-first preference. On Windows/Linux, an
+eligible YOLOX-S session tries the pinned ONNX Runtime CUDA backend; macOS and
+unsupported profiles use CPU. GPU startup must
 prove actual CUDA-only execution; a failed attempt starts a fresh CPU worker.
-The tile shows its actual backend and fallback reason. See [setup, recovery and
+Use `--live-backend opencv-cpu` to select CPU explicitly. The tile shows its
+actual backend and fallback reason; a preference or available provider is not
+execution evidence. See [setup, recovery and
 resource limits](live-gpu.md) and the [November 2 measurement record](verification/live-gpu-2026-11-02/README.md).
 
 ## How it works
@@ -153,7 +157,8 @@ camera tile ──JPEG (≤960 px, ≤5/s)──▶ local service ──▶ live
 ```
 
 **Detection.** The pinned OpenCV Zoo YOLOX-S model (Ge et al., 2021), trained on
-the 80 COCO classes (Lin et al., 2014), runs by default on the CPU through OpenCV DNN (or the optional verified CUDA path) with
+the 80 COCO classes (Lin et al., 2014), runs through OpenCV DNN on CPU or the
+verified CUDA path according to the selected service preference, with
 the same preprocessing, decoding and per-class non-maximum suppression as
 recording analysis. The worker verifies the model's SHA-256 against the catalog
 before parsing it.

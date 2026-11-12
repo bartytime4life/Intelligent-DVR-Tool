@@ -10,15 +10,26 @@
 
 This is an engineering sizing proposal, checked against manufacturer documentation on **October 27, 2026**. It is not a benchmark, purchase order or 100-camera qualification. The app's **System** workspace makes the assumptions editable and exports local limits; it does not provision hardware or storage.
 
-![Actual System workspace; all capacity and power figures are entered assumptions and calculations.](media/system-setup.webp)
+![Earlier System workspace layout; all capacity and power figures are entered assumptions and calculations.](media/system-setup.webp)
+
+The current System view leads with recording storage and browser controls;
+processing, GPU, memory and power controls are under **Advanced planning
+details**. [Current visual atlas](visual-atlas.md).
 
 ## Recommended approach
 
-Separate long-term encoded recording from AI sampling. Keep the recorder dependable while inference work can be stopped, upgraded or moved to another local machine. A CPU-only review/evaluation pilot can run now. Live ingest/recording and an accelerated GPU service still need implementation and acceptance.
+Separate long-term encoded recording from AI sampling. Keep the recorder
+dependable while inference work can be stopped, upgraded or moved to another
+local machine. The implemented local lanes include up to four previews, explicit
+live AI on at most two cameras, one-channel sampled recording, and verified OEM
+copies. Analysis-enabled service launches prefer supported CUDA with visible CPU
+fallback; the direct analyzer CLI defaults to CPU. These bounded implementations
+still need physical-device, sustained-operation and quality acceptance. A
+multi-camera continuous archive and distributed analytics remain future work.
 
 | Build | CPU / RAM planning suggestion | Storage suggestion | GPU and power suggestion |
 | --- | --- | --- | --- |
-| Existing-machine qualification | Keep the current workstation first; 8+ modern cores and 32–64 GB RAM are a development starting point | 1 TB OS SSD; separate 2 TB working SSD and a few approved recordings | Use an existing compatible GPU for future qualification; current inference remains CPU |
+| Existing-machine qualification | Keep the current workstation first; 8+ modern cores and 32–64 GB RAM are a development starting point | 1 TB OS SSD; separate 2 TB working SSD and a few approved recordings | Use an existing compatible GPU for separate target-host qualification; the ordinary installer is CPU-only, while the prepared service can execute CUDA |
 | Dedicated recording/storage candidate | Ryzen 9 9950X class, **128 GB RAM**, motherboard with validated HBA/NIC lane layout | **12 active 24 TB CMR HDDs**, two-parity layout; 1–2 TB boot SSD; mirrored enterprise SSD metadata/work tier | Integrated display or modest display GPU; separate AI host; compatible **1000 W** PSU candidate after rail/startup review |
 | Combined expandable workstation candidate | Threadripper 9960X class, **128–256 GB ECC RDIMM** on a compatible TRX50 board | Same disk calculation, with direct HBA/backplane access and dedicated boot/working SSDs | Qualify an already-owned RTX 5080 or a measured-fit RTX PRO candidate; the 350 W CPU + 5080 + 12-HDD example needs **1,560 W PSU arithmetic at 75% loading**, before any extra boost allowance |
 | Split recording candidate | Two independent machines; initially 16-core class, 64–128 GB RAM each, measured per-node load | **8 active 24 TB, two-parity HDDs per node**, each assigned 50 cameras | Separate analytics host(s) sized from measurements; failure of one node does not silently move its cameras to the other |

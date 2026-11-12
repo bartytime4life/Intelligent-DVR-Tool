@@ -14,6 +14,14 @@ Open results with their exact original recording. Recognition verifies the sourc
 bytes before attaching overlays. Read complete/partial coverage and the sampled
 frame position. A box or score is an observation to investigate, not a verdict.
 
+For a recording observation already in Events, **Open in Recognition** reveals
+**Open saved results** and focuses the next source-review step. Its camera, clip
+time and recording/model fingerprints identify the requested evidence. Load its
+matching results and original recording explicitly; unrelated loaded results
+stay available. When both already match, the observation opens on its original
+sample. **Close source request** removes the guidance without clearing the review.
+Ordinary navigation then preserves your current sample and task.
+
 ## Work through the queue
 
 1. Inspect the relevant sampled scene in **Recognition**. Compare the box with
@@ -33,6 +41,12 @@ frame position. A box or score is an observation to investigate, not a verdict.
    storage errors are visible and need attention.
 5. Return to Recognition for a report with the current decisions matched to this
    source. Save the recognition results and analyzed recording as a pair.
+
+Result openings share one current request across recording jobs, LAN segments,
+OEM backups and imported files. Older downloads cannot replace a newer choice,
+including a rejected file. Leaving Recognition or hiding the page cancels pending
+openings while retaining the loaded review; reopen deliberately when ready.
+Background analysis, recording and backup keep their own Stop/Cancel controls.
 
 Keyboard review, local observation stills, CSV and bulk dismiss are convenience
 controls. Verify the selection and original evidence before a bulk decision.
@@ -84,6 +98,9 @@ drafts need their separate download.
 Browser storage can be edited or cleared; it is not a shared, authenticated audit
 trail. Counts across sampled frames can include repeated sightings of the same
 person. Preserve the original recording and context when sharing a report.
+Review exports carry metadata, decisions and saved notes, not the analyzed stills
+in IndexedDB. Those images belong to this browser profile and origin/port;
+copying the checkout or an OEM backup does not copy them.
 
 ## Resolve a browser save conflict
 

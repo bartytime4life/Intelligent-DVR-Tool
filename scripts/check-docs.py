@@ -150,6 +150,46 @@ def check():
     if guide_total > 2_000_000:
         errors.append('Visual guide images exceed the independent 2 MB budget')
 
+    # New source-bound captures have their own receipt; old media stays immutable.
+    followup_root = ROOT / 'docs/media/guided-experience-2026-11-11'
+    followup = json.loads((followup_root / 'manifest.json').read_text(encoding='utf-8'))
+    expected_views = {
+        '04-monitor-after.jpg': (1265, 712), '05-monitor-mobile-after.jpg': (375, 812),
+        '06-system-after.jpg': (1265, 712), '07-system-mobile-advanced-after.jpg': (375, 812),
+    }
+    if followup.get('schema') != 'intelligent-dvr.guided-experience-media.v1':
+        errors.append('Invalid guided-experience media manifest schema')
+    if followup.get('merged_application_commit') != 'cb91fa40d9d388faacca0785075c8b1986b33773':
+        errors.append('Missing guided-experience merged source revision')
+    followup_paths, followup_total = set(), 0
+    for entry in followup.get('assets', []):
+        rel = entry.get('path', '')
+        path = (ROOT / rel).resolve()
+        if (not path.is_relative_to(followup_root) or not path.is_file()
+                or path.name not in expected_views or rel in followup_paths):
+            errors.append(f'Invalid, duplicate or missing guided-experience image: {rel}')
+            continue
+        followup_paths.add(rel)
+        raw = path.read_bytes()
+        followup_total += len(raw)
+        original = (ROOT / entry.get('original_path', '')).resolve()
+        if (not original.is_relative_to(ROOT / 'docs/verification/guided-experience-2026-11-11')
+                or original.name != path.name or not original.is_file() or original.read_bytes() != raw):
+            errors.append(f'Guided-experience image differs from original verification: {rel}')
+        if len(raw) != entry.get('bytes') or hashlib.sha256(raw).hexdigest() != entry.get('sha256'):
+            errors.append(f'Guided-experience image integrity mismatch: {rel}')
+        if not (raw.startswith(b'\xff\xd8') and raw.endswith(b'\xff\xd9')):
+            errors.append(f'Invalid guided-experience JPEG: {rel}')
+        if ((entry.get('width'), entry.get('height')) != expected_views[path.name]
+                or entry.get('kind') != 'actual-browser-screenshot'
+                or entry.get('realCameraFootage') is not False
+                or entry.get('source_commit') != '13355e18fbac15553bc9092dbadb11bb1deab979'):
+            errors.append(f'Missing guided-experience capture provenance: {rel}')
+    if followup_paths != {str((followup_root / name).relative_to(ROOT)) for name in expected_views}:
+        errors.append('Guided-experience manifest must cover exactly four reviewed screenshots')
+    if {p.name for p in followup_root.glob('*.jpg')} != set(expected_views) or followup_total > 350_000:
+        errors.append('Unexpected guided-experience images or media budget exceeded')
+
     graphics = runpy.run_path(str(ROOT / 'scripts/build-guide-graphics.py'))
     for name, args in graphics['GUIDES'].items():
         expected = graphics['build'](name, *args)
@@ -237,7 +277,7 @@ def check():
     runpy.run_path(str(ROOT / 'docs/verification/journal-2026-10-28/verify-results.py'))['check']()
     runpy.run_path(str(ROOT / 'docs/verification/batching-2026-10-28/verify-results.py'))['check']()
     runpy.run_path(str(ROOT / 'docs/verification/durable-overload-2026-10-28/verify-results.py'))['check']()
-    print(f'Documentation checks passed: {links} local links, {len(manifest["assets"])} historical media hashes, {len(current["assets"])} current visual blobs, {total:,} historical + {current_total:,} PR61 + {guide_total:,} guide media bytes, test-count consistency.')
+    print(f'Documentation checks passed: {links} local links, {len(manifest["assets"])} historical media hashes, {len(current["assets"])} PR61 visual blobs, {total:,} historical + {current_total:,} PR61 + {guide_total:,} guide + {followup_total:,} guided-experience media bytes, test-count consistency.')
 
 
 if __name__ == '__main__':

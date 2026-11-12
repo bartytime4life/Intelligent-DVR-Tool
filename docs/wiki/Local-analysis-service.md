@@ -14,7 +14,7 @@ review decisions, queue limits, export and Undo remain in place.
 
 ## Start the local application
 
-Install the existing [Linux](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Linux-setup) or [Windows](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Windows-setup) local
+Install the existing [Mac](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Mac-setup), [Linux](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Linux-setup) or [Windows](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Windows-setup) local
 requirements. Obtain and verify your own supported model as described in
 [model qualification](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Model-qualification-2026-10-26). No weights are downloaded
 by the service. The example catalog is `edge/local-analysis.example.json`: place
@@ -52,6 +52,13 @@ serves the interface only; incomplete or invalid setup is reported as an error.
 The [update guide](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Mac-setup#preserve-data-when-updating) covers private data,
 temporary results and browser exports separately.
 
+The Linux/Windows companion launcher is also the model-free path to guided DVR
+source setup. An analysis-enabled PC launch provides it too. Plain preview-only
+Start does not provide the library connection used by that form. For direct
+service invocation, guided entry additionally needs matching `--feeds-config`
+and `--camera-setup-config` paths; analysis configuration already supplies the
+library session. See [source setup](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Camera-sources#local-dvr-or-ip-camera).
+
 `--allow-training` (Linux `--allow-training`, Windows `-AllowTraining`) lets
 [guided training](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Guided-training) save tuned rule sets in `trained/` beside the
 catalog. Saved sets load at startup and appear with the configured ones; files are
@@ -72,9 +79,11 @@ hosted-site calls. Starting the service does **not** start inference. In Recogni
 2. Press **Analyze recording**. Read the preparation/analysis/verification phase,
    sampled-frame count and decoded-frame budget; these are not a guessed percent
    of the entire recording. Cancel whenever processing is active.
-3. Successful results open automatically after bundle validation and SHA-256
-   matching of the service's frozen recording snapshot. Review paused sample
-   boxes, classes and scores; send observations to Events for a human decision.
+3. Successful results open after bundle validation and SHA-256 matching of the
+   service's frozen recording snapshot, while Recognition is visible and no newer
+   review request superseded this job. A different loaded review stays open until
+   you choose **Open results**. Review paused sample boxes, classes and scores;
+   send observations to Events for a human decision.
 
 Source playback requires a browser-supported codec. If decoding succeeds in
 OpenCV but the browser cannot play the file, Recognition explains that limitation;
@@ -110,6 +119,15 @@ changed models, process failures, time limits and disk/access errors leave contr
 available for another explicit attempt. A previous loaded review is retained if
 a new job fails validation. A frame-budget stop is marked **PARTIAL**, not complete
 coverage of the recording. A time-limit stop produces no review result.
+
+Opening a completed result has a two-minute deadline and its own **Cancel result
+opening** control. Cancelling that download preserves the loaded review and does
+not cancel a finished or active job. Leaving Recognition or hiding the page also
+cancels review openings; return and choose **Open results** deliberately. A newer
+results-file or source-matching request wins over an older pending download,
+including when the newer file is rejected. Recovery captures that request order
+before fetching the service session, so a delayed reconnect cannot replace a
+newer file choice. See [review continuity](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Recognition-details#review-continuity-and-recovery).
 
 A failed job's `error.code` names the cause when the worker or OS reports one.
 The worker writes a bounded `failure.json` with one fixed code, and the service

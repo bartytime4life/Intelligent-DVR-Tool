@@ -10,11 +10,17 @@
 
 ## Pick the outcome
 
+In the app, Monitor's **What’s next?** guide opens **Watch cameras**, **Analyze
+saved video**, **Keep DVR copies** and **Plan coverage**. **Find a task**
+(**Ctrl+K** / **Cmd+K**) opens the complete task list. Choosing a route starts
+no camera, recording, backup or analysis. [Task map and keyboard controls](how-to.md#find-the-next-task).
+
 | I want to… | Start here | Continue with |
 | --- | --- | --- |
 | Understand the whole tool | [Visual operator handbook](how-to.md) | [First session](getting-started.md), [screenshots](visual-atlas.md) |
 | Install or update a Mac | [Mac Install / Check / Start](setup-macos.md) | [Local analysis setup](local-analysis-service.md), [troubleshooting](troubleshooting.md) |
 | Install or test a PC | [PC kit](pc-testing.md) | [Linux](setup-linux.md), [Windows](setup-windows.md), [field runbook](field-acceptance.md) |
+| Keep copies from an existing DVR | [OEM backup setup](oem-backup.md) | [First session](getting-started.md#try-the-workflows), [acceptance procedure](oem-field-acceptance.md) |
 | Verify one completed OEM recording | [OEM acceptance procedure](oem-field-acceptance.md) | [Backup setup](oem-backup.md), [GPU execution](live-gpu.md) |
 | Connect one source | [Webcam and local DVR](local-camera-feeds.md) | [Approved public webcams](public-webcams.md) |
 | See people and objects live | [Live AI and tracking](live-detection.md) | [Optional GPU setup](live-gpu.md), [Review and Events](review-and-events.md), [zones](zones.md) |
@@ -27,7 +33,7 @@
 | Define image rules | [Zones on a still](zones.md) | [Recognition details](recording-recognition.md) |
 | Plan buildings and cameras | [Facility builder](facility-builder.md) | [Maps/shapes](map-measurements-and-shapes.md), [saved facilities](saved-facilities.md) |
 | Inspect image science | [Diagnostics](facility-image-diagnostics.md) | [Ground-plane calibration](facility-calibration.md) |
-| Plan hardware and limits | [System control scopes](resource-controls.md) | [Hardware](hardware-guide.md), [GPUs](gpu-planning.md), [100-camera preparation](performance-100-cameras.md) |
+| Plan hardware and limits | [Basic and advanced System controls](how-to.md#10-plan-resources) | [Control scopes](resource-controls.md), [hardware](hardware-guide.md), [GPUs](gpu-planning.md), [100-camera preparation](performance-100-cameras.md) |
 | Validate an operating claim | [Product status](product-status.md) | [Field acceptance](field-acceptance.md), [evaluation](offline-evaluation.md), [evidence checklist](offline-qualification.md) |
 
 ## Set up a facility
@@ -45,7 +51,7 @@ The [novice-study kit](facility-novice-study.md) and [easy-setup research](easy-
 | Data and implementation | [Architecture](architecture.md), [edge CLI](../edge/README.md), [third-party notices](third-party-notices.md), [security](../SECURITY.md) |
 | Evaluation | [Offline evaluation](offline-evaluation.md), [qualification checklist](offline-qualification.md), [dated model qualification](model-qualification-20261026.md), [coverage](recording-coverage.md) |
 | Capacity and rollout | [Pilot scope](pilot-scope.md), [100-camera preparation](performance-100-cameras.md), [roadmap](roadmap.md), [field acceptance](field-acceptance.md) |
-| Evidence | [Verification index](verification/README.md), [product status](product-status.md), [current image provenance](media/guide/README.md), [older image provenance](media/current/README.md) |
+| Evidence | [Verification index](verification/README.md), [product status](product-status.md), [November 11 image provenance](media/guided-experience-2026-11-11/README.md), [November 1 image provenance](media/guide/README.md), [earlier image provenance](media/current/README.md) |
 
 ## Historical decisions and reviews
 
@@ -59,4 +65,7 @@ These keep their original dates, claims and evidence: [October 29 experience rev
 - **Planning estimate:** geometry or arithmetic that still needs physical measurements.
 - **Field evidence:** a separately recorded source, environment, workload and result; green CI is not a substitute.
 
-The published [GitHub Wiki](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki) is generated from these canonical guides. [Wiki publication instructions](wiki/README.md) explain its separate Git history and bundled image assets.
+The [GitHub Wiki](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki) has
+its own published history. Its source pages are generated from these canonical
+guides; updating them does not itself publish the Wiki. [Wiki publication
+instructions](wiki/README.md) explain the separate Git history and bundled image assets.

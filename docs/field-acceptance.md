@@ -19,7 +19,8 @@ This guide turns the local prototype into a **reproducible, operator-approved PC
 | Browser webcam | Explicit live preview and user-triggered clip capture, with a requested 60-second stop and 64 MiB maximum | All camera drivers, precise timing, unattended background capture |
 | DVR/IP camera preview | Private-IPv4 RTSP/TCP and bounded CPU decoding; up to four active previews | ONVIF discovery, public endpoints, RTSP/UDP, RTSPS, long-running capacity |
 | LAN recording | One configured RTSP channel with explicit Start/Stop, verified sampled segments and bounded retention | Gapless archive, parallel channel recording, sustained physical-device acceptance |
-| Local Recognition | Selected recording, pinned compatible model, GPU-preferred bounded inference with visible CPU fallback, human-reviewed source-matched reports | Identity recognition, tracking, continuous live inference, independently measured accuracy |
+| Local Recognition | Selected recording, pinned compatible model, GPU-preferred bounded inference with visible CPU fallback, human-reviewed source-matched reports and short-lived tracks | Independently measured detection/tracking accuracy, identity or authorization decisions |
+| Monitor live AI | Explicit Start AI on at most two connected cameras, one frame in flight per camera, short-lived within-camera tracks and per-observation Send to Events | Unattended/background analytics, representative tracking quality, physical-camera capacity or real-world identity |
 | Facility and scale preparation | Planned FOV/coverage estimates, offline scheduler/CUDA experiments | Actual person handoffs, surveyed geometry or 100 active live cameras |
 
 The local service prefers CUDA when prepared and reports actual execution or CPU fallback. The default installer remains CPU-only. See [GPU setup and execution checks](live-gpu.md). [Camera limits](local-camera-feeds.md) · [Analysis contract](local-analysis-service.md) · [One-camera recorder](lan-recording.md).
@@ -58,12 +59,49 @@ A sampled detection count does **not** mean unique people, a verified identity, 
 
 ## 3. Prove an authorized local RTSP preview and one-camera recorder
 
-1. Obtain camera-owner approval, document permitted recording and retention, and configure one fixed private IPv4 DVR/IP camera channel using [`edge/local-feeds.example.json`](../edge/local-feeds.example.json). Supply the exact RTSP/TCP substream path and a dedicated viewer account **on the PC**, never in a public issue. On Linux run `chmod 600 local-feeds.json`.
-2. Restart the service, then **Monitor → Set up local DVR → Load configured DVR sources → Connect DVR channel**. Verify frames and age. Deliberately test an invalid substream in a disposable config, then restore. Causes such as `RTSP_UNAUTHORIZED` and `RTSP_NOT_FOUND` support authorized troubleshooting, not scanning or bypasses.
-3. For opt-in recording, copy [`edge/lan-recorder.example.json`](../edge/lan-recorder.example.json) to `local-recorder.json`. Set its `source` to exactly one configured feed ID. Prepare the analysis model/rules. Launch with `bash scripts/run-linux.sh --analysis --recorder-config local-recorder.json` (Windows: `.\scripts\Start-IntelligentDvr.ps1 -Analysis -RecorderConfig .\local-recorder.json`).
-4. In **Recognition**, choose **Connect LAN recorder**, the model and rules, then **Start recording & analysis**. Check a completed segment with its source hash, review and export the pair, inspect retention/dropped counters and failure `cause`, then **Stop recording & analysis**. Restart must leave recording and analysis **off** until another explicit Start.
+1. Obtain camera-owner approval and document permitted preview, recording and
+   retention. Stop the current service, then use the **DVR Companion** launcher
+   for guided setup; it works without a recognition model and keeps backup
+   paused. An analysis-enabled launch also supports the form. A plain preview
+   launch does not enable its backup-session connection.
+2. Choose **Monitor → Local DVR / IP camera → Add camera or DVR source**.
+   In Recognition, **Connect to this computer**, then enter the authorized
+   private IPv4, documented RTSP/TCP port/path and dedicated viewer account.
+   **Save camera source** preserves credentials locally and starts no stream or
+   recording. Return to Monitor, load/refresh the list, select the channel and
+   explicitly **Connect DVR channel**. A guided addition needs no restart.
+   Verify frames and age. In a disposable configuration test an invalid path,
+   then restore; causes such as `RTSP_UNAUTHORIZED` and `RTSP_NOT_FOUND` support
+   authorized troubleshooting, not scanning or bypasses.
+3. For one-channel recording, prepare the analysis catalog and launch the
+   companion with that catalog available. In **Use my existing DVR → Connect
+   an IP camera or LAN DVR**, select the saved source and choose **Use for LAN
+   recording**. This saves configuration without starting capture.
+4. In **Recognition → Record a LAN camera**, choose **Connect LAN recorder**,
+   the model and rules, then **Start recording & analysis**. Check a completed
+   segment with its source hash, review and export the pair, inspect
+   retention/dropped counters and failure `cause`, then **Stop recording &
+   analysis**. Restart must leave recording and analysis off until another Start.
+
+Manual source/recorder configuration remains an advanced alternative: stop the
+service, use [`edge/local-feeds.example.json`](../edge/local-feeds.example.json)
+and [`edge/lan-recorder.example.json`](../edge/lan-recorder.example.json), restrict
+the credentials file to your account, and restart with
+`bash scripts/run-linux.sh --analysis --recorder-config local-recorder.json`
+or PowerShell
+`.\scripts\Start-IntelligentDvr.ps1 -Analysis -RecorderConfig .\local-recorder.json`.
+The recorder source must match exactly one configured feed ID. On Linux,
+`chmod 600 local-feeds.json` restricts a manually written file. Never put
+credentials in a public issue or exported plan.
 
 The pilot's default 10-second segments reconnect between captures. It is not gapless footage or a multi-camera DVR. The browser's webcam clip action does not record RTSP preview frames. [Recorder bounds and recovery](lan-recording.md).
+
+With the analysis catalog enabled, separately exercise **Monitor → Start AI**
+on an approved connected source. Confirm its actual backend/fallback, retained
+observations, explicit Send to Events, Stop AI and expired-session recovery.
+Rechecking setup never restarts AI automatically. Keep sampled detections and
+short-lived track IDs distinct from independent detection/tracking quality.
+[Live AI limits](live-detection.md) · [Tracking evaluation](tracking-evaluation.md).
 
 ## 4. Record evidence and exercise failures
 
@@ -79,6 +117,7 @@ For each case record **PASS / FAIL / BLOCKED / NOT RUN**, UTC time, app commit/`
 | A6 | Abrupt service interruption then restart without autonomous camera/inference restart | Before/after status, failure/recovery notes |
 | A7 | Config privacy, low-disk response, export/restore of browser reviews | Redacted settings and recovery checklist |
 | A8 | Independent annotations on representative, permitted footage with misses and false alerts | [Evaluation report](offline-evaluation.md) and review notes |
+| A9 | Explicit live AI start/stop, actual backend/fallback, manual observation send and expired-session recovery | Redacted session status, retained observation and recovery notes |
 
 Treat missing evidence, incomplete media presented as complete, silent source changes, spontaneous camera restart and exposed credentials as **FAIL**. Do not mark tests PASS on the basis of a mocked/virtual feed. Preserve originals; exports and local SQLite/browser data are not immutable independent audit records.
 

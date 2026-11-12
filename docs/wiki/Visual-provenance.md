@@ -8,6 +8,12 @@ different purposes. The screenshots show controls; diagrams explain a procedure;
 the hero establishes the camera/clip/review/plan relationship visually. None
 qualifies real recognition, camera compatibility, site measurements or capacity.
 
+This collection and its hashes remain dated to the source below. Updated
+Monitor goal-guide and System-disclosure images are kept in the separate
+[November 11 guided-experience collection](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Guided-experience-visual-provenance).
+Current guides may use both collections; a newer guide does not change the source
+revision or claims of these November 1 assets.
+
 ## Actual interface captures
 
 Source: merged `main` [`2566d845fbbc7b9f54f98441009a604f2fa513ce`](https://github.com/bartytime4life/Intelligent-DVR-Tool/commit/2566d845fbbc7b9f54f98441009a604f2fa513ce), through PR #71. The frontend was built from that source for a clean local service and an isolated browser origin. Default browser viewport: **1280 × 720**; `recognition-setup.jpg` is a native full-page capture. Images were compressed to JPEG with macOS `sips`, quality 83, without adding controls or changing content.

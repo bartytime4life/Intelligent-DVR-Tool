@@ -59,9 +59,13 @@ publishing a baseline-only success. Service/evaluator require the current
 implementation hash. The browser can inspect older declared implementations of
 the known profile; it validates bindings, not unsigned declarations' truth.
 
-The service retains its five-minute wall deadline, 4 GiB process-memory bound,
-6,000 decoded frames, stride 5, two CPU threads and 32 MiB review bound. CLI
-resource/frame controls still apply. Both detection inventories share the
+The service retains its five-minute wall deadline, 6,000 decoded frames, stride
+5 and 32 MiB review bound. CPU inference requests two OpenCV threads; its worker
+uses a 4 GiB virtual-address limit on Linux and a 4 GiB process-commit limit on
+Windows, with no memory cap on macOS. Eligible CUDA jobs use their
+[separate memory policy](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Live-GPU#resource-policy-and-limits); a service GPU
+preference is not proof of execution. CLI resource/frame controls still apply.
+Both detection inventories share the
 100,000-detection trace limit and at most 10,000 sampled frames. Failures stop
 publication; frame/event limits still mark coverage partial. No extra storage
 quota or concurrency is introduced. Extra inference cost may require shorter
