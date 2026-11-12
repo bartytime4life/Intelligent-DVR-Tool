@@ -1,5 +1,20 @@
 # Product status and evidence
 
+**Current documentation baseline:** [PR #116](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/116)
+merged as [`63b06ba2`](https://github.com/bartytime4life/Intelligent-DVR-Tool/commit/63b06ba2aab3adcffc38f52310b55969fb538afe).
+All four hosted workflows passed on the final heads of PRs #114, #115 and #116.
+The [latest documentation and CI record](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/documentation-status-2026-11-12/README.md)
+binds those results to their exact revisions. Earlier snapshots below retain
+the workflows' states at their original read times. This documentation follow-up
+does not rerun application suites or establish installed-machine acceptance.
+
+**Under review:** [PR #117](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/117)
+corrects valid projective transforms rejected by the current calibration solver
+and degenerate planes it can accept. It is a draft at the recorded read time,
+outside this merged baseline. Read the [current calibration limits](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Planar-calibration#known-numerical-limits)
+before relying on a plane ruler. Its proposed v2 matrix representation and
+generated checks belong to that branch until it merges.
+
 **Merged source baseline verified November 12, 2026 (America/Chicago):**
 [PR #114](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/114) merged
 as [`66e6dd1c`](https://github.com/bartytime4life/Intelligent-DVR-Tool/commit/66e6dd1cde9913e6c4f03fb94733e83dc3070c93).

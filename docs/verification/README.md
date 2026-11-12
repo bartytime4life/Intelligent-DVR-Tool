@@ -1,5 +1,10 @@
 # Verification index
 
+[Documentation status and full inventory, November 12](documentation-status-2026-11-12/README.md)
+records merged documentation PR #116, completed final-head CI for PRs #114–#116,
+the separate pending calibration correction, and current link/Wiki/media checks.
+Earlier read-time snapshots and historical receipts remain unchanged.
+
 [Current documentation alignment, November 12](documentation-alignment-2026-11-12/README.md)
 follows the earlier 197-path audit, records the merged route/evaluation baseline and
 corrects rehearsal duration/position wording without replacing historical receipts.

@@ -140,6 +140,10 @@ At least **100 simultaneously active cameras** is the owner's requirement. Conne
 
 Begin with the [visual handbook](docs/how-to.md), then use the [complete guide index](docs/README.md). The [screenshot atlas](docs/visual-atlas.md) distinguishes current controlled captures, explanatory graphics and the [historical visual tour](docs/visual-tour.md). The [GitHub Wiki](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki) has its own published history and image assets; checked source mirrors live in [docs/wiki](docs/wiki/README.md).
 
+The [latest documentation record](docs/verification/documentation-status-2026-11-12/README.md)
+checks the full guide inventory and separates merged capabilities, completed CI
+and the calibration correction still under review.
+
 ## Checks and project terms
 
 Use a prepared platform Python environment for native checks. Build first;

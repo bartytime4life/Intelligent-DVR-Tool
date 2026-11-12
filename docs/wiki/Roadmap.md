@@ -24,6 +24,12 @@ The minimum capacity goal is **100 simultaneously active cameras**. The current 
 
 ## Delivered through November 12, 2026
 
+[PR #116](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/116), merged
+as `63b06ba2`, aligns operator/developer guides and generated Wiki source with
+the route and evaluation changes below. The [latest documentation record](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/documentation-status-2026-11-12/README.md)
+confirms all four hosted workflows passed for each final head of PRs #114–#116.
+Separate Wiki publication and physical acceptance remain distinct steps.
+
 [PR #114](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/114), merged
 as `66e6dd1c`, binds detection/tracking evaluation to the JSON bytes actually
 captured and checked. It rejects tracking input changes between stages while
@@ -59,6 +65,17 @@ copy-only startup, local review recovery and GPU-preferred execution have their
 own [verification records](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Evidence-and-validation). The current
 [capability register](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Product-status) separates these delivered behaviors from
 representative quality, physical-device and 100-camera acceptance.
+
+## Under review
+
+[PR #117](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/117) proposes
+accepting valid perspective calibration regardless of matrix scale while
+refusing collapsed ground planes. Its generated numerical and browser checks
+are branch evidence, not a delivered capability or physical-camera result.
+The [calibration guide](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Planar-calibration#known-numerical-limits) records
+the current solver's known failures. See the dated
+[status snapshot](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/documentation-status-2026-11-12/README.md)
+for review and CI state.
 
 ## Delivered November 1, 2026
 

@@ -12,6 +12,24 @@ The experimental **Ground-plane calibration** panel links coordinates in **one f
 
 The solver uses a normalized, Householder-QR planar homography (eight degrees of freedom). This relates two planes under a perspective projection; see the [OpenCV homography overview](https://docs.opencv.org/4.13.0/d9/dab/tutorial_homography.html). It is deterministic and runs in the local browser with no subscriptions, model inference, camera activation, upload or remote service.
 
+## Known numerical limits
+
+The merged solver identifies itself as `normalized-householder-dlt-v1`.
+Generated counterexamples show that it can reject a valid perspective mapping
+whose bottom-right matrix entry is zero. It can also accept collinear ground
+references, or a singular fitted map with small residuals, and collapse a ruler
+distance. Small fit and withheld errors alone do not exclude this failure.
+Use references spread across a two-dimensional measured area and check ruler
+distances against independently measured dimensions; unexpected collapse or
+rejection needs investigation.
+
+[PR #117](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/117) proposes
+scale-independent matrix handling and explicit destination/rank screens. Its
+[source-bound generated proof](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/2122eed5a62d6f697f50e0148c3299cbf4769ce8/docs/verification/calibration-projective-math-2026-11-12/README.md)
+is available for review, but the proposed `normalized-householder-dlt-v2` method
+is not part of this merged baseline. Both methods remain experimental; these
+checks do not establish physical calibration accuracy.
+
 ## Operator workflow
 
 1. Open **Facility → Cameras**, select a camera and **Image diagnostics**. Freeze an explicitly connected source, open a local still, or pause an approved local recording and freeze a frame. The source is sampled to at most 720 pixels on the longest side.
