@@ -1,9 +1,9 @@
 # Guided facility builder
 
-**Current branch proposal:** camera views now use a tilted pinhole ground
+**Since [PR #122](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/122):** camera views use a tilted pinhole ground
 footprint with complete wall shadows. The map, coverage, rehearsal and installer
-share one revision-bound estimate. This is under review alongside the earlier
-pixel-density and zone-area proposals; see [status](product-status.md) and the
+share one revision-bound estimate, merged together with the pixel-density and
+zone-area changes; see [status](product-status.md) and the
 [source-bound geometry record](verification/ground-frustum-math-2026-11-12/README.md).
 
 October 28 follow-up: [current workflow/geometry](facility-setup-reliability.md)

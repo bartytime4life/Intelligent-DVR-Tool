@@ -145,12 +145,12 @@ each validator and reproduce the appropriate software checks.
 
 ## Visibility is geometry
 
-The [current integrated proposal](verification/coordinate-integrity-math-2026-11-12/README.md)
+Since [PR #122](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/122), the [integrated planning source](verification/coordinate-integrity-math-2026-11-12/README.md)
 clips a tilted pinhole ground footprint to horizontal range and subtracts finite-
 elevation opaque-wall shadows. It retains holes and separate visible pieces.
 The selected-camera 3D rendering connects the mount to those ground regions;
 it illustrates an estimated envelope, not calibrated visibility through a volume.
-The merged baseline remains separately identified in [product status](product-status.md).
+[Product status](product-status.md) records its verification limits.
 
 A disposable visibility worker produces one bounded, validated snapshot for the
 exact displayed plan and attempt. Hooks suppress stale snapshots during render;
