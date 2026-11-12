@@ -33,7 +33,7 @@ export const baselineText = b => !b ? 'No baseline check yet'
 // Frames just after a prompt changes are ambiguous while the person reacts.
 export const TRANSITION_SECONDS = 2;
 // The margin covers lighting changes: a wall portrait scored 0.26 in the evening and 0.43 in daylight.
-export const SENSITIVITY = Object.freeze({ min: 0.3, max: 0.9, step: 0.05, margin: 0.2, floor: 0.4 });
+export const SENSITIVITY = Object.freeze({ min: 0.3, max: 0.9, step: 0.01, margin: 0.2, floor: 0.4 });
 export const HISTORY_KEY = 'dvr.training.history.v1';
 export const DEFAULT_RULES_KEY = 'dvr.analysis.defaultRules';
 const HISTORY_LIMIT = 50;
@@ -52,8 +52,63 @@ export function segmentAt(timeline, seconds) {
   return timeline.find(s => seconds >= s.start && seconds < s.end) || null;
 }
 
-const roundTo = (value, step) => Math.round(value / step) * step;
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
+
+// With score >= threshold, each observed score represents the classification
+// state just below it. Bounds cover the remaining allowed states. Keep the
+// manual grid/preferred cutoff too, for useful choices within tied plateaus.
+export function thresholdCandidates(observedScores, options = {}) {
+  const { min, max, step, floor, preferred } = { ...SENSITIVITY, ...options };
+  const lower = Math.max(min, floor);
+  const candidates = new Set([lower, max]);
+  for (let n = 0; n <= Math.round((max - min) / step); n++) candidates.add(Number((min + n * step).toFixed(2)));
+  if (Number.isFinite(preferred)) candidates.add(preferred);
+  for (const score of observedScores) candidates.add(score);
+  return [...candidates].filter(threshold => Number.isFinite(threshold) && threshold >= lower && threshold <= max).sort((a, b) => a - b);
+}
+
+export function preferredThreshold(emptyMax, options = {}) {
+  const { min, max, margin, floor } = { ...SENSITIVITY, ...options };
+  // Remove arithmetic residue from this computed preference only. Observed
+  // score boundaries and selected/applied values are never quantized.
+  return Number(clamp(Math.max(emptyMax + margin, floor), min, max).toPrecision(15));
+}
+
+// Sort once, then move each score cursor only forwards. This avoids filtering
+// every stored frame again for every empirical cutoff in a large library.
+export function fitCalibrationThreshold(calibration, current, options = {}) {
+  const groups = calibration.map(sample => {
+    const present = [...sample.present].sort((a, b) => a - b), absent = [...sample.absent].sort((a, b) => a - b);
+    return { present, absent, p: 0, a: 0,
+      baselineFound: present.filter(score => score >= current).length,
+      baselineAlarms: absent.filter(score => score >= current).length };
+  });
+  const emptyMax = groups.reduce((largest, group) => Math.max(largest, group.absent.at(-1) ?? 0), 0);
+  const preferred = preferredThreshold(emptyMax, options);
+  function* observedScores() {
+    for (const group of groups) { yield* group.present; yield* group.absent; }
+  }
+  let best = null;
+  for (const threshold of thresholdCandidates(observedScores(), { ...options, preferred })) {
+    let admissible = true, improved = false, score = 0;
+    for (const group of groups) {
+      while (group.p < group.present.length && group.present[group.p] < threshold) group.p++;
+      while (group.a < group.absent.length && group.absent[group.a] < threshold) group.a++;
+      const found = group.present.length - group.p, alarms = group.absent.length - group.a;
+      if (!found || found < group.baselineFound || alarms > group.baselineAlarms) admissible = false;
+      if (found > group.baselineFound || alarms < group.baselineAlarms) improved = true;
+      score += found / group.present.length - alarms / group.absent.length;
+    }
+    if (!admissible || !improved) continue;
+    score /= groups.length; // Equal session and present/absent condition weights.
+    if (!best || score > best.score + 1e-10 || Math.abs(score - best.score) < 1e-10 && Math.abs(threshold - preferred) < Math.abs(best.threshold - preferred)) best = { threshold, score };
+  }
+  return { threshold: best?.threshold ?? null, emptyMax };
+}
+
+// Keep the shortest round-trippable number; never label an empirical cutoff as
+// a different rounded threshold. Ordinary hundredths retain two decimal places.
+export const formatThreshold = value => String(value).includes('.') ? String(value).padEnd(4, '0') : `${value}.00`;
 
 export function labelScore(frame, label = 'person') {
   return frame.detections.reduce((best, d) => d.label === label && d.score > best ? d.score : best, 0);
@@ -122,29 +177,14 @@ export function compareTrainingCheck(labeled, currentThreshold, candidateThresho
 // conditions equal weight regardless of duration. Prefer the empty-room
 // margin when multiple cutoffs give the same counts.
 export function recommendThreshold(labeled, options = {}) {
-  const { min, max, step, margin, floor, current = 0.5 } = { ...SENSITIVITY, ...options };
+  const { min, max, margin, current = 0.5 } = { ...SENSITIVITY, ...options };
   const present = labeled.filter(f => f.expect === 'present'), absent = labeled.filter(f => f.expect === 'absent');
   if (!present.some(f => f.score >= min)) return { threshold: null, reason: 'not-seen', emptyMax: null };
   if (!absent.length) return { threshold: current, reason: 'no-empty-check', emptyMax: null };
-  const emptyMax = Math.max(0, ...absent.map(f => f.score));
-  const preferred = clamp(roundTo(Math.max(emptyMax + margin, floor) + step / 2 - 1e-9, step), min, max);
-  const countsAt = cutoff => ({
-    found: present.filter(f => f.score >= cutoff).length,
-    falseAlarms: absent.filter(f => f.score >= cutoff).length,
-  });
-  const baseline = countsAt(current);
-  let best = null;
-  for (let n = 0; n <= Math.round((max - min) / step); n++) {
-    const threshold = Number((min + n * step).toFixed(2));
-    if (threshold < floor || threshold > max) continue;
-    const candidate = countsAt(threshold);
-    if (!candidate.found || compareCounts(baseline, candidate) !== 'improved') continue;
-    const score = candidate.found * absent.length - candidate.falseAlarms * present.length;
-    if (!best || score > best.score || (score === best.score && Math.abs(threshold - preferred) < Math.abs(best.threshold - preferred))) {
-      best = { score, threshold };
-    }
-  }
-  if (best) return { threshold: best.threshold, reason: 'ok', emptyMax };
+  const { threshold, emptyMax } = fitCalibrationThreshold([
+    { present: present.map(f => f.score), absent: absent.map(f => f.score) },
+  ], current, options);
+  if (threshold !== null) return { threshold, reason: 'ok', emptyMax };
   return { threshold: current, reason: emptyMax + margin > max ? 'empty-room-busy' : 'keep-current', emptyMax };
 }
 

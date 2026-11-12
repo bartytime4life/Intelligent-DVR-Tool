@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { CaretDown, ChartBar, CheckCircle, FrameCorners, PersonSimple, SlidersHorizontal, VideoCamera } from '@phosphor-icons/react';
-import { evaluate, frameMoments, recommendThreshold, SENSITIVITY } from './training.mjs';
+import { evaluate, frameMoments, recommendThreshold, formatThreshold, SENSITIVITY } from './training.mjs';
 import OllamaCoach from './OllamaCoach.jsx';
 import { compareTrainingLibrary, recommendCumulativeThreshold } from './training-library.mjs';
 import './training-library.css';
@@ -37,7 +37,7 @@ function difference(before, after, word) {
 
 function SampleCount({ label, threshold, hits, total, trial }) {
   return <div className={`train-score-count${trial ? ' is-trial' : ''}`}>
-    <span>{label} <small>{threshold.toFixed(2)}</small></span>
+    <span>{label} <small>{formatThreshold(threshold)}</small></span>
     {total ? <>
       <strong>{hits} <small>of {total}</small></strong>
       <div className="train-score-bar" aria-hidden="true"><i style={{ width: `${100 * hits / total}%` }} /></div>
@@ -71,6 +71,7 @@ export default function TrainingScorecard({ outcome, service, onCheck, onSave, o
   // Once a new recording has been scored, its two thresholds stay fixed.
   const fresh = check?.result;
   const value = fresh ? check.value : selection ?? recommendation.threshold ?? outcome.current;
+  const manualValue = Number(value.toFixed(2));
   useEffect(() => { onPreview?.(value); }, [value, onPreview]);
   const calibration = useMemo(() => evaluate(outcome.labeled, value), [outcome, value]);
   const original = useMemo(() => evaluate(outcome.labeled, outcome.current), [outcome]);
@@ -143,7 +144,7 @@ export default function TrainingScorecard({ outcome, service, onCheck, onSave, o
         <div className="train-score-actions">
           {!fresh && <button className="button amber" disabled={saving} onClick={() => onCheck(value)}><VideoCamera size={18} aria-hidden="true" />Check on a new recording</button>}
           {canApply && <button className="button amber" disabled={saving || !service.training?.enabled} onClick={() => onSave(value, true)}>
-            <CheckCircle size={18} aria-hidden="true" />{saving ? 'Saving setting…' : `Use checked setting ${value.toFixed(2)}`}</button>}
+            <CheckCircle size={18} aria-hidden="true" />{saving ? 'Saving setting…' : `Use checked setting ${formatThreshold(value)}`}</button>}
           <button className={fresh && !canApply ? 'button amber' : 'button'} disabled={saving} onClick={() => onSave(outcome.current, false)}>Keep current setting</button>
           {fresh && (!confirmed || fresh.verdict === 'insufficient') && <button className="button" disabled={saving} onClick={() => onCheck(value)}>Repeat the fresh check</button>}
           <button className="text-button" disabled={saving} onClick={onRetry}>Record again</button>
@@ -155,23 +156,24 @@ export default function TrainingScorecard({ outcome, service, onCheck, onSave, o
       </div>
 
       <details className="train-score-detail">
-        <summary><SlidersHorizontal size={18} aria-hidden="true" /><span>Advanced sensitivity</span><small>Trial {value.toFixed(2)}</small><CaretDown size={16} aria-hidden="true" /></summary>
+        <summary><SlidersHorizontal size={18} aria-hidden="true" /><span>Advanced sensitivity</span><small>Trial {formatThreshold(value)}</small><CaretDown size={16} aria-hidden="true" /></summary>
         <div className="train-score-detail-body">
-          {fresh ? <p>The trial threshold was fixed at {value.toFixed(2)} before the fresh check. Start another session to test a different setting.</p>
+          {fresh ? <p>The trial threshold was fixed at {formatThreshold(value)} before the fresh check. Start another session to test a different setting.</p>
             : <>
-              <label className="train-score-slider">Trial detection threshold <output>{value.toFixed(2)}</output>
-                <input type="range" aria-label="Trial detection threshold" min={SENSITIVITY.min} max={SENSITIVITY.max} step={SENSITIVITY.step} value={value}
+              <label className="train-score-slider">Trial detection threshold <output>{formatThreshold(value)}</output>
+                <input type="range" aria-label="Trial detection threshold" aria-valuetext={formatThreshold(value)} min={SENSITIVITY.min} max={SENSITIVITY.max} step={SENSITIVITY.step} value={manualValue}
                   disabled={saving} onChange={e => preview(Number(e.target.value))} /></label>
               <p>Lower values admit weaker detections. Higher values require a stronger person signal.</p>
+              {manualValue !== value && <p>The suggested cutoff is {formatThreshold(value)}. Moving the slider chooses a manual threshold in 0.01 steps.</p>}
               {recommendation.threshold !== null && value !== recommendation.threshold &&
-                <button className="text-button" disabled={saving} onClick={() => { setSelection(null); onPreview?.(recommendation.threshold); }}>Reset to suggested {recommendation.threshold.toFixed(2)}</button>}
+                <button className="text-button" disabled={saving} onClick={() => { setSelection(null); onPreview?.(recommendation.threshold); }}>Reset to suggested {formatThreshold(recommendation.threshold)}</button>}
             </>}
         </div>
       </details>
       <details className="train-score-detail" onToggle={e => setEvidenceOpen(e.currentTarget.open)}>
         <summary><FrameCorners size={18} aria-hidden="true" /><span>Review the first recording</span><CaretDown size={16} aria-hidden="true" /></summary>
         <div className="train-score-detail-body">
-          <p>At {value.toFixed(2)}, {calibration.presentChecks + calibration.emptyChecks} of {outcome.frames} sampled frames fell inside a scored prompt.
+          <p>At {formatThreshold(value)}, {calibration.presentChecks + calibration.emptyChecks} of {outcome.frames} sampled frames fell inside a scored prompt.
             {' '}{outcome.timing?.verified ? 'Decoded video timestamps aligned these samples to the recording clock.' : 'Prompt times are estimated from frame position and recording length.'}
             {' '}The first two seconds after each prompt change are excluded.</p>
           <ul className="train-score-prompts">{calibration.segments.map(s => <li key={s.id}>

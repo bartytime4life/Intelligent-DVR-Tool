@@ -1,0 +1,204 @@
+{
+  "data_kind": "synthetic",
+  "qualification": "NOT_ESTABLISHED",
+  "scope": "Exact assignment only; excludes IoU, detection, tracking updates, capture and transfer.",
+  "baseline_revision": "c517b438789efbe81d410f23f2a0a173ed72c86c",
+  "baseline_sha256": "da07c7bd6134e9d74c3fb3f40e1e0db32c4b5c6ee7a31d777b725038a6bb7a6c",
+  "candidate_sha256": "882aeb583ae2f92b7112b98fd22851f6c26882a00961b228d25cbf50eb8811c0",
+  "method": "bytetrack-style-iou-kalman-v3",
+  "python": "3.12.3",
+  "numpy": "2.5.4",
+  "platform": "Linux-7.0.0-42-generic-x86_64-with-glibc2.43",
+  "cases": {
+    "no-feasible-edges": {
+      "shape": [
+        300,
+        300
+      ],
+      "feasible_edges": 0,
+      "baseline": {
+        "matches": 0,
+        "total_cost": 0.0,
+        "unmatched_rows": 300,
+        "unmatched_cols": 300,
+        "hungarian_calls": 1,
+        "hungarian_matrix_cells": 90000,
+        "largest_hungarian_matrix_cells": 90000,
+        "samples_ms": [
+          310.1526190293953,
+          300.70035508833826,
+          321.9379249494523
+        ],
+        "median_ms": 310.1526190293953
+      },
+      "candidate": {
+        "matches": 0,
+        "total_cost": 0.0,
+        "unmatched_rows": 300,
+        "unmatched_cols": 300,
+        "hungarian_calls": 0,
+        "hungarian_matrix_cells": 0,
+        "largest_hungarian_matrix_cells": 0,
+        "samples_ms": [
+          0.018944963812828064,
+          0.01622992567718029,
+          0.01547904685139656
+        ],
+        "median_ms": 0.01622992567718029
+      }
+    },
+    "isolated-pairs": {
+      "shape": [
+        300,
+        300
+      ],
+      "feasible_edges": 300,
+      "baseline": {
+        "matches": 300,
+        "total_cost": 30.000000000000156,
+        "unmatched_rows": 0,
+        "unmatched_cols": 0,
+        "hungarian_calls": 1,
+        "hungarian_matrix_cells": 90000,
+        "largest_hungarian_matrix_cells": 90000,
+        "samples_ms": [
+          4.605791997164488,
+          4.593107965774834,
+          4.586755996569991
+        ],
+        "median_ms": 4.593107965774834
+      },
+      "candidate": {
+        "matches": 300,
+        "total_cost": 30.000000000000156,
+        "unmatched_rows": 0,
+        "unmatched_cols": 0,
+        "hungarian_calls": 0,
+        "hungarian_matrix_cells": 0,
+        "largest_hungarian_matrix_cells": 0,
+        "samples_ms": [
+          1.1467389995232224,
+          1.0968860005959868,
+          1.087478012777865
+        ],
+        "median_ms": 1.0968860005959868
+      }
+    },
+    "three-object-groups": {
+      "shape": [
+        300,
+        300
+      ],
+      "feasible_edges": 900,
+      "baseline": {
+        "matches": 300,
+        "total_cost": 67.14841952267851,
+        "unmatched_rows": 0,
+        "unmatched_cols": 0,
+        "hungarian_calls": 1,
+        "hungarian_matrix_cells": 90000,
+        "largest_hungarian_matrix_cells": 90000,
+        "samples_ms": [
+          6.271764053963125,
+          6.260563037358224,
+          6.257106899283826
+        ],
+        "median_ms": 6.260563037358224
+      },
+      "candidate": {
+        "matches": 300,
+        "total_cost": 67.14841952267851,
+        "unmatched_rows": 0,
+        "unmatched_cols": 0,
+        "hungarian_calls": 100,
+        "hungarian_matrix_cells": 900,
+        "largest_hungarian_matrix_cells": 9,
+        "samples_ms": [
+          3.8606650196015835,
+          3.8634310476481915,
+          3.8709050277248025
+        ],
+        "median_ms": 3.8634310476481915
+      }
+    },
+    "unbalanced-groups": {
+      "shape": [
+        300,
+        300
+      ],
+      "feasible_edges": 450,
+      "baseline": {
+        "matches": 150,
+        "total_cost": 14.999999999999963,
+        "unmatched_rows": 150,
+        "unmatched_cols": 150,
+        "hungarian_calls": 1,
+        "hungarian_matrix_cells": 90000,
+        "largest_hungarian_matrix_cells": 90000,
+        "samples_ms": [
+          152.98764500766993,
+          155.24915303103626,
+          163.5531559586525
+        ],
+        "median_ms": 155.24915303103626
+      },
+      "candidate": {
+        "matches": 150,
+        "total_cost": 14.999999999999963,
+        "unmatched_rows": 150,
+        "unmatched_cols": 150,
+        "hungarian_calls": 0,
+        "hungarian_matrix_cells": 0,
+        "largest_hungarian_matrix_cells": 0,
+        "samples_ms": [
+          0.46019197907298803,
+          0.4458449548110366,
+          0.44229894410818815
+        ],
+        "median_ms": 0.4458449548110366
+      }
+    },
+    "dense-ambiguous": {
+      "shape": [
+        300,
+        300
+      ],
+      "feasible_edges": 90000,
+      "baseline": {
+        "matches": 300,
+        "total_cost": 1.111110604097066,
+        "unmatched_rows": 0,
+        "unmatched_cols": 0,
+        "hungarian_calls": 1,
+        "hungarian_matrix_cells": 90000,
+        "largest_hungarian_matrix_cells": 90000,
+        "samples_ms": [
+          39.081042050383985,
+          39.347672020085156,
+          40.1994080748409
+        ],
+        "median_ms": 39.347672020085156
+      },
+      "candidate": {
+        "matches": 300,
+        "total_cost": 1.111110604097066,
+        "unmatched_rows": 0,
+        "unmatched_cols": 0,
+        "hungarian_calls": 1,
+        "hungarian_matrix_cells": 90000,
+        "largest_hungarian_matrix_cells": 90000,
+        "samples_ms": [
+          40.51885602530092,
+          40.41603393852711,
+          55.390988010913134
+        ],
+        "median_ms": 40.51885602530092
+      }
+    }
+  },
+  "limitations": [
+    "Descriptive local timings, not hardware throughput or concurrent-camera qualification.",
+    "Tied optimal pair choices can differ while cardinality and cost remain optimal.",
+    "Dense association and all IoU matrices remain quadratic in storage."
+  ]
+}

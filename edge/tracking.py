@@ -27,7 +27,7 @@ import statistics
 import numpy as np
 
 SCHEMA = 'intelligent-dvr.tracks.v1'
-METHOD = 'bytetrack-style-iou-kalman-v2'
+METHOD = 'bytetrack-style-iou-kalman-v3'
 # ByteTrack's filter is tuned per frame at 30 FPS. Sampled or live frames arrive at
 # other intervals, so motion and noise advance in units of that reference frame.
 REFERENCE_FPS = 30.0
@@ -124,6 +124,59 @@ def assign(cost, limit):
                 matches.append((int(r), int(c)))
     matched_rows, matched_cols = {r for r, _ in matches}, {c for _, c in matches}
     return (sorted(matches), [r for r in range(rows) if r not in matched_rows],
+            [c for c in range(cols) if c not in matched_cols])
+
+
+def assign_gated(cost, limit):
+    """Solve independent feasible association components without dropping edges.
+
+    Tracker costs are bounded in [0, 1]. With no feasible edge between two
+    components, maximum cardinality and minimum cost are additive, so each
+    component can use the same exact Hungarian solver. Dense graphs retain the
+    original solver to avoid Python graph overhead. Ties are deterministic in
+    input order, but can differ from a single padded global solve.
+    """
+    cost = np.asarray(cost, dtype=np.float64)
+    rows, cols = cost.shape if cost.ndim == 2 else (0, 0)
+    if not rows or not cols:
+        return [], list(range(rows)), list(range(cols))
+    feasible = cost <= limit
+    edges = int(np.count_nonzero(feasible))
+    if not edges:
+        return [], list(range(rows)), list(range(cols))
+    if edges > 4 * (rows + cols):
+        return assign(cost, limit)
+    parent = list(range(rows + cols))
+
+    def root(node):
+        while parent[node] != node:
+            parent[node] = parent[parent[node]]
+            node = parent[node]
+        return node
+
+    edge_rows, edge_cols = np.nonzero(feasible)
+    for r, c in zip(edge_rows.tolist(), edge_cols.tolist()):
+        a, b = root(r), root(rows + c)
+        if a != b:
+            parent[b] = a
+    groups = {}
+    for r in np.flatnonzero(feasible.any(axis=1)).tolist():
+        groups.setdefault(root(r), ([], []))[0].append(r)
+    for c in np.flatnonzero(feasible.any(axis=0)).tolist():
+        groups[root(rows + c)][1].append(c)
+    pairs = []
+    for rr, cc in groups.values():
+        if len(rr) == 1:
+            # Every column in a one-row component has a feasible edge.
+            pairs.append((rr[0], cc[int(np.argmin(cost[rr[0], cc]))]))
+        elif len(cc) == 1:
+            pairs.append((rr[int(np.argmin(cost[rr, cc[0]]))], cc[0]))
+        else:
+            matches, _, _ = assign(cost[np.ix_(rr, cc)], limit)
+            pairs.extend((rr[r], cc[c]) for r, c in matches)
+    pairs.sort()
+    matched_rows, matched_cols = {r for r, _ in pairs}, {c for _, c in pairs}
+    return (pairs, [r for r in range(rows) if r not in matched_rows],
             [c for c in range(cols) if c not in matched_cols])
 
 
@@ -292,7 +345,7 @@ class Tracker:
                 overlap = iou([self.kalman.box(tracks[r].mean) for r in rows],
                               [boxes[indices[c]] for c in cols])
                 similarity = overlap * np.array([scores[indices[c]] for c in cols])[None] if fused else overlap
-                matches, _, _ = assign(1 - similarity, 1 - minimum)
+                matches, _, _ = assign_gated(1 - similarity, 1 - minimum)
                 pairs.extend((rows[r], cols[c]) for r, c in matches)
             pairs.sort()
             matched_rows, matched_cols = {r for r, _ in pairs}, {c for _, c in pairs}
@@ -397,6 +450,19 @@ class Tracker:
                 'path': [[round(s, 6), round(x, 5), round(y, 5)] for s, x, y in path],
                 'zones': {name: {'entered_seconds': round(z['entered_seconds'], 6), 'seconds': round(z['seconds'], 6)}
                           for name, z in sorted(t.zones.items())}}
+
+    def needs_detection(self, seconds):
+        """Keep sampling while any unexpired association can confirm or recover.
+
+        Report IDs are bounded separately: tentative tracks and tracks beyond
+        the summary cap still need detections. A missed stationary object also
+        gets its existing lost-track window to recover before idle gating.
+        Querying this policy does not advance time or refresh a track's lease.
+        """
+        if not finite(seconds) or seconds < 0 or (self.previous is not None and seconds < self.previous):
+            raise ValueError('Sampling time must be finite, non-negative and not precede the last frame')
+        return any(t.state in ('tracked', 'tentative', 'lost')
+                   and seconds - t.last <= self.config.max_lost_seconds for t in self.tracks)
 
     def active(self):
         """Confirmed tracks currently followed, with their last matched box (normalized)."""

@@ -17,15 +17,17 @@ test('recognition review retains real class names, provenance and event-frame as
   assert.equal(run.receipt.events.length, 1);
 });
 
-test('v2 tracking imports the conventional even median and preserves v1 history', () => {
-  const current = trackingRecognitionFixture();
-  assert.equal(parseRecognition(current).tracking.classes.person.median_duration_seconds, .25);
+test('v2/v3 tracking imports the conventional even median and preserves v1 history', () => {
   const historical = trackingRecognitionFixture('bytetrack-style-iou-kalman-v1');
   assert.equal(parseRecognition(historical).tracking.classes.person.median_duration_seconds, .5);
-  for (const value of [current, historical]) {
-    value.trace.tracking.classes.person.median_duration_seconds = value === current ? .5 : .25;
-    assert.throws(() => parseRecognition(value), /Invalid tracking class summary/);
+  for (const method of ['bytetrack-style-iou-kalman-v2', 'bytetrack-style-iou-kalman-v3']) {
+    const current = trackingRecognitionFixture(method);
+    assert.equal(parseRecognition(current).tracking.classes.person.median_duration_seconds, .25);
+    current.trace.tracking.classes.person.median_duration_seconds = .5;
+    assert.throws(() => parseRecognition(current), /Invalid tracking class summary/);
   }
+  historical.trace.tracking.classes.person.median_duration_seconds = .25;
+  assert.throws(() => parseRecognition(historical), /Invalid tracking class summary/);
 });
 
 test('mixed-source/model/settings/observation bundles fail closed', () => {

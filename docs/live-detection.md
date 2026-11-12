@@ -167,13 +167,17 @@ before parsing it.
 Following the practice of running cheap motion detection before object detection
 (as in the open-source Frigate NVR), the worker compares a 160-pixel-wide, blurred
 grey copy of each frame with the previous one. When less than 0.2 % of pixels
-change, nothing is being tracked and the detector ran within the last 2 seconds,
+change, no unexpired tentative/tracked/lost association needs a sample, and the detector ran within the last 2 seconds,
 it skips the detector for that frame and reports "Still scene · detector resting".
-Any motion or any tracked object runs the detector on every frame.
+Any motion or unexpired association runs the detector on every frame. Pending
+confirmations and recovery attempts therefore keep receiving samples, even when
+the numbered-summary cap hides a track from the public list. Once the existing
+lost window expires, a still scene can rest again. This may add detector calls
+during recovery; the empty-scene keyframe policy is unchanged.
 
 **Tracking.** Tracks follow the two-stage association approach of ByteTrack
 (Zhang et al., 2022) on a constant-velocity Kalman filter as in SORT (Bewley et al.,
-2016). Tracker method `bytetrack-style-iou-kalman-v2` adapts the reference noise
+2016). Tracker method `bytetrack-style-iou-kalman-v3` adapts the reference noise
 weights as continuous diffusion rates for irregular sample intervals; it is not
 an exact reproduction of the reference per-frame filter:
 
@@ -192,7 +196,10 @@ an exact reproduction of the reference per-frame filter:
    IoU × score, using the Hungarian method (Kuhn, 1955) for the optimal
    assignment. Classes form independent assignment groups, so no cross-class
    matrix entries need to be computed. This preserves the optimal feasible match
-   count and cost; a single-class scene retains the original matrix dimensions.
+   count and cost. Within a sparse class graph, disconnected feasible groups
+   are solved independently, without removing any permitted edge. Dense graphs
+   retain the original Hungarian solve; all IoU matrices still have their original
+   dimensions. Tied optimal assignments can select different valid pairs.
 3. Match tracks still unmatched to low-score boxes (0.1–0.5) by IoU ≥ 0.5. This is
    ByteTrack's key idea: a partly hidden or blurred person keeps their track
    instead of disappearing and returning with a new number.

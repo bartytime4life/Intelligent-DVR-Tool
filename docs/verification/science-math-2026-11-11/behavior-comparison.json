@@ -1,0 +1,55 @@
+{
+  "data_kind": "synthetic",
+  "qualification": "NOT_ESTABLISHED",
+  "baseline_revision": "c517b438789efbe81d410f23f2a0a173ed72c86c",
+  "motion_sampling": {
+    "baseline": {
+      "first_confirmed_frame": null,
+      "detector_calls": 5,
+      "frames": 35,
+      "empty_scene_detector_calls": 4
+    },
+    "candidate": {
+      "first_confirmed_frame": 2,
+      "detector_calls": 35,
+      "frames": 35,
+      "empty_scene_detector_calls": 4
+    }
+  },
+  "threshold_selection": {
+    "coarse-gap": {
+      "baseline": {
+        "threshold": 0.5,
+        "reason": "keep-current",
+        "emptyMax": 0.51,
+        "fresh_check": "unchanged"
+      },
+      "candidate": {
+        "threshold": 0.53,
+        "reason": "ok",
+        "emptyMax": 0.51,
+        "fresh_check": "improved"
+      }
+    },
+    "narrow-gap": {
+      "baseline": {
+        "threshold": 0.5,
+        "reason": "keep-current",
+        "emptyMax": 0.512,
+        "fresh_check": "unchanged"
+      },
+      "candidate": {
+        "threshold": 0.514,
+        "reason": "ok",
+        "emptyMax": 0.512,
+        "fresh_check": "improved"
+      }
+    }
+  },
+  "limits": "Prescribed detector outputs and generated JPEGs; no detector model, camera, private footage, network, accuracy or capacity qualification.",
+  "candidate_source_sha256": {
+    "edge/tracking.py": "882aeb583ae2f92b7112b98fd22851f6c26882a00961b228d25cbf50eb8811c0",
+    "edge/live_worker.py": "0941314679d91d0387d23ffb7ab34d200519e97aaa01aa634e8d8a6b39c6f8e2",
+    "src/training.mjs": "c94a042c9c739cf2d4aadb2c97144d820af09f1ae137c0ca75bdb9199f072e59"
+  }
+}

@@ -171,7 +171,9 @@ The source subset, upstream hashes, license and explicit compatibility changes
 are preserved [beside the vendored code](../edge/_vendor/trackeval/README.md).
 No tracking metric is approximated by detector precision/recall.
 
-The compatibility adapter reuses the application's Hungarian solver. Exhaustive
+The compatibility adapter reuses the application's original dense Hungarian solver;
+the tracker's v3 sparse component dispatcher does not change the reference metric
+adapter. Exhaustive
 small-matrix tests verify its optimal assignment costs, including rectangular,
 negative, tied and large-cost matrices. Equal-optimum ties use deterministic input
 order and can select a different valid assignment from SciPy; this is not a claim

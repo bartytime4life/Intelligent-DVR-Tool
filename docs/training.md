@@ -31,9 +31,15 @@ To use a run from the separate **Training Lab**, open **Reports** there and expo
 1. Select **Start session**. At **Camera check**, open **Detector and reference rule** if you want to choose the local detector and the rule used for the Current column. Select **Connect camera**, grant camera permission, and check the framing and lighting. The microphone stays off.
 2. Start the guided recording. The five prompts take **54 seconds**. Stay in view for 10 seconds, leave for 12, walk along the far side for 14, stand partly hidden for 10, then return for 8. If you want an audible cue while out of view, enable **Play prompt tones** before recording. One tone marks a prompt and two mark the finish. The tones play locally. Keep the training tab visible to follow the script. If the tab becomes hidden, capture pauses and gives you a countdown when you return.
 3. Let local analysis finish. Compare **Current** and **Trial**. For each threshold, the scorecard gives the number of person detections during the in-view prompts and the number of person flags during the empty-room prompt. Each count includes the number of frames checked.
-4. Open **Review the first recording** to inspect individual prompts and available stills. Under **Advanced sensitivity**, move the slider from 0.30 to 0.90 in steps of 0.05 to preview how another threshold would score on the same frames. You can choose **Keep current setting** and record the calibration in your history.
+4. Open **Review the first recording** to inspect individual prompts and available stills. Under **Advanced sensitivity**, move the slider from 0.30 to 0.90 in steps of 0.01 to preview how another threshold would score on the same frames. An automatic suggestion may use a finer observed-score boundary; its exact value stays available through the fresh check and saving. You can choose **Keep current setting** and record the calibration in your history.
 
-The app tests suggested thresholds from **0.40 through 0.90** in steps of 0.05. It considers a change only when it still finds someone during the in-view prompts, improves one count and holds or improves the other. It gives the in-view and empty-room conditions equal weight when ranking those choices. Ties favor a setting close to a safety margin above the strongest empty-room score. The fresh recording tests whichever threshold you chose.
+The app tests suggested thresholds from **0.40 through 0.90**, including observed
+score boundaries so it can find a useful setting between manual slider steps.
+It considers a change only when it still finds someone during the in-view prompts,
+improves one count and holds or improves the other. It gives the in-view and
+empty-room conditions equal weight when ranking those choices. Ties favor a
+setting close to a margin above the strongest empty-room score. The fresh recording
+tests whichever threshold you chose. See the [mathematics and validation limits](science-and-algorithms.md#choose-a-useful-detection-threshold).
 
 While the trial is automatic, changing combined evidence updates its suggestion.
 A threshold you choose under **Advanced sensitivity** stays selected when you

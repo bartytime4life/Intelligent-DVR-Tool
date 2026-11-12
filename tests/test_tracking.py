@@ -5,7 +5,7 @@ import unittest
 
 import numpy as np
 
-from edge.tracking import (MAX_ACTIVE, MAX_PATH, REPORTED_PATH, Kalman, Tracker, TrackerConfig, assign, class_summary, iou,
+from edge.tracking import (MAX_ACTIVE, MAX_PATH, REPORTED_PATH, Kalman, Tracker, TrackerConfig, assign, assign_gated, class_summary, iou,
                            zones_from_rules)
 from edge.rules import Rule
 
@@ -160,7 +160,7 @@ class TrackerTest(unittest.TestCase):
         boxes = [box(100 + 200 * i, 100, label=label) for i in range(2)
                  for label in ('person', 'car', 'dog')]
         tracker.update(0, boxes, W, H)
-        with patch('edge.tracking.assign', wraps=assign) as solver:
+        with patch('edge.tracking.assign_gated', wraps=assign_gated) as solver:
             # Reverse detection order: local block indices must map back correctly.
             self.assertEqual(tracker.update(.2, boxes[::-1], W, H), [6, 5, 4, 3, 2, 1])
             self.assertEqual([call.args[0].shape for call in solver.call_args_list], [(2, 2)] * 3)
@@ -171,7 +171,7 @@ class TrackerTest(unittest.TestCase):
         tracker = Tracker()
         tracker.update(0, [], W, H)
         tracker.update(.1, boxes, W, H)
-        with patch('edge.tracking.assign', wraps=assign) as solver:
+        with patch('edge.tracking.assign_gated', wraps=assign_gated) as solver:
             self.assertEqual(tracker.update(.2, boxes[::-1], W, H), [6, 5, 4, 3, 2, 1])
             self.assertEqual([call.args[0].shape for call in solver.call_args_list], [(2, 2)] * 3)
 
