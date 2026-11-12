@@ -56,7 +56,7 @@ import FacilityStairs,{StairDestination} from './FacilityStairs.jsx';
 import {stairAtStart,suggestedStair,stairPlacementIssue} from './facility-stair-placement.mjs';
 import {addBuildingLevel} from './facility.mjs';
 import {unitFactor, displayLength, unitLabel, enteredLength, localizeLengths, nextBuildingName, rotateShape, shapeBounds, suggestBuildingOffset, translateShape} from './facility-shape-edit.mjs';
-import {formatDistance} from './facility-measurements.mjs';
+import {formatDistance, formatArea} from './facility-measurements.mjs';
 import {createFloorOpening,createFloorPath,snapToBuilding,solidSpaceProblem,applyBuildingEdit,buildingMotion,fittingRectangle,reoriginPlan,SNAP_TOLERANCE} from './facility.mjs';
 import {backdropDismiss} from './dialog-dismiss.mjs';
 import FacilityLevels from './FacilityLevels.jsx';
@@ -70,7 +70,8 @@ import {roomAdditions} from './facility-room-sketch.mjs';
 import FacilityZones from './FacilityZones.jsx';
 import { createFacilityZone } from './facility-zones.mjs';
 import FacilityCameraPreview from './FacilityCameraPreview.jsx';
-import { fanCache, coverageMetrics, zoneCoverage, enabledFans, MAX_COVERAGE_CELLS } from './facility-coverage.mjs';
+import { fanCache } from './facility-coverage.mjs';
+import {useFacilityCoverage} from './use-facility-coverage.mjs';
 import { DORI_NOTE, LENS_PRESETS, lensPreset, doriDistances, densityAtGround, PIXELS_WIDE, pixelsWideOK } from './facility-dori.mjs';
 import { installerSheetHTML, installerSheetFilename } from './facility-installer.mjs';
 import './facility-camera-planning.css';
@@ -562,12 +563,13 @@ function FacilityEditor({onPreviewCount,initialPlan,facilityControls,persistence
     }
   }, [preview, previewError, mapDrafts, replaceDrafts, selected.id, view, floor, ready, measurements, units, b?.id, manipulate, stairEditor, directPlacement, step]);
   useEffect(() => api.current?.setBuildingPreview(step === 1 && shapeOpen ? shapePreview : null), [step,shapeOpen,shapePreview,ready]);
-  // Coverage metrics use the same cached fans the map draws, from the previewed plan.
-  const coverage = useMemo(() => step === 4 ? coverageMetrics(preview, fans.current(wallObstacles(preview))) : null, [step, preview]);
+  // Background metrics use the same fan algorithm and preview geometry as the
+  // map. Only a response bound to this plan/attempt can reach the display.
+  const {metrics:coverage, status:coverageStatus, error:coverageError, retry:retryCoverage} = useFacilityCoverage(preview, step === 4);
   const blindSpots = useMemo(() => {
-    const zone = step === 4 && (preview.zones || []).find(z => z.id === blindZone && z.enabled && z.buildingId === undefined);
-    return zone ? zoneCoverage(zone.footprint, enabledFans(preview, fans.current(wallObstacles(preview))), {blindSpots:true}).blindSpots : null;
-  }, [step, preview, blindZone]);
+    const zone = coverage?.zones.find(z => z.id === blindZone && z.estimated);
+    return zone?.blindSpots ?? null;
+  }, [coverage, blindZone]);
   useEffect(() => api.current?.setBlindSpots(blindSpots), [blindSpots, ready]);
   const photoCenter = sitePreview || plan.origin;
   useEffect(() => { if (ready) api.current?.setBasemap(mapLayer.id, {fade: mapLayer.fade, photoCenter}); }, [ready, mapLayer.id, mapLayer.fade, photoCenter[0], photoCenter[1]]);
@@ -1008,7 +1010,7 @@ pect its modeled view.", "Draw a route and review proposed camera transitions.",
     place("label", [0, 0]);
   }}>Add label at origin</button>
       </>}
-      {(step === 3 || step === 4) && <>{step === 4 && coverage && <CoverageMetrics metrics={coverage} blindZone={blindZone} onBlindZone={setBlindZone} blindSpots={blindSpots} dirty={propertyDirty} units={units}/>}<div className="facility-action-row"><button className="facility-secondary" disabled={!ready} onClick={() => startTool(
+      {(step === 3 || step === 4) && <>{step === 4 && (coverage ? <CoverageMetrics metrics={coverage} blindZone={blindZone} onBlindZone={setBlindZone} blindSpots={blindSpots} dirty={propertyDirty} units={units}/> : <section className="facility-coverage-metrics" aria-label="Estimated coverage metrics"><h3 className="facility-subheading">Estimated coverage</h3><p className="facility-caption" role="status">{coverageStatus === 'error' ? coverageError : 'Updating coverage… You can keep editing your plan.'}</p>{coverageStatus === 'error' && <button type="button" className="facility-secondary" onClick={retryCoverage}>Try coverage again</button>}</section>)}<div className="facility-action-row"><button className="facility-secondary" disabled={!ready} onClick={() => startTool(
     "camera"
   )}><Plus />Place camera</button><button className="facility-link" onClick={() => place("camera", [0, -20])}>Add with coordinates</button></div>
         <label className="facility-field"><span>Selected camera</span><select aria-label="Selected camera" value={selected.
@@ -1119,13 +1121,14 @@ function PixelDensity({ camera, units }) {
 function CoverageMetrics({ metrics, blindZone, onBlindZone, blindSpots, dirty, units }) {
   const shown = metrics.zones.find(z => z.id === blindZone && z.estimated);
   return <section className="facility-coverage-metrics" aria-label="Estimated coverage metrics"><h3 className="facility-subheading">Estimated coverage</h3>
-    {metrics.zones.length || metrics.route ? <table><thead><tr><th>Area</th><th>Coverage<small>≥1 camera</small></th><th>Overlap<small>≥2 cameras</small></th><th aria-label="Blind-spot overlay" /></tr></thead><tbody>
-      {metrics.zones.map(z => <tr key={z.id}><th scope="row">{z.name}<small>{z.type === 'object_watch' ? 'Object watch' : 'Restricted'}{z.estimateReason === 'indoor' ? ' · indoor' : ''}</small></th>{z.estimated ? <><td>{percent(z.coverage)}</td><td>{percent(z.overlap)}</td><td><button type="button" className="facility-blind-toggle" aria-pressed={blindZone === z.id} aria-label={`Blind spots for ${z.name}`} onClick={() => onBlindZone(blindZone === z.id ? '' : z.id)}>Blind spots</button></td></> : <td colSpan={3} className="facility-not-estimated">{z.estimateReason === 'no-interior-samples' ? 'Not estimated · this area needs a finer grid' : 'Not estimated · ground-plane only'}</td>}</tr>)}
+    {metrics.zones.length || metrics.route ? <table><thead><tr><th scope="col">Area</th><th scope="col">Coverage<small>≥1 camera</small></th><th scope="col">Overlap<small>≥2 cameras</small></th><th scope="col" aria-label="Blind-spot overlay" /></tr></thead><tbody>
+      {metrics.zones.map(z => <tr key={z.id}><th scope="row">{z.name}<small>{z.type === 'object_watch' ? 'Object watch' : 'Restricted'}{z.estimateReason === 'indoor' ? ' · indoor' : ''}</small>{z.estimated && <small>{formatArea(z.area, units)} planned area</small>}</th>{z.estimated ? <><td>{percent(z.coverage)}</td><td>{percent(z.overlap)}</td><td><button type="button" className="facility-blind-toggle" aria-pressed={blindZone === z.id} aria-label={`Blind spots for ${z.name}`} onClick={() => onBlindZone(blindZone === z.id ? '' : z.id)}>Blind spots</button></td></> : <td colSpan={3} className="facility-not-estimated">{z.estimateReason === 'indoor' ? 'Not estimated · ground-plane only' : z.estimateReason === 'geometry-limit' ? 'Not estimated · geometry is too complex' : 'Not estimated · geometry could not be resolved'}</td>}</tr>)}
       {metrics.route && <tr><th scope="row">Handoff route<small>{formatDistance(metrics.route.length, units)} path length</small></th><td>{percent(metrics.route.coverage)}</td><td>{percent(metrics.route.overlap)}</td><td /></tr>}
     </tbody></table> : <p className="facility-caption">Add an enabled outdoor zone (step 7) or a handoff route (step 6) to estimate coverage.</p>}
-    {shown && blindSpots && <p className="facility-caption" role="status">{blindSpots.length ? `Map shows uncovered sample cells in ${shown.name} (cells about ${formatDistance(shown.cellWidth, units)} × ${formatDistance(shown.cellHeight, units)}).` : `No uncovered sample cells in ${shown.name}.`}</p>}
+    {shown && blindSpots && <p className="facility-caption" role="status">{blindSpots.length ? `Map shows uncovered areas in ${shown.name}.` : `No uncovered area in ${shown.name}.`}</p>}
+    {metrics.zones.some(z => !z.estimated && z.estimateReason !== 'indoor') && <p className="facility-caption">Change or simplify the zone or camera plan to retry unavailable estimates. You can still edit, save and Undo.</p>}
     {metrics.route && <p className="facility-caption" aria-label="Route coverage details">{formatDistance(metrics.route.uncoveredLength, units)} of the route is outside the drawn coverage. Longest continuous gap: {formatDistance(metrics.route.longestBlindStretch, units)}.</p>}
-    <p className="facility-caption">Zones use up to {MAX_COVERAGE_CELLS.toLocaleString('en-US')} grid cells each. Route percentages use path length inside the drawn ground fans, including their edges, for {metrics.cameras} included {metrics.cameras === 1 ? 'camera' : 'cameras'}. {dirty ? 'Includes the unsaved camera preview. ' : ''}Indoor and level zones are not estimated because coverage is ground-plane only. Planning estimate; verify on site.</p>
+    <p className="facility-caption">Zone percentages measure area inside the drawn ground coverage. Overlap requires two different cameras. Routes measure path length for {metrics.cameras} included {metrics.cameras === 1 ? 'camera' : 'cameras'}. {dirty ? 'Includes the unsaved camera preview. ' : ''}Indoor and level zones are not estimated because coverage is ground-plane only. Planning estimate; verify on site.</p>
   </section>;
 }
 function SiteForm({ plan, commit, center, pickedOrigin, onPin, ready, onDirtyChange, onPreview, addressFocus, focusAddress }) {

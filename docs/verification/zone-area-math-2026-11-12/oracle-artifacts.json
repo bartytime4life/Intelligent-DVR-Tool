@@ -1,0 +1,89 @@
+{
+  "scope": "Independent public generated-geometry oracle artifacts; manifest excludes itself. Original README bytes retained as oracle.md.",
+  "files": {
+    "baseline-expected.json.gz": {
+      "bytes": 12259,
+      "sha256": "a43b668e7e4d3dab3d205a16a11d840a778bd0f53860ff434f6af6abc9cfda52"
+    },
+    "baseline-observations.json.gz": {
+      "bytes": 67618,
+      "sha256": "50d3d9459c8835594f3402cc8a7cfd9bf29776eb935b3f29c93b8bc29afc46f0"
+    },
+    "baseline-receipt.json.gz": {
+      "bytes": 13521,
+      "sha256": "5f39045a2aa006ba19d3a22cbbcc2680bfa32560b60cd8d06239e61ef5bf027c"
+    },
+    "baseline-src/facility-coverage.mjs": {
+      "bytes": 9691,
+      "sha256": "122dce3ca246afea2cb66f816dae27b40f4baf5ee8bfd9bee1b2b6cac8d5bfad"
+    },
+    "baseline-src/facility-doorways.mjs": {
+      "bytes": 10476,
+      "sha256": "dee737c4c8bdc7bce497ae7c4d82be0a76e45f2a132804f9b911cfc4d7c994fd"
+    },
+    "baseline-src/facility-stairs.mjs": {
+      "bytes": 8004,
+      "sha256": "4ce62cab36971dd528a4af8667168e6cc39f723e5aecbfc619e091106c05a544"
+    },
+    "baseline-src/facility-windows.mjs": {
+      "bytes": 7064,
+      "sha256": "84cc16197f284680b86edb77b8fd6d49bdc53bb11c316b87332774879cac7ff4"
+    },
+    "baseline-src/facility-zones.mjs": {
+      "bytes": 3602,
+      "sha256": "14080041069bed6d8eb2ad48ec22c0e004db8b0feaa7c82eabea581898355248"
+    },
+    "baseline-src/facility.mjs": {
+      "bytes": 42726,
+      "sha256": "dc6d0a44a608c6c07df92ccff06b64b6ba082c6a574763589ba67c177ae53df6"
+    },
+    "candidate-expected.json.gz": {
+      "bytes": 12259,
+      "sha256": "a43b668e7e4d3dab3d205a16a11d840a778bd0f53860ff434f6af6abc9cfda52"
+    },
+    "candidate-observations.json.gz": {
+      "bytes": 79358,
+      "sha256": "e98b4e31d71fac55a943d3467f2158db98fe5546f20939bffcad84a5b8a28b79"
+    },
+    "candidate-receipt.json": {
+      "bytes": 7413,
+      "sha256": "40b4f6089599275bd5f465df2316303cb1636449e239cd11cf850c0325c974f3"
+    },
+    "check-convex-reference.py": {
+      "bytes": 3977,
+      "sha256": "dcada5ab717234399b37c7d157052fa63825589db7ec7ac0d139cd3c90814fb5"
+    },
+    "check-zone-area.py": {
+      "bytes": 16506,
+      "sha256": "8be922ff71164d15b097cc0cb10be3f772ca9f7f8a3eb2f49fdee4819cc3cd08"
+    },
+    "convex-reference-receipt.json": {
+      "bytes": 635,
+      "sha256": "e8b3d3e9f00423c2d2499631ce7dcaad173278632b7003222b174e8559b3cd23"
+    },
+    "first-candidate-failed-receipt.json.gz": {
+      "bytes": 3617,
+      "sha256": "ef33da0100170cbc8c284fcdc16c7ae8027a875a832bb3515d2c6923b041addc"
+    },
+    "first-candidate-failure.json": {
+      "bytes": 915,
+      "sha256": "3e65786c0e55316915f4efde5ad2a1a784362ff9361dc324930da31013ef93fc"
+    },
+    "inputs.json.gz": {
+      "bytes": 277813,
+      "sha256": "0cb47e3acd2d186db1892e04e2e44e659fd19a36a37db91a7a3507a182cd1526"
+    },
+    "proof.json": {
+      "bytes": 1287,
+      "sha256": "76d2c29d28716d3fbc2b46d7be3a9f97ade009e7d4ad8cc4c6787782e556e735"
+    },
+    "runner.mjs": {
+      "bytes": 1080,
+      "sha256": "d05c8f1f2c22f6f465c11a7715adeb86c6c3e6b4a92a34b329ecb686720f4a71"
+    },
+    "oracle.md": {
+      "bytes": 8379,
+      "sha256": "d4eeb1ad4a827bcf17dc818aab84a04d0efa982a2b7643c07da65cfd11a5a5dd"
+    }
+  }
+}

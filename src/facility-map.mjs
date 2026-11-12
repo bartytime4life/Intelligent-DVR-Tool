@@ -7,6 +7,7 @@ import { centroid, toLngLat, fromLngLat, coverageFan, wallObstacles, buildingFea
 import { stairOnLevel, stairDimensions, stairFootprint, stairTreadPolygons } from "./facility-stairs.mjs";
 import { measurementLabels, lineRibbonSegments, floorRenderPlan, floorElevation, visibleLabelIndices, formatDistance } from "./facility-measurements.mjs";
 import { fanCache } from "./facility-coverage.mjs";
+import {blindSpotCollection} from './facility-blind-spots.mjs';
 import { translateShape, unitFactor } from "./facility-shape-edit.mjs";
 import {createStairMap} from "./facility-stair-map.mjs";
 import {createWindowMap} from "./facility-window-map.mjs";
@@ -868,8 +869,8 @@ e-stroke-width": 2 } });
       }
       draftKey = key;
     },
-    setBlindSpots(rings) {
-      if (ready) map.getSource("blind-spots").setData(fc((rings || []).map(ring => polygon(ring, current.origin))));
+    setBlindSpots(polygons) {
+      if (ready) map.getSource("blind-spots").setData(blindSpotCollection(polygons, current.origin));
     },
     destroy() {
       const pending = photo.controller;

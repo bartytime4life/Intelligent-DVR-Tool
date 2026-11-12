@@ -1,0 +1,29 @@
+{
+  "sourceSha256": "0477c12aec149d25c1aa41a8f85df41bc92f415eeb0cd11ddaac9391c5d771eb",
+  "corpusSha256": "1cc1553b86d844df042fec7752afefb9bccd3fcd57e43a6bbc75d13e375b1089",
+  "case": "five-hundred-stripes",
+  "runtime": "v22.13.1",
+  "elapsedMs": 110.23485199999999,
+  "scope": "One local generated diagnostic; not a hardware or camera-capacity qualification",
+  "result": {
+    "method": "polygon-area-v1",
+    "cameras": 500,
+    "estimated": true,
+    "area": 1,
+    "coveredArea": 0.0017464377163539824,
+    "overlapArea": 0,
+    "uncoveredArea": 0.998253562283646,
+    "coverage": 0.0017464377163539826,
+    "overlap": 0,
+    "blindSpots": {
+      "polygons": 501,
+      "vertices": 2505
+    },
+    "work": {
+      "operations": 1500,
+      "inputVertices": 101890,
+      "outputVertices": 29945,
+      "peakVertices": 2505
+    }
+  }
+}

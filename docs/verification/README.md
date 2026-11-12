@@ -1,5 +1,11 @@
 # Verification index
 
+[Zone coverage by area, November 12](zone-area-math-2026-11-12/README.md)
+records sampled-grid counterexamples, distinct-camera area/overlap integration,
+hole-preserving blind polygons, independent rational checks and bounded,
+revision-bound background calculation. Proposed source remains separate from
+merged, installed and field-qualified behavior.
+
 [Current documentation alignment, November 12](documentation-alignment-2026-11-12/README.md)
 follows the earlier 197-path audit, records the merged route/evaluation baseline and
 corrects rehearsal duration/position wording without replacing historical receipts.

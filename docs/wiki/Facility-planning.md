@@ -196,17 +196,28 @@ recognition-quality claim.
   selected camera's fan mark each limit and break where modeled walls shorten
   the view. Lens presets (2.8–12 mm) fill a **typical** horizontal view only;
   vertical view is unchanged, and a datasheet value always wins.
-- **Coverage metrics.** The Coverage step uses the same cached fans the map
-  draws, including any unsaved camera preview. Outdoor zones use a grid (at most
-  20,000 cells, target spacing at least 0.25 m) for coverage (≥1 camera), overlap
-  (≥2 cameras) and one zone’s uncovered-cell overlay as merged row rectangles.
-  The grid fits the zone's bounding box, so narrow zones still receive an
-  interior row or column; actual cells can be smaller than the target spacing.
-  An irregular zone with no interior sample centers shows **Not estimated**,
-  rather than 0% coverage or a claim that no blind areas exist. The overlay uses
-  the actual rectangular cell dimensions. These are sampled estimates, not an
-  exact area union or calibrated visibility.
-  Indoor and level zones show "not estimated" because coverage is ground-plane only.
+- **Coverage metrics.** The Coverage step calculates from the previewed plan
+  using the same ground-fan algorithm as the map. Outdoor zone percentages now
+  measure polygon **area** inside at least one camera's drawn fan. **Overlap**
+  requires at least two different cameras; duplicate fragments of one camera
+  count once. A fan touching an edge or point contributes no area.
+  The **Blind spots** toggle shades the zone minus that coverage, preserving
+  disconnected pieces and covered islands as holes. It does not fill bounding
+  rectangles outside a concave zone. Planned area appears beneath the zone name
+  in your selected metres/feet units. The saved zone is still a single-ring
+  footprint; computed overlay holes do not add editable holes to the plan schema.
+  These remain estimates of the drawn ground plane, not calibrated visibility.
+  Indoor and level zones remain **Not estimated · ground-plane only**.
+
+  Calculation runs in a bounded background worker. **Updating coverage** hides
+  old numbers and shading while you keep editing; newer drafts supersede older
+  requests. Leaving Coverage cancels its work. **Save camera**, Discard and Undo
+  retain their existing meaning. A worker error or timeout offers **Try coverage
+  again**. A zone that exceeds the geometry budget or cannot be resolved shows
+  **Not estimated**, with no numeric or empty-overlay fallback. Change or simplify
+  its geometry to retry. Local per-zone and whole-plan work caps can leave complex
+  plans partly unestimated; they do not establish a target-host latency guarantee.
+  See the [area mathematics, limits and generated checks](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/zone-area-math-2026-11-12/README.md).
   The **handoff route** uses covered path length rather than sample-point counts.
   Each segment is intersected with the drawn positive-area fan polygons; intervals
   from the same camera count once before coverage and overlap are measured.

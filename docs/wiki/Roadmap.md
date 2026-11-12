@@ -39,6 +39,11 @@ keeps analytic, independent-oracle and local browser evidence. Zone grids and
 the simulated handoff rehearsal remain separate; no optical calibration,
 real tracking or camera-capacity claim follows from these calculations.
 
+The separate [zone-area proposal](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/zone-area-math-2026-11-12/README.md)
+replaces the outdoor grid with distinct-camera polygon area, coherent blind
+geometry and bounded background calculation. It remains under review until
+merged; generated geometry and worker checks do not qualify physical visibility.
+
 [PR #112](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/112), merged
 as `cd6d1566`, replaces coarse automatic training cutoffs with empirical score
 boundaries, requests live detections while tentative/recoverable tracks need

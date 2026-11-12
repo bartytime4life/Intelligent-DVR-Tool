@@ -1,5 +1,7 @@
-import { coverageFan, pointInPolygon } from './facility.mjs';
-// Fans are cached per camera geometry and reset whenever the wall set changes; the map and metrics share one cache.
+import { coverageFan } from './facility.mjs';
+import clipping from 'polygon-clipping';
+// Each caller caches camera geometry until its wall set changes. The map and
+// background metrics worker use the same coverageFan algorithm.
 export function fanCache() {
   let walls = "", fans = new Map();
   return (obstacles) => {
@@ -12,45 +14,167 @@ export function fanCache() {
     };
   };
 }
-// Ground-plane zones retain their bounded grid; route metrics integrate arclength.
-export const MAX_COVERAGE_CELLS = 20000, MIN_CELL = .25;
 const bounds = ring => [0, 1, 0, 1].map((k, i) => (i < 2 ? Math.min : Math.max)(...ring.map(p => p[k])));
 const overlaps = (a, b) => a[0] <= b[2] && a[2] >= b[0] && a[1] <= b[3] && a[3] >= b[1];
 export function enabledFans(plan, fanOf) {
-  return plan.cameras.filter(c => c.enabled).map(c => ({id:c.id, ring:fanOf(c)})).filter(f => f.ring.length > 3).map(f => ({...f, box:bounds(f.ring)}));
+  return plan.cameras.filter(c => c.enabled).map(c => ({id:c.id, ring:fanOf(c)})).filter(f => hasArea(f.ring)).map(f => ({...f, box:bounds(f.ring)}));
 }
-// Counts cameras seeing p, stopping at two (overlap needs no more).
-function seenBy(p, fans) {
-  let n = 0;
-  for (const f of fans) if (p[0] >= f.box[0] && p[0] <= f.box[2] && p[1] >= f.box[1] && p[1] <= f.box[3] && pointInPolygon(p, f.ring) && ++n > 1) break;
-  return n;
+
+// These caps bound work submitted to the synchronous clipping library, not wall
+// time inside a call. The UI runs the calculation in a disposable worker.
+export const ZONE_COVERAGE_LIMITS = Object.freeze({operations:3000, inputVertices:2000000, outputVertices:600000, geometryVertices:65536});
+export const PLAN_COVERAGE_LIMITS = Object.freeze({operations:12000, inputVertices:4000000, outputVertices:1200000, geometryVertices:65536});
+const emptyWork = () => ({operations:0, inputVertices:0, outputVertices:0, peakVertices:0});
+function boundedLimits(requested, maximum) {
+  return Object.fromEntries(Object.entries(maximum).map(([key, value]) => [key,
+    Number.isSafeInteger(requested?.[key]) && requested[key] >= 0 ? Math.min(value, requested[key]) : value]));
 }
-export function zoneCoverage(footprint, fans, {maxCells = MAX_COVERAGE_CELLS, blindSpots = false} = {}) {
-  const box = bounds(footprint), w = box[2] - box[0], h = box[3] - box[1];
-  let cell = Math.max(MIN_CELL, Math.sqrt(w * h / maxCells));
-  while (Math.ceil(w / cell) * Math.ceil(h / cell) > maxCells) cell *= 1.01;
-  const nx = Math.ceil(w / cell), ny = Math.ceil(h / cell), near = fans.filter(f => overlaps(f.box, box)), gaps = [];
-  // Fit the grid to the bounds. A zone narrower than the target spacing still
-  // needs an interior column, and edge cells must not extend past its bounds.
-  const cellWidth = w / nx, cellHeight = h / ny;
-  let cells = 0, covered = 0, overlap = 0;
-  for (let j = 0; j < ny; j++) {
-    const bottom = box[1] + j * cellHeight, top = j === ny - 1 ? box[3] : box[1] + (j + 1) * cellHeight;
-    const y = (bottom + top) / 2;
-    let run = null;
-    const close = () => { if (run) gaps.push([[run[0], bottom], [run[1], bottom], [run[1], top], [run[0], top], [run[0], bottom]]); run = null; };
-    for (let i = 0; i < nx; i++) {
-      const left = box[0] + i * cellWidth, right = i === nx - 1 ? box[2] : box[0] + (i + 1) * cellWidth;
-      const x = (left + right) / 2, inside = pointInPolygon([x, y], footprint), n = inside ? seenBy([x, y], near) : 0;
-      if (inside) { cells++; if (n) covered++; if (n > 1) overlap++; }
-      // Uncovered cells merge into row runs so the overlay stays a few rectangles, not thousands.
-      if (blindSpots) { if (inside && !n) run = run ? [run[0], right] : [left, right]; else close(); }
+const budget = limits => ({limits, work:emptyWork(), exhausted:false});
+class GeometryLimit extends Error {}
+function vertices(multi) {
+  if (!Array.isArray(multi)) throw Error('Invalid polygon result.');
+  let count = 0;
+  for (const polygon of multi) {
+    if (!Array.isArray(polygon) || !polygon.length) throw Error('Invalid polygon result.');
+    for (const ring of polygon) {
+      if (!Array.isArray(ring) || ring.length < 4 || !ring.every(p => Array.isArray(p) && p.length === 2 && p.every(Number.isFinite)) ||
+          ring[0][0] !== ring.at(-1)[0] || ring[0][1] !== ring.at(-1)[1]) throw Error('Invalid polygon result.');
+      count += ring.length;
     }
-    if (blindSpots) close();
   }
-  return {cells, cell, cellWidth, cellHeight, cameras:near.length, estimated:cells > 0,
-    ...(cells ? {} : {estimateReason:'no-interior-samples'}),
-    coverage:cells ? covered / cells : null, overlap:cells ? overlap / cells : null, ...(blindSpots ? {blindSpots:gaps} : {})};
+  return count;
+}
+function geometryOperation(geometry, local, shared) {
+  return (method, ...input) => {
+    if (shared?.exhausted) throw new GeometryLimit();
+    const nonempty = input.filter(g => g.length);
+    if (method === 'union' && nonempty.length < 2) return nonempty[0] || [];
+    if (method === 'intersection' && nonempty.length !== input.length) return [];
+    const inputSize = input.reduce((sum, value) => sum + vertices(value), 0);
+    const budgets = shared ? [local, shared] : [local];
+    for (const item of budgets) if (inputSize > item.limits.geometryVertices || item.work.operations + 1 > item.limits.operations ||
+        item.work.inputVertices + inputSize > item.limits.inputVertices) {
+      item.exhausted = true; throw new GeometryLimit();
+    }
+    for (const item of budgets) {
+      item.work.operations++; item.work.inputVertices += inputSize;
+      item.work.peakVertices = Math.max(item.work.peakVertices, inputSize);
+    }
+    const output = geometry[method](...input), outputSize = vertices(output);
+    for (const item of budgets) {
+      // Output costs are observed after the library returns. A rejected output
+      // still consumed work; retain that cost rather than reporting a false cap.
+      item.work.outputVertices += outputSize;
+      item.work.peakVertices = Math.max(item.work.peakVertices, outputSize);
+      if (outputSize > item.limits.geometryVertices || item.work.outputVertices > item.limits.outputVertices) item.exhausted = true;
+    }
+    if (budgets.some(item => item.exhausted)) throw new GeometryLimit();
+    return output;
+  };
+}
+function compensated(values) {
+  let sum = 0, correction = 0;
+  for (const value of values) {
+    const next = sum + value;
+    correction += Math.abs(sum) >= Math.abs(value) ? (sum - next) + value : (value - next) + sum;
+    sum = next;
+  }
+  return sum + correction;
+}
+function ringMeasure(ring) {
+  const [x, y] = ring[0], cross = [], magnitudes = [];
+  for (let i = 1; i + 1 < ring.length; i++) {
+    const a = (ring[i][0] - x) * (ring[i + 1][1] - y), b = (ring[i][1] - y) * (ring[i + 1][0] - x);
+    cross.push(a - b); magnitudes.push(Math.abs(a) + Math.abs(b));
+  }
+  return {area:Math.abs(compensated(cross)) / 2, magnitude:compensated(magnitudes) / 2};
+}
+function multiMeasure(multi) {
+  const polygons = multi.map(p => p.map(ringMeasure));
+  return {area:compensated(polygons.map(p => p[0].area - compensated(p.slice(1).map(r => r.area)))),
+    magnitude:compensated(polygons.flatMap(p => p.map(r => r.magnitude)))};
+}
+
+// Each leaf belongs to one distinct camera. Child camera sets are disjoint, so
+// their union intersection adds exactly the points seen by >=2 cameras. A third
+// camera never adds a second vote to area already counted by the overlap union.
+function thresholdTwo(leaves, operate, from = 0, to = leaves.length) {
+  if (to === from) return {union:[], overlap:[]};
+  if (to - from === 1) return {union:leaves[from], overlap:[]};
+  const middle = (from + to) >>> 1, a = thresholdTwo(leaves, operate, from, middle), b = thresholdTwo(leaves, operate, middle, to);
+  return {union:operate('union', a.union, b.union),
+    overlap:operate('union', a.overlap, b.overlap, operate('intersection', a.union, b.union))};
+}
+
+// Area is integrated over the drawn polygonal fans, not camera pixels or a
+// survey. All geometry is copied into a local uniform frame before clipping.
+export function zoneCoverage(footprint, fans, {geometry = clipping, limits, sharedBudget} = {}) {
+  const local = budget(boundedLimits(limits, ZONE_COVERAGE_LIMITS));
+  let cameras = 0;
+  try {
+    if (sharedBudget?.exhausted) throw new GeometryLimit();
+    vertices([[footprint]]);
+    const box = bounds(footprint), scale = Math.max(box[2] - box[0], box[3] - box[1]);
+    if (!(scale > 0)) throw Error('Empty zone.');
+    const origin = [(box[0] + box[2]) / 2, (box[1] + box[3]) / 2];
+    const transform = ring => ring.map(p => [(p[0] - origin[0]) / scale, (p[1] - origin[1]) / scale]);
+    const subject = [[transform(footprint)]], measuredSubject = multiMeasure(subject), area = measuredSubject.area;
+    if (!(area > 0)) throw Error('Empty zone.');
+    const lower = transform([[box[0], box[1]]])[0], upper = transform([[box[2], box[3]]])[0];
+    const padding = lower.map((value, axis) => Math.max((upper[axis] - value) * .01,
+      32 * Number.EPSILON * Math.max(1, Math.abs(value), Math.abs(upper[axis]))));
+    const [left, bottom] = lower.map((value, axis) => value - padding[axis]);
+    const [right, top] = upper.map((value, axis) => value + padding[axis]);
+    const guard = [[[[left,bottom],[right,bottom],[right,top],[left,top],[left,bottom]]]];
+    const operate = geometryOperation(geometry, local, sharedBudget), byCamera = new Map();
+    for (const fan of fans) {
+      if (!Array.isArray(fan.ring) || !fan.ring.every(p => Array.isArray(p) && p.length === 2 && p.every(Number.isFinite))) throw Error('Invalid fan.');
+      if (!hasArea(fan.ring)) continue;
+      vertices([[fan.ring]]);
+      if (!overlaps(bounds(fan.ring), box)) continue;
+      if (!byCamera.has(fan.id)) byCamera.set(fan.id, []);
+      byCamera.get(fan.id).push([[transform(fan.ring)]]);
+    }
+    cameras = byCamera.size;
+    const leaves = [];
+    for (const fragments of byCamera.values()) {
+      // The guard strictly contains the zone. Replacing every fan F by F∩guard
+      // therefore preserves all threshold sets within the zone exactly, while
+      // removing irrelevant near/far arcs. Its axis-aligned sides also avoid
+      // reconstructing rotated subject edges at every leaf. The 1% padding is
+      // per axis; the floating-point minimum only keeps the guard strictly out.
+      const nearby = fragments.map(fragment => operate('intersection', guard, fragment)).filter(fragment => fragment.length);
+      // Union fragments of the same camera before thresholding, so overlapping
+      // fragments cannot manufacture two-camera overlap.
+      const camera = operate('union', ...nearby);
+      if (camera.length) leaves.push(camera);
+    }
+    const masks = thresholdTwo(leaves, operate);
+    // Clip the final masks rather than each leaf. Repeatedly reconstructing the
+    // subject boundary and then subtracting it again can create contradictory
+    // floating-point intersections on otherwise ordinary rotated boundaries.
+    const coveredGeometry = operate('intersection', subject, masks.union);
+    const overlapGeometry = operate('intersection', subject, masks.overlap);
+    const blind = masks.union.length ? operate('difference', subject, masks.union) : subject;
+    const measured = [coveredGeometry, overlapGeometry, blind].map(multiMeasure);
+    let [covered, overlap, uncovered] = measured.map(value => value.area);
+    // Only absorb floating-point closure error. Inconsistent/nonfinite output
+    // is unavailable, never silently turned into complete or empty coverage.
+    // Use the magnitudes of the cross-product terms, rather than only the net
+    // area: a thin diagonal polygon subtracts large products to get a small area.
+    const tolerance = 128 * Number.EPSILON * (area + measuredSubject.magnitude + compensated(measured.map(value => value.magnitude)));
+    if (![covered, overlap, uncovered].every(Number.isFinite) || covered < -tolerance || overlap < -tolerance || uncovered < -tolerance ||
+        covered > area + tolerance || overlap > covered + tolerance || Math.abs(covered + uncovered - area) > tolerance) throw Error('Inconsistent polygon areas.');
+    covered = Math.max(0, Math.min(area, covered)); overlap = Math.max(0, Math.min(covered, overlap)); uncovered = Math.max(0, Math.min(area, uncovered));
+    const squareScale = scale * scale;
+    return {method:'polygon-area-v1', cameras, estimated:true, area:area * squareScale,
+      coveredArea:covered * squareScale, overlapArea:overlap * squareScale, uncoveredArea:uncovered * squareScale,
+      coverage:covered / area, overlap:overlap / area,
+      blindSpots:blind.map(p => p.map(r => r.map(([x, y]) => [x * scale + origin[0], y * scale + origin[1]]))), work:{...local.work}};
+  } catch (error) {
+    return {method:'polygon-area-v1', cameras, estimated:false, estimateReason:error instanceof GeometryLimit ? 'geometry-limit' : 'geometry-error',
+      area:null, coveredArea:null, overlapArea:null, uncoveredArea:null, coverage:null, overlap:null, blindSpots:null, work:{...local.work}};
+  }
 }
 // Ignore collapsed fans, rather than promoting their zero-area traces to a
 // physical footprint. Anchor the area calculation locally to avoid cancellation
@@ -167,10 +291,20 @@ export function routeCoverage(route, fans) {
     segments, intersectionTests};
 }
 // Enabled ground zones and the handoff route; indoor zones are listed but never estimated.
-export function coverageMetrics(plan, fanOf) {
-  const fans = enabledFans(plan, fanOf);
+export function coverageMetrics(plan, fanOf, {geometry = clipping, zoneLimits, planLimits} = {}) {
+  const fans = enabledFans(plan, fanOf), sharedBudget = budget(boundedLimits(planLimits, PLAN_COVERAGE_LIMITS)), cache = new Map();
+  let cacheHits = 0;
   return {cameras:fans.length,
     zones:(plan.zones || []).filter(z => z.enabled).map(z => z.buildingId !== undefined ? {id:z.id, name:z.name, type:z.type, estimated:false, estimateReason:'indoor'} :
-      {id:z.id, name:z.name, type:z.type, ...zoneCoverage(z.footprint, fans)}),
-    route:routeCoverage(plan.route, fans)};
+      (() => {
+        const key = JSON.stringify(z.footprint);
+        let result = cache.get(key);
+        if (result) cacheHits++;
+        else {
+          result = zoneCoverage(z.footprint, fans, {geometry, limits:zoneLimits, sharedBudget});
+          if (result.estimated) cache.set(key, result);
+        }
+        return {id:z.id, name:z.name, type:z.type, ...result};
+      })()),
+    route:routeCoverage(plan.route, fans), work:{...sharedBudget.work}, cacheHits};
 }

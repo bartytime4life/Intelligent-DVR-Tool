@@ -192,7 +192,7 @@ test('opening and pathway helpers retain exact converted imperial dimensions wit
 
 import {coverageFan} from '../src/facility.mjs';
 import {DORI_BANDS, DORI_NOTE, LENS_PRESETS, lensPreset, pixelsPerMetre, doriDistances, doriArcs} from '../src/facility-dori.mjs';
-import {fanCache, enabledFans, zoneCoverage, routeCoverage, coverageMetrics, MAX_COVERAGE_CELLS} from '../src/facility-coverage.mjs';
+import {fanCache, enabledFans, zoneCoverage, routeCoverage, coverageMetrics} from '../src/facility-coverage.mjs';
 import {installerSheetHTML, installerRows, installerSheetFilename, INSTALLER_LIMITS} from '../src/facility-installer.mjs';
 const lens = {id:'C1',name:'North',x:0,y:0,z:4,bearing:0,tilt:30,hfov:90,vfov:60,range:50,enabled:true,pixelsWide:1920};
 const rect = (x0,y0,x1,y1) => [[x0,y0],[x1,y0],[x1,y1],[x0,y1],[x0,y0]];
@@ -220,7 +220,7 @@ test('DORI arcs follow the drawn fan and break where a wall shortens rays',()=>{
   assert.deepEqual(doriArcs({...lens,enabled:false},coverageFan({...lens,enabled:false},[])),[]);
 });
 
-test('coverage metrics grid-sample the shared cached fans with bounded cells, overlap and blind-spot runs',()=>{
+test('coverage metrics integrate shared cached fans by area, including overlap and blind polygons',()=>{
   const fans=fanCache()([]),plan={...blankFacility(),cameras:[lens,{...lens,id:'C2',x:200}]};
   assert.equal(fans(lens),fans({...lens}));assert.equal(enabledFans(plan,fans)[0].ring,fans(lens));
   const inside=zoneCoverage(rect(-5,10,5,20),enabledFans(plan,fans));
@@ -229,12 +229,11 @@ test('coverage metrics grid-sample the shared cached fans with bounded cells, ov
   assert.equal(twice.overlap,1);
   const half=zoneCoverage(rect(-30,10,30,20),enabledFans(plan,fans),{blindSpots:true});
   near(half.coverage,.5,.02);
-  const blindArea=half.blindSpots.reduce((sum,r)=>sum+(r[1][0]-r[0][0])*(r[2][1]-r[1][1]),0);
-  near(blindArea,(1-half.coverage)*half.cells*half.cell**2,1e-6);
-  assert.ok(half.blindSpots.every(r=>r.length===5)&&half.blindSpots.length<half.cells/10);
+  near(half.area,600,1e-9);near(half.uncoveredArea,(1-half.coverage)*half.area,1e-9);
+  assert.ok(half.blindSpots.every(p=>p.every(r=>r.length>=4)));
   const huge=zoneCoverage(rect(-1000,-1000,1000,1000),[]);
-  assert.ok(huge.cells<=MAX_COVERAGE_CELLS&&huge.cells>15000);assert.equal(huge.coverage,0);
-  assert.equal(zoneCoverage(rect(0,0,1,1),[]).cell,.25);
+  assert.equal(huge.area,4000000);assert.equal(huge.coverage,0);assert.equal(huge.work.operations,0);
+  assert.equal(zoneCoverage(rect(0,0,1,1),[]).area,1);
   const route=routeCoverage([[0,-10],[0,20]],enabledFans(plan,fans));
   assert.equal(route.method,'arclength-intervals-v1');near(route.coverage,(20-4/Math.sqrt(3))/30,1e-9);assert.equal(route.overlap,0);
   near(route.uncoveredLength,10+4/Math.sqrt(3),1e-9);
@@ -252,38 +251,31 @@ test('coverage metrics list enabled ground zones and the route; indoor zones are
   assert.equal(metrics.route.coverage,1);
 });
 
-test('narrow valid zones sample inside their bounds and use actual rectangular blind-cell extents',()=>{
+test('narrow valid zones retain their complete polygon area and blind geometry',()=>{
   const footprint=rect(0,0,.1,20),enclosing={id:'one',ring:rect(-1,-1,1,21),box:[-1,-1,1,21]};
   const plan=validateFacility({...blankFacility(),zones:[{...zone(),footprint}]});
   assert.equal(plan.zones.length,1);
-  const covered=zoneCoverage(footprint,[enclosing],{blindSpots:true});
-  assert.ok(covered.cells>0);assert.equal(covered.estimated,true);
+  const covered=zoneCoverage(footprint,[enclosing]);
+  assert.equal(covered.estimated,true);assert.equal(covered.method,'polygon-area-v1');
   assert.equal(covered.coverage,1);assert.equal(covered.overlap,0);assert.deepEqual(covered.blindSpots,[]);
   const twice=zoneCoverage(footprint,[enclosing,{...enclosing,id:'two'}]);
   assert.equal(twice.overlap,1);
-  const blind=zoneCoverage(footprint,[],{blindSpots:true});
-  assert.equal(blind.coverage,0);assert.equal(blind.cellWidth,.1);assert.equal(blind.cellHeight,.25);
-  assert.equal(blind.blindSpots.length,80);
-  for(const ring of blind.blindSpots)for(const [x,y]of ring){assert.ok(x>=0&&x<=.1);assert.ok(y>=0&&y<=20);}
-  const area=blind.blindSpots.reduce((sum,r)=>sum+(r[1][0]-r[0][0])*(r[2][1]-r[1][1]),0);
-  near(area,2,1e-9);near(area,blind.cells*blind.cellWidth*blind.cellHeight,1e-9);
-  const fractional=zoneCoverage(rect(-.2,-.3,1.13,2.27),[],{blindSpots:true});
-  const fractionalArea=fractional.blindSpots.reduce((sum,r)=>sum+(r[1][0]-r[0][0])*(r[2][1]-r[1][1]),0);
-  near(fractionalArea,1.33*2.57,1e-9);
-  assert.ok(fractional.blindSpots.flat().every(([x,y])=>x>=-.2-1e-9&&x<=1.13+1e-9&&y>=-.3-1e-9&&y<=2.27+1e-9));
+  const blind=zoneCoverage(footprint,[]);
+  assert.equal(blind.coverage,0);near(blind.area,2,1e-9);near(blind.uncoveredArea,2,1e-9);
+  assert.deepEqual(blind.blindSpots,[[footprint]]);
+  const fractional=zoneCoverage(rect(-.2,-.3,1.13,2.27),[]);
+  near(fractional.uncoveredArea,1.33*2.57,1e-9);
+  assert.ok(fractional.blindSpots.flat(2).every(([x,y])=>x>=-.2-1e-9&&x<=1.13+1e-9&&y>=-.3-1e-9&&y<=2.27+1e-9));
 });
 
-test('valid diagonal areas with no interior samples remain unestimated rather than reporting zero coverage',()=>{
+test('valid diagonal areas with no old grid samples are estimated from their polygon area',()=>{
   const angle=23*Math.PI/180,footprint=rect(0,0,1000,.002).map(([x,y])=>[x*Math.cos(angle)-y*Math.sin(angle),x*Math.sin(angle)+y*Math.cos(angle)]);
   const plan=validateFacility({...blankFacility(),zones:[{...zone(),footprint}]});
-  const sampled=zoneCoverage(footprint,[],{blindSpots:true});
-  assert.equal(sampled.cells,0);assert.equal(sampled.estimated,false);
-  assert.equal(sampled.estimateReason,'no-interior-samples');assert.equal(sampled.coverage,null);assert.equal(sampled.overlap,null);
+  const measured=zoneCoverage(footprint,[]);
+  assert.equal(measured.estimated,true);near(measured.area,2,1e-8);
+  assert.equal(measured.coverage,0);assert.equal(measured.overlap,0);
   const metrics=coverageMetrics(plan,()=>[]);
-  assert.equal(metrics.zones[0].estimated,false);assert.equal(metrics.zones[0].estimateReason,'no-interior-samples');
-  const capped=zoneCoverage(rect(-1000,-1000,1000,1000),[],{blindSpots:true});
-  assert.ok(capped.cells<=MAX_COVERAGE_CELLS);
-  assert.ok(Math.ceil(2000/capped.cellWidth)*Math.ceil(2000/capped.cellHeight)<=MAX_COVERAGE_CELLS);
+  assert.equal(metrics.zones[0].estimated,true);near(metrics.zones[0].uncoveredArea,2,1e-8);
 });
 
 test('installer sheet is offline, escaped, CSP-restricted HTML with an inline SVG plan and closing limits',()=>{

@@ -131,13 +131,72 @@ segment length; tiny roundoff-scale gaps can coalesce. A nearly collinear edge
 can be treated as closed boundary even if raw binary vertices sit a few rounding
 units on its opposite side; an exactly coincident route is sensitive to that
 choice. The small errors in ordinary oracle cases are not a universal error bound.
-Outdoor zone percentages still use a bounded grid. The separate handoff
+The zone-area proposal below replaces the earlier outdoor grid. The separate handoff
 rehearsal defaults to `max(2, min(601, ceil(route_length_metres) + 1))`
 distance-spaced positions and assumes 1.4 m/s. Its simulated duration is
 `route_length_metres / 1.4`; the UI uses an integer playback multiplier for
 simulations longer than 60 seconds. These sampled proposals are not actual
 tracking, and exact integration of drawn polygons does not establish physical
 visibility. [Rehearsal documentation correction](verification/documentation-alignment-2026-11-12/README.md).
+
+## Measure zone coverage by area
+
+A regular grid can miss gaps between its sample centres. A validated 10 × 1 m
+zone crossing an ordinary fan edge has 90% covered area, yet the old grid reports
+100%. A second camera covers a 10% strip between grid rows but produces 0% sampled
+overlap. Narrow views repeated at grid centres can amplify this aliasing: a
+validated 500-camera fixture reports 100% where the drawn fans cover about 0.175%.
+These are generated numerical counterexamples, not observations of field failure.
+
+For each camera ID, union its fan fragments and clip them to the zone. For a group
+of distinct cameras, keep two masks: `U` for at least one view and `O` for at least
+two. Combining disjoint camera groups A and B gives:
+
+```text
+U(A ∪ B) = U(A) ∪ U(B)
+O(A ∪ B) = O(A) ∪ O(B) ∪ (U(A) ∩ U(B))
+coverage = area(U) / area(zone)
+overlap  = area(O) / area(zone)
+blind    = zone \ U
+```
+
+Implementation first clips each fan to a strictly expanded axis-aligned bounding
+rectangle `B` containing the zone `Z`, then combines masks and clips final results
+to `Z`. The identity `Z ∩ F = Z ∩ (F ∩ B)` preserves the measured set while removing
+irrelevant arcs. Padding is 1% of each normalized bounding-box span, with a
+32-machine-epsilon minimum; the zone itself is neither enlarged nor snapped.
+This operation order avoids reproduced floating boundary-reconstruction failures.
+
+The recurrence counts every point with at least two distinct cameras, including
+triple overlap, exactly once as a set. A balanced merge avoids repeatedly scanning
+one growing union. Boolean operations use the already pinned
+[polygon-clipping library](https://github.com/mfogel/polygon-clipping), which
+returns polygon components with outer rings and holes. Area uses locally anchored,
+compensated cross products, subtracting holes from their outer rings; the
+[CGAL signed-area reference](https://doc.cgal.org/latest/Polygon/group__PkgPolygon2Functions.html)
+describes the orientation convention. CGAL is not added as a dependency.
+
+Method `polygon-area-v1` translates/scales a copied zone and fans into a local
+frame, integrates the resulting polygonal areas, and checks area ordering and
+coverage-plus-blind conservation within a stated floating tolerance. Failed
+geometry is unavailable, not zero. Collapsed fans are excluded before clipping.
+The blind overlay carries full MultiPolygon topology rather than grid rectangles.
+These calculations measure the drawn radial-sector fans; their sampled rays,
+wall model and ground-plane assumptions remain approximations of real visibility.
+
+Per-zone and aggregate clipping budgets bound submitted operations and vertex
+visits. Repeated identical zone footprints reuse their result within one plan.
+The worker is disposable, rejects responses at or beyond a ten-second monotonic
+elapsed-time deadline and is cancelled
+when its plan is superseded or Coverage closes. The UI accepts only the current
+plan/attempt response and clears old numbers/shading while it waits. Browser
+scheduling can delay a timeout callback; the counters are computational limits,
+not a proof of real-time performance or 100-camera ingest/inference capacity.
+
+The [independent area record](verification/zone-area-math-2026-11-12/README.md)
+compares generated cases with exact rational horizontal-slab integration and
+checks scalar areas, blind geometry, distinct-camera counts, invariance and
+failure recovery. Numerical agreement does not establish optical calibration.
 
 ## Bind metrics to evaluated bytes
 

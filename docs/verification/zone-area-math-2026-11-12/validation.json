@@ -1,0 +1,57 @@
+{
+  "base_commit": "63b06ba2aab3adcffc38f52310b55969fb538afe",
+  "build": "passed",
+  "node": {
+    "passed": 601,
+    "failed": 0,
+    "skipped": 0,
+    "sockets_opt_in": true
+  },
+  "sites": {
+    "passed": 4,
+    "failed": 0
+  },
+  "browser": {
+    "passed": 20,
+    "failed": 0,
+    "scope": "12 camera-planning and 8 Studio distinct scenarios"
+  },
+  "oracle": {
+    "cases": 114,
+    "candidate_assertions": 8437,
+    "candidate_failures": 0,
+    "baseline_assertions": 3282,
+    "baseline_failed_assertions": 1283,
+    "baseline_strict_exit": 1,
+    "candidate_strict_exit": 0
+  },
+  "documentation_checks": {
+    "local_links": 1617,
+    "wiki_outputs": 68,
+    "editable_graphics": 10,
+    "wiki_tests": 8,
+    "diff_check": "passed"
+  },
+  "root_replay": {
+    "baseline_exit": 1,
+    "candidate_exit": 0,
+    "both_retained_receipts_equal": true
+  },
+  "deployment": "not performed",
+  "wiki_publication": "not performed",
+  "source_manifest_verified": true,
+  "historical_base_paths_unchanged": {
+    "docs/verification/": 274,
+    "docs/media/": 65
+  },
+  "independent_reviews": {
+    "numerical_and_async": "PASS - no blockers",
+    "ux_documentation_async": "PASS - no blockers"
+  },
+  "production_preview": {
+    "port": 4318,
+    "source": "built dist/client",
+    "fixture": "preview-plan.json",
+    "verified": "90.0% coverage, 10.0% overlap, selected uncovered area, no camera connected"
+  }
+}

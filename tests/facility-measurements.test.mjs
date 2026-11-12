@@ -1,8 +1,23 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {formatDistance, formatArea, lineMeasurements, polygonMeasurements, measurementLabels, lineRibbonSegments, floorElevation, floorRenderPlan, visibleLabelIndices} from '../src/facility-measurements.mjs';
+import {blindSpotCollection} from '../src/facility-blind-spots.mjs';
+import {toLngLat} from '../src/facility.mjs';
 
 const box = (x, y, width, height) => [[x,y],[x+width,y],[x+width,y+height],[x,y+height],[x,y]];
+test('blind-spot map geometry keeps holes and separate components, and clears unavailable results', () => {
+  const origin = [-98,38.5], outer = box(0,0,20,20), hole = box(5,5,5,5), separate = box(25,0,5,5);
+  const polygons = [[outer,hole],[separate]], before = structuredClone(polygons);
+  const collection = blindSpotCollection(polygons, origin);
+  assert.equal(collection.features.length,1);
+  assert.equal(collection.features[0].geometry.type,'MultiPolygon');
+  assert.deepEqual(collection.features[0].geometry.coordinates,
+    polygons.map(polygon => polygon.map(ring => ring.map(point => toLngLat(point,origin)))));
+  assert.equal(collection.features[0].geometry.coordinates[0].length,2);
+  assert.equal(collection.features[0].geometry.coordinates.length,2);
+  assert.deepEqual(polygons,before);
+  for (const absent of [null,undefined,[]]) assert.deepEqual(blindSpotCollection(absent,origin),{type:'FeatureCollection',features:[]});
+});
 test('polygon measurements subtract courtyards and count their boundaries', () => {
   const result = polygonMeasurements(box(0,0,10,20), [box(2,2,3,4)]);
   assert.equal(result.area, 188);
