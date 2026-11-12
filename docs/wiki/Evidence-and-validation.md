@@ -1,5 +1,9 @@
 # Verification index
 
+[Route coverage by arclength, November 12](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/route-coverage-math-2026-11-12/README.md)
+records three reproduced sampling errors, covered/overlap distance and longest
+blind stretch, independent rectangle/analytic checks and generated browser cases.
+Zone grids and the simulated handoff rehearsal remain separate.
 [Complete documentation follow-up, November 12](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/documentation-complete-2026-11-12/README.md)
 records current merged v3 source, corrected update/source/memory instructions,
 assistant data boundaries, developer checks, the Markdown inventory and generated

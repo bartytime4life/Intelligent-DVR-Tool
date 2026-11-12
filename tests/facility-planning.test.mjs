@@ -236,7 +236,9 @@ test('coverage metrics grid-sample the shared cached fans with bounded cells, ov
   assert.ok(huge.cells<=MAX_COVERAGE_CELLS&&huge.cells>15000);assert.equal(huge.coverage,0);
   assert.equal(zoneCoverage(rect(0,0,1,1),[]).cell,.25);
   const route=routeCoverage([[0,-10],[0,20]],enabledFans(plan,fans));
-  assert.equal(route.samples,61);near(route.coverage,36/61,1e-9);assert.equal(route.overlap,0);
+  assert.equal(route.method,'arclength-intervals-v1');near(route.coverage,(20-4/Math.sqrt(3))/30,1e-9);assert.equal(route.overlap,0);
+  near(route.uncoveredLength,10+4/Math.sqrt(3),1e-9);
+  near(route.longestBlindStretch,route.uncoveredLength,1e-9);
   assert.equal(routeCoverage([[1,1]],[]),null);assert.equal(routeCoverage([[1,1],[1,1]],[]),null);
 });
 
