@@ -5,11 +5,11 @@ This guide connects the delivered mathematics to the problems it solves. The
 scores, pixels and assignment matrices. They establish software behavior, not
 physical-camera accuracy, detector throughput or 100-camera capacity.
 
-The [current integrated proposal](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/coordinate-integrity-math-2026-11-12/README.md)
-combines visible-ground geometry, pixel density, zone area, projective calibration,
-image diagnostics and site-coordinate preservation. The model below describes
-this branch; [product status](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Product-status) separates it from merged source,
-installed software and physical qualification.
+The [integrated planning work](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/coordinate-integrity-math-2026-11-12/README.md),
+merged in PR #122, combines visible-ground geometry, pixel density, zone area,
+projective calibration, image diagnostics and site-coordinate preservation. The
+model below describes merged source; [product status](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Product-status) separates
+it from installed software and physical qualification.
 
 ## Preserve the meaning of planning readouts
 
@@ -377,7 +377,7 @@ units on its opposite side; an exactly coincident route is sensitive to that
 choice. The small errors in ordinary oracle cases are not a universal error bound.
 Those historical fan dimensions remain in their dated record; they are not
 recalculated as though they came from the new pinhole model. The zone-area
-proposal below replaces the earlier outdoor grid. The separate handoff
+method below replaces the earlier outdoor grid. The separate handoff
 rehearsal defaults to `max(2, min(601, ceil(route_length_metres) + 1))`
 distance-spaced positions and assumes 1.4 m/s. Its simulated duration is
 `route_length_metres / 1.4`; the UI uses an integer playback multiplier for
@@ -415,7 +415,7 @@ This operation order avoids reproduced floating boundary-reconstruction failures
 
 The recurrence counts every point with at least two distinct cameras, including
 triple overlap, exactly once as a set. A balanced merge avoids repeatedly scanning
-one growing union. This branch uses the same pinned high-precision Boolean
+one growing union. Merged source uses the same pinned high-precision Boolean
 wrapper as ground visibility, returning components with outer rings and holes.
 The earlier area record used polygon-clipping 0.15.7, retained for other callers.
 Area uses locally anchored,

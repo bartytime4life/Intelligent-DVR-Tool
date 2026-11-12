@@ -8,10 +8,10 @@
 
 *Concept illustration. Use the [current screenshot atlas](visual-atlas.md) for actual interface captures and their provenance.*
 
-The [current integrated planning proposal](verification/coordinate-integrity-math-2026-11-12/README.md)
-brings together ground visibility, coverage, calibration, image diagnostics and
-site-coordinate recovery. Follow the task guides below; [product status](product-status.md)
-identifies the separate merged baseline and the proposal's verification limits.
+The [integrated planning work](verification/coordinate-integrity-math-2026-11-12/README.md),
+merged in PR #122, brings together ground visibility, coverage, calibration, image
+diagnostics and site-coordinate recovery. Follow the task guides below; [product status](product-status.md)
+states its software-only verification limits.
 The [timing follow-up](verification/rule-time-boundaries-2026-11-12/README.md)
 and [planning readout record](verification/planning-readouts-2026-11-12/README.md)
 cover the latest boundary fixes and their documentation checks.

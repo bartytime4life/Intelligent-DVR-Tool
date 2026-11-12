@@ -8,10 +8,10 @@
 
 *Concept illustration. Use the [current screenshot atlas](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-atlas) for actual interface captures and their provenance.*
 
-The [current integrated planning proposal](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/coordinate-integrity-math-2026-11-12/README.md)
-brings together ground visibility, coverage, calibration, image diagnostics and
-site-coordinate recovery. Follow the task guides below; [product status](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Product-status)
-identifies the separate merged baseline and the proposal's verification limits.
+The [integrated planning work](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/coordinate-integrity-math-2026-11-12/README.md),
+merged in PR #122, brings together ground visibility, coverage, calibration, image
+diagnostics and site-coordinate recovery. Follow the task guides below; [product status](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Product-status)
+states its software-only verification limits.
 The [timing follow-up](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/rule-time-boundaries-2026-11-12/README.md)
 and [planning readout record](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/planning-readouts-2026-11-12/README.md)
 cover the latest boundary fixes and their documentation checks.
