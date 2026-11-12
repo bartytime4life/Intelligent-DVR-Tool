@@ -142,7 +142,7 @@ Begin with the [visual handbook](docs/how-to.md), then use the [complete guide i
 
 The [latest documentation record](docs/verification/documentation-status-2026-11-12/README.md)
 checks the full guide inventory and separates merged capabilities, completed CI
-and the calibration correction still under review.
+and the calibration correction then under review, since merged as PR #117.
 
 ## Checks and project terms
 

@@ -5,8 +5,8 @@
 [Home](../README.md) · [Visual handbook](how-to.md) · [First session](getting-started.md) · [Troubleshooting](troubleshooting.md) · [Product status](product-status.md)
 
 The [latest documentation check](verification/documentation-status-2026-11-12/README.md)
-records the merged source, completed CI workflows and calibration work still
-under review. Use [product status](product-status.md) to distinguish them.
+records the merged source, completed CI workflows and calibration work then
+under review, since merged as PR #117. Use [product status](product-status.md) to distinguish them.
 
 ![Conceptual overview of the camera, local recording, human-review computer and facility plan.](media/guide/overview.jpg)
 

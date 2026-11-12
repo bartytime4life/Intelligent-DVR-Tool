@@ -1,0 +1,123 @@
+{
+  "generated_at_utc": "2026-11-12T07:21:01.967862+00:00",
+  "historical_comparison_base": "66e6dd1cde9913e6c4f03fb94733e83dc3070c93",
+  "initial_test_base": "66e6dd1cde9913e6c4f03fb94733e83dc3070c93",
+  "integrated_main_revision": "63b06ba2aab3adcffc38f52310b55969fb538afe",
+  "scope": "Browser-only numerical calibration change. Exact generated references and controlled UI; no physical-marker or camera qualification.",
+  "method": "normalized-householder-dlt-v2",
+  "build": {
+    "passed": true,
+    "advisory": "Existing chunk-size advisory above 500kB retained."
+  },
+  "tests": {
+    "node_full": {
+      "passed": 580,
+      "failed": 0,
+      "skipped": 0,
+      "socket_opt_in": true
+    },
+    "calibration_focused": {
+      "passed": 14,
+      "failed": 0,
+      "skipped": 0
+    },
+    "sites": {
+      "passed": 4,
+      "failed": 0
+    },
+    "browser_studio": {
+      "distinct_scenarios_passed": 10,
+      "failed": 0,
+      "skipped": 0
+    },
+    "browser_final_crop_rerun": {
+      "passed": 2,
+      "failed": 0,
+      "scope": "Same two new cases after changing screenshot target; no production source changes."
+    },
+    "full_python_native": "Not rerun; no Python runtime change.",
+    "wiki_tests": {
+      "passed": 8,
+      "failed": 0,
+      "skipped": 0
+    }
+  },
+  "documentation": {
+    "local_links": 1599,
+    "wiki_pages_and_navigation": 68,
+    "editable_workflow_graphics": 10,
+    "wiki_freshness": "PASS",
+    "diff_check": "PASS"
+  },
+  "independent_oracle": {
+    "safe_fits": 1120,
+    "direct_projections": 880,
+    "unsafe_fits": 49,
+    "candidate_failed": 0,
+    "baseline_failed": 1014,
+    "same_input_sha256": "cc4f56b4054efb143f8a367bf5345c9f05acf2f82e3fbf8a90746960e5b8d7e9",
+    "require_pass_rejects_baseline": true,
+    "observed_errors_not_universal_bounds": true
+  },
+  "review": {
+    "independent_math_and_guard_review": "PASS; conservative refusal heuristics, no full condition-number or physical-noise guarantee.",
+    "final_code_and_record_review": "Requested separately against frozen source and receipt hashes."
+  },
+  "environment": {
+    "node": "v22.13.1",
+    "python": "3.10.9",
+    "playwright": "1.61.1",
+    "browser": "Google Chrome 157.0.8103.50",
+    "browser_channel": "chrome",
+    "packages_installed": false
+  },
+  "logs_sha256": {
+    "/tmp/dvr-calibration-node-20261112.log": "281978ff71a361716818f6902cc07f0027f8b884a32cb8c2dbb8ca944590219c",
+    "/tmp/dvr-calibration-browser-20261112.log": "5e8b414f940a16c9bd91955ba9b549a051a05a1a14c89729dc763adbac0565d5",
+    "/tmp/dvr-calibration-browser-final-20261112.log": "f158d641b352e1767cfb0436dbb8f901f9b17c668a757be703d678ab22b69a19"
+  },
+  "source_and_record_sha256": {
+    "src/facility-calibration.mjs": "15431ab59fe11e373e0d0d57156c10ea3a0e671e2306e6a3bd6a5c130b677f23",
+    "tests/facility-calibration.test.mjs": "7711ba41c3c68688be8f1a0b5d545187ece725ef60bf9df3245b6edc5b6fa1c8",
+    "tests/browser/facility-studio.spec.mjs": "08904da88957560cf8a862f95dd820852cfd6266984bf290b8191cebe27ac2f0",
+    "docs/facility-calibration.md": "7c78de9b599cb4166115ec34dd48b19230e9feff7b04ea015156dcefd4d443c1",
+    "docs/science-and-algorithms.md": "66da90074a713fc365de879d4faf0765df92c800f93c051790e85f7d440ee395",
+    "docs/verification/README.md": "5b34b8bcda793d526630ff358f5186e5a43fc9e52168f5af63cc610c1ec825aa",
+    "docs/wiki/Planar-calibration.md": "caf01a1ce5229a9947bf6408f6437ec74b822785ddc279a20955bfa908bd9e19",
+    "docs/wiki/Science-and-algorithms.md": "39d5d474a4c24c3ae8330813edd496325b61efe1044107d54fb495e446e87555",
+    "docs/wiki/Evidence-and-validation.md": "883eddce2156c4261a5ce799f32e1c764eba10745c61625895fc22240d9ad5de",
+    "docs/verification/calibration-projective-math-2026-11-12/README.md": "fb919633c66e198bf69f2cf36d2c0c49339b01e3e04be8dd058d9f6cab359e57",
+    "docs/verification/calibration-projective-math-2026-11-12/baseline-oracle.json": "6991792d2fd44c9a515bb0d7b2840b07617b28d119e55ce05b8c5c47d4f708f5",
+    "docs/verification/calibration-projective-math-2026-11-12/calibration-ruler.png": "f3c38799ff248b975918cc20487c8a4211593b124d6f2528d8ff41a6ade8044a",
+    "docs/verification/calibration-projective-math-2026-11-12/oracle.json": "38ecd7b81eee78666552ded28a226c57a777a1cf646859901cc5948101812d68",
+    "docs/verification/calibration-projective-math-2026-11-12/oracle.py": "c756bae88a1cd3afa906e41f3e4600b099c95a0cada156c10d3793cdea63859a",
+    "docs/verification/calibration-projective-math-2026-11-12/proof.json": "bf45241f0d256c63d2d06c3c3d6e3ae95bf8f81d1ce8473fcbca60720cf7ca59",
+    "docs/verification/calibration-projective-math-2026-11-12/reproduce.py": "04462d4d756cfeff8eca51925232f7758c0428314d9e0b5762a4d2fd0d538f60"
+  },
+  "preservation": {
+    "protected_sha256": {
+      "edge/inference.py": "7e95beb9e25dd67ac5d8d977ec6c466874371d12d112119a85a619124687b2f1",
+      "edge/journal.py": "70f7a3419d05d76380ea32ad5de20ee440bc17256e25baf0f2289a86e46a495a",
+      "edge/supervision.py": "03f334d5fa072e5f3ad02bd90536fd2c00fc97ebfaa54ca1ef1c10b64b80a9cf",
+      "edge/scheduler.py": "8639b46d3ba2e1a14efaa7ff647f412e6be437685ec7be5717a00983835b9019",
+      "edge/profiling.py": "f7c0a3e4b831d7f996840aec51a73e3fe68e06627cdce854716c576068f80f91",
+      ".openai/hosting.json": "d532abb65cf9ae20634b464d954cb4a08a0de9f3cd3cdf7f9c3ec8948826d947",
+      "worker/index.js": "2dd0615a445143933d88d4271f54f5d63ee951421fcd08c5a7617bb09c564389",
+      "scripts/prepare-sites-build.mjs": "b6a6adaa4fab3234676116dd1c9cb6611275ab9d92dd26f5bf402393e3744bf6",
+      "tests/sites-worker.test.mjs": "96af7b48906c6460c793356d7b6952f7d5026dbf5a502bec0d9297ff04201c26"
+    },
+    "requirements_and_dependency_pins_unchanged": true,
+    "historical_records_and_media_unchanged": true,
+    "private_runtime_files": "Not opened or changed.",
+    "existing_ui_component_unchanged": true,
+    "controls_added": false
+  },
+  "publication": {
+    "new_head_hosted_ci": "Inspect exact published head separately; not established by local checks.",
+    "wiki_source_regenerated": true,
+    "separate_wiki_pushed": false,
+    "installed_service_replaced": false,
+    "camera_or_detector_started": false,
+    "merge_or_deployment_performed": false
+  }
+}

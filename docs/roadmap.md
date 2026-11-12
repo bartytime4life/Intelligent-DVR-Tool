@@ -24,6 +24,13 @@ The minimum capacity goal is **100 simultaneously active cameras**. The current 
 
 ## Delivered through November 12, 2026
 
+[PR #117](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/117), merged
+as `7868707a`, accepts valid perspective calibration regardless of matrix scale
+while refusing collapsed ground planes. Its generated numerical and browser
+checks are software evidence, not a physical-camera result; the
+[calibration guide](facility-calibration.md#known-numerical-limits) records the
+earlier solver's failures and remaining limits.
+
 [PR #116](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/116), merged
 as `63b06ba2`, aligns operator/developer guides and generated Wiki source with
 the route and evaluation changes below. The [latest documentation record](verification/documentation-status-2026-11-12/README.md)
@@ -65,17 +72,6 @@ copy-only startup, local review recovery and GPU-preferred execution have their
 own [verification records](verification/README.md). The current
 [capability register](product-status.md) separates these delivered behaviors from
 representative quality, physical-device and 100-camera acceptance.
-
-## Under review
-
-[PR #117](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/117) proposes
-accepting valid perspective calibration regardless of matrix scale while
-refusing collapsed ground planes. Its generated numerical and browser checks
-are branch evidence, not a delivered capability or physical-camera result.
-The [calibration guide](facility-calibration.md#known-numerical-limits) records
-the current solver's known failures. See the dated
-[status snapshot](verification/documentation-status-2026-11-12/README.md)
-for review and CI state.
 
 ## Delivered November 1, 2026
 

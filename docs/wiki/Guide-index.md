@@ -5,8 +5,8 @@
 [Home](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Home) · [Visual handbook](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-handbook) · [First session](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Getting-started) · [Troubleshooting](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Troubleshooting) · [Product status](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Product-status)
 
 The [latest documentation check](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/documentation-status-2026-11-12/README.md)
-records the merged source, completed CI workflows and calibration work still
-under review. Use [product status](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Product-status) to distinguish them.
+records the merged source, completed CI workflows and calibration work then
+under review, since merged as PR #117. Use [product status](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Product-status) to distinguish them.
 
 ![Conceptual overview of the camera, local recording, human-review computer and facility plan.](https://raw.githubusercontent.com/wiki/bartytime4life/Intelligent-DVR-Tool/docs/media/guide/overview.jpg)
 

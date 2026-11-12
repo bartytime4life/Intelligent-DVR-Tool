@@ -142,7 +142,7 @@ Begin with the [visual handbook](https://github.com/bartytime4life/Intelligent-D
 
 The [latest documentation record](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/documentation-status-2026-11-12/README.md)
 checks the full guide inventory and separates merged capabilities, completed CI
-and the calibration correction still under review.
+and the calibration correction then under review, since merged as PR #117.
 
 ## Checks and project terms
 

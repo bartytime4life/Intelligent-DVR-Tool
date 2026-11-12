@@ -5,6 +5,11 @@ records merged documentation PR #116, completed final-head CI for PRs #114–#11
 the separate pending calibration correction, and current link/Wiki/media checks.
 Earlier read-time snapshots and historical receipts remain unchanged.
 
+[Projective calibration mathematics, November 12](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/calibration-projective-math-2026-11-12/README.md)
+records valid zero-coefficient perspective maps, scale-invariant projection,
+collinear and noisy fitted-plane collapse refusals, independent exact-arithmetic
+comparisons and the existing operator-gated ruler workflow.
+
 [Current documentation alignment, November 12](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/documentation-alignment-2026-11-12/README.md)
 follows the earlier 197-path audit, records the merged route/evaluation baseline and
 corrects rehearsal duration/position wording without replacing historical receipts.
