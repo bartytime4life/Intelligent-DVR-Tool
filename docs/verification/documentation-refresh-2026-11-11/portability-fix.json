@@ -1,0 +1,66 @@
+{
+  "schema": "intelligent-dvr.documentation-portability-fix.v1",
+  "checked_at_utc": "2026-11-12T02:12:00.798065+00:00",
+  "initial_documentation_commit": "df6377f032b91f9bae49c7786af501bc72ce068e",
+  "observed_failure": {
+    "url": "https://github.com/bartytime4life/Intelligent-DVR-Tool/actions/runs/43136403188/job/130912688491",
+    "message": "Guided-experience manifest must cover exactly four reviewed screenshots",
+    "platform": "Windows",
+    "cause": "str(Path.relative_to) produced backslashes while JSON paths use forward slashes"
+  },
+  "repair": "Serialize manifest paths with as_posix, preserving exact-four/containment/hash/source/byte/budget checks.",
+  "regression": {
+    "test": "test_reviewed_screenshot_manifest_paths_are_portable",
+    "scope": "PureWindowsPath and PurePosixPath against the actual four-entry image receipt",
+    "red_before_green_after": true
+  },
+  "focused_tests_passed": 8,
+  "checks": [
+    {
+      "command": [
+        "python",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-p",
+        "test_wiki_docs.py"
+      ],
+      "returncode": 0,
+      "output": "........\n----------------------------------------------------------------------\nRan 8 tests in 0.047s\n\nOK\n"
+    },
+    {
+      "command": [
+        "python",
+        "scripts/check-docs.py"
+      ],
+      "returncode": 0,
+      "output": "Host summaries verified: 300 distinct images; reference/queue/rate/parity/source/default invariants checked. No experiments rerun.\nCUDA evidence checks passed: parity, queue accounting, runtime scope and publication bounds.\nWorker evidence checks passed: initial/final trials, parity, queue accounting and publication scope.\nRecovery evidence checks passed: native proof, generations/reaping, fault intervals, outcome/queue accounting and privacy scope.\nJournal evidence checks passed: native proof, interrupted work, acknowledgment/redelivery, replay accounting and measured durability cost.\nBatching evidence checks passed: atomic native exits, version compatibility, indexed delivery, matched medians and honest queue/delivery accounting.\nOwner synthetic record: source/policy bindings, 142 tests per environment, legacy recovery, CUDA block and all loss identities verified.\nDocumentation checks passed: 1439 local links, 14 historical media hashes, 11 PR61 visual blobs, 2,381,700 historical + 185,432 PR61 + 1,626,214 guide + 222,707 guided-experience media bytes, test-count consistency.\n"
+    },
+    {
+      "command": [
+        "python",
+        "scripts/build-wiki.py",
+        "--check"
+      ],
+      "returncode": 0,
+      "output": "Wiki checked: 65 pages/navigation files.\n"
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "returncode": 0,
+      "output": ""
+    }
+  ],
+  "native_windows_rerun": "Pending CI for the correction commit; portable path regression passed locally.",
+  "review": "Independent read-only PASS",
+  "source_hashes": {
+    "scripts/check-docs.py": "f2c25e4036887938275638c8b312357d1f34be3c2970f3a430427817464eabd6",
+    "tests/test_wiki_docs.py": "14e9729e6dd158f7400ab3d9618657f5af4841b8164177b15da92815d5ae311c"
+  }
+}

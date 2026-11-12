@@ -14,6 +14,11 @@ from urllib.parse import unquote, urlsplit
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def manifest_paths(root, paths):
+    """Serialize repository paths for comparison with portable JSON manifests."""
+    return {path.relative_to(root).as_posix() for path in paths}
+
+
 def check():
     errors = []
     docs = [ROOT / 'README.md', ROOT / 'SECURITY.md', ROOT / 'AGENTS.md',
@@ -185,7 +190,7 @@ def check():
                 or entry.get('realCameraFootage') is not False
                 or entry.get('source_commit') != '13355e18fbac15553bc9092dbadb11bb1deab979'):
             errors.append(f'Missing guided-experience capture provenance: {rel}')
-    if followup_paths != {str((followup_root / name).relative_to(ROOT)) for name in expected_views}:
+    if followup_paths != manifest_paths(ROOT, (followup_root / name for name in expected_views)):
         errors.append('Guided-experience manifest must cover exactly four reviewed screenshots')
     if {p.name for p in followup_root.glob('*.jpg')} != set(expected_views) or followup_total > 350_000:
         errors.append('Unexpected guided-experience images or media budget exceeded')
