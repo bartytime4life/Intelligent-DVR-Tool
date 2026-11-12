@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import {readFileSync} from 'node:fs';
+import { readFile } from 'node:fs/promises';
 import { blankFacility, validateFacility } from '../../src/facility.mjs';
 import { createLibrary, LIBRARY_KEY } from '../../src/facility-library.mjs';
 
@@ -99,6 +100,26 @@ test('maximum Sobel response is bounded at 100 percent and versioned in exported
   await page.locator('.facility-lab-metrics').screenshot({path:testInfo.outputPath('sobel-maximum.png')});
   expect(errors).toEqual([]);
 });
+
+async function calibrationPanel(page) {
+  await openStudio(page);
+  await page.getByRole('combobox',{name:'Jump to facility task'}).selectOption('3');
+  await page.locator('.facility-image-lab summary').click();
+  const picture=await image(page,false);
+  await page.getByLabel('Open image for diagnostics').setInputFiles({
+    name:'generated-plane.png',mimeType:'image/png',buffer:Buffer.from(picture,'base64')
+  });
+  const panel=page.locator('.facility-calibration');
+  await panel.locator('summary').click();
+  return panel;
+}
+async function enterCalibrationReferences(page,points) {
+  for(let i=0;i<points.length;i++) {
+    for(const [j,label] of ['Image X %','Image Y %','East metres','North metres'].entries()) {
+      await page.getByLabel(`Reference ${i+1} ${label}`,{exact:true}).fill(String(points[i][j]));
+    }
+  }
+}
 
 test('Facility Studio focus map and navigation are reversible and keyboard accessible', async({page})=>{
   await openStudio(page);
@@ -252,6 +273,70 @@ test('calibrated map ruler requires withheld check and independent measured refe
   await expect(cal).toContainText('Extrapolation is refused');
   await page.getByLabel('Reference 1 East metres').fill('2');
   await expect(cal.getByRole('button',{name:'Measure within reference boundary'})).toHaveCount(0);
+  expect(errors).toEqual([]);
+});
+
+test('safe perspective calibration with zero origin denominator measures and exports through existing gates',async({page},testInfo)=>{
+  const errors=[];page.on('pageerror',err=>errors.push(err.message));
+  const cal=await calibrationPanel(page);
+  // Independently generated from east=1/u, north=v/u. The horizon u=0
+  // stays outside the reference square; all five measured points are finite.
+  await enterCalibrationReferences(page,[[20,20,5,1],[80,20,1.25,.25],
+    [80,80,1.25,1],[20,80,5,4],[50,50,2,1]]);
+  await cal.getByRole('button',{name:'Compute planar transform'}).click();
+  await expect(cal.getByRole('alert')).toHaveCount(0);
+  await expect(cal).toContainText('Independent check (1)');
+  await expect(cal.getByRole('button',{name:'Measure within reference boundary'})).toBeDisabled();
+  await cal.locator('.facility-calibration-declaration input').check();
+  await expect(cal.getByRole('button',{name:'Measure within reference boundary'})).toBeEnabled();
+  await page.getByLabel('Ground ruler Start X',{exact:true}).fill('25');
+  await page.getByLabel('Ground ruler Start Y',{exact:true}).fill('50');
+  await page.getByLabel('Ground ruler End X',{exact:true}).fill('50');
+  await page.getByLabel('Ground ruler End Y',{exact:true}).fill('50');
+  // Ground endpoints are (4,2) and (2,1): distance sqrt(5).
+  await expect(cal).toContainText('Plane-only estimated distance: 2.24 m');
+  const download=page.waitForEvent('download');
+  await cal.getByRole('button',{name:'Export calibration JSON'}).click();
+  const document=JSON.parse(await readFile(await (await download).path(),'utf8'));
+  expect(document.schema).toBe('intelligent-dvr.planar-calibration.v1');
+  expect(document.operatorAcceptance).toBe(true);
+  expect(document.method).toBe('normalized-householder-dlt-v2');
+  expect(document.matrix).toHaveLength(9);
+  expect(document.matrix.every(Number.isFinite)).toBe(true);
+  expect(Math.abs(document.matrix[8])).toBeLessThan(1e-10);
+  expect(document.ruler.metres).toBeCloseTo(Math.sqrt(5),10);
+  expect(document.sourceSampleRGBAsha256).toMatch(/^[a-f0-9]{64}$/);
+  await cal.locator('.facility-calibration-ruler').screenshot({path:testInfo.outputPath('calibration-projective-safe.png')});
+  await page.getByLabel('Ground ruler End X',{exact:true}).fill('99');
+  await expect(cal).toContainText('Extrapolation is refused');
+  expect(errors).toEqual([]);
+});
+
+test('a collapsed ground plane cannot unlock the ruler and corrected markers recover',async({page})=>{
+  const errors=[];page.on('pageerror',err=>errors.push(err.message));
+  const cal=await calibrationPanel(page);
+  await cal.getByRole('button',{name:'Add fit point',exact:true}).click();
+  // Five distinct image fits all map to a single ground line; the independent
+  // check also lies on that line. Tiny residuals cannot make this a plane.
+  await enterCalibrationReferences(page,[[10,10,.1,.2],[90,15,.9,1.8],
+    [80,90,.8,1.6],[20,80,.2,.4],[50,50,.5,1],[40,30,.4,.8]]);
+  await cal.getByRole('button',{name:'Compute planar transform'}).click();
+  await expect(cal.getByRole('alert')).toContainText(/non-collinear|degenerate|singular/i);
+  await expect(cal.getByRole('region',{name:'Fitted ground-plane transform'})).toHaveCount(0);
+  await expect(cal.getByRole('button',{name:'Measure within reference boundary'})).toHaveCount(0);
+  await expect(cal.getByRole('button',{name:'Export calibration JSON'})).toHaveCount(0);
+  await enterCalibrationReferences(page,[[10,10,1,1],[90,15,9,1.5],
+    [80,90,8,9],[20,80,2,8],[50,50,5,5],[40,30,4,3]]);
+  await cal.getByRole('button',{name:'Compute planar transform'}).click();
+  await expect(cal.getByRole('alert')).toHaveCount(0);
+  await expect(cal.getByRole('button',{name:'Measure within reference boundary'})).toBeDisabled();
+  await cal.locator('.facility-calibration-declaration input').check();
+  await expect(cal.getByRole('button',{name:'Measure within reference boundary'})).toBeEnabled();
+  await page.getByLabel('Ground ruler Start X',{exact:true}).fill('25');
+  await page.getByLabel('Ground ruler Start Y',{exact:true}).fill('25');
+  await page.getByLabel('Ground ruler End X',{exact:true}).fill('75');
+  await page.getByLabel('Ground ruler End Y',{exact:true}).fill('25');
+  await expect(cal).toContainText('Plane-only estimated distance: 5.00 m');
   expect(errors).toEqual([]);
 });
 

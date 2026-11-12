@@ -5,6 +5,30 @@ This guide connects the delivered mathematics to the problems it solves. The
 scores, pixels and assignment matrices. They establish software behavior, not
 physical-camera accuracy, detector throughput or 100-camera capacity.
 
+## Preserve valid planar reference geometry
+
+A homography maps image points to a single measured plane using homogeneous
+coordinates: `s * [east, north, 1] = H * [u, v, 1]`. Multiplying all entries of
+`H` by the same nonzero number does not change that map. The
+[OpenCV explanation](https://docs.opencv.org/4.13.0/d9/dab/tutorial_homography.html)
+describes both bottom-right-entry and unit-Frobenius normalization.
+
+Forcing the denormalized bottom-right entry to one incorrectly refused the safe
+map `east = 1/u, north = v/u` on a reference square with `u` from 0.2 to 0.8.
+Its horizon at `u = 0` lies outside that working region. Calibration now keeps a
+unit-Frobenius matrix and uses scale-relative projection/horizon checks.
+Conversely, five or more references mapping to one ground line could previously
+produce tiny fitting and withheld errors while collapsing a ruler distance to
+zero. A ground-plane transform must also be nonsingular; residuals alone cannot
+establish that geometry. Checks operate in normalized coordinates so changing
+the local ground origin does not itself create a rank failure.
+
+The [calibration guide](facility-calibration.md) and
+[generated projective checks](verification/calibration-projective-math-2026-11-12/README.md)
+keep the independent-marker, operator-declaration, residual-tolerance and
+no-extrapolation gates. They do not establish physical marker accuracy, lens
+calibration, depth or survey acceptance.
+
 ## Choose a useful detection threshold
 
 A detector score is an ordering signal, not a calibrated probability that a
