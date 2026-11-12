@@ -158,13 +158,17 @@ export default function FacilityImageLab({ capture, connected = false, sourceNam
   function exportData() {
     if (!selected || !metrics) return;
     const report = {
-      schema: 'intelligent-dvr-image-diagnostics-v1',
+      schema: 'intelligent-dvr-image-diagnostics-v2',
       source: selected.source, capturedAt: selected.capturedAt,
       originalPixels: [selected.originalWidth, selected.originalHeight],
       sampledPixels: [selected.sampledWidth, selected.sampledHeight],
       frame: frames.a === selected ? 'A' : frames.b === selected ? 'B' : 'selected',
       region, metrics, difference, rulerPixels,
-      processing: { background: 'opaque-black', exportFormat: 'image/png', downsampleMaxSide: MAX_SIDE },
+      processing: { background: 'opaque-black', exportFormat: 'image/png', downsampleMaxSide: MAX_SIDE,
+        analysisMethod: metrics.method,
+        sobel: { units: 'percent-of-maximum-8bit-response', kernel: [3, 3], aggregation: 'mean-magnitude',
+          support: 'selected-region-interior-no-padding', maximumMagnitude: metrics.sobelMaximum,
+          unavailable: 'null-with-zero-samples' } },
       caveat: 'Local downsampled 8-bit sRGB channel-weighted image metrics. Edge detail and pixel changes do not establish focus, identity, physical dimension, surveillance detection quality or motion.'
     };
     const url = URL.createObjectURL(new Blob([JSON.stringify(report, null, 2)], {type:'application/json'}));
@@ -223,8 +227,10 @@ export default function FacilityImageLab({ capture, connected = false, sourceNam
           <div><small>P05–P95 luma</small><strong>{metrics.low}–{metrics.high}</strong></div>
           <div><small>Shadow clipping</small><strong>{pct(metrics.shadowPercent)}</strong></div>
           <div><small>Highlight clipping</small><strong>{pct(metrics.highlightPercent)}</strong></div>
-          <div><small>Sobel edge energy</small><strong>{pct(metrics.sobel)}</strong></div>
-          <div><small>Selected area</small><strong>{metrics.pixels.toLocaleString()} <sub>px</sub></strong></div>
+          <div role="group" aria-label="Sobel edge strength"><small>Sobel edge strength</small><strong>{metrics.sobel === null ? 'Unavailable' : pct(metrics.sobel)}</strong>
+            <span className="facility-lab-support">{metrics.sobel === null ? 'Needs a region of at least 3 × 3 pixels.' : `${metrics.sobelSamples.toLocaleString()} interior ${metrics.sobelSamples === 1 ? 'pixel' : 'pixels'}`}</span></div>
+          <div><small>Selected area</small><strong>{metrics.pixels.toLocaleString()} <sub>px</sub></strong>
+            <span className="facility-lab-support">{metrics.width} × {metrics.height} pixels</span></div>
         </div>
         <div className="facility-lab-histogram"><span>Luma distribution · 16 bins</span>
           <div role="img" aria-label="Sixteen histogram bins from shadow to highlight">{metrics.histogram.map((n, index) =>
@@ -242,7 +248,7 @@ export default function FacilityImageLab({ capture, connected = false, sourceNam
         </div>
         <FacilityCalibration frame={selected} slot={slot} camera={camera} facilityName={facilityName}
           origin={origin} mapPick={mapPick} onRequestMapPoint={onRequestMapPoint}/>
-        <p className="facility-lab-note">Luma uses channel-weighted 8-bit sRGB, not a light meter. Sobel edge energy is a detail proxy—not optical focus. Two-frame differences also respond to camera movement, compression, and lighting; they do not prove person/object motion. Sampling is downscaled to 720 px on the longest side, with no physical calibration.</p>
+        <p className="facility-lab-note">Luma uses channel-weighted 8-bit sRGB, not a light meter. Sobel edge strength is the mean gradient as a percentage of the kernel’s maximum response, a detail proxy rather than optical focus or the percentage of pixels containing edges. Two-frame differences also respond to camera movement, compression, and lighting; they do not prove person/object motion. Sampling is downscaled to 720 px on the longest side, with no physical calibration.</p>
       </> : <p className="facility-lab-empty">No frame selected. Choose Frame A or B, freeze a preview, sample a local video, or open a PNG/JPEG/WebP from this computer.</p>}
     </div>
   </details>;

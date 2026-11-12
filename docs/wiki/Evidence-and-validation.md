@@ -1,5 +1,10 @@
 # Verification index
 
+[Image diagnostics mathematics, November 12](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/image-diagnostics-math-2026-11-12/README.md)
+records the tight Sobel bound, unavailable-versus-zero support, versioned exports,
+an independent generated-pixel oracle and desktop/phone browser checks. This is
+proposed branch behavior until merged, without physical-camera qualification.
+
 [Current documentation alignment, November 12](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/documentation-alignment-2026-11-12/README.md)
 follows the earlier 197-path audit, records the merged route/evaluation baseline and
 corrects rehearsal duration/position wording without replacing historical receipts.

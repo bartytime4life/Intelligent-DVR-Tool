@@ -151,6 +151,51 @@ an atomic multi-file snapshot or loaded-code provenance.
 [Generated replacement-race evidence](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/evaluation-binding-2026-11-11/README.md)
 checks consistency independently of detection quality.
 
+## Normalize image edge strength
+
+The image laboratory uses the standard unscaled 3×3 horizontal and vertical
+[Sobel kernels and Euclidean gradient magnitude](https://docs.opencv.org/4.13.0/d2/d2c/tutorial_sobel_derivatives.html).
+This is a JavaScript calculation; it does not execute OpenCV's example pipeline,
+its additional blur, border padding or display conversion.
+
+For rounded 8-bit channel-weighted sRGB luma `I`, the kernels are:
+
+```text
+Kx = [-1 0 1; -2 0 2; -1 0 1]
+Ky = [-1 -2 -1; 0 0 0; 1 2 1]
+g  = sqrt((Kx · I)^2 + (Ky · I)^2)
+```
+
+The squared norm of this linear map is convex over `[0,255]^9`. Every patch is a
+convex combination of the cube's binary vertices, so its squared response is at
+most the largest vertex response. Exact integer enumeration of all 512 binary
+patches gives `max(g²) = 20 × 255² = 1,300,500`. The patch
+`[0 0 255; 0 0 255; 0 255 255]` attains it with gradients `(1020, 510)`.
+Thus the tight maximum is **`255 × √20`**, rather than the previous `4 × 255`.
+This bound is derived here; the linked reference supplies the kernels.
+
+Method `srgb-luma-sobel-max-v2` averages each interior centre's
+`sqrt((gx² + gy²) / (20 × 255²))`, then multiplies by 100. Normalizing before
+summation keeps the result within 0–100% without clipping. The bounded byte
+gradients and their squares are exact integers in JavaScript; square roots and
+averages retain floating-point roundoff. This is a mean of magnitudes, not RMS,
+not an edge fraction and not a calibrated sharpness or recognition score.
+
+An effective region of width `w` and height `h` supports
+`max(0,w-2) × max(0,h-2)` centres, each with its entire neighbourhood inside the
+region. No centres means **unavailable / JSON null**, while a supported flat
+region measures zero. The new [v2 export contract](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Image-diagnostics#export-version-and-compatibility)
+preserves that distinction and identifies the changed scale. Other diagnostics
+and A/B difference thresholds retain their earlier definitions.
+
+The [independent verification](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/image-diagnostics-math-2026-11-12/README.md)
+compares all binary patches plus generated grayscale, alpha, random-RGBA,
+ROI-boundary and thin-region cases against rational luma and high-precision
+kernel-dot-product calculations. The mathematical bound applies to every rounded
+luma-byte patch; the finite corpus is software regression evidence, not universal
+accuracy evidence for arbitrary malformed arrays, browser resizing, optical focus
+or physical cameras.
+
 ## Next experiments need independent observations
 
 - Compare v3 with the prior tracker using the existing [CLEAR/IDF1/HOTA evaluator](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Tracking-evaluation)

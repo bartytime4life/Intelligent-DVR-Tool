@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import {readFileSync} from 'node:fs';
 import { blankFacility, validateFacility } from '../../src/facility.mjs';
 import { createLibrary, LIBRARY_KEY } from '../../src/facility-library.mjs';
 
@@ -18,6 +19,86 @@ const image = (data, white=false) => data.evaluate(isWhite => {
   if(!isWhite){ctx.fillStyle='white';ctx.fillRect(8,0,8,16);}
   return c.toDataURL('image/png').split(',')[1];
 },white);
+
+async function exportMetrics(page) {
+  const downloaded=page.waitForEvent('download');
+  await page.getByRole('button',{name:'Export metrics JSON',exact:true}).click();
+  const result=await downloaded;
+  expect(result.suggestedFilename()).toBe('facility-image-diagnostics.json');
+  return JSON.parse(readFileSync(await result.path(),'utf8'));
+}
+
+async function patchImage(page, maximum=false) {
+  return page.evaluate(max => {
+    const canvas=document.createElement('canvas');canvas.width=3;canvas.height=3;
+    const ctx=canvas.getContext('2d'), data=ctx.createImageData(3,3);
+    const levels=max ? [0,0,255,0,0,255,0,255,255] : Array(9).fill(128);
+    levels.forEach((v,i)=>data.data.set([v,v,v,255],4*i));ctx.putImageData(data,0,0);
+    return canvas.toDataURL('image/png').split(',')[1];
+  },maximum);
+}
+
+for (const width of [1440,375]) test(`image edge strength distinguishes no support from measured zero at ${width}px`,async({page},testInfo)=>{
+  await page.setViewportSize({width,height:1000});
+  await openStudio(page);
+  const errors=[];page.on('pageerror',e=>errors.push(e.message));
+  await page.getByRole('combobox',{name:'Jump to facility task'}).selectOption('3');
+  await page.locator('.facility-image-lab summary').click();
+  const picture=await image(page,false);
+  await page.getByLabel('Open image for diagnostics').setInputFiles({name:'generated-step.png',mimeType:'image/png',buffer:Buffer.from(picture,'base64')});
+  await page.getByLabel('Diagnostics region height').fill('10');
+  const strength=page.getByRole('group',{name:'Sobel edge strength',exact:true}),metrics=page.locator('.facility-lab-metrics');
+  await expect(strength.locator('strong')).toHaveText('Unavailable');
+  await expect(strength).toContainText('Needs a region of at least 3 × 3 pixels.');
+  await expect(metrics).toContainText('16 × 2 pixels');
+  const thin=await exportMetrics(page);
+  expect(thin.schema).toBe('intelligent-dvr-image-diagnostics-v2');
+  expect(thin.metrics).toMatchObject({sobel:null,sobelSamples:0,sobelMeanMagnitude:null,width:16,height:2,method:'srgb-luma-sobel-max-v2'});
+  expect(thin.processing).toMatchObject({background:'opaque-black',exportFormat:'image/png',downsampleMaxSide:720,
+    analysisMethod:'srgb-luma-sobel-max-v2',sobel:{units:'percent-of-maximum-8bit-response',kernel:[3,3],aggregation:'mean-magnitude',support:'selected-region-interior-no-padding',unavailable:'null-with-zero-samples'}});
+  expect(thin.metrics.sobelMaximum).toBeCloseTo(1140.3946685248927,9);
+  expect(thin.processing.sobel.maximumMagnitude).toBe(thin.metrics.sobelMaximum);
+  expect(thin.source).toBe('generated-step.png');expect(thin.frame).toBe('A');
+  expect(thin.originalPixels).toEqual([16,16]);expect(thin.sampledPixels).toEqual([16,16]);
+  expect(thin.region.height).toBe(.1);expect(thin.difference).toBeNull();expect(thin.rulerPixels).toBeNull();
+  await metrics.scrollIntoViewIfNeeded();
+  expect(await metrics.evaluate(el=>el.scrollWidth<=el.clientWidth)).toBe(true);
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+  await metrics.screenshot({path:testInfo.outputPath(`sobel-unavailable-${width}.png`)});
+  await page.getByRole('button',{name:'Full frame',exact:true}).click();
+  await expect(strength.locator('strong')).not.toHaveText('Unavailable');
+  await expect(strength).toContainText('196 interior pixels');
+  await page.getByRole('button',{name:/Frame B/}).click();
+  const flat=await patchImage(page);
+  await page.getByLabel('Open image for diagnostics').setInputFiles({name:'generated-flat.png',mimeType:'image/png',buffer:Buffer.from(flat,'base64')});
+  await expect(strength.locator('strong')).toHaveText('0.0%');
+  await expect(strength).toContainText('1 interior pixel');
+  await expect(page.getByText('Different sampled dimensions; pixel-aligned comparison is unavailable.')).toBeVisible();
+  const zero=await exportMetrics(page);
+  expect(zero.frame).toBe('B');expect(zero.metrics).toMatchObject({sobel:0,sobelSamples:1,sobelMeanMagnitude:0,width:3,height:3});
+  expect(zero.difference).toBeNull();expect(zero.originalPixels).toEqual([3,3]);
+  await metrics.screenshot({path:testInfo.outputPath(`sobel-measured-zero-${width}.png`)});
+  expect(errors).toEqual([]);
+});
+
+test('maximum Sobel response is bounded at 100 percent and versioned in exported metrics',async({page},testInfo)=>{
+  await openStudio(page);
+  const errors=[];page.on('pageerror',e=>errors.push(e.message));
+  await page.getByRole('combobox',{name:'Jump to facility task'}).selectOption('3');
+  await page.locator('.facility-image-lab summary').click();
+  const maximum=await patchImage(page,true);
+  await page.getByLabel('Open image for diagnostics').setInputFiles({name:'generated-maximum.png',mimeType:'image/png',buffer:Buffer.from(maximum,'base64')});
+  const strength=page.getByRole('group',{name:'Sobel edge strength',exact:true});
+  await expect(strength.locator('strong')).toHaveText('100.0%');
+  await expect(strength).toContainText('1 interior pixel');
+  const report=await exportMetrics(page);
+  expect(report.schema).toBe('intelligent-dvr-image-diagnostics-v2');
+  expect(report.metrics.sobel).toBe(100);expect(report.metrics.sobelSamples).toBe(1);
+  expect(report.metrics.sobelMeanMagnitude).toBe(report.metrics.sobelMaximum);
+  expect(report.metrics.sobelMaximum).toBeCloseTo(1140.3946685248927,9);
+  await page.locator('.facility-lab-metrics').screenshot({path:testInfo.outputPath('sobel-maximum.png')});
+  expect(errors).toEqual([]);
+});
 
 test('Facility Studio focus map and navigation are reversible and keyboard accessible', async({page})=>{
   await openStudio(page);

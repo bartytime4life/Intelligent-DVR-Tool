@@ -1,0 +1,106 @@
+{
+  "base_commit": "63b06ba2aab3adcffc38f52310b55969fb538afe",
+  "files": {
+    "src/image-science.mjs": "fbe7708e6226c5ece2310c2d71c8a1b703e7b5ff8461e19398ee2ee50b9cc001",
+    "src/FacilityImageLab.jsx": "8361f0e72ad5ffb448d4dbb61850982db53e97eefe3139d64befce0c30f62579",
+    "src/facility-image-lab.css": "9766cb05eef800db41bc72f2493be1037e6eb518cfc2132c94526d5b82eb1638",
+    "tests/image-science.test.mjs": "9d99fd6d199a9d789038b0e1e89a967655b2596a08f930773537b47c684b1d6e",
+    "tests/browser/facility-studio.spec.mjs": "fcd4f2c7a0a7eb98f8f0da7c7458e9f354dcea6fea2fb4abf1c42448f56c4975"
+  },
+  "captured_at": "2026-11-12",
+  "screenshots": "Generated pixel fixtures in actual Chrome UI; metrics crops, not real camera footage.",
+  "artifacts": {
+    "baseline-expected.json.gz": {
+      "bytes": 13201,
+      "sha256": "46680dfd11669c147ecf5759c4a37f930d4daf29816f5df8230790e837d2b18e"
+    },
+    "baseline-observations.json.gz": {
+      "bytes": 7466,
+      "sha256": "66b0c29b97ef405ba26ee818ab8a697528d5f13b5b87fe499f2a99664479cf6a"
+    },
+    "baseline-receipt.json.gz": {
+      "bytes": 17701,
+      "sha256": "031f1d81bcd23b9cca95b7f0a6c464cd124d51ef40a096116c5831569a55f5d7"
+    },
+    "baseline-source.mjs": {
+      "bytes": 4712,
+      "sha256": "6f576c07939b35ed2a479494b1dc1ebdaeba8ba9fc1fe715dff814268124c7f9"
+    },
+    "browser.log": {
+      "bytes": 1875,
+      "sha256": "d15ad6130bc77c904a3698ce0df91e82c8e0a69bd748ea8aa405207b4e3aba21"
+    },
+    "build.log": {
+      "bytes": 2932,
+      "sha256": "5767f377b2c826a5cb23aec3721e1d0c541373477434ecb6a81c4a4630b3cfad"
+    },
+    "candidate-expected.json.gz": {
+      "bytes": 13201,
+      "sha256": "46680dfd11669c147ecf5759c4a37f930d4daf29816f5df8230790e837d2b18e"
+    },
+    "candidate-observations.json.gz": {
+      "bytes": 8697,
+      "sha256": "f4a56945f1896237a56f398daa2ebb6a1df262ae78cfca775e80c70aa1d36341"
+    },
+    "candidate-receipt.json": {
+      "bytes": 4460,
+      "sha256": "f2412c4f4b791066ac4a8cce1711b506959dc4649b76c23d33301949c1431304"
+    },
+    "check-sobel.py": {
+      "bytes": 19237,
+      "sha256": "7b7749a149334cc19df6438396a2eda25bf0047e0a048129aed0d2067e0eb2a7"
+    },
+    "inputs.json.gz": {
+      "bytes": 69635,
+      "sha256": "10da3f2fa766ce7e2d1a085529cfcdfd847543c75e22bf1877fc9c66684f8622"
+    },
+    "node.log.gz": {
+      "bytes": 26939,
+      "sha256": "5d571eddb4cecf771f36ada61089e775700f39ab18338295103d851e60d5bfaa"
+    },
+    "preservation.json": {
+      "bytes": 1739,
+      "sha256": "fb29d1288ec904de1028979b418aa1efc231c4de120e1f4c19fc9847be5bc666"
+    },
+    "preview-generated.jpg": {
+      "bytes": 93401,
+      "sha256": "5d3cf6e2285a238b5be7accbb318c27b7a6203b3b80a1905c83118d796afc5c0"
+    },
+    "proof.json": {
+      "bytes": 2558,
+      "sha256": "283a9d50a29434bf40bcdb33b7f3db3b5eb5d09f3d76e3a6381278eb94d10419"
+    },
+    "root-replay.json": {
+      "bytes": 320,
+      "sha256": "07bd938924f517c572f3a7afda58e098fe7854b2b593a0a8ccf73719f5b91e9c"
+    },
+    "runner.mjs": {
+      "bytes": 1152,
+      "sha256": "31604d63bc8978e03fe067136676c9e86b6e369f50d212c81a4749c8e46bef99"
+    },
+    "sites.log": {
+      "bytes": 826,
+      "sha256": "d5723518c8a19a7b379d6e7da78086e36a13f3801ca3ebea5c5a336b972c5269"
+    },
+    "sobel-maximum.png": {
+      "bytes": 17343,
+      "sha256": "01898ad1989d349df832906cf88fabb4d3c168ae6c62c6eb00a1c8951d5f4cb9"
+    },
+    "sobel-measured-zero-1440.png": {
+      "bytes": 16689,
+      "sha256": "6d7153d5ac5c9219c5351724c831decd67ff92038a6dea1f8218cb6cdad0226a"
+    },
+    "sobel-measured-zero-375.png": {
+      "bytes": 17171,
+      "sha256": "00b53279137f7e563d272365a37a1a44ef094a4288c710b322cb96ce9d671d1d"
+    },
+    "sobel-unavailable-1440.png": {
+      "bytes": 19509,
+      "sha256": "cfa92235daf54ba557312888e387854a8fe453cf2dc1e45d07c53102f253b6c6"
+    },
+    "sobel-unavailable-375.png": {
+      "bytes": 19760,
+      "sha256": "efc2795a3941c5bbb24d931ae9f0adac28da6cdc793a23ea97c741547a10a275"
+    }
+  }
+}

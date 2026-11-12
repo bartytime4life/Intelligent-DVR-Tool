@@ -238,6 +238,9 @@ coverage on the Facility map is a different kind of geometry.
 
 Facility's image diagnostics freeze a deliberately chosen local frame. Inspect
 the histogram, exposure/detail proxies, A/B difference and sampled-pixel ruler.
+An unavailable edge result needs a region at least 3 × 3 sampled pixels; the
+selected-area card shows the effective dimensions. Measured zero has a positive
+interior-pixel count. Keep the v2 metric-export scale separate from older files.
 For ground-plane calibration, enter measured reference markers, reserve
 independent check markers and review the error against your chosen limits.
 

@@ -29,16 +29,59 @@ The browser samples no more than 720 pixels on the longest image side. It draws 
 | Mean luma, 0–255 | Mean of 8-bit channel-weighted sRGB brightness (0.2126R + 0.7152G + 0.0722B), composited over black for transparency | Approximate displayed luma, not linear luminance or lux |
 | P05–P95 | Exact 5th/95th percentiles of selected image pixels | A histogram spread, not a camera dynamic-range measurement |
 | Shadow/highlight clipping | Percent of pixels with luma at most 15 / at least 240 | Sensitive to gamma/exposure, not a proof of recoverable detail |
-| Sobel edge energy | Mean normalized gradient magnitude for interior ROI pixels | Structural detail proxy, **not calibrated focus, blur, resolution or detection accuracy** |
+| Sobel edge strength, 0–100% | Mean 3×3 Sobel gradient magnitude divided by the maximum possible 8-bit response, `255 × √20` | Structural detail proxy, **not a percentage of edge pixels, calibrated focus, blur, resolution or detection accuracy** |
 | Luma histogram | 16 bins from darkest to brightest pixels | Display distribution; no identity or scene recognition |
 | Two-frame difference | Mean absolute luma difference (0–255) and percent of selected pixels differing by at least 24 luma levels | **Pixel-aligned only**; lighting, JPEG artifacts, shadows or camera motion can look like object changes |
 | Pixel ruler | Euclidean distance between two user-selected points in the sampled image | No spatial scale, perspective calibration or physical length |
 
 These diagnostic tools make it easier to compare exposure, investigate glare and shadow, examine contrast, and spot **candidate visual changes** before human review. They do **not** replace independent calibration or an annotated test for human/object recognition. Changing a planned field of view on the map does not physically move a camera. Planned DORI/coverage and image-level metrics are separate measurements with separate limitations.
 
+### Read the edge result
+
+The selected-area card shows the effective sampled width and height. Region
+bounds round outward to whole pixels. Sobel uses only kernel centres whose full
+3×3 neighbourhood lies inside that region, without padding or borrowing pixels
+outside it. Its support count is `max(0, width - 2) × max(0, height - 2)`.
+
+- **Unavailable** means the region is narrower or shorter than three pixels.
+  Enlarge it or choose **Full frame**. Other exposure/histogram metrics still work.
+- **0.0%** with a positive interior-pixel count is a measured result. A uniform
+  region is one example; zero response does not establish optical quality.
+- **100.0%** is the maximum response of this particular kernel and normalization.
+  More strength does not necessarily mean a better image: texture, noise, exposure,
+  resizing and compression all affect gradients.
+
+The value averages individual gradient magnitudes; it is not RMS energy or an
+edge-pixel count. Compare the same sampled region at the same dimensions and
+processing settings. See the [derivation and numerical limits](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Science-and-algorithms#normalize-image-edge-strength).
+
+### Export version and compatibility
+
+**Export metrics JSON** keeps the filename `facility-image-diagnostics.json` and
+uses schema `intelligent-dvr-image-diagnostics-v2`. The frame, source name/time,
+original/sample dimensions, region, difference and pixel ruler remain present.
+`metrics.method` and `processing.analysisMethod` identify
+`srgb-luma-sobel-max-v2`.
+
+| Export field | Meaning |
+| --- | --- |
+| `metrics.sobel` | Mean gradient as percent of the maximum, or JSON `null` when there are no interior samples |
+| `metrics.sobelSamples` | Number of interior kernel centres; zero means unavailable |
+| `metrics.sobelMeanMagnitude` | Mean raw gradient magnitude in luma/kernel units, or `null` |
+| `metrics.sobelMaximum` | `255 × √20`, approximately `1140.3946685248927` |
+| `processing.sobel` | Units, 3×3 kernel size, mean-magnitude aggregation, interior-only/no-padding support, maximum and null semantics |
+
+Historical v1 exports remain historical files. Their divisor was `4 × 255`, so
+a supported maximum patch could report about **111.8%**. For the same supported
+pixels, the new percent equals the old percent times `2 / √5`, apart from floating
+roundoff. An old zero alone cannot reveal whether any kernel centres existed;
+do not convert that zero to a measured v2 zero without checking region dimensions.
+There is no metrics-JSON import/migration flow. Keep versions explicit in external
+comparisons rather than mixing their scales.
+
 ## Verification and operational boundary
 
-The pure calculations have deterministic tests in `tests/image-science.test.mjs`, run by `npm test`. The browser scenario exercises focus-mode recovery, keyboard navigation, local-image ROI evaluation and frame comparison. These are software tests using generated pixels; they do **not** establish performance on any physical camera.
+The pure calculations have deterministic tests in `tests/image-science.test.mjs`, run by `npm test`. The [November 12 source-bound record](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/image-diagnostics-math-2026-11-12/README.md) includes an independent generated-pixel oracle, the exact kernel bound, phone/desktop recovery, genuine measured zero, maximum response and actual JSON-download checks. The broader Studio suite also exercises focus-mode recovery, keyboard navigation and frame comparison. These are software tests using generated pixels; they do **not** establish performance on any physical camera.
 
 Images are opened explicitly and read in the local browser. Frame data remain in session memory, not IndexedDB or localStorage. Do not use the tool to obtain images without camera-owner consent. Human-reviewed reports and original evidence should follow the [recording workflow](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Recording-workflow) and [field-acceptance runbook](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Field-acceptance) for identity, storage and recovery checks.
 
