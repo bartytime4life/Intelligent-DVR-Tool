@@ -121,10 +121,10 @@ proxies. [Ground-plane calibration](https://github.com/bartytime4life/Intelligen
 references and independent checks. Neither recovers general depth or establishes
 survey accuracy.
 
-## November 12 proposal · coordinate recovery
+## November 12 · coordinate recovery
 
 These captures show generated fixture plans and marker coordinates in the
-current proposed source, with exact hashes in the [coordinate-integrity record](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/coordinate-integrity-math-2026-11-12/README.md).
+source later merged as PR #122, with exact hashes in the [coordinate-integrity record](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/coordinate-integrity-math-2026-11-12/README.md).
 They are software checks, not photographs or measured site calibration.
 
 ![Controlled phone-width calibration panel refusing a point outside the fitting-marker boundary.](https://raw.githubusercontent.com/wiki/bartytime4life/Intelligent-DVR-Tool/docs/media/coordinate-integrity-2026-11-12/calibration-outside-phone.png)
@@ -138,7 +138,7 @@ inside endpoint recovers. A withheld check outside the boundary keeps it locked.
 The explicit site correction preserves shared room boundaries, supports Undo and
 survives reload. [Site-origin choices](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Facility-planning).
 
-## November 12 proposal · small planning values
+## November 12 · small planning values
 
 [Reviewed phone and desktop captures](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/planning-readouts-2026-11-12/README.md#checks-and-actual-exports)
 show a 0.01 Mbit/s System plan, a 4 cm route gap and an incomplete zone with a
@@ -156,7 +156,7 @@ planning calculation; they do not establish hardware or site accuracy.
 ## Dated collections and reproduction
 
 - [November 12 coordinate-integrity collection](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/media/coordinate-integrity-2026-11-12/README.md):
-  two reviewed proposal captures with generated references/plans and unchanged source bytes.
+  two reviewed pre-merge captures of PR #122 with generated references/plans and unchanged source bytes.
 
 - [November 11 guided-experience collection](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Guided-experience-visual-provenance):
   four unchanged controlled Monitor/System captures, with separate provenance.

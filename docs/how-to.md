@@ -236,8 +236,9 @@ coverage on the Facility map is a different kind of geometry.
    available while geometry is pending after existing Save/Discard guards are
    satisfied. Coverage and rehearsal remain estimates.
 
-These visibility/recovery changes belong to the [current integrated proposal](verification/coordinate-integrity-math-2026-11-12/README.md);
-[product status](product-status.md) identifies the merged baseline.
+These visibility/recovery changes merged in [PR #122](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/122)
+([verification record](verification/coordinate-integrity-math-2026-11-12/README.md));
+[product status](product-status.md) records their limits.
 
 Coverage just below complete can read **>99.9%**; a small positive result can
 read **<0.1%**. Small uncovered distances remain visible instead of rounding to
