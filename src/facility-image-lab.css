@@ -28,6 +28,7 @@
 .facility-lab-metrics small{display:block;font-size:10px;color:#a5c8d2;margin-bottom:6px}
 .facility-lab-metrics strong{font-size:17px;font-weight:650;font-variant-numeric:tabular-nums;color:#e4fafb}
 .facility-lab-metrics sub{font-size:10px;color:#a0c3cc;vertical-align:baseline}
+.facility-lab-metrics .facility-lab-support{display:block;margin-top:5px;font-size:10px;line-height:1.5;color:#a5c8d2;overflow-wrap:anywhere}
 .facility-lab-histogram{margin:14px 0 12px;font-size:11px;color:#aac6d0}
 .facility-lab-histogram>div{height:78px;display:flex;gap:3px;align-items:end;padding:5px 0;border-bottom:1px solid #5f8390}
 .facility-lab-histogram i{flex:1;min-width:0;display:block;background:linear-gradient(#65dfe1,#2b8e9c);border-radius:3px 3px 0 0}

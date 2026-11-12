@@ -121,6 +121,23 @@ proxies. [Ground-plane calibration](https://github.com/bartytime4life/Intelligen
 references and independent checks. Neither recovers general depth or establishes
 survey accuracy.
 
+## November 12 proposal · coordinate recovery
+
+These captures show generated fixture plans and marker coordinates in the
+current proposed source, with exact hashes in the [coordinate-integrity record](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/coordinate-integrity-math-2026-11-12/README.md).
+They are software checks, not photographs or measured site calibration.
+
+![Controlled phone-width calibration panel refusing a point outside the fitting-marker boundary.](https://raw.githubusercontent.com/wiki/bartytime4life/Intelligent-DVR-Tool/docs/media/coordinate-integrity-2026-11-12/calibration-outside-phone.png)
+
+The ruler withholds the outside distance and exports no ruler result; a corrected
+inside endpoint recovers. A withheld check outside the boundary keeps it locked.
+[Plane-reference workflow](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Planar-calibration).
+
+![Controlled desktop Save site form after keeping a generated rotated building and rooms at their map positions.](https://raw.githubusercontent.com/wiki/bartytime4life/Intelligent-DVR-Tool/docs/media/coordinate-integrity-2026-11-12/saved-site-desktop.png)
+
+The explicit site correction preserves shared room boundaries, supports Undo and
+survives reload. [Site-origin choices](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Facility-planning).
+
 ## Keep the work
 
 ![Separate browser exports, private local folders and an outside verified backup.](https://raw.githubusercontent.com/wiki/bartytime4life/Intelligent-DVR-Tool/docs/media/guide/preserve.svg)
@@ -129,6 +146,9 @@ survey accuracy.
 · [Architecture and data](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Architecture-and-data).
 
 ## Dated collections and reproduction
+
+- [November 12 coordinate-integrity collection](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/media/coordinate-integrity-2026-11-12/README.md):
+  two reviewed proposal captures with generated references/plans and unchanged source bytes.
 
 - [November 11 guided-experience collection](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Guided-experience-visual-provenance):
   four unchanged controlled Monitor/System captures, with separate provenance.

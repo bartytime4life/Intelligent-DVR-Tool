@@ -8,10 +8,10 @@
 
 *Concept illustration. Use the [current screenshot atlas](visual-atlas.md) for actual interface captures and their provenance.*
 
-The [current visibility proposal](verification/ground-frustum-math-2026-11-12/README.md)
-aligns camera footprints, metrics, rehearsal and installer recovery. The
-[facility guide](facility-builder.md#visibility-model-and-evidence-limits) describes
-its controls and limits; [product status](product-status.md) identifies what is merged.
+The [current integrated planning proposal](verification/coordinate-integrity-math-2026-11-12/README.md)
+brings together ground visibility, coverage, calibration, image diagnostics and
+site-coordinate recovery. Follow the task guides below; [product status](product-status.md)
+identifies the separate merged baseline and the proposal's verification limits.
 
 ## Pick the outcome
 

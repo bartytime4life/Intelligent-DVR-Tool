@@ -236,7 +236,7 @@ coverage on the Facility map is a different kind of geometry.
    available while geometry is pending after existing Save/Discard guards are
    satisfied. Coverage and rehearsal remain estimates.
 
-These visibility/recovery changes belong to the [current branch proposal](verification/ground-frustum-math-2026-11-12/README.md);
+These visibility/recovery changes belong to the [current integrated proposal](verification/coordinate-integrity-math-2026-11-12/README.md);
 [product status](product-status.md) identifies the merged baseline.
 
 [Full facility workflow](facility-builder.md) · [Maps and shapes](map-measurements-and-shapes.md)
@@ -248,6 +248,9 @@ These visibility/recovery changes belong to the [current branch proposal](verifi
 
 Facility's image diagnostics freeze a deliberately chosen local frame. Inspect
 the histogram, exposure/detail proxies, A/B difference and sampled-pixel ruler.
+An unavailable edge result needs a region at least 3 × 3 sampled pixels; the
+selected-area card shows the effective dimensions. Measured zero has a positive
+interior-pixel count. Keep the v2 metric-export scale separate from older files.
 For ground-plane calibration, enter measured reference markers, reserve
 independent check markers and review the error against your chosen limits.
 

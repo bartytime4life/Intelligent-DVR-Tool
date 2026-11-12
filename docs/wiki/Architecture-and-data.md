@@ -133,7 +133,7 @@ each validator and reproduce the appropriate software checks.
 
 ## Visibility is geometry
 
-The [current branch proposal](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/ground-frustum-math-2026-11-12/README.md)
+The [current integrated proposal](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/coordinate-integrity-math-2026-11-12/README.md)
 clips a tilted pinhole ground footprint to horizontal range and subtracts finite-
 elevation opaque-wall shadows. It retains holes and separate visible pieces.
 The selected-camera 3D rendering connects the mount to those ground regions;
@@ -155,6 +155,18 @@ terrain, lighting, lens distortion and recognition quality. Pixel density is a
 separate planning calculation. Rehearsal follows a planned route and proposes
 camera transitions; it performs no identity recognition or cross-camera person
 matching. [Detailed limits](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Facility-planning#visibility-model-and-evidence-limits).
+
+## Coordinate integrity
+
+Site corrections and calibration queries have separate contracts. With **Keep
+buildings at their map positions** selected, Save site applies one affine
+local-grid change to stored anchors and geometry before ordinary validation and
+saving; refusal retains the prior plan. Calibrated ruler/check membership uses
+an exact BigInt determinant on the entered binary64 reference coordinates.
+Neither operation activates a service or writes to private runtime folders.
+The [algorithm guide](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Science-and-algorithms#keep-measured-plane-queries-inside-their-references)
+and [source-bound integration checks](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/coordinate-integrity-math-2026-11-12/README.md)
+distinguish arithmetic integrity from surveying and optical accuracy.
 
 ## Path toward operation
 

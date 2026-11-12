@@ -51,7 +51,14 @@ map. Map-layer buttons wrap when needed and remain available by keyboard.
    stops the request. Device accuracy depends on the location provider.
    Submitted address/place search is another route: choose a provider, submit,
    select a suggestion, review coordinates and Save site. Nothing is sent while
-   typing. Changing the origin relocates all existing local geometry geographically.
+   typing. If the plan already has geometry, choose whether to **Keep buildings
+   at their map positions** before saving. It is on by default for map-sourced
+   buildings and off for hand-drawn plans. When checked, saving re-centres the
+   local grid while retaining the plan's geographic positions in the existing
+   projection; local coordinate values can change. When unchecked, the local
+   coordinates stay the same and the whole plan moves geographically with the
+   origin. A refused correction leaves the existing plan intact. See
+   [origin changes and their limits](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Maps-and-shapes#change-the-site-origin).
 2. Review a bounded OSM area and supported exterior drafts, use an offline JSON
    file/paste extract, trace with Terra Draw, or add one of seven common shapes.
    Map drafts require explicit selection and apply; additive import preserves

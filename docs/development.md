@@ -115,6 +115,7 @@ outputs; publish only reviewed, source-bound documentation assets.
 | Local assistant and Lab receipt | [ollama.mjs](../src/ollama.mjs), [lab-receipt.mjs](../src/lab-receipt.mjs) | [Optional assistant](training.md#ask-the-local-training-assistant); Lab receipt is distinct from analyzer receipts |
 | Facility validation | [facility.mjs](../src/facility.mjs) | [Facility guide](facility-builder.md), [portable plans](saved-facilities.md) |
 | Visible ground and metrics | [facility-visibility.mjs](../src/facility-visibility.mjs), [facility-visibility-protocol.mjs](../src/facility-visibility-protocol.mjs), [use-facility-visibility.mjs](../src/use-facility-visibility.mjs), [facility-coverage.mjs](../src/facility-coverage.mjs) | [Projection mathematics](science-and-algorithms.md#project-the-visible-ground-footprint), [replayable geometry record](verification/ground-frustum-math-2026-11-12/README.md) |
+| Planar calibration and exact boundary | [facility-calibration.mjs](../src/facility-calibration.mjs), [planar-predicates.mjs](../src/planar-predicates.mjs) | [Calibration contract](facility-calibration.md), [current integration checks](verification/coordinate-integrity-math-2026-11-12/README.md) |
 | Browser still storage | [image-database.mjs](../src/image-database.mjs), [local-images.mjs](../src/local-images.mjs) | [Storage boundaries](architecture.md#where-data-goes) |
 
 The analyzer’s receipt, frame trace and browser review bundle serve different
@@ -145,6 +146,24 @@ provides frozen independent inputs, replay instructions, numerical limits and
 raw failures. Retain its ideal-circle boundary disagreements when comparing the
 inscribed range polygon with an exact circle. Tests of generated geometry and
 worker recovery do not qualify optics, installed services or camera throughput.
+
+## Verify coordinate changes
+
+Use focused unit and browser checks before the broader suites:
+
+```bash
+node --test tests/planar-predicates.test.mjs tests/facility-calibration.test.mjs tests/facility-reorigin.test.mjs
+npx playwright test --config=playwright.facility.config.mjs tests/browser/facility-studio.spec.mjs tests/browser/facility-reorigin.spec.mjs
+```
+
+The [integration record](verification/coordinate-integrity-math-2026-11-12/README.md)
+links portable frozen exact-rational oracles and baseline/candidate receipts.
+Hash imported predicate dependencies as well as the calibration module; old
+single-file receipts cannot establish which new helper bytes were executed.
+Keep old method-v2 records unchanged and record v3 replays separately. Boundary
+membership is exact for represented coordinates, while projection residuals
+retain explicit numerical tolerances. Save-site verification also checks refusal,
+Undo, reload and shared-room containment rather than only coordinate equality.
 
 ## Keep documentation and evidence current
 

@@ -1,0 +1,20 @@
+{
+  "schema": "intelligent-dvr.public-screenshots.v1",
+  "date": "2026-11-12",
+  "generatedFixturesOnly": true,
+  "sourceRecord": "../../verification/coordinate-integrity-math-2026-11-12/README.md",
+  "images": [
+    {
+      "path": "calibration-outside-phone.png",
+      "bytes": 9408,
+      "sha256": "08cab3d971334fce8f533e95422961ad707cc485d6e0d8eab6f089a9537ff23c",
+      "source": "docs/verification/coordinate-integrity-math-2026-11-12/browser/calibration-outside-375.png"
+    },
+    {
+      "path": "saved-site-desktop.png",
+      "bytes": 37272,
+      "sha256": "eab2c75bc2d06768a11325c31b8042de6b0aaf4dcc677b42ec2b65840f84c155",
+      "source": "docs/verification/coordinate-integrity-math-2026-11-12/reorigin/reorigin-saved-1440.png"
+    }
+  ]
+}

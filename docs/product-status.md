@@ -1,26 +1,35 @@
 # Product status and evidence
 
-**Current branch proposal under review:** [coherent visible-ground geometry](verification/ground-frustum-math-2026-11-12/README.md)
-replaces radial sectors and first-obstruction clipping with tilted pinhole ground
-regions and finite-elevation wall shadows. It preserves holes, separate pieces
-and rear ground views. Map shading, DORI contours, zone areas, route distance,
-rehearsal and installer SVG share one current-plan snapshot; pending or failed
-views withhold totals and proposals and offer retry. Installer export requires a
-clean saved plan and complete views. Calculation adds no new restriction to editing or JSON backups; existing
-Save/Discard guards still apply.
+**Current branch proposal under review:** [integrated planning mathematics and coordinate integrity](verification/coordinate-integrity-math-2026-11-12/README.md).
+This isolated source combines the visible-ground proposal [#122](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/122)
+(which integrates pixel-density #119 and zone-area #121), projective calibration
+[#117](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/117), and image
+diagnostics [#120](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/120).
+Original proposal receipts retain their exact source revisions.
 
-This isolated branch locally integrates the unmerged
-[pixel-density proposal #119](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/119)
-and [zone-area proposal #121](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/121).
-Their original receipts remain dated evidence. A local integration does not merge
-either hosted PR. New geometry is a software planning estimate; installed-machine
-state, optical validation and physical-camera qualification remain separate.
+Two further reproduced fixes preserve rotated rooms when **Save site → Keep
+buildings at their map positions** changes the local grid, and refuse calibrated
+ruler/check points outside the closed convex reference boundary. Calibration
+exports now identify `normalized-householder-dlt-v3`; the JSON schema is unchanged.
+The Sobel method remains `srgb-luma-sobel-max-v2` with unsupported regions reported
+as unavailable rather than measured zero.
+
+Map shading, DORI contours, zone areas, route distance, rehearsal and installer
+SVG share one current-plan visible-ground snapshot. Pending/failed views withhold
+conclusions and offer retry; installer export requires a saved plan and complete
+views. Save/Discard/Undo and portable JSON remain available under their existing
+guards. No new controls or automatic camera, recording or inference starts are added.
+
+This is a locally integrated proposal. Local checks, hosted CI, hosted PR merge,
+installed-machine state, Wiki publication, deployment and physical qualification
+are distinct. The [integration record](verification/coordinate-integrity-math-2026-11-12/README.md)
+binds current source, independent replays, documentation inventory and checks.
 
 **Main readback November 12, 2026:** `63b06ba2`, the documentation alignment
 in [PR #116](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/116).
 The source capabilities below remain the merged baseline. The new
-[verification record](verification/ground-frustum-math-2026-11-12/README.md)
-separately binds this branch's checks and refreshed proposal CI readback.
+[integration record](verification/coordinate-integrity-math-2026-11-12/README.md)
+separately binds this branch's checks and proposal CI readback.
 
 **Merged source baseline verified November 12, 2026 (America/Chicago):**
 [PR #114](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/114) merged

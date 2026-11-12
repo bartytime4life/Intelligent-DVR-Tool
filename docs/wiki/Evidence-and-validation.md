@@ -1,5 +1,11 @@
 # Verification index
 
+[Integrated planning and coordinate integrity, November 12](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/coordinate-integrity-math-2026-11-12/README.md)
+records the combined ground-visibility, calibration and image-diagnostics source;
+reproduced site-origin/shared-wall and outside-reference-ruler defects; independent
+exact-coordinate checks; current documentation inventory; and separate local/CI/
+publication evidence. Earlier records below retain their original bytes and limits.
+
 [Coherent pinhole ground visibility, November 12](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/ground-frustum-math-2026-11-12/README.md)
 records radial-sector and wall-shadow counterexamples, complete visible regions,
 shared revision-bound consumers, independent mathematical corpora and recovery
@@ -17,6 +23,16 @@ merged, installed and field-qualified behavior.
 records reproduced slant/depth errors, centreline ground intervals, straight
 fan/sensor-clipped contours, an independent generated projection oracle and
 readable short ranges in the browser and installer exports.
+
+[Projective calibration mathematics, November 12](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/calibration-projective-math-2026-11-12/README.md)
+records valid zero-coefficient perspective maps, scale-invariant projection,
+collinear and noisy fitted-plane collapse refusals, independent exact-arithmetic
+comparisons and the existing operator-gated ruler workflow.
+
+[Image diagnostics mathematics, November 12](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/image-diagnostics-math-2026-11-12/README.md)
+records the tight Sobel bound, unavailable-versus-zero support, versioned exports,
+an independent generated-pixel oracle and desktop/phone browser checks. This is
+proposed branch behavior until merged, without physical-camera qualification.
 
 [Current documentation alignment, November 12](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/documentation-alignment-2026-11-12/README.md)
 follows the earlier 197-path audit, records the merged route/evaluation baseline and

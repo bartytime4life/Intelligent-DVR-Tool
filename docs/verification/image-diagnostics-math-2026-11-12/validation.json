@@ -1,0 +1,60 @@
+{
+  "scope": "Source-bound local software checks; hosted CI, installed state, separate Wiki publication and field qualification are distinct.",
+  "base_commit": "63b06ba2aab3adcffc38f52310b55969fb538afe",
+  "source_manifest_verified": true,
+  "build": {
+    "passed": true,
+    "log": "build.log"
+  },
+  "node": {
+    "passed": 580,
+    "failed": 0,
+    "skipped": 0,
+    "sockets_opt_in": true
+  },
+  "sites": {
+    "passed": 4,
+    "failed": 0
+  },
+  "studio_browser": {
+    "passed": 11,
+    "failed": 0,
+    "scope": "facility-studio.spec.mjs only"
+  },
+  "independent_oracle": {
+    "cases": 611,
+    "images": 606,
+    "assertions": 10472,
+    "candidate_failures": 0,
+    "strict_baseline_exit": 1,
+    "strict_candidate_exit": 0,
+    "root_replayed_equal_receipts": true
+  },
+  "protected_files_and_dependencies_unchanged": true,
+  "documentation_checks": {
+    "local_links": 1619,
+    "wiki_outputs": 68,
+    "editable_graphics": 10,
+    "wiki_tests": 8,
+    "diff_check": "passed"
+  },
+  "deployment": "not performed",
+  "wiki_publication": "not performed",
+  "verified_at_utc": "2026-11-12T08:22:58Z",
+  "historical_preservation": {
+    "historical_receipts": {
+      "base_paths": 275,
+      "unchanged": true,
+      "exception": "docs/verification/README.md navigation additions"
+    },
+    "existing_media": {
+      "base_paths": 65,
+      "unchanged": true,
+      "exception": null
+    }
+  },
+  "independent_reviews": {
+    "numerical_evidence": "PASS - no blockers; strict packaged replays match retained receipts",
+    "ux_export_documentation": "PASS - no blockers; mobile/desktop screenshots and contract reviewed"
+  }
+}

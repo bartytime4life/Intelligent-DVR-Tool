@@ -39,14 +39,23 @@ keeps analytic, independent-oracle and local browser evidence. Zone grids and
 the simulated handoff rehearsal remain separate; no optical calibration,
 real tracking or camera-capacity claim follows from these calculations.
 
-The current [visible-ground proposal](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/ground-frustum-math-2026-11-12/README.md)
-locally integrates the unmerged pixel-density and zone-area proposals, then
-replaces radial sectors with a tilted pinhole footprint minus projected wall
-shadows. All planning consumers share current geometry, preserving holes and
-separate regions and withholding unavailable conclusions. Follow-up acceptance
-needs surveyed ground/pose measurements and independent physical targets,
-including low walls, raised structures and steep views. Generated mathematics
-and browser checks do not qualify physical visibility or installed software.
+## Integrated proposal awaiting review
+
+The [current integration](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/coordinate-integrity-math-2026-11-12/README.md)
+combines the unmerged visible-ground, pixel-density, zone-area, calibration and
+image-diagnostics proposals. Additional coordinate fixes preserve ordinary
+rotated boundary rooms during keep-position site corrections and prevent
+calibrated ruler/check extrapolation beside short reference edges. Independent
+numeric and browser checks establish behavior on their generated inputs.
+
+Review, merge, platform installation and physical acceptance are separate next
+steps. Physical validation needs surveyed ground/pose measurements, independent
+markers and targets, lens effects, low walls, raised structures and steep views.
+Documentation and generated Wiki source are aligned locally; Wiki publication
+and deployment need their own revision checks. No calendar or capacity guarantee
+follows from this proposal.
+
+## Earlier delivered work
 
 [PR #112](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/112), merged
 as `cd6d1566`, replaces coarse automatic training cutoffs with empirical score

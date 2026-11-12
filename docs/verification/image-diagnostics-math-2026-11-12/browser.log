@@ -1,0 +1,18 @@
+[WebServer] (node:2063114) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 11 tests using 1 worker
+
+  ✓   1 tests/browser/facility-studio.spec.mjs:41:33 › image edge strength distinguishes no support from measured zero at 1440px (2.6s)
+  ✓   2 tests/browser/facility-studio.spec.mjs:41:33 › image edge strength distinguishes no support from measured zero at 375px (2.1s)
+  ✓   3 tests/browser/facility-studio.spec.mjs:84:1 › maximum Sobel response is bounded at 100 percent and versioned in exported metrics (1.8s)
+  ✓   4 tests/browser/facility-studio.spec.mjs:103:1 › Facility Studio focus map and navigation are reversible and keyboard accessible (2.2s)
+  ✓   5 tests/browser/facility-studio.spec.mjs:127:1 › intermediate window widths keep the full map and every map-layer choice reachable (1.7s)
+  ✓   6 tests/browser/facility-studio.spec.mjs:158:1 › image laboratory imports only on request, reports ROI and compares two local frames (1.9s)
+  ✓   7 tests/browser/facility-studio.spec.mjs:182:1 › transparent local PNGs are composited before analysis and lossless frame export (1.8s)
+  ✓   8 tests/browser/facility-studio.spec.mjs:223:1 › calibrated map ruler requires withheld check and independent measured reference declaration (2.1s)
+  ✓   9 tests/browser/facility-studio.spec.mjs:258:1 › a chosen ground reference accepts an explicit local map pick, without activating recording (2.1s)
+  ✓  10 tests/browser/facility-studio.spec.mjs:279:1 › image reference numbering follows full row positions even when earlier markers are blank (1.7s)
+  ✓  11 tests/browser/facility-studio.spec.mjs:294:1 › Facility Studio has one compact task selector plus descriptive sidebar steps (1.8s)
+
+  11 passed (22.7s)

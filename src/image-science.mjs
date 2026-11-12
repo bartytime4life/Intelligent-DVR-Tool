@@ -1,6 +1,10 @@
 // Bounded, deterministic RGB image diagnostics. No camera requests, model inference or network.
 export const FULL_FRAME = Object.freeze({ x: 0, y: 0, width: 1, height: 1 });
 const clamp = (n, lo, hi) => Math.max(lo, Math.min(hi, Number.isFinite(n) ? n : lo));
+// Exact reachable maximum squared L2 magnitude for standard 3x3 Sobel on
+// [0,255] luma: enumerate binary cube vertices, then use convexity of the norm.
+const SOBEL_MAXIMUM_SQUARED = 20 * 255 * 255;
+const SOBEL_MAXIMUM = 255 * Math.sqrt(20);
 
 export function regionBounds(region = FULL_FRAME, width, height) {
   if (!Number.isInteger(width) || !Number.isInteger(height) || width < 1 || height < 1 || width > 4096 || height > 4096) {
@@ -59,14 +63,22 @@ export function analyzeImage(image, region = FULL_FRAME) {
     const k = y * width + x;
     const gx = -shades[k - width - 1] + shades[k - width + 1] - 2 * shades[k - 1] + 2 * shades[k + 1] - shades[k + width - 1] + shades[k + width + 1];
     const gy = -shades[k - width - 1] - 2 * shades[k - width] - shades[k - width + 1] + shades[k + width - 1] + 2 * shades[k + width] + shades[k + width + 1];
-    edge += Math.hypot(gx, gy) / (4 * 255);
+    // Normalize each magnitude before summing. Integer gradients make the
+    // squared ratio <= 1 exactly; this keeps the mean in [0,1] without clipping.
+    // Average the individual norms, not squared norms (RMS) or edge counts.
+    edge += Math.sqrt((gx * gx + gy * gy) / SOBEL_MAXIMUM_SQUARED);
     edges++;
   }
+  const normalizedEdge = edges ? edge / edges : null;
   return {
     pixels: count, width: bounds.right - bounds.left, height: bounds.bottom - bounds.top,
     mean: sum / count, low: percentile(0.05), high: percentile(0.95),
     shadowPercent: dark / count * 100, highlightPercent: bright / count * 100,
-    sobel: edges ? edge / edges * 100 : 0, histogram: bins
+    method: 'srgb-luma-sobel-max-v2',
+    sobel: normalizedEdge === null ? null : normalizedEdge * 100,
+    sobelSamples: edges, sobelMaximum: SOBEL_MAXIMUM,
+    sobelMeanMagnitude: normalizedEdge === null ? null : normalizedEdge * SOBEL_MAXIMUM,
+    histogram: bins
   };
 }
 

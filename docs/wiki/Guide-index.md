@@ -8,10 +8,10 @@
 
 *Concept illustration. Use the [current screenshot atlas](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-atlas) for actual interface captures and their provenance.*
 
-The [current visibility proposal](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/ground-frustum-math-2026-11-12/README.md)
-aligns camera footprints, metrics, rehearsal and installer recovery. The
-[facility guide](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Facility-planning#visibility-model-and-evidence-limits) describes
-its controls and limits; [product status](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Product-status) identifies what is merged.
+The [current integrated planning proposal](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/coordinate-integrity-math-2026-11-12/README.md)
+brings together ground visibility, coverage, calibration, image diagnostics and
+site-coordinate recovery. Follow the task guides below; [product status](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Product-status)
+identifies the separate merged baseline and the proposal's verification limits.
 
 ## Pick the outcome
 

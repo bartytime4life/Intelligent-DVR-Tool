@@ -1,0 +1,119 @@
+{
+  "schema": "dvr.coordinate-integrity.candidate-check.v1",
+  "integrated_base": "220064faad8b0423e0a666d99a02755834fa1e32",
+  "source_sha256": "ef184ab2f34bb18a56fce592d6a65066dd879fd31f820b640fd5e601147c47e3",
+  "frozen_input_sha256": "916a7e9e2c16a9c5f80b0a7cb261673a92dadf39078c22e7c8590c1de47bb866",
+  "source_before_valid": false,
+  "source_after_valid": true,
+  "independent_affine_max_error_metres": 0,
+  "boundary_midpoint_error_metres": 0,
+  "unchanged_containment_tolerance": true,
+  "output": {
+    "schema": "intelligent-dvr.facility.v6",
+    "name": "Generated rotated-room relocation",
+    "origin": [
+      -97.99995,
+      38.50005
+    ],
+    "buildings": [
+      {
+        "id": "b",
+        "name": "Workshop",
+        "footprint": [
+          [
+            295.6437977777763,
+            194.43399999981523
+          ],
+          [
+            307.64378944798625,
+            203.43399999981523
+          ],
+          [
+            301.64379361288127,
+            211.43399999981523
+          ],
+          [
+            289.6438019426713,
+            202.43399999981523
+          ],
+          [
+            295.6437977777763,
+            194.43399999981523
+          ]
+        ],
+        "height": 6,
+        "floors": 2
+      }
+    ],
+    "cameras": [],
+    "rooms": [
+      {
+        "id": "A",
+        "name": "A",
+        "buildingId": "b",
+        "level": 0,
+        "footprint": [
+          [
+            295.6437977777763,
+            194.43399999981523
+          ],
+          [
+            301.64379361288127,
+            198.93399999981523
+          ],
+          [
+            295.6437977777763,
+            206.93399999981523
+          ],
+          [
+            289.6438019426713,
+            202.43399999981523
+          ],
+          [
+            295.6437977777763,
+            194.43399999981523
+          ]
+        ],
+        "wallHeight": 2.8
+      },
+      {
+        "id": "B",
+        "name": "B",
+        "buildingId": "b",
+        "level": 0,
+        "footprint": [
+          [
+            301.64379361288127,
+            198.93399999981523
+          ],
+          [
+            307.64378944798625,
+            203.43399999981523
+          ],
+          [
+            301.64379361288127,
+            211.43399999981523
+          ],
+          [
+            295.6437977777763,
+            206.93399999981523
+          ],
+          [
+            301.64379361288127,
+            198.93399999981523
+          ]
+        ],
+        "wallHeight": 2.8
+      }
+    ],
+    "doorways": [],
+    "windows": [],
+    "labels": [],
+    "openings": [],
+    "stairs": [],
+    "paths": [],
+    "zones": [],
+    "route": []
+  },
+  "scope": "Generated local planning geometry only; not survey/physical acceptance."
+}

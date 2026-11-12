@@ -5,10 +5,11 @@ This guide connects the delivered mathematics to the problems it solves. The
 scores, pixels and assignment matrices. They establish software behavior, not
 physical-camera accuracy, detector throughput or 100-camera capacity.
 
-The current branch adds a [visible-ground proposal](verification/ground-frustum-math-2026-11-12/README.md)
-on top of the unmerged pixel-density and zone-area proposals. The model below
-describes this branch; [product status](product-status.md) keeps it separate from
-the merged baseline and installed software.
+The [current integrated proposal](verification/coordinate-integrity-math-2026-11-12/README.md)
+combines visible-ground geometry, pixel density, zone area, projective calibration,
+image diagnostics and site-coordinate preservation. The model below describes
+this branch; [product status](product-status.md) separates it from merged source,
+installed software and physical qualification.
 
 ## Project the visible ground footprint
 
@@ -120,6 +121,77 @@ bind the correction to its source. The existing thresholds remain planning
 figures, not recognition guarantees. That earlier record retains its original
 radial-sector footprint. The current ground construction is described above;
 ideal optics, roll-free pose and flat ground require separate physical validation.
+
+## Preserve valid planar reference geometry
+
+A homography maps image points to a single measured plane using homogeneous
+coordinates: `s * [east, north, 1] = H * [u, v, 1]`. Multiplying all entries of
+`H` by the same nonzero number does not change that map. The
+[OpenCV explanation](https://docs.opencv.org/4.13.0/d9/dab/tutorial_homography.html)
+describes both bottom-right-entry and unit-Frobenius normalization.
+
+Forcing the denormalized bottom-right entry to one incorrectly refused the safe
+map `east = 1/u, north = v/u` on a reference square with `u` from 0.2 to 0.8.
+Its horizon at `u = 0` lies outside that working region. Calibration now keeps a
+unit-Frobenius matrix and uses scale-relative projection/horizon checks.
+Conversely, five or more references mapping to one ground line could previously
+produce tiny fitting and withheld errors while collapsing a ruler distance to
+zero. A ground-plane transform must also be nonsingular; residuals alone cannot
+establish that geometry. Checks operate in normalized coordinates so changing
+the local ground origin does not itself create a rank failure.
+
+The [calibration guide](facility-calibration.md) and
+[generated projective checks](verification/calibration-projective-math-2026-11-12/README.md)
+keep the independent-marker, operator-declaration, residual-tolerance and
+no-extrapolation gates. They do not establish physical marker accuracy, lens
+calibration, depth or survey acceptance.
+
+## Keep measured-plane queries inside their references
+
+A convex-hull orientation test uses the sign of
+`(ax-ox)*(by-oy) - (ay-oy)*(bx-ox)`. A fixed tolerance on that area-like quantity
+can admit outside points beside short edges and erase real small turns in the
+fitting hull. [Shewchuk's robustness research](https://www.cs.cmu.edu/~quake/robust.html)
+explains why determinant signs need care near zero.
+
+The v3 calibration boundary decodes each finite
+[ECMAScript binary64 number](https://tc39.es/ecma262/multipage/ecmascript-data-types-and-values.html#sec-ecmascript-language-types-number-type)
+as an integer times a power of two. It shifts the six coordinates to a common
+power-of-two grid and evaluates the determinant with BigInt. This is an original,
+always-exact sign implementation for represented inputs, rather than a port of
+Shewchuk's adaptive expansion code. Zero/duplicate coordinates are handled
+explicitly; malformed/sparse pairs are refused. The monotone-chain hull removes
+only true collinear or clockwise turns, and closed-boundary membership uses no
+outward epsilon. Calibration still enforces the existing reference-span, distinct
+withheld-marker, rank, horizon and operator-residual gates.
+
+The reproduced perspective example admitted an outside point near a short edge
+and returned about 153.648 m, despite tiny fitting and check residuals. The
+[integration record](verification/coordinate-integrity-math-2026-11-12/README.md)
+retains exact-rational membership truth, baseline failures and candidate replays.
+The predicate is exact for stored numbers; physical uncertainty and floating-point
+homography fitting remain separate.
+
+## Preserve map positions when correcting the site
+
+The facility grid uses longitude scaled by the cosine of its origin latitude.
+Changing from origin `(lon0,lat0)` to `(lon1,lat1)` while keeping geographic
+positions gives one affine map under that existing model:
+
+```text
+s  = cos(lat1) / cos(lat0)
+x' = s*x + (lon0-lon1)*111320*cos(lat1)
+y' = y   + (lat0-lat1)*111320
+```
+
+Cosines use latitude in radians; longitude/latitude differences use degrees.
+Applying one map avoids per-vertex geographic round trips and micrometre snapping
+that previously moved boundary rooms outside a rotated exterior wall. Aperture
+widths use the same linear map on wall-direction vectors before translation.
+Physical stair/camera sizes and poses retain their existing schema semantics;
+anchors move with the grid. The model is a local planning projection, not a
+survey or a globally exact geodesic transformation. The [operator guide](facility-builder.md)
+describes the explicit keep-position choice, refusal recovery and Undo.
 
 ## Choose a useful detection threshold
 
@@ -331,6 +403,51 @@ binding. The report's `input_binding` describes these semantics, without claimin
 an atomic multi-file snapshot or loaded-code provenance.
 [Generated replacement-race evidence](verification/evaluation-binding-2026-11-11/README.md)
 checks consistency independently of detection quality.
+
+## Normalize image edge strength
+
+The image laboratory uses the standard unscaled 3×3 horizontal and vertical
+[Sobel kernels and Euclidean gradient magnitude](https://docs.opencv.org/4.13.0/d2/d2c/tutorial_sobel_derivatives.html).
+This is a JavaScript calculation; it does not execute OpenCV's example pipeline,
+its additional blur, border padding or display conversion.
+
+For rounded 8-bit channel-weighted sRGB luma `I`, the kernels are:
+
+```text
+Kx = [-1 0 1; -2 0 2; -1 0 1]
+Ky = [-1 -2 -1; 0 0 0; 1 2 1]
+g  = sqrt((Kx · I)^2 + (Ky · I)^2)
+```
+
+The squared norm of this linear map is convex over `[0,255]^9`. Every patch is a
+convex combination of the cube's binary vertices, so its squared response is at
+most the largest vertex response. Exact integer enumeration of all 512 binary
+patches gives `max(g²) = 20 × 255² = 1,300,500`. The patch
+`[0 0 255; 0 0 255; 0 255 255]` attains it with gradients `(1020, 510)`.
+Thus the tight maximum is **`255 × √20`**, rather than the previous `4 × 255`.
+This bound is derived here; the linked reference supplies the kernels.
+
+Method `srgb-luma-sobel-max-v2` averages each interior centre's
+`sqrt((gx² + gy²) / (20 × 255²))`, then multiplies by 100. Normalizing before
+summation keeps the result within 0–100% without clipping. The bounded byte
+gradients and their squares are exact integers in JavaScript; square roots and
+averages retain floating-point roundoff. This is a mean of magnitudes, not RMS,
+not an edge fraction and not a calibrated sharpness or recognition score.
+
+An effective region of width `w` and height `h` supports
+`max(0,w-2) × max(0,h-2)` centres, each with its entire neighbourhood inside the
+region. No centres means **unavailable / JSON null**, while a supported flat
+region measures zero. The new [v2 export contract](facility-image-diagnostics.md#export-version-and-compatibility)
+preserves that distinction and identifies the changed scale. Other diagnostics
+and A/B difference thresholds retain their earlier definitions.
+
+The [independent verification](verification/image-diagnostics-math-2026-11-12/README.md)
+compares all binary patches plus generated grayscale, alpha, random-RGBA,
+ROI-boundary and thin-region cases against rational luma and high-precision
+kernel-dot-product calculations. The mathematical bound applies to every rounded
+luma-byte patch; the finite corpus is software regression evidence, not universal
+accuracy evidence for arbitrary malformed arrays, browser resizing, optical focus
+or physical cameras.
 
 ## Next experiments need independent observations
 

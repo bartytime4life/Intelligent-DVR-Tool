@@ -14,12 +14,12 @@ A local-first camera-analysis and facility-planning project from **BARTA AI Solu
 
 *The cover is an ImageGen illustration, not an application screenshot. The screenshots below are actual software with a clean local test session. [Image provenance](docs/media/guide/README.md).*
 
-**Current branch proposal:** [coherent ground visibility](docs/verification/ground-frustum-math-2026-11-12/README.md)
-retains low-wall shadows, visible ground beneath raised walls and steep rear views
-across the planner, metrics, rehearsal and installer. Pending or failed views
-withhold conclusions and offer retry. It integrates the unmerged pixel-density
-and zone-area proposals; [product status](docs/product-status.md) separates this
-work from merged and installed behavior.
+**Current branch proposal:** [verified planning mathematics and coordinate integrity](docs/verification/coordinate-integrity-math-2026-11-12/README.md)
+combines visible-ground geometry, pixel density, zone areas, projective calibration
+and image diagnostics. Site corrections preserve shared room walls when keeping
+map positions; the calibrated ruler refuses points outside its reference boundary.
+[Product status](docs/product-status.md) separates this tested proposal from merged
+source, installed software and physical-camera qualification.
 
 ## Choose a launch path
 

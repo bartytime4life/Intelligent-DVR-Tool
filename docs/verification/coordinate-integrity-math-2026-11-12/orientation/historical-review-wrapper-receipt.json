@@ -1,0 +1,21 @@
+{
+  "cases": 2707,
+  "assertions": 8132,
+  "failures": [],
+  "elapsedMs": 216.748728,
+  "timings": [
+    {
+      "kind": "typical",
+      "iterations": 1000,
+      "hullAndQueryMs": 60.129001
+    },
+    {
+      "kind": "wide-exponent",
+      "iterations": 1000,
+      "hullAndQueryMs": 138.575916
+    }
+  ],
+  "inputSha256": "053566499b241abc8a3135a4e9b0b3c6b046f2b64f5968ebbd3db9f032dba0a5",
+  "scriptSha256": "962c02f5af333794418b35d94f67f27cd2f701b065deecbc02ff93df480106ea",
+  "limits": "Prototype exact signs of represented binary64 inputs compared with independent Python Fraction arithmetic. Does not qualify homography solver, camera calibration or physical uncertainty."
+}

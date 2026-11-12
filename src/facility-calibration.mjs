@@ -1,6 +1,7 @@
 // Planar camera-frame -> facility ground-plane calibration.
 // Local, numeric, deterministic; not lens distortion, 3D depth, camera pose, or identity.
 // Image coordinates are fractions of the sampled raster; ground coordinates are metres east/north.
+import {finitePoint, orientationSign} from './planar-predicates.mjs';
 const DIM = 8;
 const EPS = 1e-11;
 const finite = n => typeof n === 'number' && Number.isFinite(n);
@@ -9,6 +10,26 @@ const multiply = (a,b) => Array.from({length:9}, (_,k)=>{
   const row=Math.floor(k/3),col=k%3;
   return a[row*3]*b[col]+a[row*3+1]*b[3+col]+a[row*3+2]*b[6+col];
 });
+function canonicalMatrix(matrix) {
+  if(!matrix.every(finite))return null;
+  const peak=Math.max(...matrix.map(Math.abs));
+  if(peak===0)return null;
+  // A homography is unchanged by any nonzero scalar. Do not choose h33 as
+  // its gauge: the image origin may be on the horizon outside the fit hull.
+  // Scale before the Frobenius norm to avoid squaring large/tiny coefficients.
+  const scaled=matrix.map(value=>value/peak),norm=Math.hypot(...scaled);
+  const sign=scaled.find(value=>Math.abs(value)===1)<0?-1:1;
+  return scaled.map(value=>value/(sign*norm));
+}
+function requireNonsingular(matrix) {
+  // Test in normalized image/ground coordinates, before world translation
+  // can make a valid transform's coefficient norm arbitrarily large.
+  const h=canonicalMatrix(matrix);
+  const det=h[0]*(h[4]*h[8]-h[5]*h[7])-h[1]*(h[3]*h[8]-h[5]*h[6])+
+    h[2]*(h[3]*h[7]-h[4]*h[6]);
+  if(Math.abs(det)<=128*Number.EPSILON)
+    throw new RangeError('The planar transform is singular or numerically rank deficient.');
+}
 
 function pair(value) {
   if (!value || !value.image || !value.ground) throw new RangeError('A point needs image and ground coordinates.');
@@ -65,24 +86,31 @@ function solveLeastSquares(rows, rhs) {
 export function projectGround(matrix, imagePoint) {
   if (!Array.isArray(matrix)||matrix.length!==9||!matrix.every(finite)||
       !Array.isArray(imagePoint)||imagePoint.length!==2||!imagePoint.every(finite)) return null;
-  const [x,y]=imagePoint,d=matrix[6]*x+matrix[7]*y+matrix[8];
-  if(!finite(d)||Math.abs(d)<1e-10)return null;
-  const point=[(matrix[0]*x+matrix[1]*y+matrix[2])/d,(matrix[3]*x+matrix[4]*y+matrix[5])/d];
+  const h=canonicalMatrix(matrix);
+  if(!h)return null;
+  const [x,y]=imagePoint,terms=[h[6]*x,h[7]*y,h[8]],d=terms.reduce((sum,value)=>sum+value,0);
+  const magnitude=terms.reduce((sum,value)=>sum+Math.abs(value),0);
+  // Reject cancellation near a horizon, not a harmless small global gauge.
+  if(!finite(d)||!finite(magnitude)||magnitude===0||Math.abs(d)<=magnitude*1e-10)return null;
+  const point=[(h[0]*x+h[1]*y+h[2])/d,(h[3]*x+h[4]*y+h[5])/d];
   return point.every(finite) ? point : null;
 }
-const cross=(o,a,b)=>(a[0]-o[0])*(b[1]-o[1])-(a[1]-o[1])*(b[0]-o[0]);
 function hull(points){
-  const sorted=points.map(p=>p.slice()).sort((a,b)=>a[0]-b[0]||a[1]-b[1]);
+  const ordered=points.map(p=>p.slice()).sort((a,b)=>a[0]-b[0]||a[1]-b[1]);
+  const sorted=ordered.filter((p,i)=>i===0||p[0]!==ordered[i-1][0]||p[1]!==ordered[i-1][1]);
   const lower=[],upper=[];
-  for(const p of sorted){while(lower.length>=2&&cross(lower.at(-2),lower.at(-1),p)<=EPS)lower.pop();lower.push(p);}
-  for(const p of sorted.slice().reverse()){while(upper.length>=2&&cross(upper.at(-2),upper.at(-1),p)<=EPS)upper.pop();upper.push(p);}
+  for(const p of sorted){while(lower.length>=2&&orientationSign(lower.at(-2),lower.at(-1),p)<=0)lower.pop();lower.push(p);}
+  for(const p of sorted.slice().reverse()){while(upper.length>=2&&orientationSign(upper.at(-2),upper.at(-1),p)<=0)upper.pop();upper.push(p);}
   return lower.slice(0,-1).concat(upper.slice(0,-1));
 }
 export function insideReferenceHull(point, vertices) {
-  if(!Array.isArray(point)||point.length!==2||!point.every(finite)||!Array.isArray(vertices)||vertices.length<3)return false;
+  if(!finitePoint(point)||!Array.isArray(vertices)||vertices.length<3)return false;
+  for(let i=0;i<vertices.length;i++)if(!finitePoint(vertices[i]))return false;
   const boundary=hull(vertices);
   if(boundary.length<3)return false;
-  return boundary.every((p,i)=>cross(p,boundary[(i+1)%boundary.length],point)>=-1e-9);
+  // Closed boundary of the represented coordinates; no area tolerance expands
+  // short edges or erases a real positive turn in the reference markers.
+  return boundary.every((p,i)=>orientationSign(p,boundary[(i+1)%boundary.length],point)>=0);
 }
 export function fitPlanarCalibration(references) {
   if(!Array.isArray(references)||references.length<4||references.length>24)throw new RangeError('Use 4 to 24 references.');
@@ -108,22 +136,24 @@ export function fitPlanarCalibration(references) {
       Math.abs(hull(src).reduce((sum,p,i,a)=>sum+p[0]*a[(i+1)%a.length][1]-p[1]*a[(i+1)%a.length][0],0))<1e-5)
     throw new RangeError('References must span a non-collinear portion of both planes.');
   const ns=normalize(src),nd=normalize(dst),rows=[],rhs=[];
+  if(hull(nd.points).length<3)
+    throw new RangeError('References must span a non-collinear portion of both planes.');
   for(let i=0;i<src.length;i++){
     const [u,v]=ns.points[i], [x,y]=nd.points[i];
     rows.push([u,v,1,0,0,0,-u*x,-v*x]);rhs.push(x);
     rows.push([0,0,0,u,v,1,-u*y,-v*y]);rhs.push(y);
   }
   const h=solveLeastSquares(rows,rhs),normal=[h[0],h[1],h[2],h[3],h[4],h[5],h[6],h[7],1];
-  let matrix=multiply(nd.inverse,multiply(normal,ns.forward));
-  if(!matrix.every(finite)||Math.abs(matrix[8])<EPS)throw new RangeError('The normalized transform is unbounded.');
-  matrix=matrix.map(v=>v/matrix[8]);
+  requireNonsingular(normal);
+  const matrix=canonicalMatrix(multiply(nd.inverse,multiply(normal,ns.forward)));
+  if(!matrix)throw new RangeError('The normalized transform is unbounded.');
   // The projective denominator is affine in image x/y. Its extrema on a
   // convex reference hull occur at vertices. A zero between the extrema
   // puts an invisible projective horizon inside the measured working area.
   const boundary=hull(src);
   const denominators=boundary.map(([x,y])=>matrix[6]*x+matrix[7]*y+matrix[8]);
   const minD=Math.min(...denominators),maxD=Math.max(...denominators);
-  const boundD=Math.max(Math.abs(minD),Math.abs(maxD),1);
+  const boundD=Math.max(Math.abs(minD),Math.abs(maxD));
   if((minD<=0&&maxD>=0)||Math.min(Math.abs(minD),Math.abs(maxD))<boundD*1e-7) {
     throw new RangeError('A projective horizon enters or approaches the reference area.');
   }
@@ -142,7 +172,7 @@ export function fitPlanarCalibration(references) {
   const checkInsideHull=checks.length>0 && checks.every(p=>insideReferenceHull(p.image,fittingHull));
   return {matrix,fit:summary(fitErrors),holdout:summary(checkErrors),
     fittingHull,fittingCount:fit.length,checkCount:checks.length,checkInsideHull,
-    verified:false, method:'normalized-householder-dlt-v1'};
+    verified:false, method:'normalized-householder-dlt-v3'};
 }
 export function calibratedGroundDistance(calibration,from,to) {
   if(!calibration || !Array.isArray(from)||!Array.isArray(to) ||

@@ -34,7 +34,7 @@ Later merged features are not pictured here: [guided training](https://github.co
 
 ![Original schematic of four fitted sample points and an independent check point on a measured ground plane.](https://raw.githubusercontent.com/wiki/bartytime4life/Intelligent-DVR-Tool/docs/media/current/facility-science.svg)
 
-Image diagnostics expose luma, histograms, clipping proxies, Sobel edge energy and A/B differences. The experimental planar ruler requires a measured common plane, at least four fitting markers and a withheld check inside the reference hull. It is not a 3D tracker, identity system or verified optical survey. [Image lab](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Image-diagnostics) · [Planar method](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Planar-calibration).
+Image diagnostics expose luma, histograms, clipping proxies, Sobel edge strength and A/B differences. The edge card shows its interior-pixel count and distinguishes unavailable support from measured zero; v2 metric exports identify the corrected normalization. The experimental planar ruler requires a measured common plane, at least four fitting markers and a withheld check inside the reference hull. It is not a 3D tracker, identity system or verified optical survey. [Image lab](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Image-diagnostics) · [Planar method](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Planar-calibration).
 
 ## Historical prototype captures
 

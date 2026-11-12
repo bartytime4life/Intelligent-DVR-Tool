@@ -1,0 +1,255 @@
+{
+  "schema": "dvr.measurement.reorigin-audit.v1",
+  "source_sha256": "1ef907792316c57251d5609b89cce27db79bea8721eee8842cd00d8c5cfcc33b",
+  "source_revision": "33fedd1bc364fc07cdb9331594aefef06bf52e6e",
+  "input_valid": true,
+  "expected_affine_plan_valid": true,
+  "candidate_plan_valid": false,
+  "candidateError": "Rooms must fit inside their building and reference an existing floor. Check room “A” in Workshop.",
+  "plan": {
+    "schema": "intelligent-dvr.facility.v6",
+    "name": "Generated rotated-room relocation",
+    "origin": [
+      -98,
+      38.5
+    ],
+    "buildings": [
+      {
+        "id": "b",
+        "name": "Workshop",
+        "footprint": [
+          [
+            300,
+            200
+          ],
+          [
+            312,
+            209
+          ],
+          [
+            306,
+            217
+          ],
+          [
+            294,
+            208
+          ],
+          [
+            300,
+            200
+          ]
+        ],
+        "height": 6,
+        "floors": 2
+      }
+    ],
+    "cameras": [],
+    "rooms": [
+      {
+        "id": "A",
+        "name": "A",
+        "buildingId": "b",
+        "level": 0,
+        "footprint": [
+          [
+            300,
+            200
+          ],
+          [
+            306,
+            204.5
+          ],
+          [
+            300,
+            212.5
+          ],
+          [
+            294,
+            208
+          ],
+          [
+            300,
+            200
+          ]
+        ],
+        "wallHeight": 2.8
+      },
+      {
+        "id": "B",
+        "name": "B",
+        "buildingId": "b",
+        "level": 0,
+        "footprint": [
+          [
+            306,
+            204.5
+          ],
+          [
+            312,
+            209
+          ],
+          [
+            306,
+            217
+          ],
+          [
+            300,
+            212.5
+          ],
+          [
+            306,
+            204.5
+          ]
+        ],
+        "wallHeight": 2.8
+      }
+    ],
+    "doorways": [],
+    "windows": [],
+    "labels": [],
+    "openings": [],
+    "stairs": [],
+    "paths": [],
+    "zones": [],
+    "route": []
+  },
+  "target": [
+    -97.99995,
+    38.50005
+  ],
+  "candidate": {
+    "schema": "intelligent-dvr.facility.v6",
+    "name": "Generated rotated-room relocation",
+    "origin": [
+      -97.99995,
+      38.50005
+    ],
+    "buildings": [
+      {
+        "id": "b",
+        "name": "Workshop",
+        "footprint": [
+          [
+            295.643798,
+            194.434
+          ],
+          [
+            307.643789,
+            203.434
+          ],
+          [
+            301.643794,
+            211.434
+          ],
+          [
+            289.643802,
+            202.434
+          ],
+          [
+            295.643798,
+            194.434
+          ]
+        ],
+        "height": 6,
+        "floors": 2
+      }
+    ],
+    "cameras": [],
+    "rooms": [
+      {
+        "id": "A",
+        "name": "A",
+        "buildingId": "b",
+        "level": 0,
+        "footprint": [
+          [
+            295.643798,
+            194.434
+          ],
+          [
+            301.643794,
+            198.934
+          ],
+          [
+            295.643798,
+            206.934
+          ],
+          [
+            289.643802,
+            202.434
+          ],
+          [
+            295.643798,
+            194.434
+          ]
+        ],
+        "wallHeight": 2.8
+      },
+      {
+        "id": "B",
+        "name": "B",
+        "buildingId": "b",
+        "level": 0,
+        "footprint": [
+          [
+            301.643794,
+            198.934
+          ],
+          [
+            307.643789,
+            203.434
+          ],
+          [
+            301.643794,
+            211.434
+          ],
+          [
+            295.643798,
+            206.934
+          ],
+          [
+            301.643794,
+            198.934
+          ]
+        ],
+        "wallHeight": 2.8
+      }
+    ],
+    "doorways": [],
+    "windows": [],
+    "labels": [],
+    "openings": [],
+    "stairs": [],
+    "paths": [],
+    "zones": [],
+    "route": []
+  },
+  "affine": {
+    "sx": 0.9999993058508325,
+    "dx": -4.355993977473448,
+    "dy": -5.566000000184772
+  },
+  "candidate_boundary": {
+    "afterEdge": [
+      [
+        295.643798,
+        194.434
+      ],
+      [
+        307.643789,
+        203.434
+      ]
+    ],
+    "afterMid": [
+      301.643794,
+      198.934
+    ],
+    "trueMid": [
+      301.6437935,
+      198.934
+    ],
+    "cross": 0.000004499999988638592,
+    "distance": 3.0000014324262176e-7
+  },
+  "scope": "Generated local planning geometry only; no physical source or camera. No source edits."
+}
