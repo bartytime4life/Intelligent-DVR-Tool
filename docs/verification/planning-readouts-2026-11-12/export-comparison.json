@@ -1,0 +1,37 @@
+{
+  "schema": "dvr.planning-readouts.export-comparison.v1",
+  "checks": {
+    "system-1440-setup-plan.json": {
+      "byte_identical": true,
+      "sha256": "ff46a615b812358d9dbb6cfa7a753bd4bfc2b65d00e9726ac3a67692268e3a36"
+    },
+    "system-1440-analyzer-policy.json": {
+      "byte_identical": true,
+      "sha256": "a0672f2f99c9c7e101341bac010344dec4b8691eabf6698b164a12bb04d83c5b"
+    },
+    "planning-1440-facility-plan.json": {
+      "byte_identical": true,
+      "sha256": "6824e8577690135be968f964a073affabdc8bbd921415f189c47d334520c2d0b"
+    },
+    "installer-1440-svg": {
+      "byte_identical": true,
+      "sha256": "e0512ba30a70ef579553a68326bdecd79c0af26e49d7116f16ebc5911f56fdfd"
+    },
+    "system-375-setup-plan.json": {
+      "byte_identical": true,
+      "sha256": "ff46a615b812358d9dbb6cfa7a753bd4bfc2b65d00e9726ac3a67692268e3a36"
+    },
+    "system-375-analyzer-policy.json": {
+      "byte_identical": true,
+      "sha256": "a0672f2f99c9c7e101341bac010344dec4b8691eabf6698b164a12bb04d83c5b"
+    },
+    "planning-375-facility-plan.json": {
+      "byte_identical": true,
+      "sha256": "6824e8577690135be968f964a073affabdc8bbd921415f189c47d334520c2d0b"
+    },
+    "installer-375-svg": {
+      "byte_identical": true,
+      "sha256": "e0512ba30a70ef579553a68326bdecd79c0af26e49d7116f16ebc5911f56fdfd"
+    }
+  }
+}

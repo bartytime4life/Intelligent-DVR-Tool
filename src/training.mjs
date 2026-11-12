@@ -129,14 +129,30 @@ export function labelFrames(frames, { script = TRAINING_SCRIPT, recordedSeconds,
   });
 }
 
+const timeBits = new DataView(new ArrayBuffer(8));
+function timeUlp(value) {
+  timeBits.setFloat64(0, Math.abs(value));
+  const exponent=(timeBits.getUint32(0) >>> 20) & 2047;
+  return exponent ? 2**(exponent-1075) : Number.MIN_VALUE;
+}
+function elapsedRelation(now, then, boundary) {
+  const elapsed=now-then;
+  // Same full-ULP sum and relative-resolution guard as edge/rules.py. This
+  // repairs representation/subtraction residue, not physical timing gaps.
+  const roundoff=timeUlp(now)+timeUlp(then)+timeUlp(boundary)+timeUlp(elapsed);
+  if(elapsed===boundary || boundary>0 && roundoff<=boundary*2**-26 &&
+      Math.abs(elapsed-boundary)<=roundoff)return 0;
+  return elapsed<boundary?-1:elapsed>boundary?1:NaN;
+}
+
 // Same semantics as edge/rules.py: a run continues while matches are at most maxGap apart.
 export function countObservations(labeled, threshold, { dwell = 1, maxGap = 2 } = {}) {
   let count = 0, start = null, last = null, emitted = false;
   for (const frame of labeled) {
     if (frame.score < threshold) continue;
-    if (start === null || frame.seconds - last > maxGap) { start = frame.seconds; emitted = false; }
+    if (start === null || elapsedRelation(frame.seconds, last, maxGap)>0) { start = frame.seconds; emitted = false; }
     last = frame.seconds;
-    if (!emitted && frame.seconds - start >= dwell) { count++; emitted = true; }
+    if (!emitted && elapsedRelation(frame.seconds, start, dwell)>=0) { count++; emitted = true; }
   }
   return count;
 }

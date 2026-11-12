@@ -1,0 +1,290 @@
+{
+  "schema": "dvr.planning-readouts.artifacts.v1",
+  "files": [
+    {
+      "path": "README.md",
+      "sha256": "f136b8f9a3a1d7ee5be2007114ba597df136a02ba778eef216d7db2706d2bcad",
+      "bytes": 5985
+    },
+    {
+      "path": "after/browser-results.json",
+      "sha256": "8580f6c704790c91b8781070bd022857e868feff4933a0f3a219923593fce774",
+      "bytes": 6053
+    },
+    {
+      "path": "after/browser-spec.mjs.txt",
+      "sha256": "72f05e5b90b9405f19d12e5393cb9599f814fa88b8e7742f3ea7e2e2b747a1f5",
+      "bytes": 7629
+    },
+    {
+      "path": "after/browser.log",
+      "sha256": "0b9ccfab3bb11d0cd531b9d86440649f4e7ae51b40bfb12f409536a11e5904ea",
+      "bytes": 814
+    },
+    {
+      "path": "after/planning-1440-facility-plan.json",
+      "sha256": "6824e8577690135be968f964a073affabdc8bbd921415f189c47d334520c2d0b",
+      "bytes": 715
+    },
+    {
+      "path": "after/planning-1440-installer-imperial.html",
+      "sha256": "f7397bf5ffbf6cede961ef1f5c4ef9dbf3a97e56ce71d157f4bd16ca7ec318ab",
+      "bytes": 7119
+    },
+    {
+      "path": "after/planning-1440-installer-metric.html",
+      "sha256": "e9786c5302d6b064b39b76db01694d09d7bcaf8e00c01912018f1624695acb9f",
+      "bytes": 7116
+    },
+    {
+      "path": "after/planning-1440-planning-observed.json",
+      "sha256": "d70ceefd72d9322dfb385686a094cab1bbcd1d923e0f212e767d042baf4e6311",
+      "bytes": 2263
+    },
+    {
+      "path": "after/planning-1440-planning-small-1440.png",
+      "sha256": "9d4ec4d2a34426b25bed5f128201ec2b0ee3fc0a7770ce5932e54f2a2d1babd4",
+      "bytes": 35476
+    },
+    {
+      "path": "after/planning-375-facility-plan.json",
+      "sha256": "6824e8577690135be968f964a073affabdc8bbd921415f189c47d334520c2d0b",
+      "bytes": 715
+    },
+    {
+      "path": "after/planning-375-installer-imperial.html",
+      "sha256": "4fb3f8d1541750770116ac0accd600024af9cb0accaa3cf31f7df8788ef0674b",
+      "bytes": 7119
+    },
+    {
+      "path": "after/planning-375-installer-metric.html",
+      "sha256": "4f8bf5bebfee3ba306686b979b571e74faab17863f37f6a888fcd4cebed978ab",
+      "bytes": 7116
+    },
+    {
+      "path": "after/planning-375-planning-observed.json",
+      "sha256": "d70ceefd72d9322dfb385686a094cab1bbcd1d923e0f212e767d042baf4e6311",
+      "bytes": 2263
+    },
+    {
+      "path": "after/planning-375-planning-small-375.png",
+      "sha256": "5769db54826e970fa8e5a0af7305f5a93dc28cadec1471ae2785f5e8c76573cb",
+      "bytes": 36342
+    },
+    {
+      "path": "after/system-1440-analyzer-policy.json",
+      "sha256": "a0672f2f99c9c7e101341bac010344dec4b8691eabf6698b164a12bb04d83c5b",
+      "bytes": 382
+    },
+    {
+      "path": "after/system-1440-setup-plan-04.json",
+      "sha256": "3521aec4127093dfbf8eeb093d89f7f6dec15c12af782172a5634f4dad6cf05d",
+      "bytes": 940
+    },
+    {
+      "path": "after/system-1440-setup-plan.json",
+      "sha256": "ff46a615b812358d9dbb6cfa7a753bd4bfc2b65d00e9726ac3a67692268e3a36",
+      "bytes": 941
+    },
+    {
+      "path": "after/system-1440-system-observed.json",
+      "sha256": "0ed5ee1b19ddfb36550dc9032edbf270b2b2fb3d934497b7575433242cb641ab",
+      "bytes": 2057
+    },
+    {
+      "path": "after/system-1440-system-small-1440.png",
+      "sha256": "1b43f3d6ce6f125b554c2b8fdbb6fc5c6adeaaeb091d89ee7e30a5ace0b44d36",
+      "bytes": 8384
+    },
+    {
+      "path": "after/system-375-analyzer-policy.json",
+      "sha256": "a0672f2f99c9c7e101341bac010344dec4b8691eabf6698b164a12bb04d83c5b",
+      "bytes": 382
+    },
+    {
+      "path": "after/system-375-setup-plan-04.json",
+      "sha256": "3521aec4127093dfbf8eeb093d89f7f6dec15c12af782172a5634f4dad6cf05d",
+      "bytes": 940
+    },
+    {
+      "path": "after/system-375-setup-plan.json",
+      "sha256": "ff46a615b812358d9dbb6cfa7a753bd4bfc2b65d00e9726ac3a67692268e3a36",
+      "bytes": 941
+    },
+    {
+      "path": "after/system-375-system-observed.json",
+      "sha256": "e9c52215d6d31652f6383ea0698de43c936effe4d9b5eeddbc9acdb912aa3c36",
+      "bytes": 2057
+    },
+    {
+      "path": "after/system-375-system-small-375.png",
+      "sha256": "04eee0fee74c128f68387ee6695cd197b82681cd5633caf447b5c0ef3e2058e7",
+      "bytes": 11264
+    },
+    {
+      "path": "before/browser-results.json",
+      "sha256": "db2358b3f012761bbd95b63b563036f271140600e9eecede17770d9bae91aa24",
+      "bytes": 29126
+    },
+    {
+      "path": "before/browser-spec.mjs.txt",
+      "sha256": "3584d6eaf23abdc3b3a115707021ef8a35511b7ed9a0991f4cded8fb84c70bbe",
+      "bytes": 7418
+    },
+    {
+      "path": "before/browser.log",
+      "sha256": "16a13e8cca5989d833bdf20d3690707260bc28a8bb14cf06ef5db6faccd3db56",
+      "bytes": 13568
+    },
+    {
+      "path": "before/planning-1440-facility-plan.json",
+      "sha256": "6824e8577690135be968f964a073affabdc8bbd921415f189c47d334520c2d0b",
+      "bytes": 715
+    },
+    {
+      "path": "before/planning-1440-installer-metric.html",
+      "sha256": "09d616953f4f6ac6f1661d9d1bd94b4c4a28543b9327133eb96c308412386c1f",
+      "bytes": 7112
+    },
+    {
+      "path": "before/planning-1440-planning-observed.json",
+      "sha256": "4cf255326b22550ccd5acc2a7bb6af1a06a573e36711ecf961b47fe112db0bcd",
+      "bytes": 2260
+    },
+    {
+      "path": "before/planning-1440-planning-small-1440.png",
+      "sha256": "7debc153c178107f91fde35d9630fea0431b74b9039e1b5d16d9290f6823f0d3",
+      "bytes": 34785
+    },
+    {
+      "path": "before/planning-375-facility-plan.json",
+      "sha256": "6824e8577690135be968f964a073affabdc8bbd921415f189c47d334520c2d0b",
+      "bytes": 715
+    },
+    {
+      "path": "before/planning-375-installer-metric.html",
+      "sha256": "84b734f927c81972085ae5df140229eb69b44a644feb8177f2d2ca818957fdca",
+      "bytes": 7112
+    },
+    {
+      "path": "before/planning-375-planning-observed.json",
+      "sha256": "4cf255326b22550ccd5acc2a7bb6af1a06a573e36711ecf961b47fe112db0bcd",
+      "bytes": 2260
+    },
+    {
+      "path": "before/planning-375-planning-small-375.png",
+      "sha256": "d0dd9701e9ab1d93d2fd14fee2e04208b1fef5df18fe4eb1509e2400246d3af1",
+      "bytes": 35692
+    },
+    {
+      "path": "before/system-1440-analyzer-policy.json",
+      "sha256": "a0672f2f99c9c7e101341bac010344dec4b8691eabf6698b164a12bb04d83c5b",
+      "bytes": 382
+    },
+    {
+      "path": "before/system-1440-setup-plan.json",
+      "sha256": "ff46a615b812358d9dbb6cfa7a753bd4bfc2b65d00e9726ac3a67692268e3a36",
+      "bytes": 941
+    },
+    {
+      "path": "before/system-1440-system-observed.json",
+      "sha256": "b954f429e04bfc2829bb6bc44d59579266b3d56a9dcce9d50dfa5d0d3c6636ff",
+      "bytes": 1965
+    },
+    {
+      "path": "before/system-1440-system-small-1440.png",
+      "sha256": "93b5253b2e1562f065902ff8aa3e9d26c0ce8b284b75d590f1eb963c012f3fcc",
+      "bytes": 8257
+    },
+    {
+      "path": "before/system-375-analyzer-policy.json",
+      "sha256": "a0672f2f99c9c7e101341bac010344dec4b8691eabf6698b164a12bb04d83c5b",
+      "bytes": 382
+    },
+    {
+      "path": "before/system-375-setup-plan.json",
+      "sha256": "ff46a615b812358d9dbb6cfa7a753bd4bfc2b65d00e9726ac3a67692268e3a36",
+      "bytes": 941
+    },
+    {
+      "path": "before/system-375-system-observed.json",
+      "sha256": "b954f429e04bfc2829bb6bc44d59579266b3d56a9dcce9d50dfa5d0d3c6636ff",
+      "bytes": 1965
+    },
+    {
+      "path": "before/system-375-system-small-375.png",
+      "sha256": "f8860f3dfef508e153ee6fc4f28dc80391b20b9075f4b6586bb5dd4f343a67b3",
+      "bytes": 10436
+    },
+    {
+      "path": "export-comparison.json",
+      "sha256": "d5093535eedfaa07b3800fdbef02959720bdfc2422b1b54273fa25661607ac39",
+      "bytes": 1333
+    },
+    {
+      "path": "frozen/FacilityBuilder.jsx",
+      "sha256": "bf96ab4c0d75f92d5ea6562d84f6640850cc9c46564f3bfd92954df40f6fb4bb",
+      "bytes": 105792
+    },
+    {
+      "path": "frozen/SystemSetup.jsx",
+      "sha256": "408ee697b36cc304c9042b9bbdbf3dd26c77892d0bced71f68e3973b5be51e19",
+      "bytes": 20915
+    },
+    {
+      "path": "frozen/before.json",
+      "sha256": "1243eeae6414b64904d73b48ce14e70db4c2acbb2f14a158fba996b5e322617d",
+      "bytes": 4539
+    },
+    {
+      "path": "frozen/facility-installer.mjs",
+      "sha256": "92704eae223955f72388e8ee76a91f01c2efccffd8ee336ed04caabe1d181878",
+      "bytes": 10738
+    },
+    {
+      "path": "frozen/facility-measurements.mjs",
+      "sha256": "79b9e46f965ef8d6c0653b3b4f7ef0c3eda50c34892a38cdcf3caf4ce5882431",
+      "bytes": 9119
+    },
+    {
+      "path": "frozen/inputs.json",
+      "sha256": "e4affd3a11d8d25fe88a99e443070fca943161f9c761c3e8e3aecdcb653f19f0",
+      "bytes": 2052
+    },
+    {
+      "path": "frozen/manifest.json",
+      "sha256": "61dc87795038cee4a29f688db7787a926cc01fc9715a1873e911708cddcd9062",
+      "bytes": 1198
+    },
+    {
+      "path": "frozen/resources.mjs",
+      "sha256": "fe176b58fc29107a53ebf54f20114f9dc721471c70cc4317fba032eea821b6c1",
+      "bytes": 10135
+    },
+    {
+      "path": "node-checks.log",
+      "sha256": "8ccefa7fede8cf4290dbca9f1535b78f2eb77d01786b970766355c959291cb84",
+      "bytes": 14792
+    },
+    {
+      "path": "proof.json",
+      "sha256": "6199ca4a1b84b814fda69c7bfed1420bd3e9aa203fae6616830ddf78346e6f34",
+      "bytes": 2201
+    },
+    {
+      "path": "replay.mjs",
+      "sha256": "7f5b45d6101843b89357c6eeaa6b82e8b6e75e586bc6cfa2e738700ed35066e5",
+      "bytes": 5730
+    },
+    {
+      "path": "source-manifest.json",
+      "sha256": "09840490e372234d21dcf0c56c7bdab10ad23e82a63349b46a029ed54fb6a80e",
+      "bytes": 4827
+    },
+    {
+      "path": "validation.json",
+      "sha256": "3dc50afe7639d2af8a94bd3a44db42ec1db4333f447f5b1e58df640677fb5861",
+      "bytes": 2086
+    }
+  ]
+}

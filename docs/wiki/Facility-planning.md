@@ -269,6 +269,14 @@ recognition-quality claim.
   floating-point tolerance, but the result remains an estimate of the drawn
   ground plane, not calibrated visibility. The separate rehearsal below uses
   sampled, simulated handoff proposals. [Mathematics and generated checks](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/route-coverage-math-2026-11-12/README.md).
+  Coverage and overlap read **<0.1%** or **>99.9%** when a small positive fraction
+  or a fraction just below complete would otherwise round to an endpoint. Only
+  calculated fractions exactly zero or one display **0.0%** or **100.0%**.
+  Small positive lengths and areas retain a nonzero readout: a 4 cm route gap is
+  **0.04 m**, rather than **0.0 m**. The map, dimensional summaries and printable
+  installer sheet use the same distance formatting; short installer ground
+  intervals keep their two endpoints distinct. Plan JSON retains the original
+  coordinates and values. These display rules do not increase planning accuracy.
 - **Direct manipulation.** Dragging the selected camera (mouse or touch) or its
   round heading handle previews its position on the map; release, Alt+Arrow and
   `[` / `]` change only the unsaved draft. Save camera commits, Discard preview

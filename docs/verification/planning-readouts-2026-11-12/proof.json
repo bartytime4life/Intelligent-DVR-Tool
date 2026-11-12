@@ -1,0 +1,71 @@
+{
+  "schema": "dvr.planning-readouts.replay.v1",
+  "baseline_revision": "6ce57a5180655693f7d3d6d2e91d8c68693f1961",
+  "frozen_manifest_sha256": "61dc87795038cee4a29f688db7787a926cc01fc9715a1873e911708cddcd9062",
+  "source": {
+    "readout-format.mjs": "ed487cfae16ab17c6810f4b27ddba6d9fa026c7d05e18d1148f036dc7a24f676",
+    "SystemSetup.jsx": "7cd4431db644312228b32e8b0ac24b2b4fee9b87c13c717b45c6b64409086e29",
+    "FacilityBuilder.jsx": "a977925828a29060e4c9930fd7e2d4ab608eda350d6cad1cf4bcc1fdc4ba8b29",
+    "facility-measurements.mjs": "a3e512652de0e21c1dbc435d5a1aeb336e4612f7553b92721a2568308897ce85",
+    "facility-installer.mjs": "abb636b454fec778f8f1f6329cdbc33374aa9ad00708bfc5a9db2c34b080a779",
+    "FacilityStairs.jsx": "4393e1319c96231992c789c5154bab041f6a847b1b403d4a1b40ffed528fc2e7"
+  },
+  "system": {
+    "neededTB": {
+      "value": 0.000108,
+      "before": "0",
+      "after": "0.0001"
+    },
+    "ingressMbps": {
+      "value": 0.01,
+      "before": "0",
+      "after": "0.01"
+    },
+    "writeMBps": {
+      "value": 0.00125,
+      "before": "0",
+      "after": "0.001"
+    },
+    "perDriveTBYear": {
+      "value": 0.005912999999999999,
+      "before": "0",
+      "after": "0.01"
+    },
+    "workingGiB": {
+      "value": 0.017578125,
+      "before": "0",
+      "after": "0.02"
+    },
+    "availableGiB": {
+      "value": 0.0009999999999998899,
+      "before": "0",
+      "after": "0.001"
+    },
+    "gpuEstimatedGiB": {
+      "value": 0.00555419921875,
+      "before": "0",
+      "after": "0.01"
+    },
+    "gpuAvailableGiB": {
+      "value": 0.0010000000000000009,
+      "before": "0",
+      "after": "0.001"
+    }
+  },
+  "route": {
+    "coverage": 0.9996667777407532,
+    "uncoveredMetres": 0.03999999999999914,
+    "beforePercent": "100.0%",
+    "afterPercent": ">99.9%",
+    "beforeGap": "0.0 m",
+    "afterGap": "0.04 m"
+  },
+  "zone": {
+    "coverage": 0.9998999999999972,
+    "uncoveredSquareMetres": 0.0010000000000273679,
+    "beforePercent": "100.0%",
+    "afterPercent": ">99.9%"
+  },
+  "method": "Display-only checks against captured formatter source and independent rational planning inputs; generated software evidence, not physical accuracy.",
+  "passed": true
+}

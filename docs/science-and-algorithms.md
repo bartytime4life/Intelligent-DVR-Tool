@@ -11,6 +11,24 @@ image diagnostics and site-coordinate preservation. The model below describes
 this branch; [product status](product-status.md) separates it from merged source,
 installed software and physical qualification.
 
+## Preserve the meaning of planning readouts
+
+Display precision must not erase a calculated nonzero amount or turn a fraction
+below one into complete coverage. System and facility scalar labels keep their
+ordinary precision, increasing decimals only when rounding would erase a
+nonzero value or its sign. Precision is bounded at 12 fractional digits, then a
+compact scientific label is used. Exact signed zero displays as ordinary zero;
+nonfinite or invalid quantities are withheld with **—**.
+
+For coverage and overlap, a positive fraction that would round to **0.0%** reads
+**<0.1%**; a fraction below one that would round to **100.0%** reads **>99.9%**.
+These strict inequalities also cover the smallest positive represented fraction
+and the represented value immediately below one. Distance intervals retain
+their separate endpoints in the selected metres/feet units. The formatting
+changes neither the numerical models nor exported setup/plan JSON. More visible
+decimals are not additional physical precision. See the
+[generated counterexamples and browser/export checks](verification/planning-readouts-2026-11-12/README.md).
+
 ## Project the visible ground footprint
 
 An ideal pinhole camera has a rectangular image plane. Intersecting that view
@@ -192,6 +210,42 @@ Physical stair/camera sizes and poses retain their existing schema semantics;
 anchors move with the grid. The model is a local planning projection, not a
 survey or a globally exact geodesic transformation. The [operator guide](facility-builder.md)
 describes the explicit keep-position choice, refusal recovery and Undo.
+
+## Compare sampled rule times at their numerical resolution
+
+An exact 0.2-second cadence can produce `0.8 - 0.6 = 0.20000000000000007` in
+binary64. Strict subtraction previously reset a valid presence run at a 0.2-second
+maximum gap; at 25 FPS with stride 5, a generated continuous run emitted no
+observation instead of one at 1 second. The same issue affected the browser
+training counter. Decimal representation and per-operation rounding are described
+in the [Python floating-point reference](https://docs.python.org/3.12/tutorial/floatingpoint.html).
+
+The Python rule engine and JavaScript counter now use the same left-associated
+full-ULP budget, where ULP is the spacing described by
+[`math.ulp`](https://docs.python.org/3.12/library/math.html#math.ulp):
+
+```text
+elapsed = now - then
+roundoff = ((ulp(now) + ulp(then)) + ulp(boundary)) + ulp(elapsed)
+```
+
+A comparison coalesces to equality only for a positive boundary, a difference no
+greater than `roundoff`, and `roundoff <= boundary * 2**-26`. Exact equality still
+holds. The relative-resolution guard is a declared numerical policy, limiting
+any forgiven difference to about 1.49e-8 of the configured interval. Coarse clocks,
+zero boundaries and intervals whose cap underflows retain strict comparisons.
+There is no fixed millisecond grace period. This treats representation residue;
+it cannot recover physical time or clock uncertainty from underresolved numbers.
+
+An independently frozen exact-rational corpus has 1,579 runs/54,614 samples, plus
+nine invalid-input/recovery cases. The original Python engine fails 822 of 1,597
+assertions; the candidate passes all. The original JavaScript counter fails 716
+of 1,579 count checks; the candidate passes all. The APIs expose different results,
+so these totals must not be added into a footage-quality claim. The
+[timing record](verification/rule-time-boundaries-2026-11-12/README.md) preserves
+both baselines, unchanged checkers, extreme-clock ambiguity and normal generated
+CPU analyzer/review/evaluation checks. The changed rule-engine hash requires new
+traces for current evaluation; historical evidence must retain its original hash.
 
 ## Choose a useful detection threshold
 

@@ -23,7 +23,7 @@
     }
   ],
   "run_id": "03e1b4e50430695f74d45b5662ffb3ed98694f59697e8aef78f930756b94e1b4",
-  "rule_engine_sha256": "b6614c4a3a36e726beadbf5d444fbf8b78c5d40a844bc4ac77b468b6ea2a74fb",
+  "rule_engine_sha256": "6151670cdf8c9837c274150b51589e44043993fdb576b9706ba1ac21d39f10da",
   "camera": "synthetic-camera",
   "frames_read": 4,
   "fps_metadata": 1,

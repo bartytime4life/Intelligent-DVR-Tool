@@ -138,6 +138,14 @@ inside endpoint recovers. A withheld check outside the boundary keeps it locked.
 The explicit site correction preserves shared room boundaries, supports Undo and
 survives reload. [Site-origin choices](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Facility-planning).
 
+## November 12 proposal · small planning values
+
+[Reviewed phone and desktop captures](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/planning-readouts-2026-11-12/README.md#checks-and-actual-exports)
+show a 0.01 Mbit/s System plan, a 4 cm route gap and an incomplete zone with a
+positive blind polygon. The record binds actual before/after downloads and
+unchanged numeric plans. Additional digits and endpoint bounds describe the
+planning calculation; they do not establish hardware or site accuracy.
+
 ## Keep the work
 
 ![Separate browser exports, private local folders and an outside verified backup.](https://raw.githubusercontent.com/wiki/bartytime4life/Intelligent-DVR-Tool/docs/media/guide/preserve.svg)

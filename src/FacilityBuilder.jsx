@@ -54,6 +54,7 @@ import {stairAtStart,suggestedStair,stairPlacementIssue} from './facility-stair-
 import {addBuildingLevel} from './facility.mjs';
 import {unitFactor, displayLength, unitLabel, enteredLength, localizeLengths, nextBuildingName, rotateShape, shapeBounds, suggestBuildingOffset, translateShape} from './facility-shape-edit.mjs';
 import {formatDistance, formatDistanceRange, formatArea} from './facility-measurements.mjs';
+import {formatCoveragePercent,formatReadoutNumber} from './readout-format.mjs';
 import {createFloorOpening,createFloorPath,snapToBuilding,solidSpaceProblem,applyBuildingEdit,buildingMotion,fittingRectangle,reoriginPlan,SNAP_TOLERANCE} from './facility.mjs';
 import {backdropDismiss} from './dialog-dismiss.mjs';
 import FacilityLevels from './FacilityLevels.jsx';
@@ -1117,7 +1118,7 @@ Kept as separate tracks."} This does not verify identity.</p>}</div>) : <p class
     {sketchOpen && b && <RoomSketch plan={plan} building={b} level={floor} units={units} onUnits={setUnits} onSave={saveSketch} error={error} onClose={closeSketch}/>}<>{pasteOpen && <PlanPasteDialog close={() => setPasteOpen(false)} onImport={text=>onImportFacilities(text)} onDirtyChange={onImportDraftChange} />}</><input ref={input} hidden type="file" accept=".json,application/json" aria-label="Import facility plan" onChange={importFile} />
   </section></MeasurementUnits.Provider>;
 }
-const percent = v => `${(Math.round(v * 1000) / 10).toFixed(1)}%`;
+const percent = formatCoveragePercent;
 // Pixel density bands for the draft camera; nothing is shown until a horizontal resolution is entered.
 function PixelDensity({ camera, units }) {
   const bands = doriDistances(camera);
@@ -1126,7 +1127,7 @@ function PixelDensity({ camera, units }) {
   return <div className="facility-dori" role="group" aria-label="Pixel density estimate">
     <p className="facility-dori-note"><WarningCircle size={15} />{DORI_NOTE}</p>
     <table><thead><tr><th scope="col">Band</th><th scope="col">≥ px/m</th><th scope="col">Centreline ground range</th></tr></thead><tbody>{bands.map(band => <tr key={band.id}><th scope="row"><i style={{ background: band.color }} />{band.name}</th><td>{band.ppm}</td><td>{band.reached ? <>{formatDistanceRange(band.from, band.to, units)}{band.limited && <small> · view limit</small>}</> : 'Not reached'}</td></tr>)}</tbody></table>
-    <p className="facility-caption">Estimated horizontal detail across the ground, perpendicular to the camera’s bearing. Ranges run forward from the mount along that bearing within the modeled view, before wall shadows.{farDensity !== null && <> About {Math.round(farDensity)} px/m at the far centreline limit.</>} Colored lines mark thresholds inside the estimated ground view, including off-axis areas. IEC 62676-4 figures are planning thresholds; verify detail on site.</p>
+    <p className="facility-caption">Estimated horizontal detail across the ground, perpendicular to the camera’s bearing. Ranges run forward from the mount along that bearing within the modeled view, before wall shadows.{farDensity !== null && <> About {formatReadoutNumber(farDensity,{digits:0})} px/m at the far centreline limit.</>} Colored lines mark thresholds inside the estimated ground view, including off-axis areas. IEC 62676-4 figures are planning thresholds; verify detail on site.</p>
   </div>;
 }
 function CoverageMetrics({ metrics, blindZone, onBlindZone, blindSpots, dirty, units }) {

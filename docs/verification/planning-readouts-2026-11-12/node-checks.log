@@ -1,0 +1,345 @@
+TAP version 13
+# Subtest: short positive planning ranges remain visible in metres and feet
+ok 1 - short positive planning ranges remain visible in metres and feet
+  ---
+  duration_ms: 9.876041
+  ...
+# Subtest: blind-spot map geometry keeps holes and separate components, and clears unavailable results
+ok 2 - blind-spot map geometry keeps holes and separate components, and clears unavailable results
+  ---
+  duration_ms: 1.006641
+  ...
+# Subtest: polygon measurements subtract courtyards and count their boundaries
+ok 3 - polygon measurements subtract courtyards and count their boundaries
+  ---
+  duration_ms: 0.266441
+  ...
+# Subtest: line lengths use actual segments, including diagonals and open paths
+ok 4 - line lengths use actual segments, including diagonals and open paths
+  ---
+  duration_ms: 0.151525
+  ...
+# Subtest: imperial display converts length and area independently
+ok 5 - imperial display converts length and area independently
+  ---
+  duration_ms: 0.355859
+  ...
+# Subtest: labels include selected polygon, courtyards and complete route total
+ok 6 - labels include selected polygon, courtyards and complete route total
+  ---
+  duration_ms: 1.10226
+  ...
+# Subtest: map label budget holds for maximum route and polygon sizes
+ok 7 - map label budget holds for maximum route and polygon sizes
+  ---
+  duration_ms: 4.517186
+  ...
+# Subtest: floor measurement labels exclude rooms belonging to another building
+ok 8 - floor measurement labels exclude rooms belonging to another building
+  ---
+  duration_ms: 0.157115
+  ...
+# Subtest: floor-scoped zone measurements are hidden outside their matching floor
+ok 9 - floor-scoped zone measurements are hidden outside their matching floor
+  ---
+  duration_ms: 0.651633
+  ...
+# Subtest: floor slab area subtracts only openings on the selected level
+ok 10 - floor slab area subtracts only openings on the selected level
+  ---
+  duration_ms: 1.294542
+  ...
+# Subtest: stair measurement summary reports footprint size and actual modeled rise
+ok 11 - stair measurement summary reports footprint size and actual modeled rise
+  ---
+  duration_ms: 0.628621
+  ...
+# Subtest: floor paths retain per-segment and total distance only on their own floor
+ok 12 - floor paths retain per-segment and total distance only on their own floor
+  ---
+  duration_ms: 0.266681
+  ...
+# Subtest: floor path ribbons stay bounded to segment count and ignore duplicate points
+ok 13 - floor path ribbons stay bounded to segment count and ignore duplicate points
+  ---
+  duration_ms: 0.152637
+  ...
+# Subtest: a wholly open floor has no misleading slab area or edge measurements
+ok 14 - a wholly open floor has no misleading slab area or edge measurements
+  ---
+  duration_ms: 0.358333
+  ...
+# Subtest: floor display preserves the slab below while the drawing view has one flat coordinate plane
+ok 15 - floor display preserves the slab below while the drawing view has one flat coordinate plane
+  ---
+  duration_ms: 0.180889
+  ...
+# Subtest: floor rendering clamps a stale level when a building loses upper floors
+ok 16 - floor rendering clamps a stale level when a building loses upper floors
+  ---
+  duration_ms: 0.05896
+  ...
+# Subtest: small-geometry labels retain selected summary and suppress colliding edges
+ok 17 - small-geometry labels retain selected summary and suppress colliding edges
+  ---
+  duration_ms: 0.166363
+  ...
+# Subtest: selected polygon and floor path summaries are marked as required
+ok 18 - selected polygon and floor path summaries are marked as required
+  ---
+  duration_ms: 0.369955
+  ...
+# Subtest: retained cutouts do not display measurements while their entire floor is open
+ok 19 - retained cutouts do not display measurements while their entire floor is open
+  ---
+  duration_ms: 0.314842
+  ...
+# Subtest: legacy facilities gain empty zones and current zones round trip without URLs or arbitrary metadata
+ok 20 - legacy facilities gain empty zones and current zones round trip without URLs or arbitrary metadata
+  ---
+  duration_ms: 3.55074
+  ...
+# Subtest: zones reject invalid IDs, polygons, class inventories, type, dwell, floor and image rules
+ok 21 - zones reject invalid IDs, polygons, class inventories, type, dwell, floor and image rules
+  ---
+  duration_ms: 1.714841
+  ...
+# Subtest: indoor zones require solid modeled floor space and a valid level
+ok 22 - indoor zones require solid modeled floor space and a valid level
+  ---
+  duration_ms: 0.775537
+  ...
+# Subtest: add-top-level keeps earlier floor and room elevations, base, footprint and source metadata
+ok 23 - add-top-level keeps earlier floor and room elevations, base, footprint and source metadata
+  ---
+  duration_ms: 1.088214
+  ...
+# Subtest: copy rooms upstairs preserves geometry and creates independent IDs, while refusing collisions and limits
+ok 24 - copy rooms upstairs preserves geometry and creates independent IDs, while refusing collisions and limits
+  ---
+  duration_ms: 1.021028
+  ...
+# Subtest: restricted rules and unexpected-class rules use explicit matching-camera image bounds
+ok 25 - restricted rules and unexpected-class rules use explicit matching-camera image bounds
+  ---
+  duration_ms: 0.445657
+  ...
+# Subtest: replacing a facility clears zones while appending retains them
+ok 26 - replacing a facility clears zones while appending retains them
+  ---
+  duration_ms: 4.652609
+  ...
+# Subtest: v3 protects independent slab openings while accepting earlier plans without advanced shapes
+ok 27 - v3 protects independent slab openings while accepting earlier plans without advanced shapes
+  ---
+  duration_ms: 0.621558
+  ...
+# Subtest: floor openings reject invalid floors, overlap, courtyard crossings and touching outer walls
+ok 28 - floor openings reject invalid floors, overlap, courtyard crossings and touching outer walls
+  ---
+  duration_ms: 1.154028
+  ...
+# Subtest: opening and camera IDs share a namespace and room copying does not duplicate slab openings
+ok 29 - opening and camera IDs share a namespace and room copying does not duplicate slab openings
+  ---
+  duration_ms: 0.72427
+  ...
+# Subtest: stairs persist bounded physical parameters and reject invalid floors or courtyard footprint
+ok 30 - stairs persist bounded physical parameters and reject invalid floors or courtyard footprint
+  ---
+  duration_ms: 1.486412
+  ...
+# Subtest: per-floor pathways stay within solid floor and reject concave shortcuts and missing levels
+ok 31 - per-floor pathways stay within solid floor and reject concave shortcuts and missing levels
+  ---
+  duration_ms: 1.236823
+  ...
+# Subtest: whole open levels omit their slabs and open only the corresponding ceiling below
+ok 32 - whole open levels omit their slabs and open only the corresponding ceiling below
+  ---
+  duration_ms: 0.20773
+  ...
+# Subtest: open level inventories reject duplicates, invalid levels and schema downgrades; paths need solid floors
+ok 33 - open level inventories reject duplicates, invalid levels and schema downgrades; paths need solid floors
+  ---
+  duration_ms: 0.525367
+  ...
+# Subtest: opening and pathway helpers retain exact converted imperial dimensions without centimetre snapping
+ok 34 - opening and pathway helpers retain exact converted imperial dimensions without centimetre snapping
+  ---
+  duration_ms: 0.269417
+  ...
+# Subtest: DORI centreline intervals use camera-axis depth and agree with projected steep-camera targets
+ok 35 - DORI centreline intervals use camera-axis depth and agree with projected steep-camera targets
+  ---
+  duration_ms: 1.475151
+  ...
+# Subtest: DORI density agrees with projected targets across supported optical bounds and tilt
+ok 36 - DORI density agrees with projected targets across supported optical bounds and tilt
+  ---
+  duration_ms: 1.32014
+  ...
+# Subtest: DORI rejects invalid optical drafts and map poses without NaN or infinity
+ok 37 - DORI rejects invalid optical drafts and map poses without NaN or infinity
+  ---
+  duration_ms: 0.38873
+  ...
+# Subtest: DORI threshold contact has no positive interval while a positive band and view limit are retained
+ok 38 - DORI threshold contact has no positive interval while a positive band and view limit are retained
+  ---
+  duration_ms: 0.114916
+  ...
+# Subtest: DORI contours are straight projected-density limits clipped to fans and wall shadows
+ok 39 - DORI contours are straight projected-density limits clipped to fans and wall shadows
+  ---
+  duration_ms: 0.663817
+  ...
+# Subtest: DORI contour clipping preserves concave splits, closed edges, small gaps and zero-measure tangencies
+ok 40 - DORI contour clipping preserves concave splits, closed edges, small gaps and zero-measure tangencies
+  ---
+  duration_ms: 0.244008
+  ...
+# Subtest: DORI contours obey both sensor dimensions even when a supplied fan extends beyond them
+ok 41 - DORI contours obey both sensor dimensions even when a supplied fan extends beyond them
+  ---
+  duration_ms: 0.128932
+  ...
+# Subtest: DORI retains rear contour fragments when the forward centreline band has zero length
+ok 42 - DORI retains rear contour fragments when the forward centreline band has zero length
+  ---
+  duration_ms: 1.044812
+  ...
+# Subtest: DORI contour fragments are invariant under winding, rotation and translated camera poses
+ok 43 - DORI contour fragments are invariant under winding, rotation and translated camera poses
+  ---
+  duration_ms: 0.37263
+  ...
+# Subtest: coverage metrics integrate shared cached fans by area, including overlap and blind polygons
+ok 44 - coverage metrics integrate shared cached fans by area, including overlap and blind polygons
+  ---
+  duration_ms: 19.840578
+  ...
+# Subtest: coverage metrics list enabled ground zones and the route; indoor zones are not estimated
+ok 45 - coverage metrics list enabled ground zones and the route; indoor zones are not estimated
+  ---
+  duration_ms: 2.128378
+  ...
+# Subtest: narrow valid zones retain their complete polygon area and blind geometry
+ok 46 - narrow valid zones retain their complete polygon area and blind geometry
+  ---
+  duration_ms: 1.835467
+  ...
+# Subtest: valid diagonal areas with no old grid samples are estimated from their polygon area
+ok 47 - valid diagonal areas with no old grid samples are estimated from their polygon area
+  ---
+  duration_ms: 0.230893
+  ...
+# Subtest: installer sheet is offline, escaped, CSP-restricted HTML with an inline SVG plan and closing limits
+ok 48 - installer sheet is offline, escaped, CSP-restricted HTML with an inline SVG plan and closing limits
+  ---
+  duration_ms: 11.748879
+  ...
+# Subtest: installer density intervals retain the near limit and positive steep-camera detail in both units
+ok 49 - installer density intervals retain the near limit and positive steep-camera detail in both units
+  ---
+  duration_ms: 1.291937
+  ...
+# Subtest: ordinary System and facility precision remains unchanged; exact signed zero is zero
+ok 50 - ordinary System and facility precision remains unchanged; exact signed zero is zero
+  ---
+  duration_ms: 8.380992
+  ...
+# Subtest: small positive and negative quantities retain their sign in metric, imperial and system readouts
+ok 51 - small positive and negative quantities retain their sign in metric, imperial and system readouts
+  ---
+  duration_ms: 0.876696
+  ...
+# Subtest: extreme finite inputs use bounded scientific labels instead of rounded zero
+ok 52 - extreme finite inputs use bounded scientific labels instead of rounded zero
+  ---
+  duration_ms: 2.086439
+  ...
+# Subtest: invalid numbers and percentages are withheld rather than rendered as zero
+ok 53 - invalid numbers and percentages are withheld rather than rendered as zero
+  ---
+  duration_ms: 0.163356
+  ...
+# Subtest: only exact percentage endpoints display zero or complete coverage
+ok 54 - only exact percentage endpoints display zero or complete coverage
+  ---
+  duration_ms: 0.784483
+  ...
+# Subtest: actual pinhole planning retains the independent 40mm route gap and positive blind zone
+ok 55 - actual pinhole planning retains the independent 40mm route gap and positive blind zone
+  ---
+  duration_ms: 13.190938
+  ...
+# Subtest: the printable installer keeps signed coordinates and distinct steep-camera ground ranges
+ok 56 - the printable installer keeps signed coordinates and distinct steep-camera ground ranges
+  ---
+  duration_ms: 1.409758
+  ...
+# Subtest: low-bitrate and small memory plans retain exact model/export values after formatting
+ok 57 - low-bitrate and small memory plans retain exact model/export values after formatting
+  ---
+  duration_ms: 1.191929
+  ...
+# Subtest: 100 × 4 Mbit × 30 days distinguishes raw, redundancy, overhead and reserve
+ok 58 - 100 × 4 Mbit × 30 days distinguishes raw, redundancy, overhead and reserve
+  ---
+  duration_ms: 1.301495
+  ...
+# Subtest: doubling bitrate halves retention; six 24TB dual-parity drives are inadequate for this full workload
+ok 59 - doubling bitrate halves retention; six 24TB dual-parity drives are inadequate for this full workload
+  ---
+  duration_ms: 0.263034
+  ...
+# Subtest: mirror and unprotected capacity are explicit and invalid arrays cannot be saved
+ok 60 - mirror and unprotected capacity are explicit and invalid arrays cannot be saved
+  ---
+  duration_ms: 0.501121
+  ...
+# Subtest: memory, byte-budget, drive-workload and power warnings never become capacity passes
+ok 61 - memory, byte-budget, drive-workload and power warnings never become capacity passes
+  ---
+  duration_ms: 0.133231
+  ...
+# Subtest: VRAM contexts include batch tensors and exceed the allowance without pretending to run GPU inference
+ok 62 - VRAM contexts include batch tensors and exceed the allowance without pretending to run GPU inference
+  ---
+  duration_ms: 0.306235
+  ...
+# Subtest: invalid imported values, prototype fields and unbounded JSON are rejected
+ok 63 - invalid imported values, prototype fields and unbounded JSON are rejected
+  ---
+  duration_ms: 1.157995
+  ...
+# Subtest: exported application policy matches the shared Python contract fixture
+ok 64 - exported application policy matches the shared Python contract fixture
+  ---
+  duration_ms: 0.308018
+  ...
+# Subtest: wall budget always preserves selected sources with at most the applied count
+ok 65 - wall budget always preserves selected sources with at most the applied count
+  ---
+  duration_ms: 0.07948
+  ...
+# Subtest: background sample playback respects the applied pause setting
+ok 66 - background sample playback respects the applied pause setting
+  ---
+  duration_ms: 0.163137
+  ...
+# Subtest: host import retains bounded numerical observations and drops private or unknown fields
+ok 67 - host import retains bounded numerical observations and drops private or unknown fields
+  ---
+  duration_ms: 0.404489
+  ...
+1..67
+# tests 67
+# suites 0
+# pass 67
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 107.673661

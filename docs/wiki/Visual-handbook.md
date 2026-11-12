@@ -239,6 +239,10 @@ coverage on the Facility map is a different kind of geometry.
 These visibility/recovery changes belong to the [current integrated proposal](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/coordinate-integrity-math-2026-11-12/README.md);
 [product status](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Product-status) identifies the merged baseline.
 
+Coverage just below complete can read **>99.9%**; a small positive result can
+read **<0.1%**. Small uncovered distances remain visible instead of rounding to
+zero. These are [planning readouts](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Facility-planning), not measured visibility.
+
 [Full facility workflow](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Facility-planning) · [Maps and shapes](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Maps-and-shapes)
 · [Saved facilities](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Saved-facilities).
 
@@ -274,6 +278,10 @@ leave warning to retain an unapplied draft.
 **Apply workspace limits** applies supported browser limits; **Export analyzer
 policy** is a separate action for supported offline analyzer controls. Use
 **Export setup plan** to preserve the whole plan for future review.
+
+Small positive estimates retain enough digits to stay visible. More displayed
+digits do not add measurement accuracy. Saved/exported numeric values keep their
+original precision; see [readout examples](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/planning-readouts-2026-11-12/README.md).
 
 The page does not provision drives, start recording, activate a GPU or benchmark
 your machine. Test one authorized source before advancing toward 5/25/50/100.

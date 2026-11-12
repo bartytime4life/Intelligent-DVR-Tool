@@ -122,6 +122,18 @@ implementation and hash. Guided training fits empirical score boundaries using
 calibration sessions and reserves fresh checks for validation; it does not retrain
 the model or establish a calibrated probability of presence.
 
+Presence observations use the same bounded fractional-time comparison in
+`edge/rules.py` and the browser training counter. The changed engine fingerprint
+requires re-analysis for current evaluation, including tracking's shared
+validation stage; historical review imports stay separate. The
+[timing record](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/rule-time-boundaries-2026-11-12/README.md) binds the
+policy, generated CPU path and unchanged rational-oracle comparisons.
+
+System/facility readouts format small nonzero values without changing their
+stored numbers or calculation inputs. Coverage labels distinguish represented
+fractions below one from exact completeness. [Presentation evidence](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/planning-readouts-2026-11-12/README.md)
+checks actual downloads separately from those labels.
+
 The optional [training assistant](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Guided-training#ask-the-local-training-assistant)
 does not score detections or apply rules. The browser checks structured answers
 against measured counts and permitted next steps. Assistant-response timings are

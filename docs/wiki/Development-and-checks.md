@@ -101,6 +101,14 @@ fixtures. Check each configuration for its fixed port and fixture setup.
 Screenshots/traces under `test-results/` and JSON under `qa-local/` are local
 outputs; publish only reviewed, source-bound documentation assets.
 
+Make asynchronous browser checks wait for observable readiness. A transient
+loading status needs a controlled request gate, rather than a delay that can
+expire before the assertion. After discarding a child draft, wait for the parent
+navigation guard's disabled controls to become ready before changing tasks.
+The [boundary verification record](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/rule-time-boundaries-2026-11-12/README.md)
+retains the original failures and strict checks; it does not replace them with
+retries, arbitrary sleeps or alternative acceptable outcomes.
+
 ## Find the implementation and data contract
 
 | Change | Start here | Contract / guide |
@@ -124,6 +132,33 @@ recording/model/labels/rules or required implementation fingerprint. Current
 tracker method is `bytetrack-style-iou-kalman-v3`; historical v1/v2 review imports
 remain readable, while current tracking evaluation requires re-analysis with the
 current source. See [metric provenance](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Tracking-evaluation#metric-provenance-and-reproducibility).
+
+## Verify rule-time changes
+
+The Python presence engine and browser training counter must preserve the same
+dwell/gap policy. Start with the focused generated cases:
+
+```bash
+node --test tests/training.test.mjs
+python -m unittest discover -s tests -p 'test_rule_time_boundaries.py'
+python -m unittest discover -s tests -p 'test_evaluation.py'
+```
+
+The first eight timing tests use only the standard library. The ninth runs a
+generated constant-model CPU recording through the normal analyzer, trace, review
+and evaluator; it skips explicitly without the native fixture dependencies.
+It also checks refusal of the previous rule-engine fingerprint. These tests do
+not open cameras or download models. The [independent package](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/rule-time-boundaries-2026-11-12/independent/README.md)
+supplies frozen rational inputs, unchanged Python/JavaScript checkers, source
+snapshots and strict baseline failures without requiring a native environment.
+
+The committed evaluation corpus is a current generated test fixture, separate
+from historical verification receipts. After a deliberate rule-engine change,
+generate a fresh corpus with the existing generator into a new directory and
+review the byte differences. For this change only the rule-engine fingerprint
+and dependent review trace hashes differ; detections, event IDs, timestamps and
+expected metrics are unchanged. Preserve historical records and never update a
+real trace's fingerprint to bypass current-source validation.
 
 ## Verify ground visibility changes
 

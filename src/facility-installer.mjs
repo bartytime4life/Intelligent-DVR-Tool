@@ -21,7 +21,7 @@ export function installerRows(plan, units = 'metric') {
   return validateFacility(plan).cameras.map(c => {
     const {near, far} = groundRange(c), dori = doriDistances(c);
     return {id:c.id, name:c.name, channel:c.channel || '', enabled:c.enabled, east:d(c.x), north:d(c.y), height:d(c.z), bearing:deg(c.bearing), tilt:deg(c.tilt),
-      fov:`${n2(c.hfov)}° × ${n2(c.vfov)}°`, range:`${d(c.range)} · ground ${d(near)}–${d(Math.max(near, far))}`,
+      fov:`${n2(c.hfov)}° × ${n2(c.vfov)}°`, range:`${d(c.range)} · ground ${formatDistanceRange(near, Math.max(near, far), units)}`,
       resolution:c.pixelsWide ? `${c.pixelsWide} px wide` : 'Not set',
       dori:DORI_BANDS.map((band, i) => !dori ? '—' : !dori[i].reached ? 'Not reached' : `${formatDistanceRange(dori[i].from, dori[i].to, units)}${dori[i].limited ? ' (view limit)' : ''}`)};
   });

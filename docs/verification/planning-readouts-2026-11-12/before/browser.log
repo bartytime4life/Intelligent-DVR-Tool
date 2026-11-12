@@ -1,0 +1,172 @@
+[WebServer] (node:2611367) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 4 tests using 1 worker
+
+  ✘  1 tests/browser/planning-readouts.spec.mjs:34:31 › System small readouts keep nonzero estimates and exact exports at 1440px (6.3s)
+  ✘  2 tests/browser/planning-readouts.spec.mjs:34:31 › System small readouts keep nonzero estimates and exact exports at 375px (6.3s)
+  ✘  3 tests/browser/planning-readouts.spec.mjs:62:31 › Planning readouts retain the40mmgap, blind area and portable geometry at 1440px (7.5s)
+  ✘  4 tests/browser/planning-readouts.spec.mjs:62:31 › Planning readouts retain the40mmgap, blind area and portable geometry at 375px (6.9s)
+
+
+  1) tests/browser/planning-readouts.spec.mjs:34:31 › System small readouts keep nonzero estimates and exact exports at 1440px 
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: locator('.system-metrics > div').filter({ hasText: 'Camera network payload' })
+    Expected substring: "0.01"
+    Received string:    "Camera network payload0 Mbit/s"
+    Timeout: 5000ms
+
+    Call log:
+      - Expect "toContainText" with timeout 5000ms
+      - waiting for locator('.system-metrics > div').filter({ hasText: 'Camera network payload' })
+        9 × locator resolved to <div>…</div>
+          - unexpected value "Camera network payload0 Mbit/s"
+
+
+      45 |  await writeFile(testInfo.outputPath('system-observed.json'),JSON.stringify(initial,null,2));
+      46 |  await page.locator('.system-metrics').screenshot({path:testInfo.outputPath(`system-small-${width}.png`)});
+    > 47 |  await expect(page.locator('.system-metrics > div').filter({hasText:'Camera network payload'})).toContainText('0.01');
+         |                                                                                                 ^
+      48 |  await expect(page.locator('.system-metrics > div').filter({hasText:'Recording write estimate'})).toContainText('0.001');
+      49 |  await expect(page.locator('.system-capacity-label')).toContainText('0.0001 TB');
+      50 |  await expect(page.locator('.system-reading').filter({hasText:'estimated workers'})).toContainText('0.02 GiB');
+        at <repo>/tests/browser/planning-readouts.spec.mjs:47:97
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    qa-local/readouts-before-results/planning-readouts-System-s-bd6dd-and-exact-exports-at-1440px/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: qa-local/readouts-before-results/planning-readouts-System-s-bd6dd-and-exact-exports-at-1440px/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    qa-local/readouts-before-results/planning-readouts-System-s-bd6dd-and-exact-exports-at-1440px/trace.zip
+    Usage:
+
+        npx playwright show-trace qa-local/readouts-before-results/planning-readouts-System-s-bd6dd-and-exact-exports-at-1440px/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) tests/browser/planning-readouts.spec.mjs:34:31 › System small readouts keep nonzero estimates and exact exports at 375px 
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: locator('.system-metrics > div').filter({ hasText: 'Camera network payload' })
+    Expected substring: "0.01"
+    Received string:    "Camera network payload0 Mbit/s"
+    Timeout: 5000ms
+
+    Call log:
+      - Expect "toContainText" with timeout 5000ms
+      - waiting for locator('.system-metrics > div').filter({ hasText: 'Camera network payload' })
+        9 × locator resolved to <div>…</div>
+          - unexpected value "Camera network payload0 Mbit/s"
+
+
+      45 |  await writeFile(testInfo.outputPath('system-observed.json'),JSON.stringify(initial,null,2));
+      46 |  await page.locator('.system-metrics').screenshot({path:testInfo.outputPath(`system-small-${width}.png`)});
+    > 47 |  await expect(page.locator('.system-metrics > div').filter({hasText:'Camera network payload'})).toContainText('0.01');
+         |                                                                                                 ^
+      48 |  await expect(page.locator('.system-metrics > div').filter({hasText:'Recording write estimate'})).toContainText('0.001');
+      49 |  await expect(page.locator('.system-capacity-label')).toContainText('0.0001 TB');
+      50 |  await expect(page.locator('.system-reading').filter({hasText:'estimated workers'})).toContainText('0.02 GiB');
+        at <repo>/tests/browser/planning-readouts.spec.mjs:47:97
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    qa-local/readouts-before-results/planning-readouts-System-s-8884f--and-exact-exports-at-375px/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: qa-local/readouts-before-results/planning-readouts-System-s-8884f--and-exact-exports-at-375px/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    qa-local/readouts-before-results/planning-readouts-System-s-8884f--and-exact-exports-at-375px/trace.zip
+    Usage:
+
+        npx playwright show-trace qa-local/readouts-before-results/planning-readouts-System-s-8884f--and-exact-exports-at-375px/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) tests/browser/planning-readouts.spec.mjs:62:31 › Planning readouts retain the40mmgap, blind area and portable geometry at 1440px 
+
+    Error: expect(locator).toHaveText(expected) failed
+
+    Locator:  getByRole('region', { name: 'Estimated coverage metrics' }).getByRole('row', { name: /Boundary zone/ }).getByRole('cell').first()
+    Expected: ">99.9%"
+    Received: "100.0%"
+    Timeout:  5000ms
+
+    Call log:
+      - Expect "toHaveText" with timeout 5000ms
+      - waiting for getByRole('region', { name: 'Estimated coverage metrics' }).getByRole('row', { name: /Boundary zone/ }).getByRole('cell').first()
+        9 × locator resolved to <td>100.0%</td>
+          - unexpected value "100.0%"
+
+
+      76 |   mapLabels:await page.locator('.facility-dimension-label').allTextContents(),exported},null,2));
+      77 |  await metrics.screenshot({path:testInfo.outputPath(`planning-small-${width}.png`)});
+    > 78 |  await expect(row.getByRole('cell').first()).toHaveText('>99.9%');
+         |                                              ^
+      79 |  await expect(metrics.getByRole('row',{name:/Handoff route/}).getByRole('cell').first()).toHaveText('>99.9%');
+      80 |  await expect(metrics.getByLabel('Route coverage details')).toHaveText('0.04 m of the route is outside the drawn coverage. Longest continuous gap: 0.04 m.');
+      81 |  await expect(page.locator('.facility-route-dimension').filter({hasText:/^0\.04 m$/})).toHaveCount(1);
+        at <repo>/tests/browser/planning-readouts.spec.mjs:78:46
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    qa-local/readouts-before-results/planning-readouts-Planning-48d8b-portable-geometry-at-1440px/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: qa-local/readouts-before-results/planning-readouts-Planning-48d8b-portable-geometry-at-1440px/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    qa-local/readouts-before-results/planning-readouts-Planning-48d8b-portable-geometry-at-1440px/trace.zip
+    Usage:
+
+        npx playwright show-trace qa-local/readouts-before-results/planning-readouts-Planning-48d8b-portable-geometry-at-1440px/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  4) tests/browser/planning-readouts.spec.mjs:62:31 › Planning readouts retain the40mmgap, blind area and portable geometry at 375px 
+
+    Error: expect(locator).toHaveText(expected) failed
+
+    Locator:  getByRole('region', { name: 'Estimated coverage metrics' }).getByRole('row', { name: /Boundary zone/ }).getByRole('cell').first()
+    Expected: ">99.9%"
+    Received: "100.0%"
+    Timeout:  5000ms
+
+    Call log:
+      - Expect "toHaveText" with timeout 5000ms
+      - waiting for getByRole('region', { name: 'Estimated coverage metrics' }).getByRole('row', { name: /Boundary zone/ }).getByRole('cell').first()
+        9 × locator resolved to <td>100.0%</td>
+          - unexpected value "100.0%"
+
+
+      76 |   mapLabels:await page.locator('.facility-dimension-label').allTextContents(),exported},null,2));
+      77 |  await metrics.screenshot({path:testInfo.outputPath(`planning-small-${width}.png`)});
+    > 78 |  await expect(row.getByRole('cell').first()).toHaveText('>99.9%');
+         |                                              ^
+      79 |  await expect(metrics.getByRole('row',{name:/Handoff route/}).getByRole('cell').first()).toHaveText('>99.9%');
+      80 |  await expect(metrics.getByLabel('Route coverage details')).toHaveText('0.04 m of the route is outside the drawn coverage. Longest continuous gap: 0.04 m.');
+      81 |  await expect(page.locator('.facility-route-dimension').filter({hasText:/^0\.04 m$/})).toHaveCount(1);
+        at <repo>/tests/browser/planning-readouts.spec.mjs:78:46
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    qa-local/readouts-before-results/planning-readouts-Planning-a6860--portable-geometry-at-375px/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: qa-local/readouts-before-results/planning-readouts-Planning-a6860--portable-geometry-at-375px/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    qa-local/readouts-before-results/planning-readouts-Planning-a6860--portable-geometry-at-375px/trace.zip
+    Usage:
+
+        npx playwright show-trace qa-local/readouts-before-results/planning-readouts-Planning-a6860--portable-geometry-at-375px/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  4 failed
+    tests/browser/planning-readouts.spec.mjs:34:31 › System small readouts keep nonzero estimates and exact exports at 1440px 
+    tests/browser/planning-readouts.spec.mjs:34:31 › System small readouts keep nonzero estimates and exact exports at 375px 
+    tests/browser/planning-readouts.spec.mjs:62:31 › Planning readouts retain the40mmgap, blind area and portable geometry at 1440px 
+    tests/browser/planning-readouts.spec.mjs:62:31 › Planning readouts retain the40mmgap, blind area and portable geometry at 375px 

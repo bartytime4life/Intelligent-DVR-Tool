@@ -48,6 +48,13 @@ rotated boundary rooms during keep-position site corrections and prevent
 calibrated ruler/check extrapolation beside short reference edges. Independent
 numeric and browser checks establish behavior on their generated inputs.
 
+The [timing follow-up](verification/rule-time-boundaries-2026-11-12/README.md)
+keeps fractional samples at dwell/gap boundaries consistent across the engine and
+training counter, with old-trace refusal and generated CPU integration checks.
+[Planning readouts](verification/planning-readouts-2026-11-12/README.md) preserve
+small positive values and distinguish incomplete coverage from an exact endpoint.
+The existing controls, numeric models and explicit start actions remain.
+
 Review, merge, platform installation and physical acceptance are separate next
 steps. Physical validation needs surveyed ground/pose measurements, independent
 markers and targets, lens effects, low walls, raised structures and steep views.

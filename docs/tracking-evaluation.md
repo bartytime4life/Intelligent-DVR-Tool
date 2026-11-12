@@ -191,6 +191,10 @@ reported hash. The report records this policy in `input_binding`. The
 [generated race regressions](verification/evaluation-binding-2026-11-11/README.md)
 exercise both stage changes and replacements after capture. Source media is
 hash-checked as a stream, without copying or decoding it.
+Shared validation also checks the rule-engine source hash. After the fractional
+presence-time correction, preserve old traces/reports and re-analyze the approved
+recording for current evaluation, even though the tracker method is unchanged.
+See the [timing record](verification/rule-time-boundaries-2026-11-12/README.md).
 Repeat with the same files, code and environment; reports contain no generated
 timestamp. Retain those exact inputs privately for reproducibility. The records
 are unsigned evidence, not proof of authentic independent labels or recording

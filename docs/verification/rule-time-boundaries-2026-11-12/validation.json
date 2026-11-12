@@ -1,0 +1,140 @@
+{
+  "schema": "intelligent-dvr.boundary-validation.v1",
+  "base_revision": "6ce57a5180655693f7d3d6d2e91d8c68693f1961",
+  "environment": {
+    "node": "22.13.1",
+    "npm": "10.9.2",
+    "python": "3.12.3",
+    "platform": "Linux x86_64",
+    "playwright": "1.56.1",
+    "chromium": "141.0.7390.37 build1194",
+    "cpu_fixture_packages": {
+      "opencv-python-headless": "4.13.0.92",
+      "numpy": "2.5.4",
+      "onnx": "1.23.2",
+      "ml_dtypes": "0.6.0",
+      "protobuf": "7.36.2",
+      "typing_extensions": "4.16.0",
+      "av": "19.0.2"
+    },
+    "all_seven_cpu_versions_match_pins": true,
+    "existing_cpu_interpreter_replaced": false
+  },
+  "checks": {
+    "build": {
+      "exit": 0,
+      "warning": "Existing >500kB chunk warning retained",
+      "log": "build.log.gz"
+    },
+    "node_full_socket_enabled": {
+      "passed": 692,
+      "failed": 0,
+      "skipped": 0,
+      "command": "DVR_TEST_SOCKETS=1 npm test",
+      "log": "node-socket-enabled.tap.gz"
+    },
+    "python_full_fixture_refreshed": {
+      "passed": 579,
+      "failed": 0,
+      "skipped": 0,
+      "seconds": 64.728,
+      "command": "DVR_TEST_SOCKETS=1 PYTHONDONTWRITEBYTECODE=1 python -m unittest discover -s tests -p 'test_*.py'",
+      "log": "python-fixture-refreshed.log.gz"
+    },
+    "sites": {
+      "passed": 4,
+      "failed": 0,
+      "skipped": 0,
+      "log": "sites.tap.gz"
+    },
+    "browser_runs": {
+      "general_initial": {
+        "startTime": "2026-11-12T11:29:38.996Z",
+        "duration": 612413.977,
+        "expected": 262,
+        "skipped": 0,
+        "unexpected": 1,
+        "flaky": 0
+      },
+      "map_parent_original": {
+        "startTime": "2026-11-12T11:43:56.817Z",
+        "duration": 21418.879,
+        "expected": 1,
+        "skipped": 0,
+        "unexpected": 2,
+        "flaky": 0
+      },
+      "map_candidate_original": {
+        "startTime": "2026-11-12T11:41:40.454Z",
+        "duration": 22270.481,
+        "expected": 1,
+        "skipped": 0,
+        "unexpected": 2,
+        "flaky": 0
+      },
+      "map_parent_ready": {
+        "startTime": "2026-11-12T11:45:04.815Z",
+        "duration": 11521.282,
+        "expected": 3,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "map_candidate_ready": {
+        "startTime": "2026-11-12T11:45:39.803Z",
+        "duration": 38053.96799999999,
+        "expected": 21,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      }
+    },
+    "browser_interpretation": "262 initial general passes plus all7 corrected map-draft cases passing3 executions each cover263 distinct general scenarios across runs. This is not a single clean263-case run. Original failures retained.",
+    "rule_time_oracles": {
+      "python_assertions": 1597,
+      "js_assertions": 1579,
+      "candidate_failures": 0,
+      "original_python_failures": 822,
+      "original_js_failures": 716,
+      "four_archived_receipts_reproduced_byte_identically": true
+    },
+    "readout_package": {
+      "artifacts": 57,
+      "sources": 24,
+      "unchanged_models": 8,
+      "all_hashes_verified": true,
+      "portable_replay": "pass"
+    },
+    "documentation": {
+      "paths": 220,
+      "local_links": 1893,
+      "wiki_outputs": 68,
+      "editable_graphics": 10,
+      "wiki_unit_tests": 8,
+      "failed": 0,
+      "commands": [
+        "python3 -B scripts/check-docs.py",
+        "python3 -B scripts/build-wiki.py --check",
+        "python3 -B scripts/build-guide-graphics.py --check",
+        "python -m unittest discover -s tests -p test_wiki_docs.py"
+      ]
+    },
+    "preservation": {
+      "earlier_evidence_media_and_protected_files": 618,
+      "protected_files": 9,
+      "changed": 0
+    }
+  },
+  "limitations": {
+    "dedicated_native_browser_suites": "Not rerun in this closure; parent hosted steps skipped after general browser failure. Full native Python generated fixtures are separate.",
+    "field_camera_recognition_gpu_capacity": "Unqualified by these generated checks.",
+    "wiki": "Source regenerated only; no separate live Wiki publication.",
+    "installation_or_deployment": "None.",
+    "parent_ci": "Three successful workflows; browser failed. See remote-state.json.",
+    "candidate_ci": "Separate post-publication evidence; no claim of success here."
+  },
+  "preview": {
+    "url": "http://127.0.0.1:4321/#system",
+    "observed": "Ready System planning workspace; No camera preview active; no settings applied or source starts."
+  }
+}

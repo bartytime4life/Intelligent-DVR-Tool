@@ -1,5 +1,18 @@
 # Verification index
 
+[Fractional rule-time boundaries, November 12](rule-time-boundaries-2026-11-12/README.md)
+records reproduced missed/duplicate observations, a shared bounded numerical
+policy, unchanged independent rational oracles, generated CPU analyzer/review/
+evaluation checks, current synthetic-fixture regeneration and documentation audit.
+Older traces retain their historical fingerprints and require re-analysis for
+current evaluation.
+
+[Small planning readouts, November 12](planning-readouts-2026-11-12/README.md)
+records nonzero/endpoint rounding counterexamples, bounded display formatting,
+independent rational route/area checks, four expected baseline browser failures,
+four passing final browser cases and byte-identical numerical exports. This
+display-only proposal does not establish physical accuracy or installed capacity.
+
 [Integrated planning and coordinate integrity, November 12](coordinate-integrity-math-2026-11-12/README.md)
 records the combined ground-visibility, calibration and image-diagnostics source;
 reproduced site-origin/shared-wall and outside-reference-ruler defects; independent

@@ -7,6 +7,15 @@ This isolated source combines the visible-ground proposal [#122](https://github.
 diagnostics [#120](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/120).
 Original proposal receipts retain their exact source revisions.
 
+The current follow-up repairs fractional presence-rule dwell/gap comparisons in
+the local engine and browser training counter. It changes the rule-engine source
+hash, so older traces need re-analysis for current evaluation. The
+[timing record](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/rule-time-boundaries-2026-11-12/README.md) retains
+strict baseline failures, independent rational checks and a generated CPU
+analyzer/review/evaluation test. [Planning readouts](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/planning-readouts-2026-11-12/README.md)
+also preserve small positive resource/distance values and avoid displaying
+incomplete coverage as 100%; underlying numeric planning values are unchanged.
+
 Two further reproduced fixes preserve rotated rooms when **Save site → Keep
 buildings at their map positions** changes the local grid, and refuse calibrated
 ruler/check points outside the closed convex reference boundary. Calibration

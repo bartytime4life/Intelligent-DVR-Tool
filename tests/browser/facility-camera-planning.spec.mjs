@@ -23,18 +23,26 @@ const boundaryPlan = () => validateFacility({...fixture,
   cameras:[{...fixture.cameras[0],bearing:45,tilt:0},{...fixture.cameras[0],id:'C2',name:'Second view',bearing:45,tilt:0,y:.8}],
   zones:[zone('edge','Boundary strip',rect(10,-.1,20,.9)),fixture.zones[1]],route:[]});
 
-// Slow only the coverage request, retaining the real worker/math. This makes
-// pending-edit and supersession behavior deterministic without delaying maps.
-async function delayCoverage(page) {
+// Hold only coverage requests until the test releases them to the real worker.
+// A fixed delay can finish before Playwright observes the pending state.
+async function holdCoverage(page) {
   await page.addInitScript(()=>{
     const NativeWorker=window.Worker;
+    const queued=new Map();
+    window.__coverageGate={
+      bearings:()=>Array.from(queued.values(),entry=>entry.message.plan.cameras.find(camera=>camera.id==='C1').bearing),
+      release:bearing=>{
+        const matches=Array.from(queued.entries()).filter(([,entry])=>entry.message.plan.cameras.find(camera=>camera.id==='C1').bearing===bearing);
+        if(matches.length!==1)throw new Error('Expected one current coverage request');
+        const [worker,entry]=matches[0];queued.delete(worker);entry.post(entry.message);
+      },
+    };
     window.Worker=function(url,options){
       const worker=new NativeWorker(url,options);
       if(String(url).includes('facility-coverage-worker')){
         const post=worker.postMessage.bind(worker),terminate=worker.terminate.bind(worker);
-        let timer;
-        worker.postMessage=message=>{timer=setTimeout(()=>post(message),600);};
-        worker.terminate=()=>{clearTimeout(timer);terminate();};
+        worker.postMessage=message=>{queued.set(worker,{message,post});};
+        worker.terminate=()=>{queued.delete(worker);terminate();};
       }
       return worker;
     };
@@ -92,26 +100,40 @@ for(const width of [1440,375]) test(`zone area finds coverage and overlap betwee
 });
 
 test('background coverage clears old numbers during draft changes and survives navigation',async({page})=>{
-  await delayCoverage(page);await openFixture(page,boundaryPlan());
+  await holdCoverage(page);await openFixture(page,boundaryPlan());
   await page.getByRole('button',{name:/^5 Coverage/}).click();
   const metrics=page.getByRole('region',{name:'Estimated coverage metrics'}),row=metrics.getByRole('row',{name:/Boundary strip/});
+  const pending=()=>page.evaluate(()=>window.__coverageGate.bearings());
+  await expect.poll(pending).toEqual([45]);
   await expect(metrics.getByRole('status')).toContainText('Updating coverage');
+  await expect(row).toHaveCount(0);
+  await page.evaluate(()=>window.__coverageGate.release(45));
   await expect(row).toContainText('90.0%10.0%');
   await metrics.getByRole('button',{name:'Blind spots for Boundary strip',exact:true}).click();
   await expect(page.locator('.blind-spot-key')).toHaveCount(1);
   await page.getByLabel('Direction from north',{exact:true}).fill('225');
+  await expect.poll(pending).toEqual([225]);
   await expect(metrics.getByRole('status')).toContainText('Updating coverage');
   await expect(row).toHaveCount(0);await expect(page.locator('.blind-spot-key')).toHaveCount(0);
   await expect(page.getByRole('button',{name:'Save camera',exact:true})).toBeEnabled();
   await page.getByLabel('Direction from north',{exact:true}).fill('45');
+  // The held old-bearing request must be terminated rather than released later.
+  await expect.poll(pending).toEqual([45]);
+  await page.evaluate(()=>window.__coverageGate.release(45));
   await expect(row).toContainText('90.0%10.0%');
   // Leaving the task cancels outstanding work and clears the selected overlay.
   await page.getByLabel('Direction from north',{exact:true}).fill('225');
+  await expect.poll(pending).toEqual([225]);
   await expect(metrics.getByRole('status')).toContainText('Updating coverage');
   await page.getByRole('button',{name:'Discard preview',exact:true}).click();
   await page.getByRole('combobox',{name:'Jump to facility task'}).selectOption('3');
+  await expect.poll(pending).toEqual([]);
   await expect(metrics).toHaveCount(0);await expect(page.locator('.blind-spot-key')).toHaveCount(0);
   await page.getByRole('combobox',{name:'Jump to facility task'}).selectOption('4');
+  await expect.poll(pending).toEqual([45]);
+  await expect(metrics.getByRole('status')).toContainText('Updating coverage');
+  await expect(row).toHaveCount(0);
+  await page.evaluate(()=>window.__coverageGate.release(45));
   await expect(row).toContainText('90.0%10.0%');
 });
 

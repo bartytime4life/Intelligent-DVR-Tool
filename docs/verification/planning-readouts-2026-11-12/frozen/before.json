@@ -1,0 +1,159 @@
+{
+  "schema": "dvr.planning-readouts.before.v1",
+  "source_revision": "6ce57a5180655693f7d3d6d2e91d8c68693f1961",
+  "scope": "Frozen generated inputs and existing readouts before edits; no devices or providers.",
+  "source_sha256": {
+    "SystemSetup.jsx": "408ee697b36cc304c9042b9bbdbf3dd26c77892d0bced71f68e3973b5be51e19",
+    "resources.mjs": "fe176b58fc29107a53ebf54f20114f9dc721471c70cc4317fba032eea821b6c1",
+    "FacilityBuilder.jsx": "bf96ab4c0d75f92d5ea6562d84f6640850cc9c46564f3bfd92954df40f6fb4bb",
+    "facility-measurements.mjs": "79b9e46f965ef8d6c0653b3b4f7ef0c3eda50c34892a38cdcf3caf4ce5882431",
+    "facility-installer.mjs": "92704eae223955f72388e8ee76a91f01c2efccffd8ee336ed04caabe1d181878"
+  },
+  "system": {
+    "input": {
+      "schema": "intelligent-dvr.setup.v1",
+      "platform": "linux",
+      "workload": {
+        "cameras": 1,
+        "mbps": 0.01,
+        "days": 1,
+        "overhead": 0
+      },
+      "storage": {
+        "drives": 12,
+        "driveTB": 24,
+        "layout": "dual-parity",
+        "fsAllowance": 5,
+        "freeReserve": 20,
+        "readPercent": 50,
+        "workloadRating": 550
+      },
+      "compute": {
+        "ramGiB": 2,
+        "reserveGiB": 1.999,
+        "workerMiB": 16,
+        "workerSlots": 1,
+        "threads": 1,
+        "threadBudget": 16,
+        "bufferMiB": 2,
+        "maxAgeSeconds": 2,
+        "maxFrames": 6000
+      },
+      "power": {
+        "cpuW": 170,
+        "gpuW": 0,
+        "otherW": 100,
+        "hddStartupW": 30,
+        "psuW": 1000
+      },
+      "gpu": {
+        "profile": "rtx5080",
+        "location": "separate-host",
+        "vramGiB": 1,
+        "reserveGiB": 0.999,
+        "sessions": 1,
+        "batch": 1,
+        "modelMiB": 1,
+        "workspaceMiB": 0
+      },
+      "browser": {
+        "visibleTiles": 4,
+        "pauseHidden": true,
+        "overlayScale": 2
+      }
+    },
+    "metrics": {
+      "neededTB": {
+        "value": 0.000108,
+        "display": "0"
+      },
+      "ingressMbps": {
+        "value": 0.01,
+        "display": "0"
+      },
+      "writeMBps": {
+        "value": 0.00125,
+        "display": "0"
+      },
+      "perDriveTBYear": {
+        "value": 0.005912999999999999,
+        "display": "0"
+      },
+      "workingGiB": {
+        "value": 0.017578125,
+        "display": "0"
+      },
+      "availableGiB": {
+        "value": 0.0009999999999998899,
+        "display": "0"
+      },
+      "gpuEstimatedGiB": {
+        "value": 0.00555419921875,
+        "display": "0"
+      },
+      "gpuAvailableGiB": {
+        "value": 0.0010000000000000009,
+        "display": "0"
+      }
+    },
+    "exportPreservesBitrate": 0.01,
+    "overageWarnings": [
+      "Estimated workers and queue exceed the RAM planning allowance.",
+      "Estimated GPU contexts, workspace and batch tensors exceed the entered VRAM allowance.",
+      "The queue budget cannot retain one 640\u00d7640 RGB sample per camera plus every worker; admission can reject samples."
+    ]
+  },
+  "coverage": {
+    "zone": {
+      "coverage": 0.9998999999999972,
+      "uncoveredArea": 0.0010000000000273679,
+      "display": "100.0%",
+      "blindComponents": 1
+    },
+    "route": {
+      "length": 120.04,
+      "coverage": 0.9996667777407532,
+      "uncoveredLength": 0.03999999999999914,
+      "longestBlindStretch": 0.03999999999999914,
+      "displayCoverage": "100.0%",
+      "displayUncovered": "0.0 m",
+      "displayLongestGap": "0.0 m"
+    }
+  },
+  "independent_expectations": {
+    "route": {
+      "length": "3001/25",
+      "covered": "120",
+      "uncovered": "1/25",
+      "coverage": "3000/3001",
+      "physical_reason": "Bearing45\u00b0, tilt0\u00b0, HFOV90\u00b0 makes the two image side planes x=0 and y=0. All y20 route points are beyond vertical near bound and inside300m range."
+    },
+    "zone": {
+      "area": "10",
+      "uncoveredArea": "1/1000",
+      "coverage": "9999/10000",
+      "physical_reason": "x10..20, y[-.0001,.9999] crosses y=0 side plane; covered fraction is .9999 of1m height, safely inside other limits."
+    }
+  },
+  "signed_coordinate": {
+    "metres": -0.01,
+    "old_metric": "-0.0 m",
+    "old_imperial": "-0.0 ft"
+  },
+  "steep_installer_input": {
+    "id": "c",
+    "name": "Steep camera",
+    "x": 0,
+    "y": 0,
+    "z": 0.5,
+    "bearing": 0,
+    "tilt": 89,
+    "hfov": 90,
+    "vfov": 5,
+    "range": 1,
+    "enabled": true,
+    "pixelsWide": 1920
+  },
+  "steep_installer_old_range": "1.0 m \u00b7 ground 0.0 m\u20130.0 m",
+  "steep_installer_old_dori": "0.000 m\u20130.031 m (view limit)"
+}

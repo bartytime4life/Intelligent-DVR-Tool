@@ -1,0 +1,52 @@
+{
+  "schema": "intelligent-dvr.setup.v1",
+  "platform": "linux",
+  "workload": {
+    "cameras": 1,
+    "mbps": 0.01,
+    "days": 1,
+    "overhead": 0
+  },
+  "storage": {
+    "drives": 12,
+    "driveTB": 24,
+    "layout": "dual-parity",
+    "fsAllowance": 5,
+    "freeReserve": 20,
+    "readPercent": 50,
+    "workloadRating": 550
+  },
+  "compute": {
+    "ramGiB": 2,
+    "reserveGiB": 1.999,
+    "workerMiB": 16,
+    "workerSlots": 1,
+    "threads": 1,
+    "threadBudget": 16,
+    "bufferMiB": 2,
+    "maxAgeSeconds": 2,
+    "maxFrames": 6000
+  },
+  "power": {
+    "cpuW": 170,
+    "gpuW": 0,
+    "otherW": 100,
+    "hddStartupW": 30,
+    "psuW": 1000
+  },
+  "gpu": {
+    "profile": "rtx5080",
+    "location": "separate-host",
+    "vramGiB": 1,
+    "reserveGiB": 0.999,
+    "sessions": 1,
+    "batch": 1,
+    "modelMiB": 1,
+    "workspaceMiB": 0
+  },
+  "browser": {
+    "visibleTiles": 4,
+    "pauseHidden": true,
+    "overlayScale": 2
+  }
+}

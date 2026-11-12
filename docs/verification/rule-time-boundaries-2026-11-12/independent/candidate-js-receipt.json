@@ -1,0 +1,18 @@
+{
+  "schema": "dvr-rule-time-js-count-receipt-v1",
+  "source_sha256": "cd1979b16c575611aa13cdbeeb3832f86094e5998e8acd4de2f16b406cfbfbdd",
+  "inputs_sha256": "fb6910432ee1e83a8a87a2aa971b3b51a16017f8fa2fa18c9722014ff2104a9b",
+  "adapter_inputs_sha256": "8c90905f099e3fc74c7c3eb8773976687addb6cd5d7bd799256d6f20e6c14d8d",
+  "checker_sha256": "f8932d7e3247a430e849fd1a474f7bbf712dccf0309c56921ca32d204c729b12",
+  "cases": 1579,
+  "samples": 54614,
+  "assertions": 1579,
+  "failure_count": 0,
+  "failures": [],
+  "source_and_inputs_unchanged": true,
+  "limits": [
+    "Supplemental browser-training count adapter; exact-rational expected event counts are copied from the unchanged Python corpus.",
+    "Does not assert invalid-input rejection because countObservations has a validated-input caller contract.",
+    "No media, camera or inference."
+  ]
+}
