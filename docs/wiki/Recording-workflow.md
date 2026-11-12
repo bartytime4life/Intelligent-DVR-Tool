@@ -9,7 +9,7 @@ For an existing OEM DVR, use the [watched-folder backup workflow](https://github
 **Quick path:** Capture or import → Analyze recording → inspect the matched source → review in Events → save the report and exact result/recording pair.
 
 This workflow joins explicit browser-webcam capture, bounded local file import,
-the existing native CPU analyzer, source-matched inspection, human decisions and
+the existing local analyzer, source-matched inspection, human decisions and
 portable reporting. The separate [one-camera LAN recorder](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/LAN-recording) now
 feeds finalized RTSP segments into the same workflow with explicit Start/Stop and
 bounded retention. Gapless recording, identity tracking and sustained 100-camera
@@ -28,8 +28,10 @@ On Mac, **Start-Mac.command** enables configured local analysis, imports, traini
 `-Analysis -AllowRecordingImport` on Windows. Custom catalogs remain supported.
 Models and configured rules stay off the browser write API; the one exception is
 [guided training](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Guided-training), which with `--allow-training` may add new tuned
-rule sets and never overwrites a file. The original CPU limits and explicit
-separate CUDA CLI path remain in force.
+rule sets and never overwrites a file. The local service prefers eligible GPU
+execution with visible CPU fallback; use `--analysis-backend opencv-cpu` for an
+explicit CPU override. The standalone analyzer CLI retains explicit backend
+selection without automatic fallback. See [runtime limits](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Live-GPU).
 
 ## Use the complete path
 
@@ -79,9 +81,17 @@ recognition-bundle export is what reopens frame overlays.
 | Webcam clip in browser | One clip up to 64 MiB; save/import before reload or closing. Unsaved clips block another capture until discarded or imported. |
 | Imported files | Same configured recording folder; content-derived filename; 64 MiB each, at most 20 managed files/512 MiB; never overwrite originals or automatically delete older imports. |
 | Incomplete import | Removed on handled failure. Crash leftovers count toward the quota. A retained `.dvr-import.lock` refuses further imports until all services are stopped and the lock is inspected/removed locally. |
-| Active analysis | Existing one-job CPU limits; imports are refused while the job runs. |
+| Active analysis | One isolated job with runtime-specific CPU/GPU limits; imports are refused while the job runs. |
 | Last completed result | Temporary by default; optional Linux last-job recovery remains separate. New jobs replace the last result, not the imported recording library. |
 | Human decisions | Browser storage and explicit review/report exports; no durable authenticated review database yet. |
+| Observation stills | Small JPEGs in this browser's IndexedDB after explicit Send to Events; review/report metadata exports do not include these images. |
+
+Loaded reviews survive workspace changes, while pending review openings are
+cancelled when Recognition is hidden or left. A slower completed-job, backup or
+LAN download cannot replace a newer file choice or source match, even if that
+newer file is rejected. Return to its task and choose **Open results**, **Review
+backup** or **Review segment** when ready. These controls do not stop a background
+analysis, backup or recorder; use each operation's explicit Stop/Cancel.
 
 The endpoint checks exact loopback Host, origin and token before reading media.
 One bounded binary request carries a SHA-256 fingerprint. Content length, MIME and

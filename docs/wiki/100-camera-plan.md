@@ -6,7 +6,7 @@
 
 **Quick path:** Specify recording, analysis and visible-tile workloads separately → measure one source → qualify staged loads on the intended host.
 
-[Evidence-led roadmap](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Roadmap) · [Fresh 100-source model results](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/2026-10-27/README.md#100-source-load-model) · [Architecture](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Architecture-and-data)
+[Evidence-led roadmap](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Roadmap) · [Dated 100-source model results](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/2026-10-27/README.md#100-source-load-model) · [Architecture](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Architecture-and-data)
 
 Owner requirement, 2026-10-27: **at least 100 concurrently active cameras** in a
 locally deployed system without subscriptions or paid inference services. Five
@@ -14,14 +14,18 @@ generated scenes are UI fixtures, not a product capacity limit. The
 [capacity target](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/edge/capacity-target.json) records this decision separately
 from workload values still requiring pilot decisions.
 
-Current state: a single-recording analyzer with an explicit optional CUDA backend,
+Current local delivery includes bounded previews, at most two explicit live-AI
+sessions, one sampled LAN recorder and the OEM-copy companion. The scaling
+foundation remains a separate single-recording analyzer with an explicit CUDA backend,
 hash-bound YOLOX profile, evaluation harness, reusable sample scheduler, bounded
 thread execution, optional Linux process supervision/local outcome journal and a synthetic load model. The
 [CUDA record](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/cuda-2026-10-28/README.md) and
 [worker record](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/workers-2026-10-28/README.md) retain measured scope.
 The [recovery record](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/recovery-2026-10-28/README.md) covers the optional
-process boundary. Live ingest, a recording service, distributed workers and
-100-camera hardware acceptance remain open.
+process boundary. Multi-source recording, integration of the shared scheduler
+with live ingest/per-camera rule state, distributed workers and 100-camera
+hardware acceptance remain open. The existing single-channel recorder does not
+complete those scaling tasks.
 
 ## Separate the workloads
 
@@ -317,7 +321,7 @@ Only the Python standard library is required. From the repository root:
 python3 -m edge.capacity --cameras 100 --sample-fps 2 --workers 8 \
   --service-ms 650 --duration-seconds 10 \
   --output /tmp/dvr-100-source-simulation.json
-python3 -m unittest discover -s tests -p 'test_*.py'
+python3 -m unittest discover -s tests -p 'test_capacity.py'
 ```
 
 Use a new output path each time. `--service-ms` is required to make the assumed
@@ -375,9 +379,11 @@ No finding here establishes that one particular workstation can satisfy them.
    into an admitted pipeline with durable results, per-camera rule state,
    freshness/recovery policy and deterministic receipts. Requalify dwell/max-gap
    behavior under explicit frame loss. Keep recording separate from sample drops.
-5. **Add a governed local ingest/recording service.** Use explicit source
-   admission and private credential handling, per-source reconnect/backoff and
-   health, protected APIs, retention and disk backpressure. Credentials/stream
+5. **Extend and qualify local ingest/recording.** The existing bounded preview,
+   two-camera live-AI and single-channel recorder need physical-device acceptance
+   before expanding them. Preserve explicit admission, private credentials,
+   per-source reconnect/backoff and health, protected APIs, retention and disk
+   backpressure across the larger pipeline. Credentials/stream
    URLs must not reach the hosted UI or Git. No automatic activation is implied.
 6. **Scale across local worker hosts when measured capacity requires it.**
    Partition camera ownership explicitly; preserve sequence ordering, source

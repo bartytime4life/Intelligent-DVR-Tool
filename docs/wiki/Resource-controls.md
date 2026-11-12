@@ -6,9 +6,9 @@
 
 **Quick path:** Enter workload assumptions → Apply workspace limits for browser behavior → Export analyzer policy for supported offline limits → measure actual use.
 
-![Actual System planning workspace with editable defaults, not detected hardware or benchmark results.](https://raw.githubusercontent.com/wiki/bartytime4life/Intelligent-DVR-Tool/docs/media/guide/system.jpg)
+![November 11 System workspace with basic recording and browser settings first. Values are editable assumptions, not detected hardware or benchmarks.](https://raw.githubusercontent.com/wiki/bartytime4life/Intelligent-DVR-Tool/docs/media/guided-experience-2026-11-11/06-system-after.jpg)
 
-*Merged source `2566d845`, clean local browser; [capture provenance](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-provenance).*
+*PR #110 source `13355e18`, merged as `cb91fa40`; [capture provenance](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Guided-experience-visual-provenance).*
 
 [Hardware](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Hardware-guide) · [Linux](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Linux-setup) · [Windows](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Windows-setup) · [GPU planning](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/GPU-planning)
 
@@ -26,8 +26,8 @@ disclosure; changing the disclosure does not apply any setting.
 | Setting / action | Enforced now | Limits |
 | --- | --- | --- |
 | Camera wall tiles: 1, 2 or 4 | Applied browser setting unmounts excess wall tiles and keeps the selected source visible | Does not connect, decode or analyze real cameras; an expanded view is separate |
-| Camera overlay pixel scale: 1× or 2× | Applied setting changes camera overlay canvas dimensions | 1× uses a quarter of the overlay pixels of 2×; scene imagery is unaffected; no frame-rate claim |
-| Pause sample playback in hidden tabs | Applied setting stops sample-timeline timers while `document.hidden` is true | Covers sample camera-tile playback, not a whole-host power policy or the facility rehearsal |
+| Zone overlay pixel scale: 1× or 2× | Applied setting changes the Zones editor's overlay canvas dimensions | 1× uses a quarter of the overlay pixels of 2×; source imagery is unaffected; no frame-rate claim |
+| Hidden-page behavior | Camera previews and recording playback always stop/pause when the page is hidden; no pause toggle is offered | Exported policies set `pause_when_hidden` to true even for older plans that stored false; this does not stop explicitly running local backup or LAN recording jobs |
 | OpenCV threads per analyzer | `edge.analyze --resource-policy FILE` calls `cv2.setNumThreads` with a value no greater than the policy cap | OpenCV's CPU pool only; other native libraries/decoders and the OS may have additional threads |
 | Decoded frames per run | Analyzer stops reading at the policy ceiling and records partial state when the bound is reached | A decoded-frame count, not seconds or a memory ceiling; stride still controls analyzed samples |
 | Worker slots, retained queue bytes, dispatch age | `scheduler_from_policy` constructs the bounded scheduler with these limits | No worker processes are created; it is not yet wired into live ingest or the recording analyzer |
@@ -102,7 +102,7 @@ requires 1–4 scheduler slots and rejects larger counts; it does not silently
 clamp an exported plan. Its polled deadlines, bounded IPC and owned-child
 termination are distinct from the browser's planning fields and OS quotas.
 
-Use the Linux/Windows guides for the distinction between cgroup/systemd properties and Windows Job Object limits. No OS containment, filesystem quota, GPU-power setting, retention-deletion service or priority tuner is controlled by the browser. An admitted host-control service still needs authenticated narrow APIs, supported OS enforcement, per-process health and durable failure receipts before such controls can be presented as live.
+Use the Linux/Windows guides for the distinction between cgroup/systemd properties and Windows Job Object limits. System planning does not control OS containment, filesystem quotas, GPU power, retention deletion or process priorities. The separate LAN recorder does apply its own bounded retention after explicit Start; the OEM backup library never deletes copies automatically. An admitted host-control service still needs authenticated narrow APIs, supported OS enforcement, per-process health and durable failure receipts before such controls can be presented as live.
 
 The 100-camera requirement remains a workload qualification target. Valid policy imports, successful calculations and green unit tests do not establish sustained camera throughput or recognition quality.
 

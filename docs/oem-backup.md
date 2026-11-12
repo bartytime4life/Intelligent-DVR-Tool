@@ -20,8 +20,9 @@ Before relying on a real OEM, complete the [one-recording field acceptance proce
    after the normal PC installation (on Mac use the ordinary prepared analysis
    Start). A model is optional on Linux/Windows: without a prepared catalog the
    companion opens in **Copy-only mode**. Then open
-   **Recognition → Use my existing DVR → Connect to this computer**. The ordinary Linux/Windows PC
-   launcher exposes guided camera setup. A prepared Mac analysis launch exposes
+   **Recognition → Use my existing DVR → Connect to this computer**. The companion
+   and analysis-enabled Linux/Windows PC launchers expose guided camera setup;
+   plain preview-only Start lacks this task's backup connection. A prepared Mac analysis launch exposes
    the folder backup; its LAN preview/recorder platform limits still apply.
 2. Choose the **DVR source folder** where the OEM finishes recordings or exports.
    Use **Choose source folder**, or paste the full path from your file manager.
@@ -45,16 +46,25 @@ Before relying on a real OEM, complete the [one-recording field acceptance proce
    an explicit human handoff from the existing Recognition review.
 7. **Stop backup** pauses copying and cancels its active analysis. Completed copies
    remain. Closing a browser tab does not stop the service; restarting the service
-   always leaves backup paused. Settings and completed reviews survive restart.
+   always leaves backup paused. Library settings and completed source/review pairs
+   survive restart; human decisions and notes remain in browser storage and their
+   separate exports.
 
 Opening **Review backup** verifies the result and exact saved recording. One
 opening runs at a time with a two-minute deadline. **Cancel backup opening**
 releases its controls and preserves the current review. While connected with
 backup or analysis active, **Stop backup** remains available during opening.
 Cancelling an opening does not stop background backup or delete a saved video.
+Leaving Recognition or hiding the page cancels the opening as well. A newer
+result or source-matching request takes precedence over its late reply, including
+when that newer file is rejected. Return and choose **Review backup** explicitly
+when ready; the saved copy and current review stay available.
 
-To expose camera setup with a direct developer invocation, use matching
-`--feeds-config` and `--camera-setup-config` paths. File backup can be enabled alone with
+To expose the guided form with a direct developer invocation, use matching
+`--feeds-config` and `--camera-setup-config` paths, plus `--backup-state-dir` or
+recording-analysis configuration so **Connect to this computer** can load its
+library session. Configuring the source API alone is insufficient for that form.
+File backup can be enabled alone with
 `--backup-state-dir /absolute/private/settings-folder`. Analysis additionally needs
 `--recordings` and `--config` together. The library session has its own
 same-origin, same-account (Linux) token endpoint; it does not enable analysis or
@@ -80,6 +90,12 @@ capabilities; an ONVIF label alone is insufficient evidence of interoperability.
 
 ## Add an IP camera or local-network DVR
 
+Monitor's empty DVR chooser also offers **Add camera or DVR source**, which opens
+this form and focuses **Connect to this computer** if disconnected. After that
+explicit availability check, focus moves to the source details. An already
+connected form opens with unfinished fields intact. This handoff alone makes no
+source write, camera connection, recording or inference request.
+
 Expand **Connect an IP camera or LAN DVR**. Enter a name, its exact private IPv4
 address, RTSP port, the documented channel path and a viewer login. **Save camera
 source** stores the credentials privately in the local service configuration; the
@@ -91,7 +107,7 @@ To use the existing one-camera recorder, select the saved channel and choose
 **Use for LAN recording**. The app opens the **Record a LAN camera** task and
 moves keyboard focus there. Review its settings, then explicitly choose
 **Start recording & analysis**. Saving/configuring alone never connects it. This
-removes JSON editing for the ordinary Linux/Windows setup path. The recorder
+removes JSON editing for the analysis-enabled Linux/Windows setup path. The recorder
 remains a bounded, sampled video-only pilot with possible gaps and automatic
 retention. It is separate from the full-byte OEM backup library and is not an
 archival substitute. See [LAN recording limits](lan-recording.md).

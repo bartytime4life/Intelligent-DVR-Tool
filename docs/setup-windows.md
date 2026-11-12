@@ -4,7 +4,9 @@
 
 ![Workflow diagram for setup windows.](media/guide/start.svg)
 
-**Quick path:** Install prerequisites and the isolated PC runtime → prepare local models → run Check → Start the foreground loopback service.
+**Quick path:** Install the isolated PC runtime → run Check → Start the
+foreground loopback service. Prepare a model only for analysis/training; a
+copy-only DVR Companion does not require one.
 
 [Hardware and storage](hardware-guide.md) · [GPU plan](gpu-planning.md) · [Resource limits](resource-controls.md) · [Linux](setup-linux.md)
 
@@ -52,6 +54,17 @@ py -3.12 -m edge.pc_setup --check
 py -3.12 -m edge.pc_setup
 ~~~
 
+## Choose the task before starting
+
+Plain Start enables the preview service. For guided camera-source and OEM folder
+setup, use the DVR Companion launcher, or an analysis-enabled service. The
+companion can start copy-only with no detector model; backup, preview, recording
+and inference still require their own explicit actions. See
+[the PC task paths](pc-testing.md#first-real-device-test) and
+[OEM companion setup](oem-backup.md). The direct `edge.analyze` CLI defaults to
+OpenCV CPU; the prepared analysis service instead prefers supported CUDA with
+visible CPU fallback. Installing the default runtime alone does not install CUDA.
+
 ## Read-only inventory and local policy
 
 Choose an existing path on the intended recording volume and a new output filename:
@@ -61,7 +74,7 @@ Choose an existing path on the intended recording volume and a new output filena
 .\.venv\Scripts\python.exe -m edge.resources --policy 'C:\PrivateDvr\dvr-resource-policy.json'
 ```
 
-The first command queries only selected volume capacity, OS CPU/RAM totals and the opt-in fixed NVIDIA name/VRAM query. Import its JSON locally in System. The second validates the exported policy only. Neither starts analysis, tunes the OS, creates an array or installs drivers.
+The first command queries only selected volume capacity, OS CPU/RAM totals and the opt-in fixed NVIDIA name/VRAM query. Import its JSON in **System → Advanced planning details → Import local host snapshot**. The second validates the exported policy only. Neither starts analysis, tunes the OS, creates an array or installs drivers.
 
 For an explicitly approved recording/model and new output files:
 
@@ -82,7 +95,7 @@ Paths are examples; validate the rule and ensure directories exist. The selected
 
 The local analysis and DVR preview workers apply Windows **Job Object** process-memory limits and kill-on-close containment [W2]. They do not implement Windows CPU-rate quotas. Changing Task Manager priority is not equivalent to a hard quota; the System page's RAM reserve remains a planning allowance.
 
-Keep the future recording service and the interactive review UI separate. Qualify actual Windows camera/codec compatibility, storage recovery, driver updates, power failure, long sessions and the 100-source workload before unattended use. The Windows CI matrix checks software contracts; it does not perform physical-camera or target-machine acceptance. The Linux-only bounded model-qualification worker is not a Windows feature; its platform-specific cases remain explicitly skipped there.
+Keep any future unattended or multi-source recording service separate from the interactive review UI. The current foreground service already provides explicit single-channel recording. Qualify actual Windows camera/codec compatibility, storage recovery, driver updates, power failure, long sessions and the 100-source workload before unattended use. The Windows CI matrix checks software contracts; it does not perform physical-camera or target-machine acceptance. The Linux-only bounded model-qualification worker is not a Windows feature; its platform-specific cases remain explicitly skipped there.
 
 ## Primary references
 

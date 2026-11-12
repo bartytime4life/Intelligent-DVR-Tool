@@ -35,6 +35,14 @@ result. Camera names may be hidden until permission is granted.
 
 ## Local DVR or IP camera
 
+For guided source entry after the normal PC installation, use
+**Start-DVR-Companion-Linux.sh** or **Start-DVR-Companion-Windows.cmd**. Copy-only
+companion mode needs no recognition model. An analysis-enabled PC launch also
+provides the required backup connection and source-setup APIs. A plain
+preview-only Start can list and connect configured sources, but cannot complete
+the guided form's backup connection; restart with the companion, or use the
+manual configuration alternative below. See [companion setup](oem-backup.md#quick-setup).
+
 In Monitor's DVR source chooser, **Add camera or DVR source** opens the existing
 guided form in Recognition. If needed, explicitly **Connect to this computer**
 to check availability, then enter and save the authorized source details. This
@@ -42,11 +50,23 @@ handoff preserves unfinished fields and does not save a source, connect a camera
 or start recording or analysis. Return to Monitor to connect the saved source
 when ready.
 
+The handoff opens **Connect an IP camera or LAN DVR** and focuses the explicit
+connection button first, or the source form if already connected. That request
+remains pending while availability loads. If unsent live observations trigger a
+leave warning, cancelling it keeps Monitor's chooser and observations intact.
+Accepting departure follows the normal Monitor cleanup. Check source details
+before pressing **Save camera source**; saving and connecting remain separate.
+
 This first connection path supports **RTSP over TCP**, with a fixed private IPv4
 address. It does not scan the LAN or implement ONVIF discovery, DVR vendor APIs,
 cloud-camera accounts, public endpoints, hostnames, IPv6, RTSPS or UDP transport.
 Consult the DVR’s own setup page/manual for the RTSP channel path. Prefer a
 read-only viewer account and a low-bandwidth substream at or below 1080p.
+
+### Manual configuration alternative
+
+Use these steps when preparing the source file directly rather than using the
+guided companion or analysis-enabled Linux/Windows form:
 
 1. Install the repository’s Linux or Windows local edge environment; see
    [Linux](setup-linux.md) or [Windows](setup-windows.md).

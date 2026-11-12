@@ -1,0 +1,162 @@
+{
+  "schema": "intelligent-dvr.documentation-validation.v1",
+  "checked_at_utc": "2026-11-12T01:39:23.435987+00:00",
+  "baseline_revision": "cb91fa40d9d388faacca0785075c8b1986b33773",
+  "application_sources_changed": false,
+  "historical_evidence_rewritten": false,
+  "inventory_counts": {
+    "project instructions retained": 1,
+    "updated or new canonical documentation": 38,
+    "dated evidence retained": 66,
+    "reviewed current documentation retained": 17,
+    "new documentation verification": 1,
+    "generated Wiki companion": 65,
+    "third-party reference retained": 1,
+    "fixture reference retained": 1
+  },
+  "checks": [
+    {
+      "command": [
+        "python",
+        "scripts/check-docs.py"
+      ],
+      "returncode": 0,
+      "output": "Host summaries verified: 300 distinct images; reference/queue/rate/parity/source/default invariants checked. No experiments rerun.\nCUDA evidence checks passed: parity, queue accounting, runtime scope and publication bounds.\nWorker evidence checks passed: initial/final trials, parity, queue accounting and publication scope.\nRecovery evidence checks passed: native proof, generations/reaping, fault intervals, outcome/queue accounting and privacy scope.\nJournal evidence checks passed: native proof, interrupted work, acknowledgment/redelivery, replay accounting and measured durability cost.\nBatching evidence checks passed: atomic native exits, version compatibility, indexed delivery, matched medians and honest queue/delivery accounting.\nOwner synthetic record: source/policy bindings, 142 tests per environment, legacy recovery, CUDA block and all loss identities verified.\nDocumentation checks passed: 1439 local links, 14 historical media hashes, 11 PR61 visual blobs, 2,381,700 historical + 185,432 PR61 + 1,626,214 guide + 222,707 guided-experience media bytes, test-count consistency.\n"
+    },
+    {
+      "command": [
+        "python",
+        "scripts/build-wiki.py",
+        "--check"
+      ],
+      "returncode": 0,
+      "output": "Wiki checked: 65 pages/navigation files.\n"
+    },
+    {
+      "command": [
+        "python",
+        "scripts/build-guide-graphics.py",
+        "--check"
+      ],
+      "returncode": 0,
+      "output": "Checked 10 editable workflow graphics.\n"
+    },
+    {
+      "command": [
+        "python",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-p",
+        "test_wiki_docs.py"
+      ],
+      "returncode": 0,
+      "output": ".......\n----------------------------------------------------------------------\nRan 7 tests in 0.047s\n\nOK\n"
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "returncode": 0,
+      "output": ""
+    }
+  ],
+  "capacity_recipe_check": {
+    "command": [
+      "python",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "tests",
+      "-p",
+      "test_capacity.py"
+    ],
+    "passed": 15,
+    "skipped": 0,
+    "failed": 0,
+    "note": "Executed during this documentation review, separate from prior application suites."
+  },
+  "discovery_patterns": [
+    {
+      "document": "README.md",
+      "pattern": "test_*.py",
+      "matched_files": 42
+    },
+    {
+      "document": "edge/README.md",
+      "pattern": "test_inference.py",
+      "matched_files": 1
+    },
+    {
+      "document": "edge/README.md",
+      "pattern": "test_media_coverage.py",
+      "matched_files": 1
+    },
+    {
+      "document": "edge/README.md",
+      "pattern": "test_tracking.py",
+      "matched_files": 1
+    },
+    {
+      "document": "edge/README.md",
+      "pattern": "test_*.py",
+      "matched_files": 42
+    },
+    {
+      "document": "docs/performance-100-cameras.md",
+      "pattern": "test_capacity.py",
+      "matched_files": 1
+    },
+    {
+      "document": "docs/offline-evaluation.md",
+      "pattern": "test_evaluation.py",
+      "matched_files": 1
+    },
+    {
+      "document": "docs/oem-field-acceptance.md",
+      "pattern": "test_backup_library.py",
+      "matched_files": 1
+    },
+    {
+      "document": "docs/oem-field-acceptance.md",
+      "pattern": "test_field_acceptance.py",
+      "matched_files": 1
+    },
+    {
+      "document": "docs/oem-field-acceptance.md",
+      "pattern": "test_backup_library.py",
+      "matched_files": 1
+    },
+    {
+      "document": "docs/oem-field-acceptance.md",
+      "pattern": "test_field_acceptance.py",
+      "matched_files": 1
+    },
+    {
+      "document": "docs/model-qualification-20261026.md",
+      "pattern": "test_*.py",
+      "matched_files": 42
+    },
+    {
+      "document": "docs/tracking-evaluation.md",
+      "pattern": "test_tracking_evaluation.py",
+      "matched_files": 1
+    },
+    {
+      "document": "docs/tracking-evaluation.md",
+      "pattern": "test_tracking.py",
+      "matched_files": 1
+    },
+    {
+      "document": "docs/tracking-evaluation.md",
+      "pattern": "test_evaluation.py",
+      "matched_files": 1
+    }
+  ],
+  "independent_review": "PASS: entry/operator, technical scope, generator/media boundaries and final corrections"
+}

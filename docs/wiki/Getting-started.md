@@ -4,11 +4,20 @@
 
 ![Schematic of five user-controlled steps from approved source to an exported human review.](https://raw.githubusercontent.com/wiki/bartytime4life/Intelligent-DVR-Tool/docs/media/guide/recording.svg)
 
-**Start with one task, not every control.** A fresh Monitor looks like the tested screenshot below: no video is connected until you explicitly choose a source and complete its permission/setup step.
+**Start with one task.** Monitor's **What’s next?** guide offers **Watch cameras**,
+**Analyze saved video**, **Keep DVR copies** and **Plan coverage**. The first
+focuses **Connect source**; the others open their existing task controls. No
+video connects until you explicitly choose a source and complete its permission/setup step.
 
-![Current Monitor's source chooser in a controlled desktop Chromium run, with no connected camera or synthetic footage.](https://raw.githubusercontent.com/wiki/bartytime4life/Intelligent-DVR-Tool/docs/media/guide/monitor.jpg)
+![November 11 Monitor goal guide and source chooser, with no connected camera or synthetic footage.](https://raw.githubusercontent.com/wiki/bartytime4life/Intelligent-DVR-Tool/docs/media/guided-experience-2026-11-11/04-monitor-after.jpg)
 
-*Captured from merged source `2566d845` in a clean local browser session. No camera was connected. [Source provenance](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-provenance).*
+*Controlled November 11 application capture. No camera was connected.
+[Capture provenance](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Guided-experience-visual-provenance). The older
+[November 1 collection](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-provenance) remains dated separately.*
+
+Use **Find a task** (**Ctrl+K** on Windows/Linux, **Cmd+K** on macOS) for the
+full task list. Search, use Up/Down and Enter, or Escape to close.
+[Complete task map](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-handbook#find-the-next-task).
 
 ## Install, check and start
 
@@ -30,17 +39,20 @@ records remain available without invented imagery.
 | --- | --- | --- |
 | Monitor | Use the **Computer webcam** first-run card (or **Connect source**), then **Connect webcam** and allow browser permission | Live preview without automatic inference, visible status and explicit disconnect |
 | Webcam clip | Record webcam clip → Stop recording → Open clip in Recognition | Opt-in bounded clip ready for a separately authorized local import and analysis job |
-| Local DVR | Configure local-feeds.json, restart, load/select a channel and connect | Bounded RTSP/TCP preview; actionable connection errors |
-| Recognition | Configure an approved recordings folder/model/rules; connect and explicitly analyze | Progress, cancellation and source-matched results using the existing analyzer |
+| Local DVR | Use the PC DVR Companion or an analysis-enabled service with camera setup enabled. Select **Add camera or DVR source** in Monitor's **Local DVR / IP camera** chooser; connect to this computer, save the channel, then return to Monitor to load/select and explicitly connect | Bounded RTSP/TCP preview; saving a source starts no preview or recording. [Supported setup and configuration alternatives](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Camera-sources) |
+| Existing OEM DVR | On Linux/Windows, open **Start-DVR-Companion-Windows.cmd** / **Start-DVR-Companion-Linux.sh**, then **Keep DVR copies → Connect to this computer**. Select separate folders, save, then **Start backup** | Verified finished-recording copies; copy-only mode needs no detector model. [Backup workflow and Mac path](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/OEM-backup) |
+| Recognition | **Analyze saved video** → **Connect local analysis**; select/import an approved recording, choose model/rules, then **Analyze recording** | Progress, cancellation and source-matched results using the existing analyzer |
 | Train · detection tuning | Name the camera view, record calibration and confirm its prompts. Repeat sessions with that view name, then check a proposed threshold on fresh footage. [Guided session](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Guided-training) | Matching confirmed sessions contribute together. A saved improvement must pass the fresh check and avoid regressions on earlier evidence. |
 | Train: person enrollment | Enable [enrollment](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Person-enrollment), obtain consent and capture the guided baseline | A deletable face template stays in the local service; Recognition can explicitly request possible matches for local jobs |
 | Events | Send a verified observation for review; add a note, confirm/dismiss and export | Decisions remain through workspace switches; no new simulated events |
 | Zones | Use a still from a Monitor preview, a Recognition frame or an image file, draw the zone and **Export analyzer rules** | A rule file the local analyzer accepts, in full-frame coordinates of that camera's image; no live inference implied |
 | Facility | Choose a task from **Current task** or the left guided steps; add a shape or import reviewed footprints, edit cameras and Undo | Estimated coverage and explicitly simulated route rehearsal |
-| System | Review the machine plan and apply 1/2/4 visible-tile limits | Selected live feed stays visible within the chosen limit |
+| System | Start with recording/storage and camera-wall settings; expand **Advanced planning details** for processing/GPU/memory/power, then apply or export deliberately | Selected live feed stays visible within the applied 1/2/4-tile limit; other figures remain planning assumptions |
 
 See [camera setup](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Camera-sources), [recording analysis](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Local-analysis-service),
 [Linux](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Linux-setup) and [Windows](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Windows-setup). Previews do not record.
+The ordinary preview-only Start does not expose the companion's folder/source
+setup service, even though the browser can show its task controls.
 [Live AI](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Live-AI-and-tracking) with short-lived tracks runs only after **Start AI**
 on a tile. Actual device compatibility, detection and tracking quality require
 separate testing.
@@ -64,6 +76,13 @@ scored library. Downloaded count receipts do not restore that library.
 
 Facility import validates before replacement, and Undo restores the previous
 edit. The [facility guide](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Facility-planning) documents bounds and source fields.
+
+Cancel a leave warning to keep an unfinished editor open. System's collapsed
+advanced section retains edited values and shows **Unapplied advanced changes**;
+errors and warnings remain visible. A loaded Recognition review survives ordinary
+workspace switches, but opening a result is cancelled when Recognition or the
+page is hidden. Return and explicitly retry the result or file opening. Background
+analysis, backup and LAN recording have their own **Cancel**/**Stop** controls.
 
 ## Maps and location
 

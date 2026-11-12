@@ -44,12 +44,17 @@ The pointer controls need a ready map. External tiles remain off by default.
 
 ## Geometry contract
 
-New exports use `intelligent-dvr.facility.v2`. Ordinary v1 plans migrate in memory
-without changing local geometry. The existing browser storage key is retained.
-V2 adds optional `holes` (at most 20 and 1,000 total vertices per building), `base`
+The October 28 geometry extension introduced `intelligent-dvr.facility.v2`.
+Current exports use `intelligent-dvr.facility.v6`; supported v1–v5 plans migrate
+in memory to the current contract without discarding their geometry. Named
+[facility collections](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Saved-facilities) use `dvr.facilities.v1` and preserve
+the legacy `dvr.facility.v1` save during migration. Later versions add floors/openings, doorways,
+windows and stair placement; see the [current facility guide](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Facility-planning).
+V2 introduced optional `holes` (at most 20 and 1,000 total vertices per building), `base`
 (elevation above ground, default zero) and `part` (independent building-part flag).
 `height` is the roof's elevation above ground; occupied volume is base to height.
-Older code rejects v2 instead of silently discarding its courtyards/bases. Export
+Code predating v2 rejects its courtyards/bases rather than silently discarding them;
+older versions likewise cannot represent newer v6 fields. Export
 before rollback; there is no automatic downgrade or destructive storage migration.
 
 Complete ways and multipolygon outer/inner members can stitch reversed segments.

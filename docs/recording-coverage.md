@@ -86,11 +86,14 @@ uses binary wheels and its bounded native readiness probe validates generated
 AVI coverage without contacting cameras. An older installation needs its current
 runtime requirements installed before new recording analysis is available.
 
-Validation shares the existing local service worker's five-minute wall deadline,
-4 GiB address-space/process-memory bound and Linux CPU limit. Cancellation and
-parent-loss cleanup remain enforced. Validation time is included in job elapsed
-time, not detector-only latency percentiles. No separate service or GPU worker
-is introduced. The standalone CLI retains its existing lack of a hard native
+Validation shares the existing local service worker's five-minute wall deadline.
+CPU workers use a 4 GiB virtual-address limit on Linux and a 4 GiB process-commit
+limit on Windows; macOS has no worker memory cap. Eligible CUDA jobs instead use
+the [separate GPU resource policy](live-gpu.md#resource-policy-and-limits), including
+Linux's 128 TiB virtual-address ceiling and sampled 4 GiB resident-memory guard.
+Cancellation and parent-loss cleanup remain enforced.
+Validation time is included in job elapsed time, not detector-only latency
+percentiles. No separate validator service or worker is introduced. The standalone CLI retains its existing lack of a hard native
 wall-time deadline; use the bounded local service for that enforcement.
 
 ## Verification and remaining work
@@ -102,8 +105,11 @@ retry and Linux recovery. Browser tests cover native corrupt-media failure/retry
 unverified versus limit explanations and legacy results. These establish software
 behavior, not physical-camera acceptance or detection accuracy.
 
-Next work remains full-quality source preservation, visual enhancement comparison
-and reviewed labeling. This fix does not change recorder sampling/re-encoding,
+The separate [OEM companion](oem-backup.md) preserves full-byte finished-file
+copies, and [sharpening comparison](enhancement-comparison.md) offers a bounded
+original/candidate view. Neither recovers lost source detail or establishes
+accuracy; representative reviewed labeling remains required. Coverage validation
+does not change the LAN recorder's sampling/re-encoding,
 infer missing timestamps, enable a camera, install restoration weights, replace
 the owner's running application or qualify continuous/100-camera operation.
 

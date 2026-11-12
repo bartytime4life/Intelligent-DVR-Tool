@@ -15,9 +15,11 @@ flowchart TD
   A["Explicit webcam permission"] --> B["Monitor video preview"]
   C["Configured LAN RTSP channel"] --> D["Pinned relay + bounded CPU decoder"]
   D --> B
+  B -->|"Explicit Start AI"| I["Bounded local live detector + tracks"]
+  I -->|"Explicit Send to Events + analyzed still"| H["Recognition / Events + human review"]
   E["Selected local recording + model/rules"] --> F["Bounded analysis job"]
   F --> G["Existing analyzer + verified review bundle"]
-  G --> H["Recognition + human review"]
+  G --> H
 ```
 
 Webcam video remains in the browser. DVR previews use the optional same-computer
@@ -29,22 +31,29 @@ The optional [LAN recorder](lan-recording.md) uses the same relay/decoder and
 feeds verified, finalized segments into that job service. It retains matching
 source/results, has explicit Start/Stop and bounded storage, and exposes gaps
 between connections. The scheduler/load model remains separate preparation;
-tracking and 100-camera capacity are not implied. Facility plans are metadata,
+tracking accuracy and 100-camera capacity are not implied. The separate
+[OEM backup library](oem-backup.md) makes verified full-byte copies of finished
+files without automatic deletion. Monitor's explicit
+[live AI](live-detection.md) sends only its displayed frames to a bounded local
+worker; preview alone never starts it. Facility plans are metadata,
 not calibrated camera feeds. The browser performs no neural-network inference.
 
 | Component | Source | Role |
 | --- | --- | --- |
-| Camera previews and clips | `src/LiveMonitor.jsx`, `src/clip-capture.mjs`, `edge/local_feeds.py`, `edge/feed_worker.py` | Explicit browser webcam and LAN RTSP preview; optional video-only browser webcam clip capture; no live inference |
-| LAN recording | `edge/lan_recorder.py`, `edge/segment_worker.py`, `src/LanRecorder.jsx` | Explicit one-source segment capture, bounded retention and existing CPU job dispatch; no discovery or automatic startup |
+| Camera previews and clips | `src/LiveMonitor.jsx`, `src/clip-capture.mjs`, `edge/local_feeds.py`, `edge/feed_worker.py` | Explicit browser webcam, LAN RTSP and approved public HTTPS preview; optional video-only browser webcam clip capture; AI is a separate action |
+| Live AI and tracks | `src/live-ai.mjs`, `edge/live_analysis.py`, `edge/live_worker.py`, `edge/tracking.py` | Explicit per-tile detection, short-lived tracks and unsent observations; at most two AI sessions; no recording or automatic Events handoff |
+| LAN recording | `edge/lan_recorder.py`, `edge/segment_worker.py`, `src/LanRecorder.jsx` | Explicit one-source segment capture, automatic bounded retention and local job dispatch; no discovery or automatic startup |
+| OEM backup library | `edge/backup_library.py`, `src/BackupLibrary.jsx` | Verified finished-file copies, optional local analysis and explicit review; no automatic deletion or OEM configuration changes |
 | Workspace | `src/App.jsx`, `src/data.mjs` | Review, rules, local video preview, explicit receipt import |
-| Recording recognition | `src/RecognitionReview.jsx`, `src/recognition.mjs` | Explicit review bundle, original-file hash matching, paused sampled detections/counts and Event handoff; connects to the optional same-origin local job API |
+| Recording recognition | `src/RecognitionReview.jsx`, `src/recognition.mjs`, `src/review-transfer.mjs` | Explicit review bundle, exact-file matching, sampled detections and Event handoff; shared opening intent prevents late results from replacing newer choices |
 | Guided training | `src/TrainingWorkspace.jsx`, `src/training.mjs`, `edge/local_service.py` | Scripted webcam session, local analysis and opt-in rule-threshold saving; no detector retraining |
 | Person enrollment and suggestions | `edge/people.py`, `edge/faces.py`, `edge/face_worker.py`, `src/RecognitionReview.jsx` | Consent-gated local face templates and explicit possible matches for human review; no verified identity or automatic decision |
 | Facility model | `src/facility.mjs` | Bounded plan validation, local-meter projection, estimated visibility and rehearsal |
 | Facility renderer | `src/FacilityBuilder.jsx`, `src/facility-map.mjs` | Guided controls, MapLibre and selected-camera Three.js volume |
 | Map starter | `src/FacilityStarter.jsx`, `src/facility-starter.mjs` | Common shapes, dimensions, reviewed simple ways/supported outer and inner relations and source records |
 | Place search and services | `src/AddressSearch.jsx`, `src/facility-services.mjs` | Explicit submitted search, selectable public/local services and bounded responses |
-| Local recording jobs | `edge/local_service.py`, `edge/analysis_worker.py`, `src/LocalAnalysis.jsx` | Loopback selection catalog, one isolated CPU job, bounds, progress/cancel and source-matched result opening |
+| Local recording jobs | `edge/local_service.py`, `edge/analysis_worker.py`, `src/LocalAnalysis.jsx` | Loopback catalog, one isolated job, bounds, progress/cancel and source-matched opening; GPU-first service preference with CPU fallback |
+| Runtime selection | `edge/acceleration.py`, `edge/live_backend.py` | One shared GPU slot for eligible Windows/Linux YOLOX-S jobs and live AI; actual CUDA execution must be verified; CPU override remains available |
 | Analyzer | `edge/analyze.py`, `edge/model_profiles.py`, `edge/rules.py` | Explicit recording analysis and profile-bound decoding |
 | Evaluation | `edge/evaluation.py`, `edge/evaluate.py` | Annotation matching, review coverage and timing summaries |
 | Scaling preparation | `edge/scheduler.py`, `edge/capacity.py` | Fair bounded sample admission and virtual-time load simulation |
@@ -57,6 +66,9 @@ not calibrated camera feeds. The browser performs no neural-network inference.
 | Preview a local video | Local browser object URL | Preview is not analysis; no upload is implemented |
 | Open recognition results + matching recording | Transient browser memory and local object URL | SHA-256 match before attachment; metadata and video never uploaded; selected observations can be explicitly imported into localStorage |
 | Start local analysis job | One explicit local folder, frozen input snapshots and same-computer HTTP result transfer; optional Linux private last-job recovery | Token/Host/origin checks; opt-in bounded same-computer recording import, no cloud inference; [restart storage](local-analysis-service.md#optional-linux-restart-recovery) is not continuous recording or a durable human-review database |
+| Start live AI | Displayed JPEG frames sent to this computer's loopback service; bounded observations/stills retained in tab memory | No footage recording; unsent review is temporary; only explicit Send to Events saves its analyzed still in this browser |
+| Start OEM backup | Separate `Intelligent-DVR-Backup/` tree, private file receipts/reviews and SQLite index | Originals stay unchanged; no automatic deletion; browser decisions and models need separate backups |
+| Start LAN recording | Private `.lan-recorder/` beneath the recordings folder | Automatic age/count/space retention can delete completed and pending segments; export needed evidence separately |
 | Apply guided training | New rule file under `trained/` beside the catalog; default selection/history in browser storage | Explicit apply and training-write permission; detector weights are unchanged; [storage](training.md#what-is-saved-where) |
 | Enroll or check a consenting person | Private `people/` templates beside the catalog; clips stay in the recordings folder | Face models and processing stay local; deleting a template does not delete clips; [deletion](person-enrollment.md#storage-and-deletion) |
 | Check for enrolled people in Recognition | Pending embeddings in service memory for one local job; browser receives names, boxes and similarity only | Confirm may add a template view; Not this person hides the suggestion; no automatic Events/export handoff; [limits](person-enrollment.md#possible-matches-in-recognition) |
@@ -72,6 +84,12 @@ not calibrated camera feeds. The browser performs no neural-network inference.
 | Send observations to Events from a matched recording or LAN segment | Small JPEG stills in this browser's IndexedDB | Drawn from the verified local recording; removed with their observations; never uploaded |
 | Use a still for zones | A re-encoded JPEG per rule plan in this browser's IndexedDB | Captured only on an explicit click; never uploaded; remove it with Remove still |
 | Choose a webcam | The device id in this browser's localStorage | Remembered for the next connection only; no frames stored |
+
+Browser saves and IndexedDB stills belong to the current browser profile and
+origin, including its port. Copying the checkout or a service store does not
+copy those records. Review exports contain metadata and notes, not the local
+observation images. Preserve browser exports and private service files
+separately before moving or reinstalling. See [review storage](review-and-events.md).
 
 Local analysis does not make every optional browser asset/provider offline. Default local paths are `/geo/search` and `/geo/overpass`; the operator must configure their fixed upstream services. The Sites Worker does not implement them. Same-origin routing does not certify downstream egress, and failure never silently switches to a public provider. See [service contracts](facility-setup-reliability.md#local-and-offline-delivery), [SECURITY.md](../SECURITY.md) and the provider disclosures.
 
@@ -102,15 +120,18 @@ It omits slabs, doors, windows, furniture, terrain, lighting, distortion, pixel 
 
 ```mermaid
 flowchart TD
-  A["Implemented: prototype + offline analyzer"] --> B["Required: representative labeled recordings"]
+  A["Implemented: explicit preview, live AI, recording, backup + review"] --> B["Required: representative labeled recordings"]
   B --> C["Required: sustained target-host qualification"]
-  C --> D["Future: ingest + recording + supervised workers"]
+  C --> D["Required: integrated continuous workloads + operational recovery"]
   D --> E["Required: 1 / 5 / 25 / 50 / 100+ source acceptance"]
   E --> F["Required: durable review + deployment acceptance"]
 ```
 
-Every box after the first is work needed for an operational capacity claim. This refresh introduces no production recorder, GPU worker service, multi-host inference system or authenticated review backend. [Roadmap](roadmap.md).
+Every box after the first is work needed for an operational capacity claim.
+Bounded local workers and a one-camera recorder exist; they do not establish
+continuous archival recording, multi-host inference, authenticated review or
+qualified 100-camera operation. [Roadmap](roadmap.md).
 
 ## Local machine setup and resource policy
 
-System adds explicit setup arithmetic and browser performance preferences. A read-only `edge.host` snapshot can be imported locally without exposing a privileged host API. Exported policies are consumed by the offline analyzer for OpenCV threads and frame caps, and by a separate scheduler adapter for retained bytes, slots and dispatch age. RAM, VRAM, disk and power estimates are not native quotas. GPU presets do not change the CPU backend. See [control scopes](resource-controls.md), [Linux](setup-linux.md), [Windows](setup-windows.md) and [GPU planning](gpu-planning.md).
+System adds explicit setup arithmetic and browser performance preferences. A read-only `edge.host` snapshot can be imported locally without exposing a privileged host API. Exported policies are consumed by the offline analyzer for OpenCV threads and frame caps, and by a separate scheduler adapter for retained bytes, slots and dispatch age. RAM, VRAM, disk and power estimates are not native quotas. Hardware presets do not select an execution backend or start inference; the local service's separate GPU preference and CPU override follow the [runtime policy](live-gpu.md). See [control scopes](resource-controls.md), [Linux](setup-linux.md), [Windows](setup-windows.md) and [GPU planning](gpu-planning.md).

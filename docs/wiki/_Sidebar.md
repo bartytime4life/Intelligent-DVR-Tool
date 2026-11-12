@@ -71,6 +71,7 @@
 - [Evidence and validation](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Evidence-and-validation)
 - [Roadmap](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Roadmap)
 - [Visual provenance](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-provenance)
+- [Guided experience visual provenance](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Guided-experience-visual-provenance)
 - [Wiki publication](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Wiki-publication)
 
 ### Dated records

@@ -1,0 +1,364 @@
+{
+  "schema": "intelligent-dvr.wiki-publication.v1",
+  "checked_at_utc": "2026-11-12T02:12:00.798065+00:00",
+  "source_commit": "df6377f032b91f9bae49c7786af501bc72ce068e",
+  "previous_wiki_commit": "b26130d39b5ada8854326c9954edae588ffb8983",
+  "published_wiki_commit": "6e3c2703a72d53f3da1a9b2adddc0e895c65d550",
+  "url": "https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki",
+  "delivery": "Existing authenticated GitHub Wiki browser editor; terminal credential expired; no authentication or repository-rule changes.",
+  "managed_pages_and_navigation": 65,
+  "edited_created_pages": 64,
+  "unchanged_footer_verified": true,
+  "exact_generated_markdown_readback": 64,
+  "images": [
+    {
+      "path": "docs/media/facility-capitol-roof-detail.webp",
+      "sha256": "08fe9829d6bd907e052fdb70385391a8abe28d6ab488d512c0c16b2366c0e52d",
+      "url": "https://raw.githubusercontent.com/bartytime4life/Intelligent-DVR-Tool/df6377f032b91f9bae49c7786af501bc72ce068e/docs/media/facility-capitol-roof-detail.webp"
+    },
+    {
+      "path": "docs/media/guided-experience-2026-11-11/04-monitor-after.jpg",
+      "sha256": "65f3a23056f31d61c57d3e9095850ac2464437dff2ee0f13bfe33bd28f10a3f6",
+      "url": "https://raw.githubusercontent.com/bartytime4life/Intelligent-DVR-Tool/df6377f032b91f9bae49c7786af501bc72ce068e/docs/media/guided-experience-2026-11-11/04-monitor-after.jpg"
+    },
+    {
+      "path": "docs/media/guided-experience-2026-11-11/05-monitor-mobile-after.jpg",
+      "sha256": "cb9a66eff4a38d9fce7611ccfa62f6a589e14a6f3206f984cbbd2692c0a867aa",
+      "url": "https://raw.githubusercontent.com/bartytime4life/Intelligent-DVR-Tool/df6377f032b91f9bae49c7786af501bc72ce068e/docs/media/guided-experience-2026-11-11/05-monitor-mobile-after.jpg"
+    },
+    {
+      "path": "docs/media/guided-experience-2026-11-11/06-system-after.jpg",
+      "sha256": "c5e351d8a3b198a32ddaccf89f7fe75bd448c8251f1169aebdb001b24592a146",
+      "url": "https://raw.githubusercontent.com/bartytime4life/Intelligent-DVR-Tool/df6377f032b91f9bae49c7786af501bc72ce068e/docs/media/guided-experience-2026-11-11/06-system-after.jpg"
+    },
+    {
+      "path": "docs/media/guided-experience-2026-11-11/07-system-mobile-advanced-after.jpg",
+      "sha256": "d09c89cdbf9d78f52cc15072818190a28720cecb30975ed25fd2b888e8cf19c3",
+      "url": "https://raw.githubusercontent.com/bartytime4life/Intelligent-DVR-Tool/df6377f032b91f9bae49c7786af501bc72ce068e/docs/media/guided-experience-2026-11-11/07-system-mobile-advanced-after.jpg"
+    }
+  ],
+  "image_delivery": "Five images absent from the older Wiki use immutable raw URLs at the published source commit. Other images retain Wiki-hosted URLs and assets. Text matches the generated set after only this explicit URL mapping.",
+  "pages": [
+    {
+      "file": "Guided-experience-visual-provenance.md",
+      "title": "Guided-experience-visual-provenance",
+      "sha256": "6723d018ac52e25e1ea80e90e03b73f1d50bcf5330cf6be4ede181df7418d053"
+    },
+    {
+      "file": "OEM-backup.md",
+      "title": "OEM-backup",
+      "sha256": "1d8ea298936a95ae12128e9aaeb9b29861519aea79e385d7c8a83d7f88e34f4d"
+    },
+    {
+      "file": "OEM-field-acceptance.md",
+      "title": "OEM-field-acceptance",
+      "sha256": "7d531f6898713f823815fbe2d66df5294c06592623974ebe360bac2dc812f551"
+    },
+    {
+      "file": "Home.md",
+      "title": "Home",
+      "sha256": "533f07114911c4e8e0e9bff9be20f0f41de7af04c2b060e2ecd49d4937e4ab39"
+    },
+    {
+      "file": "100-camera-plan.md",
+      "title": "100-camera-plan",
+      "sha256": "e837e2ead15d918457946755e2322d535745297342566cd4b259ed6e5aefe990"
+    },
+    {
+      "file": "Architecture-and-data.md",
+      "title": "Architecture-and-data",
+      "sha256": "a810d7eeadd3f45860176a7d7df0d5edd708429b1d69870da0ac6d010b7818f6"
+    },
+    {
+      "file": "Assessment-2026-10-30.md",
+      "title": "Assessment-2026-10-30",
+      "sha256": "03f321f8a061458f1b6d552a432dd008787d8098152ceaea0cb7d829e61db2e5"
+    },
+    {
+      "file": "Camera-sources.md",
+      "title": "Camera-sources",
+      "sha256": "9d82e72b29e9355ea82d0702f037845bd7acd40922f87baa2955844153add20f"
+    },
+    {
+      "file": "Edge-CLI.md",
+      "title": "Edge-CLI",
+      "sha256": "9b125495d9edd7593e99dfea5bd94f02d5a1131d2786130d1be21fcdeb336339"
+    },
+    {
+      "file": "Enhancement-comparison.md",
+      "title": "Enhancement-comparison",
+      "sha256": "a9a572f11399f40751a76961561e9818f1ee94fcba90750650c3836aea80d76e"
+    },
+    {
+      "file": "Evidence-and-validation.md",
+      "title": "Evidence-and-validation",
+      "sha256": "60e114380ff2a9f6e0fb17ea57a3a9d3e3e8374c71284425c8845c68205d6b17"
+    },
+    {
+      "file": "Experience-review-2026-10-29.md",
+      "title": "Experience-review-2026-10-29",
+      "sha256": "645c6e7e8ea677eb51695bbc064a192356540dc2ea38c3928c00e12e8abe4a3f"
+    },
+    {
+      "file": "Facility-planning.md",
+      "title": "Facility-planning",
+      "sha256": "97e2feddf2878de9a08b793c8ec91f13dad7e73d6e6a07097460be4648087005"
+    },
+    {
+      "file": "Facility-setup-reliability.md",
+      "title": "Facility-setup-reliability",
+      "sha256": "b325c851b0b9800eebadec3f3ed7947b90e4c2aa100f8ec15b92fdb398646228"
+    },
+    {
+      "file": "Facility-setup-research.md",
+      "title": "Facility-setup-research",
+      "sha256": "5728ab14c75af9299020531d7133dc284b8fa16cad01cac5c1c155e8f66c6757"
+    },
+    {
+      "file": "Facility-study-kit.md",
+      "title": "Facility-study-kit",
+      "sha256": "287227840e5c1ebf179ef56cd0c345406a85495af54fcd0b4d7f8240a7a350eb"
+    },
+    {
+      "file": "Facility-upgrades-2026-10-29.md",
+      "title": "Facility-upgrades-2026-10-29",
+      "sha256": "59cb8de0739ea13d495dac40d72f4fbe71a40db62b35d8b9b584f32056bdd692"
+    },
+    {
+      "file": "Field-acceptance.md",
+      "title": "Field-acceptance",
+      "sha256": "b8ed46f5a44081992d5e4e0e69fe6120346cb4a492a7e05de18ac252b65f13f8"
+    },
+    {
+      "file": "GPU-planning.md",
+      "title": "GPU-planning",
+      "sha256": "971321920ba3d9277a48f7e14d400b57b4612c8818b3b066512e0b8bde8a5071"
+    },
+    {
+      "file": "Getting-started.md",
+      "title": "Getting-started",
+      "sha256": "87efb0ddffc36f2ce619135abf1e2689d515f39782bca47481fd11d85f2bf70d"
+    },
+    {
+      "file": "Guide-index.md",
+      "title": "Guide-index",
+      "sha256": "a815b000b446f425a873df9a0c66e02d3774d2adedd83473de3a15579867a98a"
+    },
+    {
+      "file": "Guided-training.md",
+      "title": "Guided-training",
+      "sha256": "04c5129946d9b562e506e0ad8e00260da691178007f837ff83502e6fd7461ae0"
+    },
+    {
+      "file": "Hardware-guide.md",
+      "title": "Hardware-guide",
+      "sha256": "34ab48ce749fd14453ec3c5d652cb586d21b11d02aef9c291e2c01e10fdc68c9"
+    },
+    {
+      "file": "Historical-visual-provenance.md",
+      "title": "Historical-visual-provenance",
+      "sha256": "777f1bbbcd40d07cba9f0cfafbf1d513a2e7f5ee40d59d6b81b3c4ccfecdc756"
+    },
+    {
+      "file": "Image-diagnostics.md",
+      "title": "Image-diagnostics",
+      "sha256": "99c09f12c686601f0833cf2ba573bf50fa7380abd57e86169a626cddaf436476"
+    },
+    {
+      "file": "LAN-recording.md",
+      "title": "LAN-recording",
+      "sha256": "34f483fa1892e44e3e51e95d13f61b926061da9337ec1f37a5fe01cebc8c0415"
+    },
+    {
+      "file": "Linux-setup.md",
+      "title": "Linux-setup",
+      "sha256": "6052a691d51cf1932006ad4e0f9a14736e22af475244842279783c0fbbe4b14b"
+    },
+    {
+      "file": "Live-AI-and-tracking.md",
+      "title": "Live-AI-and-tracking",
+      "sha256": "ab03cb2f836a460e719b5fdf24106ceeac6a1bf9969301e33154bb5bec37ca76"
+    },
+    {
+      "file": "Live-GPU.md",
+      "title": "Live-GPU",
+      "sha256": "b129ded4ead4427f6ce3a391305a3b6c24ae9ee13753fe4d7b328b3e877ac46a"
+    },
+    {
+      "file": "Local-analysis-service.md",
+      "title": "Local-analysis-service",
+      "sha256": "65797f009b4920c42a66afe71fd08df70d4bfd65ef44c137f87dc3cb9f0aa207"
+    },
+    {
+      "file": "Local-map-services.md",
+      "title": "Local-map-services",
+      "sha256": "099beb299bdc303ba972140cfd19897c147073a67d9630e847b5d6344eda2785"
+    },
+    {
+      "file": "Mac-setup.md",
+      "title": "Mac-setup",
+      "sha256": "cc8e6841bbe3da4bf5c9d0e673d193b92fa445a091c5e7b8d73e42ea473bfec9"
+    },
+    {
+      "file": "Maps-and-shapes.md",
+      "title": "Maps-and-shapes",
+      "sha256": "56a89ea5271d10fe016b159bd9f3a70a5c840ef596f3acff9aca4d16fef497e8"
+    },
+    {
+      "file": "Model-qualification-2026-10-26.md",
+      "title": "Model-qualification-2026-10-26",
+      "sha256": "bfcc2396af92484a49bcffd5707647f1149ee29a29bcdc809d07d2649769f48e"
+    },
+    {
+      "file": "Offline-evaluation.md",
+      "title": "Offline-evaluation",
+      "sha256": "bf8a1fba7f6dd5407c621f940374a33227cabcb25c9075ec9efb4a096c8f4b2a"
+    },
+    {
+      "file": "Offline-qualification.md",
+      "title": "Offline-qualification",
+      "sha256": "42fbd27cda61ccd33230ad3464c92220939565e102e5d75ee73451d53c2399da"
+    },
+    {
+      "file": "PC-testing.md",
+      "title": "PC-testing",
+      "sha256": "4f8f880f4f1f303bf56123b9f832cac63b13beef81681870e03f5ca965597ba8"
+    },
+    {
+      "file": "PR61-visual-provenance.md",
+      "title": "PR61-visual-provenance",
+      "sha256": "d311960fd1f4bb9b28a84a8480ba89e08a03f7f361f295f604adb8b6882a66f1"
+    },
+    {
+      "file": "Person-enrollment.md",
+      "title": "Person-enrollment",
+      "sha256": "b7f4008c3a9e9205063416fe4128c46ed76a4bfc2921c3f4c7cde1768e010dd1"
+    },
+    {
+      "file": "Pilot-scope.md",
+      "title": "Pilot-scope",
+      "sha256": "b58b8d4664c8a156f9fedc47251ed55688409b21c35b26ae8252b84700a064fa"
+    },
+    {
+      "file": "Planar-calibration.md",
+      "title": "Planar-calibration",
+      "sha256": "fd1d14cd79d51be743d4c8ef020cc89e883b808325ede88c1188a9bb981c6dda"
+    },
+    {
+      "file": "Product-status.md",
+      "title": "Product-status",
+      "sha256": "b31317e4a751280aabda5f7039edbecdb66fb3e8f787ba7a76e6d9d2de7db5ca"
+    },
+    {
+      "file": "Public-webcams.md",
+      "title": "Public-webcams",
+      "sha256": "36ffdab37ba8454fa2aba5c6417166f12d41a9c3a8f3b9ae4ec9af701e261954"
+    },
+    {
+      "file": "Recognition-details.md",
+      "title": "Recognition-details",
+      "sha256": "5ef0cea6f42a3d5b40c0715b9dc1220d38f6ad688de6492101a163a36542439b"
+    },
+    {
+      "file": "Recording-coverage.md",
+      "title": "Recording-coverage",
+      "sha256": "963588fc8bc7cefcf3c768d1a0db763c6900bf42555a71d8cfbea9f4a391b654"
+    },
+    {
+      "file": "Recording-workflow.md",
+      "title": "Recording-workflow",
+      "sha256": "703157b3317e777dc7b30bc830fe9e9fcc27ec67f6311a74f1e13b10bafb5ee1"
+    },
+    {
+      "file": "Resource-controls.md",
+      "title": "Resource-controls",
+      "sha256": "67f25f67b2cb02c62cac6e02d5c7e68d03c5be076f0cff5839b95d6784cee76b"
+    },
+    {
+      "file": "Review-2026-10-30.md",
+      "title": "Review-2026-10-30",
+      "sha256": "94b6867ce84810443c1f1a049c30040bfa3a90e3ce7db4315c92c5fb37a892ad"
+    },
+    {
+      "file": "Review-and-events.md",
+      "title": "Review-and-events",
+      "sha256": "98c0ce4e67122601008a1563edf57c12f6b02e483e81e50a809824457333f0fa"
+    },
+    {
+      "file": "Roadmap.md",
+      "title": "Roadmap",
+      "sha256": "06badbc6403a3e9f163dd117be156d7c924dc002e2e77213b483444a42f610ec"
+    },
+    {
+      "file": "Saved-facilities.md",
+      "title": "Saved-facilities",
+      "sha256": "3197c0a7a74e4416a891d8636cbb34b60b8afd1e2811f255fc7f50bfec7aaded"
+    },
+    {
+      "file": "Security-boundary.md",
+      "title": "Security-boundary",
+      "sha256": "34c4905bbef2de4e01dbfabc2b7b77e73dab678e9e308809ff1a9cabafe3b30f"
+    },
+    {
+      "file": "Third-party-notices.md",
+      "title": "Third-party-notices",
+      "sha256": "40274f300365fc6ee17b7cb2e48de0bc65063d09038ac96db6ef8ad9c21ce68e"
+    },
+    {
+      "file": "Tracking-evaluation.md",
+      "title": "Tracking-evaluation",
+      "sha256": "b7663f54c61e20d233d8ca767c6630ac02b53aa0c296f7fcee0f097031249c70"
+    },
+    {
+      "file": "Troubleshooting.md",
+      "title": "Troubleshooting",
+      "sha256": "b764e178ab810bf7023c4e5832fdaea159c2aa73b00a7b20d7708d946f77a4c9"
+    },
+    {
+      "file": "Visual-atlas.md",
+      "title": "Visual-atlas",
+      "sha256": "44acd9e7d1c31e4194d3052976b233c9ebfb104306d62bd1ec4ac9edd8534f1f"
+    },
+    {
+      "file": "Visual-handbook.md",
+      "title": "Visual-handbook",
+      "sha256": "7593f1ebeb4907fa1a6545c745273ef997e0d27c1b7474f47ab3f94ba3de0d68"
+    },
+    {
+      "file": "Visual-provenance.md",
+      "title": "Visual-provenance",
+      "sha256": "e60ef0dc308e056d68b6ad16d18cf8257afa01ca5f6a798dbefb6ff75d14e62a"
+    },
+    {
+      "file": "Visual-tour.md",
+      "title": "Visual-tour",
+      "sha256": "67e1828cbf41e203265f8a5deec7d5f65cf00613bae6f8e96a7795b3a415c47c"
+    },
+    {
+      "file": "Wiki-publication.md",
+      "title": "Wiki-publication",
+      "sha256": "64f527b3d7cd2f570cb7f70029fe271f4c5a1052c0762625a8e0650d09fb53d9"
+    },
+    {
+      "file": "Windows-setup.md",
+      "title": "Windows-setup",
+      "sha256": "6a3775d481fed1f01f589e905979194e84eed651d0ecd00de7b69417c9f7878e"
+    },
+    {
+      "file": "Workspace-audit-2026-10-31.md",
+      "title": "Workspace-audit-2026-10-31",
+      "sha256": "6610dc61939d3364b4dd13a2cbe6cbd7c2ed5bd602a285ce47378f7df8373a87"
+    },
+    {
+      "file": "Zones.md",
+      "title": "Zones",
+      "sha256": "d4dc66adcea17926c62d3901a4be5f84838ea92af0d1247e91c0ec45b6eaf00d"
+    },
+    {
+      "file": "_Sidebar.md",
+      "title": "_Sidebar",
+      "sha256": "862537f79bd8ead793d3c08ce8b5b2f5a59edac4802db4ee09bc15c7f79fb55c"
+    }
+  ],
+  "unmanaged_files": "Preserved; no deletions outside the temporary Unicode-title rename into the canonical generated route."
+}

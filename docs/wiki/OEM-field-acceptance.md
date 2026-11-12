@@ -64,15 +64,17 @@ A listed provider, GPU name or `nvidia-smi` result is not execution evidence.
 ## 2. Preliminary checks with generated input only
 
 From a **source checkout**, reuse the existing integration harness. Its additional
-developer dependencies are `edge/requirements-test.txt` and Playwright/browser
-packages from `package-lock.json`. Install those only into a disposable Python
-3.12 environment. The fixture creates a synthetic ONNX model and VP8 video; no
+developer dependencies are `edge/requirements-test.txt` plus separately installed
+Playwright/browser packages. Playwright is not in the application lockfile; the
+CI harness pins `@playwright/test@1.56.1`. Use a disposable source checkout and
+Python 3.12 environment; the commands below leave the application lockfile alone. The fixture creates a synthetic ONNX model and VP8 video; no
 external model or camera is needed for its CPU path.
 
 Linux:
 
 ```bash
 .venv/bin/python -m pip install -r edge/requirements-test.txt
+npm install --no-save --package-lock=false @playwright/test@1.56.1
 npx playwright install chromium
 npm run build
 DVR_TEST_PYTHON="$PWD/.venv/bin/python" npx playwright test --config=playwright.library-native.config.mjs
@@ -84,6 +86,7 @@ Windows PowerShell:
 
 ```powershell
 .venv\Scripts\python.exe -m pip install -r edge/requirements-test.txt
+npm install --no-save --package-lock=false @playwright/test@1.56.1
 npx playwright install chromium
 npm run build
 $env:DVR_TEST_PYTHON = (Resolve-Path '.venv\Scripts\python.exe').Path

@@ -4,7 +4,9 @@
 
 ![Workflow diagram for setup linux.](media/guide/start.svg)
 
-**Quick path:** Install prerequisites and the isolated PC runtime → prepare local models → run Check → Start the foreground loopback service.
+**Quick path:** Install the isolated PC runtime → run Check → Start the
+foreground loopback service. Prepare a model only for analysis/training; a
+copy-only DVR Companion does not require one.
 
 [Hardware and storage](hardware-guide.md) · [GPU plan](gpu-planning.md) · [Resource limits](resource-controls.md) · [Windows](setup-windows.md)
 
@@ -48,6 +50,17 @@ and Start as shown in [Linux analysis recovery](pc-testing.md#optional-linux-ana
 Use **--temporary** to bypass saved state without deleting it. Neither mode
 automatically connects a camera or runs analysis.
 
+## Choose the task before starting
+
+Plain Start enables the preview service. For guided camera-source and OEM folder
+setup, use the DVR Companion launcher, or an analysis-enabled service. The
+companion can start copy-only with no detector model; backup, preview, recording
+and inference still require their own explicit actions. See
+[the PC task paths](pc-testing.md#first-real-device-test) and
+[OEM companion setup](oem-backup.md). The direct `edge.analyze` CLI defaults to
+OpenCV CPU; the prepared analysis service instead prefers supported CUDA with
+visible CPU fallback. Installing the default runtime alone does not install CUDA.
+
 ## Compare with the host
 
 Select an existing path on the actual recording volume, not merely the OS/project disk. Use a new output filename each time:
@@ -57,7 +70,7 @@ Select an existing path on the actual recording volume, not merely the OS/projec
   --output /tmp/dvr-host-001.json
 ```
 
-The path must already exist. The fixed optional GPU query reads NVIDIA names/VRAM only; it does not install a driver or change power/clocks. Import the file locally using **System → Import local host snapshot**. Hostnames, usernames, IPs, serials and selected disk paths are omitted. A snapshot reports point-in-time OS totals/free space; it does not establish RAID health, CPU entitlement, decode throughput or 100-camera support.
+The path must already exist. The fixed optional GPU query reads NVIDIA names/VRAM only; it does not install a driver or change power/clocks. Import the file locally using **System → Advanced planning details → Import local host snapshot**. Hostnames, usernames, IPs, serials and selected disk paths are omitted. A snapshot reports point-in-time OS totals/free space; it does not establish RAID health, CPU entitlement, decode throughput or 100-camera support.
 
 Use **Use reported CPU count & RAM in draft** only after checking the snapshot's origin/date. Physical RAM is not necessarily available to this process under containers/cgroups. Disk selections may refer to the same filesystem; do not sum them without checking.
 
@@ -92,7 +105,7 @@ These OS controls are not set by System, its policy or the launcher. Do not infe
 
 ## Before relying on the machine
 
-Run the repository checks, then qualify the actual storage/decoder/model workload. Test long writes and concurrent reads, full-disk handling, disk/worker failures, UPS shutdown/recovery, reconnect behavior once ingest exists, time synchronization and retention deletion. Keep recording separate from analytics sample drops. Follow the [100-camera qualification ladder](performance-100-cameras.md).
+Run the repository checks, then qualify the actual storage/decoder/model workload. Test long writes and concurrent reads, full-disk handling, disk/worker failures, UPS shutdown/recovery, reconnect and sampled-recording continuity for the implemented single-channel path, time synchronization and retention deletion. Keep recording separate from analytics sample drops. Follow the [100-camera qualification ladder](performance-100-cameras.md).
 
 GPU driver/backend installation and acceleration parity remain deliberate separate work; see [GPU planning](gpu-planning.md). Confirm system sleep/power/reboot policy with the owner before unattended operation; the launcher changes none of it.
 

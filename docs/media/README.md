@@ -1,12 +1,15 @@
 # Motion with provenance
 
-[Latest guide imagery](guide/README.md) · [Current screenshot atlas](../visual-atlas.md) · [PR #61 collection](current/README.md)
+[November 11 captures](guided-experience-2026-11-11/README.md) · [November 1 handbook imagery](guide/README.md) · [Current screenshot atlas](../visual-atlas.md) · [PR #61 collection](current/README.md)
 
-## Current software UI and new static illustrations
+## Dated software screenshots and illustrations
 
 ![Current Monitor and Facility have a verified screenshot archive that is distinct from this historical animation set.](current/overview.svg)
 
-The [current visual atlas](../visual-atlas.md) and [current media manifest](current/manifest.json) contain **five current tested-browser screenshots** and **six original illustrated SVG guides**. Current screenshot sources are tied to a named green Chromium job; all artwork is clearly labeled as a schematic, not live camera footage. The old animated screenshots below retain their exact October 27 source revision, test claims and asset hashes.
+The [visual atlas](../visual-atlas.md) separates newer captures from this historical
+collection. The [PR #61 media manifest](current/manifest.json) records **five
+tested-browser screenshots** and **six original illustrated SVG guides**. These
+PR #61 screenshot sources are tied to a named green Chromium job; all artwork is clearly labeled as a schematic, not live camera footage. The old animated screenshots below retain their exact October 27 source revision, test claims and asset hashes.
 
 The five captures are fixed at PR #61 source `9719eda`; `current/` is a collection name, not a latest-release guarantee. They predate Train and enrolled-person suggestions. [Capture revision boundary](current/README.md) · [Later software status](../product-status.md).
 

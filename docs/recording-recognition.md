@@ -24,8 +24,10 @@ backup or local-job download cannot replace a newer results-file choice or
 recording match, including when the newer file is rejected. The previous review
 remains available. Leaving Recognition or hiding the page cancels review
 openings (including pending file reads and downloads); background analysis,
-recording and backup jobs retain their own
-explicit Stop/Cancel controls. Reopen a result deliberately when ready.
+recording and backup jobs retain their own explicit Stop/Cancel controls.
+Reopen a result deliberately when ready. A delayed reconnect also retains the
+request order from before its service response, so it cannot open an older job
+over a newer file choice that is still being read.
 
 [Home](../README.md) · [Analyzer](../edge/README.md) · [Deployment path](roadmap.md#recognition-deployment-path--october-29-2026)
 
@@ -90,7 +92,8 @@ between workspaces retains them and pauses hidden playback; page reload/close
 releases the browser session. Reconnecting to a running local service can reopen
 its retained result. Imported event decisions use existing localStorage and need
 explicit export for a backup. The optional local job API requires explicit start;
-there is no footage upload, camera connection or installed background service.
+same-computer imports and result transfers stay local, with no remote footage
+upload, automatic camera connection or installed background service.
 Existing optional fonts/maps retain their documented destinations.
 
 ## Contract and bounds
@@ -191,6 +194,10 @@ files already match, the requested sampled frame opens with the original
 detections selected. **Close source request** clears this guidance while keeping
 the loaded review. Ordinary workspace navigation preserves your subsequent sample
 and task choices.
+If a matching results-file read was pending when you left or hid Recognition,
+the opening is cancelled rather than applied on return. The prior review and
+pending source request stay available. Choose the matching file again to advance
+the request and focus its next step.
 
 OEM-backup review and LAN-segment review, Event handoff and timing downloads each
 allow one review transfer per panel, with a two-minute deadline. Use **Cancel

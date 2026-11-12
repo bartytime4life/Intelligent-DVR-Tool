@@ -15,6 +15,9 @@ Linux/Windows launcher. Check does not contact a configured camera.
 | Python dependencies missing or wrong version | Rerun the platform installer in this checkout; retain an incompatible environment and use a fresh folder if advised. |
 | Model or catalog verification fails | Check the selected pinned files, SHA-256, relative paths, labels and compatible rules. Preserve the existing analysis folder while repairing it. |
 | A camera preview is blank | Confirm the intended source, permission, device availability and receiving status. For DVR, verify the private host, port, credentials and RTSP path. |
+| No DVR channels configured | In Monitor's DVR chooser, choose **Add camera or DVR source**. Explicitly connect to this computer if needed, then use the guided source form. Save it, return to Monitor and load/connect the channel deliberately. Cancelling a leave warning keeps your chooser and unsent observations. |
+| Guided camera setup asks for the DVR Companion launcher | Start the Linux/Windows **DVR Companion** after normal installation; copy-only mode needs no model. An analysis-enabled PC launch also supplies the required library connection. Plain preview-only Start cannot complete this form. Preserve settings, restart appropriately and reconnect, or use the [manual source-file alternative](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Camera-sources#manual-configuration-alternative). |
+| Live AI session expired after restarting the app | In Monitor's Live AI settings, choose **Check again**, then explicitly **Start AI**. Rechecking preserves unsent observations and does not start inference. A network preview ended by the restart needs its own reconnect. |
 | Public webcam fails | Confirm the provider-permitted direct HTTPS JPEG/MJPEG source and availability; HTML players/HLS are not bundled formats. |
 | Recording cannot open or decode | Keep the original. Verify supported container/codec and a complete copy; analyze a separately converted copy when necessary. |
 | Partial or unverified result | Read the coverage status and frame/time limits. Partial/unknown coverage is not complete coverage. |
@@ -30,6 +33,8 @@ Linux/Windows launcher. Check does not contact a configured camera.
 | Browser cannot coordinate workspace saves | Preserve review/rule exports before closing. The app keeps changes in memory when shared browser save locking is unavailable. |
 | Train warns before leaving | Cancel to keep unfinished recordings, checks or consent input. If a decision finished but a browser save failed, download the measurement and inspect the save messages before leaving. [Training saves and exit](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Guided-training#leave-or-restart-a-session) |
 | A backup or LAN review transfer stalls | Use **Cancel backup opening** or **Cancel review transfer**. These operations also have a two-minute deadline and preserve the current review. Stop the connected recorder or backup separately if needed. |
+| A local job's completed result opening stalls | Use **Cancel result opening**, then **Open results again** when ready. The opening has its own two-minute deadline. Reconnect if contact was lost; do not start another analysis just to retrieve the existing result. |
+| Opening was cancelled or a newer review stays open | Leaving Recognition or hiding the page cancels pending file reads/downloads. A newer file choice or source match also supersedes older result openings, even when the newer file is rejected. The loaded review remains available; explicitly reopen the intended result or choose its file again. Background jobs have separate Stop/Cancel controls. |
 
 ## Before reinstalling or moving folders
 

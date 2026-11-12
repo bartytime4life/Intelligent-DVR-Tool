@@ -1,5 +1,9 @@
 # Verification index
 
+[Documentation reconciliation, November 11](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/documentation-refresh-2026-11-11/README.md)
+records the merged PR #110 source/CI binding, reviewed guide inventory,
+current task/setup instructions, dated screenshot collections and Wiki checks.
+
 [Guided tasks, recovery and planning, November 11](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/guided-experience-2026-11-11/README.md)
 records goal shortcuts, simpler System controls, guarded source setup,
 cross-source review protection, expired-session recovery, fitted coverage

@@ -1,12 +1,15 @@
 # Motion with provenance
 
-[Latest guide imagery](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-provenance) · [Current screenshot atlas](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-atlas) · [PR #61 collection](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/PR61-visual-provenance)
+[November 11 captures](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Guided-experience-visual-provenance) · [November 1 handbook imagery](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-provenance) · [Current screenshot atlas](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-atlas) · [PR #61 collection](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/PR61-visual-provenance)
 
-## Current software UI and new static illustrations
+## Dated software screenshots and illustrations
 
 ![Current Monitor and Facility have a verified screenshot archive that is distinct from this historical animation set.](https://raw.githubusercontent.com/wiki/bartytime4life/Intelligent-DVR-Tool/docs/media/current/overview.svg)
 
-The [current visual atlas](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-atlas) and [current media manifest](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/media/current/manifest.json) contain **five current tested-browser screenshots** and **six original illustrated SVG guides**. Current screenshot sources are tied to a named green Chromium job; all artwork is clearly labeled as a schematic, not live camera footage. The old animated screenshots below retain their exact October 27 source revision, test claims and asset hashes.
+The [visual atlas](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-atlas) separates newer captures from this historical
+collection. The [PR #61 media manifest](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/media/current/manifest.json) records **five
+tested-browser screenshots** and **six original illustrated SVG guides**. These
+PR #61 screenshot sources are tied to a named green Chromium job; all artwork is clearly labeled as a schematic, not live camera footage. The old animated screenshots below retain their exact October 27 source revision, test claims and asset hashes.
 
 The five captures are fixed at PR #61 source `9719eda`; `current/` is a collection name, not a latest-release guarantee. They predate Train and enrolled-person suggestions. [Capture revision boundary](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/PR61-visual-provenance) · [Later software status](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Product-status).
 

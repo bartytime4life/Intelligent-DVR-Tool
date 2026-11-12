@@ -42,7 +42,7 @@ python3 -m edge.evaluate \
   --manifest tests/fixtures/evaluation/manifest.json \
   --reviews tests/fixtures/evaluation/reviews.json \
   --output /tmp/dvr-synthetic-evaluation.json
-python3 -m unittest discover -s tests -p 'test_*.py'
+python3 -m unittest discover -s tests -p 'test_evaluation.py'
 ```
 
 Use a new output filename each time. Evaluation reports use

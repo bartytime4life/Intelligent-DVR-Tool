@@ -1,0 +1,56 @@
+{
+  "schema": "intelligent-dvr.guided-experience-media.v1",
+  "captured_date": "2026-11-11",
+  "timezone": "America/Chicago",
+  "merged_application_commit": "cb91fa40d9d388faacca0785075c8b1986b33773",
+  "assets": [
+    {
+      "path": "docs/media/guided-experience-2026-11-11/04-monitor-after.jpg",
+      "original_path": "docs/verification/guided-experience-2026-11-11/04-monitor-after.jpg",
+      "kind": "actual-browser-screenshot",
+      "source_commit": "13355e18fbac15553bc9092dbadb11bb1deab979",
+      "width": 1265,
+      "height": 712,
+      "bytes": 80034,
+      "sha256": "65f3a23056f31d61c57d3e9095850ac2464437dff2ee0f13bfe33bd28f10a3f6",
+      "realCameraFootage": false,
+      "description": "Monitor goal shortcuts and explicit source connection"
+    },
+    {
+      "path": "docs/media/guided-experience-2026-11-11/05-monitor-mobile-after.jpg",
+      "original_path": "docs/verification/guided-experience-2026-11-11/05-monitor-mobile-after.jpg",
+      "kind": "actual-browser-screenshot",
+      "source_commit": "13355e18fbac15553bc9092dbadb11bb1deab979",
+      "width": 375,
+      "height": 812,
+      "bytes": 37265,
+      "sha256": "cb9a66eff4a38d9fce7611ccfa62f6a589e14a6f3206f984cbbd2692c0a867aa",
+      "realCameraFootage": false,
+      "description": "Narrow Monitor view with four goal shortcuts"
+    },
+    {
+      "path": "docs/media/guided-experience-2026-11-11/06-system-after.jpg",
+      "original_path": "docs/verification/guided-experience-2026-11-11/06-system-after.jpg",
+      "kind": "actual-browser-screenshot",
+      "source_commit": "13355e18fbac15553bc9092dbadb11bb1deab979",
+      "width": 1265,
+      "height": 712,
+      "bytes": 73620,
+      "sha256": "c5e351d8a3b198a32ddaccf89f7fe75bd448c8251f1169aebdb001b24592a146",
+      "realCameraFootage": false,
+      "description": "System recording and browser settings before advanced planning"
+    },
+    {
+      "path": "docs/media/guided-experience-2026-11-11/07-system-mobile-advanced-after.jpg",
+      "original_path": "docs/verification/guided-experience-2026-11-11/07-system-mobile-advanced-after.jpg",
+      "kind": "actual-browser-screenshot",
+      "source_commit": "13355e18fbac15553bc9092dbadb11bb1deab979",
+      "width": 375,
+      "height": 812,
+      "bytes": 31788,
+      "sha256": "d09c89cdbf9d78f52cc15072818190a28720cecb30975ed25fd2b888e8cf19c3",
+      "realCameraFootage": false,
+      "description": "Narrow System view with expanded processing controls"
+    }
+  ]
+}

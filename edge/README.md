@@ -20,12 +20,18 @@ For read-only source/log reconciliation and an explicit workload-plan preflight,
 use the [offline qualification checklist](../docs/offline-qualification.md).
 It runs separately from this analyzer and does not execute inference.
 
-[Architecture and data](../docs/architecture.md) · [Evaluation](../docs/offline-evaluation.md) · [Fresh verification](../docs/verification/2026-10-27/README.md)
+[Architecture and data](../docs/architecture.md) · [Evaluation](../docs/offline-evaluation.md) · [Revision-bound verification](../docs/verification/README.md)
 
 This tool reads one explicitly supplied local recording. It does not connect to
 cameras, start background services, download models, send footage, or call an API.
 No trained model is supplied. Camera compatibility, recognition accuracy and
 production latency are unqualified.
+
+This boundary describes `edge.analyze`, not every component in `edge/`.
+The separate [local service](../docs/local-analysis-service.md) supports explicit
+camera preview, live AI, one-channel recording and OEM-copy workflows. Its normal
+analysis launches prefer CUDA with visible CPU fallback; this CLI keeps its
+OpenCV CPU default and requires an explicit CUDA argument.
 
 An [offline evaluation harness](../docs/offline-evaluation.md) now compares
 frame-level traces with approved local labels, reports fixed-threshold per-class
@@ -109,7 +115,11 @@ Add `--trace-output /private/pilot/trace.json` to retain sampled detections and
 per-frame timing for evaluation. Every run also links detections into short-lived
 tracks (`edge/tracking.py`, ByteTrack-style; see [live AI and tracking](../docs/live-detection.md)):
 traces mark tracked boxes with `track` and add a `tracking` record, and receipts
-carry a per-class summary. Track numbers are continuity estimates, not identities. `--threads 1` (default; range 1–8) explicitly
+carry a per-class summary. The current method is
+`bytetrack-style-iou-kalman-v2`, bound to the tracking source hash. Re-analyze an
+older trace before evaluating it against this implementation; retain historical
+receipts with their original provenance. Track numbers are continuity estimates,
+not identities. `--threads 1` (default; range 1–8) explicitly
 selects OpenCV CPU thread count and, on the optional CUDA route, the ONNX Runtime
 CPU thread-pool limit. It is not a GPU, codec or OS resource quota. Receipt import remains unchanged. Evaluation
 traces are separate metadata files and are not browser receipts. See the
@@ -215,11 +225,16 @@ variable-rate recordings need separate timing qualification. Rules cannot
 establish what happened between sampled frames.
 
 Work is bounded by `--max-frames` (default 6,000), a 4K decoded image limit and
-1,000 events. Bound exhaustion produces `state: partial`. Decode failure is
-indistinguishable from EOF in OpenCV's boolean read result; receipts are not
-proof of complete source integrity. Untrusted media/model parsing should run in
-an isolated, resource-limited environment. No inference deadline or hardware
-memory isolation is provided by this first adapter.
+1,000 events. Bound exhaustion produces `state: partial`. OpenCV's end-of-read
+signal alone cannot establish completion: when decoding ends before a frame/event
+limit, the analyzer performs a separate strict PyAV decode and inventory comparison.
+Only matching supported coverage can publish `state: completed`; unknown
+completeness stays partial, and detected early/corrupt decoding publishes no
+result. See [coverage states and limits](../docs/recording-coverage.md).
+These checks do not authenticate the recording or establish detection accuracy.
+Untrusted media/model parsing should run in an isolated, resource-limited
+environment. A direct CLI invocation supplies no parent inference deadline or
+hardware memory isolation; the local service adds its own worker bounds.
 
 Receipts include source/model SHA-256, sampling details, review-required events,
 and local inference/postprocessing timing. These timings exclude capture,
@@ -232,12 +247,20 @@ the original video and hashes before relying on any observation.
 
 ```bash
 .venv/bin/pip install -r edge/requirements-test.txt
-.venv/bin/python -m unittest discover -s tests -p 'test_*.py'
+.venv/bin/python -m unittest discover -s tests -p 'test_inference.py'
+.venv/bin/python -m unittest discover -s tests -p 'test_media_coverage.py'
+.venv/bin/python -m unittest discover -s tests -p 'test_tracking.py'
 ```
 
 The integration fixture emits a constant synthetic box regardless of pixels.
 It tests the ONNX→decoder→rules→receipt path; it does **not** test recognition.
 The fixtures are created in a temporary directory and removed after tests.
+
+These commands select analyzer, coverage and tracking regressions. The full
+application Python suite also exercises the production service entry point and
+needs a built frontend: in a source checkout with Node.js 22, run `npm ci` and
+`npm run build` before `unittest discover -s tests -p 'test_*.py'`. Keep generated
+checks separate from approved-recording, installed-machine and camera acceptance.
 
 Primary implementation reference:
 https://docs.opencv.org/4.13.0/d6/d0f/group__dnn.html

@@ -1,7 +1,8 @@
 """Publication boundaries for generated Wiki pages and public media."""
 import importlib.util
+import json
 import os
-from pathlib import Path
+from pathlib import Path, PurePosixPath, PureWindowsPath
 import subprocess
 import tempfile
 import unittest
@@ -11,9 +12,20 @@ ROOT = Path(__file__).resolve().parents[1]
 spec = importlib.util.spec_from_file_location('wiki_docs', ROOT / 'scripts/build-wiki.py')
 wiki = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(wiki)
+docs_spec = importlib.util.spec_from_file_location('check_docs', ROOT / 'scripts/check-docs.py')
+docs = importlib.util.module_from_spec(docs_spec)
+docs_spec.loader.exec_module(docs)
 
 
 class WikiPublicationTests(unittest.TestCase):
+    def test_reviewed_screenshot_manifest_paths_are_portable(self):
+        manifest = json.loads((ROOT / 'docs/media/guided-experience-2026-11-11/manifest.json').read_text(encoding='utf-8'))
+        expected = {entry['path'] for entry in manifest['assets']}
+        for root in (PurePosixPath('/checkout'), PureWindowsPath('D:/checkout')):
+            with self.subTest(platform=type(root).__name__):
+                paths = (root / path for path in expected)
+                self.assertEqual(docs.manifest_paths(root, paths), expected)
+
     def test_every_top_level_guide_has_a_wiki_page(self):
         self.assertTrue({p.relative_to(ROOT).as_posix() for p in (ROOT / 'docs').glob('*.md')} <= wiki.PAGES.keys())
         self.assertEqual(len(wiki.PAGES), len(set(wiki.PAGES.values())))

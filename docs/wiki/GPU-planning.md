@@ -10,14 +10,23 @@
 
 **If you already own an RTX 5080, use it for the first qualification work.** Buying a larger GPU before measuring decode, inference and memory use could spend money on the wrong bottleneck. This recommendation is an engineering judgment, not a measured performance ranking.
 
-The analyzer defaults to **OpenCV CPU**. The explicit optional
+The direct `edge.analyze` CLI defaults to **OpenCV CPU**. The explicit optional
 `--backend onnxruntime-cuda` route is limited to the pinned YOLOX-S profile and
 separate qualified runtime; see the [operator commands](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Edge-CLI#optional-explicit-cuda-backend)
 and [backend verification](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/cuda-2026-10-28/README.md). System's GPU
 presets remain planning controls: they install no drivers, allocate no GPU
 memory and switch no inference backend. Hardware inventory alone does not prove acceleration.
 
-![Actual GPU and RAM planning controls in System. The values are editable planning assumptions, not measurements.](https://raw.githubusercontent.com/wiki/bartytime4life/Intelligent-DVR-Tool/docs/media/gpu-setup.webp)
+The separately launched local service prefers supported CUDA for saved-video
+and live AI, with an explicit CPU override and visible fallback. The ordinary
+installer still prepares CPU packages only. See [current service preferences,
+runtime preparation and execution proof](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Live-GPU).
+
+![Earlier System GPU and RAM planning layout. The values are editable planning assumptions, not measurements.](https://raw.githubusercontent.com/wiki/bartytime4life/Intelligent-DVR-Tool/docs/media/gpu-setup.webp)
+
+These controls now live under **System → Advanced planning details**.
+[Current workspace images](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-atlas) distinguish the revised layout from
+earlier captures.
 
 ## Candidate comparison
 
@@ -46,7 +55,12 @@ flowchart TD
 
 NVIDIA documents NVDEC decoding and NVENC encoding as separate engines/APIs [G6]. Inference uses a qualified compute backend; browser WebGL rendering is another workload. Codec/profile, resolution, frame rate, bit depth, chroma, simultaneous sessions and transfer overhead all affect capacity. Consult the vendor support matrix for the exact card/codec; do not turn NVENC session counts into an NVDEC or inference camera limit.
 
-The proposed recorder should retain encoded source streams without unnecessary re-encoding. Analyze selected frames/substreams under a qualified policy. Changing precision, model, preprocessing, sampling or decode path requires output/quality checks.
+An encoded-stream archive remains a future recording lane. The current
+[single-channel recorder](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/LAN-recording) makes bounded sampled segments, while
+the [OEM companion](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/OEM-backup) preserves finished recording bytes in separate
+verified copies. Neither establishes a gapless multi-camera archive. Analyze
+selected frames/substreams under a qualified policy. Changing precision, model,
+preprocessing, sampling or decode path requires output/quality checks.
 
 ## VRAM planning in System
 
@@ -92,10 +106,11 @@ No GPU purchase, accelerated backend or 100-camera operating claim is made by th
 - **G6:** [NVIDIA Video Codec SDK](https://developer.nvidia.com/video-codec-sdk), [codec support matrix](https://developer.nvidia.com/video-encode-decode-support-matrix).
 
 
-## Optional live CUDA first step
+## Current live CUDA preference
 
-Monitor now has an explicit CUDA preference for the pinned YOLOX-S model, with
-CPU default/fallback, one GPU worker and two total live sessions. See the
+Analysis-enabled service launches prefer CUDA for the pinned YOLOX-S model, with
+visible CPU fallback, one shared GPU slot and two total live sessions. An
+explicit CPU override remains available. See the
 [setup and resource contract](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Live-GPU) and its
 [dated verification record](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/live-gpu-2026-11-02/README.md).
 This does not qualify Windows/Linux live GPU execution, total VRAM consumption,
