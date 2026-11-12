@@ -1,5 +1,9 @@
 # Verification index
 
+[Current documentation alignment, November 12](documentation-alignment-2026-11-12/README.md)
+follows the earlier 197-path audit, records the merged route/evaluation baseline and
+corrects rehearsal duration/position wording without replacing historical receipts.
+
 [Evaluation input binding, November 12 integration](evaluation-binding-2026-11-11/README.md)
 records four reproduced parsed-bytes/hash races, bounded UTF-8 snapshots,
 tracking-stage consistency and generated integration checks. Historical proof

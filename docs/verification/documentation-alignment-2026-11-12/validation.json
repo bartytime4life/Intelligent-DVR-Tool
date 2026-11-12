@@ -1,0 +1,65 @@
+{
+  "base_commit": "66e6dd1cde9913e6c4f03fb94733e83dc3070c93",
+  "generated_at_utc": "2026-11-12T06:51:47.487873+00:00",
+  "scope": "Documentation-only alignment after merged PR114 and PR115; prose/source review, generated Wiki and retained artifact validation. No application suites rerun.",
+  "documentation": {
+    "all_repository_markdown": 201,
+    "inventory_entries_excluding_this_record": 200,
+    "local_links": 1588,
+    "generated_wiki_pages_and_navigation": 68,
+    "editable_workflow_graphics": 10,
+    "wiki_tests": {
+      "run": 8,
+      "passed": 8,
+      "failed": 0,
+      "skipped": 0
+    },
+    "wiki_freshness": "PASS",
+    "diff_check": "PASS",
+    "inventory_paths_and_hashes": "PASS"
+  },
+  "commands": [
+    "python3 scripts/check-docs.py",
+    "python3 scripts/build-guide-graphics.py --check",
+    "python3 scripts/build-wiki.py --check",
+    "python3 -m unittest discover -s tests -p test_wiki_docs.py",
+    "git diff --check"
+  ],
+  "review": {
+    "source_accuracy": "PASS by independent read-only reviewer",
+    "independently_repeated_documentation_checks": "Initial f864596 correction checkpoint: 1572 links, 68 Wiki outputs, eight tests, inventory/receipt hashes and preservation verified. New main integration receives a separate final review."
+  },
+  "preservation": {
+    "tracked_non_markdown_files_unchanged": true,
+    "existing_historical_records_unchanged": true,
+    "media_unchanged": true,
+    "application_tests_dependencies_unchanged": true,
+    "private_runtime_data": "Not opened or modified; isolated public-source worktree.",
+    "protected_sha256": {
+      "edge/inference.py": "7e95beb9e25dd67ac5d8d977ec6c466874371d12d112119a85a619124687b2f1",
+      "edge/journal.py": "70f7a3419d05d76380ea32ad5de20ee440bc17256e25baf0f2289a86e46a495a",
+      "edge/supervision.py": "03f334d5fa072e5f3ad02bd90536fd2c00fc97ebfaa54ca1ef1c10b64b80a9cf",
+      "edge/scheduler.py": "8639b46d3ba2e1a14efaa7ff647f412e6be437685ec7be5717a00983835b9019",
+      "edge/profiling.py": "f7c0a3e4b831d7f996840aec51a73e3fe68e06627cdce854716c576068f80f91",
+      ".openai/hosting.json": "d532abb65cf9ae20634b464d954cb4a08a0de9f3cd3cdf7f9c3ec8948826d947",
+      "worker/index.js": "2dd0615a445143933d88d4271f54f5d63ee951421fcd08c5a7617bb09c564389",
+      "scripts/prepare-sites-build.mjs": "b6a6adaa4fab3234676116dd1c9cb6611275ab9d92dd26f5bf402393e3744bf6",
+      "tests/sites-worker.test.mjs": "96af7b48906c6460c793356d7b6952f7d5026dbf5a502bec0d9297ff04201c26"
+    }
+  },
+  "record_hashes": {
+    "inventory.json": "2d287c41c6f72f267ec9fa5b788a0ae0bb7322f572d6ed514b564852087dac19",
+    "baseline-ci.json": "438eb2df091b9979e8cc68fae22e9ad470b57ad720cdc717b738baa0385a3944",
+    "README.md": "5bf1a532d218c96c3c2c0a0836aeafccdb8d64e4cbd309ad146362da0d81edee"
+  },
+  "publication": {
+    "separate_wiki_published": false,
+    "reason": "Terminal Git authentication unavailable. Generated source is reviewable; publication needs a separate source-bound commit and readback.",
+    "merge_install_deployment": "No merge, installed-service replacement or deployment performed by this documentation pass."
+  },
+  "limits": [
+    "Current guide inventory is not a new runtime experiment.",
+    "CI snapshot binds the stated historical PR heads, not this prose change.",
+    "No camera, detector, recognition-quality, real-site, endurance or 100-camera qualification."
+  ]
+}

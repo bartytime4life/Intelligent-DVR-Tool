@@ -1,6 +1,35 @@
 # Product status and evidence
 
-**Merged source baseline verified November 11, 2026 (America/Chicago):**
+**Merged source baseline verified November 12, 2026 (America/Chicago):**
+[PR #114](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/114) merged
+as [`66e6dd1c`](https://github.com/bartytime4life/Intelligent-DVR-Tool/commit/66e6dd1cde9913e6c4f03fb94733e83dc3070c93).
+Offline detection and tracking evaluation now parse and hash the same bounded
+JSON capture. Tracking also rejects manifest/trace changes between validation
+stages. The [input-binding record](verification/evaluation-binding-2026-11-11/README.md)
+retains generated replacement-race proofs and the corrected cross-platform
+regressions. The [CI snapshot](verification/documentation-alignment-2026-11-12/baseline-ci.json)
+records successful cross-platform, PC-kit and Mac workflows; browser CI was
+still running at its read time. Captured JSON does not establish an atomic
+multi-file snapshot, a signature or loaded-code provenance.
+
+[PR #115](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/115) merged
+as [`2cac2173`](https://github.com/bartytime4life/Intelligent-DVR-Tool/commit/2cac2173f1f6b751f23ab1847ce25a3aea40a6b2).
+Facility route coverage and overlap now measure path length inside the drawn
+camera fans, counting distinct cameras. The display adds total uncovered
+distance and the longest continuous gap across route vertices. Outdoor zone
+grids and simulated handoff rehearsal remain separate planning calculations.
+The [route record](verification/route-coverage-math-2026-11-12/README.md) binds
+574 Node passes, four Sites checks, generated browser cases and independent
+geometry comparisons to their tested source. These are local software checks,
+not a claim that all hosted workflows or physical-device acceptance passed.
+
+[PR #113](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/113)
+completed the earlier [197-path documentation audit](verification/documentation-complete-2026-11-12/README.md).
+The [current alignment follow-up](verification/documentation-alignment-2026-11-12/README.md)
+corrects the rehearsal's adaptive position count and duration, retains dated
+receipts, and records this newer merged route baseline.
+
+**Historical merged source baseline verified November 11, 2026 (America/Chicago):**
 [PR #112](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/112) merged
 as [`cd6d1566`](https://github.com/bartytime4life/Intelligent-DVR-Tool/commit/cd6d15666beb55a9641068398d82a3d02eaa7769).
 Its source tree matches tested head `ba735298`. Training searches empirical
@@ -238,7 +267,7 @@ saves migrate without deleting the original. See [saved facilities](saved-facili
 | Live AI and tracking | **Start AI** on a Monitor tile: local YOLOX-S detection (CUDA preferred when supported, visible CPU fallback and an explicit CPU override) with a motion gate, ByteTrack-style short-lived tracks, the existing rule engine and explicit **Send to Events**; at most two cameras, one frame in flight, 15-minute sessions. Recording analysis adds the same tracks to traces and Recognition; [guide](live-detection.md) · [tracker](../edge/tracking.py) · [live worker](../edge/live_worker.py) | Unit, protocol and fixture-model checks, a Chromium synthetic-camera browser test, and a development run of the actual pinned model on one local owner clip (about 80–90 ms per frame on an Apple M4 CPU). The [November 2 live GPU record](verification/live-gpu-2026-11-02/README.md) adds deterministic selection/recovery tests and actual CPU execution/fallback evidence; GPU timing/parity could not be measured in that session. The [November 3 GPU-default record](verification/gpu-default-2026-11-03/README.md) separately records controlled RTX 5080 execution. Current-source synthetic tracker checks do not qualify physical-camera tracking quality, other OS/GPU combinations or multi-camera capacity. Track numbers are not identities. |
 | Guided training | Named camera views can accumulate up to 50 confirmed sessions in this browser. Compatible calibration sessions inform threshold suggestions equally; saved recordings guard against regressions. A separate 20-second fresh check, sample counts, JSON receipt and explicit Recognition rule selection remain required. [Guide](training.md) | [Cumulative-session verification](verification/cumulative-training-2026-11-02/README.md) covers generated-camera persistence, pooling and apply gating. Threshold tuning does not retrain detector weights or guarantee accuracy gains. Older summary-only history is preserved separately; representative detection accuracy needs independently labeled recordings. |
 | Enrolled-person suggestions | Consent-gated local templates, baseline checks, explicit matching within a local job's person boxes, Confirm and Not this person; [guide](person-enrollment.md) | Templates stay in the local service; no face embeddings in the browser, automatic identity decisions or automatic Events/export handoff; accuracy and anti-spoofing remain unqualified |
-| Facility planning | Map-first task selector, buildings/floors/rooms/labels, camera aim/coverage/rehearsal, local image diagnostics, experimental ground-plane calibration, export and Undo; [guide](facility-builder.md) | Dated [November 1 interface screenshot](media/guide/facility.jpg), [pixel limits](facility-image-diagnostics.md) and [calibration constraints](facility-calibration.md). Coverage and distances require real marker/optical qualification; simulated handoffs remain unverified. |
+| Facility planning | Map-first task selector, buildings/floors/rooms/labels, camera aim, zone-grid estimates, route covered/overlap distance and longest blind gap, simulated rehearsal, local image diagnostics, experimental ground-plane calibration, export and Undo; [guide](facility-builder.md) | Dated [November 1 interface screenshot](media/guide/facility.jpg), [route geometry checks](verification/route-coverage-math-2026-11-12/README.md), [pixel limits](facility-image-diagnostics.md) and [calibration constraints](facility-calibration.md). Coverage and distances require real marker/optical qualification; simulated handoffs remain unverified. |
 | Find and draft a site | Submitted Photon search, GPS/numeric origin, map-pin suggestion, rectangular/custom polygon area, selectable services, offline JSON file/paste; opt-in Streets (OSM) and Aerial (USGS/NAIP, contiguous U.S.) map layers for tracing, with map preview of a suggested site; one-click **Find mapped buildings** with click-to-include/exclude drafts on the map; [service source](../src/facility-services.mjs) · [map layers](facility-builder.md#real-map-layer) | [Six Chromium scenarios](verification/facility-2026-10-27/README.md) use recorded geometry/mocked services; map-layer and one-click draft scenarios use stand-in pictures and the recorded Eppan extract. Public Overpass endpoints timed out in live testing on 2026-11-01. External availability, real GPS, imagery positional accuracy and novice completion remain unqualified. |
 | OSM geometry | Facility v2, complete simple ways and supported outer/inner relations, raised bases and independent parts; [adapter](../src/facility-starter.mjs) | Review and provenance survive apply/export. Courtyards/bases survive edits, rendering and coverage. Overlapping parts/envelopes and invalid/incomplete geometry remain excluded. [Limits](facility-setup-reliability.md). |
 | System controls | Basic storage/browser settings first, advanced planning on demand, preserved drafts, planning arithmetic, applied browser limits, setup/policy exports and host-snapshot import; [control contract](resource-controls.md) | Browser controls and analyzer thread/frame caps have explicit scopes. RAM/VRAM/power/storage estimates are not OS quotas or activated hardware. |

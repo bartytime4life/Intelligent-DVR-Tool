@@ -134,7 +134,12 @@ each validator and reproduce the appropriate software checks.
 
 The planner estimates a pinhole view intersecting a horizontal ground plane. Wall intersections can shorten rays. The 3D volume illustrates that approximation; it does not add a calibrated optical model.
 
-It omits slabs, doors, windows, furniture, terrain, lighting, distortion, pixel density and recognition quality. Rehearsal follows a planned route and proposes camera transitions. It performs no identity recognition or cross-camera person matching. [Detailed limits](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Facility-planning#visibility-model-and-evidence-limits).
+Planned room doorway gaps and their opaque lintels affect the ray intersections;
+exterior glazing stays opaque. The estimate omits floor/roof slabs, furniture,
+terrain, lighting, lens distortion and recognition quality. Pixel density is a
+separate planning calculation. Rehearsal follows a planned route and proposes
+camera transitions; it performs no identity recognition or cross-camera person
+matching. [Detailed limits](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Facility-planning#visibility-model-and-evidence-limits).
 
 ## Path toward operation
 
