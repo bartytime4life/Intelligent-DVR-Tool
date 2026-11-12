@@ -24,6 +24,15 @@ The minimum capacity goal is **100 simultaneously active cameras**. The current 
 
 ## Delivered through November 11, 2026
 
+[PR #112](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/112), merged
+as `cd6d1566`, replaces coarse automatic training cutoffs with empirical score
+boundaries, requests live detections while tentative/recoverable tracks need
+them, and solves sparse feasible match components independently. The
+[science guide](science-and-algorithms.md) explains the mathematics, version v3,
+generated before/after cases and limits. Representative held-out recording
+comparisons remain the next quality gate; fewer assignment cells do not measure
+detector throughput or camera capacity.
+
 [PR #110](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/110), merged
 as `cb91fa40`, adds Monitor goal shortcuts, guided camera-source handoff, basic
 System settings before advanced planning, explicit expired-session recovery,

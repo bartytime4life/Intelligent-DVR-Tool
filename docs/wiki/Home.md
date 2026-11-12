@@ -142,6 +142,10 @@ Begin with the [visual handbook](https://github.com/bartytime4life/Intelligent-D
 
 ## Checks and project terms
 
+Use a prepared platform Python environment for native checks. Build first;
+the opt-in loopback fixtures run with `DVR_TEST_SOCKETS=1` as described in the
+[development guide](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Development-and-checks#run-the-checks-that-cover-the-change).
+
 ```bash
 npm run build
 npm test
@@ -151,7 +155,7 @@ python3 scripts/check-docs.py
 python3 scripts/build-wiki.py --check
 ```
 
-Use the platform's isolated dependencies for native checks; optional test fixtures require ONNX. [Verification](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Evidence-and-validation) keeps historical and current test scopes separate. The [November 11 guided-experience record](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/guided-experience-2026-11-11/README.md) covers the task guide, recovery, System disclosure and planning repairs merged through [PR #110](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/110). Software and CI checks do not establish field acceptance.
+Use the platform's isolated dependencies for native checks; optional test fixtures require ONNX. [Verification](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Evidence-and-validation) keeps historical and current test scopes separate. The [November 11 algorithm record](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/science-math-2026-11-11/README.md) covers empirical training cutoffs, lifecycle-aware sampling and sparse association merged in [PR #112](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/112). The [guided-experience record](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/guided-experience-2026-11-11/README.md) keeps the earlier task, recovery and planning checks. Software and CI checks do not establish field acceptance. [Contributing](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Contributing) describes the review workflow.
 
 [Cumulative training results](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/cumulative-training-2026-11-02/README.md)
 record compatible-session pooling, browser persistence, duplicate-source

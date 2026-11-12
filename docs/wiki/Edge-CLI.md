@@ -116,7 +116,10 @@ per-frame timing for evaluation. Every run also links detections into short-live
 tracks (`edge/tracking.py`, ByteTrack-style; see [live AI and tracking](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Live-AI-and-tracking)):
 traces mark tracked boxes with `track` and add a `tracking` record, and receipts
 carry a per-class summary. The current method is
-`bytetrack-style-iou-kalman-v2`, bound to the tracking source hash. Re-analyze an
+`bytetrack-style-iou-kalman-v3`, bound to the tracking source hash. Sparse gated
+matches are solved by independent feasible components; dense cases retain the
+original Hungarian solver. See [the algorithm and limits](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Science-and-algorithms#reduce-assignment-work-exactly).
+Re-analyze an
 older trace before evaluating it against this implementation; retain historical
 receipts with their original provenance. Track numbers are continuity estimates,
 not identities. `--threads 1` (default; range 1–8) explicitly
@@ -216,8 +219,9 @@ while qualifying observations are at most `max_gap` seconds apart; sampled
 frames without one inside that gap (brief occlusion, motion blur) neither end
 the run nor emit a second observation. A longer gap starts a new run and
 resets dwell, which is measured from the run's first qualifying frame. It does
-**not** prove that the same object or person remained there. There is no
-identity tracking or learned anomaly model.
+**not** prove that the same object or person remained there. Presence rules do
+not use the short-lived track number as identity. There is no learned anomaly
+model.
 
 The default stride is five decoded frames. The tool rejects sampling intervals
 longer than a rule's `max_gap`. Timestamps use frame index / declared frame rate;
@@ -244,6 +248,9 @@ not the source video or model. Imported receipts are unverified input; verify
 the original video and hashes before relying on any observation.
 
 ## Validation
+
+[Development and checks](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Development-and-checks) lists the prepared platform
+environments, socket opt-in, browser suites and source/data-contract map.
 
 ```bash
 .venv/bin/pip install -r edge/requirements-test.txt

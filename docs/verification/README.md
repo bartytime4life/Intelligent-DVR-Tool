@@ -1,5 +1,10 @@
 # Verification index
 
+[Complete documentation follow-up, November 12](documentation-complete-2026-11-12/README.md)
+records current merged v3 source, corrected update/source/memory instructions,
+assistant data boundaries, developer checks, the Markdown inventory and generated
+Wiki validation. Its CI snapshot preserves the browser workflow’s pending state.
+
 [Science and mathematical improvements, November 11](science-math-2026-11-11/README.md)
 records empirical threshold selection, lifecycle-aware detector sampling and exact
 sparse association, with generated regressions and primary research references.
@@ -111,7 +116,7 @@ unpublished click/drag placement, room-edit persistence, Undo and v4 plans;
 270 unit checks and 15 controlled indoor browser scenarios, with four doorway
 scenarios repeated after the final input guard. Software fixtures only.
 
-**Current interface/regression check (October 31 Central / November 1 UTC):** [PR #61](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/61) merged with **14/14 reported CI checks**; [Chromium run 41263964836](https://github.com/bartytime4life/Intelligent-DVR-Tool/actions/runs/41263964836) passed **65 general/Facility + 12 analysis + 13 feeds + 2 recorder browser scenarios**, capturing 1440px and 390px controlled UI states. [Visual manifest](../media/current/manifest.json). These are software fixture tests, **not** field-camera recognition quality or 100-camera capacity.
+**Historical interface/regression check (October 31 Central / November 1 UTC):** [PR #61](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/61) merged with **14/14 reported CI checks**; [Chromium run 41263964836](https://github.com/bartytime4life/Intelligent-DVR-Tool/actions/runs/41263964836) passed **65 general/Facility + 12 analysis + 13 feeds + 2 recorder browser scenarios**, capturing 1440px and 390px controlled UI states. [Visual manifest](../media/current/manifest.json). These are software fixture tests, **not** field-camera recognition quality or 100-camera capacity.
 
 [Review fixes, October 30](review-fixes-2026-10-30/README.md): PR #45/#46 on
 `main`, with local Node/Python/browser runs and green Linux/Windows CI, plus the
@@ -151,7 +156,7 @@ v2 courtyard/base geometry, bounded local delivery and novice-study preparation.
 Local checks and unresolved field/human acceptance are recorded separately.
 
 
-Reviewed October 28, 2026. [Product status](../product-status.md) · [Home](../../README.md)
+Index updated November 12, 2026; dated records retain their original scope. [Product status](../product-status.md) · [Home](../../README.md)
 
 ## Historical audited application baseline
 
