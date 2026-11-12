@@ -1,5 +1,10 @@
 # Verification index
 
+[Projective calibration mathematics, November 12](calibration-projective-math-2026-11-12/README.md)
+records valid zero-coefficient perspective maps, scale-invariant projection,
+collinear and noisy fitted-plane collapse refusals, independent exact-arithmetic
+comparisons and the existing operator-gated ruler workflow.
+
 [Current documentation alignment, November 12](documentation-alignment-2026-11-12/README.md)
 follows the earlier 197-path audit, records the merged route/evaluation baseline and
 corrects rehearsal duration/position wording without replacing historical receipts.
