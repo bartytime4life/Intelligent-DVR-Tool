@@ -1,9 +1,15 @@
 # Verification index
 
+[Evaluation input binding, November 12 integration](evaluation-binding-2026-11-11/README.md)
+records four reproduced parsed-bytes/hash races, bounded UTF-8 snapshots,
+tracking-stage consistency and generated integration checks. Historical proof
+and the current merged-source validation are retained separately.
+
 [Route coverage by arclength, November 12](route-coverage-math-2026-11-12/README.md)
 records three reproduced sampling errors, covered/overlap distance and longest
 blind stretch, independent rectangle/analytic checks and generated browser cases.
 Zone grids and the simulated handoff rehearsal remain separate.
+
 [Complete documentation follow-up, November 12](documentation-complete-2026-11-12/README.md)
 records current merged v3 source, corrected update/source/memory instructions,
 assistant data boundaries, developer checks, the Markdown inventory and generated

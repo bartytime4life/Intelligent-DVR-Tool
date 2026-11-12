@@ -9,7 +9,7 @@ from pathlib import Path
 
 import numpy as np
 
-from .evaluation import (evaluate, read_json, local_file, relative_file, digest,
+from .evaluation import (evaluate, read_json, read_json_snapshot, local_file, relative_file, digest,
                          require, text, integer, number, iou)
 from .model_profiles import ASSETS
 from .tracking import SCHEMA as TRACK_SCHEMA, METHOD, TrackerConfig
@@ -107,8 +107,8 @@ def evaluate_tracking(manifest_path, score_threshold=.1, iou_threshold=.5):
     # hashes, timestamps, frame inventory, model binding, rules and event replay.
     detection = evaluate(manifest_path, score_threshold=score_threshold, iou_threshold=iou_threshold)
     manifest_path = local_file(manifest_path)
-    manifest = read_json(manifest_path, 8*1024**2)
-    require(digest(manifest_path) == detection['manifest_sha256'], 'Manifest changed during evaluation')
+    manifest, manifest_hash = read_json_snapshot(manifest_path, 8*1024**2)
+    require(manifest_hash == detection['manifest_sha256'], 'Manifest changed during evaluation')
     declaration = manifest.get('tracking')
     require(isinstance(declaration, dict) and declaration.get('schema') == LABEL_SCHEMA
             and declaration.get('independent_labels') is True
@@ -123,8 +123,8 @@ def evaluate_tracking(manifest_path, score_threshold=.1, iou_threshold=.5):
     untracked_total = 0
     for ci, clip in enumerate(manifest['clips']):
         trace_path = relative_file(manifest_path.parent, clip['trace'])
-        trace = read_json(trace_path)
-        require(digest(trace_path) == detection['clips'][ci]['trace_sha256'],
+        trace, trace_hash = read_json_snapshot(trace_path)
+        require(trace_hash == detection['clips'][ci]['trace_sha256'],
                 'Trace changed during evaluation')
         tracking = validate_tracks(trace)
         frames, annotations = trace['frames'], clip['frames']
@@ -195,7 +195,7 @@ def evaluate_tracking(manifest_path, score_threshold=.1, iou_threshold=.5):
                      if d['label'] in manifest['classes'] and d['score'] >= score_threshold and 'track' not in d]
         untracked_total += len(untracked)
         per_clip.append({'camera': clip['camera'], 'source_sha256': clip['source_sha256'],
-                         'trace_sha256': digest(trace_path), 'tracker': {k: tracking[k] for k in
+                         'trace_sha256': trace_hash, 'tracker': {k: tracking[k] for k in
                              ('method', 'tracker_sha256', 'parameters', 'tracks_dropped')},
                          'frames_scored': len(frames), 'fps': clip['fps'], 'stride': trace['stride'],
                          'sample_interval_seconds': trace['stride']/clip['fps'],
@@ -210,6 +210,8 @@ def evaluate_tracking(manifest_path, score_threshold=.1, iou_threshold=.5):
                                                   ASSETS/'tracking.py', ASSETS/'evaluation.py']}
     return {'schema': SCHEMA, 'data_kind': manifest['data_kind'], 'approval': manifest['approval'],
             'manifest_sha256': detection['manifest_sha256'], 'labels_sha256': detection['labels_sha256'],
+            'input_binding': {**detection['input_binding'],
+                              'tracking_second_pass': 'captured manifest and trace hashes must match detection stage'},
             'annotation_declaration': declaration, 'frames_scored': sum(c['frames_scored'] for c in per_clip),
             'model': {k: detection[k] for k in ('inference_profile', 'model_sha256', 'model_provenance')},
             'score_threshold': score_threshold, 'iou_threshold': iou_threshold,
