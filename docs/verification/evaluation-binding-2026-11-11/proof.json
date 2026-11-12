@@ -1,0 +1,127 @@
+{
+  "schema": "intelligent-dvr.evaluation-input-binding-proof.v1",
+  "baseline_revision": "c517b438789efbe81d410f23f2a0a173ed72c86c",
+  "generated_only": true,
+  "baseline_evaluator_sha256": "942996df422bb274bf98358b740adc58d6c21c656fea92e2e972e1b7843c407c",
+  "candidate_evaluator_sha256": "ec7a766815dae61e0726a2bd858b65288023edf46738d96db2cc8a394a05532c",
+  "cases": {
+    "manifest.json": {
+      "before": {
+        "status": "evaluated",
+        "reported_sha256": "d78dcbd5d4e5d632c30ffa8472c2872085d269518312df79a12cddd7fdb92399",
+        "evaluated_bytes_sha256": "c299621164cbf13c882af3c9256dfb5b8948df3ee976d07f7512c55cf301ac19",
+        "hash_matches_evaluated_bytes": false,
+        "person_counts": {
+          "TP": 2,
+          "FP": 2,
+          "FN": 1,
+          "precision": 0.5,
+          "recall": 0.6666666666666666
+        },
+        "reviewed_false_alerts": 0
+      },
+      "after": {
+        "status": "evaluated",
+        "reported_sha256": "c299621164cbf13c882af3c9256dfb5b8948df3ee976d07f7512c55cf301ac19",
+        "evaluated_bytes_sha256": "c299621164cbf13c882af3c9256dfb5b8948df3ee976d07f7512c55cf301ac19",
+        "hash_matches_evaluated_bytes": true,
+        "person_counts": {
+          "TP": 2,
+          "FP": 2,
+          "FN": 1,
+          "precision": 0.5,
+          "recall": 0.6666666666666666
+        },
+        "reviewed_false_alerts": 0
+      }
+    },
+    "trace.json": {
+      "before": {
+        "status": "evaluated",
+        "reported_sha256": "1a32d74275820e6e0075b3a364dfda940b1ffff6c101a1bf20c57cace2901bcb",
+        "evaluated_bytes_sha256": "07050aba4799323a6d2074b00e24694b01db33dfd9e190012c0f82c6e5856f5c",
+        "hash_matches_evaluated_bytes": false,
+        "person_counts": {
+          "TP": 0,
+          "FP": 0,
+          "FN": 3,
+          "precision": null,
+          "recall": 0.0
+        },
+        "reviewed_false_alerts": 0
+      },
+      "after": {
+        "status": "evaluated",
+        "reported_sha256": "1a32d74275820e6e0075b3a364dfda940b1ffff6c101a1bf20c57cace2901bcb",
+        "evaluated_bytes_sha256": "1a32d74275820e6e0075b3a364dfda940b1ffff6c101a1bf20c57cace2901bcb",
+        "hash_matches_evaluated_bytes": true,
+        "person_counts": {
+          "TP": 2,
+          "FP": 2,
+          "FN": 1,
+          "precision": 0.5,
+          "recall": 0.6666666666666666
+        },
+        "reviewed_false_alerts": 0
+      }
+    },
+    "labels.json": {
+      "before": {
+        "status": "rejected",
+        "reason": "Trace labels hash mismatch"
+      },
+      "after": {
+        "status": "evaluated",
+        "reported_sha256": "3ee03641b29d38d58531f7045d7ffe4bd32af682e96aa81de81e672c5ce93166",
+        "evaluated_bytes_sha256": "3ee03641b29d38d58531f7045d7ffe4bd32af682e96aa81de81e672c5ce93166",
+        "hash_matches_evaluated_bytes": true,
+        "person_counts": {
+          "TP": 2,
+          "FP": 2,
+          "FN": 1,
+          "precision": 0.5,
+          "recall": 0.6666666666666666
+        },
+        "reviewed_false_alerts": 0
+      }
+    },
+    "reviews.json": {
+      "before": {
+        "status": "evaluated",
+        "reported_sha256": "ac8763256fe75975896fe7e113382ac26c45c2c43c6384846f8bf3878e6ab863",
+        "evaluated_bytes_sha256": "31d5aea33f1a123072eb1b1ad058db9f1b67566933cf64aa84c00195f3eeb693",
+        "hash_matches_evaluated_bytes": false,
+        "person_counts": {
+          "TP": 2,
+          "FP": 2,
+          "FN": 1,
+          "precision": 0.5,
+          "recall": 0.6666666666666666
+        },
+        "reviewed_false_alerts": 1
+      },
+      "after": {
+        "status": "evaluated",
+        "reported_sha256": "31d5aea33f1a123072eb1b1ad058db9f1b67566933cf64aa84c00195f3eeb693",
+        "evaluated_bytes_sha256": "31d5aea33f1a123072eb1b1ad058db9f1b67566933cf64aa84c00195f3eeb693",
+        "hash_matches_evaluated_bytes": true,
+        "person_counts": {
+          "TP": 2,
+          "FP": 2,
+          "FN": 1,
+          "precision": 0.5,
+          "recall": 0.6666666666666666
+        },
+        "reviewed_false_alerts": 1
+      }
+    }
+  },
+  "protected_runtime_files_unchanged": {
+    "inference.py": true,
+    "journal.py": true,
+    "supervision.py": true,
+    "scheduler.py": true,
+    "profiling.py": true
+  },
+  "scope": "Deterministic JSON replacement injection; not camera, model, accuracy or capacity qualification."
+}

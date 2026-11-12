@@ -82,9 +82,17 @@ def local_file(path, root=None):
     return path
 
 
-def read_json(path, limit=32 * 1024**2):
+def read_json_snapshot(path, limit=32 * 1024**2):
+    """Parse and identify the same bounded UTF-8 bytes, even if the path changes.
+
+    A size check before an unbounded read cannot constrain a growing file.
+    Read at most one byte beyond the limit so oversize inputs fail before parsing.
+    """
     path = local_file(path)
-    require(0 < path.stat().st_size <= limit, 'JSON file exceeds size bound or is empty')
+    require(type(limit) is int and limit > 0, 'Invalid JSON byte limit')
+    with path.open('rb') as stream:
+        raw = stream.read(limit + 1)
+    require(0 < len(raw) <= limit, 'JSON file exceeds size bound or is empty')
     def unique(pairs):
         result = {}
         for key, value in pairs:
@@ -97,8 +105,13 @@ def read_json(path, limit=32 * 1024**2):
         result = float(value)
         require(math.isfinite(result), 'Nonfinite JSON number')
         return result
-    return json.loads(path.read_text(encoding='utf-8'), object_pairs_hook=unique,
-                      parse_constant=bad_constant, parse_float=finite_float)
+    value = json.loads(raw.decode('utf-8'), object_pairs_hook=unique,
+                       parse_constant=bad_constant, parse_float=finite_float)
+    return value, hashlib.sha256(raw).hexdigest()
+
+
+def read_json(path, limit=32 * 1024**2):
+    return read_json_snapshot(path, limit)[0]
 
 
 def relative_file(base, value):
@@ -224,7 +237,7 @@ def evaluate(manifest_path, reviews_path=None, score_threshold=.5, iou_threshold
     integer(warmup_frames, 'warmup_frames', 0, MAX_FRAMES)
     manifest_path = local_file(manifest_path)
     base = manifest_path.parent
-    manifest = read_json(manifest_path, 8 * 1024**2)
+    manifest, manifest_hash = read_json_snapshot(manifest_path, 8 * 1024**2)
     require(manifest.get('schema') == MANIFEST_SCHEMA, 'Unknown manifest schema')
     kind = manifest.get('data_kind')
     require(kind in ('synthetic', 'approved-local-recordings'), 'Explicit data_kind required')
@@ -232,8 +245,7 @@ def evaluate(manifest_path, reviews_path=None, score_threshold=.5, iou_threshold
     for key in ('approved_by', 'source_rights', 'annotation_policy', 'annotated_by', 'split'):
         text(approval.get(key), key)
     labels_path = relative_file(base, manifest['labels'])
-    labels = read_json(labels_path, 64 * 1024)
-    labels_hash = digest(labels_path)
+    labels, labels_hash = read_json_snapshot(labels_path, 64 * 1024)
     classes = manifest['classes']
     require(isinstance(classes, list) and classes and len(set(classes)) == len(classes)
             and all(x in labels for x in classes), 'Use unique evaluated classes from model labels')
@@ -246,12 +258,11 @@ def evaluate(manifest_path, reviews_path=None, score_threshold=.5, iou_threshold
     review_hash = None
     decisions = {}
     if reviews_path is not None:
-        reviews = read_json(reviews_path, 8 * 1024**2)
-        require(reviews.get('schema') == REVIEW_SCHEMA and reviews.get('manifest_sha256') == digest(manifest_path),
+        reviews, review_hash = read_json_snapshot(reviews_path, 8 * 1024**2)
+        require(reviews.get('schema') == REVIEW_SCHEMA and reviews.get('manifest_sha256') == manifest_hash,
                 'Reviews must bind this exact manifest hash')
         require(isinstance(reviews.get('decisions'), list) and len(reviews['decisions']) <= 100000,
                 'Invalid review count')
-        review_hash = digest(reviews_path)
         for decision in reviews['decisions']:
             key = (sha(decision['trace_sha256']), text(decision['event_id'], 'event_id', 120))
             require(key not in decisions, 'Duplicate alert review')
@@ -271,8 +282,7 @@ def evaluate(manifest_path, reviews_path=None, score_threshold=.5, iou_threshold
         source = relative_file(base, clip['source'])
         require(digest(source) == clip['source_sha256'], 'Local source SHA-256 mismatch')
         trace_path = relative_file(base, clip['trace'])
-        trace_hash = digest(trace_path)
-        trace = read_json(trace_path)
+        trace, trace_hash = read_json_snapshot(trace_path)
         require(kind == 'synthetic' or trace.get('origin') == 'offline-analyzer',
                 'Precomputed synthetic traces cannot evaluate representative recordings')
         frames, events = validate_trace(trace, labels, labels_hash, clip)
@@ -369,7 +379,10 @@ def evaluate(manifest_path, reviews_path=None, score_threshold=.5, iou_threshold
         provenance = read_json(ASSETS / 'candidates' / (YOLOX_PROFILE + '.json'))
     result = {'schema': SCHEMA, 'state': 'evaluated', 'data_kind': kind,
             'capacity_target_cameras': MINIMUM_CAMERA_TARGET,
-            'manifest_sha256': digest(manifest_path), 'reviews_sha256': review_hash,
+            'manifest_sha256': manifest_hash, 'reviews_sha256': review_hash,
+            'input_binding': {'json': 'sha256-of-bounded-captured-utf8-bytes',
+                              'mutation_policy': 'snapshot; later path changes do not alter captured inputs',
+                              'source': 'streamed-sha256-check-at-validation; media is not decoded or copied'},
             'evaluator_sha256': digest(Path(__file__)), 'approval_declarations': approval,
             'rule_engine_sha256': digest(ASSETS / 'rules.py'),
             'model_profiles_sha256': digest(ASSETS / 'model_profiles.py'),

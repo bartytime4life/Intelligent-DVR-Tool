@@ -1,14 +1,18 @@
 """Evaluation arithmetic/integrity tests; no representative-scene accuracy claim."""
 import copy
+import hashlib
+import io
 import json
 from pathlib import Path
 import subprocess
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 
+import edge.evaluation as evaluation_module
 from edge.evaluation import (evaluate, digest, canonical_hash, iou, match_frame,
-                             read_json, relative_file, timing_distribution)
+                             read_json, read_json_snapshot, relative_file, timing_distribution)
 from evaluation_fixtures import make_fixture, write_json
 
 
@@ -158,6 +162,51 @@ class EvaluationTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.run_eval(False)
 
+    def test_each_json_hash_binds_the_captured_bytes_after_its_path_changes(self):
+        for name in ('manifest.json', 'trace.json', 'labels.json', 'reviews.json'):
+            with self.subTest(input=name):
+                self.manifest, self.trace, self.reviews = make_fixture(self.root)
+                reference = self.run_eval()
+                target = self.root/name
+                original = target.read_bytes()
+                replacement = json.loads(original)
+                if name == 'manifest.json':
+                    replacement['clips'][0]['frames'][1]['objects'].pop(1)
+                elif name == 'trace.json':
+                    for frame in replacement['frames']:
+                        frame['detections'] = []
+                    replacement['events'] = []
+                elif name == 'labels.json':
+                    replacement.reverse()
+                else:
+                    for decision in replacement['decisions']:
+                        decision['verdict'] = 'confirmed'
+                captured = []
+                reader = read_json_snapshot
+                def capture_then_replace(path, *args, **kwargs):
+                    snapshot = reader(path, *args, **kwargs)
+                    if Path(path) == target:
+                        captured.append(snapshot[1])
+                        write_json(target, replacement)
+                    return snapshot
+                with patch.object(evaluation_module, 'read_json_snapshot', side_effect=capture_then_replace):
+                    result = self.run_eval()
+                self.assertEqual(captured, [hashlib.sha256(original).hexdigest()])
+                self.assertNotEqual(target.read_bytes(), original)
+                self.assertEqual(result, reference)
+                self.assertEqual(result['input_binding']['json'], 'sha256-of-bounded-captured-utf8-bytes')
+
+    def test_source_bytes_are_still_checked_after_json_capture(self):
+        reader = read_json_snapshot
+        def change_source_after_labels(path, *args, **kwargs):
+            snapshot = reader(path, *args, **kwargs)
+            if Path(path) == self.root/'labels.json':
+                (self.root/'source.synthetic.txt').write_bytes(b'Changed generated source; no footage.\n')
+            return snapshot
+        with patch.object(evaluation_module, 'read_json_snapshot', side_effect=change_source_after_labels):
+            with self.assertRaisesRegex(ValueError, 'Local source SHA-256 mismatch'):
+                self.run_eval(False)
+
     def test_receipt_or_model_qualification_cannot_be_used_as_trace(self):
         for schema in ('intelligent-dvr.receipt.v1', 'intelligent-dvr.model-compatibility.v1'):
             self.trace['schema'] = schema
@@ -283,6 +332,46 @@ class EvaluationTest(unittest.TestCase):
         result = self.run_eval(False, score_threshold=1)
         self.assertIsNone(result['per_class']['person']['precision'])
         self.assertEqual(result['per_class']['person']['recall'], 0)
+
+
+class JsonSnapshotTest(unittest.TestCase):
+    def test_snapshot_parses_and_hashes_the_exact_utf8_bytes(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp)/'input.json'
+            raw = '{"name":"café","value":1.25}\r\n'.encode('utf-8')
+            path.write_bytes(raw)
+            value, fingerprint = read_json_snapshot(path, len(raw))
+            self.assertEqual(value, {'name': 'café', 'value': 1.25})
+            self.assertEqual(fingerprint, hashlib.sha256(raw).hexdigest())
+            self.assertEqual(read_json(path, len(raw)), value)
+
+    def test_actual_capture_is_bounded_even_when_the_stream_outgrows_its_file_size(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp)/'growing.json'
+            path.write_bytes(b'{}')  # A pre-read stat would admit this file.
+            calls = []
+            class GrowingStream(io.BytesIO):
+                def read(self, size=-1):
+                    calls.append(size)
+                    return super().read(size)
+            stream = GrowingStream(b'{"value":"' + b'x'*1024 + b'"}')
+            original_open = Path.open
+            def open_stream(candidate, *args, **kwargs):
+                return stream if candidate == path else original_open(candidate, *args, **kwargs)
+            with patch.object(Path, 'open', open_stream):
+                with self.assertRaisesRegex(ValueError, 'size bound'):
+                    read_json_snapshot(path, 32)
+            self.assertEqual(calls, [33])
+
+    def test_empty_oversized_and_non_utf8_json_remain_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp)/'input.json'
+            for raw, limit in ((b'', 64), (b'{} ', 2), ('{"x":1}'.encode('utf-16'), 64),
+                               ('{"x":1}'.encode('utf-32'), 64)):
+                with self.subTest(raw=raw):
+                    path.write_bytes(raw)
+                    with self.assertRaises(ValueError):
+                        read_json_snapshot(path, limit)
 
 
 class MatchingTest(unittest.TestCase):

@@ -199,6 +199,17 @@ also bind evaluator/rule-engine/profile code hashes and optional review-file
 hash. Identical inputs and options produce identical JSON in the same code
 version; new real inference runs have their own measured times and trace hashes.
 
+Manifest, label, trace and review JSON hashes identify the exact bounded UTF-8
+bytes captured for parsing. Each read accepts at most its limit plus one byte,
+then rejects an oversized input before parsing. Duplicate keys, nonfinite values,
+non-UTF-8 JSON and the existing disallowed paths remain rejected. The report's
+`input_binding` records snapshot semantics: a later edit or replacement at the
+same path does not change the input already evaluated or its reported hash.
+Keep those exact input bytes for reproduction; the report does not preserve a
+copy of them. Source media still receives a streamed SHA-256 check at validation,
+without copying or decoding the recording. See the
+[generated input-binding regressions](verification/evaluation-binding-2026-11-11/README.md).
+
 ## Human alert decisions
 
 Keep a separate `intelligent-dvr.alert-reviews.v1` JSON file with:

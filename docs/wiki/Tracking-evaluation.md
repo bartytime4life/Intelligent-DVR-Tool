@@ -182,6 +182,15 @@ metric tests verify swaps, misses, false tracks and the HOTA threshold sweep.
 
 Each report binds manifest, source, trace, model/labels, tracker parameters,
 upstream commit, local implementation SHA-256 values and Python/NumPy versions.
+JSON hashes identify the bounded UTF-8 bytes actually parsed, rather than a later
+read of the live path. Tracking captures its manifest and traces again after the
+shared detection-validation stage and requires those captured hashes to match
+the first stage; changes between stages fail evaluation. Once a second-stage
+capture succeeds, later path changes do not alter that captured input or its
+reported hash. The report records this policy in `input_binding`. The
+[generated race regressions](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/evaluation-binding-2026-11-11/README.md)
+exercise both stage changes and replacements after capture. Source media is
+hash-checked as a stream, without copying or decoding it.
 Repeat with the same files, code and environment; reports contain no generated
 timestamp. Retain those exact inputs privately for reproducibility. The records
 are unsigned evidence, not proof of authentic independent labels or recording

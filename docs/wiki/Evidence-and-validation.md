@@ -1,5 +1,10 @@
 # Verification index
 
+[Evaluation input binding, November 12 integration](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/evaluation-binding-2026-11-11/README.md)
+records four reproduced parsed-bytes/hash races, bounded UTF-8 snapshots,
+tracking-stage consistency and generated integration checks. Historical proof
+and the current merged-source validation are retained separately.
+
 [Science and mathematical improvements, November 11](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/science-math-2026-11-11/README.md)
 records empirical threshold selection, lifecycle-aware detector sampling and exact
 sparse association, with generated regressions and primary research references.

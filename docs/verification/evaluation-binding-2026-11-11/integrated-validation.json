@@ -1,0 +1,141 @@
+{
+  "schema": "intelligent-dvr.evaluation-input-binding-integration.v1",
+  "date": "2026-11-12",
+  "source": {
+    "historical_defect_baseline_revision": "c517b438789efbe81d410f23f2a0a173ed72c86c",
+    "preserved_patch_revision": "790b59c549949f6611d4097d70a40b2a6a461768",
+    "integrated_main_revision": "cd6d15666beb55a9641068398d82a3d02eaa7769",
+    "tested_source_checkpoint": "b8fce70c558feec08ab13d6867996e13189b67e9",
+    "merge_conflicts": false,
+    "sha256": {
+      "edge/evaluation.py": "ec7a766815dae61e0726a2bd858b65288023edf46738d96db2cc8a394a05532c",
+      "edge/tracking_evaluation.py": "9f989169a475f652147372c2ad15730cc9545476f171cb5b2f13025a72ff0d55",
+      "tests/test_evaluation.py": "e83da61165cad61090bd623eda345664db410e734af88bde294b2696a94ba762",
+      "tests/test_tracking_evaluation.py": "bfc436184c58aa914905dee09e5f33f767c1a600206ca00c44fde5be65589f07"
+    },
+    "protected_runtime_matches_integrated_main": {
+      "inference.py": true,
+      "journal.py": true,
+      "supervision.py": true,
+      "scheduler.py": true,
+      "profiling.py": true
+    }
+  },
+  "historical_proof_replay": {
+    "file": "proof.json",
+    "byte_identical": true,
+    "sha256": "35c36e81125db3e0dc5d58ec36f8ecbc4bb3414ca082c082aa27b6cba10fc957",
+    "command": "python docs/verification/evaluation-binding-2026-11-11/reproduce.py --output NEW_FILE.json"
+  },
+  "environment": {
+    "platform": "Linux",
+    "python": "3.12.3",
+    "node": "22.13.1",
+    "npm": "10.9.2",
+    "existing_python_environment": true,
+    "existing_node_dependencies": true,
+    "reused_dependency_lockfile_matches": true,
+    "packages_installed": false
+  },
+  "build": {
+    "command": "npm run build",
+    "exit_code": 0,
+    "advisory": "Existing chunks exceed the 500 kB advisory; build and Sites preparation completed."
+  },
+  "targeted_tests": [
+    {
+      "command": "python -m unittest discover -s tests -p test_evaluation.py",
+      "tests_run": 30,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "command": "python -m unittest discover -s tests -p test_tracking_evaluation.py",
+      "tests_run": 23,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  ],
+  "full_native_suite": {
+    "command": "python -m unittest discover -s tests -p 'test_*.py'",
+    "tests_run": 567,
+    "passed": 554,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 13,
+    "seconds": 29.443,
+    "log_sha256": "a8bf9f4a0c8ff3581a6c5dfc149e46c64703e6d35ff7222f8483fdfc28c67d71"
+  },
+  "skipped_loopback_rerun": {
+    "command_prefix": "DVR_TEST_SOCKETS=1 PYTHONPATH=tests python -m unittest -v",
+    "selection_source": "Precisely the 13 decorator-skipped cases from full native discovery; names and original reasons below.",
+    "environment": {
+      "DVR_TEST_SOCKETS": "1"
+    },
+    "selection": [
+      {
+        "test": "test_copy_only_backup.CopyOnlyBackupTest.test_real_http_copy_without_model_keeps_auth_and_rejects_analysis",
+        "reason": "Optional generated loopback HTTP check"
+      },
+      {
+        "test": "test_failures.NativeWorkerCodeTest.test_actual_workers_report_rtsp_causes_without_endpoint_details",
+        "reason": "Requires controlled loopback sockets"
+      },
+      {
+        "test": "test_lan_recorder.RtspRecorderTest.test_actual_rtsp_relay_segment_worker_http_analysis_and_restart",
+        "reason": "Requires Linux/Windows recorder storage and controlled loopback sockets"
+      },
+      {
+        "test": "test_live_analysis.LiveHttpTest.test_live_routes_require_the_session_token_and_a_bounded_jpeg",
+        "reason": "Set DVR_TEST_SOCKETS=1 on a host allowing loopback"
+      },
+      {
+        "test": "test_local_feeds.NativeFeedTest.test_real_rtsp_tcp_auth_decode_and_http_guards",
+        "reason": "Set DVR_TEST_SOCKETS=1 on a host allowing loopback"
+      },
+      {
+        "test": "test_local_service.ServiceTest.test_http_host_origin_token_body_and_source_controls",
+        "reason": "Set DVR_TEST_SOCKETS=1 on a host allowing loopback"
+      },
+      {
+        "test": "test_local_service.ServiceTest.test_idle_connections_do_not_stall_api_calls_and_handlers_are_bounded",
+        "reason": "Set DVR_TEST_SOCKETS=1 on a host allowing loopback"
+      },
+      {
+        "test": "test_local_service.ServiceTest.test_real_loopback_peer_owner_including_a_dual_stack_client",
+        "reason": "Real Linux loopback sockets"
+      },
+      {
+        "test": "test_local_service.ServiceTest.test_restart_on_the_same_port_survives_time_wait_but_a_live_listener_keeps_it",
+        "reason": "Set DVR_TEST_SOCKETS=1 on a Linux or macOS host allowing loopback"
+      },
+      {
+        "test": "test_mac_setup.MacSetupTests.test_duplicate_and_restart_against_actual_listener",
+        "reason": "Explicit local socket checks"
+      },
+      {
+        "test": "test_pc_setup.PcSetupTest.test_occupied_port_fails_then_recovers",
+        "reason": "Requires local socket permission"
+      },
+      {
+        "test": "test_pc_setup.PcSetupTest.test_service_restart_after_http_and_active_port_exclusion",
+        "reason": "Requires local socket permission"
+      },
+      {
+        "test": "test_recording_import.RecordingImportTests.test_real_http_binary_import_is_guarded_and_idempotent",
+        "reason": "Real loopback transport runs in CI"
+      }
+    ],
+    "tests_run": 13,
+    "seconds": 36.508,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "successful": true,
+    "log_sha256": "d9ce11bcaf6166769b96c79c9fa25c5d751347f4fbd1ef22599774a11730efcb"
+  },
+  "all_567_discovered_native_cases_executed_successfully_across_runs": true,
+  "scope": "Local build and generated fixture checks; not publication, installed-service replacement, pinned production detector execution, field accuracy, physical camera or capacity qualification."
+}
