@@ -48,7 +48,7 @@ The [novice-study kit](facility-novice-study.md) and [easy-setup research](easy-
 
 | Area | Guides |
 | --- | --- |
-| Data and implementation | [Architecture](architecture.md), [science and algorithms](science-and-algorithms.md), [edge CLI](../edge/README.md), [third-party notices](third-party-notices.md), [security](../SECURITY.md) |
+| Data and implementation | [Development and checks](development.md), [contributing](../CONTRIBUTING.md), [architecture](architecture.md), [science and algorithms](science-and-algorithms.md), [edge CLI](../edge/README.md), [third-party notices](third-party-notices.md), [security](../SECURITY.md) |
 | Evaluation | [Offline evaluation](offline-evaluation.md), [qualification checklist](offline-qualification.md), [dated model qualification](model-qualification-20261026.md), [coverage](recording-coverage.md) |
 | Capacity and rollout | [Pilot scope](pilot-scope.md), [100-camera preparation](performance-100-cameras.md), [roadmap](roadmap.md), [field acceptance](field-acceptance.md) |
 | Evidence | [Verification index](verification/README.md), [product status](product-status.md), [November 11 image provenance](media/guided-experience-2026-11-11/README.md), [November 1 image provenance](media/guide/README.md), [earlier image provenance](media/current/README.md) |

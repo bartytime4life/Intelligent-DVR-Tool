@@ -33,6 +33,29 @@ validated by the analyzer's rule engine and written with exclusive creation unde
 `trained/` beside the catalog (private permissions, at most 50 files). Models and
 configured rule files remain read-only to the browser.
 
+## Optional local training assistant
+
+The Train assistant calls the fixed `http://127.0.0.1:11434/api/` endpoint only
+from a loopback-hosted app, after explicit operator requests. It omits browser
+credentials, refuses redirects and checks installed-model metadata before chat.
+Models advertising remote hosts/models, or names ending `-cloud` or `:cloud`,
+are excluded. Discovery
+reads metadata; an explanation can load and run the selected local chat model.
+No model installation or download is implemented by this client.
+
+Prompts contain stage instructions and projected training measurements, not
+recordings, images, embeddings or camera credentials. Imported Training Lab
+receipts are limited to 16 MiB, their payload hash is checked and held-out counts
+are recomputed before a count-only summary can reach the model. This hash is not
+an author signature. Checked scorecard answers and Lab actions are validated
+against the measured facts; the assistant cannot start cameras, apply settings
+or bypass fresh-check/consent requirements. Discovery has a 30-second budget;
+metadata requests use eight-second timeouts and chat/generation 90 seconds.
+These are client cancellation limits, not hard runtime memory or execution caps.
+The operator controls the separately installed Ollama service and its offline
+configuration. Loopback routing and metadata filtering do not attest that
+runtime’s behavior. [Operator instructions](docs/training.md#ask-the-local-training-assistant).
+
 The browser imports bounded JSON metadata (1 MB, 1,000 events) and renders it as
 React text. There is no HTML injection or URL-based media fetch from a receipt.
 Receipt-only imports do not borrow sample imagery. Recognition can attach the
@@ -98,7 +121,7 @@ is performed by System or the supplied launchers.
 
 ## Local recording job service
 
-The optional `edge.local_service` binds only to `127.0.0.1`, checks exact Host and browser origin, and requires a per-service token for jobs and artifacts. Loopback is reachable by every account on the computer. On Linux, every API request, including the token-issuing session endpoints, must come from a TCP socket owned by the service's own OS account (looked up in `/proc/net/tcp` and `tcp6`, IPv4-mapped clients included); if those tables are unavailable, as on WSL1, API requests are refused. Windows and macOS have no such check: any local account can open the session endpoints and obtain the token, so run the service only on a computer whose other accounts you trust. Analysis accepts opaque catalog selections, never client commands. The separately tokened OEM companion intentionally accepts validated absolute source and backup folders, with non-overlap, regular-file and identity checks; explicit Start grants reads/copies under the service account. Guided camera setup can save validated private RTSP credentials without connecting the camera. An explicit `--allow-recording-import` switch enables same-computer file copies with a 64 MiB per-file cap, 20-file/512 MiB inbox limits, 64 MiB free-space reserve, container-header and SHA-256 verification, exclusive publication, and idempotent content-derived names. Imports do not start inference. An OS-released folder lock serializes imports across services; after a crash, the next import reclaims the left-over partial file. No remote upload endpoint or cloud inference is added. One recording worker invokes the analyzer with bounded local snapshots, time, threads and frame/output limits. Analysis prefers supported CUDA execution with visible CPU fallback; CPU and GPU memory enforcement differ by platform, as described in the GPU guide. Worker isolation is a resource policy, not a filesystem or network sandbox. It is single-user software for owner-approved recordings and hash-pinned models, not a hostile-model sandbox. See [the full boundary and shutdown/recovery behavior](docs/local-analysis-service.md).
+The optional `edge.local_service` binds only to `127.0.0.1`, checks exact Host and browser origin, and requires a per-service token for jobs and artifacts. Loopback is reachable by every account on the computer. On Linux, every API request, including the token-issuing session endpoints, must come from a TCP socket owned by the service's own OS account (looked up in `/proc/net/tcp` and `tcp6`, IPv4-mapped clients included); if those tables are unavailable, as on WSL1, API requests are refused. Windows and macOS have no such check: any local account can open the session endpoints and obtain the token, so run the service only on a computer whose other accounts you trust. Analysis accepts opaque catalog selections, never client commands. The optional OEM companion shares the per-service token with other enabled API families; it intentionally accepts validated absolute source and backup folders, with non-overlap, regular-file and identity checks; explicit Start grants reads/copies under the service account. Guided camera setup can save validated private RTSP credentials without connecting the camera. An explicit `--allow-recording-import` switch enables same-computer file copies with a 64 MiB per-file cap, 20-file/512 MiB inbox limits, 64 MiB free-space reserve, container-header and SHA-256 verification, exclusive publication, and idempotent content-derived names. Imports do not start inference. An OS-released folder lock serializes imports across services; after a crash, the next import reclaims the left-over partial file. No remote upload endpoint or cloud inference is added. One recording worker invokes the analyzer with bounded local snapshots, time, threads and frame/output limits. Analysis prefers supported CUDA execution with visible CPU fallback; CPU and GPU memory enforcement differ by platform, as described in the GPU guide. Worker isolation is a resource policy, not a filesystem or network sandbox. It is single-user software for owner-approved recordings and hash-pinned models, not a hostile-model sandbox. See [the full boundary and shutdown/recovery behavior](docs/local-analysis-service.md).
 
 ### Worker failure codes and the diagnostic log
 

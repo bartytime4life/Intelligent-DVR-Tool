@@ -10,7 +10,7 @@ copy-only DVR Companion does not require one.
 
 [Hardware and storage](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Hardware-guide) · [GPU plan](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/GPU-planning) · [Resource limits](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Resource-controls) · [Windows](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Windows-setup)
 
-Reference target: **Ubuntu 24.04 LTS x86-64**, Node.js **22**, Python **3.12**, a WebGL-capable desktop browser. Canonical lists standard security maintenance for Ubuntu 24.04 through May 2029 [L1]. A desktop is convenient for review; a future recorder service can be headless, but no such service is installed by these instructions.
+Reference target: **Ubuntu 24.04 LTS x86-64**, Node.js **22**, Python **3.12**, a WebGL-capable desktop browser. Canonical lists standard security maintenance for Ubuntu 24.04 through May 2029 [L1]. A desktop is convenient for review. The foreground service already supports an explicitly enabled [one-channel recorder](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/LAN-recording); these instructions install no background/system service and start no recording automatically.
 
 ## Prepare the machine
 

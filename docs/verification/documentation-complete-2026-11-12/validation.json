@@ -1,0 +1,88 @@
+{
+  "base_commit": "cd6d15666beb55a9641068398d82a3d02eaa7769",
+  "base_tree": "660af95b0d8607b4f881f24c2b67d0c41a7d1655",
+  "validated_at": "2026-11-12T06:02:37.335059+00:00",
+  "checks": [
+    {
+      "command": [
+        "python3",
+        "scripts/build-guide-graphics.py",
+        "--check"
+      ],
+      "exit_code": 0,
+      "output": "Checked 10 editable workflow graphics.\n"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/build-wiki.py",
+        "--check"
+      ],
+      "exit_code": 0,
+      "output": "Wiki checked: 68 pages/navigation files.\n"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/check-docs.py"
+      ],
+      "exit_code": 0,
+      "output": "Host summaries verified: 300 distinct images; reference/queue/rate/parity/source/default invariants checked. No experiments rerun.\nCUDA evidence checks passed: parity, queue accounting, runtime scope and publication bounds.\nWorker evidence checks passed: initial/final trials, parity, queue accounting and publication scope.\nRecovery evidence checks passed: native proof, generations/reaping, fault intervals, outcome/queue accounting and privacy scope.\nJournal evidence checks passed: native proof, interrupted work, acknowledgment/redelivery, replay accounting and measured durability cost.\nBatching evidence checks passed: atomic native exits, version compatibility, indexed delivery, matched medians and honest queue/delivery accounting.\nOwner synthetic record: source/policy bindings, 142 tests per environment, legacy recovery, CUDA block and all loss identities verified.\nDocumentation checks passed: 1542 local links, 14 historical media hashes, 11 PR61 visual blobs, 2,381,700 historical + 185,432 PR61 + 1,626,214 guide + 222,707 guided-experience media bytes, test-count consistency.\n"
+    },
+    {
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-p",
+        "test_wiki_docs.py"
+      ],
+      "exit_code": 0,
+      "output": "........\n----------------------------------------------------------------------\nRan 8 tests in 0.057s\n\nOK\n"
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exit_code": 0,
+      "output": ""
+    }
+  ],
+  "inventory_markdown_files": 197,
+  "inventory_sha256": "162bb2cff01b7cdf1d8872b47d51ac791ddcfd0046886abdfe13f5d6da54bd63",
+  "protected_and_dependency_sha256": {
+    "edge/inference.py": "7e95beb9e25dd67ac5d8d977ec6c466874371d12d112119a85a619124687b2f1",
+    "edge/journal.py": "70f7a3419d05d76380ea32ad5de20ee440bc17256e25baf0f2289a86e46a495a",
+    "edge/supervision.py": "03f334d5fa072e5f3ad02bd90536fd2c00fc97ebfaa54ca1ef1c10b64b80a9cf",
+    "edge/scheduler.py": "8639b46d3ba2e1a14efaa7ff647f412e6be437685ec7be5717a00983835b9019",
+    "edge/profiling.py": "f7c0a3e4b831d7f996840aec51a73e3fe68e06627cdce854716c576068f80f91",
+    ".openai/hosting.json": "d532abb65cf9ae20634b464d954cb4a08a0de9f3cd3cdf7f9c3ec8948826d947",
+    "worker/index.js": "2dd0615a445143933d88d4271f54f5d63ee951421fcd08c5a7617bb09c564389",
+    "scripts/prepare-sites-build.mjs": "b6a6adaa4fab3234676116dd1c9cb6611275ab9d92dd26f5bf402393e3744bf6",
+    "tests/sites-worker.test.mjs": "96af7b48906c6460c793356d7b6952f7d5026dbf5a502bec0d9297ff04201c26",
+    "package.json": "f461ab9ccfa49f2905fcadf70abdfd674d23b173af474d08ea3c2f585b11a57f",
+    "package-lock.json": "b71d95b16fe76f892c899ad4e832380add9298fed4e6c0973fc44d18b455f480"
+  },
+  "preservation": {
+    "application_sources_changed": false,
+    "private_runtime_data_accessed": false,
+    "historical_evidence_changed": false,
+    "media_bytes_changed": false,
+    "new_application_tests_run": false
+  },
+  "wiki": {
+    "generated": true,
+    "published": false,
+    "reason": "Separate Git write authentication unavailable; dry-run refused without a username. Source connector does not expose Wiki writes."
+  },
+  "review": {
+    "operator_source_review": "PASS",
+    "developer_source_review": "PASS",
+    "scope": "Read-only checks; no camera/model/native runs"
+  }
+}

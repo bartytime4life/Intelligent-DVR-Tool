@@ -5,6 +5,10 @@ This change integrates on merged source
 is byte-identical to historical baseline
 `c517b438789efbe81d410f23f2a0a173ed72c86c`; the reproducer checks that identity.
 Inputs are generated plan coordinates, not camera footage or surveyed sites.
+The later [documentation integration](documentation-integration.json) records
+merged documentation source `65ec81166f7b4c7577e415c757e4696459012d63`, unchanged
+algorithm/UI hashes and regenerated 68-page Wiki outputs. Original validation
+counts above that integration remain bound to their original source.
 
 ## Reproduced errors
 

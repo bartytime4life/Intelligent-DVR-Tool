@@ -47,6 +47,7 @@ not calibrated camera feeds. The browser performs no neural-network inference.
 | Workspace | `src/App.jsx`, `src/data.mjs` | Review, rules, local video preview, explicit receipt import |
 | Recording recognition | `src/RecognitionReview.jsx`, `src/recognition.mjs`, `src/review-transfer.mjs` | Explicit review bundle, exact-file matching, sampled detections and Event handoff; shared opening intent prevents late results from replacing newer choices |
 | Guided training | `src/TrainingWorkspace.jsx`, `src/training.mjs`, `edge/local_service.py` | Scripted webcam session, local analysis and opt-in rule-threshold saving; no detector retraining |
+| Optional training assistant | `src/OllamaCoach.jsx`, `src/ollama.mjs`, `src/ollama-scorecard.mjs`, `src/lab-receipt.mjs` | Explicit browser-to-local-Ollama requests; checked score summaries and restricted review suggestions, separate from the detector and service |
 | Person enrollment and suggestions | `edge/people.py`, `edge/faces.py`, `edge/face_worker.py`, `src/RecognitionReview.jsx` | Consent-gated local face templates and explicit possible matches for human review; no verified identity or automatic decision |
 | Facility model | `src/facility.mjs` | Bounded plan validation, local-meter projection, estimated visibility and rehearsal |
 | Facility renderer | `src/FacilityBuilder.jsx`, `src/facility-map.mjs` | Guided controls, MapLibre and selected-camera Three.js volume |
@@ -70,6 +71,8 @@ not calibrated camera feeds. The browser performs no neural-network inference.
 | Start OEM backup | Separate `Intelligent-DVR-Backup/` tree, private file receipts/reviews and SQLite index | Originals stay unchanged; no automatic deletion; browser decisions and models need separate backups |
 | Start LAN recording | Private `.lan-recorder/` beneath the recordings folder | Automatic age/count/space retention can delete completed and pending segments; export needed evidence separately |
 | Apply guided training | New rule file under `trained/` beside the catalog; default selection/history in browser storage | Explicit apply and training-write permission; detector weights are unchanged; [storage](training.md#what-is-saved-where) |
+| Ask the training assistant | Fixed `http://127.0.0.1:11434/api/` Ollama endpoint from a loopback-hosted app | Explicit requests with prompt-stage/count/threshold summaries; no video, embeddings or recording bytes; runtime installation/configuration is separate |
+| Review a Training Lab receipt | Browser memory after bounded JSON/hash checks and held-out count recomputation | A distinct Lab contract, not an analyzer review bundle; assistant receives projected counts/scope/threshold, without operator strings, filenames, boxes or notes |
 | Enroll or check a consenting person | Private `people/` templates beside the catalog; clips stay in the recordings folder | Face models and processing stay local; deleting a template does not delete clips; [deletion](person-enrollment.md#storage-and-deletion) |
 | Check for enrolled people in Recognition | Pending embeddings in service memory for one local job; browser receives names, boxes and similarity only | Confirm may add a template view; Not this person hides the suggestion; no automatic Events/export handoff; [limits](person-enrollment.md#possible-matches-in-recognition) |
 | Run analyzer | Explicit local output files | No camera capture or model download |
@@ -109,6 +112,23 @@ flowchart TD
 Source hashes bind files; they do not establish source truth, annotation correctness or signed custody. Human review confirms/dismisses an observation, not intent. Browser-local history is editable and lacks operational audit guarantees.
 
 The YOLOX-S profile binds a selected model hash, COCO80 order and explicit preprocessing/decoding. Generic YOLOv8-style raw output is a different profile. An `.onnx` extension alone does not establish compatibility.
+
+The current tracker is `bytetrack-style-iou-kalman-v3`. Its sparse component
+matching, elapsed-time state updates and live detector scheduling are explained
+in [science and algorithms](science-and-algorithms.md). Older review bundles stay
+readable; current tracking evaluation requires traces from the current
+implementation and hash. Guided training fits empirical score boundaries using
+calibration sessions and reserves fresh checks for validation; it does not retrain
+the model or establish a calibrated probability of presence.
+
+The optional [training assistant](training.md#ask-the-local-training-assistant)
+does not score detections or apply rules. The browser checks structured answers
+against measured counts and permitted next steps. Assistant-response timings are
+distinct from detector timings. A fixed local endpoint and metadata checks do
+not certify the separately managed Ollama runtime’s network behavior.
+
+Developers can use the [source map and check matrix](development.md) to locate
+each validator and reproduce the appropriate software checks.
 
 ## Visibility is geometry
 

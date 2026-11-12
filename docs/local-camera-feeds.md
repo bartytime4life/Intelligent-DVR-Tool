@@ -70,9 +70,13 @@ guided companion or analysis-enabled Linux/Windows form:
 
 1. Install the repository’s Linux or Windows local edge environment; see
    [Linux](setup-linux.md) or [Windows](setup-windows.md).
-2. Copy [the example](../edge/local-feeds.example.json) to `local-feeds.json` in
-   the repository root. This local filename is ignored by Git. Replace the example
-   address/path with your DVR’s exact settings. Add one entry per channel.
+2. Check for `local-feeds.json` in the repository root first. The PC installer
+   creates an empty file only when absent. Back up and edit an existing file,
+   preserving its other channels, public sources and credentials. If absent,
+   create it using [the example](../edge/local-feeds.example.json), replacing the
+   example address/path with your DVR’s exact settings. Add one entry per channel.
+   This local filename is ignored by Git; never overwrite a configured source list
+   with the example.
 3. Restrict the file to your OS account (`chmod 600 local-feeds.json` on Linux).
    Credentials are local plaintext settings, not a credential vault. Do not commit,
    export to a hosted Site or upload it. On POSIX, the service and Check warn while

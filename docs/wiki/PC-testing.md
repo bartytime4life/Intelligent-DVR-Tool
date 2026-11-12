@@ -4,7 +4,9 @@
 
 ![Workflow diagram for pc testing.](https://raw.githubusercontent.com/wiki/bartytime4life/Intelligent-DVR-Tool/docs/media/guide/start.svg)
 
-**Quick path:** Extract the PC kit → Install → prepare verified local models → Check → Start. Camera connections and inference remain explicit.
+**Quick path:** Extract the PC kit → Install → Check → Start. Prepare verified
+local models when using analysis or training; preview and copy-only DVR Companion
+use need no model. Camera connections and inference remain explicit.
 
 This kit prepares an interactive **single-user local test installation** on
 Ubuntu 24.04 x86-64 or Windows 11 x64. It includes the built interface and local
@@ -325,10 +327,34 @@ Use the same browser profile and exact **http://127.0.0.1:4298** origin for
 continuity. A changed port/origin has separate browser storage. Export reviews,
 rules and facility plans before updates; browser storage is not a backup.
 
-Stop before updating. Extract a new kit into a new folder, install its own
-environment and copy only reviewed settings. Keep footage/models outside the app
-folder. To uninstall, stop, export browser work and remove the extracted folder
-after preserving anything you added. No system service or machine-wide uninstall
+Stop before updating. Extract a new kit into a new folder and install its own
+environment. Preserve the old folder until the new Check and saved-data inspection
+pass. Do not copy the old `.venv` or merge private folders into an already
+configured destination.
+
+Default model preparation creates **`local-analysis/` inside the app folder**.
+It can contain the model, catalog, recording inbox, tuned `trained/` rules, private
+`people/` templates and companion settings. Back up that entire private folder;
+copy it to the new installation only when that destination is absent, preserving
+its permissions and relative paths. Review any custom catalog paths separately.
+Also preserve root `.backup-library/` when present, `local-feeds.json` and any
+recorder configuration outside that folder. The selected OEM backup tree and
+externally located recordings/models are separate and must remain available at
+their configured paths. [Storage map](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Architecture-and-data#where-data-goes).
+
+The optional Linux `--state-dir` is a separate last-job store. Preserve it and
+export needed results before changing installations; follow its
+[recovery procedure](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Local-analysis-service#optional-linux-restart-recovery).
+Browser exports are separate from all of these folders. Reopen the new app on
+the same origin and inspect the saved facilities, reviews, rules, model/rule
+choices and enrollment list before deleting the old installation. Start no
+camera or inference merely to inspect the data. Inspect OEM Saved videos and
+settings, any retained stopped-recorder segments, and the configured absolute
+source/backup paths too. Preserve evidence needed outside the recorder’s
+automatic retention window before restarting it.
+
+To uninstall, stop, export browser work and remove the extracted folder only
+after preserving everything above. No system service or machine-wide uninstall
 step is installed.
 
 ## Acceptance boundary
