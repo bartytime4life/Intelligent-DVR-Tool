@@ -133,9 +133,11 @@ restart. Restarting the service itself never starts cameras or analysis.
 
 ## Resource policy and limits
 
-CPU workers retain the existing Linux 3 GiB hard address-space limit and Windows
-Job Object committed-memory cap. GPU workers keep the two-thread, file/core,
-CPU-time, frame-size and parent deadline/session bounds.
+CPU live-AI workers have a 3 GiB Linux hard address-space limit or Windows Job
+Object committed-memory cap. CPU recorded-video workers use 4 GiB under those
+same platform mechanisms. macOS workers have no address-space memory cap.
+GPU workers keep the two-thread, file/core, CPU-time, frame-size and parent
+deadline/session bounds; their different memory policy is described below.
 
 The Linux GPU per-file write limit is 40 MiB so the verified 35,858,002-byte model
 snapshot fits. CPU workers retain their existing 34 MiB limit. A native Linux
