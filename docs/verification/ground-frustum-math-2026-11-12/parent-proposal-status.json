@@ -1,0 +1,170 @@
+{
+  "schema": "intelligent-dvr.ground-visibility.proposal-readback.v1",
+  "read_at": "2026-11-12 10:03:51 UTC",
+  "main_sha": "63b06ba2aab3adcffc38f52310b55969fb538afe",
+  "proposals": [
+    {
+      "pr": {
+        "url": "https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/119",
+        "number": 119,
+        "state": "open",
+        "merged": false,
+        "mergeable": true,
+        "draft": true,
+        "title": "Project planned ground detail using camera-axis depth",
+        "base": "main",
+        "base_sha": "63b06ba2aab3adcffc38f52310b55969fb538afe",
+        "head": "codex/dori-projective-density-20261112",
+        "head_sha": "e1468c9b263b24c0cef045af86ce69ea263fc116",
+        "head_repo_id": 1432694968,
+        "head_repo_full_name": "bartytime4life/Intelligent-DVR-Tool",
+        "merge_commit_sha": "a7e3de1133af2f0aab893d56fca5d98f3e9348de",
+        "user": {
+          "login": "bartytime4life",
+          "name": "bartytime4life",
+          "email": null,
+          "avatar_url": "https://avatars.githubusercontent.com/u/203533328?v=4",
+          "id": 203533328
+        },
+        "requested_reviewers": null,
+        "requested_team_reviewers": null,
+        "diff": null,
+        "comments": null,
+        "created_at": "2026-11-12T08:01:01Z",
+        "updated_at": "2026-11-12T09:18:43Z",
+        "closed_at": null,
+        "merged_at": null,
+        "commits": 2,
+        "changed_files": 27,
+        "additions": 2199,
+        "deletions": 64,
+        "display_url": "https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/119",
+        "display_title": "Project planned ground detail using camera-axis depth"
+      },
+      "runs": [
+        {
+          "id": 43190292991,
+          "name": "Mac source install",
+          "status": "completed",
+          "conclusion": "success",
+          "run_number": 233,
+          "jobs_url": "https://api.github.com/repos/bartytime4life/Intelligent-DVR-Tool/actions/runs/43190292991/jobs",
+          "logs_url": "https://api.github.com/repos/bartytime4life/Intelligent-DVR-Tool/actions/runs/43190292991/logs",
+          "workflow_id": 403855532
+        },
+        {
+          "id": 43190292655,
+          "name": "Cross-platform checks",
+          "status": "completed",
+          "conclusion": "success",
+          "run_number": 619,
+          "jobs_url": "https://api.github.com/repos/bartytime4life/Intelligent-DVR-Tool/actions/runs/43190292655/jobs",
+          "logs_url": "https://api.github.com/repos/bartytime4life/Intelligent-DVR-Tool/actions/runs/43190292655/logs",
+          "workflow_id": 395543320
+        },
+        {
+          "id": 43190292260,
+          "name": "PC install kit",
+          "status": "completed",
+          "conclusion": "success",
+          "run_number": 480,
+          "jobs_url": "https://api.github.com/repos/bartytime4life/Intelligent-DVR-Tool/actions/runs/43190292260/jobs",
+          "logs_url": "https://api.github.com/repos/bartytime4life/Intelligent-DVR-Tool/actions/runs/43190292260/logs",
+          "workflow_id": 400856528
+        },
+        {
+          "id": 43190292575,
+          "name": "Facility browser regression",
+          "status": "completed",
+          "conclusion": "success",
+          "run_number": 572,
+          "jobs_url": "https://api.github.com/repos/bartytime4life/Intelligent-DVR-Tool/actions/runs/43190292575/jobs",
+          "logs_url": "https://api.github.com/repos/bartytime4life/Intelligent-DVR-Tool/actions/runs/43190292575/logs",
+          "workflow_id": 398651984
+        }
+      ]
+    },
+    {
+      "pr": {
+        "url": "https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/121",
+        "number": 121,
+        "state": "open",
+        "merged": false,
+        "mergeable": true,
+        "draft": true,
+        "title": "Measure zone coverage by area and keep editing responsive",
+        "base": "main",
+        "base_sha": "63b06ba2aab3adcffc38f52310b55969fb538afe",
+        "head": "codex/zone-area-math-20261112",
+        "head_sha": "730df9a3e45d96bb9bf154e809bf8d03c10c4c64",
+        "head_repo_id": 1432694968,
+        "head_repo_full_name": "bartytime4life/Intelligent-DVR-Tool",
+        "merge_commit_sha": "869c6e4d685fb0353644db1fca54daab1681e523",
+        "user": {
+          "login": "bartytime4life",
+          "name": "bartytime4life",
+          "email": null,
+          "avatar_url": "https://avatars.githubusercontent.com/u/203533328?v=4",
+          "id": 203533328
+        },
+        "requested_reviewers": null,
+        "requested_team_reviewers": null,
+        "diff": null,
+        "comments": null,
+        "created_at": "2026-11-12T09:18:42Z",
+        "updated_at": "2026-11-12T09:18:42Z",
+        "closed_at": null,
+        "merged_at": null,
+        "commits": 1,
+        "changed_files": 62,
+        "additions": 8451,
+        "deletions": 115,
+        "display_url": "https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/121",
+        "display_title": "Measure zone coverage by area and keep editing responsive"
+      },
+      "runs": [
+        {
+          "id": 43190340861,
+          "name": "Cross-platform checks",
+          "status": "completed",
+          "conclusion": "success",
+          "run_number": 620,
+          "jobs_url": "https://api.github.com/repos/bartytime4life/Intelligent-DVR-Tool/actions/runs/43190340861/jobs",
+          "logs_url": "https://api.github.com/repos/bartytime4life/Intelligent-DVR-Tool/actions/runs/43190340861/logs",
+          "workflow_id": 395543320
+        },
+        {
+          "id": 43190340704,
+          "name": "Mac source install",
+          "status": "completed",
+          "conclusion": "success",
+          "run_number": 234,
+          "jobs_url": "https://api.github.com/repos/bartytime4life/Intelligent-DVR-Tool/actions/runs/43190340704/jobs",
+          "logs_url": "https://api.github.com/repos/bartytime4life/Intelligent-DVR-Tool/actions/runs/43190340704/logs",
+          "workflow_id": 403855532
+        },
+        {
+          "id": 43190340886,
+          "name": "PC install kit",
+          "status": "completed",
+          "conclusion": "success",
+          "run_number": 481,
+          "jobs_url": "https://api.github.com/repos/bartytime4life/Intelligent-DVR-Tool/actions/runs/43190340886/jobs",
+          "logs_url": "https://api.github.com/repos/bartytime4life/Intelligent-DVR-Tool/actions/runs/43190340886/logs",
+          "workflow_id": 400856528
+        },
+        {
+          "id": 43190340892,
+          "name": "Facility browser regression",
+          "status": "completed",
+          "conclusion": "success",
+          "run_number": 573,
+          "jobs_url": "https://api.github.com/repos/bartytime4life/Intelligent-DVR-Tool/actions/runs/43190340892/jobs",
+          "logs_url": "https://api.github.com/repos/bartytime4life/Intelligent-DVR-Tool/actions/runs/43190340892/logs",
+          "workflow_id": 398651984
+        }
+      ]
+    }
+  ],
+  "scope": "Read-only hosted status for parent proposals; not CI for the local ground-visibility integration, not merge or installed acceptance."
+}

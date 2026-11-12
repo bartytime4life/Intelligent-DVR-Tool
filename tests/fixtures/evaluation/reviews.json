@@ -3,7 +3,7 @@
   "manifest_sha256": "c299621164cbf13c882af3c9256dfb5b8948df3ee976d07f7512c55cf301ac19",
   "decisions": [
     {
-      "trace_sha256": "1a32d74275820e6e0075b3a364dfda940b1ffff6c101a1bf20c57cace2901bcb",
+      "trace_sha256": "9b4719835a27a02f08ff942d99030e35d0351c4306c3c90b17c82075dd148a7f",
       "event_id": "4cb9484255eb1acc06bb69ffc62f3f1a",
       "verdict": "confirmed",
       "reviewer": "synthetic-fixture-reviewer",
@@ -11,7 +11,7 @@
       "reviewed_at": "2026-10-27T00:00:00Z"
     },
     {
-      "trace_sha256": "1a32d74275820e6e0075b3a364dfda940b1ffff6c101a1bf20c57cace2901bcb",
+      "trace_sha256": "9b4719835a27a02f08ff942d99030e35d0351c4306c3c90b17c82075dd148a7f",
       "event_id": "6c8ae31776dc4f099f2db70b4ffbcfbe",
       "verdict": "false_alert",
       "reviewer": "synthetic-fixture-reviewer",

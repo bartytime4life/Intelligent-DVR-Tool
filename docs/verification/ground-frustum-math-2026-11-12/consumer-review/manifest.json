@@ -1,0 +1,162 @@
+{
+  "schema": "intelligent-dvr-ground-frustum-consumer-evidence-v1",
+  "date": "2026-11-12",
+  "coreSha256": "9207e0aeab51e2578cab9f3f82f28aa0fcd6cd3f1714a2bac5350a451587cf36",
+  "coverageSha256": "ee7a36dcfc79ee8c4d5c5fc9e12e71a47a13d0debd0ef0e0897312de8f46c9a2",
+  "sources": {
+    "src/facility-visibility.mjs": "9207e0aeab51e2578cab9f3f82f28aa0fcd6cd3f1714a2bac5350a451587cf36",
+    "src/facility-polygon.mjs": "e8ac82a5ad920a1a74b98e59f971bacdd4db659da72207ebbdd175fba32ef495",
+    "src/facility-visibility-protocol.mjs": "f15f3180f3bc40bcef62aafba9fa725ed1e3b49a4195daab85032cd2d5c29c43",
+    "src/facility-coverage.mjs": "ee7a36dcfc79ee8c4d5c5fc9e12e71a47a13d0debd0ef0e0897312de8f46c9a2",
+    "src/facility.mjs": "1ef907792316c57251d5609b89cce27db79bea8721eee8842cd00d8c5cfcc33b",
+    "tests/facility-visibility.test.mjs": "e9b323cef69b2875c9e0720deb59f89bd19eb429fd8279e706809cf5bd07ec54",
+    "tests/facility-visibility-integration.test.mjs": "63d0180361e59ecf6b22cccac276df0c96911134bdaf3ceda86ca664b40c6258",
+    "tests/facility-visibility-task.test.mjs": "4802b31df0f842dd7ad0cbc2402ccc3a4fee48b9527b7f0c42380b18b05cba92",
+    "tests/facility-coverage-task.test.mjs": "bd02da72afbaae0f7210d5d86b6d6273e8e4a710096526926e5cccfe2f2b4597",
+    "node_modules/polyclip-ts/dist/esm/index.js": "270c291bb9cf124a91bd81692fa38973b00337a4a9b3d563b0b295adb1182f8d",
+    "node_modules/bignumber.js/bignumber.mjs": "476d669a2d8bcc169bce832bdb0e5a531b3c5bac127e94422a56bbff65f6d2b0",
+    "node_modules/splaytree-ts/dist/esm/index.js": "c52c9064ca7eb8093b860e20d259d0ae3d429821ab6d5b802b93aa1188c03b26"
+  },
+  "artifacts": {
+    "README.md": {
+      "sha256": "16ccfd1579680b1f07bdd7bf825a392b299fe66db98678066126f353d5e09fe2",
+      "bytes": 9051
+    },
+    "adapter-inputs.json.gz": {
+      "sha256": "f1dd579166a9f80d33dfe126b08a12eb1e7da187db153ea498f700ba38195816",
+      "bytes": 4728,
+      "decompressedSha256": "1fe9c7a10c2cb1fc23d699b19c6ab221bc506d287c52055bbdb095e37d1801b5",
+      "decompressedBytes": 28990
+    },
+    "adapter-proof.json": {
+      "sha256": "e8775bd6b22e7195e9ae82dce101a2eae2b957a90adbcb0971612d08351485c7",
+      "bytes": 1370
+    },
+    "baseline-c2f8e13a.mjs.gz": {
+      "sha256": "de2b33729c3bc68742aa0680db937e53dde59d7e56719e98e969357dd4577659",
+      "bytes": 6027,
+      "decompressedSha256": "c2f8e13a86e1a0b4e15d92fa2e61a0585d143576dcaa48cda2c38aad6fcefb53",
+      "decompressedBytes": 17305
+    },
+    "baseline-wall-scenes-proof.json.gz": {
+      "sha256": "4761673e4a5a5c414027d3c2edbb32a101b247688be9ecc1b43bdd20ea781468",
+      "bytes": 40156,
+      "decompressedSha256": "1b4ea4cabdb9ba61561c72c40ee0071605c758ad96d3754a6ea248c38d06f4df",
+      "decompressedBytes": 294356
+    },
+    "benchmark-rehearsal.mjs": {
+      "sha256": "94354de8402a600fc96ca87c8106bd90b7390ef0a850af1989b0afa90ff90a6b",
+      "bytes": 2953
+    },
+    "check-adapters.mjs": {
+      "sha256": "b827f8cff318f0f8faa1c07a15bc9acb8fb9f1e46a5f482e6c4041fd61c06abb",
+      "bytes": 4564
+    },
+    "check-wall-scenes.mjs": {
+      "sha256": "dc87743cec9d03965103de8d373ad6709169dad6e2cd7a6a96c9ef9802862512",
+      "bytes": 6111
+    },
+    "focused-tests.tap": {
+      "sha256": "1367fea825e9250bed3cc155dcc810d7c80ad5361c41c4b7a5462cbd304c0ac4",
+      "bytes": 11179
+    },
+    "historical-collapsed-output.json.gz": {
+      "sha256": "54450532b4c6aa98e8d1c6fbb70dc816d83c0056a551f3ffda9f11fd3cc0cbbe",
+      "bytes": 9456,
+      "decompressedSha256": "5db65e749ee763350a7bfe756ef01978efb211c0a1852fca2015d7ad8b02977b",
+      "decompressedBytes": 61963
+    },
+    "historical-plane-mask-failures.json.gz": {
+      "sha256": "a76b1b40444fb68ac7776a204bba89edd6eed9711140fec441bba504e148276b",
+      "bytes": 26836,
+      "decompressedSha256": "e15c2246670e93bf08fc78a12436f792af9e40871660f755c149ef6f2ea1ce04",
+      "decompressedBytes": 110386
+    },
+    "historical-precision20.json": {
+      "sha256": "aa756d281c7e9414dc8b2de36ec98cbb4f8b4fd1f5be6f5f4a4e33264aae18ac",
+      "bytes": 1704
+    },
+    "historical-precision80.json": {
+      "sha256": "f20384ce260922dfd7ac596b57ee8b1181c941db687d01b268076d61fd4f2960",
+      "bytes": 83
+    },
+    "historical-projected-quad-failures.json.gz": {
+      "sha256": "b498b4aa70fb947888ac19e5b3702aab545948ec0bcde9dae8d5096c41a2cd68",
+      "bytes": 10251,
+      "decompressedSha256": "3de0fb838b47cb4c2ed74ea6976c58782d8de1f192ca021ba88bb46e5714d351",
+      "decompressedBytes": 37910
+    },
+    "historical-query-before-fix.json.gz": {
+      "sha256": "a26619cd5ab617c103f2c323d4aaa244ef0c006d0cc33f3b5c3bc182cd2b78bc",
+      "bytes": 40062,
+      "decompressedSha256": "92df1ae82c2e93a8f300d7f6f321b7cc407f1a7c2bbe6570457d047b74534797",
+      "decompressedBytes": 294243
+    },
+    "original-final-benchmark.json": {
+      "sha256": "b52d28b2f18a8ab70c380f0de94b3936cafe7436fd1413cc974ee19ac0f85594",
+      "bytes": 2200
+    },
+    "performance-proof.json": {
+      "sha256": "350392ae1f501333305b15558785ef7c5bab8d1c15bf5bff7d1ce24f670d8b75",
+      "bytes": 3125
+    },
+    "rehearsal-inputs.json.gz": {
+      "sha256": "8ece7198bce51ad7cafa79e480cfc743f031bfce9af1e328c53609f39beffe18",
+      "bytes": 9347,
+      "decompressedSha256": "57a234a10125544cdfe2a148393bc16c2b52124a675d2b470f2e616fb7e4d315",
+      "decompressedBytes": 122939
+    },
+    "replay-support.mjs": {
+      "sha256": "e7797a85c5672e525bd6d2752f2f1e072b714c427821c6cb863233065cce9c5e",
+      "bytes": 2925
+    },
+    "wall-scenes-proof.json": {
+      "sha256": "3fa05482efabb592a5b6909eb168d59bd5fb2472f41187d252c04e3719d66699",
+      "bytes": 46691
+    },
+    "wall-scenes.json.gz": {
+      "sha256": "a13569f623a30de27fd44af9d2a70473f138bf28846e0e77acff3d487b070871",
+      "bytes": 1063525,
+      "decompressedSha256": "128b21e094b8447cb26af51780e035103217fcb3c6e887a644d4eed926e3fdbb",
+      "decompressedBytes": 2370901
+    }
+  },
+  "cliResults": {
+    "wallScenes": {
+      "exitCode": 0,
+      "cases": 250,
+      "assertions": 94758,
+      "failures": 0
+    },
+    "capturedBaseline": {
+      "exitCode": 1,
+      "cases": 250,
+      "assertions": 94758,
+      "failures": 1402
+    },
+    "adapters": {
+      "exitCode": 0,
+      "sourceCases": 100,
+      "poses": 3,
+      "cases": 300,
+      "assertions": 3900,
+      "failures": 0
+    },
+    "performance": {
+      "exitCode": 0,
+      "cases": 2,
+      "exactOutputsMatch": true
+    },
+    "focusedTests": {
+      "passed": 50,
+      "failed": 0,
+      "skipped": 0
+    }
+  },
+  "notes": [
+    "All gzip files use deterministic mtime=0 and preserve original decompressed bytes.",
+    "Captured c2f8 module changes only import locations for isolated replay; original source digest is retained.",
+    "Historical diagnostics are retained independently of final-source receipts.",
+    "Generated ideal geometry and local timings do not qualify physical optics, recognition or camera throughput."
+  ]
+}

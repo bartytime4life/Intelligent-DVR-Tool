@@ -1,0 +1,14 @@
+{
+  "schema": "intelligent-dvr-exact-orientation-evidence-v1",
+  "evaluated": "actual-app-helper",
+  "cases": 2707,
+  "assertions": 8121,
+  "failures": [],
+  "inputSha256": "053566499b241abc8a3135a4e9b0b3c6b046f2b64f5968ebbd3db9f032dba0a5",
+  "expectedSha256": "268d2b4c4c9f14f52fbda9e224fa52609f7afaa9e1bbdf482a91fb347825c12a",
+  "helperSha256": "50101ba8edd52a893cddf71557f9338abd251451a7ba372777e2607f7cb303e9",
+  "calibrationSha256": "6dd984785eb2b348d72c8df19b695d3d687165f1e841a8d12d0b422252a6b9e7",
+  "scriptSha256": "4262e3f6f6255904060db588c340ee3ac5bafd5c9de6d576441515f8694a1cc9",
+  "sourceUnchanged": true,
+  "limits": "Exact sign checks of represented finite binary64 triples against Python Fraction expectations. This does not test the homography solver, physical calibration or measurement uncertainty. Historical prototype assumes valid pairs; actual malformed-input behavior is covered separately by focused unit tests."
+}

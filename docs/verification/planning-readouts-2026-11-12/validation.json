@@ -1,0 +1,58 @@
+{
+  "schema": "dvr.planning-readouts.validation.v1",
+  "base": "6ce57a5180655693f7d3d6d2e91d8c68693f1961",
+  "scope": "Local generated display checks only; no deployed, installed, device, optics, throughput or capacity acceptance.",
+  "checks": {
+    "portable_replay": {
+      "passed": true,
+      "command": "node docs/verification/planning-readouts-2026-11-12/replay.mjs --repo ."
+    },
+    "focused_node": {
+      "passed": 67,
+      "failed": 0,
+      "skipped": 0,
+      "command": "node --test tests/readout-format.test.mjs tests/facility-measurements.test.mjs tests/resources.test.mjs tests/facility-planning.test.mjs"
+    },
+    "baseline_browser": {
+      "expected_failed": 4,
+      "unexpected_harness_failures": 0,
+      "reason": "Published source displayed0Mbit/s and100.0%; exports/readouts captured before the intentional assertion failures.",
+      "captured_spec_sha256": "3584d6eaf23abdc3b3a115707021ef8a35511b7ed9a0991f4cded8fb84c70bbe"
+    },
+    "final_browser": {
+      "passed": 4,
+      "failed": 0,
+      "skipped": 0,
+      "seconds": 7.6,
+      "viewports": [
+        1440,
+        375
+      ],
+      "playwright": "1.56.1",
+      "browser": "pinned Chromium",
+      "command": "npm run test:facility:browser -- tests/browser/planning-readouts.spec.mjs",
+      "spec_sha256": "72f05e5b90b9405f19d12e5393cb9599f814fa88b8e7742f3ea7e2e2b747a1f5"
+    },
+    "documentation": {
+      "passed": true,
+      "local_links": 1840,
+      "historical_media_hashes": 14,
+      "command": "python3 scripts/check-docs.py"
+    },
+    "wiki_outputs": {
+      "passed": 68,
+      "command": "python3 scripts/build-wiki.py --check"
+    },
+    "wiki_unit": {
+      "passed": 8,
+      "command": "python3 -m unittest discover -s tests -p test_wiki_docs.py"
+    },
+    "diff_check": {
+      "passed": true,
+      "command": "git diff --check"
+    }
+  },
+  "source_manifest_sha256": "09840490e372234d21dcf0c56c7bdab10ad23e82a63349b46a029ed54fb6a80e",
+  "broader_checks": "Full application/build/CI checks are separate from this focused record.",
+  "port_4182_released": true
+}

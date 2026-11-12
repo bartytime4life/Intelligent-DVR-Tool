@@ -59,6 +59,11 @@ not assign a license to BARTA's repository.
 - Room sketch includes polygon-clipping 0.15.7 (MIT), splaytree 3.2.3 (MIT)
   and robust-predicates 3.0.3 (Unlicense). Their complete upstream notices are
   in [room-sketch-LICENSE.txt](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/public/licenses/room-sketch-LICENSE.txt).
+- Ground visibility and zone-area Boolean operations use polyclip-ts 0.16.8
+  (MIT), BigNumber.js 9.3.1 (MIT) and splaytree-ts 1.0.2 (BSD-3-Clause). Exact packages
+  and integrity hashes are pinned in the lockfile. Their complete distributed
+  notices are in [ground-visibility-LICENSE.txt](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/public/licenses/ground-visibility-LICENSE.txt).
+  The earlier polygon-clipping dependency remains for existing callers.
 - The optional Streets map layer uses OpenStreetMap data and tiles. Visible
   attribution is supplied when enabled. Data and hosted tile-service terms are
   separate from the renderer license; see https://www.openstreetmap.org/copyright

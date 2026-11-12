@@ -121,6 +121,31 @@ proxies. [Ground-plane calibration](facility-calibration.md) requires measured
 references and independent checks. Neither recovers general depth or establishes
 survey accuracy.
 
+## November 12 proposal · coordinate recovery
+
+These captures show generated fixture plans and marker coordinates in the
+current proposed source, with exact hashes in the [coordinate-integrity record](verification/coordinate-integrity-math-2026-11-12/README.md).
+They are software checks, not photographs or measured site calibration.
+
+![Controlled phone-width calibration panel refusing a point outside the fitting-marker boundary.](media/coordinate-integrity-2026-11-12/calibration-outside-phone.png)
+
+The ruler withholds the outside distance and exports no ruler result; a corrected
+inside endpoint recovers. A withheld check outside the boundary keeps it locked.
+[Plane-reference workflow](facility-calibration.md).
+
+![Controlled desktop Save site form after keeping a generated rotated building and rooms at their map positions.](media/coordinate-integrity-2026-11-12/saved-site-desktop.png)
+
+The explicit site correction preserves shared room boundaries, supports Undo and
+survives reload. [Site-origin choices](facility-builder.md).
+
+## November 12 proposal · small planning values
+
+[Reviewed phone and desktop captures](verification/planning-readouts-2026-11-12/README.md#checks-and-actual-exports)
+show a 0.01 Mbit/s System plan, a 4 cm route gap and an incomplete zone with a
+positive blind polygon. The record binds actual before/after downloads and
+unchanged numeric plans. Additional digits and endpoint bounds describe the
+planning calculation; they do not establish hardware or site accuracy.
+
 ## Keep the work
 
 ![Separate browser exports, private local folders and an outside verified backup.](media/guide/preserve.svg)
@@ -129,6 +154,9 @@ survey accuracy.
 · [Architecture and data](architecture.md).
 
 ## Dated collections and reproduction
+
+- [November 12 coordinate-integrity collection](media/coordinate-integrity-2026-11-12/README.md):
+  two reviewed proposal captures with generated references/plans and unchanged source bytes.
 
 - [November 11 guided-experience collection](media/guided-experience-2026-11-11/README.md):
   four unchanged controlled Monitor/System captures, with separate provenance.

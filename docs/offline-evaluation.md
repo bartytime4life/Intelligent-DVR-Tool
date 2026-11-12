@@ -34,6 +34,14 @@ report never automatically promotes those states, including on real recordings.
 
 ## Reproduce the deterministic evaluation
 
+The current rule engine repairs fractional dwell/gap comparisons. Its changed
+source hash intentionally makes older traces ineligible for current evaluation.
+Keep the original trace/report, re-analyze the approved source into new outputs,
+then evaluate that new trace. Do not replace a hash in an old trace to make it
+pass. Historical browser review compatibility is separate. The
+[timing record](verification/rule-time-boundaries-2026-11-12/README.md) includes a
+generated native analyzer-to-evaluator check and explicit old-hash rejection.
+
 From the repository root, using Python 3.11+ (the evaluator uses only the standard
 library; native inference requirements are separate):
 

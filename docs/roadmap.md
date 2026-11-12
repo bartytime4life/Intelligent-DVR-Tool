@@ -39,6 +39,31 @@ keeps analytic, independent-oracle and local browser evidence. Zone grids and
 the simulated handoff rehearsal remain separate; no optical calibration,
 real tracking or camera-capacity claim follows from these calculations.
 
+## Integrated proposal awaiting review
+
+The [current integration](verification/coordinate-integrity-math-2026-11-12/README.md)
+combines the unmerged visible-ground, pixel-density, zone-area, calibration and
+image-diagnostics proposals. Additional coordinate fixes preserve ordinary
+rotated boundary rooms during keep-position site corrections and prevent
+calibrated ruler/check extrapolation beside short reference edges. Independent
+numeric and browser checks establish behavior on their generated inputs.
+
+The [timing follow-up](verification/rule-time-boundaries-2026-11-12/README.md)
+keeps fractional samples at dwell/gap boundaries consistent across the engine and
+training counter, with old-trace refusal and generated CPU integration checks.
+[Planning readouts](verification/planning-readouts-2026-11-12/README.md) preserve
+small positive values and distinguish incomplete coverage from an exact endpoint.
+The existing controls, numeric models and explicit start actions remain.
+
+Review, merge, platform installation and physical acceptance are separate next
+steps. Physical validation needs surveyed ground/pose measurements, independent
+markers and targets, lens effects, low walls, raised structures and steep views.
+Documentation and generated Wiki source are aligned locally; Wiki publication
+and deployment need their own revision checks. No calendar or capacity guarantee
+follows from this proposal.
+
+## Earlier delivered work
+
 [PR #112](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/112), merged
 as `cd6d1566`, replaces coarse automatic training cutoffs with empirical score
 boundaries, requests live detections while tentative/recoverable tracks need

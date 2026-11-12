@@ -1,0 +1,39 @@
+{
+  "schema": "intelligent-dvr.rule-time-root-replay.v1",
+  "input_decompressed_sha256": "fb6910432ee1e83a8a87a2aa971b3b51a16017f8fa2fa18c9722014ff2104a9b",
+  "checker_python_sha256": "10dc76adb8a5a36bc3a08d144444ea10aa400220b96a48b6cef836d4baf40272",
+  "runs": [
+    {
+      "check": "python-baseline",
+      "strict_exit": 1,
+      "expected_exit": 1,
+      "archived_receipt": "baseline-receipt.json.gz",
+      "byte_identical": true,
+      "receipt_sha256": "6fa9bbcbbf909742660b8cdf68a5b02b669670413a10b8cdf254f2c5433d5b50"
+    },
+    {
+      "check": "python-candidate",
+      "strict_exit": 0,
+      "expected_exit": 0,
+      "archived_receipt": "candidate-python-receipt.json",
+      "byte_identical": true,
+      "receipt_sha256": "9b19ef33ad9ce8df7d76189bf884f27444e5543e54b62d64196a5b549000aa3a"
+    },
+    {
+      "check": "js-baseline",
+      "strict_exit": 1,
+      "expected_exit": 1,
+      "archived_receipt": "baseline-js-receipt.json.gz",
+      "byte_identical": true,
+      "receipt_sha256": "c731f9191b38054245306e1fbb7ba3f693e5a36e319874bf77139bbdac7674be"
+    },
+    {
+      "check": "js-candidate",
+      "strict_exit": 0,
+      "expected_exit": 0,
+      "archived_receipt": "candidate-js-receipt.json",
+      "byte_identical": true,
+      "receipt_sha256": "5d813029e001506ff2c3f2ffa59fc13a625a851f1f0a4d539742569ca0354685"
+    }
+  ]
+}

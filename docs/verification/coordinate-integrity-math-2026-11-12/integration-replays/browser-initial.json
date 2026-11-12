@@ -1,0 +1,2866 @@
+{
+  "config": {
+    "configFile": "<review-checkout>/playwright.facility.config.mjs",
+    "rootDir": "<review-checkout>/tests/browser",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "reporter": [
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "quiet": false,
+    "projects": [
+      {
+        "outputDir": "<review-checkout>/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "",
+        "name": "",
+        "testDir": "<review-checkout>/tests/browser",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "shard": null,
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.56.1",
+    "workers": 1,
+    "webServer": {
+      "command": "npm run dev -- --host 127.0.0.1 --port 4182 --strictPort",
+      "url": "http://127.0.0.1:4182",
+      "reuseExistingServer": false,
+      "timeout": 20000
+    }
+  },
+  "suites": [
+    {
+      "title": "facility-camera-planning.spec.mjs",
+      "file": "facility-camera-planning.spec.mjs",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "zone area finds coverage and overlap between old grid centres at 1440px",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3722,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-12T10:46:52.863Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "dcd935f59d8f2e30203c-6b0e13eaa6af9fee55a1",
+          "file": "facility-camera-planning.spec.mjs",
+          "line": 64,
+          "column": 32
+        },
+        {
+          "title": "zone area finds coverage and overlap between old grid centres at 375px",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2583,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-12T10:46:56.619Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "dcd935f59d8f2e30203c-10397e2177433920fc88",
+          "file": "facility-camera-planning.spec.mjs",
+          "line": 64,
+          "column": 32
+        },
+        {
+          "title": "background coverage clears old numbers during draft changes and survives navigation",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 5024,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-12T10:46:59.207Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "dcd935f59d8f2e30203c-c45abe86eaa78489d0e8",
+          "file": "facility-camera-planning.spec.mjs",
+          "line": 94,
+          "column": 1
+        },
+        {
+          "title": "a coverage worker load failure is explicit and retry recovers the real calculation",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1713,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-12T10:47:04.235Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "dcd935f59d8f2e30203c-a564e5f64f297d2aa959",
+          "file": "facility-camera-planning.spec.mjs",
+          "line": 118,
+          "column": 1
+        },
+        {
+          "title": "drag, rotate handle and keyboard edits change only the camera draft until Save camera",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 5060,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-12T10:47:05.952Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "dcd935f59d8f2e30203c-5b47b87a6d8bdb3e95de",
+          "file": "facility-camera-planning.spec.mjs",
+          "line": 132,
+          "column": 1
+        },
+        {
+          "title": "coverage measures narrow and diagonal areas while retaining unsupported indoor zones",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2806,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-12T10:47:11.016Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "dcd935f59d8f2e30203c-9c6647ab78e7efd1a1a6",
+          "file": "facility-camera-planning.spec.mjs",
+          "line": 182,
+          "column": 1
+        },
+        {
+          "title": "touch drag moves the selected camera draft",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3725,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-12T10:47:13.826Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "dcd935f59d8f2e30203c-580e5da2fdaffc0127dc",
+          "file": "facility-camera-planning.spec.mjs",
+          "line": 204,
+          "column": 1
+        },
+        {
+          "title": "losing window focus cancels a camera drag without leaving a stale release handler",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4134,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-12T10:47:17.555Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "dcd935f59d8f2e30203c-e559cba39100dc8874a5",
+          "file": "facility-camera-planning.spec.mjs",
+          "line": 220,
+          "column": 1
+        },
+        {
+          "title": "coverage step reports zone and route coverage, marks indoor zones and toggles blind spots",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2672,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-12T10:47:21.693Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "dcd935f59d8f2e30203c-f76a03bdf0cf26bf4ffb",
+          "file": "facility-camera-planning.spec.mjs",
+          "line": 242,
+          "column": 1
+        },
+        {
+          "title": "pixel density table, lens preset and installer sheet download use the saved plan",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2643,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-12T10:47:24.370Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "dcd935f59d8f2e30203c-7d4ae07fb089a9fcebf1",
+          "file": "facility-camera-planning.spec.mjs",
+          "line": 270,
+          "column": 1
+        },
+        {
+          "title": "projected ground detail remains readable at tilt 60 and 1440px",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3558,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-12T10:47:27.017Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "dcd935f59d8f2e30203c-fa99d2c81e699f37b1ca",
+          "file": "facility-camera-planning.spec.mjs",
+          "line": 303,
+          "column": 63
+        },
+        {
+          "title": "projected ground detail remains readable at tilt 60 and 375px",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1602,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-12T10:47:30.579Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "dcd935f59d8f2e30203c-c6b2f539c5ffba1ccb37",
+          "file": "facility-camera-planning.spec.mjs",
+          "line": 303,
+          "column": 63
+        },
+        {
+          "title": "projected ground detail remains readable at tilt 89 and 1440px",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1842,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-12T10:47:32.185Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "dcd935f59d8f2e30203c-9d49ff225a789b3543dc",
+          "file": "facility-camera-planning.spec.mjs",
+          "line": 303,
+          "column": 63
+        },
+        {
+          "title": "projected ground detail remains readable at tilt 89 and 375px",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1617,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-12T10:47:34.030Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "dcd935f59d8f2e30203c-855592381281551be726",
+          "file": "facility-camera-planning.spec.mjs",
+          "line": 303,
+          "column": 63
+        },
+        {
+          "title": "route percentages measure length between narrow camera fans at 1440px",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1726,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-12T10:47:35.651Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "dcd935f59d8f2e30203c-d8ee18dfb7c3d4dd3551",
+          "file": "facility-camera-planning.spec.mjs",
+          "line": 337,
+          "column": 34
+        },
+        {
+          "title": "route percentages measure length between narrow camera fans at 375px",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1568,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-12T10:47:37.380Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "dcd935f59d8f2e30203c-3e24cbd752aa9c222031",
+          "file": "facility-camera-planning.spec.mjs",
+          "line": 337,
+          "column": 34
+        }
+      ]
+    },
+    {
+      "title": "facility-doorways.spec.mjs",
+      "file": "facility-doorways.spec.mjs",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "click a shared map wall, drag the doorway, save, reload and undo without changing room outlines",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 6567,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-12T10:47:38.957Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b72cbdc6598772199da6-f972b975334cae07daa8",
+          "file": "facility-doorways.spec.mjs",
+          "line": 21,
+          "column": 1
+        },
+        {
+          "title": "numeric fallback, feet and floor copying preserve door records and reject narrowing away the opening",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4725,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-12T10:47:45.528Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b72cbdc6598772199da6-fba2dd6bc6b03f9b0b9e",
+          "file": "facility-doorways.spec.mjs",
+          "line": 59,
+          "column": 1
+        },
+        {
+          "title": "touch dragging and keyboard nudges move only the preview until Save",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3019,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-12T10:47:50.257Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b72cbdc6598772199da6-6646a49dfd7096c4fdf2",
+          "file": "facility-doorways.spec.mjs",
+          "line": 83,
+          "column": 1
+        },
+        {
+          "title": "numeric doorway placement works without WebGL, and converting its room removes the doorway atomically",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1563,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-12T10:47:53.279Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b72cbdc6598772199da6-231d795dc9e59c53245f",
+          "file": "facility-doorways.spec.mjs",
+          "line": 106,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "facility-library.spec.mjs",
+      "file": "facility-library.spec.mjs",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "new installs start with one blank facility and no sample map features",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2388,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-12T10:47:54.852Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "89f77efa91ac507c8794-639f132236ea356f0f4f",
+          "file": "facility-library.spec.mjs",
+          "line": 25,
+          "column": 1
+        },
+        {
+          "title": "named facilities keep independent geometry and the active facility survives reload",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 6366,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-12T10:47:57.243Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "89f77efa91ac507c8794-283d3b52b61a016bab48",
+          "file": "facility-library.spec.mjs",
+          "line": 41,
+          "column": 1
+        },
+        {
+          "title": "named save files and collection backups import as additional facilities without replacing originals",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3529,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-12T10:48:03.613Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "89f77efa91ac507c8794-1b9a2deb62865dead110",
+          "file": "facility-library.spec.mjs",
+          "line": 73,
+          "column": 1
+        },
+        {
+          "title": "a full 30-facility backup restores on a fresh install without a spare starter record",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2664,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-12T10:48:07.146Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "89f77efa91ac507c8794-bb57860ebafc87f96e4c",
+          "file": "facility-library.spec.mjs",
+          "line": 108,
+          "column": 1
+        },
+        {
+          "title": "an existing saved plan migrates once and the original legacy save stays intact",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2830,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-12T10:48:09.816Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "89f77efa91ac507c8794-4677f016a0de1cfbc3c7",
+          "file": "facility-library.spec.mjs",
+          "line": 124,
+          "column": 1
+        },
+        {
+          "title": "corrupt collection data stays untouched and is downloadable for recovery",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1484,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-12T10:48:12.652Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "89f77efa91ac507c8794-4ba1cc5dc0dc9d3c0246",
+          "file": "facility-library.spec.mjs",
+          "line": 139,
+          "column": 84
+        },
+        {
+          "title": "corrupt legacy plan data stays untouched and is downloadable for recovery",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1479,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-12T10:48:14.139Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "89f77efa91ac507c8794-cae578c1d2ed72e79ef0",
+          "file": "facility-library.spec.mjs",
+          "line": 139,
+          "column": 84
+        },
+        {
+          "title": "unsaved site and shape edits block facility switching and creation",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3602,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-12T10:48:15.622Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "89f77efa91ac507c8794-9257523675193adaea45",
+          "file": "facility-library.spec.mjs",
+          "line": 154,
+          "column": 1
+        },
+        {
+          "title": "file reads recheck current drafts before selecting an imported facility",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1250,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-12T10:48:19.228Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "89f77efa91ac507c8794-c6105570de572add92b3",
+          "file": "facility-library.spec.mjs",
+          "line": 175,
+          "column": 1
+        },
+        {
+          "title": "custom shape drafts survive collapsed controls and block navigation until applied or discarded",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2865,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-12T10:48:20.481Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "89f77efa91ac507c8794-24cfd21dea93f0854e8e",
+          "file": "facility-library.spec.mjs",
+          "line": 196,
+          "column": 1
+        },
+        {
+          "title": "unapplied line measurements protect navigation while Apply and Discard remain available",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2559,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-12T10:48:23.350Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "89f77efa91ac507c8794-bba03a1ba1fefce6e368",
+          "file": "facility-library.spec.mjs",
+          "line": 217,
+          "column": 1
+        },
+        {
+          "title": "pending floor-path measurements protect levels, units and surfaces until Apply and Save",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2783,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-12T10:48:25.913Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "89f77efa91ac507c8794-21f8727426b48df39c71",
+          "file": "facility-library.spec.mjs",
+          "line": 237,
+          "column": 1
+        },
+        {
+          "title": "selecting a zone on the map preserves a pending shape draft",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3743,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-12T10:48:28.700Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "89f77efa91ac507c8794-00568ae9a96f539b8de4",
+          "file": "facility-library.spec.mjs",
+          "line": 274,
+          "column": 1
+        },
+        {
+          "title": "example layouts are opt-in and keep the existing blank facility",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1535,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-12T10:48:32.447Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "89f77efa91ac507c8794-6b620761038192de8b7f",
+          "file": "facility-library.spec.mjs",
+          "line": 304,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "facility-recovery.spec.mjs",
+      "file": "facility-recovery.spec.mjs",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "two facility tabs recover with Keep this tab’s version and preserve both collections",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3185,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-12T10:48:33.990Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6e8e796acead0236f1be-c8b90702eccac6f297f5",
+          "file": "facility-recovery.spec.mjs",
+          "line": 26,
+          "column": 75
+        },
+        {
+          "title": "two facility tabs recover with Use other tab’s version and preserve both collections",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3581,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-12T10:48:37.179Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6e8e796acead0236f1be-0711a201fbb9d3b55ffe",
+          "file": "facility-recovery.spec.mjs",
+          "line": 26,
+          "column": 75
+        },
+        {
+          "title": "unreadable facility storage can be explicitly recovered with the original bytes preserved",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2643,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-12T10:48:40.764Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6e8e796acead0236f1be-2f3547740828defc9064",
+          "file": "facility-recovery.spec.mjs",
+          "line": 52,
+          "column": 1
+        },
+        {
+          "title": "new previews entered while a conflict choice waits for the lock are kept",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2626,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-12T10:48:43.411Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6e8e796acead0236f1be-59c16d71d7851edc56e3",
+          "file": "facility-recovery.spec.mjs",
+          "line": 65,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "facility-reorigin.spec.mjs",
+      "file": "facility-reorigin.spec.mjs",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "Save site preserves rotated boundary rooms and recovers from a rejected origin at 1440px",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3062,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-12T10:48:46.046Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "537fe01b93b35b0c5576-30b56e05496915779387",
+          "file": "facility-reorigin.spec.mjs",
+          "line": 30,
+          "column": 31
+        },
+        {
+          "title": "Save site preserves rotated boundary rooms and recovers from a rejected origin at 375px",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2798,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-12T10:48:49.112Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "537fe01b93b35b0c5576-b621c14e07a83a1d6b7d",
+          "file": "facility-reorigin.spec.mjs",
+          "line": 30,
+          "column": 31
+        }
+      ]
+    },
+    {
+      "title": "facility-stair-placement.spec.mjs",
+      "file": "facility-stair-placement.spec.mjs",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "click the start, choose a floor, drag and rotate around the landing, save one edit and reopen it",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 55000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 8552,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-12T10:48:51.919Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9c5de6748a56e0241e27-1ad85d78a5d38d29bb46",
+          "file": "facility-stair-placement.spec.mjs",
+          "line": 30,
+          "column": 1
+        },
+        {
+          "title": "a one-floor plan can add a destination and position stairs without graphics; invalid fit blocks save",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1428,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-12T10:49:00.475Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9c5de6748a56e0241e27-47347d38a64a0c7c3ee4",
+          "file": "facility-stair-placement.spec.mjs",
+          "line": 55,
+          "column": 1
+        }
+      ],
+      "suites": [
+        {
+          "title": "touch stairs",
+          "file": "facility-stair-placement.spec.mjs",
+          "line": 66,
+          "column": 6,
+          "specs": [
+            {
+              "title": "tap on the top floor, choose downstairs, rotate by touch and save on the map",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 50000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2920,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-12T10:49:01.907Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "9c5de6748a56e0241e27-af918321dbe6cd351b2a",
+              "file": "facility-stair-placement.spec.mjs",
+              "line": 68,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "facility-studio.spec.mjs",
+      "file": "facility-studio.spec.mjs",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "image edge strength distinguishes no support from measured zero at 1440px",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1955,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-12T10:49:04.837Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b5c67dd43c98d7afa352-6bf48cd18ae63224f1eb",
+          "file": "facility-studio.spec.mjs",
+          "line": 63,
+          "column": 33
+        },
+        {
+          "title": "image edge strength distinguishes no support from measured zero at 375px",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1838,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-12T10:49:06.795Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b5c67dd43c98d7afa352-e9c1fa3c7711b2e8b4e9",
+          "file": "facility-studio.spec.mjs",
+          "line": 63,
+          "column": 33
+        },
+        {
+          "title": "maximum Sobel response is bounded at 100 percent and versioned in exported metrics",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1640,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-12T10:49:08.637Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b5c67dd43c98d7afa352-af0f7d9aea7fd5906dd3",
+          "file": "facility-studio.spec.mjs",
+          "line": 106,
+          "column": 1
+        },
+        {
+          "title": "Facility Studio focus map and navigation are reversible and keyboard accessible",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2243,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-12T10:49:10.280Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b5c67dd43c98d7afa352-799055343ad39acf88e6",
+          "file": "facility-studio.spec.mjs",
+          "line": 125,
+          "column": 1
+        },
+        {
+          "title": "intermediate window widths keep the full map and every map-layer choice reachable",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1578,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-12T10:49:12.527Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b5c67dd43c98d7afa352-683784b3323d754d1323",
+          "file": "facility-studio.spec.mjs",
+          "line": 149,
+          "column": 1
+        },
+        {
+          "title": "image laboratory imports only on request, reports ROI and compares two local frames",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1619,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-12T10:49:14.109Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b5c67dd43c98d7afa352-f62dd57604b5f43965be",
+          "file": "facility-studio.spec.mjs",
+          "line": 180,
+          "column": 1
+        },
+        {
+          "title": "transparent local PNGs are composited before analysis and lossless frame export",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1726,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-12T10:49:15.732Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b5c67dd43c98d7afa352-0590d96b5bcc449ea997",
+          "file": "facility-studio.spec.mjs",
+          "line": 204,
+          "column": 1
+        },
+        {
+          "title": "calibrated map ruler requires withheld check and independent measured reference declaration",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1909,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-12T10:49:17.462Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b5c67dd43c98d7afa352-5f851020769c3ab98def",
+          "file": "facility-studio.spec.mjs",
+          "line": 245,
+          "column": 1
+        },
+        {
+          "title": "safe perspective calibration with zero origin denominator measures and exports through existing gates",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1916,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-12T10:49:19.375Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b5c67dd43c98d7afa352-27cae360eba13762cbf4",
+          "file": "facility-studio.spec.mjs",
+          "line": 280,
+          "column": 1
+        },
+        {
+          "title": "calibration refuses an outside short-edge ruler and check at 1440px",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 6903,
+                  "error": {
+                    "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeEnabled\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator:  locator('.facility-calibration').getByRole('button', { name: 'Measure within reference boundary' })\nExpected: enabled\nReceived: disabled\nTimeout:  5000ms\n\nCall log:\n\u001b[2m  - Expect \"toBeEnabled\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for locator('.facility-calibration').getByRole('button', { name: 'Measure within reference boundary' })\u001b[22m\n\u001b[2m    9 × locator resolved to <button disabled type=\"button\">Measure within reference boundary</button>\u001b[22m\n\u001b[2m      - unexpected value \"disabled\"\u001b[22m\n",
+                    "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeEnabled\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator:  locator('.facility-calibration').getByRole('button', { name: 'Measure within reference boundary' })\nExpected: enabled\nReceived: disabled\nTimeout:  5000ms\n\nCall log:\n\u001b[2m  - Expect \"toBeEnabled\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for locator('.facility-calibration').getByRole('button', { name: 'Measure within reference boundary' })\u001b[22m\n\u001b[2m    9 × locator resolved to <button disabled type=\"button\">Measure within reference boundary</button>\u001b[22m\n\u001b[2m      - unexpected value \"disabled\"\u001b[22m\n\n    at <review-checkout>/tests/browser/facility-studio.spec.mjs:326:84",
+                    "location": {
+                      "file": "<review-checkout>/tests/browser/facility-studio.spec.mjs",
+                      "column": 84,
+                      "line": 326
+                    },
+                    "snippet": "  324 |   await expect(cal.getByRole('alert')).toHaveCount(0);\n  325 |   await cal.locator('.facility-calibration-declaration input').check();\n> 326 |   await expect(cal.getByRole('button',{name:'Measure within reference boundary'})).toBeEnabled();\n      |                                                                                    ^\n  327 |   for(const label of ['Start X','Start Y'])await page.getByLabel(`Ground ruler ${label}`,{exact:true}).fill('90');\n  328 |   for(const label of ['End X','End Y'])await page.getByLabel(`Ground ruler ${label}`,{exact:true}).fill('99.9954');\n  329 |   await expect(cal).toContainText('Extrapolation is refused');"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "<review-checkout>/tests/browser/facility-studio.spec.mjs",
+                        "column": 84,
+                        "line": 326
+                      },
+                      "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeEnabled\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator:  locator('.facility-calibration').getByRole('button', { name: 'Measure within reference boundary' })\nExpected: enabled\nReceived: disabled\nTimeout:  5000ms\n\nCall log:\n\u001b[2m  - Expect \"toBeEnabled\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for locator('.facility-calibration').getByRole('button', { name: 'Measure within reference boundary' })\u001b[22m\n\u001b[2m    9 × locator resolved to <button disabled type=\"button\">Measure within reference boundary</button>\u001b[22m\n\u001b[2m      - unexpected value \"disabled\"\u001b[22m\n\n\n  324 |   await expect(cal.getByRole('alert')).toHaveCount(0);\n  325 |   await cal.locator('.facility-calibration-declaration input').check();\n> 326 |   await expect(cal.getByRole('button',{name:'Measure within reference boundary'})).toBeEnabled();\n      |                                                                                    ^\n  327 |   for(const label of ['Start X','Start Y'])await page.getByLabel(`Ground ruler ${label}`,{exact:true}).fill('90');\n  328 |   for(const label of ['End X','End Y'])await page.getByLabel(`Ground ruler ${label}`,{exact:true}).fill('99.9954');\n  329 |   await expect(cal).toContainText('Extrapolation is refused');\n    at <review-checkout>/tests/browser/facility-studio.spec.mjs:326:84"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-12T10:49:21.296Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "<review-checkout>/test-results/facility-studio-calibratio-65fc3-e-ruler-and-check-at-1440px/test-failed-1.png"
+                    },
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "<review-checkout>/test-results/facility-studio-calibratio-65fc3-e-ruler-and-check-at-1440px/error-context.md"
+                    },
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "<review-checkout>/test-results/facility-studio-calibratio-65fc3-e-ruler-and-check-at-1440px/trace.zip"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "<review-checkout>/tests/browser/facility-studio.spec.mjs",
+                    "column": 84,
+                    "line": 326
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "b5c67dd43c98d7afa352-7d84964bb4b2809af410",
+          "file": "facility-studio.spec.mjs",
+          "line": 316,
+          "column": 32
+        },
+        {
+          "title": "calibration refuses an outside short-edge ruler and check at 375px",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 7020,
+                  "error": {
+                    "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeEnabled\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator:  locator('.facility-calibration').getByRole('button', { name: 'Measure within reference boundary' })\nExpected: enabled\nReceived: disabled\nTimeout:  5000ms\n\nCall log:\n\u001b[2m  - Expect \"toBeEnabled\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for locator('.facility-calibration').getByRole('button', { name: 'Measure within reference boundary' })\u001b[22m\n\u001b[2m    9 × locator resolved to <button disabled type=\"button\">Measure within reference boundary</button>\u001b[22m\n\u001b[2m      - unexpected value \"disabled\"\u001b[22m\n",
+                    "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeEnabled\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator:  locator('.facility-calibration').getByRole('button', { name: 'Measure within reference boundary' })\nExpected: enabled\nReceived: disabled\nTimeout:  5000ms\n\nCall log:\n\u001b[2m  - Expect \"toBeEnabled\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for locator('.facility-calibration').getByRole('button', { name: 'Measure within reference boundary' })\u001b[22m\n\u001b[2m    9 × locator resolved to <button disabled type=\"button\">Measure within reference boundary</button>\u001b[22m\n\u001b[2m      - unexpected value \"disabled\"\u001b[22m\n\n    at <review-checkout>/tests/browser/facility-studio.spec.mjs:326:84",
+                    "location": {
+                      "file": "<review-checkout>/tests/browser/facility-studio.spec.mjs",
+                      "column": 84,
+                      "line": 326
+                    },
+                    "snippet": "  324 |   await expect(cal.getByRole('alert')).toHaveCount(0);\n  325 |   await cal.locator('.facility-calibration-declaration input').check();\n> 326 |   await expect(cal.getByRole('button',{name:'Measure within reference boundary'})).toBeEnabled();\n      |                                                                                    ^\n  327 |   for(const label of ['Start X','Start Y'])await page.getByLabel(`Ground ruler ${label}`,{exact:true}).fill('90');\n  328 |   for(const label of ['End X','End Y'])await page.getByLabel(`Ground ruler ${label}`,{exact:true}).fill('99.9954');\n  329 |   await expect(cal).toContainText('Extrapolation is refused');"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "<review-checkout>/tests/browser/facility-studio.spec.mjs",
+                        "column": 84,
+                        "line": 326
+                      },
+                      "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeEnabled\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator:  locator('.facility-calibration').getByRole('button', { name: 'Measure within reference boundary' })\nExpected: enabled\nReceived: disabled\nTimeout:  5000ms\n\nCall log:\n\u001b[2m  - Expect \"toBeEnabled\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for locator('.facility-calibration').getByRole('button', { name: 'Measure within reference boundary' })\u001b[22m\n\u001b[2m    9 × locator resolved to <button disabled type=\"button\">Measure within reference boundary</button>\u001b[22m\n\u001b[2m      - unexpected value \"disabled\"\u001b[22m\n\n\n  324 |   await expect(cal.getByRole('alert')).toHaveCount(0);\n  325 |   await cal.locator('.facility-calibration-declaration input').check();\n> 326 |   await expect(cal.getByRole('button',{name:'Measure within reference boundary'})).toBeEnabled();\n      |                                                                                    ^\n  327 |   for(const label of ['Start X','Start Y'])await page.getByLabel(`Ground ruler ${label}`,{exact:true}).fill('90');\n  328 |   for(const label of ['End X','End Y'])await page.getByLabel(`Ground ruler ${label}`,{exact:true}).fill('99.9954');\n  329 |   await expect(cal).toContainText('Extrapolation is refused');\n    at <review-checkout>/tests/browser/facility-studio.spec.mjs:326:84"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-12T10:49:28.608Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "<review-checkout>/test-results/facility-studio-calibratio-a8be9-ge-ruler-and-check-at-375px/test-failed-1.png"
+                    },
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "<review-checkout>/test-results/facility-studio-calibratio-a8be9-ge-ruler-and-check-at-375px/error-context.md"
+                    },
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "<review-checkout>/test-results/facility-studio-calibratio-a8be9-ge-ruler-and-check-at-375px/trace.zip"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "<review-checkout>/tests/browser/facility-studio.spec.mjs",
+                    "column": 84,
+                    "line": 326
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "b5c67dd43c98d7afa352-73e2bda4c417cb3535a5",
+          "file": "facility-studio.spec.mjs",
+          "line": 316,
+          "column": 32
+        },
+        {
+          "title": "a collapsed ground plane cannot unlock the ruler and corrected markers recover",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2332,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-12T10:49:35.976Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b5c67dd43c98d7afa352-60d4880bfe6156cd158d",
+          "file": "facility-studio.spec.mjs",
+          "line": 350,
+          "column": 1
+        },
+        {
+          "title": "a chosen ground reference accepts an explicit local map pick, without activating recording",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2226,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-12T10:49:38.344Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b5c67dd43c98d7afa352-f8e76927c65f196c4515",
+          "file": "facility-studio.spec.mjs",
+          "line": 378,
+          "column": 1
+        },
+        {
+          "title": "image reference numbering follows full row positions even when earlier markers are blank",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1615,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-12T10:49:40.574Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b5c67dd43c98d7afa352-8a0db81be775073359fa",
+          "file": "facility-studio.spec.mjs",
+          "line": 399,
+          "column": 1
+        },
+        {
+          "title": "Facility Studio has one compact task selector plus descriptive sidebar steps",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1743,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-12T10:49:42.193Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b5c67dd43c98d7afa352-4f4d1bedc719b65118e6",
+          "file": "facility-studio.spec.mjs",
+          "line": 414,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "facility-visibility.spec.mjs",
+      "file": "facility-visibility.spec.mjs",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "shared visibility renders off-axis image corner at 1440px",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2641,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-12T10:49:43.948Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "91173bcd0ff66abd1946-d28bb969ddf7c8d69084",
+          "file": "facility-visibility.spec.mjs",
+          "line": 30,
+          "column": 29
+        },
+        {
+          "title": "shared visibility renders nadir view behind bearing at 375px",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1691,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-12T10:49:46.593Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "91173bcd0ff66abd1946-c4e2913e9d79fa6c5e2c",
+          "file": "facility-visibility.spec.mjs",
+          "line": 30,
+          "column": 29
+        },
+        {
+          "title": "shared visibility renders finite low wall at 1440px",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2686,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-12T10:49:48.288Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "91173bcd0ff66abd1946-6781bdbce771399e1409",
+          "file": "facility-visibility.spec.mjs",
+          "line": 30,
+          "column": 29
+        },
+        {
+          "title": "shared visibility renders raised wall at 375px",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1706,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-12T10:49:50.978Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "91173bcd0ff66abd1946-27f4ce5d7ec345c2c9a1",
+          "file": "facility-visibility.spec.mjs",
+          "line": 30,
+          "column": 29
+        },
+        {
+          "title": "visibility failure withholds rehearsal, totals and export and retry restores the saved plan",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2171,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-12T10:49:52.688Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "91173bcd0ff66abd1946-43b9eb3c1c65d56d5552",
+          "file": "facility-visibility.spec.mjs",
+          "line": 51,
+          "column": 1
+        },
+        {
+          "title": "pending changed visibility clears old results and preserves draft, discard, save and Undo",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 5373,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-12T10:49:54.864Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "91173bcd0ff66abd1946-d575ca86f6723919d54b",
+          "file": "facility-visibility.spec.mjs",
+          "line": 82,
+          "column": 1
+        },
+        {
+          "title": "task and Undo changes cancel the old drag before release and a fresh gesture still works",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 8983,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-12T10:50:00.241Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "91173bcd0ff66abd1946-cf524c83534958488472",
+          "file": "facility-visibility.spec.mjs",
+          "line": 128,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "title": "facility-windows.spec.mjs",
+      "file": "facility-windows.spec.mjs",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "click an exterior wall, move and resize both ends, set elevation, save, export and undo",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 55000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 8401,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-12T10:50:09.234Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6bc06f9c95b4f550721a-a7660105f6dc9e210102",
+          "file": "facility-windows.spec.mjs",
+          "line": 23,
+          "column": 1
+        },
+        {
+          "title": "without graphics, place on an empty upper floor and edit width and sill in feet",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1830,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-12T10:50:17.639Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6bc06f9c95b4f550721a-b2168d539e39e79685c0",
+          "file": "facility-windows.spec.mjs",
+          "line": 58,
+          "column": 1
+        }
+      ],
+      "suites": [
+        {
+          "title": "touch window editing",
+          "file": "facility-windows.spec.mjs",
+          "line": 73,
+          "column": 6,
+          "specs": [
+            {
+              "title": "touch-resize a window, nudge its center, then place a second one",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2984,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-12T10:50:19.472Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "6bc06f9c95b4f550721a-ac0eb514d166b294b071",
+              "file": "facility-windows.spec.mjs",
+              "line": 75,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "facility-workspace.spec.mjs",
+      "file": "facility-workspace.spec.mjs",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "dimensions follow selected polygon, switch units, and hide without altering geometry",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3019,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-12T10:50:22.464Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "f479c10a11bca0419dac-df036c998a8f4cb437b8",
+          "file": "facility-workspace.spec.mjs",
+          "line": 12,
+          "column": 1
+        },
+        {
+          "title": "copy rooms upstairs, add a level, and undo preserve lower floor elevations",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3408,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-12T10:50:25.488Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "f479c10a11bca0419dac-bbedccd07c8d2875b635",
+          "file": "facility-workspace.spec.mjs",
+          "line": 27,
+          "column": 1
+        },
+        {
+          "title": "centering right after a view switch settles at that view's pitch",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 6408,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-12T10:50:28.900Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "f479c10a11bca0419dac-4997bc3c983ebd3d5739",
+          "file": "facility-workspace.spec.mjs",
+          "line": 57,
+          "column": 1
+        },
+        {
+          "title": "camera edits retain unsaved changes across center and aim tools",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3860,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-12T10:50:35.313Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "f479c10a11bca0419dac-a1e150b8c1388aed8c91",
+          "file": "facility-workspace.spec.mjs",
+          "line": 78,
+          "column": 1
+        },
+        {
+          "title": "zone configuration is saved, exported as a real rule, and pending edits block navigation",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4388,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-12T10:50:39.177Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "f479c10a11bca0419dac-7b672da8f2de229c4d7c",
+          "file": "facility-workspace.spec.mjs",
+          "line": 94,
+          "column": 1
+        },
+        {
+          "title": "narrow layout keeps map controls and zone setup reachable",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1838,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-12T10:50:43.569Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "f479c10a11bca0419dac-5edd69bdc9d004b6e843",
+          "file": "facility-workspace.spec.mjs",
+          "line": 121,
+          "column": 1
+        },
+        {
+          "title": "stair length entry converts feet to metres and unsaved stair edits protect navigation",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4243,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-12T10:50:45.410Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "f479c10a11bca0419dac-9ec342cb303d22f8de81",
+          "file": "facility-workspace.spec.mjs",
+          "line": 138,
+          "column": 1
+        },
+        {
+          "title": "stair cutout becomes a ceiling opening below and supports exact dimensions with dirty protection",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 5024,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-12T10:50:49.658Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "f479c10a11bca0419dac-9c493c66dce1929c25bc",
+          "file": "facility-workspace.spec.mjs",
+          "line": 160,
+          "column": 1
+        },
+        {
+          "title": "whole-floor toggle removes only its slab, retains partial openings, and Undo restores it",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4566,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-12T10:50:54.686Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "f479c10a11bca0419dac-a9705f6505b11ce5046a",
+          "file": "facility-workspace.spec.mjs",
+          "line": 190,
+          "column": 1
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-11-12T10:46:51.947Z",
+    "duration": 247376.143,
+    "expected": 75,
+    "skipped": 0,
+    "unexpected": 2,
+    "flaky": 0
+  }
+}

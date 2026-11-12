@@ -1,6 +1,7 @@
 // Planar camera-frame -> facility ground-plane calibration.
 // Local, numeric, deterministic; not lens distortion, 3D depth, camera pose, or identity.
 // Image coordinates are fractions of the sampled raster; ground coordinates are metres east/north.
+import {finitePoint, orientationSign} from './planar-predicates.mjs';
 const DIM = 8;
 const EPS = 1e-11;
 const finite = n => typeof n === 'number' && Number.isFinite(n);
@@ -94,19 +95,22 @@ export function projectGround(matrix, imagePoint) {
   const point=[(h[0]*x+h[1]*y+h[2])/d,(h[3]*x+h[4]*y+h[5])/d];
   return point.every(finite) ? point : null;
 }
-const cross=(o,a,b)=>(a[0]-o[0])*(b[1]-o[1])-(a[1]-o[1])*(b[0]-o[0]);
 function hull(points){
-  const sorted=points.map(p=>p.slice()).sort((a,b)=>a[0]-b[0]||a[1]-b[1]);
+  const ordered=points.map(p=>p.slice()).sort((a,b)=>a[0]-b[0]||a[1]-b[1]);
+  const sorted=ordered.filter((p,i)=>i===0||p[0]!==ordered[i-1][0]||p[1]!==ordered[i-1][1]);
   const lower=[],upper=[];
-  for(const p of sorted){while(lower.length>=2&&cross(lower.at(-2),lower.at(-1),p)<=EPS)lower.pop();lower.push(p);}
-  for(const p of sorted.slice().reverse()){while(upper.length>=2&&cross(upper.at(-2),upper.at(-1),p)<=EPS)upper.pop();upper.push(p);}
+  for(const p of sorted){while(lower.length>=2&&orientationSign(lower.at(-2),lower.at(-1),p)<=0)lower.pop();lower.push(p);}
+  for(const p of sorted.slice().reverse()){while(upper.length>=2&&orientationSign(upper.at(-2),upper.at(-1),p)<=0)upper.pop();upper.push(p);}
   return lower.slice(0,-1).concat(upper.slice(0,-1));
 }
 export function insideReferenceHull(point, vertices) {
-  if(!Array.isArray(point)||point.length!==2||!point.every(finite)||!Array.isArray(vertices)||vertices.length<3)return false;
+  if(!finitePoint(point)||!Array.isArray(vertices)||vertices.length<3)return false;
+  for(let i=0;i<vertices.length;i++)if(!finitePoint(vertices[i]))return false;
   const boundary=hull(vertices);
   if(boundary.length<3)return false;
-  return boundary.every((p,i)=>cross(p,boundary[(i+1)%boundary.length],point)>=-1e-9);
+  // Closed boundary of the represented coordinates; no area tolerance expands
+  // short edges or erases a real positive turn in the reference markers.
+  return boundary.every((p,i)=>orientationSign(p,boundary[(i+1)%boundary.length],point)>=0);
 }
 export function fitPlanarCalibration(references) {
   if(!Array.isArray(references)||references.length<4||references.length>24)throw new RangeError('Use 4 to 24 references.');
@@ -168,7 +172,7 @@ export function fitPlanarCalibration(references) {
   const checkInsideHull=checks.length>0 && checks.every(p=>insideReferenceHull(p.image,fittingHull));
   return {matrix,fit:summary(fitErrors),holdout:summary(checkErrors),
     fittingHull,fittingCount:fit.length,checkCount:checks.length,checkInsideHull,
-    verified:false, method:'normalized-householder-dlt-v2'};
+    verified:false, method:'normalized-householder-dlt-v3'};
 }
 export function calibratedGroundDistance(calibration,from,to) {
   if(!calibration || !Array.isArray(from)||!Array.isArray(to) ||

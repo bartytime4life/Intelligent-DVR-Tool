@@ -1,0 +1,192 @@
+{
+  "observedAt": "2026-11-12",
+  "main": "63b06ba2aab3adcffc38f52310b55969fb538afe",
+  "scope": "Prepublication readback; no workflows on the new integrated patch are claimed here.",
+  "results": [
+    {
+      "kind": "parent122-ci",
+      "status": "fulfilled",
+      "value": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Action completed."
+          }
+        ],
+        "structuredContent": {
+          "workflow_runs": [
+            {
+              "id": 43200491587,
+              "name": "PC install kit",
+              "status": "completed",
+              "conclusion": "success",
+              "run_number": 483,
+              "jobs_url": "https://api.github.com/repos/bartytime4life/Intelligent-DVR-Tool/actions/runs/43200491587/jobs",
+              "logs_url": "https://api.github.com/repos/bartytime4life/Intelligent-DVR-Tool/actions/runs/43200491587/logs",
+              "workflow_id": 400856528
+            },
+            {
+              "id": 43200491601,
+              "name": "Cross-platform checks",
+              "status": "completed",
+              "conclusion": "success",
+              "run_number": 622,
+              "jobs_url": "https://api.github.com/repos/bartytime4life/Intelligent-DVR-Tool/actions/runs/43200491601/jobs",
+              "logs_url": "https://api.github.com/repos/bartytime4life/Intelligent-DVR-Tool/actions/runs/43200491601/logs",
+              "workflow_id": 395543320
+            },
+            {
+              "id": 43200491542,
+              "name": "Mac source install",
+              "status": "completed",
+              "conclusion": "failure",
+              "run_number": 236,
+              "jobs_url": "https://api.github.com/repos/bartytime4life/Intelligent-DVR-Tool/actions/runs/43200491542/jobs",
+              "logs_url": "https://api.github.com/repos/bartytime4life/Intelligent-DVR-Tool/actions/runs/43200491542/logs",
+              "workflow_id": 403855532
+            },
+            {
+              "id": 43200491700,
+              "name": "Facility browser regression",
+              "status": "completed",
+              "conclusion": "success",
+              "run_number": 575,
+              "jobs_url": "https://api.github.com/repos/bartytime4life/Intelligent-DVR-Tool/actions/runs/43200491700/jobs",
+              "logs_url": "https://api.github.com/repos/bartytime4life/Intelligent-DVR-Tool/actions/runs/43200491700/logs",
+              "workflow_id": 398651984
+            }
+          ]
+        },
+        "isError": false
+      }
+    },
+    {
+      "kind": "parent117-pr",
+      "status": "fulfilled",
+      "value": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Action completed."
+          }
+        ],
+        "structuredContent": {
+          "url": "https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/117",
+          "number": 117,
+          "state": "open",
+          "merged": false,
+          "mergeable": true,
+          "draft": false,
+          "body": "A valid ground-plane mapping with a zero bottom-right matrix entry was rejected even when its projective horizon lay outside the measured references. Conversely, five collinear ground references—or non-collinear noisy references with a singular fitted map—could pass the residual/declaration gates and collapse a ruler distance to zero.\n\nKeep the normalized Householder-QR fit, but canonicalize the final matrix to signed unit Frobenius norm, make projection/horizon guards independent of global matrix scale, and check destination geometry plus normalized transform rank. The existing interface retains independent markers, measured-plane declaration, both residual maxima and the no-extrapolation boundary. Exports keep their schema and identify method normalized-householder-dlt-v2; h33 is not assumed to equal one. No controls or dependencies are added.\n\nValidation: build, 580 Node tests with socket opt-in (zero skips), four Sites checks, 14 focused calibration tests and ten distinct Studio Chrome scenarios passed. The two new browser scenarios also passed a final screenshot rerun. An independent Fraction/80-digit Decimal oracle passes all 2,049 generated cases; the same targeted corpus exposes 1,014 baseline failures. This is generated numerical evidence, not a field failure rate. The strict before/after proof also covers noisy fitted rank collapse and retains horizon refusals. Independent numerical review found no blockers. Documentation passed 1,599 links, 68 Wiki outputs, ten graphics, eight Wiki tests and diff checks.\n\n[Proof, independent oracle, rendered ruler and source-bound validation](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/2122eed5a62d6f697f50e0148c3299cbf4769ce8/docs/verification/calibration-projective-math-2026-11-12/README.md). Rank/geometry screens are conservative numerical refusal heuristics, not full condition-number or physical-noise guarantees. No private footage, cameras, detector execution, installed-service replacement or deployment is part of these checks. Protected runtime/hosting files, dependencies, historical receipts and media remain unchanged. Full Python suites were not rerun for the browser-only numerical change; Wiki regeneration does not publish the separate Wiki. The branch incorporates merged documentation main 63b06ba.",
+          "title": "Accept valid perspective calibration and reject collapsed ground planes",
+          "base": "main",
+          "base_sha": "63b06ba2aab3adcffc38f52310b55969fb538afe",
+          "head": "codex/calibration-projective-math-20261112",
+          "head_sha": "2122eed5a62d6f697f50e0148c3299cbf4769ce8",
+          "head_repo_id": 1432694968,
+          "head_repo_full_name": "bartytime4life/Intelligent-DVR-Tool",
+          "merge_commit_sha": "a78b6b8339211ae46de224d1ac3640e84865853a",
+          "user": {
+            "login": "bartytime4life",
+            "name": "bartytime4life",
+            "email": null,
+            "avatar_url": "https://avatars.githubusercontent.com/u/203533328?v=4",
+            "id": 203533328
+          },
+          "requested_reviewers": null,
+          "requested_team_reviewers": null,
+          "diff": null,
+          "comments": null,
+          "created_at": "2026-11-12T07:22:48Z",
+          "updated_at": "2026-11-12T07:40:47Z",
+          "closed_at": null,
+          "merged_at": null,
+          "commits": 1,
+          "changed_files": 17,
+          "additions": 1727,
+          "deletions": 14,
+          "display_url": "https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/117",
+          "display_title": "Accept valid perspective calibration and reject collapsed ground planes"
+        },
+        "isError": false
+      }
+    },
+    {
+      "kind": "parent120-pr",
+      "status": "fulfilled",
+      "value": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Action completed."
+          }
+        ],
+        "structuredContent": {
+          "url": "https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/120",
+          "number": 120,
+          "state": "open",
+          "merged": false,
+          "mergeable": true,
+          "draft": true,
+          "body": "The image lab can report 111.8% for a valid maximum-response 3×3 patch, while a region too thin for any Sobel kernel centre reports the same zero as a measured flat region.\n\nNormalize the mean Sobel magnitude by its tight 8-bit maximum, 255 × √20, without clipping. Distinguish unavailable support from measured zero, show interior-pixel counts and effective region dimensions, and version metric exports as intelligent-dvr-image-diagnostics-v2 with method, denominator, raw magnitude and support semantics. Preserve existing frame/source/ROI/comparison/ruler fields and filename. No new controls or dependencies.\n\nUpdate the image guide, mathematical reference, handbook, visual tour, verification index and generated Wiki companions. Document the exact bound, the old-to-new scale relationship, historical zero ambiguity, reproducible checks and qualification limits.\n\nValidation: build, 580 Node tests with socket opt-in (zero skips), four Sites checks and eleven distinct Studio Chrome scenarios passed. The independent 611-case / 606-generated-image oracle passes 10,472 assertions; unchanged checks expose 3,031 baseline failed assertions, including new metadata-contract checks. Strict baseline exits 1, candidate exits 0, and root plus independent final replays match retained receipts exactly. Desktop/375px checks exercise unavailable support, measured zero, Full frame recovery, maximum response and actual JSON downloads. Numerical and UX review found no blockers. Documentation passes 1,619 links, 68 Wiki outputs, ten graphics and eight Wiki tests.\n\n[Exact proof, immutable compressed corpus, source-bound receipts, rendered results and validation](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/6507638a56adfce873b70b98e2c0b60f0398bf12/docs/verification/image-diagnostics-math-2026-11-12/README.md). This is generated byte-image software evidence, not optical-focus, recognition, field or capacity qualification. Malformed generic arrays and fractional ROI-input display precision remain separate limitations. Full Python application suites were not rerun for this JavaScript change. Protected runtime/hosting files, dependency manifests, existing media and historical receipts remain unchanged from main 63b06ba. The separate Wiki is not published by regeneration. No cameras, recording or inference started; no merge, installed-service replacement or deployment performed. Published tree c67e8fe3d2388c54787115fc6424b6c520a6c4f7 exactly matches the locally tested tree.",
+          "title": "Correct image edge strength and distinguish unavailable support",
+          "base": "main",
+          "base_sha": "63b06ba2aab3adcffc38f52310b55969fb538afe",
+          "head": "codex/image-diagnostics-math-20261112",
+          "head_sha": "6507638a56adfce873b70b98e2c0b60f0398bf12",
+          "head_repo_id": 1432694968,
+          "head_repo_full_name": "bartytime4life/Intelligent-DVR-Tool",
+          "merge_commit_sha": "29edb2fedaf44807b3c4ec610dd6e29dd9fda576",
+          "user": {
+            "login": "bartytime4life",
+            "name": "bartytime4life",
+            "email": null,
+            "avatar_url": "https://avatars.githubusercontent.com/u/203533328?v=4",
+            "id": 203533328
+          },
+          "requested_reviewers": null,
+          "requested_team_reviewers": null,
+          "diff": null,
+          "comments": null,
+          "created_at": "2026-11-12T08:26:51Z",
+          "updated_at": "2026-11-12T08:26:51Z",
+          "closed_at": null,
+          "merged_at": null,
+          "commits": 1,
+          "changed_files": 41,
+          "additions": 1377,
+          "deletions": 13,
+          "display_url": "https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/120",
+          "display_title": "Correct image edge strength and distinguish unavailable support"
+        },
+        "isError": false
+      }
+    },
+    {
+      "kind": "parent122-mac-job",
+      "status": "fulfilled",
+      "value": {
+        "content": [
+          {
+            "type": "text",
+            "text": "Action completed."
+          }
+        ],
+        "structuredContent": {
+          "jobs": [
+            {
+              "id": 131122311237,
+              "name": "apple-silicon",
+              "status": "completed",
+              "conclusion": "cancelled",
+              "run_id": 43200491542,
+              "logs_url": null,
+              "steps": null
+            }
+          ]
+        },
+        "isError": false
+      }
+    }
+  ]
+}

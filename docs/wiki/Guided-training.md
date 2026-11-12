@@ -196,6 +196,15 @@ The local decoder (PyAV) reads the presentation time of each sampled frame. Its 
 
 The scorecard skips the first two seconds after a prompt change to give you time to respond. A frame counts as a find or flag when its strongest person score meets the threshold. Both settings are fixed before the fresh recording starts.
 
+Class-presence observation counts also honor the rule's dwell and maximum gap.
+The browser counter and local rule engine share a bounded numerical policy so
+ordinary fractional sample intervals at the gap limit keep one run, and a sample
+at dwell can emit on time. This changes observation counting, not the scorecard's
+per-frame find/flag definition or detector scores. It does not establish what
+happened between samples. The [timing record](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/rule-time-boundaries-2026-11-12/README.md)
+explains the generated comparisons and why current evaluation needs new traces
+after the rule-engine source changes.
+
 For installation or service problems, see [local analysis setup](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Local-analysis-service) and [troubleshooting](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Troubleshooting).
 
 ---

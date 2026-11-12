@@ -20,8 +20,10 @@ API key, recording upload or live person tracking is required.
 ## Workflow
 
 1. Facility → Locate site → submit an address/place search, use GPS, pick a map pin or enter manual coordinates → review → Save site.
-   GPS suggests device location; it does not measure buildings. Changing the
-   origin moves the whole local plan geographically.
+   GPS suggests device location; it does not measure buildings. For an existing
+   plan, **Keep buildings at their map positions** chooses whether an origin
+   change re-centres the local grid or moves the whole plan geographically.
+   [Review that choice before saving](#change-the-site-origin).
 2. Open **Draft buildings from OpenStreetMap**. Select a rectangular search area
    by width/depth and east/north offsets, choose **Custom polygon** and edit its
    east/north vertex pairs, or use **Draw search area** on a ready map. The
@@ -39,6 +41,31 @@ API key, recording upload or live person tracking is required.
    height and floors. Inputs support meters/feet; stored geometry uses meters.
 
 Offline fallback: open a JSON file or paste an Overpass JSON extract with complete way/member geometry into the same review flow. This is not a generic GeoJSON, imagery or BIM importer.
+
+## Change the site origin
+
+When a plan already has geometry, **Keep buildings at their map positions** is
+on by default for map-sourced buildings and off for hand-drawn plans. Review it
+before choosing **Save site**:
+
+- **Checked:** re-centre the local east/north grid while retaining the plan's
+  geographic positions under the existing projection. Buildings and their
+  attached rooms, openings, doorways and windows move together with cameras,
+  zones, routes and other authored geometry. Local coordinate values can change.
+- **Unchecked:** retain local coordinate values and move the whole plan
+  geographically with the new origin.
+
+The checked path uses one affine coordinate change rather than independently
+rounding each vertex through geographic coordinates. Shared vertices remain
+consistent; doorway/window widths follow their transformed wall direction.
+The projection's east scale depends on latitude, so this is not a promise that
+every local numeric dimension stays identical or a correction for survey error.
+
+An origin that would move geometry beyond the local grid or leave invalid
+attachments is refused without replacing the existing plan. Choose a closer
+origin, or uncheck the option if moving the plan geographically is intended.
+Keep an exported plan before a significant site correction; ordinary Undo remains
+available after an accepted edit.
 
 ## Measurements and assumptions
 

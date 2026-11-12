@@ -1,0 +1,21 @@
+{
+  "schema": "intelligent-dvr.synthetic-fixture-refresh.v1",
+  "base_revision": "6ce57a5180655693f7d3d6d2e91d8c68693f1961",
+  "generator": "tests/evaluation_fixtures.py",
+  "changed_files": [
+    {
+      "path": "tests/fixtures/evaluation/reviews.json",
+      "before_sha256": "31d5aea33f1a123072eb1b1ad058db9f1b67566933cf64aa84c00195f3eeb693",
+      "after_sha256": "4f6fe659ba4d1cff452636574bfa2eba313481aa0d0a6998f078edaa5a42cea6",
+      "reason": "Current generated fixture binds updated rule-engine source; boxes, times, events and expected metrics unchanged."
+    },
+    {
+      "path": "tests/fixtures/evaluation/trace.json",
+      "before_sha256": "1a32d74275820e6e0075b3a364dfda940b1ffff6c101a1bf20c57cace2901bcb",
+      "after_sha256": "9b4719835a27a02f08ff942d99030e35d0351c4306c3c90b17c82075dd148a7f",
+      "reason": "Current generated fixture binds updated rule-engine source; boxes, times, events and expected metrics unchanged."
+    }
+  ],
+  "historical_verification_records_modified": false,
+  "expected_metric_or_event_changes": false
+}

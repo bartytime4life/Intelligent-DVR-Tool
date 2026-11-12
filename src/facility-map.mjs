@@ -3,10 +3,11 @@ import workerUrl from "maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url";
 import * as THREE from "three";
 import { TerraDraw, TerraDrawPolygonMode, TerraDrawLineStringMode } from "./vendor/terra-draw.mjs";
 import { TerraDrawMapLibreGLAdapter } from "./vendor/terra-maplibre.mjs";
-import { centroid, toLngLat, fromLngLat, coverageFan, wallObstacles, buildingFeature, floorSlabRings, ceilingOpenings } from "./facility.mjs";
+import { centroid, toLngLat, fromLngLat, buildingFeature, floorSlabRings, ceilingOpenings } from "./facility.mjs";
 import { stairOnLevel, stairDimensions, stairFootprint, stairTreadPolygons } from "./facility-stairs.mjs";
 import { measurementLabels, lineRibbonSegments, floorRenderPlan, floorElevation, visibleLabelIndices, formatDistance } from "./facility-measurements.mjs";
-import { fanCache } from "./facility-coverage.mjs";
+import {visibilityCollection, visibilityMesh} from './facility-visibility-presentation.mjs';
+import {blindSpotCollection} from './facility-blind-spots.mjs';
 import { translateShape, unitFactor } from "./facility-shape-edit.mjs";
 import {createStairMap} from "./facility-stair-map.mjs";
 import {createWindowMap} from "./facility-window-map.mjs";
@@ -87,26 +88,22 @@ class CameraVolumes {
     if (view === "2d") return;
     const c = plan.cameras.find((c2) => c2.id === selected);
     if (c?.enabled) {
-      const fan = options.fanOf ? options.fanOf(c) : coverageFan(c, wallObstacles(plan));
-      const half = (fan.length - 1) / 2;
-      if (half > 1) {
-        const positions = [];
-        for (let i = 0; i < half - 1; i++) positions.push(c.x, c.y, c.z, ...fan[i], 0.12, ...fan[i + 1], 0.12);
-        const geo = new THREE.BufferGeometry();
-        geo.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
-        geo.computeVertexNormals();
-        this.group.add(new THREE.Mesh(geo, new THREE.MeshBasicMaterial({
-          color: 3530979,
-          transparent: true,
-          opacity: 0.12,
-          side: THREE.DoubleSide,
-          depthWrite: false
-        })));
-        const lines = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(c.x, c.y, c.z), new THREE.Vector3(
-          ...fan[0],
-          0.12
-        ), new THREE.Vector3(...fan[half - 1], 0.12), new THREE.Vector3(c.x, c.y, c.z)]);
-        this.group.add(new THREE.Line(lines, new THREE.LineBasicMaterial({ color: 6155245, transparent: true, opacity: 0.8 })));
+      const result=c.id===options.suppressedCamera ? null : options.geometryOf?.(c);
+      if(result?.estimated && result.polygons?.length) {
+        const mesh=visibilityMesh(c,result.polygons);
+        for(const [positions,opacity] of [[mesh.sides,.1],[mesh.caps,.1]]) {
+          if(!positions.length) continue;
+          const geometry=new THREE.BufferGeometry();
+          geometry.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));
+          geometry.computeVertexNormals();
+          this.group.add(new THREE.Mesh(geometry,new THREE.MeshBasicMaterial({
+            color:3530979,transparent:true,opacity,side:THREE.DoubleSide,depthWrite:false,
+          })));
+        }
+        for(const ring of mesh.outlines) {
+          const geometry=new THREE.BufferGeometry().setFromPoints(ring.map(p=>new THREE.Vector3(...p)));
+          this.group.add(new THREE.Line(geometry,new THREE.LineBasicMaterial({color:6155245,transparent:true,opacity:.8})));
+        }
       }
     }
     // A floor n slab is also the ceiling above floor n-1. Its opening is
@@ -151,7 +148,7 @@ class CameraVolumes {
     this.renderer?.dispose();
   }
 }
-// options.fans shares the fan cache with coverage metrics so both use the same drawn fans.
+// Visibility geometry is supplied from the current plan-bound worker snapshot.
 function createFacilityMap(container, callbacks, initialPlan, options = {}) {
   const map = new Map({
     container,
@@ -222,7 +219,7 @@ function createFacilityMap(container, callbacks, initialPlan, options = {}) {
   map.addControl(new NavigationControl({ visualizePitch: true }), "bottom-right");
   const scaleControl = new ScaleControl({ unit: "metric" });
   map.addControl(scaleControl, "bottom-left");
-  const volumes = new CameraVolumes(), fans = options.fans || fanCache();
+  const volumes = new CameraVolumes();
   let draw, ready = false, suppressSelection = false, current = initialPlan, selected = "C-07", view = "3d", floor = 0, tool = "\
 select", markers = [];
   const windowMap=createWindowMap(map,{onLayout:scheduleLabels,onChange:w=>callbacks.onChangeWindow(w),onError:message=>callbacks.onDoorwayError(message)});
@@ -232,7 +229,7 @@ select", markers = [];
   let displayOptions = {measurements: true, units: "metric", floorBuildingId: null};
   let labelRecords = [], labelFrame = null, markerKey = "";
   // Direct manipulation of the selected camera: drag state, the rotate handle and markers that follow a drag.
-  let fanOf = null, volumeOptions = null, drag = null, handle = null, cameraLabel = null, doriLabels = [];
+  let geometryOf = () => null, volumeOptions = null, drag = null, handle = null, cameraLabel = null, doriLabels = [];
   function declutterLabels() {
     labelFrame = null;
     const visible = visibleLabelIndices([...labelRecords.map(record => ({priority:record.priority,keep:record.keep,rect:record.element.getBoundingClientRect()})),
@@ -513,7 +510,7 @@ e-stroke-width": 2 } });
     const paint = () => {
       drag.frame = null;
       renderCameras(current, drag.preview);
-      if (volumeOptions) volumes.update({...current, cameras: current.cameras.map(c => c.id === cam.id ? drag.preview : c)}, selected, view, floor, volumeOptions);
+      if (volumeOptions) volumes.update({...current, cameras: current.cameras.map(c => c.id === cam.id ? drag.preview : c)}, selected, view, floor, {...volumeOptions,suppressedCamera:cam.id});
       if (kind === "move") cameraLabel?.setLngLat(toLngLat([drag.preview.x, drag.preview.y], current.origin));
     };
     const move = (e) => {
@@ -547,7 +544,7 @@ e-stroke-width": 2 } });
     };
     const up = () => finish(true), cancel = () => finish(false);
     const key = (e) => { if (e.key === "Escape") { e.stopPropagation(); cancel(); } };
-    drag = {kind, start: [start.clientX, start.clientY], moved: false, point: null, preview: null, frame: null, cancel};
+    drag = {kind, context:{plan:current,selected,view,floor}, start: [start.clientX, start.clientY], moved: false, point: null, preview: null, frame: null, cancel};
     document.addEventListener("mousemove", move); document.addEventListener("mouseup", up);
     document.addEventListener("touchmove", move, {passive: false}); document.addEventListener("touchend", up); document.addEventListener("touchcancel", cancel);
     document.addEventListener("keydown", key, true);
@@ -567,12 +564,11 @@ e-stroke-width": 2 } });
   // Cameras, their fans, the heading line, DORI arcs and the rotate handle; `moved` replaces one camera during a drag.
   function renderCameras(plan, moved = null) {
     const o = plan.origin, cameras = moved ? plan.cameras.map(c => c.id === moved.id ? moved : c) : plan.cameras, cam = cameras.find(c => c.id === selected);
-    map.getSource("coverage").setData(fc(cameras.filter((c) => c.enabled || c.id === selected).map((c) => ({ c, fan: fanOf(c) })).filter((x) => x.fan.
-    length > 3).map(({ c, fan }) => polygon(fan, o, { selected: c.id === selected }))));
+    map.getSource("coverage").setData(visibilityCollection(cameras,geometryOf,o,selected,moved?.id));
     map.getSource("cameras").setData(fc(cameras.map((c) => feat("Point", toLngLat([c.x, c.y], o), { id: c.id, selected: c.
     id === selected, enabled: c.enabled }))));
     map.getSource("camera-heading").setData(fc(cam ? [feat("LineString", [toLngLat([cam.x, cam.y], o), toLngLat(headingTip(cam), o)])] : []));
-    map.getSource("dori-arcs").setData(fc(cam?.enabled ? doriArcs(cam, fanOf(cam)).flatMap(arc => arc.lines.map(line => feat("LineString", line.map(p => toLngLat(p, o)), {band: arc.id, color: arc.color}))) : []));
+    map.getSource("dori-arcs").setData(fc(cam?.enabled ? doriArcs(cam, moved?.id===cam.id ? null : geometryOf(cam)?.polygons).flatMap(arc => arc.lines.map(line => feat("LineString", line.map(p => toLngLat(p, o)), {band: arc.id, color: arc.color}))) : []));
     const show = !!(displayOptions.manipulate && cam && tool === "select");
     if (show) {
       handle ||= new Marker({element: handleElement(), anchor: "center"});
@@ -583,13 +579,19 @@ e-stroke-width": 2 } });
     return cam;
   }
   function update(plan, selection, mode, level, options = {}) {
+    const nextOptions={...displayOptions,...options};
+    const levelBuilding=plan.buildings.find(building=>building.id===nextOptions.floorBuildingId);
+    const nextFloor=Number.isInteger(level) ? Math.max(0,Math.min(level,levelBuilding ? levelBuilding.floors-1 : 39)) : 0;
+    // A gesture owns its starting plan and editing context. Cancel before
+    // publishing new references so a delayed release cannot edit a new item.
+    // Snapshot arrival, units and styling alone leave that context unchanged.
+    if(drag && (drag.context.plan!==plan || drag.context.selected!==selection || drag.context.view!==mode || drag.context.floor!==nextFloor || !nextOptions.manipulate)) drag.cancel();
     const apertureModeChanged=displayOptions.apertureEditing!==options.apertureEditing;
-    displayOptions = {...displayOptions, ...options};
+    displayOptions = nextOptions;
     const originChanged = current.origin[0] !== plan.origin[0] || current.origin[1] !== plan.origin[1];
     current = plan;
     selected = selection;
-    const levelBuilding = plan.buildings.find(building => building.id === displayOptions.floorBuildingId);
-    floor = Number.isInteger(level) ? Math.max(0, Math.min(level, levelBuilding ? levelBuilding.floors - 1 : 39)) : 0;
+    floor = nextFloor;
     const modeChanged = view !== mode;
     view = mode;
     if (!ready) return;
@@ -655,7 +657,7 @@ e-stroke-width": 2 } });
       const base = building ? floorElevation(building,zone.level,floorDrawing) : 0;
       return polygon(zone.footprint, o, {id: zone.id, type: zone.type, enabled: zone.enabled !== false, selected: zone.id === selected, base, top: base + .2});
     })));
-    fanOf = fans(wallObstacles(plan));
+    geometryOf = displayOptions.geometryOf || (() => null);
     renderCameras(plan, drag?.preview);
     map.getSource("route").setData(fc(plan.route.length > 1 ? [feat("LineString", plan.route.map((p) => toLngLat(p, o)))] :
     []));
@@ -680,8 +682,8 @@ e-stroke-width": 2 } });
     });
     const cam = plan.cameras.find((c) => c.id === selected);
     if (cam) specs.push({ className: "facility-map-label selected-camera-label", text: cam.id + " \xB7 " + cam.name, priority: 1, keep: false, anchor: "top", offset: [0, 14], lngLat: toLngLat([cam.x, cam.y], o) });
-    if (cam?.enabled) for (const arc of doriArcs(cam, fanOf(cam))) specs.push({ className: "facility-map-label facility-dori-label", text: `${arc.name} \u2264 ${formatDistance(arc.to, displayOptions.units)}`,
-      title: "Pixel-density planning estimate \u00b7 assumes ideal focus and no compression", priority: 3, keep: false, anchor: "center", offset: [0, 0], lngLat: toLngLat(arc.label, o) });
+    if (cam?.enabled) for (const arc of doriArcs(cam, drag?.moved && drag.preview?.id===cam.id ? null : geometryOf(cam)?.polygons)) specs.push({ className: "facility-map-label facility-dori-label", text: `${arc.name} · ${arc.ppm} px/m`,
+      title: "Pixel-density planning estimate \u00b7 assumes ideal focus and no compression", priority: 3, keep: false, anchor: "bottom", offset: [0, -6], lngLat: toLngLat(arc.label, o) });
     if (displayOptions.measurements) for (const label of measurementLabels(plan, selected, {...displayOptions, floor, view: mode})) specs.push({
       className: `facility-map-label facility-dimension-label${label.summary ? " facility-measurement-summary" : ""}${label.route ? " facility-route-dimension" : ""}`,
       text: label.text, title: "Plan dimensions · verify on site", priority: label.primary ? 0 : label.summary ? 2 : 3, keep: !!label.primary,
@@ -707,7 +709,7 @@ e-stroke-width": 2 } });
       }
     }
     scheduleLabels();
-    volumeOptions = {...displayOptions,floorDrawing,fanOf};
+    volumeOptions = {...displayOptions,floorDrawing,geometryOf,suppressedCamera:drag?.moved ? drag.preview?.id : null};
     volumes.update(plan, selected, mode, floor, volumeOptions);
     const nextHasOsm = plan.buildings.some(b=>b.source?.provider==='OpenStreetMap');
     if(nextHasOsm!==hasOsm) {
@@ -868,8 +870,8 @@ e-stroke-width": 2 } });
       }
       draftKey = key;
     },
-    setBlindSpots(rings) {
-      if (ready) map.getSource("blind-spots").setData(fc((rings || []).map(ring => polygon(ring, current.origin))));
+    setBlindSpots(polygons) {
+      if (ready) map.getSource("blind-spots").setData(blindSpotCollection(polygons, current.origin));
     },
     destroy() {
       const pending = photo.controller;

@@ -1,9 +1,51 @@
 # Verification index
 
+[Fractional rule-time boundaries, November 12](rule-time-boundaries-2026-11-12/README.md)
+records reproduced missed/duplicate observations, a shared bounded numerical
+policy, unchanged independent rational oracles, generated CPU analyzer/review/
+evaluation checks, current synthetic-fixture regeneration and documentation audit.
+Older traces retain their historical fingerprints and require re-analysis for
+current evaluation.
+
+[Small planning readouts, November 12](planning-readouts-2026-11-12/README.md)
+records nonzero/endpoint rounding counterexamples, bounded display formatting,
+independent rational route/area checks, four expected baseline browser failures,
+four passing final browser cases and byte-identical numerical exports. This
+display-only proposal does not establish physical accuracy or installed capacity.
+
+[Integrated planning and coordinate integrity, November 12](coordinate-integrity-math-2026-11-12/README.md)
+records the combined ground-visibility, calibration and image-diagnostics source;
+reproduced site-origin/shared-wall and outside-reference-ruler defects; independent
+exact-coordinate checks; current documentation inventory; and separate local/CI/
+publication evidence. Earlier records below retain their original bytes and limits.
+
+[Coherent pinhole ground visibility, November 12](ground-frustum-math-2026-11-12/README.md)
+records radial-sector and wall-shadow counterexamples, complete visible regions,
+shared revision-bound consumers, independent mathematical corpora and recovery
+checks. It preserves raw ideal-circle boundary disagreements and numerical
+limits. This local integration of unmerged proposals is separate from main,
+installed services and physical-camera acceptance.
+
+[Zone coverage by area, November 12](zone-area-math-2026-11-12/README.md)
+records sampled-grid counterexamples, distinct-camera area/overlap integration,
+hole-preserving blind polygons, independent rational checks and bounded,
+revision-bound background calculation. Proposed source remains separate from
+merged, installed and field-qualified behavior.
+
+[Ground pixel density through pinhole projection, November 12](dori-projection-2026-11-12/README.md)
+records reproduced slant/depth errors, centreline ground intervals, straight
+fan/sensor-clipped contours, an independent generated projection oracle and
+readable short ranges in the browser and installer exports.
+
 [Projective calibration mathematics, November 12](calibration-projective-math-2026-11-12/README.md)
 records valid zero-coefficient perspective maps, scale-invariant projection,
 collinear and noisy fitted-plane collapse refusals, independent exact-arithmetic
 comparisons and the existing operator-gated ruler workflow.
+
+[Image diagnostics mathematics, November 12](image-diagnostics-math-2026-11-12/README.md)
+records the tight Sobel bound, unavailable-versus-zero support, versioned exports,
+an independent generated-pixel oracle and desktop/phone browser checks. This is
+proposed branch behavior until merged, without physical-camera qualification.
 
 [Current documentation alignment, November 12](documentation-alignment-2026-11-12/README.md)
 follows the earlier 197-path audit, records the merged route/evaluation baseline and

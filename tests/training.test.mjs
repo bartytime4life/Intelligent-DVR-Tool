@@ -5,6 +5,36 @@ import { TRAINING_SCRIPT, CHECK_SCRIPT, scriptTimeline, scriptSeconds, labelFram
   frameMoments, plural, readHistory, ENROLL_SCRIPT, BASELINE_SCRIPT, CONSENT_TEXT, baselineText, appendHistory, readDefaultRules, writeDefaultRules, HISTORY_KEY, percent, formatThreshold } from '../src/training.mjs';
 
 const frame = (seconds, ...scores) => ({ seconds, detections: scores.map(score => ({ label: 'person', score, box: [0, 0, .5, .5] })) });
+
+test('observation counts preserve exact fractional cadence and dwell boundaries',()=>{
+  for(const [fps,stride,dwell] of [[25,5,1],[10,1,.5],[30,1,1]]){
+    const samples=Array.from({length:fps*30/stride},(_,i)=>({seconds:i*stride/fps,score:.9}));
+    assert.equal(countObservations(samples,.7,{dwell,maxGap:stride/fps}),1);
+  }
+  assert.equal(countObservations([{seconds:.2,score:.9},{seconds:.3,score:.9}],.7,{dwell:.1,maxGap:1}),1);
+});
+
+test('observation counts keep true timing gaps and under-dwell refusals',()=>{
+  const separated=Array.from({length:100},(_,i)=>({seconds:i*.200001,score:.9}));
+  assert.equal(countObservations(separated,.7,{dwell:.4,maxGap:.2}),0);
+  assert.equal(countObservations([{seconds:.2,score:.9},{seconds:.299999,score:.9}],.7,{dwell:.1,maxGap:1}),0);
+  const missed=[0,.2,.4,.6,.8,1].map((seconds,i)=>({seconds,score:i===2?0:.9}));
+  assert.equal(countObservations(missed,.7,{dwell:.4,maxGap:.2}),1);
+});
+
+test('observation counts repair late frame times while coarse clocks remain strict',()=>{
+  const late=Array.from({length:100},(_,i)=>({seconds:(900000+i*5)/25,score:.9}));
+  assert.equal(countObservations(late,.7,{dwell:1,maxGap:.2}),1);
+  const start=2**54;
+  assert.equal(countObservations([{seconds:start,score:.9},{seconds:start+4,score:.9}],.7,{dwell:1,maxGap:.2}),0);
+  assert.equal(countObservations([{seconds:start,score:.9},{seconds:start+56,score:.9}],.7,{dwell:60,maxGap:60}),0);
+  assert.equal(countObservations([{seconds:start,score:.9},{seconds:start+60,score:.9}],.7,{dwell:60,maxGap:60}),1);
+});
+
+test('unavailable times do not become an observation during numerical comparison',()=>{
+  assert.equal(countObservations([{seconds:NaN,score:.9}],.7),0);
+});
+
 function memory(fail = false) {
   const data = new Map();
   return { data, getItem: k => data.has(k) ? data.get(k) : null, setItem: (k, v) => { if (fail) throw Error('full'); data.set(k, v); } };

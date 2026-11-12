@@ -3,9 +3,10 @@ import {Plus, Stairs, ArrowClockwise, Check, Trash} from '@phosphor-icons/react'
 import {STAIR_REFERENCE, stairDimensions, stairOnLevel} from './facility-stairs.mjs';
 import {anchorStair,stairAnchors,stairDestination,turnStair,travelBearing,destinationLevels} from './facility-stair-placement.mjs';
 import {displayLength, enteredLength} from './facility-shape-edit.mjs';
+import {formatReadoutNumber} from './readout-format.mjs';
 import './facility-stairs.css';
 
-const formatDistance=(value,units)=>`${Number((value/(units==='imperial' ? .3048 : 1)).toFixed(3))} ${units==='imperial' ? 'ft' : 'm'}`;
+const formatDistance=(value,units)=>`${formatReadoutNumber(Number.isFinite(value) ? value/(units==='imperial' ? .3048 : 1) : NaN,{digits:3,locale:'en-US'})} ${units==='imperial' ? 'ft' : 'm'}`;
 
 function LengthField({label,value,onChange,units,min=.05,max=100,step='any'}) {
   const factor=units==='imperial' ? .3048 : 1, suffix=units==='imperial' ? 'ft' : 'm';

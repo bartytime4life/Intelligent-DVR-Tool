@@ -1,0 +1,103 @@
+{
+  "inputs_sha256": "3bb534c91d32404bf42d0481984c45dad164945669a767c6378237fc1ae54bbd",
+  "candidate_proof_sha256": "1d52ba0d4b410402063a07086a3f9b369fcb8738674bb2a52ab1d8a14a82c475",
+  "positive_table_intervals": 507,
+  "empty_table_intervals": 401,
+  "sensor_horizontal_boundary_endpoints": 112,
+  "fan_boundary_endpoints": 246,
+  "vertical_sensor_masked_band_candidates": 35,
+  "special_cases": [
+    {
+      "case": "concave-wall-0",
+      "band": "observe",
+      "centreline_reached": true,
+      "fragments": 2
+    },
+    {
+      "case": "concave-wall-90",
+      "band": "observe",
+      "centreline_reached": true,
+      "fragments": 2
+    },
+    {
+      "case": "concave-wall-237",
+      "band": "observe",
+      "centreline_reached": true,
+      "fragments": 2
+    },
+    {
+      "case": "off-axis-only-0",
+      "band": "identify",
+      "centreline_reached": false,
+      "fragments": 2
+    },
+    {
+      "case": "off-axis-only-123",
+      "band": "identify",
+      "centreline_reached": false,
+      "fragments": 2
+    }
+  ],
+  "actual_check_tolerances": {
+    "density_query_absolute_floor": 1e-07,
+    "density_query_relative": 2e-10,
+    "contour_density_absolute": 1e-05,
+    "geometry_metres": 2e-06,
+    "projected_sensor_bound_pixels": 2e-06
+  },
+  "limits": "Support counts are generated fixture evidence, not universal bounds or optics/recognition qualification.",
+  "baseline_proof_sha256": "b774102c963ca3dd8fc0494a4f4b72481d149f7c23e4b133a7989df17f018095",
+  "oracle_sha256": "1e94a185b44f71711f784e770f65f080156350a086ae6a36778ae9d6258a221c",
+  "compressed_inputs_sha256": "da3f9a3bd25d5648979fef99f9b6c78402118fcea20915171e3450a52c2e4fa6",
+  "compressed_input_mtime": 0,
+  "uncompressed_inputs_sha256": "3bb534c91d32404bf42d0481984c45dad164945669a767c6378237fc1ae54bbd",
+  "input_sizes_bytes": {
+    "uncompressed": 788381,
+    "compressed": 76696
+  },
+  "cli_results": [
+    {
+      "name": "final-baseline",
+      "command": [
+        "/home/bartytime/.pyenv/versions/3.10.9/bin/python",
+        "/tmp/dvr-dori-oracle-20261112/check_dori.py",
+        "--repo",
+        "/home/bartytime/Documents/ChatGPT/Intelligent-DVR-Tool/dori-projective-workspace",
+        "--inputs",
+        "/tmp/dvr-dori-oracle-20261112/inputs.json.gz",
+        "--output",
+        "/tmp/dvr-dori-oracle-20261112/final-baseline-proof.json",
+        "--require-pass",
+        "--revision",
+        "63b06ba2aab3adcffc38f52310b55969fb538afe"
+      ],
+      "exit_code": 1,
+      "result": "FAIL",
+      "failure_count": 4621,
+      "receipt_written": true,
+      "observations_byte_identical_to_initial_run": true
+    },
+    {
+      "name": "final-candidate",
+      "command": [
+        "/home/bartytime/.pyenv/versions/3.10.9/bin/python",
+        "/tmp/dvr-dori-oracle-20261112/check_dori.py",
+        "--repo",
+        "/home/bartytime/Documents/ChatGPT/Intelligent-DVR-Tool/dori-projective-workspace",
+        "--inputs",
+        "/tmp/dvr-dori-oracle-20261112/inputs.json.gz",
+        "--output",
+        "/tmp/dvr-dori-oracle-20261112/final-candidate-proof.json",
+        "--require-pass"
+      ],
+      "exit_code": 0,
+      "result": "PASS",
+      "failure_count": 0,
+      "receipt_written": true,
+      "observations_byte_identical_to_initial_run": true
+    }
+  ],
+  "mathematical_checks_unchanged": true,
+  "same_236_camera_corpus": true,
+  "observations_identical_to_initial_runs": true
+}

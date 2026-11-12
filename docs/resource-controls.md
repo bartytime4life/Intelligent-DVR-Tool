@@ -21,6 +21,14 @@ remains visible when those values differ from the applied plan, including an
 empty or invalid edit. Validation warnings and save status stay outside the
 disclosure; changing the disclosure does not apply any setting.
 
+Readouts retain small nonzero estimates instead of rounding them to zero. For
+example, one camera at 0.01 Mbit/s displays **0.01 Mbit/s**, and small recording
+or memory allowances gain enough decimals to remain visible. Ordinary values keep
+their usual precision; exceptionally small values use a compact scientific label.
+An invalid or unavailable number is shown as **—**. Formatting does not change
+the calculations, warnings, saved setup or exported policy, and extra displayed
+decimals do not establish hardware measurement accuracy.
+
 ## Controls and their scope
 
 | Setting / action | Enforced now | Limits |

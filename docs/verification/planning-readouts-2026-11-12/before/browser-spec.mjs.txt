@@ -1,0 +1,88 @@
+import {test,expect} from '@playwright/test';
+import {readFile,writeFile} from 'node:fs/promises';
+import {blankFacility,validateFacility} from '../../src/facility.mjs';
+import {createLibrary,LIBRARY_KEY} from '../../src/facility-library.mjs';
+import {DEFAULT_SETUP,resourcePolicy} from '../../src/resources.mjs';
+import {savedPlan} from './facility-test-helpers.mjs';
+
+const lowSetup=structuredClone(DEFAULT_SETUP);
+lowSetup.workload={cameras:1,mbps:.01,days:1,overhead:0};
+lowSetup.compute={...lowSetup.compute,ramGiB:2,reserveGiB:1.999,workerMiB:16,workerSlots:1,bufferMiB:2};
+lowSetup.gpu={...lowSetup.gpu,vramGiB:1,reserveGiB:.999,sessions:1,batch:1,modelMiB:1,workspaceMiB:0};
+const camera={id:'c',name:'Boundary camera',x:0,y:0,z:4,bearing:45,tilt:0,hfov:90,vfov:60,range:300,enabled:true};
+const plan=validateFacility({...blankFacility(),name:'Small planning readouts',
+ cameras:[camera,{...camera,id:'steep',name:'Steep camera',x:-10,y:-10,z:.5,bearing:0,tilt:89,vfov:5,range:1,pixelsWide:1920,enabled:false}],
+ // Same120.04m route as the frozen counterexample, subdivided at x=0 to
+ // exercise the existing per-edge map label as well as the uncovered total.
+ route:[[-.04,20],[0,20],[120,20]],zones:[{id:'z',name:'Boundary zone',type:'restricted',enabled:true,
+ expectedClasses:['person'],dwellSeconds:2,footprint:[[10,-.0001],[20,-.0001],[20,.9999],[10,.9999],[10,-.0001]]}]});
+
+async function blockActivation(page){
+ await page.route('**/*',route=>{
+  const url=new URL(route.request().url());
+  return url.hostname==='127.0.0.1'&&!url.pathname.startsWith('/api/')?route.continue():route.abort();
+ });
+ await page.addInitScript(()=>Object.defineProperty(navigator,'mediaDevices',{configurable:true,value:{
+  enumerateDevices:async()=>[],getUserMedia:()=>{throw Error('Devices are forbidden in this generated check.');}
+ }}));
+}
+async function download(page,testInfo,name,button){
+ const pending=page.waitForEvent('download');await button.click();const file=await pending;
+ const path=testInfo.outputPath(name);await file.saveAs(path);return readFile(path,'utf8');
+}
+
+for(const width of [1440,375])test(`System small readouts keep nonzero estimates and exact exports at ${width}px`,async({page},testInfo)=>{
+ await page.setViewportSize({width,height:1000});await blockActivation(page);
+ await page.addInitScript(setup=>localStorage.setItem('dvr.setup.v1',JSON.stringify(setup)),lowSetup);
+ await page.goto('/#system');
+ await expect(page.getByLabel('Average Mbit/s per camera',{exact:true})).toHaveValue('0.01');
+ const setup=JSON.parse(await download(page,testInfo,'setup-plan.json',page.getByRole('button',{name:'Export setup plan',exact:true})));
+ const policy=JSON.parse(await download(page,testInfo,'analyzer-policy.json',page.getByRole('button',{name:'Export analyzer policy',exact:true})));
+ expect(setup).toEqual(lowSetup);expect(policy).toEqual(resourcePolicy(lowSetup));
+ await page.locator('.system-advanced > summary').click();
+ const initial={capacity:await page.locator('.system-capacity').innerText(),metrics:await page.locator('.system-metrics').innerText(),
+  memory:await page.locator('.system-reading').allTextContents(),setup,policy};
+ await writeFile(testInfo.outputPath('system-observed.json'),JSON.stringify(initial,null,2));
+ await page.locator('.system-metrics').screenshot({path:testInfo.outputPath(`system-small-${width}.png`)});
+ await expect(page.locator('.system-metrics > div').filter({hasText:'Camera network payload'})).toContainText('0.01');
+ await expect(page.locator('.system-metrics > div').filter({hasText:'Recording write estimate'})).toContainText('0.001');
+ await expect(page.locator('.system-capacity-label')).toContainText('0.0001 TB');
+ await expect(page.locator('.system-reading').filter({hasText:'estimated workers'})).toContainText('0.02 GiB');
+ await expect(page.locator('.system-reading').filter({hasText:'modeled VRAM'})).toContainText('0.01 GiB');
+ await expect(page.locator('.system-warnings')).toContainText('exceed');
+ // The ordinary0.4Mbit/s case also keeps its entered/exported bitrate.
+ await page.getByLabel('Average Mbit/s per camera',{exact:true}).fill('0.4');
+ await expect(page.locator('.system-metrics > div').filter({hasText:'Camera network payload'})).toContainText('0.4');
+ const changed=JSON.parse(await download(page,testInfo,'setup-plan-04.json',page.getByRole('button',{name:'Export setup plan',exact:true})));
+ expect(changed.workload.mbps).toBe(.4);expect(changed.compute).toEqual(lowSetup.compute);
+ expect(await page.evaluate(()=>JSON.parse(localStorage.getItem('dvr.setup.v1')))).toEqual(lowSetup);
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+});
+
+for(const width of [1440,375])test(`Planning readouts retain the40mmgap, blind area and portable geometry at ${width}px`,async({page},testInfo)=>{
+ await page.setViewportSize({width,height:1000});await blockActivation(page);
+ await page.addInitScript(({key,raw})=>localStorage.setItem(key,raw),{key:LIBRARY_KEY,raw:JSON.stringify(createLibrary(plan))});
+ await page.goto('/#facility');
+ await expect(page.getByLabel('Facility name',{exact:true})).toHaveValue(plan.name);
+ await page.getByRole('button',{name:/^5 Coverage/}).click();
+ const metrics=page.getByRole('region',{name:'Estimated coverage metrics'}),row=metrics.getByRole('row',{name:/Boundary zone/});
+ await expect(row).toBeVisible();await expect(page.getByRole('button',{name:'Download installer sheet',exact:true})).toBeEnabled();
+ const exported=JSON.parse(await download(page,testInfo,'facility-plan.json',page.getByRole('button',{name:'Export plan',exact:true}).last()));
+ const installer=await download(page,testInfo,'installer-metric.html',page.getByRole('button',{name:'Download installer sheet',exact:true}));
+ expect(exported).toEqual(plan);expect(await savedPlan(page)).toEqual(plan);
+ await metrics.getByRole('button',{name:'Blind spots for Boundary zone',exact:true}).click();
+ await expect(metrics.getByRole('status')).toHaveText('Map shows uncovered areas in Boundary zone.');
+ await writeFile(testInfo.outputPath('planning-observed.json'),JSON.stringify({metrics:await metrics.innerText(),
+  mapLabels:await page.locator('.facility-dimension-label').allTextContents(),exported},null,2));
+ await metrics.screenshot({path:testInfo.outputPath(`planning-small-${width}.png`)});
+ await expect(row.getByRole('cell').first()).toHaveText('>99.9%');
+ await expect(metrics.getByRole('row',{name:/Handoff route/}).getByRole('cell').first()).toHaveText('>99.9%');
+ await expect(metrics.getByLabel('Route coverage details')).toHaveText('0.04 m of the route is outside the drawn coverage. Longest continuous gap: 0.04 m.');
+ await expect(page.locator('.facility-route-dimension').filter({hasText:/^0\.04 m$/})).toHaveCount(1);
+ expect(installer).toContain('ground 0.000 m–0.031 m');
+ await page.getByLabel('Measurement units',{exact:true}).selectOption('imperial');
+ await expect(metrics.getByLabel('Route coverage details')).toHaveText('0.1 ft of the route is outside the drawn coverage. Longest continuous gap: 0.1 ft.');
+ const imperial=await download(page,testInfo,'installer-imperial.html',page.getByRole('button',{name:'Download installer sheet',exact:true}));
+ expect(imperial).toContain('ground 0.0 ft–0.1 ft');
+ expect(await savedPlan(page)).toEqual(plan);expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+});

@@ -228,6 +228,15 @@ longer than a rule's `max_gap`. Timestamps use frame index / declared frame rate
 variable-rate recordings need separate timing qualification. Rules cannot
 establish what happened between sampled frames.
 
+Fractional sample times use the same bounded numerical comparison as the browser
+training counter. An interval equal to `max_gap` keeps the run; reaching dwell
+emits once. Tiny binary64 representation/subtraction residue can compare equal
+only when the interval has sufficient numerical resolution. Genuine larger gaps
+still reset the run. This does not measure physical-clock accuracy. See the
+[timing policy and generated checks](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/rule-time-boundaries-2026-11-12/README.md).
+The rule-engine source hash changes: preserve old results and re-analyze approved
+recordings into new outputs before current-source evaluation.
+
 Work is bounded by `--max-frames` (default 6,000), a 4K decoded image limit and
 1,000 events. Bound exhaustion produces `state: partial`. OpenCV's end-of-read
 signal alone cannot establish completion: when decoding ends before a frame/event

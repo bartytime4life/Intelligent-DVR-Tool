@@ -98,6 +98,13 @@ Existing optional fonts/maps retain their documented destinations.
 
 ## Contract and bounds
 
+Fractional sampling at a rule's maximum gap now keeps one presence run, and a
+sample reaching dwell can emit on time. A bounded numerical comparison removes
+representation residue without a fixed extra time allowance. Larger real gaps
+still reset the run. Preserve older review results; re-analyze the approved
+recording into new outputs for current-source evaluation, because the rule-engine
+fingerprint changed. See [timing checks and limits](verification/rule-time-boundaries-2026-11-12/README.md).
+
 `intelligent-dvr.recognition-review.v1` contains an unchanged v1 receipt and its
 frame trace. The parser checks source/model/labels/rules hashes, camera/profile,
 sampling/state agreement, event agreement, frame ordering/times/dimensions and

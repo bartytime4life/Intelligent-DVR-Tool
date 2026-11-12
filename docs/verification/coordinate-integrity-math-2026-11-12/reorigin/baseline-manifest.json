@@ -1,0 +1,35 @@
+{
+  "schema": "dvr.coordinate-integrity.baseline.v1",
+  "source_revision": "33fedd1bc364fc07cdb9331594aefef06bf52e6e",
+  "integration_checkpoint": "220064faad8b0423e0a666d99a02755834fa1e32",
+  "files": [
+    {
+      "path": "baseline-src/facility.mjs",
+      "sha256": "1ef907792316c57251d5609b89cce27db79bea8721eee8842cd00d8c5cfcc33b",
+      "bytes": 42965
+    },
+    {
+      "path": "baseline-src/facility-stairs.mjs",
+      "sha256": "4ce62cab36971dd528a4af8667168e6cc39f723e5aecbfc619e091106c05a544",
+      "bytes": 8004
+    },
+    {
+      "path": "baseline-src/facility-doorways.mjs",
+      "sha256": "dee737c4c8bdc7bce497ae7c4d82be0a76e45f2a132804f9b911cfc4d7c994fd",
+      "bytes": 10476
+    },
+    {
+      "path": "baseline-src/facility-windows.mjs",
+      "sha256": "84cc16197f284680b86edb77b8fd6d49bdc53bb11c316b87332774879cac7ff4",
+      "bytes": 7064
+    },
+    {
+      "path": "baseline-src/facility-zones.mjs",
+      "sha256": "14080041069bed6d8eb2ad48ec22c0e004db8b0feaa7c82eabea581898355248",
+      "bytes": 3602
+    }
+  ],
+  "original_oracle_sha256": "48bd8fc22bc66482994732d35054ead8dffb94e21f5ef42f0c918307fc768005",
+  "original_receipt_sha256": "916a7e9e2c16a9c5f80b0a7cb261673a92dadf39078c22e7c8590c1de47bb866",
+  "original_oracle_note": "Machine-specific original script remains local; replay.mjs uses the unchanged frozen receipt/input and independent affine formula without publishing home-directory paths."
+}

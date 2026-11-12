@@ -1,0 +1,119 @@
+{
+  "schema": "intelligent-dvr.timing-log-provenance.v1",
+  "logs": [
+    {
+      "path": "focused-baseline.log.gz",
+      "raw_sha256": "9109b21942f79b895bbdace6854cdad1b10309632b8f4261f9043e65b5b4faa5",
+      "published_decompressed_sha256": "b05abf03f93ae3dd692b09afaa70ea09d366a5c3e8689dc81751d55fc2fb97d7",
+      "redaction": "Candidate absolute repository path replaced with <candidate-repository>; other output unchanged."
+    },
+    {
+      "path": "focused-candidate.log.gz",
+      "raw_sha256": "637ad693971420b70a01476cd5d51065ecc3c7af270c41cfe91899ec8c2db4bd",
+      "published_decompressed_sha256": "637ad693971420b70a01476cd5d51065ecc3c7af270c41cfe91899ec8c2db4bd",
+      "redaction": "Candidate absolute repository path replaced with <candidate-repository>; other output unchanged."
+    },
+    {
+      "path": "native-baseline.log.gz",
+      "raw_sha256": "6f6ce054663c00490c45acd261f51cb143ea75d21ee5f51f3a25f2596fc69053",
+      "published_decompressed_sha256": "dd4d1d06577b415a8c26b9e29a067a4203f46c8a30cbeea8a8c3111ccd4303ed",
+      "redaction": "Candidate absolute repository path replaced with <candidate-repository>; other output unchanged."
+    },
+    {
+      "path": "native-candidate.log.gz",
+      "raw_sha256": "66813e0c970dbf0cb3fb80772fecfb6a2105ec14a735dbc852a24850985974a7",
+      "published_decompressed_sha256": "66813e0c970dbf0cb3fb80772fecfb6a2105ec14a735dbc852a24850985974a7",
+      "redaction": "Candidate absolute repository path replaced with <candidate-repository>; other output unchanged."
+    },
+    {
+      "path": "evaluation-refreshed.log.gz",
+      "raw_sha256": "ef0137d155e646cd240e95f82f6256bd3eccdfb776b796231119b1fec1240d43",
+      "published_decompressed_sha256": "ef0137d155e646cd240e95f82f6256bd3eccdfb776b796231119b1fec1240d43",
+      "redaction": "Candidate absolute repository path replaced with <candidate-repository>; other output unchanged."
+    },
+    {
+      "path": "python-pre-fixture-refresh.log.gz",
+      "raw_sha256": "d824ca29992114238cf76db79ead689dfbdebd347d78aca5c729f77aee6fef03",
+      "published_decompressed_sha256": "d6ccf726526ba1bb4deb3ecc2794cbffb22b2b11c5ff1b4c79b4c3376f052dfe",
+      "redaction": "Candidate absolute repository path replaced with <candidate-repository>; other output unchanged."
+    },
+    {
+      "path": "node-without-sockets.tap.gz",
+      "raw_sha256": "9e2cf984dd38619f54d027d7324738ed8877ceba8f611c529601a9b5e4a829d2",
+      "published_decompressed_sha256": "9e2cf984dd38619f54d027d7324738ed8877ceba8f611c529601a9b5e4a829d2",
+      "redaction": "Candidate absolute repository path replaced with <candidate-repository>; other output unchanged."
+    },
+    {
+      "path": "browser-full-initial.json.gz",
+      "raw_sha256": "533e3a3a91e10a8c1fab898c83ed4d3ef512f580ce866239a64a5f45a0988f74",
+      "published_decompressed_sha256": "6493d555e7b12493b86c7444ebab98797af48f0f651c666acb9c61f7208d2dab",
+      "redaction": "Repository/tool paths and ANSI codes normalized; five embedded generated AUDIT_JPEG payloads omitted from the full report/log only. Outcomes and timings retained."
+    },
+    {
+      "path": "map-draft-parent-original.json.gz",
+      "raw_sha256": "df163b45532b09ea41413c6e6d6c0c0a632652e5dc552f2bdfc8f3d035d44d77",
+      "published_decompressed_sha256": "5269d3f99f88fbb83b857a520b593c62cda6576511b9258847daa3562e2cf4ec",
+      "redaction": "Repository/tool paths and ANSI codes normalized; five embedded generated AUDIT_JPEG payloads omitted from the full report/log only. Outcomes and timings retained."
+    },
+    {
+      "path": "map-draft-candidate-original.json.gz",
+      "raw_sha256": "946949c4f5309920c480f88bff5bb8aa2c75606f203ab4ff23232c85553a6ba4",
+      "published_decompressed_sha256": "502985d014a63c1d07831087f20f282e40c9fc816b0f196c56a8df00ed6894be",
+      "redaction": "Repository/tool paths and ANSI codes normalized; five embedded generated AUDIT_JPEG payloads omitted from the full report/log only. Outcomes and timings retained."
+    },
+    {
+      "path": "map-draft-parent-ready.json.gz",
+      "raw_sha256": "ec091986fcbf9cc88a6d51580d49df95a7671091a69b2e3a2cff8bd997e8b64f",
+      "published_decompressed_sha256": "0c368df63076f45fa50a000e464c5a417d9a47c253f6afc7c811508a5d5a50b2",
+      "redaction": "Repository/tool paths and ANSI codes normalized; five embedded generated AUDIT_JPEG payloads omitted from the full report/log only. Outcomes and timings retained."
+    },
+    {
+      "path": "map-draft-candidate-ready.json.gz",
+      "raw_sha256": "a8f7dd340afe667192754cea85b49b7bd5fb3c200d92008f3592037800f19d2d",
+      "published_decompressed_sha256": "e85d2ccf0f8933fba911a2fb7e6416bec7d5015f5bc1fe33f3a808c53b29ea9b",
+      "redaction": "Repository/tool paths and ANSI codes normalized; five embedded generated AUDIT_JPEG payloads omitted from the full report/log only. Outcomes and timings retained."
+    },
+    {
+      "path": "browser-full-initial.log.gz",
+      "raw_sha256": "326e9812914eac5cd1ac8cd29730b16706302e0a137cec16639b70bdd4c94a38",
+      "published_decompressed_sha256": "87b6f58de7ff16133b2b2bfde9b40e56471543f002239d10fc1028d20b0a09b6",
+      "redaction": "Repository/tool paths and ANSI codes normalized; five embedded generated AUDIT_JPEG payloads omitted from the full report/log only. Outcomes and timings retained."
+    },
+    {
+      "path": "build.log.gz",
+      "raw_sha256": "e15aea94a52d53d2ac4bed918286354ed37b6d0eb7d5f01b80b2365c2e595628",
+      "published_decompressed_sha256": "e15aea94a52d53d2ac4bed918286354ed37b6d0eb7d5f01b80b2365c2e595628",
+      "redaction": "Repository/tool paths and ANSI codes normalized; five embedded generated AUDIT_JPEG payloads omitted from the full report/log only. Outcomes and timings retained."
+    },
+    {
+      "path": "node-socket-enabled.tap.gz",
+      "raw_sha256": "dec06ce094ae98eff3a0b322b7b828c423f43b98cf106351960ee018200fa163",
+      "published_decompressed_sha256": "dec06ce094ae98eff3a0b322b7b828c423f43b98cf106351960ee018200fa163",
+      "redaction": "Repository/tool paths and ANSI codes normalized; five embedded generated AUDIT_JPEG payloads omitted from the full report/log only. Outcomes and timings retained."
+    },
+    {
+      "path": "python-fixture-refreshed.log.gz",
+      "raw_sha256": "f2bd830a9d003c78bd3b4216286e836c603ea3f7329c7b400f8322ec239517d3",
+      "published_decompressed_sha256": "f2bd830a9d003c78bd3b4216286e836c603ea3f7329c7b400f8322ec239517d3",
+      "redaction": "Repository/tool paths and ANSI codes normalized; five embedded generated AUDIT_JPEG payloads omitted from the full report/log only. Outcomes and timings retained."
+    },
+    {
+      "path": "sites.tap.gz",
+      "raw_sha256": "64c0c654441f3af2855c8cc20d3dfc3599a39e790bf180a471d3b67ae50917da",
+      "published_decompressed_sha256": "64c0c654441f3af2855c8cc20d3dfc3599a39e790bf180a471d3b67ae50917da",
+      "redaction": "Repository/tool paths and ANSI codes normalized; five embedded generated AUDIT_JPEG payloads omitted from the full report/log only. Outcomes and timings retained."
+    },
+    {
+      "path": "map-draft-parent-ready.log.gz",
+      "raw_sha256": "feddf01e71d9a7656ab4d1e1c58396af92d82373bac0ca194d3a9d2fe4540b9c",
+      "published_decompressed_sha256": "44a3efb226db14e4353f5539f6dccde293499617192f4a48092435f3af291dcb",
+      "redaction": "Repository/tool paths and ANSI codes normalized; five embedded generated AUDIT_JPEG payloads omitted from the full report/log only. Outcomes and timings retained."
+    },
+    {
+      "path": "map-draft-candidate-ready.log.gz",
+      "raw_sha256": "42d1c443ea06f827d6a520531ec60076946e7fccdb3e9d5ddba7f9da7f0c4131",
+      "published_decompressed_sha256": "b18a66fa4513b5d5e0b81c1be6b62183de472096c00f378a1a5892ed22c2f6de",
+      "redaction": "Repository/tool paths and ANSI codes normalized; five embedded generated AUDIT_JPEG payloads omitted from the full report/log only. Outcomes and timings retained."
+    }
+  ]
+}

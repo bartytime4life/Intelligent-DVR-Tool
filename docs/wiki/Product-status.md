@@ -1,5 +1,45 @@
 # Product status and evidence
 
+**Current branch proposal under review:** [integrated planning mathematics and coordinate integrity](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/coordinate-integrity-math-2026-11-12/README.md).
+This isolated source combines the visible-ground proposal [#122](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/122)
+(which integrates pixel-density #119 and zone-area #121), projective calibration
+[#117](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/117), and image
+diagnostics [#120](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/120).
+Original proposal receipts retain their exact source revisions.
+
+The current follow-up repairs fractional presence-rule dwell/gap comparisons in
+the local engine and browser training counter. It changes the rule-engine source
+hash, so older traces need re-analysis for current evaluation. The
+[timing record](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/rule-time-boundaries-2026-11-12/README.md) retains
+strict baseline failures, independent rational checks and a generated CPU
+analyzer/review/evaluation test. [Planning readouts](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/planning-readouts-2026-11-12/README.md)
+also preserve small positive resource/distance values and avoid displaying
+incomplete coverage as 100%; underlying numeric planning values are unchanged.
+
+Two further reproduced fixes preserve rotated rooms when **Save site → Keep
+buildings at their map positions** changes the local grid, and refuse calibrated
+ruler/check points outside the closed convex reference boundary. Calibration
+exports now identify `normalized-householder-dlt-v3`; the JSON schema is unchanged.
+The Sobel method remains `srgb-luma-sobel-max-v2` with unsupported regions reported
+as unavailable rather than measured zero.
+
+Map shading, DORI contours, zone areas, route distance, rehearsal and installer
+SVG share one current-plan visible-ground snapshot. Pending/failed views withhold
+conclusions and offer retry; installer export requires a saved plan and complete
+views. Save/Discard/Undo and portable JSON remain available under their existing
+guards. No new controls or automatic camera, recording or inference starts are added.
+
+This is a locally integrated proposal. Local checks, hosted CI, hosted PR merge,
+installed-machine state, Wiki publication, deployment and physical qualification
+are distinct. The [integration record](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/coordinate-integrity-math-2026-11-12/README.md)
+binds current source, independent replays, documentation inventory and checks.
+
+**Main readback November 12, 2026:** `63b06ba2`, the documentation alignment
+in [PR #116](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/116).
+The source capabilities below remain the merged baseline. The new
+[integration record](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/coordinate-integrity-math-2026-11-12/README.md)
+separately binds this branch's checks and proposal CI readback.
+
 **Merged source baseline verified November 12, 2026 (America/Chicago):**
 [PR #114](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/114) merged
 as [`66e6dd1c`](https://github.com/bartytime4life/Intelligent-DVR-Tool/commit/66e6dd1cde9913e6c4f03fb94733e83dc3070c93).
@@ -267,7 +307,7 @@ saves migrate without deleting the original. See [saved facilities](https://gith
 | Live AI and tracking | **Start AI** on a Monitor tile: local YOLOX-S detection (CUDA preferred when supported, visible CPU fallback and an explicit CPU override) with a motion gate, ByteTrack-style short-lived tracks, the existing rule engine and explicit **Send to Events**; at most two cameras, one frame in flight, 15-minute sessions. Recording analysis adds the same tracks to traces and Recognition; [guide](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Live-AI-and-tracking) · [tracker](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/edge/tracking.py) · [live worker](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/edge/live_worker.py) | Unit, protocol and fixture-model checks, a Chromium synthetic-camera browser test, and a development run of the actual pinned model on one local owner clip (about 80–90 ms per frame on an Apple M4 CPU). The [November 2 live GPU record](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/live-gpu-2026-11-02/README.md) adds deterministic selection/recovery tests and actual CPU execution/fallback evidence; GPU timing/parity could not be measured in that session. The [November 3 GPU-default record](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/gpu-default-2026-11-03/README.md) separately records controlled RTX 5080 execution. Current-source synthetic tracker checks do not qualify physical-camera tracking quality, other OS/GPU combinations or multi-camera capacity. Track numbers are not identities. |
 | Guided training | Named camera views can accumulate up to 50 confirmed sessions in this browser. Compatible calibration sessions inform threshold suggestions equally; saved recordings guard against regressions. A separate 20-second fresh check, sample counts, JSON receipt and explicit Recognition rule selection remain required. [Guide](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Guided-training) | [Cumulative-session verification](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/cumulative-training-2026-11-02/README.md) covers generated-camera persistence, pooling and apply gating. Threshold tuning does not retrain detector weights or guarantee accuracy gains. Older summary-only history is preserved separately; representative detection accuracy needs independently labeled recordings. |
 | Enrolled-person suggestions | Consent-gated local templates, baseline checks, explicit matching within a local job's person boxes, Confirm and Not this person; [guide](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Person-enrollment) | Templates stay in the local service; no face embeddings in the browser, automatic identity decisions or automatic Events/export handoff; accuracy and anti-spoofing remain unqualified |
-| Facility planning | Map-first task selector, buildings/floors/rooms/labels, camera aim, zone-grid estimates, route covered/overlap distance and longest blind gap, simulated rehearsal, local image diagnostics, experimental ground-plane calibration, export and Undo; [guide](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Facility-planning) | Dated [November 1 interface screenshot](https://raw.githubusercontent.com/wiki/bartytime4life/Intelligent-DVR-Tool/docs/media/guide/facility.jpg), [route geometry checks](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/route-coverage-math-2026-11-12/README.md), [pixel limits](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Image-diagnostics) and [calibration constraints](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Planar-calibration). Coverage and distances require real marker/optical qualification; simulated handoffs remain unverified. |
+| Facility planning | Map-first task selector, buildings/floors/rooms/labels, camera aim, zone coverage estimates, route covered/overlap distance and longest blind gap, simulated rehearsal, local image diagnostics, experimental ground-plane calibration, export and Undo; [guide](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Facility-planning) | Dated [November 1 interface screenshot](https://raw.githubusercontent.com/wiki/bartytime4life/Intelligent-DVR-Tool/docs/media/guide/facility.jpg), [route geometry checks](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/route-coverage-math-2026-11-12/README.md), [pixel limits](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Image-diagnostics) and [calibration constraints](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Planar-calibration). Coverage and distances require real marker/optical qualification; simulated handoffs remain unverified. |
 | Find and draft a site | Submitted Photon search, GPS/numeric origin, map-pin suggestion, rectangular/custom polygon area, selectable services, offline JSON file/paste; opt-in Streets (OSM) and Aerial (USGS/NAIP, contiguous U.S.) map layers for tracing, with map preview of a suggested site; one-click **Find mapped buildings** with click-to-include/exclude drafts on the map; [service source](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/src/facility-services.mjs) · [map layers](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Facility-planning#real-map-layer) | [Six Chromium scenarios](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/facility-2026-10-27/README.md) use recorded geometry/mocked services; map-layer and one-click draft scenarios use stand-in pictures and the recorded Eppan extract. Public Overpass endpoints timed out in live testing on 2026-11-01. External availability, real GPS, imagery positional accuracy and novice completion remain unqualified. |
 | OSM geometry | Facility v2, complete simple ways and supported outer/inner relations, raised bases and independent parts; [adapter](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/src/facility-starter.mjs) | Review and provenance survive apply/export. Courtyards/bases survive edits, rendering and coverage. Overlapping parts/envelopes and invalid/incomplete geometry remain excluded. [Limits](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Facility-setup-reliability). |
 | System controls | Basic storage/browser settings first, advanced planning on demand, preserved drafts, planning arithmetic, applied browser limits, setup/policy exports and host-snapshot import; [control contract](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Resource-controls) | Browser controls and analyzer thread/frame caps have explicit scopes. RAM/VRAM/power/storage estimates are not OS quotas or activated hardware. |

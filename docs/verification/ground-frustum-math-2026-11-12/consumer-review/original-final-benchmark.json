@@ -1,0 +1,60 @@
+{
+  "baselineSourceSha256": "c2f8e13a86e1a0b4e15d92fa2e61a0585d143576dcaa48cda2c38aad6fcefb53",
+  "candidateSourceSha256": "9207e0aeab51e2578cab9f3f82f28aa0fcd6cd3f1714a2bac5350a451587cf36",
+  "inputsSha256": "57a234a10125544cdfe2a148393bc16c2b52124a675d2b470f2e616fb7e4d315",
+  "results": [
+    {
+      "kind": "coincident",
+      "cameras": 500,
+      "samples": 101,
+      "baseline": {
+        "geometryMs": 2.579663,
+        "rehearsalMs": 2466.345999,
+        "warmMs": 2426.0913549999996,
+        "estimated": true,
+        "vertices": 257,
+        "observations": 50500,
+        "outputSha256": "ed5f4042534a1225be76d1db5784f57179b6036a9479748a45385b1d020ad53f",
+        "repeatSame": true
+      },
+      "candidate": {
+        "geometryMs": 1.555594000000383,
+        "rehearsalMs": 2.229366000000482,
+        "warmMs": 1.663315999999213,
+        "estimated": true,
+        "vertices": 257,
+        "observations": 50500,
+        "outputSha256": "ed5f4042534a1225be76d1db5784f57179b6036a9479748a45385b1d020ad53f",
+        "repeatSame": true
+      },
+      "exactOutputMatch": true
+    },
+    {
+      "kind": "distinct-bearing",
+      "cameras": 500,
+      "samples": 101,
+      "baseline": {
+        "geometryMs": 74.20490000000063,
+        "rehearsalMs": 3809.4681549999996,
+        "warmMs": 3787.5262889999995,
+        "estimated": true,
+        "vertices": 257,
+        "observations": 49502,
+        "outputSha256": "f8ae88cb8d532d570d12d0e6c02f416097ebed4c22bd5da71d487c4d8a16b010",
+        "repeatSame": true
+      },
+      "candidate": {
+        "geometryMs": 60.44369899999947,
+        "rehearsalMs": 147.85721299999932,
+        "warmMs": 20.84762700000101,
+        "estimated": true,
+        "vertices": 257,
+        "observations": 49502,
+        "outputSha256": "f8ae88cb8d532d570d12d0e6c02f416097ebed4c22bd5da71d487c4d8a16b010",
+        "repeatSame": true
+      },
+      "exactOutputMatch": true
+    }
+  ],
+  "limits": "Single-machine generated metadata benchmark, explicit101samples, no footage/inference. Cold query includes geometry preparation; warm query reuses only immutable prepared geometry. Timing is diagnostic, not an admission or hardware/camera capacity claim."
+}

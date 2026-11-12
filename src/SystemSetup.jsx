@@ -1,10 +1,11 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Cpu, HardDrives, Memory, Lightning, DownloadSimple, UploadSimple, Check, ArrowCounterClockwise, Desktop, WarningCircle, GraphicsCard } from "@phosphor-icons/react";
 import { DEFAULT_SETUP, GPU_PRESETS, GiB, calculateSetup, parseHostSnapshot, parseSetup, resourcePolicy, validateSetup } from "./resources.mjs";
+import {formatReadoutNumber} from './readout-format.mjs';
 import "./system.css";
 
 const DOCS = "https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/";
-const n = (x, digits = 1) => x.toLocaleString(undefined, { maximumFractionDigits: digits });
+const n = (value, digits = 1) => formatReadoutNumber(value,{digits});
 function NumberField({ label, value, min, max, step = 1, change }) {
   return <label className="system-field"><span>{label}</span><input type="number" min={min} max={max} step={step}
     value={value} onChange={e => change(e.target.value === "" ? "" : Number(e.target.value))} /></label>;

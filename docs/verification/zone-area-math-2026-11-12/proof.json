@@ -1,0 +1,18 @@
+{
+  "method": "exact-horizontal-line-arrangement",
+  "input_sha256": "1cc1553b86d844df042fec7752afefb9bccd3fcd57e43a6bbc75d13e375b1089",
+  "statements": [
+    "All vertex and edge-intersection ordinates partition the plane into slabs.",
+    "Crossing order is fixed within each open slab; line-intersection endpoints are affine functions of height.",
+    "Unions, differences and distinct-camera thresholds therefore have affine cross-section lengths within a slab.",
+    "Rational midpoint integration gives exact area for the represented polygon coordinates.",
+    "A second arrangement incorporating returned boundaries integrates full geometric symmetric-difference area.",
+    "Convex half-plane intersections plus inclusion-exclusion independently agree on55cases and220scalar equalities."
+  ],
+  "coverage_merge": "U=U_A union U_B",
+  "overlap_merge": "O=O_A union O_B union(U_A intersection U_B)",
+  "precondition": "Child leaves partition DISTINCT camera IDs; fragments with one ID are unioned first.",
+  "guard_clipping": "For subjectZ inside guardB, threshold sets onZ are unchanged when each camera is intersected withB.",
+  "kernel_or_grid_sampling": false,
+  "source_qualifications": "Generated planning geometry only; no physical visibility or hardware-capacity claim."
+}

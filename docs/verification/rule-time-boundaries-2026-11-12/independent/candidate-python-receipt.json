@@ -1,0 +1,46 @@
+{
+  "schema": "dvr-rule-time-oracle-receipt-v1",
+  "baseline_head": "9e88a57b377ca53a991519cae9bdbbcf25cb7924",
+  "source_sha256": "6151670cdf8c9837c274150b51589e44043993fdb576b9706ba1ac21d39f10da",
+  "inputs_sha256": "fb6910432ee1e83a8a87a2aa971b3b51a16017f8fa2fa18c9722014ff2104a9b",
+  "compressed_inputs_sha256": "f76dc4e6d29595377f027be602f9a73550dba12b9f7bdb8e32f4de6121830cb0",
+  "checker_sha256": "10dc76adb8a5a36bc3a08d144444ea10aa400220b96a48b6cef836d4baf40272",
+  "cases": 1579,
+  "invalid_cases": 9,
+  "samples": 54614,
+  "domains": {
+    "rational-cadence": 1552,
+    "exact-float": 27
+  },
+  "assertions": 1597,
+  "failure_count": 0,
+  "failures": [],
+  "ambiguity_diagnostics": [
+    {
+      "gap": "1/5",
+      "id": "same-binary64-endpoints-different-real-gaps",
+      "pairs": [
+        [
+          "180143985094819859/10",
+          "180143985094819861/10"
+        ],
+        [
+          "18014398509481984",
+          "18014398509481988"
+        ]
+      ],
+      "real_gaps": [
+        "1/5",
+        "4"
+      ],
+      "same_float_endpoints": true
+    }
+  ],
+  "source_and_inputs_unchanged": true,
+  "limits": [
+    "Generated timestamps and a constant normalized person detection; no media or inference.",
+    "Rational-cadence expectations use exact arithmetic before binary64 conversion.",
+    "Exact-float stress cases use exact binary64 endpoint values, not invented physical timing.",
+    "Ambiguity diagnostics are not pass/fail physical-clock claims."
+  ]
+}

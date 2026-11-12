@@ -8,6 +8,25 @@ def finite(value):
     return isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(value)
 
 
+def _elapsed_relation(now, then, boundary):
+    """Compare a duration with a boundary, coalescing only bounded roundoff.
+
+    Division-derived timestamps and decimal rule fields are rounded before
+    subtraction. Full ULPs conservatively cover their representation and the
+    subtraction's rounding. This is a numerical policy, not clock uncertainty.
+    Require at least half a binary64 significand of relative resolution; coarse
+    or extreme clocks retain strict comparisons instead of forgiving real gaps.
+    Keep the same arithmetic and guard as src/training.mjs.
+    """
+    elapsed = now - then
+    roundoff = math.ulp(now) + math.ulp(then) + math.ulp(boundary) + math.ulp(elapsed)
+    if (elapsed == boundary or
+            boundary > 0 and roundoff <= boundary * 2**-26 and
+            abs(elapsed - boundary) <= roundoff):
+        return 0
+    return -1 if elapsed < boundary else 1
+
+
 @dataclass(frozen=True)
 class Rule:
     name: str
@@ -76,11 +95,11 @@ class RuleEngine:
             if not matches:
                 continue  # The next match decides whether the gap ended the run.
             state = self.states.get(rule.name)
-            if state is None or seconds-state['last'] > rule.max_gap:
+            if state is None or _elapsed_relation(seconds, state['last'], rule.max_gap) > 0:
                 state = {'start': seconds, 'last': seconds, 'emitted': False}
                 self.states[rule.name] = state
             state['last'] = seconds
-            if not state['emitted'] and seconds-state['start'] >= rule.dwell:
+            if not state['emitted'] and _elapsed_relation(seconds, state['start'], rule.dwell) >= 0:
                 score = max(d['score'] for d in matches)
                 fingerprint = f'{self.run_id}|{self.camera}|{rule!r}|{state["start"]:.6f}|{seconds:.6f}'
                 events.append({'id': hashlib.sha256(fingerprint.encode()).hexdigest()[:32],

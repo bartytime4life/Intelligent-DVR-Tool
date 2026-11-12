@@ -1,0 +1,101 @@
+{
+  "metrics": "Estimated coverage\nArea\tCoverage\n≥1 camera\n\tOverlap\n≥2 cameras\n\t\nBoundary zone\nRestricted\n10.0 m² planned area\n\t100.0%\t0.0%\tBlind spots\nHandoff route\n120.0 m path length\n\t100.0%\t0.0%\t\n\nMap shows uncovered areas in Boundary zone.\n\n0.0 m of the route is outside the drawn coverage. Longest continuous gap: 0.0 m.\n\nZone percentages measure area inside the drawn ground coverage. Overlap requires two different cameras. Routes measure path length for 1 included camera. Indoor and level zones are not estimated because coverage is ground-plane only. Planning estimate; verify on site.",
+  "mapLabels": [
+    "Route 120.0 m",
+    "0.0 m",
+    "120.0 m"
+  ],
+  "exported": {
+    "schema": "intelligent-dvr.facility.v6",
+    "name": "Small planning readouts",
+    "origin": [
+      -98,
+      38.5
+    ],
+    "buildings": [],
+    "cameras": [
+      {
+        "id": "c",
+        "name": "Boundary camera",
+        "x": 0,
+        "y": 0,
+        "z": 4,
+        "bearing": 45,
+        "tilt": 0,
+        "hfov": 90,
+        "vfov": 60,
+        "range": 300,
+        "enabled": true
+      },
+      {
+        "id": "steep",
+        "name": "Steep camera",
+        "x": -10,
+        "y": -10,
+        "z": 0.5,
+        "bearing": 0,
+        "tilt": 89,
+        "hfov": 90,
+        "vfov": 5,
+        "range": 1,
+        "enabled": false,
+        "pixelsWide": 1920
+      }
+    ],
+    "rooms": [],
+    "doorways": [],
+    "windows": [],
+    "labels": [],
+    "openings": [],
+    "stairs": [],
+    "paths": [],
+    "zones": [
+      {
+        "id": "z",
+        "name": "Boundary zone",
+        "type": "restricted",
+        "footprint": [
+          [
+            10,
+            -0.0001
+          ],
+          [
+            20,
+            -0.0001
+          ],
+          [
+            20,
+            0.9999
+          ],
+          [
+            10,
+            0.9999
+          ],
+          [
+            10,
+            -0.0001
+          ]
+        ],
+        "enabled": true,
+        "expectedClasses": [
+          "person"
+        ],
+        "dwellSeconds": 2
+      }
+    ],
+    "route": [
+      [
+        -0.04,
+        20
+      ],
+      [
+        0,
+        20
+      ],
+      [
+        120,
+        20
+      ]
+    ]
+  }
+}

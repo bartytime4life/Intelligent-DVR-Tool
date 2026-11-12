@@ -1,0 +1,73 @@
+{
+  "cases": 2,
+  "failures": [],
+  "baselineSourceSha256": "c2f8e13a86e1a0b4e15d92fa2e61a0585d143576dcaa48cda2c38aad6fcefb53",
+  "candidateSourceSha256": "9207e0aeab51e2578cab9f3f82f28aa0fcd6cd3f1714a2bac5350a451587cf36",
+  "inputsSha256": "57a234a10125544cdfe2a148393bc16c2b52124a675d2b470f2e616fb7e4d315",
+  "scriptSha256": "94354de8402a600fc96ca87c8106bd90b7390ef0a850af1989b0afa90ff90a6b",
+  "sources": {
+    "src/facility-visibility.mjs": "9207e0aeab51e2578cab9f3f82f28aa0fcd6cd3f1714a2bac5350a451587cf36",
+    "src/facility-polygon.mjs": "e8ac82a5ad920a1a74b98e59f971bacdd4db659da72207ebbdd175fba32ef495",
+    "src/facility-visibility-protocol.mjs": "f15f3180f3bc40bcef62aafba9fa725ed1e3b49a4195daab85032cd2d5c29c43",
+    "src/facility.mjs": "1ef907792316c57251d5609b89cce27db79bea8721eee8842cd00d8c5cfcc33b",
+    "node_modules/polyclip-ts/dist/esm/index.js": "270c291bb9cf124a91bd81692fa38973b00337a4a9b3d563b0b295adb1182f8d",
+    "node_modules/bignumber.js/bignumber.mjs": "476d669a2d8bcc169bce832bdb0e5a531b3c5bac127e94422a56bbff65f6d2b0"
+  },
+  "sourceUnchanged": true,
+  "results": [
+    {
+      "kind": "coincident",
+      "cameras": 500,
+      "samples": 101,
+      "baseline": {
+        "geometryMs": 2.638211000000002,
+        "rehearsalMs": 2422.6004780000003,
+        "warmMs": 2390.4274210000003,
+        "estimated": true,
+        "vertices": 257,
+        "observations": 50500,
+        "outputSha256": "ed5f4042534a1225be76d1db5784f57179b6036a9479748a45385b1d020ad53f",
+        "repeatSame": true
+      },
+      "candidate": {
+        "geometryMs": 1.9045200000000477,
+        "rehearsalMs": 3.5015949999997247,
+        "warmMs": 2.7343510000000606,
+        "estimated": true,
+        "vertices": 257,
+        "observations": 50500,
+        "outputSha256": "ed5f4042534a1225be76d1db5784f57179b6036a9479748a45385b1d020ad53f",
+        "repeatSame": true
+      },
+      "exactOutputMatch": true
+    },
+    {
+      "kind": "distinct-bearing",
+      "cameras": 500,
+      "samples": 101,
+      "baseline": {
+        "geometryMs": 95.32078399999955,
+        "rehearsalMs": 3578.059892,
+        "warmMs": 3865.8017579999996,
+        "estimated": true,
+        "vertices": 257,
+        "observations": 49502,
+        "outputSha256": "f8ae88cb8d532d570d12d0e6c02f416097ebed4c22bd5da71d487c4d8a16b010",
+        "repeatSame": true
+      },
+      "candidate": {
+        "geometryMs": 71.5939870000002,
+        "rehearsalMs": 133.90230900000097,
+        "warmMs": 17.82912700000088,
+        "estimated": true,
+        "vertices": 257,
+        "observations": 49502,
+        "outputSha256": "f8ae88cb8d532d570d12d0e6c02f416097ebed4c22bd5da71d487c4d8a16b010",
+        "repeatSame": true
+      },
+      "exactOutputMatch": true
+    }
+  ],
+  "limits": "Single-machine generated metadata benchmark, explicit 101 samples, no footage/inference. First query includes geometry preparation; warm query reuses immutable prepared geometry. Timing is diagnostic, not an admission, latency guarantee or hardware/camera capacity claim.",
+  "replaySupportSha256": "e7797a85c5672e525bd6d2752f2f1e072b714c427821c6cb863233065cce9c5e"
+}

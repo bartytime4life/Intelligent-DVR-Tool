@@ -226,8 +226,22 @@ coverage on the Facility map is a different kind of geometry.
    divisions. Preview changes before saving; **Undo edit** reverses a saved edit.
 4. Place a doorway on a shared wall, a window on an outside wall, or a stair
    reservation between levels. Openings, elevations and dimensions stay editable.
-5. Place and aim planned cameras. Treat coverage, routes and planning measurements
-   as estimates. Export the named plan and collection backup when finished.
+5. Place and aim planned cameras. Release a drag to recalculate its estimated
+   ground view. **Updating estimated views** hides outdated geometry. If a view
+   fails, choose **Try views again**; incomplete views withhold totals and handoff
+   proposals. Leaving camera editing or changing the plan, camera, view or floor cancels an
+   unfinished drag; start a fresh one. Undo that changes the plan also cancels it.
+6. Save or discard edits and wait for complete saved-plan views before choosing
+   **Download installer sheet**. Named JSON plans and collection backups remain
+   available while geometry is pending after existing Save/Discard guards are
+   satisfied. Coverage and rehearsal remain estimates.
+
+These visibility/recovery changes belong to the [current integrated proposal](verification/coordinate-integrity-math-2026-11-12/README.md);
+[product status](product-status.md) identifies the merged baseline.
+
+Coverage just below complete can read **>99.9%**; a small positive result can
+read **<0.1%**. Small uncovered distances remain visible instead of rounding to
+zero. These are [planning readouts](facility-builder.md), not measured visibility.
 
 [Full facility workflow](facility-builder.md) · [Maps and shapes](map-measurements-and-shapes.md)
 · [Saved facilities](saved-facilities.md).
@@ -238,6 +252,9 @@ coverage on the Facility map is a different kind of geometry.
 
 Facility's image diagnostics freeze a deliberately chosen local frame. Inspect
 the histogram, exposure/detail proxies, A/B difference and sampled-pixel ruler.
+An unavailable edge result needs a region at least 3 × 3 sampled pixels; the
+selected-area card shows the effective dimensions. Measured zero has a positive
+interior-pixel count. Keep the v2 metric-export scale separate from older files.
 For ground-plane calibration, enter measured reference markers, reserve
 independent check markers and review the error against your chosen limits.
 
@@ -261,6 +278,10 @@ leave warning to retain an unapplied draft.
 **Apply workspace limits** applies supported browser limits; **Export analyzer
 policy** is a separate action for supported offline analyzer controls. Use
 **Export setup plan** to preserve the whole plan for future review.
+
+Small positive estimates retain enough digits to stay visible. More displayed
+digits do not add measurement accuracy. Saved/exported numeric values keep their
+original precision; see [readout examples](verification/planning-readouts-2026-11-12/README.md).
 
 The page does not provision drives, start recording, activate a GPU or benchmark
 your machine. Test one authorized source before advancing toward 5/25/50/100.

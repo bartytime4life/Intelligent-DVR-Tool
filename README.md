@@ -14,6 +14,17 @@ A local-first camera-analysis and facility-planning project from **BARTA AI Solu
 
 *The cover is an ImageGen illustration, not an application screenshot. The screenshots below are actual software with a clean local test session. [Image provenance](docs/media/guide/README.md).*
 
+**Current branch proposal:** [verified planning mathematics and coordinate integrity](docs/verification/coordinate-integrity-math-2026-11-12/README.md)
+combines visible-ground geometry, pixel density, zone areas, projective calibration
+and image diagnostics. Site corrections preserve shared room walls when keeping
+map positions; the calibrated ruler refuses points outside its reference boundary.
+The [timing follow-up](docs/verification/rule-time-boundaries-2026-11-12/README.md)
+repairs fractional dwell/gap comparisons, while
+[planning readouts](docs/verification/planning-readouts-2026-11-12/README.md)
+keep small positive values and incomplete coverage visible.
+[Product status](docs/product-status.md) separates this tested proposal from merged
+source, installed software and physical-camera qualification.
+
 ## Choose a launch path
 
 | Your computer / task | Open this guide | Local address |

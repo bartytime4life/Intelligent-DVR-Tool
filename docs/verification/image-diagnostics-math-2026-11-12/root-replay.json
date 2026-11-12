@@ -1,0 +1,11 @@
+{
+  "baseline_exit": 1,
+  "baseline_receipt_equal": true,
+  "candidate_exit": 0,
+  "candidate_receipt_equal": true,
+  "baseline_failures": 3031,
+  "candidate_failures": 0,
+  "cases": 611,
+  "assertions_per_run": 10472,
+  "decompressed_corpus_sha256": "8bd19566065866c46fbbfb5ba185b8b54935ea58397a9d0c82d6a5397f987591"
+}

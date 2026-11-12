@@ -1,0 +1,79 @@
+{
+  "schema": "intelligent-dvr.facility.v6",
+  "name": "Generated area verification",
+  "origin": [
+    -98,
+    38.5
+  ],
+  "buildings": [],
+  "cameras": [
+    {
+      "id": "C1",
+      "name": "First planned view",
+      "x": 0,
+      "y": 0,
+      "z": 4,
+      "bearing": 45,
+      "tilt": 30,
+      "hfov": 90,
+      "vfov": 60,
+      "range": 50,
+      "enabled": true
+    },
+    {
+      "id": "C2",
+      "name": "Second planned view",
+      "x": 0,
+      "y": 0.8,
+      "z": 4,
+      "bearing": 45,
+      "tilt": 30,
+      "hfov": 90,
+      "vfov": 60,
+      "range": 50,
+      "enabled": true
+    }
+  ],
+  "rooms": [],
+  "doorways": [],
+  "windows": [],
+  "labels": [],
+  "openings": [],
+  "stairs": [],
+  "paths": [],
+  "zones": [
+    {
+      "id": "edge",
+      "name": "Boundary strip",
+      "type": "restricted",
+      "footprint": [
+        [
+          10,
+          -0.1
+        ],
+        [
+          20,
+          -0.1
+        ],
+        [
+          20,
+          0.9
+        ],
+        [
+          10,
+          0.9
+        ],
+        [
+          10,
+          -0.1
+        ]
+      ],
+      "enabled": true,
+      "expectedClasses": [
+        "person"
+      ],
+      "dwellSeconds": 2
+    }
+  ],
+  "route": []
+}

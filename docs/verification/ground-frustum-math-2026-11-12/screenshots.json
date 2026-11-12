@@ -1,0 +1,87 @@
+{
+  "schema": "intelligent-dvr.ground-visibility.screenshots.v1",
+  "source_manifest": "source-manifest.json",
+  "assets": [
+    {
+      "path": "browser/finite-low-wall-1440.png",
+      "sha256": "558f1974f04ead122cca52e78b2a135bfed5e180d1c224eda81beb3543b54041",
+      "bytes": 48649,
+      "width": 781,
+      "height": 809,
+      "kind": "actual-browser-screenshot",
+      "input": "generated facility plan, no camera footage",
+      "browser": "Chromium 141.0.7390.37 / Playwright 1.56.1"
+    },
+    {
+      "path": "browser/off-axis-image-corner-1440.png",
+      "sha256": "f5890b41e45649e0f99f810e9f622e1a5de47740723ae4307619d26af48b7e5b",
+      "bytes": 45986,
+      "width": 781,
+      "height": 809,
+      "kind": "actual-browser-screenshot",
+      "input": "generated facility plan, no camera footage",
+      "browser": "Chromium 141.0.7390.37 / Playwright 1.56.1"
+    },
+    {
+      "path": "browser/nadir-view-behind-bearing-375.png",
+      "sha256": "6e6a5c0cce3541ceea4ca5117c967ebb92c9277b9f6805f55c8b1c45432211f3",
+      "bytes": 24589,
+      "width": 315,
+      "height": 480,
+      "kind": "actual-browser-screenshot",
+      "input": "generated facility plan, no camera footage",
+      "browser": "Chromium 141.0.7390.37 / Playwright 1.56.1"
+    },
+    {
+      "path": "browser/raised-wall-375.png",
+      "sha256": "aca41dafa1755a9af8f2e9cf8bdf80b3b895b5c625690b908483ea4706d00e41",
+      "bytes": 32467,
+      "width": 315,
+      "height": 480,
+      "kind": "actual-browser-screenshot",
+      "input": "generated facility plan, no camera footage",
+      "browser": "Chromium 141.0.7390.37 / Playwright 1.56.1"
+    },
+    {
+      "path": "browser/visibility-unavailable-375.png",
+      "sha256": "342f2399b80b3f3b668dc2b6b2627a67b92772877374993c7bd047b241d21866",
+      "bytes": 31926,
+      "width": 315,
+      "height": 480,
+      "kind": "actual-browser-screenshot",
+      "input": "generated facility plan, no camera footage",
+      "browser": "Chromium 141.0.7390.37 / Playwright 1.56.1"
+    },
+    {
+      "path": "browser/handoff-unavailable-375.png",
+      "sha256": "85786cae03f9c970ad42b413fe261f60a7b2962b7faae576a6b1b5767aad5bf6",
+      "bytes": 32362,
+      "width": 315,
+      "height": 480,
+      "kind": "actual-browser-screenshot",
+      "input": "generated facility plan, no camera footage",
+      "browser": "Chromium 141.0.7390.37 / Playwright 1.56.1"
+    },
+    {
+      "path": "browser/visibility-updating-1440.png",
+      "sha256": "cb61d54acaec3520cc644ca0cdb8f75f1bcce41beaf87501de73e7276034a31f",
+      "bytes": 45721,
+      "width": 781,
+      "height": 809,
+      "kind": "actual-browser-screenshot",
+      "input": "generated facility plan, no camera footage",
+      "browser": "Chromium 141.0.7390.37 / Playwright 1.56.1"
+    },
+    {
+      "path": "manual-preview.jpg",
+      "sha256": "8198118917751e2138363ee1657de0ea1f9c6b12d555e1fabd07d7f30e931236",
+      "bytes": 122946,
+      "width": 1265,
+      "height": 908,
+      "kind": "actual-built-browser-preview",
+      "input": "generated low-wall facility imported as separate plan; Grid only, no camera connected",
+      "context": "Built preview port4320, direct CUA review; transient automation timeouts resolved by reading the visible state, import confirmed complete.",
+      "format": "JPEG"
+    }
+  ]
+}

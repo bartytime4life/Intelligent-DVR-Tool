@@ -1,0 +1,66 @@
+{
+  "read_at": "2026-11-12 11:36:17 UTC",
+  "parent_proposal_head": "6ce57a5180655693f7d3d6d2e91d8c68693f1961",
+  "base_main": "63b06ba2aab3adcffc38f52310b55969fb538afe",
+  "pr": {
+    "number": 122,
+    "draft": true,
+    "merged": false,
+    "state": "open",
+    "head": "codex/ground-frustum-math-20261112",
+    "base": "main"
+  },
+  "workflow_runs": [
+    {
+      "id": 43205263396,
+      "name": "Cross-platform checks",
+      "status": "completed",
+      "conclusion": "success",
+      "run_number": 624,
+      "jobs_url": "https://api.github.com/repos/bartytime4life/Intelligent-DVR-Tool/actions/runs/43205263396/jobs",
+      "logs_url": "https://api.github.com/repos/bartytime4life/Intelligent-DVR-Tool/actions/runs/43205263396/logs",
+      "workflow_id": 395543320
+    },
+    {
+      "id": 43205263400,
+      "name": "Mac source install",
+      "status": "completed",
+      "conclusion": "success",
+      "run_number": 238,
+      "jobs_url": "https://api.github.com/repos/bartytime4life/Intelligent-DVR-Tool/actions/runs/43205263400/jobs",
+      "logs_url": "https://api.github.com/repos/bartytime4life/Intelligent-DVR-Tool/actions/runs/43205263400/logs",
+      "workflow_id": 403855532
+    },
+    {
+      "id": 43205263776,
+      "name": "Facility browser regression",
+      "status": "completed",
+      "conclusion": "failure",
+      "run_number": 577,
+      "jobs_url": "https://api.github.com/repos/bartytime4life/Intelligent-DVR-Tool/actions/runs/43205263776/jobs",
+      "logs_url": "https://api.github.com/repos/bartytime4life/Intelligent-DVR-Tool/actions/runs/43205263776/logs",
+      "workflow_id": 398651984
+    },
+    {
+      "id": 43205263974,
+      "name": "PC install kit",
+      "status": "completed",
+      "conclusion": "success",
+      "run_number": 485,
+      "jobs_url": "https://api.github.com/repos/bartytime4life/Intelligent-DVR-Tool/actions/runs/43205263974/jobs",
+      "logs_url": "https://api.github.com/repos/bartytime4life/Intelligent-DVR-Tool/actions/runs/43205263974/logs",
+      "workflow_id": 400856528
+    }
+  ],
+  "browser_failure": {
+    "run_id": 43205263776,
+    "job_id": 131138730683,
+    "passed": 258,
+    "failed": 1,
+    "failed_test": "background coverage clears old numbers during draft changes and survives navigation",
+    "failed_step": 9,
+    "native_browser_steps": "skipped after general-suite failure",
+    "analysis": "Test used a fixed600ms delay and could observe already-completed work; replacement gate holds real worker requests explicitly. Parent workflow remains failed."
+  },
+  "candidate_ci": "Not yet published when this snapshot was captured."
+}

@@ -1,0 +1,9 @@
+{
+  "cases": 2707,
+  "assertions": 8121,
+  "failures": [],
+  "inputSha256": "053566499b241abc8a3135a4e9b0b3c6b046f2b64f5968ebbd3db9f032dba0a5",
+  "prototypeSha256": "d492a968854cb2274c9c8ad58c70742d57821d4a6309830e7d12a53e39658595",
+  "sourceUnchanged": true,
+  "limits": "Actual root prototype tested against independent Fraction expected signs. Private helper assumes finite validated pairs; malformed inputs tested only on review wrapper, not this private prototype."
+}

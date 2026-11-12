@@ -1,5 +1,11 @@
 # Guided facility builder
 
+**Current branch proposal:** camera views now use a tilted pinhole ground
+footprint with complete wall shadows. The map, coverage, rehearsal and installer
+share one revision-bound estimate. This is under review alongside the earlier
+pixel-density and zone-area proposals; see [status](product-status.md) and the
+[source-bound geometry record](verification/ground-frustum-math-2026-11-12/README.md).
+
 October 28 follow-up: [current workflow/geometry](facility-setup-reliability.md)
 adds map pin/custom AOI selection, v2 courtyards/bases and independent parts.
 The earlier v1 limitations and evidence below describe the original increment;
@@ -45,7 +51,14 @@ map. Map-layer buttons wrap when needed and remain available by keyboard.
    stops the request. Device accuracy depends on the location provider.
    Submitted address/place search is another route: choose a provider, submit,
    select a suggestion, review coordinates and Save site. Nothing is sent while
-   typing. Changing the origin relocates all existing local geometry geographically.
+   typing. If the plan already has geometry, choose whether to **Keep buildings
+   at their map positions** before saving. It is on by default for map-sourced
+   buildings and off for hand-drawn plans. When checked, saving re-centres the
+   local grid while retaining the plan's geographic positions in the existing
+   projection; local coordinate values can change. When unchecked, the local
+   coordinates stay the same and the whole plan moves geographically with the
+   origin. A refused correction leaves the existing plan intact. See
+   [origin changes and their limits](map-measurements-and-shapes.md#change-the-site-origin).
 2. Review a bounded OSM area and supported exterior drafts, use an offline JSON
    file/paste extract, trace with Terra Draw, or add one of seven common shapes.
    Map drafts require explicit selection and apply; additive import preserves
@@ -168,18 +181,34 @@ clears the local Undo history and requires pending edits to be applied or discar
 ## Visibility model and evidence limits
 
 Camera inputs describe an idealized pinhole view intersecting a horizontal ground
-plane. The near/far intersection uses mounting height and vertical viewing angles;
-range is capped by the configured maximum. The horizontal viewing angle determines
-the sector. Building and room wall intersections shorten rays when the modeled
-wall spans the ray's height. The displayed sector samples 49 directions.
+plane. Mount height, bearing, tilt and both viewing angles determine the ground
+footprint. The configured range is a horizontal distance from the mount. Its
+circular boundary is approximated conservatively by an inscribed 256-sided
+polygon; the maximum inward radial error is about 0.023 m at the largest allowed
+300 m range. Steep views can include ground below and behind the mount.
+
+Building and room wall faces cast projected shadows. A low wall can leave a blind
+patch with visible ground beyond it; a raised wall can allow a view underneath.
+The estimate retains holes and separate visible pieces rather than stopping a
+whole viewing direction at its first obstruction. A camera's pieces count as
+one camera. The existing 0.5 m facade-mount clearance policy is retained.
 
 This approximation includes planned doorway gaps and opaque lintels above their
 entered heights. Exterior glazing stays opaque to this estimate. It excludes floor and roof slabs, furniture, terrain,
 lens distortion, lighting,
-motion blur, or recognition quality. Pixel density is a separate, centre-of-image
-planning estimate (below). A colored footprint is not a claim that a person can be
+motion blur, or recognition quality. Pixel density is a separate horizontal
+ground-detail planning estimate (below). A colored footprint is not a claim that a person can be
 detected or identified at that location. The current Three.js volume is an
-illustrative rendering of that estimate.
+illustrative envelope connecting the mount to its visible ground regions; it
+does not establish visibility throughout a physical 3D volume.
+
+Estimated views update in a bounded background worker. While a changed view is
+pending, its old footprint, density contours and 3D envelope are hidden. Camera
+markers remain editable. **Try views again** retries a failed calculation.
+Incomplete views withhold coverage totals and handoff proposals; they do not
+become zero coverage or an asserted blind spot. Calculation adds no new editing
+or backup restriction; the existing Save/Discard guards still apply. The [science guide](science-and-algorithms.md#project-the-visible-ground-footprint)
+explains the geometry, arithmetic and approximation limits.
 
 ## Camera planning estimates
 
@@ -188,47 +217,85 @@ and no compression**. None of it is a calibration, compliance or
 recognition-quality claim.
 
 - **Pixel density (DORI).** An optional `pixelsWide` (integer 320–7680) gives
-  horizontal pixels per metre at slant distance *d* as `W / (2·d·tan(hfov/2))`.
+  ideal horizontal pixels per metre across the ground, perpendicular to the
+  camera bearing. Pinhole projection uses camera-axis depth, rather than slant
+  distance; tilt therefore matters even for targets close to the mount.
   The IEC 62676-4 figures — Detect 25, Observe 62.5, Recognize 125 and Identify
-  250 px/m — are used as planning thresholds. Each band's ground distance is
-  `√(d² − z²)` for mount height *z*, clipped to the camera's modeled near/far
-  ground range. The camera form shows a distance table; colored arcs on the
-  selected camera's fan mark each limit and break where modeled walls shorten
-  the view. Lens presets (2.8–12 mm) fill a **typical** horizontal view only;
+  250 px/m — are used as planning thresholds. The table and installer sheet show
+  **centreline ground ranges**, from the near view limit along the bearing to
+  each threshold or the far view limit. Short positive ranges retain enough
+  displayed precision to remain visible in metres or feet. These intervals
+  describe the ideal centreline view, before wall occlusion. Colored straight
+  lines show equal-density thresholds, clipped to the current visible ground
+  regions; wall shadows can split a line into separate fragments. A contour can
+  appear behind the mount even when the forward centreline has no interval.
+  The footprint assumes ideal, roll-free optics. [Projection mathematics and
+  generated checks](science-and-algorithms.md#project-ground-detail-through-the-camera).
+  Lens presets (2.8–12 mm) fill a **typical** horizontal view only;
   vertical view is unchanged, and a datasheet value always wins.
-- **Coverage metrics.** The Coverage step uses the same cached fans the map
-  draws, including any unsaved camera preview. Outdoor zones use a grid (at most
-  20,000 cells, target spacing at least 0.25 m) for coverage (≥1 camera), overlap
-  (≥2 cameras) and one zone’s uncovered-cell overlay as merged row rectangles.
-  The grid fits the zone's bounding box, so narrow zones still receive an
-  interior row or column; actual cells can be smaller than the target spacing.
-  An irregular zone with no interior sample centers shows **Not estimated**,
-  rather than 0% coverage or a claim that no blind areas exist. The overlay uses
-  the actual rectangular cell dimensions. These are sampled estimates, not an
-  exact area union or calibrated visibility.
-  Indoor and level zones show "not estimated" because coverage is ground-plane only.
+- **Coverage metrics.** The Coverage step calculates from the previewed plan
+  using the same captured visible-ground geometry as the map. Outdoor zone percentages
+  measure polygon **area** inside at least one camera's footprint. **Overlap**
+  requires at least two different cameras; duplicate fragments of one camera
+  count once. A footprint touching an edge or point contributes no area.
+  The **Blind spots** toggle shades the zone minus that coverage, preserving
+  disconnected pieces and covered islands as holes. It does not fill bounding
+  rectangles outside a concave zone. Planned area appears beneath the zone name
+  in your selected metres/feet units. The saved zone is still a single-ring
+  footprint; computed overlay holes do not add editable holes to the plan schema.
+  These remain estimates of the drawn ground plane, not calibrated visibility.
+  Indoor and level zones remain **Not estimated · ground-plane only**.
+
+  Coverage calculation runs in a second bounded background worker, reusing the
+  current view snapshot. **Updating coverage** hides
+  old numbers and shading while you keep editing; newer drafts supersede older
+  requests. Leaving Coverage cancels the coverage calculation; views continue
+  to serve the other planning tasks. **Save camera**, Discard and Undo
+  retain their existing meaning. A worker error or timeout offers **Try coverage
+  again**. A zone that exceeds the geometry budget or cannot be resolved shows
+  **Not estimated**, with no numeric or empty-overlay fallback. Change or simplify
+  its geometry to retry. Local per-zone and whole-plan work caps can leave complex
+  plans partly unestimated; they do not establish a target-host latency guarantee.
+  See the [area mathematics, limits and generated checks](verification/zone-area-math-2026-11-12/README.md).
   The **handoff route** uses covered path length rather than sample-point counts.
-  Each segment is intersected with the drawn positive-area fan polygons; intervals
+  Each segment is intersected with the visible positive-area polygons, including
+  their separate pieces and holes; intervals
   from the same camera count once before coverage and overlap are measured.
-  A boundary segment contributes its length; touching a fan at a single point
+  The displayed polygons use closed boundaries, including the edges of shadow
+  holes. A boundary segment contributes its length; touching a footprint at a single point
   contributes none. Repeated/backtracking passages count each time. The display
   includes total uncovered distance and the longest continuous gap across route
   vertices. Zero-length segments add no distance. Calculations retain gaps above
   floating-point tolerance, but the result remains an estimate of the drawn
   ground plane, not calibrated visibility. The separate rehearsal below uses
   sampled, simulated handoff proposals. [Mathematics and generated checks](verification/route-coverage-math-2026-11-12/README.md).
+  Coverage and overlap read **<0.1%** or **>99.9%** when a small positive fraction
+  or a fraction just below complete would otherwise round to an endpoint. Only
+  calculated fractions exactly zero or one display **0.0%** or **100.0%**.
+  Small positive lengths and areas retain a nonzero readout: a 4 cm route gap is
+  **0.04 m**, rather than **0.0 m**. The map, dimensional summaries and printable
+  installer sheet use the same distance formatting; short installer ground
+  intervals keep their two endpoints distinct. Plan JSON retains the original
+  coordinates and values. These display rules do not increase planning accuracy.
 - **Direct manipulation.** Dragging the selected camera (mouse or touch) or its
-  round heading handle previews the move live on the map; release, Alt+Arrow and
+  round heading handle previews its position on the map; release, Alt+Arrow and
   `[` / `]` change only the unsaved draft. Save camera commits, Discard preview
-  restores it and Undo covers the commit. Escape or switching focus away from
-  the browser window cancels a drag and restores map panning.
+  restores it and Undo covers the commit. Release recalculates the changed view.
+  Escape, leaving the browser window, leaving camera editing or changing the
+  plan, selected camera, view or floor cancels an in-progress drag and restores
+  map panning. Undo that changes the plan also cancels it. A units-only
+  refresh preserves the current gesture.
 - **Installer sheet.** Download installer sheet writes a printable, offline HTML
   page of the saved plan with the same restrictive CSP as the recognition report:
-  an inline SVG plan (buildings, outdoor zones, route, estimated fans and camera
+  an inline SVG plan (buildings, outdoor zones, route, estimated ground regions and camera
   bearings), and a per-camera table of ID, name, an optional `channel` label
   (≤60 characters), east/north, mount height, bearing, tilt, H/V field of view,
-  range, resolution and DORI ground distances, followed by its interpretation
-  limits. It contains no credentials, stream addresses or footage.
+  range, resolution and DORI centreline ground ranges (including both near and
+  far endpoints), followed by its interpretation
+  limits. Save or discard pending edits and wait for the saved plan's complete
+  estimated views before downloading. Export stays unavailable if those views
+  fail; retry the views first. The SVG preserves visible pieces and shadow holes.
+  It contains no credentials, stream addresses or footage.
 
 The route is a planned, simulated path. Rehearsal assumes a walking pace of
 1.4 m/s, so its displayed duration is the planned route length divided by that
@@ -335,12 +402,17 @@ self-crossing/degenerate footprints, and orphaned or out-of-floor rooms. It copi
 only declared fields (cameras may add optional `pixelsWide` and `channel`, which
 v3 files without them do not need) and does not fetch media URLs from imported metadata.
 
-The map renders camera inventory points as GPU features, limits coverage sectors
-to 12 cameras (including the selection), displays at most 80 general text labels plus the selected camera label, and
+The map renders camera inventory points as GPU features and all successfully
+calculated footprints in the current snapshot. It displays at most 80 general text labels plus the selected camera label, and
 renders a 3D volume for the selected camera only. Camera search, pagination and
 the selected-camera dropdown provide access to the full inventory. Rendering is
 event-driven; rehearsal updates at 10 Hz. The facility code and its map/3D
 dependencies load only when Facility is opened.
+
+View calculations have per-camera and whole-plan operation, edge and vertex
+budgets, plus a ten-second response deadline. Complex valid plans can remain
+unestimated. These limits bound submitted work; they do not guarantee a frame
+rate or latency on every computer. See the [recorded limits and checks](verification/ground-frustum-math-2026-11-12/README.md).
 
 The 100-camera automated case exercises **metadata validation and synthetic route
 evaluation only**. It does not establish recording throughput, detector throughput,
@@ -356,6 +428,9 @@ After placing cameras, **Image diagnostics** can freeze an operator-selected pre
 
 - MapLibre GL JS 6.9.0 — BSD-3-Clause; package and lockfile pinned.
 - Three.js 0.186.1 — MIT; package and lockfile pinned.
+- polyclip-ts 0.16.8 and BigNumber.js 9.3.1 — MIT; pinned for projected shadow
+  and coverage Boolean operations. Their transitive splaytree-ts 1.0.2 uses BSD-3-Clause.
+  Full notices: [ground-visibility-LICENSE.txt](../public/licenses/ground-visibility-LICENSE.txt).
 - Terra Draw 1.38.0 and MapLibre adapter 1.5.0 — MIT; compiled from upstream
   commit `18ca034880232b8b618ef1ca843d8e0b6c82f1ab` into `src/vendor/`.
   These source snapshots were used because registry access was unavailable in the

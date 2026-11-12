@@ -1,0 +1,60 @@
+TAP version 13
+# Subtest: coverage task binds its request, terminates after one response, and clears the deadline
+ok 1 - coverage task binds its request, terminates after one response, and clears the deadline
+  ---
+  duration_ms: 1.915631
+  ...
+# Subtest: another request cannot satisfy a pending coverage task
+ok 2 - another request cannot satisfy a pending coverage task
+  ---
+  duration_ms: 0.102051
+  ...
+# Subtest: superseding a coverage task closes queued responses and errors before starting its successor
+ok 3 - superseding a coverage task closes queued responses and errors before starting its successor
+  ---
+  duration_ms: 0.122319
+  ...
+# Subtest: coverage deadline terminates work and rejects late success without inventing metrics
+ok 4 - coverage deadline terminates work and rejects late success without inventing metrics
+  ---
+  duration_ms: 0.123893
+  ...
+# Subtest: a result past the monotonic deadline is refused even before a delayed timer callback runs
+ok 5 - a result past the monotonic deadline is refused even before a delayed timer callback runs
+  ---
+  duration_ms: 0.086852
+  ...
+# Subtest: a successful reply cannot turn null or missing zone numbers into displayed zero
+ok 6 - a successful reply cannot turn null or missing zone numbers into displayed zero
+  ---
+  duration_ms: 0.458379
+  ...
+# Subtest: worker errors and unreadable messages remain recoverable, with no numeric fallback
+ok 7 - worker errors and unreadable messages remain recoverable, with no numeric fallback
+  ---
+  duration_ms: 0.098405
+  ...
+# Subtest: malformed or error replies close the task instead of displaying incomplete metrics
+ok 8 - malformed or error replies close the task instead of displaying incomplete metrics
+  ---
+  duration_ms: 0.104216
+  ...
+# Subtest: worker creation and post failures settle the task without an orphan deadline
+ok 9 - worker creation and post failures settle the task without an orphan deadline
+  ---
+  duration_ms: 0.219051
+  ...
+# Subtest: cleanup stays closed even when worker termination itself throws
+ok 10 - cleanup stays closed even when worker termination itself throws
+  ---
+  duration_ms: 0.261861
+  ...
+1..10
+# tests 10
+# suites 0
+# pass 10
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 36.532052

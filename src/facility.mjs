@@ -1,6 +1,6 @@
 import {validateStair, stairFootprint} from './facility-stairs.mjs';
-import {validateDoorways,roomWallPieces,DOORWAY_LIMIT} from './facility-doorways.mjs';
-import {validateWindows,windowWall,windowSegment,WINDOW_LIMIT} from './facility-windows.mjs';
+import {validateDoorways,roomWallPieces,doorwayWall,DOORWAY_LIMIT} from './facility-doorways.mjs';
+import {validateWindows,windowWall,WINDOW_LIMIT} from './facility-windows.mjs';
 import {FACILITY_CLASSES, ZONE_TYPES, validateImageRegion} from './facility-zones.mjs';
 const SCHEMA = "intelligent-dvr.facility.v6";
 const WINDOW_SCHEMA = "intelligent-dvr.facility.v5";
@@ -351,7 +351,10 @@ function wallObstacles(plan) {
   })];
 }
 function groundRange(c) {
-  const near = c.z / Math.tan(rad(Math.min(89.9, c.tilt + c.vfov / 2)));
+  // Nonnegative forward centreline only, not a radial bound on the whole
+  // tilted image. A view crossing nadir includes distance zero; rear ground
+  // is represented by the full pinhole visibility geometry separately.
+  const near = c.tilt + c.vfov / 2 >= 90 ? 0 : c.z / Math.tan(rad(c.tilt + c.vfov / 2));
   const far = c.tilt - c.vfov / 2 <= 0 ? c.range : Math.min(c.range, c.z / Math.tan(rad(c.tilt - c.vfov / 2)));
   return { near: Math.max(0, near), far };
 }
@@ -619,21 +622,27 @@ export function applyBuildingEdit(plan, draft) {
 
 // Re-centre the local grid on a new origin while every item keeps its map position.
 export function reoriginPlan(plan, origin) {
-  if (!Array.isArray(origin) || !origin.every(Number.isFinite)) throw Error('Enter a valid latitude and longitude.');
-  // Reproject each point: eastings scale with the origin latitude, so a uniform shift would move items.
-  const [dx, dy] = fromLngLat(plan.origin, origin), p = q => fromLngLat(toLngLat(q, plan.origin), origin).map(v => Math.round(v * 1e6) / 1e6);
+  if (!Array.isArray(origin) || origin.length!==2 || !finite(origin[0],-180,180) || !finite(origin[1],-80,80)) throw Error('Enter a valid latitude and longitude.');
+  // One affine change of local grid preserves shared vertices and collinearity.
+  // Geographic round trips lose small coordinate differences; independently
+  // rounding the resulting vertices can move a boundary room outside its wall.
+  const cosine=Math.cos(origin[1]*Math.PI/180),scale=cosine/Math.cos(plan.origin[1]*Math.PI/180);
+  const dx=(plan.origin[0]-origin[0])*111320*cosine,dy=(plan.origin[1]-origin[1])*111320;
+  const p=([x,y])=>[scale*x+dx,y+dy];
+  // Scale aperture spans as vectors, before translation, to avoid subtracting
+  // large translated endpoints and changing an otherwise unchanged width.
+  const widthAlong=(width,[a,b])=>width*(Math.hypot(scale*(b[0]-a[0]),b[1]-a[1])/Math.hypot(b[0]-a[0],b[1]-a[1]));
   const at = o => { const [x, y] = p([o.x, o.y]); return {...o, x, y}; };
   const ring = o => ({...o, footprint:o.footprint.map(p)});
   const doorways=(plan.doorways || []).map(door=>{
-    const room=plan.rooms.find(r=>r.id===door.roomIds[0]);
-    const edge=room.footprint.slice(1).map((end,i)=>[room.footprint[i],end]).find(([a,b])=>closestOnSegment([door.x,door.y],a,b).distance<1e-6);
-    const [a,b]=edge, length=Math.hypot(b[0]-a[0],b[1]-a[1]);
-    const ends=[-1,1].map(sign=>p([door.x+sign*(b[0]-a[0])/length*door.width/2,door.y+sign*(b[1]-a[1])/length*door.width/2]));
-    return {...at(door),width:Math.hypot(ends[1][0]-ends[0][0],ends[1][1]-ends[0][1])};
+    const wall=doorwayWall(plan,door);
+    if(!wall) throw Error('Doorway “'+door.name+'” must fit on a shared wall before moving the site origin.');
+    return {...at(door),width:widthAlong(door.width,wall.points)};
   });
   const windows=(plan.windows || []).map(window=>{
-    const ends=windowSegment(window,windowWall(plan,window)).map(p);
-    return {...at(window),width:Math.hypot(ends[1][0]-ends[0][0],ends[1][1]-ends[0][1])};
+    const wall=windowWall(plan,window);
+    if(!wall) throw Error('Window “'+window.name+'” must fit on an exterior wall before moving the site origin.');
+    return {...at(window),width:widthAlong(window.width,wall.points)};
   });
   const next = {...plan, windows, doorways, origin:[...origin], buildings:plan.buildings.map(b => transformBuilding(b, p)), rooms:plan.rooms.map(ring),
     openings:(plan.openings || []).map(ring), zones:(plan.zones || []).map(ring), paths:(plan.paths || []).map(o => ({...o, points:o.points.map(p)})),
