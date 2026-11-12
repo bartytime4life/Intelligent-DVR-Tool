@@ -131,9 +131,25 @@ segment length; tiny roundoff-scale gaps can coalesce. A nearly collinear edge
 can be treated as closed boundary even if raw binary vertices sit a few rounding
 units on its opposite side; an exactly coincident route is sensitive to that
 choice. The small errors in ordinary oracle cases are not a universal error bound.
-Outdoor zone percentages
-still use a bounded grid. The 61-position handoff rehearsal remains simulated,
-and exact integration of drawn polygons does not establish physical visibility.
+Outdoor zone percentages still use a bounded grid. The separate handoff
+rehearsal defaults to `max(2, min(601, ceil(route_length_metres) + 1))`
+distance-spaced positions and assumes 1.4 m/s. Its simulated duration is
+`route_length_metres / 1.4`; the UI uses an integer playback multiplier for
+simulations longer than 60 seconds. These sampled proposals are not actual
+tracking, and exact integration of drawn polygons does not establish physical
+visibility. [Rehearsal documentation correction](verification/documentation-alignment-2026-11-12/README.md).
+
+## Bind metrics to evaluated bytes
+
+Detection and tracking metrics must identify the same data they evaluate.
+[Evaluation captures each bounded JSON input once](offline-evaluation.md#what-the-report-measures),
+then parses and hashes those exact bytes. Tracking compares its second-stage
+manifest/trace captures with the hashes already validated. Source media keeps
+a streamed validation-time SHA-256 check; it is not copied or decoded by this
+binding. The report's `input_binding` describes these semantics, without claiming
+an atomic multi-file snapshot or loaded-code provenance.
+[Generated replacement-race evidence](verification/evaluation-binding-2026-11-11/README.md)
+checks consistency independently of detection quality.
 
 ## Next experiments need independent observations
 

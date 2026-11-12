@@ -203,10 +203,12 @@ uploaded. Public providers, logins, HTML players and HLS formats are not bundled
 After Install, use **Start-DVR-Companion-Linux.sh** or
 **Start-DVR-Companion-Windows.cmd**. Open **Recognition → Use my existing DVR →
 Connect to this computer**. Without a prepared analysis catalog, the app reports
-**Copy-only mode**: choose otherwise empty approved source and separate backup
-folders, save settings, then explicitly start backup. No trained weights are
-required, and analysis cannot be enabled through the UI or API in this mode.
-Use only generated input until a particular completed OEM export is approved.
+**Copy-only mode**: choose an approved source folder and a separate backup folder,
+save settings, then explicitly start backup. The source can already contain
+completed recordings; neither selected folder may contain the other. No trained
+weights are required, and analysis cannot be enabled through the UI or API in
+this mode. Use only generated input until a particular completed OEM export is
+approved.
 
 Readiness: `bash scripts/run-linux.sh --companion --check` or PowerShell
 `.\scripts\Start-IntelligentDvr.ps1 -Companion -Check`. Check examines settings

@@ -1,0 +1,1208 @@
+{
+  "base_commit": "66e6dd1cde9913e6c4f03fb94733e83dc3070c93",
+  "prior_audit_commit": "6595e1e1c8078337419321921c52ced202b0b5be",
+  "generated_at_utc": "2026-11-12T06:51:22.717529+00:00",
+  "scope": "All repository Markdown, excluding this verification directory to avoid self-referential hashes. Prior retained entries are not newly executed runtime evidence.",
+  "files": [
+    {
+      "path": "AGENTS.md",
+      "category": "project instructions retained",
+      "change": "unchanged",
+      "sha256": "2f71078e4771677a09e17d64c9ba3e48371eb4b7e41c4168145bff408e39a8cc"
+    },
+    {
+      "path": "CONTRIBUTING.md",
+      "category": "canonical documentation",
+      "change": "unchanged",
+      "sha256": "b346c1bb53c6f00e3e4b1bede7cd19790032eacc4f6cc33b0f2ab5caf05ab3d4"
+    },
+    {
+      "path": "README.md",
+      "category": "canonical documentation",
+      "change": "updated",
+      "sha256": "82a043a545bb56e309f14353a16b72b0e8f705958ff627ee57ac9d52fdbf7243"
+    },
+    {
+      "path": "SECURITY.md",
+      "category": "canonical documentation",
+      "change": "unchanged",
+      "sha256": "9ef6198e94960d501d7a1da73e0a33c7ff4aa48ad785217640b5fa88382a41d6"
+    },
+    {
+      "path": "design-qa.md",
+      "category": "dated evidence or media reference retained",
+      "change": "unchanged",
+      "sha256": "88e5edc04eb51fbd5553da262e4ebe9cfeb7fde54285b6dd38d31fa2d2137e94"
+    },
+    {
+      "path": "docs/README.md",
+      "category": "canonical documentation",
+      "change": "unchanged",
+      "sha256": "c33705d2c8e3e5dcd2d5b39c1ffe246ddd6c47447949da87f10bce6c837e4a44"
+    },
+    {
+      "path": "docs/architecture.md",
+      "category": "canonical documentation",
+      "change": "updated",
+      "sha256": "dca26fc5c1b59cfd24fae4472bc8451023921e8aea2184c8cae2ce2a368fc321"
+    },
+    {
+      "path": "docs/development.md",
+      "category": "canonical documentation",
+      "change": "unchanged",
+      "sha256": "02d59f639233993b3c8a337e10dd7a3fbdf8832a39b7963522bedd84023b7543"
+    },
+    {
+      "path": "docs/easy-facility-setup.md",
+      "category": "dated evidence or media reference retained",
+      "change": "unchanged",
+      "sha256": "c6d251475a42ac7b07fab9739831dc9b0ac69564a3dd1668229a5f27425ed959"
+    },
+    {
+      "path": "docs/enhancement-comparison.md",
+      "category": "canonical documentation",
+      "change": "unchanged",
+      "sha256": "0cb78d2407b54b93e4300281e44415fcfa454e70c7be6bc0e17208618a47f44f"
+    },
+    {
+      "path": "docs/experience-review-2026-10-29.md",
+      "category": "dated evidence or media reference retained",
+      "change": "unchanged",
+      "sha256": "8ef437e279340ea748bf9588f62fcece748b14b939f9a7f6143a60c61d84d37b"
+    },
+    {
+      "path": "docs/facility-builder.md",
+      "category": "canonical documentation",
+      "change": "updated",
+      "sha256": "32cc5a7a68064c7c268ea5ef5cbf9848bca5321b3f54b1c0fe4f71b1a90d7d31"
+    },
+    {
+      "path": "docs/facility-calibration.md",
+      "category": "canonical documentation",
+      "change": "unchanged",
+      "sha256": "12ad3ecec07e3f5f7fae37aee8a41a6e6d97a520f5287505fbfe686ca12552ff"
+    },
+    {
+      "path": "docs/facility-image-diagnostics.md",
+      "category": "canonical documentation",
+      "change": "unchanged",
+      "sha256": "7fbc4ae20214fb69fd7993c123652b8ceb7547f07272e124596c568dd696e92f"
+    },
+    {
+      "path": "docs/facility-local-delivery.md",
+      "category": "canonical documentation",
+      "change": "unchanged",
+      "sha256": "7b8061eedcc151fb2120824b34445c15a35bcb4abb60c3a75a9c356c195933c4"
+    },
+    {
+      "path": "docs/facility-novice-study.md",
+      "category": "canonical documentation",
+      "change": "unchanged",
+      "sha256": "e5a99fe3a15763ee0d4396571b88b4ea3806ba291e8a171917c85e86c9d97f7e"
+    },
+    {
+      "path": "docs/facility-setup-reliability.md",
+      "category": "canonical documentation",
+      "change": "unchanged",
+      "sha256": "f2b3620c4f0865f4c14e2dcde93d51ce299cf66311eaef82716527a4b49244c8"
+    },
+    {
+      "path": "docs/facility-workspace-upgrades.md",
+      "category": "dated evidence or media reference retained",
+      "change": "unchanged",
+      "sha256": "7b82daf906aff1bc5ed7db2ec3c8ba9e128f1919fb948cabf16763436d351abf"
+    },
+    {
+      "path": "docs/field-acceptance.md",
+      "category": "canonical documentation",
+      "change": "unchanged",
+      "sha256": "0ee3cfc6afcf7f5efdbbca3c7dd89e5d795165c75e7eb0c9577605a9d8f261b5"
+    },
+    {
+      "path": "docs/getting-started.md",
+      "category": "canonical documentation",
+      "change": "unchanged",
+      "sha256": "bef97ee62c9eab9f5399fd3da54200f96fe5823145651382f0fb9615ee02a29a"
+    },
+    {
+      "path": "docs/gpu-planning.md",
+      "category": "canonical documentation",
+      "change": "unchanged",
+      "sha256": "664f91fa5082a66854ef38fbe674ca0237d98de06cd2a18093880d9169435bc6"
+    },
+    {
+      "path": "docs/hardware-guide.md",
+      "category": "canonical documentation",
+      "change": "unchanged",
+      "sha256": "efd3832a5552ba1dddae554223f800bc01768ee1cc6869d1051049c63ea550fe"
+    },
+    {
+      "path": "docs/how-to.md",
+      "category": "canonical documentation",
+      "change": "unchanged",
+      "sha256": "d50d8bc524225156d6b664f9b964063e35a3dea3be24299f21e904dd5a5d4eb5"
+    },
+    {
+      "path": "docs/lan-recording.md",
+      "category": "canonical documentation",
+      "change": "unchanged",
+      "sha256": "b7798f2f276cbc014de256139e836f7c51376c16d6f771dc222f5297fc014d9e"
+    },
+    {
+      "path": "docs/live-detection.md",
+      "category": "canonical documentation",
+      "change": "unchanged",
+      "sha256": "b5b530a56f3ba0ee645245d047d88f07dffe224afda844c0031bfc7f2575ab40"
+    },
+    {
+      "path": "docs/live-gpu.md",
+      "category": "canonical documentation",
+      "change": "unchanged",
+      "sha256": "70fff393ec7369bdeb6f3ea2a70d9af7df10daf59317973cdfca283535d7608c"
+    },
+    {
+      "path": "docs/local-analysis-service.md",
+      "category": "canonical documentation",
+      "change": "unchanged",
+      "sha256": "a404e1d9298d522361b6d78392cc71f3be297def612a68a9669e41b895fb5e04"
+    },
+    {
+      "path": "docs/local-camera-feeds.md",
+      "category": "canonical documentation",
+      "change": "unchanged",
+      "sha256": "1d194d6f30c4a9e3ebe90f7036f1378a1a513fb92022aa49970f6bdc0533e84a"
+    },
+    {
+      "path": "docs/map-measurements-and-shapes.md",
+      "category": "canonical documentation",
+      "change": "unchanged",
+      "sha256": "0755b23bc581cfc3efbd70f22dc6352838d983de92d21ca92de166ead3dec6cf"
+    },
+    {
+      "path": "docs/media/README.md",
+      "category": "dated evidence or media reference retained",
+      "change": "unchanged",
+      "sha256": "0ccc13a22917daa6b40428d9c54790dcb87f094be38951225021bd1e86ba07d7"
+    },
+    {
+      "path": "docs/media/current/README.md",
+      "category": "dated evidence or media reference retained",
+      "change": "unchanged",
+      "sha256": "e31c7094c3a3bb90f7f72e80c8fd3e320f6eeb0ba21a20a84c54f86a7e449255"
+    },
+    {
+      "path": "docs/media/guide/README.md",
+      "category": "dated evidence or media reference retained",
+      "change": "unchanged",
+      "sha256": "882387418d3557869a2534c72f28bfc6d46338d039bcffd2762225456ff3c46f"
+    },
+    {
+      "path": "docs/media/guided-experience-2026-11-11/README.md",
+      "category": "dated evidence or media reference retained",
+      "change": "unchanged",
+      "sha256": "f3996fb170ad9f19572d437022953c4dd471a850901608cab07a0fe090ab8a60"
+    },
+    {
+      "path": "docs/media/training-2026-11-02/README.md",
+      "category": "dated evidence or media reference retained",
+      "change": "unchanged",
+      "sha256": "d852c28a055b5de5b131b8284a080608c934a9b341909f6e5606b1cec4cb68c1"
+    },
+    {
+      "path": "docs/model-qualification-20261026.md",
+      "category": "dated evidence or media reference retained",
+      "change": "unchanged",
+      "sha256": "7ef5365c311e9ed969ff411839c1af7b70166a65189a75dcf903d0575cd57596"
+    },
+    {
+      "path": "docs/oem-backup.md",
+      "category": "canonical documentation",
+      "change": "unchanged",
+      "sha256": "c690d78b85e0fac6c4be9c9c19a97eb6015697218f20ef5aaecf6b4403b174e7"
+    },
+    {
+      "path": "docs/oem-field-acceptance.md",
+      "category": "canonical documentation",
+      "change": "unchanged",
+      "sha256": "a68b9c2547a4eecdbe8091e0dab10266d9f3ad45f2101c6d8823f4d82597cea1"
+    },
+    {
+      "path": "docs/offline-evaluation.md",
+      "category": "canonical documentation",
+      "change": "unchanged",
+      "sha256": "6fe43d50a3ed18ac8bdee3dfbdb7a0a4325ee9b062691b1b725defe5a532b324"
+    },
+    {
+      "path": "docs/offline-qualification.md",
+      "category": "canonical documentation",
+      "change": "unchanged",
+      "sha256": "793ad8ce94502771945dc1b78e76bd3fde40c0ac56425b7a71679807b4c0e6df"
+    },
+    {
+      "path": "docs/pc-testing.md",
+      "category": "canonical documentation",
+      "change": "updated",
+      "sha256": "c979499b7e9d6fa2ab2013b263b23d231ce2f731bb984d7cb7330c383f318156"
+    },
+    {
+      "path": "docs/performance-100-cameras.md",
+      "category": "canonical documentation",
+      "change": "unchanged",
+      "sha256": "fb5f2f740ceddc9ae1d00258a252ea2305a9ea5e5ef36b8341c317f32aedd243"
+    },
+    {
+      "path": "docs/person-enrollment.md",
+      "category": "canonical documentation",
+      "change": "unchanged",
+      "sha256": "30f541dd6b971e1e0ba28e2104acafe661698091cd676b04d15302072489c6e2"
+    },
+    {
+      "path": "docs/pilot-scope.md",
+      "category": "canonical documentation",
+      "change": "unchanged",
+      "sha256": "d9f3724390abf0b39e63b5fc2d5e4790c804652bb824a38535f4a68dc97e0af2"
+    },
+    {
+      "path": "docs/product-status.md",
+      "category": "canonical documentation",
+      "change": "updated",
+      "sha256": "990769cf3c0ffcebc62fc68229423aea9c0318f08564cac2528829d79e1db495"
+    },
+    {
+      "path": "docs/project-assessment-2026-10-30.md",
+      "category": "dated evidence or media reference retained",
+      "change": "unchanged",
+      "sha256": "e8e7235bbaf6423fdc37d57a57f7f6e22079c03c9d6a1ea51ef3a0fab0cc3d0f"
+    },
+    {
+      "path": "docs/public-webcams.md",
+      "category": "canonical documentation",
+      "change": "unchanged",
+      "sha256": "74b3b4447fb08186254c2e2b23b8c4dbee97bfdd48ba90400386dddddf191c86"
+    },
+    {
+      "path": "docs/qa/monitor-design-qa.md",
+      "category": "dated evidence or media reference retained",
+      "change": "unchanged",
+      "sha256": "bbc3adea6ec03bf2a338fa884b23e77697ecf9639619474de1aa92c429839acb"
+    },
+    {
+      "path": "docs/recording-coverage.md",
+      "category": "canonical documentation",
+      "change": "unchanged",
+      "sha256": "a9ec8716d043dded06cac064326ce57272123fa1ddddc6305c9f53046f7d1c70"
+    },
+    {
+      "path": "docs/recording-recognition.md",
+      "category": "canonical documentation",
+      "change": "unchanged",
+      "sha256": "e4a53c8afcc8594aeaa1ffe97265a94876a408b0fb972969a6cca0155beef740"
+    },
+    {
+      "path": "docs/recording-workflow.md",
+      "category": "canonical documentation",
+      "change": "unchanged",
+      "sha256": "092425daf06e048392785d92aaa1403b69e1bd49049a1cf4cbec7f9b08d4b3e6"
+    },
+    {
+      "path": "docs/resource-controls.md",
+      "category": "canonical documentation",
+      "change": "unchanged",
+      "sha256": "21b6b3bf697856da7237942346d545db0c851c6f4cd024d0b2790ba04084442b"
+    },
+    {
+      "path": "docs/review-2026-10-30.md",
+      "category": "dated evidence or media reference retained",
+      "change": "unchanged",
+      "sha256": "af94adec6ae2dea16cecfc69d509f921e678aa48207dc80d258824efa7707653"
+    },
+    {
+      "path": "docs/review-and-events.md",
+      "category": "canonical documentation",
+      "change": "unchanged",
+      "sha256": "6012fe932cec562656aee55d9c28a94ee32ac1c1f9c3cc28661a1cceabccc74c"
+    },
+    {
+      "path": "docs/roadmap.md",
+      "category": "canonical documentation",
+      "change": "updated",
+      "sha256": "d399357798f97a0f48a6f001b15568dd0da24271fbd08070e05f6a279c9f28b9"
+    },
+    {
+      "path": "docs/saved-facilities.md",
+      "category": "canonical documentation",
+      "change": "unchanged",
+      "sha256": "f9b8f032f51803c3d60aa7b6df627c6856a52396288e0c8b92572776e7b8e222"
+    },
+    {
+      "path": "docs/science-and-algorithms.md",
+      "category": "canonical documentation",
+      "change": "updated",
+      "sha256": "cf1e5d334de8faa7b8fcbfb84b3f68f4ac951cbee52ea8fb460d2eb9aa7c40fa"
+    },
+    {
+      "path": "docs/setup-linux.md",
+      "category": "canonical documentation",
+      "change": "unchanged",
+      "sha256": "02f644f674aee32ce5fdfbca700f21e32693312b1cb9f0be1c2edad6cefea9c1"
+    },
+    {
+      "path": "docs/setup-macos.md",
+      "category": "canonical documentation",
+      "change": "unchanged",
+      "sha256": "3b22a199c3a0f757e6c16aef16f3e55c3fa58acd9998786ab658ae2e84271dd9"
+    },
+    {
+      "path": "docs/setup-windows.md",
+      "category": "canonical documentation",
+      "change": "unchanged",
+      "sha256": "d03b4c7b7b2d12dc0936538f9edfb8b064648028aec156036b15b7d3c3cdcc10"
+    },
+    {
+      "path": "docs/third-party-notices.md",
+      "category": "canonical documentation",
+      "change": "unchanged",
+      "sha256": "535fdb56638fcc2f2e722e61f7283ce30bd8ce01eb3ae802fc2665dd867e0545"
+    },
+    {
+      "path": "docs/tracking-evaluation.md",
+      "category": "canonical documentation",
+      "change": "unchanged",
+      "sha256": "ffb7fd8198abef25c3bdc93d87efd6608c9efcdef7b496c1cd52b06a1e9d9b14"
+    },
+    {
+      "path": "docs/training.md",
+      "category": "canonical documentation",
+      "change": "unchanged",
+      "sha256": "b5c065cca85d13306cdd987aa2df968349642c728fbdd1bf32b84c21968432b7"
+    },
+    {
+      "path": "docs/troubleshooting.md",
+      "category": "canonical documentation",
+      "change": "unchanged",
+      "sha256": "3a3f829f0529679f1dc828ed5cd2c55242a55ea58721ee814db7db071fa3f2f3"
+    },
+    {
+      "path": "docs/verification/2026-10-27/README.md",
+      "category": "dated evidence or media reference retained",
+      "change": "unchanged",
+      "sha256": "ed7ca0785665f3914bb41c8b960628ca18aa516167a7f6f9af76f414f7a5f8ae"
+    },
+    {
+      "path": "docs/verification/README.md",
+      "category": "canonical documentation",
+      "change": "updated",
+      "sha256": "36404a684b645396cb04cdca436d533dffbe4bc19f11e8e40fe5ef2df1b698bb"
+    },
+    {
+      "path": "docs/verification/acceptance-receipts-2026-11-09/README.md",
+      "category": "dated evidence or media reference retained",
+      "change": "unchanged",
+      "sha256": "9f0f6a4ffd29bb7737007cbae6c6fa32b1ca00b4a65ec989aac86a0eadacaccd"
+    },
+    {
+      "path": "docs/verification/analysis-recovery-2026-10-29/README.md",
+      "category": "dated evidence or media reference retained",
+      "change": "unchanged",
+      "sha256": "dcfdd5744e00c2d5862eec3c8877fe748a4c488f2b2281b566123dfca9c8892d"
+    },
+    {
+      "path": "docs/verification/batching-2026-10-28/README.md",
+      "category": "dated evidence or media reference retained",
+      "change": "unchanged",
+      "sha256": "87afdfef56b912c33073b674cb6cbadbf4b7313958f085cde0b0b1ed3a5fd24f"
+    },
+    {
+      "path": "docs/verification/bounded-image-storage-2026-11-11/README.md",
+      "category": "dated evidence or media reference retained",
+      "change": "unchanged",
+      "sha256": "8777162dd1871cf92165092f856239e7d01a384e023a3267aba2137f44a4164e"
+    },
+    {
+      "path": "docs/verification/copy-only-oem-2026-11-09/README.md",
+      "category": "dated evidence or media reference retained",
+      "change": "unchanged",
+      "sha256": "3de4436d6fffee1589bb97cc781946cf63fb64936c83d99864fa1a556d44a26d"
+    },
+    {
+      "path": "docs/verification/cuda-2026-10-28/README.md",
+      "category": "dated evidence or media reference retained",
+      "change": "unchanged",
+      "sha256": "3df856bf6185e235d6b1f731257471494fbff6743dfb3f33c93d0ef1bd81fa9a"
+    },
+    {
+      "path": "docs/verification/cumulative-training-2026-11-02/README.md",
+      "category": "dated evidence or media reference retained",
+      "change": "unchanged",
+      "sha256": "9861887ba9dcc5973caebd7a599d32145357fd8f836bc0479e003cb0bdba9f0e"
+    },
+    {
+      "path": "docs/verification/documentation-complete-2026-11-12/README.md",
+      "category": "dated evidence or media reference retained",
+      "change": "unchanged",
+      "sha256": "3ca1212d98887023ed9a10136e96f3924b7185de9e7c3dd18d7541eb9ece3762"
+    },
+    {
+      "path": "docs/verification/documentation-refresh-2026-11-11/README.md",
+      "category": "dated evidence or media reference retained",
+      "change": "unchanged",
+      "sha256": "60bd7dba22eb4d3fee081245872a23ff07fdd3a978bf10b7019aa427635144fe"
+    },
+    {
+      "path": "docs/verification/durable-overload-2026-10-28/README.md",
+      "category": "dated evidence or media reference retained",
+      "change": "unchanged",
+      "sha256": "4013ba9e3caccbaf4dc70deda0071d371d0476d3ddf3e84aa961f6727c669d7d"
+    },
+    {
+      "path": "docs/verification/enhancement-2026-10-30/README.md",
+      "category": "dated evidence or media reference retained",
+      "change": "unchanged",
+      "sha256": "96ad6b8eba9250325670a80df02635d988f569541d93046bd5c010c86e2a30ea"
+    },
+    {
+      "path": "docs/verification/evaluation-binding-2026-11-11/README.md",
+      "category": "dated evidence or media reference retained",
+      "change": "unchanged",
+      "sha256": "1518b4150155e5e0c117e81679c7c0e943d7d9ccef7372d436746e9031915405"
+    },
+    {
+      "path": "docs/verification/experience-2026-11-09/README.md",
+      "category": "dated evidence or media reference retained",
+      "change": "unchanged",
+      "sha256": "1a2caa5ba09ed1b721bcafcceb2c2b1d6b625280bfb1b41680dbac5aafa657a9"
+    },
+    {
+      "path": "docs/verification/facility-2026-10-27/README.md",
+      "category": "dated evidence or media reference retained",
+      "change": "unchanged",
+      "sha256": "1fd04a50f62f778e338424f3762abbda1c0415e28e56401433b78a142287661e"
+    },
+    {
+      "path": "docs/verification/facility-2026-10-28/README.md",
+      "category": "dated evidence or media reference retained",
+      "change": "unchanged",
+      "sha256": "0e793f596e15ba8191fd87ff64db4cb40492453cf57e4e4fd230c505a39c799a"
+    },
+    {
+      "path": "docs/verification/facility-doorways-2026-11-01/README.md",
+      "category": "dated evidence or media reference retained",
+      "change": "unchanged",
+      "sha256": "5860f5c312353335aad0bf65495edcebb0422ed56a981e3fdd9c3a2eb9d7d0db"
+    },
+    {
+      "path": "docs/verification/facility-recovery-2026-11-09/README.md",
+      "category": "dated evidence or media reference retained",
+      "change": "unchanged",
+      "sha256": "a4a709a643e64004155cc7796adfb6a7ce6dc11440307b1783f98901c43c7e2a"
+    },
+    {
+      "path": "docs/verification/facility-stairs-2026-11-01/README.md",
+      "category": "dated evidence or media reference retained",
+      "change": "unchanged",
+      "sha256": "a408dc2490ceee6027a59d98df2e4ae42988b69982bda7033d1302e97f58cd14"
+    },
+    {
+      "path": "docs/verification/facility-windows-2026-11-01/README.md",
+      "category": "dated evidence or media reference retained",
+      "change": "unchanged",
+      "sha256": "b61fbe6d36570395d723ba7bf31cecb95abbe8c3e7e94dbfcabf61f8423d3dc5"
+    },
+    {
+      "path": "docs/verification/gpu-default-2026-11-03/README.md",
+      "category": "dated evidence or media reference retained",
+      "change": "unchanged",
+      "sha256": "002ab728275c63b35355fa4d16ba173a3a83fcbb7b1de020f129d62e58a6a5bb"
+    },
+    {
+      "path": "docs/verification/guided-experience-2026-11-11/README.md",
+      "category": "dated evidence or media reference retained",
+      "change": "unchanged",
+      "sha256": "77f83c74fc1cd1d79c00a8291d39728e57689e99d31a2179d83dfc0279125a31"
+    },
+    {
+      "path": "docs/verification/guided-experience-2026-11-11/review.md",
+      "category": "dated evidence or media reference retained",
+      "change": "unchanged",
+      "sha256": "75b32140fdd7bcc7632fb175f104a741f90acc20cf26d238d15fd3f869278801"
+    },
+    {
+      "path": "docs/verification/hardware-2026-10-27/README.md",
+      "category": "dated evidence or media reference retained",
+      "change": "unchanged",
+      "sha256": "9ea23e5a239708e621a81e9a5915a6fe3acbead557bb0b86550c219deb28e359"
+    },
+    {
+      "path": "docs/verification/host-2026-10-28/README.md",
+      "category": "dated evidence or media reference retained",
+      "change": "unchanged",
+      "sha256": "4641d7dd69e0ba3aa4898f43d756ae6bb71fcf23aab216e0dcacd7629bf2a628"
+    },
+    {
+      "path": "docs/verification/journal-2026-10-28/README.md",
+      "category": "dated evidence or media reference retained",
+      "change": "unchanged",
+      "sha256": "7618512119ddc3b835babf3d6405efb79ebf894ec0e38bad36690500c5bf15ec"
+    },
+    {
+      "path": "docs/verification/lan-recorder-2026-10-30/README.md",
+      "category": "dated evidence or media reference retained",
+      "change": "unchanged",
+      "sha256": "f1b81e409e73587734578b8eab03f6bf3552245584ec3a8c7467cccc3fd47d09"
+    },
+    {
+      "path": "docs/verification/launcher-recovery-2026-10-29/README.md",
+      "category": "dated evidence or media reference retained",
+      "change": "unchanged",
+      "sha256": "729bb6014dad49a8024ddb33f2fe08cf2ec423bda5c8d24f10bdb4a68a7445d2"
+    },
+    {
+      "path": "docs/verification/live-catalogue-recovery-2026-11-11/README.md",
+      "category": "dated evidence or media reference retained",
+      "change": "unchanged",
+      "sha256": "753bbc8285ee36f2938cdceaa77326ed2acad22a42693e4e788694e365bf3d66"
+    },
+    {
+      "path": "docs/verification/live-gpu-2026-11-02/README.md",
+      "category": "dated evidence or media reference retained",
+      "change": "unchanged",
+      "sha256": "bd865561e8a3b1c95bd5b7801a4d69c98961ff4bb1ece78c5ea997f5a74033b7"
+    },
+    {
+      "path": "docs/verification/live-reply-validation-2026-11-11/README.md",
+      "category": "dated evidence or media reference retained",
+      "change": "unchanged",
+      "sha256": "5dbf79186c99cee3f6993065c3bb4ee1eb9b5894939ab4acad16bf60fd75d147"
+    },
+    {
+      "path": "docs/verification/live-review-retention-2026-11-11/README.md",
+      "category": "dated evidence or media reference retained",
+      "change": "unchanged",
+      "sha256": "60d2e7485c23a8584410c76785bcba53e9cea246dfc09fdacdf9a06b156420f2"
+    },
+    {
+      "path": "docs/verification/local-analysis-2026-10-29/README.md",
+      "category": "dated evidence or media reference retained",
+      "change": "unchanged",
+      "sha256": "72ad71991c52554f206ac56614f4dd912a2b8f6fb52091f5d0bbb22da9f671a1"
+    },
+    {
+      "path": "docs/verification/local-feeds-2026-10-29/README.md",
+      "category": "dated evidence or media reference retained",
+      "change": "unchanged",
+      "sha256": "5223a9eca5aeb3954ccbfaad4a40fcf230bbfb559656e7f7be761e12944707e9"
+    },
+    {
+      "path": "docs/verification/mac-setup-2026-11-01/README.md",
+      "category": "dated evidence or media reference retained",
+      "change": "unchanged",
+      "sha256": "3f88c0eb21b8374b4bc6b17923dac50aa1ef0bcec5ee600970394341cca509b7"
+    },
+    {
+      "path": "docs/verification/media-coverage-2026-10-30/README.md",
+      "category": "dated evidence or media reference retained",
+      "change": "unchanged",
+      "sha256": "7f2898e1c5fcfddef1bcb3c02b1bcfe569bf8d2945eff53275b42c9dff5aa086"
+    },
+    {
+      "path": "docs/verification/merged-baseline-2026-11-09/README.md",
+      "category": "dated evidence or media reference retained",
+      "change": "unchanged",
+      "sha256": "9d1a7a7743814a9af83041f052d4a71f6e5856de6123a7cf23f84b07ed6c1944"
+    },
+    {
+      "path": "docs/verification/native-2026-10-28/README.md",
+      "category": "dated evidence or media reference retained",
+      "change": "unchanged",
+      "sha256": "ab903c1c219a0b8d0ead724c52e77d3440f9916632c4d299f0797d6c17969564"
+    },
+    {
+      "path": "docs/verification/oem-backup-2026-11-03/README.md",
+      "category": "dated evidence or media reference retained",
+      "change": "unchanged",
+      "sha256": "c9bd66e2bf27aca4b55ffbc6a8cb9b438182b52b525fa79dbea7dd64f49c1a51"
+    },
+    {
+      "path": "docs/verification/oem-continuity-2026-11-09/README.md",
+      "category": "dated evidence or media reference retained",
+      "change": "unchanged",
+      "sha256": "8e7fef77f616334a07654d6119b5fb38d3454a8451457668aa6d4388ed48b72f"
+    },
+    {
+      "path": "docs/verification/oem-field-acceptance-2026-11-05/README.md",
+      "category": "dated evidence or media reference retained",
+      "change": "unchanged",
+      "sha256": "81ea226639d73343c0f23cff746c8dff8397a19d70e6995926c97c40c91946df"
+    },
+    {
+      "path": "docs/verification/profiling-2026-10-28/README.md",
+      "category": "dated evidence or media reference retained",
+      "change": "unchanged",
+      "sha256": "27337d8e1ac39ee01c9040e1faca3ac45e139a53327a5f25bb33bd395aeececb"
+    },
+    {
+      "path": "docs/verification/recognition-2026-10-29/README.md",
+      "category": "dated evidence or media reference retained",
+      "change": "unchanged",
+      "sha256": "a4f84e7f51f89d342ac84d2cfce9e0b839e0648fafe120c01f593cb5d36ed82a"
+    },
+    {
+      "path": "docs/verification/recognition-transfer-2026-11-11/README.md",
+      "category": "dated evidence or media reference retained",
+      "change": "unchanged",
+      "sha256": "6b417583d88f1205a3028dc6cf5d560c71c1f1a820eaab15c62fa5edef5d1fb0"
+    },
+    {
+      "path": "docs/verification/recovery-2026-10-28/README.md",
+      "category": "dated evidence or media reference retained",
+      "change": "unchanged",
+      "sha256": "7a7ed84f947f084a49b48cf4473d902ed2eac1121a1144670ac73b6532ae154b"
+    },
+    {
+      "path": "docs/verification/repository-checks-2026-11-03/README.md",
+      "category": "dated evidence or media reference retained",
+      "change": "unchanged",
+      "sha256": "cb2a9802cddaa1443720d3968e8ea761d079f277d2dab29bb11d769990d7859b"
+    },
+    {
+      "path": "docs/verification/review-fixes-2026-10-30/README.md",
+      "category": "dated evidence or media reference retained",
+      "change": "unchanged",
+      "sha256": "5f874d599390840eb00a370249c1733c0d82f8d05b4d81c821903bc5e6cdfd9e"
+    },
+    {
+      "path": "docs/verification/route-coverage-math-2026-11-12/README.md",
+      "category": "dated evidence or media reference retained",
+      "change": "unchanged",
+      "sha256": "0adc025c56af8edebaddf3690148ec48a93a34b7169bbaf59a0518e2002aa869"
+    },
+    {
+      "path": "docs/verification/runtime-and-handoffs-2026-11-09/README.md",
+      "category": "dated evidence or media reference retained",
+      "change": "unchanged",
+      "sha256": "cd48c446dc465095f66cfb12ce7ecb5ec4206ecd3b80e2f1803c632493e89f75"
+    },
+    {
+      "path": "docs/verification/science-math-2026-11-11/README.md",
+      "category": "dated evidence or media reference retained",
+      "change": "unchanged",
+      "sha256": "e12f849a0adcaefc2be6e259d13e5d2355a0029aac76395f5be2d6fc03208e16"
+    },
+    {
+      "path": "docs/verification/tracking-2026-11-02/README.md",
+      "category": "dated evidence or media reference retained",
+      "change": "unchanged",
+      "sha256": "967c42c8c50599885e7ab3c454f15e819cddd57a803b485ac898738464d44a9e"
+    },
+    {
+      "path": "docs/verification/tracking-algorithms-2026-11-11/README.md",
+      "category": "dated evidence or media reference retained",
+      "change": "unchanged",
+      "sha256": "c94082b24b154791ff253dfc56bfaa3d955180bf6d182f3fa698c952a78a1925"
+    },
+    {
+      "path": "docs/verification/tracking-algorithms-2026-11-11/review.md",
+      "category": "dated evidence or media reference retained",
+      "change": "unchanged",
+      "sha256": "8ca562740ab77afdd0b8578550e4f3bdd0fb6e6fe34b4736d1f43e336c192b33"
+    },
+    {
+      "path": "docs/verification/tracking-frame-size-2026-11-11/README.md",
+      "category": "dated evidence or media reference retained",
+      "change": "unchanged",
+      "sha256": "1fe33eb631fe11b7edafdb6f2254caa43065577a64a195a5443704e254fc2042"
+    },
+    {
+      "path": "docs/verification/training-studio-2026-11-02/README.md",
+      "category": "dated evidence or media reference retained",
+      "change": "unchanged",
+      "sha256": "5f6162aa1959fe65d4fe296c4a3a68f75e4fa4623318ee60ece669a1aad185b5"
+    },
+    {
+      "path": "docs/verification/visual-documentation-2026-11-01/README.md",
+      "category": "dated evidence or media reference retained",
+      "change": "unchanged",
+      "sha256": "c78a99213f3c3bfdfd86e94b6d1a3df14d78f8809586e84e9d537f95aaab4fa5"
+    },
+    {
+      "path": "docs/verification/work-preservation-2026-11-09/README.md",
+      "category": "dated evidence or media reference retained",
+      "change": "unchanged",
+      "sha256": "7c7940472783ba83232f96c0609c8da0ab292f6d412041e26498effa0b514409"
+    },
+    {
+      "path": "docs/verification/workers-2026-10-28/README.md",
+      "category": "dated evidence or media reference retained",
+      "change": "unchanged",
+      "sha256": "b4a790e35f123391dcf77dc60b7c329970d2ac690839d523d1a068b448877d9a"
+    },
+    {
+      "path": "docs/verification/workspace-experience-2026-11-09/README.md",
+      "category": "dated evidence or media reference retained",
+      "change": "unchanged",
+      "sha256": "921a4f24e85429844babac0eb9fb3df97950ead84de97caac080412ddaf5f2ba"
+    },
+    {
+      "path": "docs/verification/workspace-recovery-followup-2026-11-09/README.md",
+      "category": "dated evidence or media reference retained",
+      "change": "unchanged",
+      "sha256": "eaf910636dbae61fdadb08cf047f446760967d7e9378898ebdc1a86fd3a8515a"
+    },
+    {
+      "path": "docs/visual-atlas.md",
+      "category": "canonical documentation",
+      "change": "unchanged",
+      "sha256": "dca269b583782cdba164dcde2aa894ee6938485dfb4a5b635109beb2331a514b"
+    },
+    {
+      "path": "docs/visual-tour.md",
+      "category": "dated evidence or media reference retained",
+      "change": "unchanged",
+      "sha256": "bc19167059fa47ff90cf08bf7d2f696743b27d94bf05eaed2fc24faa597931e6"
+    },
+    {
+      "path": "docs/wiki/100-camera-plan.md",
+      "category": "generated Wiki companion",
+      "change": "unchanged",
+      "sha256": "08faa31d61f4735945ce2b1b9f7688f65b8038dec7604d0438e2d6f623505c26"
+    },
+    {
+      "path": "docs/wiki/Architecture-and-data.md",
+      "category": "generated Wiki companion",
+      "change": "updated",
+      "sha256": "3954671fbedf0e408abeb5fd5e5b3f8ae0412bc57ebd9cec564b6801300aceb2"
+    },
+    {
+      "path": "docs/wiki/Assessment-2026-10-30.md",
+      "category": "generated Wiki companion",
+      "change": "unchanged",
+      "sha256": "1410bc3447e37cbcc8994cde9d4fd4ec7004592e02b9eb4419b6f9470a9f7cb9"
+    },
+    {
+      "path": "docs/wiki/Camera-sources.md",
+      "category": "generated Wiki companion",
+      "change": "unchanged",
+      "sha256": "c7cd31ec147e766440b9480edab83064da077e7bccacb68ea14732b8f689234c"
+    },
+    {
+      "path": "docs/wiki/Contributing.md",
+      "category": "generated Wiki companion",
+      "change": "unchanged",
+      "sha256": "ed6694b49b51381ee1e8a8feac96f36391224940f2803d455fee0ae369284bd3"
+    },
+    {
+      "path": "docs/wiki/Development-and-checks.md",
+      "category": "generated Wiki companion",
+      "change": "unchanged",
+      "sha256": "7737177e0cfd9850fca3755f77bcd80dd8529a1bbfe37452b8c8593646f6da9b"
+    },
+    {
+      "path": "docs/wiki/Edge-CLI.md",
+      "category": "generated Wiki companion",
+      "change": "unchanged",
+      "sha256": "a6addcbc38d67ace9912a3d5217f183e1e5c24aeb494db98db07259a8fc3c90d"
+    },
+    {
+      "path": "docs/wiki/Enhancement-comparison.md",
+      "category": "generated Wiki companion",
+      "change": "unchanged",
+      "sha256": "9b455192cd5c3189ffa3022e2108642262f6ecc4a45c1f2819f4a3250b794116"
+    },
+    {
+      "path": "docs/wiki/Evidence-and-validation.md",
+      "category": "generated Wiki companion",
+      "change": "updated",
+      "sha256": "1aef16f083bddf1dcf259cf0113b5ccca8d9cc9f32fb3216bd39684bef2d12cb"
+    },
+    {
+      "path": "docs/wiki/Experience-review-2026-10-29.md",
+      "category": "generated Wiki companion",
+      "change": "unchanged",
+      "sha256": "49d01e9c43c1c8446c42d4e7da2bbd22f2d48584a429720794cf2f0694ac9e88"
+    },
+    {
+      "path": "docs/wiki/Facility-planning.md",
+      "category": "generated Wiki companion",
+      "change": "updated",
+      "sha256": "c4c58feb94618b98f3ad7a2cd845e4125b256a3c20b3ff13271403a69c0b5ecd"
+    },
+    {
+      "path": "docs/wiki/Facility-setup-reliability.md",
+      "category": "generated Wiki companion",
+      "change": "unchanged",
+      "sha256": "a1a39e7ca55d087e48b650db154601e7b5430310c11f2019f7f44b28edafb984"
+    },
+    {
+      "path": "docs/wiki/Facility-setup-research.md",
+      "category": "generated Wiki companion",
+      "change": "unchanged",
+      "sha256": "020b0eb752a007c62c1bf370649c7d7a229ba6531b5e55e7066d92c3555c86c5"
+    },
+    {
+      "path": "docs/wiki/Facility-study-kit.md",
+      "category": "generated Wiki companion",
+      "change": "unchanged",
+      "sha256": "1e5315ceec8270a7c8d54ab5beb349d092b60f239e3710ea9f7fb7624c944383"
+    },
+    {
+      "path": "docs/wiki/Facility-upgrades-2026-10-29.md",
+      "category": "generated Wiki companion",
+      "change": "unchanged",
+      "sha256": "a234f17dae497e952888e436cbecd5c11a9714bb27901dc2d6120da9aa93ed16"
+    },
+    {
+      "path": "docs/wiki/Field-acceptance.md",
+      "category": "generated Wiki companion",
+      "change": "unchanged",
+      "sha256": "4381f589ec57914a327ebd57194a9efe2c3bd2fcd736bcd84704b2ef1b32abb0"
+    },
+    {
+      "path": "docs/wiki/GPU-planning.md",
+      "category": "generated Wiki companion",
+      "change": "unchanged",
+      "sha256": "85eadf70c5b737f701feda6a59ddb93ce9989441fe55565ca672dd744e51cd37"
+    },
+    {
+      "path": "docs/wiki/Getting-started.md",
+      "category": "generated Wiki companion",
+      "change": "unchanged",
+      "sha256": "b2c1be8eb19047178d941920afb833dc2b916c9aef3d4e56f8278aefbb69781f"
+    },
+    {
+      "path": "docs/wiki/Guide-index.md",
+      "category": "generated Wiki companion",
+      "change": "unchanged",
+      "sha256": "4ab2b70ac71381d514d6dca92a79c0d1d954c9d378fb8701c3cc1ab6b3cc081c"
+    },
+    {
+      "path": "docs/wiki/Guided-experience-visual-provenance.md",
+      "category": "generated Wiki companion",
+      "change": "unchanged",
+      "sha256": "ecef19930a1e6c42df2e5248e8606ded9ac8ed60dc2ce1fad9d512f87fc95fd7"
+    },
+    {
+      "path": "docs/wiki/Guided-training.md",
+      "category": "generated Wiki companion",
+      "change": "unchanged",
+      "sha256": "cfe49f54e804e8a318f75e54c42d44d3ee3f76f880b7350f0fef499d853690e3"
+    },
+    {
+      "path": "docs/wiki/Hardware-guide.md",
+      "category": "generated Wiki companion",
+      "change": "unchanged",
+      "sha256": "918a06a99ba2a02228afdae955c67d3f655ddda6a6a0855415ada7d3bc6ea6a2"
+    },
+    {
+      "path": "docs/wiki/Historical-visual-provenance.md",
+      "category": "generated Wiki companion",
+      "change": "unchanged",
+      "sha256": "4c5b1e0b5f70e5c0e87a38f72fa4e3bc7e0756010a6689b7deb91b8c9078db3b"
+    },
+    {
+      "path": "docs/wiki/Home.md",
+      "category": "generated Wiki companion",
+      "change": "updated",
+      "sha256": "15addde6f037f1697c9c1105e97fca6efd730aa1fe896292198d70e269e63f99"
+    },
+    {
+      "path": "docs/wiki/Image-diagnostics.md",
+      "category": "generated Wiki companion",
+      "change": "unchanged",
+      "sha256": "41a7690fdc1aa5d53a02131c3bbcc4fd76c4da4aca5cf0f9e82bb37397d2db25"
+    },
+    {
+      "path": "docs/wiki/LAN-recording.md",
+      "category": "generated Wiki companion",
+      "change": "unchanged",
+      "sha256": "0af34fef30f8af8bcaceb3271b85522c39e9374fb6a5ffa8c8d2c9151be9df4c"
+    },
+    {
+      "path": "docs/wiki/Linux-setup.md",
+      "category": "generated Wiki companion",
+      "change": "unchanged",
+      "sha256": "d2723713bc18109e9e053559016be6d5d4af9228c0db2629d44c6488ee918d0f"
+    },
+    {
+      "path": "docs/wiki/Live-AI-and-tracking.md",
+      "category": "generated Wiki companion",
+      "change": "unchanged",
+      "sha256": "19692e476838fe62ac21f6b255a32a8d8623563f5ae74201220791b4f9eab4d0"
+    },
+    {
+      "path": "docs/wiki/Live-GPU.md",
+      "category": "generated Wiki companion",
+      "change": "unchanged",
+      "sha256": "0ff5fd95fb6e254049cbda68fc5b99e9e5fbb8c66ec4f0d3389625821780050d"
+    },
+    {
+      "path": "docs/wiki/Local-analysis-service.md",
+      "category": "generated Wiki companion",
+      "change": "unchanged",
+      "sha256": "6ec390de174a5b79ddc62a23bc17325745fb2dd0752fcd80126e529898fa15f4"
+    },
+    {
+      "path": "docs/wiki/Local-map-services.md",
+      "category": "generated Wiki companion",
+      "change": "unchanged",
+      "sha256": "7a96bbda6ddce5568f74a361631f07d1674a37254348859ed0146c087db03e9c"
+    },
+    {
+      "path": "docs/wiki/Mac-setup.md",
+      "category": "generated Wiki companion",
+      "change": "unchanged",
+      "sha256": "94599b9df802016303afe096b4d1095d81e238241a9505fcbc984645e9fdfc52"
+    },
+    {
+      "path": "docs/wiki/Maps-and-shapes.md",
+      "category": "generated Wiki companion",
+      "change": "unchanged",
+      "sha256": "164ef21c081922c562482ec1de587a27222727f000f8c719ac97902daacc30dd"
+    },
+    {
+      "path": "docs/wiki/Model-qualification-2026-10-26.md",
+      "category": "generated Wiki companion",
+      "change": "unchanged",
+      "sha256": "281cdc6fb6117b847354048700504ffc2c42fc68fff4f8d6ca5ad71593738b35"
+    },
+    {
+      "path": "docs/wiki/OEM-backup.md",
+      "category": "generated Wiki companion",
+      "change": "unchanged",
+      "sha256": "0a2640a977eeb428a837e7ccc851d6c48e9dd326380b634b5de204d7f46fdfd9"
+    },
+    {
+      "path": "docs/wiki/OEM-field-acceptance.md",
+      "category": "generated Wiki companion",
+      "change": "unchanged",
+      "sha256": "e637a2d12720944f1844ad8d451b9b67fa9d7556ee41119c655ec1a7f6ff4dfa"
+    },
+    {
+      "path": "docs/wiki/Offline-evaluation.md",
+      "category": "generated Wiki companion",
+      "change": "unchanged",
+      "sha256": "5d60c666d8e57bbbac593f0f1dbfd1e774358b80376a36d6fd2900766da3fb0e"
+    },
+    {
+      "path": "docs/wiki/Offline-qualification.md",
+      "category": "generated Wiki companion",
+      "change": "unchanged",
+      "sha256": "afd6804fb234a472ff3e553788b9a81d3763ea3dd9e69e9651d8d5d969fc5a5c"
+    },
+    {
+      "path": "docs/wiki/PC-testing.md",
+      "category": "generated Wiki companion",
+      "change": "updated",
+      "sha256": "9db46c0baa98b9f2cb93236b74a3de68f717d33c3e8ee044d102a5ffc3a7fcc5"
+    },
+    {
+      "path": "docs/wiki/PR61-visual-provenance.md",
+      "category": "generated Wiki companion",
+      "change": "unchanged",
+      "sha256": "a6794fc9741bb1b80bef05e2d41d147b698665d2c60a04118b5f7552a1f54520"
+    },
+    {
+      "path": "docs/wiki/Person-enrollment.md",
+      "category": "generated Wiki companion",
+      "change": "unchanged",
+      "sha256": "01327d771657746636ea54ff449780f54a7dd9d8be86c87b66daf516bb4df5f2"
+    },
+    {
+      "path": "docs/wiki/Pilot-scope.md",
+      "category": "generated Wiki companion",
+      "change": "unchanged",
+      "sha256": "27a60a68e739a6a0d44089a33ca51f7a2aa86e3390d1c443067d390a40721a0e"
+    },
+    {
+      "path": "docs/wiki/Planar-calibration.md",
+      "category": "generated Wiki companion",
+      "change": "unchanged",
+      "sha256": "9b4f97c1406fda346c9dc6b2fb8f922bec8c09a0a4105ec5ce18c28e19614a8b"
+    },
+    {
+      "path": "docs/wiki/Product-status.md",
+      "category": "generated Wiki companion",
+      "change": "updated",
+      "sha256": "9ca20f40f40575e87bbe642e05448a7fc6568fd1f0fb1fe5cbd6bbf210130dbc"
+    },
+    {
+      "path": "docs/wiki/Public-webcams.md",
+      "category": "generated Wiki companion",
+      "change": "unchanged",
+      "sha256": "4466a6e61c37f74dbd17ade595686dd32023293599a620862ad9b7b3c80b10c3"
+    },
+    {
+      "path": "docs/wiki/README.md",
+      "category": "canonical documentation",
+      "change": "unchanged",
+      "sha256": "601d88034152ba6327d792381ad97558300f17cbdee144a33035e9133a7039ac"
+    },
+    {
+      "path": "docs/wiki/Recognition-details.md",
+      "category": "generated Wiki companion",
+      "change": "unchanged",
+      "sha256": "d89918ec1c9bd116d3a8e958103f61a2d63d980089ff71b8951bda8af886d113"
+    },
+    {
+      "path": "docs/wiki/Recording-coverage.md",
+      "category": "generated Wiki companion",
+      "change": "unchanged",
+      "sha256": "eae5190b6994a6a67547981aaa32828d58c1515cba6170679150a66a0b4be005"
+    },
+    {
+      "path": "docs/wiki/Recording-workflow.md",
+      "category": "generated Wiki companion",
+      "change": "unchanged",
+      "sha256": "65388d6b4c7446f374a479f2327892f95faaaaea6465b0a16b39de2c62306b06"
+    },
+    {
+      "path": "docs/wiki/Resource-controls.md",
+      "category": "generated Wiki companion",
+      "change": "unchanged",
+      "sha256": "a011dcd79be2460f4e1bdaa98ec05862735056aea3a9a7aaf51a2bcd38f9ab53"
+    },
+    {
+      "path": "docs/wiki/Review-2026-10-30.md",
+      "category": "generated Wiki companion",
+      "change": "unchanged",
+      "sha256": "f77a4855cda18e9ebc86e1943e354925324f07955661a7b09e38ecdde5d81218"
+    },
+    {
+      "path": "docs/wiki/Review-and-events.md",
+      "category": "generated Wiki companion",
+      "change": "unchanged",
+      "sha256": "62ae325300f2ad25f6879ba103c6949852a97c53bc4c1607a1de029dd36cad98"
+    },
+    {
+      "path": "docs/wiki/Roadmap.md",
+      "category": "generated Wiki companion",
+      "change": "updated",
+      "sha256": "e30dedd7358c3f684d63ebf61f0a04e02d6025f6b653c718ea8fe6f658d2d12b"
+    },
+    {
+      "path": "docs/wiki/Saved-facilities.md",
+      "category": "generated Wiki companion",
+      "change": "unchanged",
+      "sha256": "35d414104666e820c10226d5cd4b34473e26617e08a956e5847a511893d0212e"
+    },
+    {
+      "path": "docs/wiki/Science-and-algorithms.md",
+      "category": "generated Wiki companion",
+      "change": "updated",
+      "sha256": "d347990e81df94c5dc02ba0f7622ad8da52d1772a4ebfcb35dbbaed0729ec94f"
+    },
+    {
+      "path": "docs/wiki/Security-boundary.md",
+      "category": "generated Wiki companion",
+      "change": "unchanged",
+      "sha256": "980718595d0f1f7de06847e33142e80087a43edc9240597307b1a9de0759e620"
+    },
+    {
+      "path": "docs/wiki/Third-party-notices.md",
+      "category": "generated Wiki companion",
+      "change": "unchanged",
+      "sha256": "397a90817b6e35d1c9088418e99a466fb040c01457d9cbade7f3d0b46b73bff3"
+    },
+    {
+      "path": "docs/wiki/Tracking-evaluation.md",
+      "category": "generated Wiki companion",
+      "change": "unchanged",
+      "sha256": "27cffad59b8eb45ae98c310bea0aa6a71977c333bbb68e8a7bd3171765e6d4af"
+    },
+    {
+      "path": "docs/wiki/Troubleshooting.md",
+      "category": "generated Wiki companion",
+      "change": "unchanged",
+      "sha256": "0da1df06d9d10076a2eec4f90a1aa474c945eece7d78286ec78c02764d07bd1b"
+    },
+    {
+      "path": "docs/wiki/Visual-atlas.md",
+      "category": "generated Wiki companion",
+      "change": "unchanged",
+      "sha256": "fbec8d856a12df8190beba59fd3f914e197da7821702e636e6aa581f68f5016f"
+    },
+    {
+      "path": "docs/wiki/Visual-handbook.md",
+      "category": "generated Wiki companion",
+      "change": "unchanged",
+      "sha256": "5b4f68a4d130a7a2689a8ffd9fc9fd29922ca130222a6a38444b9931f6eb7c61"
+    },
+    {
+      "path": "docs/wiki/Visual-provenance.md",
+      "category": "generated Wiki companion",
+      "change": "unchanged",
+      "sha256": "e92ebae208f005dd5eb3ea9ae2fc57c6d49ab6f44c94095d84bcf42a94a02b19"
+    },
+    {
+      "path": "docs/wiki/Visual-tour.md",
+      "category": "generated Wiki companion",
+      "change": "unchanged",
+      "sha256": "83f575edf6ceb297b64a8c53ec6c304d6baced6e9d5f34afd0d3f66530680935"
+    },
+    {
+      "path": "docs/wiki/Wiki-publication.md",
+      "category": "generated Wiki companion",
+      "change": "unchanged",
+      "sha256": "1b9a97c33f83c3f9d2b7b79c4c72211c891cb728fa6baa3cc22fcfaf3f8f91e9"
+    },
+    {
+      "path": "docs/wiki/Windows-setup.md",
+      "category": "generated Wiki companion",
+      "change": "unchanged",
+      "sha256": "d1edc87c92dc0926380910fc01124432a87aad865f5e3aa555b8f6837424f8fc"
+    },
+    {
+      "path": "docs/wiki/Workspace-audit-2026-10-31.md",
+      "category": "generated Wiki companion",
+      "change": "unchanged",
+      "sha256": "d0f602f8a528015cbc4ebbacb5edba9852639c90f509cf834336666f39ee00ec"
+    },
+    {
+      "path": "docs/wiki/Zones.md",
+      "category": "generated Wiki companion",
+      "change": "unchanged",
+      "sha256": "bfe11eaeec2be4916740cbc46b71c97d4e50f3d13de18591c5c823e1a43b469e"
+    },
+    {
+      "path": "docs/wiki/_Footer.md",
+      "category": "generated Wiki companion",
+      "change": "unchanged",
+      "sha256": "898abd2f7f5d3260ece985a0476fef2a21bd2c07e629be8d3f7f25c989831fb8"
+    },
+    {
+      "path": "docs/wiki/_Sidebar.md",
+      "category": "generated Wiki companion",
+      "change": "unchanged",
+      "sha256": "1a8bbdca5c95cb53a952633037c91a9ccffc183a1a082773fdaa1b2c0baf3004"
+    },
+    {
+      "path": "docs/workspace-ux-audit-2026-10-31.md",
+      "category": "dated evidence or media reference retained",
+      "change": "unchanged",
+      "sha256": "477a253f97fa1eb74eba8a16767a588bfd087563daf13a47ba717d514e1fe763"
+    },
+    {
+      "path": "docs/zones.md",
+      "category": "canonical documentation",
+      "change": "unchanged",
+      "sha256": "d859153e3adbdc1ec1493ca4fcbd1212d498d9fbc3b8888eec512960284c9183"
+    },
+    {
+      "path": "edge/README.md",
+      "category": "canonical documentation",
+      "change": "unchanged",
+      "sha256": "8fc4909e4c7d0648b4e31f72d56f21d544b541bc737944635f8b308e26d8af31"
+    },
+    {
+      "path": "edge/_vendor/trackeval/README.md",
+      "category": "third-party reference retained",
+      "change": "unchanged",
+      "sha256": "601494cfd0e3a93ae183183775ffebd5f9c68de1509cbbfe2e1bfb4ef28346c8"
+    },
+    {
+      "path": "tests/fixtures/facility/README.md",
+      "category": "fixture reference retained",
+      "change": "unchanged",
+      "sha256": "f8a28b1c2724f34fb7fb8eab0ac6835c52e7f883406c110add5b37c103824f5c"
+    }
+  ]
+}

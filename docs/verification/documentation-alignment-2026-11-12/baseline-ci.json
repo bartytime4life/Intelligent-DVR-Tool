@@ -1,0 +1,147 @@
+{
+  "captured_at_utc": "2026-11-12 06:49:41 UTC",
+  "scope": "Read-only hosted workflow snapshot; no runs cancelled or restarted. Hosted runs bind the stated PR head, not this later documentation change or an installed host.",
+  "baselines": [
+    {
+      "pr": 113,
+      "head_sha": "6595e1e1c8078337419321921c52ced202b0b5be",
+      "merged_sha": "65ec81166f7b4c7577e415c757e4696459012d63",
+      "workflow_runs": [
+        {
+          "id": 43165599432,
+          "name": "PC install kit",
+          "status": "completed",
+          "conclusion": "success",
+          "run_number": 456,
+          "jobs_url": "https://api.github.com/repos/bartytime4life/Intelligent-DVR-Tool/actions/runs/43165599432/jobs",
+          "logs_url": "https://api.github.com/repos/bartytime4life/Intelligent-DVR-Tool/actions/runs/43165599432/logs",
+          "workflow_id": 400856528
+        },
+        {
+          "id": 43165599492,
+          "name": "Cross-platform checks",
+          "status": "completed",
+          "conclusion": "success",
+          "run_number": 595,
+          "jobs_url": "https://api.github.com/repos/bartytime4life/Intelligent-DVR-Tool/actions/runs/43165599492/jobs",
+          "logs_url": "https://api.github.com/repos/bartytime4life/Intelligent-DVR-Tool/actions/runs/43165599492/logs",
+          "workflow_id": 395543320
+        },
+        {
+          "id": 43165599242,
+          "name": "Mac source install",
+          "status": "completed",
+          "conclusion": "success",
+          "run_number": 209,
+          "jobs_url": "https://api.github.com/repos/bartytime4life/Intelligent-DVR-Tool/actions/runs/43165599242/jobs",
+          "logs_url": "https://api.github.com/repos/bartytime4life/Intelligent-DVR-Tool/actions/runs/43165599242/logs",
+          "workflow_id": 403855532
+        },
+        {
+          "id": 43165599410,
+          "name": "Facility browser regression",
+          "status": "completed",
+          "conclusion": "success",
+          "run_number": 548,
+          "jobs_url": "https://api.github.com/repos/bartytime4life/Intelligent-DVR-Tool/actions/runs/43165599410/jobs",
+          "logs_url": "https://api.github.com/repos/bartytime4life/Intelligent-DVR-Tool/actions/runs/43165599410/logs",
+          "workflow_id": 398651984
+        }
+      ]
+    },
+    {
+      "pr": 115,
+      "head_sha": "3d92996abb3bf6dbef904e79436be0b7e4b07590",
+      "merged_sha": "2cac2173f1f6b751f23ab1847ce25a3aea40a6b2",
+      "workflow_runs": [
+        {
+          "id": 43168729118,
+          "name": "Facility browser regression",
+          "status": "in_progress",
+          "conclusion": null,
+          "run_number": 554,
+          "jobs_url": "https://api.github.com/repos/bartytime4life/Intelligent-DVR-Tool/actions/runs/43168729118/jobs",
+          "logs_url": "https://api.github.com/repos/bartytime4life/Intelligent-DVR-Tool/actions/runs/43168729118/logs",
+          "workflow_id": 398651984
+        },
+        {
+          "id": 43168729012,
+          "name": "PC install kit",
+          "status": "completed",
+          "conclusion": "success",
+          "run_number": 462,
+          "jobs_url": "https://api.github.com/repos/bartytime4life/Intelligent-DVR-Tool/actions/runs/43168729012/jobs",
+          "logs_url": "https://api.github.com/repos/bartytime4life/Intelligent-DVR-Tool/actions/runs/43168729012/logs",
+          "workflow_id": 400856528
+        },
+        {
+          "id": 43168729047,
+          "name": "Cross-platform checks",
+          "status": "completed",
+          "conclusion": "success",
+          "run_number": 601,
+          "jobs_url": "https://api.github.com/repos/bartytime4life/Intelligent-DVR-Tool/actions/runs/43168729047/jobs",
+          "logs_url": "https://api.github.com/repos/bartytime4life/Intelligent-DVR-Tool/actions/runs/43168729047/logs",
+          "workflow_id": 395543320
+        },
+        {
+          "id": 43168729019,
+          "name": "Mac source install",
+          "status": "completed",
+          "conclusion": "success",
+          "run_number": 215,
+          "jobs_url": "https://api.github.com/repos/bartytime4life/Intelligent-DVR-Tool/actions/runs/43168729019/jobs",
+          "logs_url": "https://api.github.com/repos/bartytime4life/Intelligent-DVR-Tool/actions/runs/43168729019/logs",
+          "workflow_id": 403855532
+        }
+      ]
+    },
+    {
+      "pr": 114,
+      "head_sha": "a27799faf227e07022e016adbd6f94683f879e39",
+      "merged_sha": "66e6dd1cde9913e6c4f03fb94733e83dc3070c93",
+      "workflow_runs": [
+        {
+          "id": 43169792809,
+          "name": "PC install kit",
+          "status": "completed",
+          "conclusion": "success",
+          "run_number": 465,
+          "jobs_url": "https://api.github.com/repos/bartytime4life/Intelligent-DVR-Tool/actions/runs/43169792809/jobs",
+          "logs_url": "https://api.github.com/repos/bartytime4life/Intelligent-DVR-Tool/actions/runs/43169792809/logs",
+          "workflow_id": 400856528
+        },
+        {
+          "id": 43169792944,
+          "name": "Cross-platform checks",
+          "status": "completed",
+          "conclusion": "success",
+          "run_number": 604,
+          "jobs_url": "https://api.github.com/repos/bartytime4life/Intelligent-DVR-Tool/actions/runs/43169792944/jobs",
+          "logs_url": "https://api.github.com/repos/bartytime4life/Intelligent-DVR-Tool/actions/runs/43169792944/logs",
+          "workflow_id": 395543320
+        },
+        {
+          "id": 43169792943,
+          "name": "Mac source install",
+          "status": "completed",
+          "conclusion": "success",
+          "run_number": 218,
+          "jobs_url": "https://api.github.com/repos/bartytime4life/Intelligent-DVR-Tool/actions/runs/43169792943/jobs",
+          "logs_url": "https://api.github.com/repos/bartytime4life/Intelligent-DVR-Tool/actions/runs/43169792943/logs",
+          "workflow_id": 403855532
+        },
+        {
+          "id": 43169793066,
+          "name": "Facility browser regression",
+          "status": "in_progress",
+          "conclusion": null,
+          "run_number": 557,
+          "jobs_url": "https://api.github.com/repos/bartytime4life/Intelligent-DVR-Tool/actions/runs/43169793066/jobs",
+          "logs_url": "https://api.github.com/repos/bartytime4life/Intelligent-DVR-Tool/actions/runs/43169793066/logs",
+          "workflow_id": 398651984
+        }
+      ]
+    }
+  ]
+}

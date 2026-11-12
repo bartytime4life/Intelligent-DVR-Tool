@@ -22,7 +22,22 @@ The minimum capacity goal is **100 simultaneously active cameras**. The current 
 | Performance | Bounded scheduler, budgets, synthetic overload model | Sustained decode/inference/end-to-end rates on intended hardware |
 | 100-camera operation | Owner requirement and staged acceptance design | Ingest/recording/worker implementation and simultaneous-source qualification |
 
-## Delivered through November 11, 2026
+## Delivered through November 12, 2026
+
+[PR #114](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/114), merged
+as `66e6dd1c`, binds detection/tracking evaluation to the JSON bytes actually
+captured and checked. It rejects tracking input changes between stages while
+retaining bounded reads and strict validation. [Replacement-race proofs and
+portable regressions](verification/evaluation-binding-2026-11-11/README.md)
+establish input consistency, not detector accuracy or an atomic filesystem snapshot.
+
+[PR #115](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/115), merged
+as `2cac2173`, measures route coverage and overlap by covered path length and
+reports total uncovered distance plus the longest continuous gap. The
+[generated geometry record](verification/route-coverage-math-2026-11-12/README.md)
+keeps analytic, independent-oracle and local browser evidence. Zone grids and
+the simulated handoff rehearsal remain separate; no optical calibration,
+real tracking or camera-capacity claim follows from these calculations.
 
 [PR #112](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/112), merged
 as `cd6d1566`, replaces coarse automatic training cutoffs with empirical score

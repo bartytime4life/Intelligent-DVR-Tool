@@ -149,7 +149,7 @@ map. Map-layer buttons wrap when needed and remain available by keyboard.
    camera or its heading handle on the map, or use the keyboard, then Save the camera.
 5. Inspect the selected camera's ground-plane visibility estimate and 3D volume,
    estimated zone and route coverage, and the blind-spot overlay for one zone.
-6. Draw a route, run the 30-second rehearsal, scrub it, and review proposed camera
+6. Draw a route, play or scrub the simulated rehearsal, and review proposed camera
    transitions. Links and separations are session-only simulation decisions.
 
 Drawing uses clicks and polygon closure (line routes finish by double-click).
@@ -215,8 +215,8 @@ recognition-quality claim.
   includes total uncovered distance and the longest continuous gap across route
   vertices. Zero-length segments add no distance. Calculations retain gaps above
   floating-point tolerance, but the result remains an estimate of the drawn
-  ground plane, not calibrated visibility. The separate 61-position rehearsal
-  below is still simulated. [Mathematics and generated checks](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/route-coverage-math-2026-11-12/README.md).
+  ground plane, not calibrated visibility. The separate rehearsal below uses
+  sampled, simulated handoff proposals. [Mathematics and generated checks](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/route-coverage-math-2026-11-12/README.md).
 - **Direct manipulation.** Dragging the selected camera (mouse or touch) or its
   round heading handle previews the move live on the map; release, Alt+Arrow and
   `[` / `]` change only the unsaved draft. Save camera commits, Discard preview
@@ -230,11 +230,17 @@ recognition-quality claim.
   range, resolution and DORI ground distances, followed by its interpretation
   limits. It contains no credentials, stream addresses or footage.
 
-The route is a planned, simulated path. It is not an observed trajectory. Rehearsal
-uses 61 distance-spaced samples over 30 seconds and labels gaps explicitly.
-Transitions are proposals, not proof of identity continuity. Real cross-camera
-tracking remains separate work: synchronized recordings, camera/floor calibration,
-per-camera tracklets, qualified association models, uncertainty and source review.
+The route is a planned, simulated path. Rehearsal assumes a walking pace of
+1.4 m/s, so its displayed duration is the planned route length divided by that
+pace. The default uses 2–601 distance-spaced positions, increasing with route
+length up to that cap, and labels gaps explicitly. Simulations longer than
+60 seconds use the integer playback multiplier shown beside the timeline to
+fit nominal playback within a minute; the scrubber still shows simulated time.
+These sampled handoff proposals are separate from the covered-distance metrics.
+They are not an observed trajectory or proof of identity continuity. Real
+cross-camera tracking remains separate work: synchronized recordings,
+camera/floor calibration, per-camera tracklets, qualified association models,
+uncertainty and source review. [Rehearsal documentation correction](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/documentation-alignment-2026-11-12/README.md).
 
 ## Local data and maps
 
