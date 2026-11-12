@@ -1,13 +1,17 @@
 # Product status and evidence
 
-**Current branch proposal under review:** [integrated planning mathematics and coordinate integrity](verification/coordinate-integrity-math-2026-11-12/README.md).
-This isolated source combines the visible-ground proposal [#122](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/122)
-(which integrates pixel-density #119 and zone-area #121), projective calibration
-[#117](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/117), and image
-diagnostics [#120](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/120).
-Original proposal receipts retain their exact source revisions.
+**Current merged baseline:** [PR #122](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/122)
+merged as [`c9b2b698`](https://github.com/bartytime4life/Intelligent-DVR-Tool/commit/c9b2b69862d854a19065e726ba84a64d5a555699), the
+[integrated planning mathematics and coordinate integrity](verification/coordinate-integrity-math-2026-11-12/README.md)
+work. It combines visible ground, pixel density
+([#119](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/119)), zone area
+([#121](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/121)) and image
+diagnostics ([#120](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/120))
+on top of projective calibration [#117](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/117).
+PRs #119–#121 were closed because #122 includes their changes. Original proposal
+receipts retain their exact source revisions.
 
-The current follow-up repairs fractional presence-rule dwell/gap comparisons in
+#122 also repairs fractional presence-rule dwell/gap comparisons in
 the local engine and browser training counter. It changes the rule-engine source
 hash, so older traces need re-analysis for current evaluation. The
 [timing record](verification/rule-time-boundaries-2026-11-12/README.md) retains
@@ -29,16 +33,30 @@ conclusions and offer retry; installer export requires a saved plan and complete
 views. Save/Discard/Undo and portable JSON remain available under their existing
 guards. No new controls or automatic camera, recording or inference starts are added.
 
-This is a locally integrated proposal. Local checks, hosted CI, hosted PR merge,
-installed-machine state, Wiki publication, deployment and physical qualification
-are distinct. The [integration record](verification/coordinate-integrity-math-2026-11-12/README.md)
-binds current source, independent replays, documentation inventory and checks.
+Local checks, hosted CI, installed-machine state, Wiki publication, deployment
+and physical qualification are distinct. #122 merged before hosted CI on its
+final head completed; the [integration record](verification/coordinate-integrity-math-2026-11-12/README.md)
+binds its local checks, independent replays, documentation inventory and earlier
+CI readback.
 
-**Main readback November 12, 2026:** `63b06ba2`, the documentation alignment
-in [PR #116](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/116).
-The source capabilities below remain the merged baseline. The new
-[integration record](verification/coordinate-integrity-math-2026-11-12/README.md)
-separately binds this branch's checks and proposal CI readback.
+**Earlier documentation record:** [PR #116](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/116)
+merged as [`63b06ba2`](https://github.com/bartytime4life/Intelligent-DVR-Tool/commit/63b06ba2aab3adcffc38f52310b55969fb538afe).
+All four hosted workflows passed on the final heads of PRs #114, #115 and #116.
+The [latest documentation and CI record](verification/documentation-status-2026-11-12/README.md)
+binds those results to their exact revisions. Earlier snapshots below retain
+the workflows' states at their original read times. This documentation follow-up
+does not rerun application suites or establish installed-machine acceptance.
+
+**Merged after that record:** [PR #117](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/117)
+merged as [`7868707a`](https://github.com/bartytime4life/Intelligent-DVR-Tool/commit/7868707aecbd61d997866f9fb25f695d3d7aeab2).
+It corrects valid projective transforms rejected by the v1 calibration solver
+and degenerate planes v1 could accept, using the `normalized-householder-dlt-v2`
+matrix representation and its [generated checks](verification/calibration-projective-math-2026-11-12/README.md);
+#122 later moved the method to `normalized-householder-dlt-v3`.
+The dated documentation record above describes it as a draft at its read time.
+Read the [calibration limits](facility-calibration.md#known-numerical-limits)
+before relying on a plane ruler; this note does not record hosted CI for that
+merge or physical calibration accuracy.
 
 **Merged source baseline verified November 12, 2026 (America/Chicago):**
 [PR #114](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/114) merged

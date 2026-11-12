@@ -1,0 +1,160 @@
+{
+  "read_at_utc": "2026-11-12 07:29:37 UTC",
+  "repository": "bartytime4life/Intelligent-DVR-Tool",
+  "merged_source_commit": "63b06ba2aab3adcffc38f52310b55969fb538afe",
+  "scope": "Final PR head workflow status, not merge-commit reruns, owner installation or physical acceptance. PR117 is outside the merged source baseline at this read.",
+  "pull_requests": [
+    {
+      "number": 114,
+      "head_sha": "a27799faf227e07022e016adbd6f94683f879e39",
+      "merge_commit_sha": "66e6dd1cde9913e6c4f03fb94733e83dc3070c93",
+      "url": "https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/114",
+      "merged": true,
+      "draft": false,
+      "workflow_runs": [
+        {
+          "id": 43169793066,
+          "name": "Facility browser regression",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/bartytime4life/Intelligent-DVR-Tool/actions/runs/43169793066"
+        },
+        {
+          "id": 43169792809,
+          "name": "PC install kit",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/bartytime4life/Intelligent-DVR-Tool/actions/runs/43169792809"
+        },
+        {
+          "id": 43169792944,
+          "name": "Cross-platform checks",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/bartytime4life/Intelligent-DVR-Tool/actions/runs/43169792944"
+        },
+        {
+          "id": 43169792943,
+          "name": "Mac source install",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/bartytime4life/Intelligent-DVR-Tool/actions/runs/43169792943"
+        }
+      ]
+    },
+    {
+      "number": 115,
+      "head_sha": "3d92996abb3bf6dbef904e79436be0b7e4b07590",
+      "merge_commit_sha": "2cac2173f1f6b751f23ab1847ce25a3aea40a6b2",
+      "url": "https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/115",
+      "merged": true,
+      "draft": false,
+      "workflow_runs": [
+        {
+          "id": 43168729118,
+          "name": "Facility browser regression",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/bartytime4life/Intelligent-DVR-Tool/actions/runs/43168729118"
+        },
+        {
+          "id": 43168729012,
+          "name": "PC install kit",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/bartytime4life/Intelligent-DVR-Tool/actions/runs/43168729012"
+        },
+        {
+          "id": 43168729047,
+          "name": "Cross-platform checks",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/bartytime4life/Intelligent-DVR-Tool/actions/runs/43168729047"
+        },
+        {
+          "id": 43168729019,
+          "name": "Mac source install",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/bartytime4life/Intelligent-DVR-Tool/actions/runs/43168729019"
+        }
+      ]
+    },
+    {
+      "number": 116,
+      "head_sha": "d75ac7e428f0aaf14a2d839a8ae9cbbb7714bce6",
+      "merge_commit_sha": "63b06ba2aab3adcffc38f52310b55969fb538afe",
+      "url": "https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/116",
+      "merged": true,
+      "draft": false,
+      "workflow_runs": [
+        {
+          "id": 43171282063,
+          "name": "Mac source install",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/bartytime4life/Intelligent-DVR-Tool/actions/runs/43171282063"
+        },
+        {
+          "id": 43171282099,
+          "name": "Cross-platform checks",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/bartytime4life/Intelligent-DVR-Tool/actions/runs/43171282099"
+        },
+        {
+          "id": 43171282090,
+          "name": "PC install kit",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/bartytime4life/Intelligent-DVR-Tool/actions/runs/43171282090"
+        },
+        {
+          "id": 43171282064,
+          "name": "Facility browser regression",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/bartytime4life/Intelligent-DVR-Tool/actions/runs/43171282064"
+        }
+      ]
+    },
+    {
+      "number": 117,
+      "head_sha": "2122eed5a62d6f697f50e0148c3299cbf4769ce8",
+      "merge_commit_sha": null,
+      "url": "https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/117",
+      "merged": false,
+      "draft": true,
+      "workflow_runs": [
+        {
+          "id": 43174828806,
+          "name": "PC install kit",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/bartytime4life/Intelligent-DVR-Tool/actions/runs/43174828806"
+        },
+        {
+          "id": 43174828701,
+          "name": "Facility browser regression",
+          "status": "in_progress",
+          "conclusion": null,
+          "url": "https://github.com/bartytime4life/Intelligent-DVR-Tool/actions/runs/43174828701"
+        },
+        {
+          "id": 43174828618,
+          "name": "Cross-platform checks",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/bartytime4life/Intelligent-DVR-Tool/actions/runs/43174828618"
+        },
+        {
+          "id": 43174828614,
+          "name": "Mac source install",
+          "status": "completed",
+          "conclusion": "success",
+          "url": "https://github.com/bartytime4life/Intelligent-DVR-Tool/actions/runs/43174828614"
+        }
+      ]
+    }
+  ]
+}

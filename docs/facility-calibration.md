@@ -12,12 +12,31 @@ The experimental **Ground-plane calibration** panel links coordinates in **one f
 
 The solver uses a normalized, Householder-QR planar homography (eight degrees of freedom). This relates two planes under a perspective projection; see the [OpenCV homography overview](https://docs.opencv.org/4.13.0/d9/dab/tutorial_homography.html). Method `normalized-householder-dlt-v3` stores a unit-Frobenius matrix instead of requiring its bottom-right entry to be one. A valid transform can have that entry zero when its horizon lies outside the measured reference region. Projection and horizon checks respect the matrix's arbitrary global scale. The solver rejects collinear ground references and singular normalized transforms even when their residuals are tiny. It is deterministic and runs in the local browser with no subscriptions, model inference, camera activation, upload or remote service.
 
-This branch's v3 boundary rule uses the exact orientation of the entered
+The v3 boundary rule uses the exact orientation of the entered
 binary64 coordinates. A point on the closed fitting boundary is eligible; a
 represented point outside it is refused even beside a very short edge. This
 protects the ruler and withheld-check gate. Exact arithmetic does not remove
 image sampling, lens or physical-marker uncertainty. Earlier v1/v2 exports remain
 historical records and are not upgraded by changing their method label.
+
+## Known numerical limits
+
+The earlier solver, `normalized-householder-dlt-v1`, could reject a valid
+perspective mapping whose bottom-right matrix entry is zero. It could also
+accept collinear ground references, or a singular fitted map with small
+residuals, and collapse a ruler distance. Small fit and withheld errors alone did
+not exclude this failure.
+
+[PR #117](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/117), merged
+as [`7868707a`](https://github.com/bartytime4life/Intelligent-DVR-Tool/commit/7868707aecbd61d997866f9fb25f695d3d7aeab2),
+replaced it with `normalized-householder-dlt-v2`: scale-independent matrix
+handling plus explicit destination and rank screens. [PR #122](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/122)
+then added the v3 closed-boundary rule described above. #117's
+[generated projective checks](verification/calibration-projective-math-2026-11-12/README.md)
+cover these counterexamples. The method remains experimental. Still use
+references spread across a two-dimensional measured area and check ruler
+distances against independently measured dimensions; these checks do not
+establish physical calibration accuracy.
 
 ## Operator workflow
 

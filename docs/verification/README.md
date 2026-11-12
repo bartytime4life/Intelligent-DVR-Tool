@@ -37,6 +37,11 @@ records reproduced slant/depth errors, centreline ground intervals, straight
 fan/sensor-clipped contours, an independent generated projection oracle and
 readable short ranges in the browser and installer exports.
 
+[Documentation status and full inventory, November 12](documentation-status-2026-11-12/README.md)
+records merged documentation PR #116, completed final-head CI for PRs #114–#116,
+the then-pending calibration correction (since merged as PR #117), and current link/Wiki/media checks.
+Earlier read-time snapshots and historical receipts remain unchanged.
+
 [Projective calibration mathematics, November 12](calibration-projective-math-2026-11-12/README.md)
 records valid zero-coefficient perspective maps, scale-invariant projection,
 collinear and noisy fitted-plane collapse refusals, independent exact-arithmetic
