@@ -1,0 +1,20 @@
+TAP version 13
+# Subtest: exact orientation retains signs through cancellation, underflow and overflow
+ok 1 - exact orientation retains signs through cancellation, underflow and overflow
+  ---
+  duration_ms: 0.611417
+  ...
+# Subtest: exact orientation rejects malformed finite-coordinate pairs including sparse arrays
+ok 2 - exact orientation rejects malformed finite-coordinate pairs including sparse arrays
+  ---
+  duration_ms: 0.64526
+  ...
+1..2
+# tests 2
+# suites 0
+# pass 2
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 30.844233

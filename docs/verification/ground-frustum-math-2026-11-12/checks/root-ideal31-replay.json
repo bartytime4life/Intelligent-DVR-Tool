@@ -1,0 +1,12 @@
+{
+  "adapterSha256": "311d7f93e7ea182638a83a62eb02c67454ce09c262467ab53e225d8d151d8267",
+  "bundleManifestSha256": "08c27f2aa2c472eb24c2e21803836524e59bcb992f019d3a8cb79fa8bad47563",
+  "mathOrExpectationsPatched": false,
+  "mode": "candidate31",
+  "originalCheckerSha256": "ca9c0ba7ec5529b1ac774ce015cca6530eec59175a40376677e758c2419bbc41",
+  "receipt": "result/receipt.json",
+  "receiptSha256": "cfddbda66c7779dff2d864df9d8c26654dd14edc75af0f81f75f9bfb586a4c77",
+  "schema": "dvr-frustum-portable-replay-v1",
+  "sourceTransport": "current source checkout and installed public npm dependencies",
+  "strictExitCode": 1
+}

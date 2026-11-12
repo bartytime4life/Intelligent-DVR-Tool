@@ -1,0 +1,70 @@
+{
+  "schema": "dvr.independent-calibration-oracle.v1",
+  "generated_only": true,
+  "source_sha256": "6dd984785eb2b348d72c8df19b695d3d687165f1e841a8d12d0b422252a6b9e7",
+  "input_sha256": "cc4f56b4054efb143f8a367bf5345c9f05acf2f82e3fbf8a90746960e5b8d7e9",
+  "oracle_script_sha256": "c756bae88a1cd3afa906e41f3e4600b099c95a0cada156c10d3793cdea63859a",
+  "runtime": {
+    "python": "3.10.9",
+    "node": "v22.13.1"
+  },
+  "oracle": "Known nonsingular Fraction homographies; 80-digit Decimal Euclidean query distances. No fitted candidate transform supplies expected truth.",
+  "fixture_contract": {
+    "seed": 90271,
+    "ground_absolute_bound_m": 2000,
+    "world_offsets_m": [
+      [
+        0,
+        0
+      ],
+      [
+        1800,
+        -1750
+      ],
+      [
+        -1800,
+        1700
+      ],
+      [
+        1950,
+        1900
+      ],
+      [
+        -1950,
+        -1900
+      ]
+    ],
+    "fitting_reference_counts": [
+      4,
+      6
+    ],
+    "projection_global_scales": [
+      "1",
+      "1e200",
+      "-1e200",
+      "1e-200",
+      "-1e-200"
+    ],
+    "fitted_error_tolerance_m": 1e-07,
+    "direct_projection_error_tolerance_m": 2e-09
+  },
+  "cases": {
+    "fits": 1120,
+    "direct": 880,
+    "unsafe": 49
+  },
+  "failed_cases": 0,
+  "failures_by_kind": {},
+  "first_failures": [],
+  "max_absolute_errors_m": {
+    "fitted_point": 1.1368683772161603e-12,
+    "fitted_distance": 1.0962342145148796e-12,
+    "direct_projection": 6.821210263296962e-13
+  },
+  "limits": [
+    "Exact generated references, not noisy physical calibration or lens/3D geometry.",
+    "Absolute fixture tolerances are comparison criteria, not universal error bounds.",
+    "Positive/negative scales span1e-200..1e200; this does not prove arbitrary underflow/overflow robustness.",
+    "No camera, model, private image, deployment or field accuracy evidence."
+  ]
+}

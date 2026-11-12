@@ -10,7 +10,14 @@
 
 The experimental **Ground-plane calibration** panel links coordinates in **one frozen camera image** to points on a **single independently measured flat facility plane**. It is intended to help site engineers compare planned camera footprints with actual reference markers. It does not calibrate a camera lens, recover 3D depth, locate an elevated person or object, prove recognition accuracy, or create a survey-grade digital twin.
 
-The solver uses a normalized, Householder-QR planar homography (eight degrees of freedom). This relates two planes under a perspective projection; see the [OpenCV homography overview](https://docs.opencv.org/4.13.0/d9/dab/tutorial_homography.html). Method `normalized-householder-dlt-v2` stores a unit-Frobenius matrix instead of requiring its bottom-right entry to be one. A valid transform can have that entry zero when its horizon lies outside the measured reference region. Projection and horizon checks respect the matrix's arbitrary global scale. The solver rejects collinear ground references and singular normalized transforms even when their residuals are tiny. It is deterministic and runs in the local browser with no subscriptions, model inference, camera activation, upload or remote service.
+The solver uses a normalized, Householder-QR planar homography (eight degrees of freedom). This relates two planes under a perspective projection; see the [OpenCV homography overview](https://docs.opencv.org/4.13.0/d9/dab/tutorial_homography.html). Method `normalized-householder-dlt-v3` stores a unit-Frobenius matrix instead of requiring its bottom-right entry to be one. A valid transform can have that entry zero when its horizon lies outside the measured reference region. Projection and horizon checks respect the matrix's arbitrary global scale. The solver rejects collinear ground references and singular normalized transforms even when their residuals are tiny. It is deterministic and runs in the local browser with no subscriptions, model inference, camera activation, upload or remote service.
+
+The v3 boundary rule uses the exact orientation of the entered
+binary64 coordinates. A point on the closed fitting boundary is eligible; a
+represented point outside it is refused even beside a very short edge. This
+protects the ruler and withheld-check gate. Exact arithmetic does not remove
+image sampling, lens or physical-marker uncertainty. Earlier v1/v2 exports remain
+historical records and are not upgraded by changing their method label.
 
 ## Known numerical limits
 
@@ -22,8 +29,9 @@ not exclude this failure.
 
 [PR #117](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/117), merged
 as [`7868707a`](https://github.com/bartytime4life/Intelligent-DVR-Tool/commit/7868707aecbd61d997866f9fb25f695d3d7aeab2),
-replaces it with `normalized-householder-dlt-v2`: scale-independent matrix
-handling plus explicit destination and rank screens. Its
+replaced it with `normalized-householder-dlt-v2`: scale-independent matrix
+handling plus explicit destination and rank screens. [PR #122](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/122)
+then added the v3 closed-boundary rule described above. #117's
 [generated projective checks](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/calibration-projective-math-2026-11-12/README.md)
 cover these counterexamples. The method remains experimental. Still use
 references spread across a two-dimensional measured area and check ruler
@@ -55,7 +63,7 @@ establish physical calibration accuracy.
 
 ## Verification gates
 
-The `tests/facility-calibration.test.mjs` suite uses known synthetic perspective transforms, noisy held-out references, singular/collinear/duplicate points, bounds and extrapolation refusals. Facility Playwright tests cover reference entry, withheld checks, plane-only measurement and map-coordinate selection. The [projective-mathematics record](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/calibration-projective-math-2026-11-12/README.md) reproduces the former zero-coefficient rejection and collapsed-plane acceptance, with generated checks for the corrected behavior. Source/CI tests cannot qualify physical marker accuracy.
+The `tests/facility-calibration.test.mjs` suite uses known synthetic perspective transforms, noisy held-out references, singular/collinear/duplicate points, bounds and extrapolation refusals. Facility Playwright tests cover reference entry, withheld checks, plane-only measurement and map-coordinate selection. The [projective-mathematics record](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/calibration-projective-math-2026-11-12/README.md) reproduces the former zero-coefficient rejection and collapsed-plane acceptance, with generated checks for the corrected behavior. The [coordinate-integrity record](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/coordinate-integrity-math-2026-11-12/README.md) adds exact-boundary and short-edge ruler/check regressions, independent supporting-line oracles, and the combined current-source checks. Source/CI tests cannot qualify physical marker accuracy.
 
 For field acceptance, use five or more measured, visible markers on a permitted real camera, record camera model/lens/codec/focus, original source frame and coordinate measurement method, and reserve one or more markers for withheld checks. Compare estimated distances against separately measured dimensions and report p50/p95/max error, not just the fitted residual. Repeat after moving or changing the camera or stream resolution. Do not claim field calibration before this evidence exists.
 

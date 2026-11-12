@@ -24,6 +24,28 @@ The minimum capacity goal is **100 simultaneously active cameras**. The current 
 
 ## Delivered through November 12, 2026
 
+[PR #122](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/122), merged
+as `c9b2b698`, delivers the [integrated planning work](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/coordinate-integrity-math-2026-11-12/README.md):
+visible ground, pixel density (#119), zone area (#121) and image diagnostics
+(#120), on top of the calibration fix (#117). Additional coordinate fixes preserve ordinary
+rotated boundary rooms during keep-position site corrections and prevent
+calibrated ruler/check extrapolation beside short reference edges. Independent
+numeric and browser checks establish behavior on their generated inputs.
+
+The [timing follow-up](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/rule-time-boundaries-2026-11-12/README.md)
+keeps fractional samples at dwell/gap boundaries consistent across the engine and
+training counter, with old-trace refusal and generated CPU integration checks.
+[Planning readouts](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/planning-readouts-2026-11-12/README.md) preserve
+small positive values and distinguish incomplete coverage from an exact endpoint.
+The existing controls, numeric models and explicit start actions remain.
+
+Hosted CI on #122's final head, platform installation and physical acceptance
+are separate next steps. Physical validation needs surveyed ground/pose measurements, independent
+markers and targets, lens effects, low walls, raised structures and steep views.
+Documentation and generated Wiki source are aligned in the repository; Wiki publication
+and deployment need their own revision checks. No calendar or capacity guarantee
+follows from this work.
+
 [PR #117](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/117), merged
 as `7868707a`, accepts valid perspective calibration regardless of matrix scale
 while refusing collapsed ground planes. Its generated numerical and browser
@@ -51,6 +73,8 @@ reports total uncovered distance plus the longest continuous gap. The
 keeps analytic, independent-oracle and local browser evidence. Zone grids and
 the simulated handoff rehearsal remain separate; no optical calibration,
 real tracking or camera-capacity claim follows from these calculations.
+
+## Earlier delivered work
 
 [PR #112](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/112), merged
 as `cd6d1566`, replaces coarse automatic training cutoffs with empirical score

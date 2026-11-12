@@ -1,0 +1,135 @@
+TAP version 13
+# Subtest: shared walls combine collinear subdivisions and exclude overlaps, corner touches and other levels
+ok 1 - shared walls combine collinear subdivisions and exclude overlaps, corner touches and other levels
+  ---
+  duration_ms: 1.515313
+  ...
+# Subtest: placement clamps at wall ends, avoids another doorway, and validates before serialization
+ok 2 - placement clamps at wall ends, avoids another doorway, and validates before serialization
+  ---
+  duration_ms: 3.556021
+  ...
+# Subtest: a doorway opens both room walls below its lintel and cannot cross a floor void
+ok 3 - a doorway opens both room walls below its lintel and cannot cross a floor void
+  ---
+  duration_ms: 1.649104
+  ...
+# Subtest: doors follow shared-wall movement, room splitting, merging and rigid building motion
+ok 4 - doors follow shared-wall movement, room splitting, merging and rigid building motion
+  ---
+  duration_ms: 8.397302
+  ...
+# Subtest: floor copying duplicates doorways with new IDs and room references
+ok 5 - floor copying duplicates doorways with new IDs and room references
+  ---
+  duration_ms: 1.524841
+  ...
+# Subtest: resize translates the downstream path while keeping earlier vertices and later lengths
+ok 6 - resize translates the downstream path while keeping earlier vertices and later lengths
+  ---
+  duration_ms: 0.912582
+  ...
+# Subtest: feet input is stored as metres and conversion does not round geometry
+ok 7 - feet input is stored as metres and conversion does not round geometry
+  ---
+  duration_ms: 0.177773
+  ...
+# Subtest: editing one vertex leaves every other point unchanged
+ok 8 - editing one vertex leaves every other point unchanged
+  ---
+  duration_ms: 0.279474
+  ...
+# Subtest: invalid or out-of-bounds edits fail without mutating input
+ok 9 - invalid or out-of-bounds edits fail without mutating input
+  ---
+  duration_ms: 0.214092
+  ...
+# Subtest: empty, oversized, malformed and degenerate loop inputs are refused
+ok 10 - empty, oversized, malformed and degenerate loop inputs are refused
+  ---
+  duration_ms: 0.172544
+  ...
+# Subtest: the maximum-size line stays bounded and detached from the input
+ok 11 - the maximum-size line stays bounded and detached from the input
+  ---
+  duration_ms: 0.196629
+  ...
+# Subtest: keyboard point lists accept one east, north pair per line in metres or feet
+ok 12 - keyboard point lists accept one east, north pair per line in metres or feet
+  ---
+  duration_ms: 0.344135
+  ...
+# Subtest: closed loop routes stay editable and stay closed
+ok 13 - closed loop routes stay editable and stay closed
+  ---
+  duration_ms: 0.146815
+  ...
+# Subtest: entered feet and metres are stored to 0.1 mm without float noise
+ok 14 - entered feet and metres are stored to 0.1 mm without float noise
+  ---
+  duration_ms: 0.157014
+  ...
+# Subtest: a seven-metre origin correction preserves rotated rooms touching exterior walls
+ok 15 - a seven-metre origin correction preserves rotated rooms touching exterior walls
+  ---
+  duration_ms: 2.813929
+  ...
+# Subtest: rotated boundary partitions survive longitude and latitude translations across supported latitudes
+ok 16 - rotated boundary partitions survive longitude and latitude translations across supported latitudes
+  ---
+  duration_ms: 11.102156
+  ...
+# Subtest: all plan geometry and metadata survive one affine change of grid
+ok 17 - all plan geometry and metadata survive one affine change of grid
+  ---
+  duration_ms: 4.602213
+  ...
+# Subtest: no-op origins retain every coordinate and declared dimension exactly
+ok 18 - no-op origins retain every coordinate and declared dimension exactly
+  ---
+  duration_ms: 1.675282
+  ...
+# Subtest: repeated latitude changes and return trips preserve validated topology and geographic positions
+ok 19 - repeated latitude changes and return trips preserve validated topology and geographic positions
+  ---
+  duration_ms: 3.469868
+  ...
+# Subtest: translation-only changes cannot shrink minimum aperture widths through endpoint cancellation
+ok 20 - translation-only changes cannot shrink minimum aperture widths through endpoint cancellation
+  ---
+  duration_ms: 1.18366
+  ...
+# Subtest: invalid and far origins reject without mutating the recoverable plan
+ok 21 - invalid and far origins reject without mutating the recoverable plan
+  ---
+  duration_ms: 1.292033
+  ...
+# Subtest: outside wall spans fold collinear vertices across the ring seam; courtyards, rotated walls and empty interiors work
+ok 22 - outside wall spans fold collinear vertices across the ring seam; courtyards, rotated walls and empty interiors work
+  ---
+  duration_ms: 3.210883
+  ...
+# Subtest: placement finds a free span; moving and resizing stop at neighbors and corners, keeping the opposite end fixed
+ok 23 - placement finds a free span; moving and resizing stop at neighbors and corners, keeping the opposite end fixed
+  ---
+  duration_ms: 1.085717
+  ...
+# Subtest: window geometry respects sill, head and pane direction; glazing does not enlarge camera estimates
+ok 24 - window geometry respects sill, head and pane direction; glazing does not enlarge camera estimates
+  ---
+  duration_ms: 1.24197
+  ...
+# Subtest: v5 round trips windows, imports older formats, rejects downgrades, and carries floor/origin edits
+ok 25 - v5 round trips windows, imports older formats, rejects downgrades, and carries floor/origin edits
+  ---
+  duration_ms: 3.393185
+  ...
+1..25
+# tests 25
+# suites 0
+# pass 25
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 62.139555

@@ -1,0 +1,173 @@
+{
+  "schema": "intelligent-dvr.ground-visibility.source-manifest.v1",
+  "main": "63b06ba2aab3adcffc38f52310b55969fb538afe",
+  "local_integration_checkpoint": "96b37413abcf2ebe7692f4fa6bdb6338bf2fb70a",
+  "scope": "Changed production, test, package and distributed-notice files relative to main. Final tested bytes are identified by SHA-256; commit publication is separate.",
+  "files": [
+    {
+      "path": "package-lock.json",
+      "bytes": 70703,
+      "sha256": "357d5c99d06572af20430a4cbbc41d238336f3ab8c45b06a06db28422444ca65"
+    },
+    {
+      "path": "package.json",
+      "bytes": 2893,
+      "sha256": "93827d3a53bdd5d4cd1bc6a35d158c7983aabd729633db3f07914e05cc28aae0"
+    },
+    {
+      "path": "public/licenses/ground-visibility-LICENSE.txt",
+      "bytes": 3803,
+      "sha256": "8aaaf1eb2ef95a2f9fdca17ccd1aff05784251dc5deffbc3a42b96498195a7ce"
+    },
+    {
+      "path": "src/FacilityBuilder.jsx",
+      "bytes": 105792,
+      "sha256": "bf96ab4c0d75f92d5ea6562d84f6640850cc9c46564f3bfd92954df40f6fb4bb"
+    },
+    {
+      "path": "src/facility-blind-spots.mjs",
+      "bytes": 539,
+      "sha256": "642ecd5761b2b060f775290919f657144224fe17535acb66291fcea9430f7adf"
+    },
+    {
+      "path": "src/facility-coverage-protocol.mjs",
+      "bytes": 124,
+      "sha256": "1b6f7f549f11d49ee4a9e7f4384266aec5d40a47953cc98f245e7b7897fd35b7"
+    },
+    {
+      "path": "src/facility-coverage-task.mjs",
+      "bytes": 5302,
+      "sha256": "8f882b44a157d9894a635dfa12ef9aac73714af10f65ec2f2f2588d3273a1d33"
+    },
+    {
+      "path": "src/facility-coverage-worker.mjs",
+      "bytes": 780,
+      "sha256": "0ad45bf801c9bc18f1e5c68a4c8cbaddea69f55c35339743e409dc50b438455c"
+    },
+    {
+      "path": "src/facility-coverage.mjs",
+      "bytes": 19826,
+      "sha256": "ee7a36dcfc79ee8c4d5c5fc9e12e71a47a13d0debd0ef0e0897312de8f46c9a2"
+    },
+    {
+      "path": "src/facility-dori.mjs",
+      "bytes": 9157,
+      "sha256": "21a82c0c865e2fcb1960a7195335690f749d4bcb244ab8463b0d289820d9f56d"
+    },
+    {
+      "path": "src/facility-installer.mjs",
+      "bytes": 10738,
+      "sha256": "92704eae223955f72388e8ee76a91f01c2efccffd8ee336ed04caabe1d181878"
+    },
+    {
+      "path": "src/facility-map.mjs",
+      "bytes": 58377,
+      "sha256": "3dbb02ef0170bb04054c4e708ec43a3677e401eef70689ba2b37c411378a7920"
+    },
+    {
+      "path": "src/facility-measurements.mjs",
+      "bytes": 9119,
+      "sha256": "79b9e46f965ef8d6c0653b3b4f7ef0c3eda50c34892a38cdcf3caf4ce5882431"
+    },
+    {
+      "path": "src/facility-polygon.mjs",
+      "bytes": 982,
+      "sha256": "e8ac82a5ad920a1a74b98e59f971bacdd4db659da72207ebbdd175fba32ef495"
+    },
+    {
+      "path": "src/facility-visibility-presentation.mjs",
+      "bytes": 1998,
+      "sha256": "b8974233648001a9b31f6599ccc789e5c29c108576e5550519373e5d7c9d6e5a"
+    },
+    {
+      "path": "src/facility-visibility-protocol.mjs",
+      "bytes": 5620,
+      "sha256": "f15f3180f3bc40bcef62aafba9fa725ed1e3b49a4195daab85032cd2d5c29c43"
+    },
+    {
+      "path": "src/facility-visibility-task.mjs",
+      "bytes": 2003,
+      "sha256": "462c017969fd8544c7c9c7d007981dc5282c9e07f1730fadfdde5b7f51834898"
+    },
+    {
+      "path": "src/facility-visibility-worker.mjs",
+      "bytes": 491,
+      "sha256": "580df1872c82f50329ca6b731c2448d7363648ce47857d98d39624ffe2143c9b"
+    },
+    {
+      "path": "src/facility-visibility.css",
+      "bytes": 644,
+      "sha256": "834a5589f432776ced4448a0b3578f029c42cda93ad90db5490228acfcd66979"
+    },
+    {
+      "path": "src/facility-visibility.mjs",
+      "bytes": 21974,
+      "sha256": "9207e0aeab51e2578cab9f3f82f28aa0fcd6cd3f1714a2bac5350a451587cf36"
+    },
+    {
+      "path": "src/facility.mjs",
+      "bytes": 42965,
+      "sha256": "1ef907792316c57251d5609b89cce27db79bea8721eee8842cd00d8c5cfcc33b"
+    },
+    {
+      "path": "src/use-facility-coverage.mjs",
+      "bytes": 1222,
+      "sha256": "8366d65d239f6dc50a0dc3636d0038c68c5167e330990fb99bda8616bd454ab3"
+    },
+    {
+      "path": "src/use-facility-visibility.mjs",
+      "bytes": 855,
+      "sha256": "be581f5c1d2eaf6f9659eb4159f1b5273a1b724b4825396a601cc4c3f32ef74e"
+    },
+    {
+      "path": "tests/browser/facility-camera-planning.spec.mjs",
+      "bytes": 24307,
+      "sha256": "3cd466a64fdb6e35e7df4fea0b65f595f1ac0882bdc5f56316b9c51728d0f1d1"
+    },
+    {
+      "path": "tests/browser/facility-visibility.spec.mjs",
+      "bytes": 12032,
+      "sha256": "6df71e7f3805e6a4deb9471a51ce9f573c4abf527b4c7261049ff90d5fab07fe"
+    },
+    {
+      "path": "tests/facility-coverage-task.test.mjs",
+      "bytes": 11213,
+      "sha256": "bd02da72afbaae0f7210d5d86b6d6273e8e4a710096526926e5cccfe2f2b4597"
+    },
+    {
+      "path": "tests/facility-measurements.test.mjs",
+      "bytes": 10168,
+      "sha256": "5c1b2819c0d02d9ff4bd0d7713cb23cdd6abae739f49c5402edfb70826753628"
+    },
+    {
+      "path": "tests/facility-planning.test.mjs",
+      "bytes": 30433,
+      "sha256": "fdca444197edf589b92bff635a4b1655b2e5e5999bd379fb659e3c90932e7417"
+    },
+    {
+      "path": "tests/facility-visibility-integration.test.mjs",
+      "bytes": 9214,
+      "sha256": "63d0180361e59ecf6b22cccac276df0c96911134bdaf3ceda86ca664b40c6258"
+    },
+    {
+      "path": "tests/facility-visibility-presentation.test.mjs",
+      "bytes": 6642,
+      "sha256": "7d914a747a51144edd9e13850e57e0115d44e4e3ae56cf65ee6aa92cdad56dc6"
+    },
+    {
+      "path": "tests/facility-visibility-task.test.mjs",
+      "bytes": 9589,
+      "sha256": "4802b31df0f842dd7ad0cbc2402ccc3a4fee48b9527b7f0c42380b18b05cba92"
+    },
+    {
+      "path": "tests/facility-visibility.test.mjs",
+      "bytes": 7186,
+      "sha256": "e9b323cef69b2875c9e0720deb59f89bd19eb429fd8279e706809cf5bd07ec54"
+    },
+    {
+      "path": "tests/facility-zone-area.test.mjs",
+      "bytes": 13809,
+      "sha256": "67de7a43e4d42843e5d3be4018e50da282838bcd673c15a04d3980d928736a84"
+    }
+  ]
+}

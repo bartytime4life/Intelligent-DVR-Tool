@@ -1,0 +1,27 @@
+[WebServer] (node:2188446) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 20 tests using 1 worker
+
+  ✓   1 tests/browser/facility-camera-planning.spec.mjs:60:32 › zone area finds coverage and overlap between old grid centres at 1440px (3.4s)
+  ✓   2 tests/browser/facility-camera-planning.spec.mjs:60:32 › zone area finds coverage and overlap between old grid centres at 375px (2.6s)
+  ✓   3 tests/browser/facility-camera-planning.spec.mjs:90:1 › background coverage clears old numbers during draft changes and survives navigation (5.3s)
+  ✓   4 tests/browser/facility-camera-planning.spec.mjs:114:1 › a coverage worker load failure is explicit and retry recovers the real calculation (1.9s)
+  ✓   5 tests/browser/facility-camera-planning.spec.mjs:128:1 › drag, rotate handle and keyboard edits change only the camera draft until Save camera (4.1s)
+  ✓   6 tests/browser/facility-camera-planning.spec.mjs:178:1 › coverage measures narrow and diagonal areas while retaining unsupported indoor zones (2.5s)
+  ✓   7 tests/browser/facility-camera-planning.spec.mjs:200:1 › touch drag moves the selected camera draft (3.3s)
+  ✓   8 tests/browser/facility-camera-planning.spec.mjs:216:1 › losing window focus cancels a camera drag without leaving a stale release handler (3.6s)
+  ✓   9 tests/browser/facility-camera-planning.spec.mjs:238:1 › coverage step reports zone and route coverage, marks indoor zones and toggles blind spots (2.5s)
+  ✓  10 tests/browser/facility-camera-planning.spec.mjs:266:1 › pixel density table, lens preset and installer sheet download use the saved plan (2.4s)
+  ✓  11 tests/browser/facility-camera-planning.spec.mjs:296:34 › route percentages measure length between narrow camera fans at 1440px (1.9s)
+  ✓  12 tests/browser/facility-camera-planning.spec.mjs:296:34 › route percentages measure length between narrow camera fans at 375px (1.8s)
+  ✓  13 tests/browser/facility-studio.spec.mjs:22:1 › Facility Studio focus map and navigation are reversible and keyboard accessible (2.2s)
+  ✓  14 tests/browser/facility-studio.spec.mjs:46:1 › intermediate window widths keep the full map and every map-layer choice reachable (1.7s)
+  ✓  15 tests/browser/facility-studio.spec.mjs:77:1 › image laboratory imports only on request, reports ROI and compares two local frames (1.9s)
+  ✓  16 tests/browser/facility-studio.spec.mjs:101:1 › transparent local PNGs are composited before analysis and lossless frame export (1.8s)
+  ✓  17 tests/browser/facility-studio.spec.mjs:142:1 › calibrated map ruler requires withheld check and independent measured reference declaration (2.1s)
+  ✓  18 tests/browser/facility-studio.spec.mjs:177:1 › a chosen ground reference accepts an explicit local map pick, without activating recording (2.2s)
+  ✓  19 tests/browser/facility-studio.spec.mjs:198:1 › image reference numbering follows full row positions even when earlier markers are blank (1.7s)
+  ✓  20 tests/browser/facility-studio.spec.mjs:213:1 › Facility Studio has one compact task selector plus descriptive sidebar steps (1.8s)
+
+  20 passed (51.9s)

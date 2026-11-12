@@ -1,0 +1,122 @@
+{
+  "schema": "intelligent-dvr.ground-visibility.validation.v1",
+  "date": "2026-11-12",
+  "source_manifest": "source-manifest.json",
+  "visibility_sha256": "9207e0aeab51e2578cab9f3f82f28aa0fcd6cd3f1714a2bac5350a451587cf36",
+  "environment": {
+    "node": "v22.13.1",
+    "npm": "10.9.2",
+    "python": "3.10.9",
+    "os": "Linux",
+    "architecture": "x86_64",
+    "playwright": "1.56.1",
+    "browser": "Chromium 141.0.7390.37 build1194, headless"
+  },
+  "checks": {
+    "build": {
+      "exit": 0,
+      "log": "checks/build.log.gz",
+      "warning": "Existing large-chunk advisory retained."
+    },
+    "node": {
+      "command": "DVR_TEST_SOCKETS=1 npm test",
+      "exit": 0,
+      "passed": 656,
+      "failed": 0,
+      "skipped": 0,
+      "log": "checks/node.log.gz"
+    },
+    "sites": {
+      "command": "npm run test:sites",
+      "exit": 0,
+      "passed": 4,
+      "failed": 0,
+      "skipped": 0,
+      "log": "checks/sites.log.gz"
+    },
+    "browser": {
+      "config": "playwright.facility.config.mjs",
+      "exit": 0,
+      "passed": 68,
+      "failed": 0,
+      "skipped": 0,
+      "duration_ms": 219643.373,
+      "log": "checks/browser.log.gz",
+      "files": [
+        "facility-camera-planning",
+        "facility-visibility",
+        "facility-studio",
+        "facility-workspace",
+        "facility-recovery",
+        "facility-library",
+        "facility-doorways",
+        "facility-windows",
+        "facility-stair-placement"
+      ]
+    },
+    "independent_wall42": {
+      "exit": 0,
+      "assertions": 76717,
+      "failed": 0,
+      "root_receipt_sha256": "f69b90200f68dfe6dd8dff6c555909de3c382999af3a56191e80d2972d5fd954"
+    },
+    "independent_consumers42": {
+      "exit": 0,
+      "assertions": 39075,
+      "failed": 0,
+      "root_receipt_sha256": "72e5dcc20df981bdeb5519fa343120d83cd9dc4b506bf55836ee997d1b72c2c4"
+    },
+    "raw_ideal31": {
+      "exit": 1,
+      "assertions": 365,
+      "failed": 2,
+      "reason": "Two exact-circle boundary points excluded by declared inscribed256gon; raw strict failure retained.",
+      "root_receipt_sha256": "cfddbda66c7779dff2d864df9d8c26654dd14edc75af0f81f75f9bfb586a4c77"
+    },
+    "numerical250": {
+      "exit": 0,
+      "assertions": 94758,
+      "failed": 0,
+      "prepared_point_queries": 42374,
+      "maximum_80_vs_120_area_difference": 0
+    },
+    "adapter300": {
+      "exit": 0,
+      "assertions": 3900,
+      "failed": 0
+    },
+    "rehearsal_benchmark": {
+      "exit": 0,
+      "scope": "Exact before/after rows and observation counts; local descriptive timings with no speed gate.",
+      "receipt": "checks/root-benchmark-receipt.json.gz"
+    }
+  },
+  "documentation": {
+    "local_links": 1709,
+    "wiki_outputs": 68,
+    "graphics": 10,
+    "wiki_tests_passed": 8,
+    "historical_receipts_and_media": "preserved",
+    "scope": "Canonical guides and generated companions; separate Wiki publication not performed.",
+    "link_check_exit": 0,
+    "wiki_drift_exit": 0,
+    "graphics_check_exit": 0,
+    "wiki_tests_failed": 0,
+    "diff_check_exit": 0
+  },
+  "not_run": [
+    "Full native Python application suites",
+    "Native camera/inference browser lanes",
+    "Physical camera/optical/installed-host acceptance",
+    "Representative recognition evaluation",
+    "100-camera workloads"
+  ],
+  "lifecycle": {
+    "main": "63b06ba2aab3adcffc38f52310b55969fb538afe",
+    "hosted_integration_ci": "Not run at local validation time; parent proposal CI stored separately.",
+    "merge": false,
+    "installed_service_replaced": false,
+    "deployed": false,
+    "camera_recording_inference_started": false
+  }
+}

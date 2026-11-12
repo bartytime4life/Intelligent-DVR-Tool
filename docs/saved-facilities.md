@@ -38,3 +38,8 @@ Route/pathway coordinate lists, map extracts and draft outlines must be applied 
 ## Verification
 
 Focused tests cover blank initialization, one-time migration, independent mutations, backup round-trips, exact dimensions, collection bounds, corrupt data preservation, quota failures, locked concurrent saves and bounded conflict recovery. Generated browser regressions cover named facilities, additive imports, reload, pending drafts, delayed requests and two-tab recovery. These checks do not establish survey accuracy, live map-provider availability, camera compatibility or physical-site acceptance.
+
+When correcting a saved site, review **Keep buildings at their map positions**
+before **Save site**. The checked choice re-centres local coordinates; the unchecked
+choice relocates the plan geographically. A rejected correction retains the prior
+plan, and a successful change supports Undo. [Site and coordinate details](facility-builder.md).

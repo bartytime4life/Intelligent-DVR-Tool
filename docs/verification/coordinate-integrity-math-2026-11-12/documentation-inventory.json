@@ -1,0 +1,1309 @@
+{
+  "files": [
+    {
+      "bytes": 22025,
+      "kind": "current-guide-or-reference",
+      "path": "AGENTS.md",
+      "sha256": "2f71078e4771677a09e17d64c9ba3e48371eb4b7e41c4168145bff408e39a8cc"
+    },
+    {
+      "bytes": 1087,
+      "kind": "current-guide-or-reference",
+      "path": "CONTRIBUTING.md",
+      "sha256": "b346c1bb53c6f00e3e4b1bede7cd19790032eacc4f6cc33b0f2ab5caf05ab3d4"
+    },
+    {
+      "bytes": 13661,
+      "kind": "current-guide-or-reference",
+      "path": "README.md",
+      "sha256": "17bce6365c5c32e4a4efcb1ee00054ae6851063a98f5131e856b2b56670252c6"
+    },
+    {
+      "bytes": 15816,
+      "kind": "current-guide-or-reference",
+      "path": "SECURITY.md",
+      "sha256": "9ef6198e94960d501d7a1da73e0a33c7ff4aa48ad785217640b5fa88382a41d6"
+    },
+    {
+      "bytes": 14261,
+      "kind": "current-guide-or-reference",
+      "path": "design-qa.md",
+      "sha256": "88e5edc04eb51fbd5553da262e4ebe9cfeb7fde54285b6dd38d31fa2d2137e94"
+    },
+    {
+      "bytes": 7429,
+      "kind": "current-guide-or-reference",
+      "path": "docs/README.md",
+      "sha256": "dc3c72c724d178f4b3c73b1bd998d2dd29a9175cc82ed7374df34aa22b6cd8e7"
+    },
+    {
+      "bytes": 17342,
+      "kind": "current-guide-or-reference",
+      "path": "docs/architecture.md",
+      "sha256": "21be9cdae8e37d7c304e6222e664457c3bc8d381b5f8d382754d998ecc23b751"
+    },
+    {
+      "bytes": 12142,
+      "kind": "current-guide-or-reference",
+      "path": "docs/development.md",
+      "sha256": "241cf347190d015d4e5f640a2507f4bcf5c85df16fa7e5a34fb1185f416b12cf"
+    },
+    {
+      "bytes": 15273,
+      "kind": "current-guide-or-reference",
+      "path": "docs/easy-facility-setup.md",
+      "sha256": "c6d251475a42ac7b07fab9739831dc9b0ac69564a3dd1668229a5f27425ed959"
+    },
+    {
+      "bytes": 9452,
+      "kind": "current-guide-or-reference",
+      "path": "docs/enhancement-comparison.md",
+      "sha256": "0cb78d2407b54b93e4300281e44415fcfa454e70c7be6bc0e17208618a47f44f"
+    },
+    {
+      "bytes": 7395,
+      "kind": "dated-evidence-or-media",
+      "path": "docs/experience-review-2026-10-29.md",
+      "sha256": "8ef437e279340ea748bf9588f62fcece748b14b939f9a7f6143a60c61d84d37b"
+    },
+    {
+      "bytes": 32865,
+      "kind": "current-guide-or-reference",
+      "path": "docs/facility-builder.md",
+      "sha256": "ab3b538418430c84a8f359748bfa2c1eee9f7783023d24be14d9679e553ad9df"
+    },
+    {
+      "bytes": 7090,
+      "kind": "current-guide-or-reference",
+      "path": "docs/facility-calibration.md",
+      "sha256": "77574d816a838d0ebc6b2ad16600e74ecca877f036895964c6cb01b134883264"
+    },
+    {
+      "bytes": 9342,
+      "kind": "current-guide-or-reference",
+      "path": "docs/facility-image-diagnostics.md",
+      "sha256": "2f1b7537a9cd23486da5f971118a6ee271fc81fe4e0ffbc0e02e92cec7e00d56"
+    },
+    {
+      "bytes": 3910,
+      "kind": "current-guide-or-reference",
+      "path": "docs/facility-local-delivery.md",
+      "sha256": "7b8061eedcc151fb2120824b34445c15a35bcb4abb60c3a75a9c356c195933c4"
+    },
+    {
+      "bytes": 3740,
+      "kind": "current-guide-or-reference",
+      "path": "docs/facility-novice-study.md",
+      "sha256": "e5a99fe3a15763ee0d4396571b88b4ea3806ba291e8a171917c85e86c9d97f7e"
+    },
+    {
+      "bytes": 8962,
+      "kind": "current-guide-or-reference",
+      "path": "docs/facility-setup-reliability.md",
+      "sha256": "f2b3620c4f0865f4c14e2dcde93d51ce299cf66311eaef82716527a4b49244c8"
+    },
+    {
+      "bytes": 8869,
+      "kind": "current-guide-or-reference",
+      "path": "docs/facility-workspace-upgrades.md",
+      "sha256": "7b82daf906aff1bc5ed7db2ec3c8ba9e128f1919fb948cabf16763436d351abf"
+    },
+    {
+      "bytes": 13732,
+      "kind": "current-guide-or-reference",
+      "path": "docs/field-acceptance.md",
+      "sha256": "0ee3cfc6afcf7f5efdbbca3c7dd89e5d795165c75e7eb0c9577605a9d8f261b5"
+    },
+    {
+      "bytes": 9049,
+      "kind": "current-guide-or-reference",
+      "path": "docs/getting-started.md",
+      "sha256": "bef97ee62c9eab9f5399fd3da54200f96fe5823145651382f0fb9615ee02a29a"
+    },
+    {
+      "bytes": 9382,
+      "kind": "current-guide-or-reference",
+      "path": "docs/gpu-planning.md",
+      "sha256": "664f91fa5082a66854ef38fbe674ca0237d98de06cd2a18093880d9169435bc6"
+    },
+    {
+      "bytes": 13932,
+      "kind": "current-guide-or-reference",
+      "path": "docs/hardware-guide.md",
+      "sha256": "efd3832a5552ba1dddae554223f800bc01768ee1cc6869d1051049c63ea550fe"
+    },
+    {
+      "bytes": 18134,
+      "kind": "current-guide-or-reference",
+      "path": "docs/how-to.md",
+      "sha256": "e632ce8d2b59d460c378908c9521acdbce235dec45efcbb08067a2eb87a430d5"
+    },
+    {
+      "bytes": 19888,
+      "kind": "current-guide-or-reference",
+      "path": "docs/lan-recording.md",
+      "sha256": "b7798f2f276cbc014de256139e836f7c51376c16d6f771dc222f5297fc014d9e"
+    },
+    {
+      "bytes": 20203,
+      "kind": "current-guide-or-reference",
+      "path": "docs/live-detection.md",
+      "sha256": "b5b530a56f3ba0ee645245d047d88f07dffe224afda844c0031bfc7f2575ab40"
+    },
+    {
+      "bytes": 9186,
+      "kind": "current-guide-or-reference",
+      "path": "docs/live-gpu.md",
+      "sha256": "70fff393ec7369bdeb6f3ea2a70d9af7df10daf59317973cdfca283535d7608c"
+    },
+    {
+      "bytes": 18607,
+      "kind": "current-guide-or-reference",
+      "path": "docs/local-analysis-service.md",
+      "sha256": "a404e1d9298d522361b6d78392cc71f3be297def612a68a9669e41b895fb5e04"
+    },
+    {
+      "bytes": 11373,
+      "kind": "current-guide-or-reference",
+      "path": "docs/local-camera-feeds.md",
+      "sha256": "1d194d6f30c4a9e3ebe90f7036f1378a1a513fb92022aa49970f6bdc0533e84a"
+    },
+    {
+      "bytes": 10102,
+      "kind": "current-guide-or-reference",
+      "path": "docs/map-measurements-and-shapes.md",
+      "sha256": "b98fce0a151bf0d3acb585abab3deda8969db595380932eb5d270f99ff9a3b63"
+    },
+    {
+      "bytes": 5881,
+      "kind": "dated-evidence-or-media",
+      "path": "docs/media/README.md",
+      "sha256": "bd738b42bdd06b729949c5bda295ac6aea1ce1725a5b873644e3568493e3ee5c"
+    },
+    {
+      "bytes": 1215,
+      "kind": "dated-evidence-or-media",
+      "path": "docs/media/coordinate-integrity-2026-11-12/README.md",
+      "sha256": "b2cffa73a51aa7ffac3e4360f9bb95ae21291af098627acee37cc458c2c5c8a1"
+    },
+    {
+      "bytes": 4635,
+      "kind": "dated-evidence-or-media",
+      "path": "docs/media/current/README.md",
+      "sha256": "e31c7094c3a3bb90f7f72e80c8fd3e320f6eeb0ba21a20a84c54f86a7e449255"
+    },
+    {
+      "bytes": 5362,
+      "kind": "dated-evidence-or-media",
+      "path": "docs/media/guide/README.md",
+      "sha256": "882387418d3557869a2534c72f28bfc6d46338d039bcffd2762225456ff3c46f"
+    },
+    {
+      "bytes": 2050,
+      "kind": "dated-evidence-or-media",
+      "path": "docs/media/guided-experience-2026-11-11/README.md",
+      "sha256": "f3996fb170ad9f19572d437022953c4dd471a850901608cab07a0fe090ab8a60"
+    },
+    {
+      "bytes": 983,
+      "kind": "dated-evidence-or-media",
+      "path": "docs/media/training-2026-11-02/README.md",
+      "sha256": "d852c28a055b5de5b131b8284a080608c934a9b341909f6e5606b1cec4cb68c1"
+    },
+    {
+      "bytes": 22726,
+      "kind": "current-guide-or-reference",
+      "path": "docs/model-qualification-20261026.md",
+      "sha256": "7ef5365c311e9ed969ff411839c1af7b70166a65189a75dcf903d0575cd57596"
+    },
+    {
+      "bytes": 13397,
+      "kind": "current-guide-or-reference",
+      "path": "docs/oem-backup.md",
+      "sha256": "c690d78b85e0fac6c4be9c9c19a97eb6015697218f20ef5aaecf6b4403b174e7"
+    },
+    {
+      "bytes": 17858,
+      "kind": "current-guide-or-reference",
+      "path": "docs/oem-field-acceptance.md",
+      "sha256": "a68b9c2547a4eecdbe8091e0dab10266d9f3ad45f2101c6d8823f4d82597cea1"
+    },
+    {
+      "bytes": 14554,
+      "kind": "current-guide-or-reference",
+      "path": "docs/offline-evaluation.md",
+      "sha256": "6fe43d50a3ed18ac8bdee3dfbdb7a0a4325ee9b062691b1b725defe5a532b324"
+    },
+    {
+      "bytes": 6171,
+      "kind": "current-guide-or-reference",
+      "path": "docs/offline-qualification.md",
+      "sha256": "793ad8ce94502771945dc1b78e76bd3fde40c0ac56425b7a71679807b4c0e6df"
+    },
+    {
+      "bytes": 23506,
+      "kind": "current-guide-or-reference",
+      "path": "docs/pc-testing.md",
+      "sha256": "c979499b7e9d6fa2ab2013b263b23d231ce2f731bb984d7cb7330c383f318156"
+    },
+    {
+      "bytes": 26545,
+      "kind": "current-guide-or-reference",
+      "path": "docs/performance-100-cameras.md",
+      "sha256": "fb5f2f740ceddc9ae1d00258a252ea2305a9ea5e5ef36b8341c317f32aedd243"
+    },
+    {
+      "bytes": 8066,
+      "kind": "current-guide-or-reference",
+      "path": "docs/person-enrollment.md",
+      "sha256": "30f541dd6b971e1e0ba28e2104acafe661698091cd676b04d15302072489c6e2"
+    },
+    {
+      "bytes": 6094,
+      "kind": "current-guide-or-reference",
+      "path": "docs/pilot-scope.md",
+      "sha256": "d9f3724390abf0b39e63b5fc2d5e4790c804652bb824a38535f4a68dc97e0af2"
+    },
+    {
+      "bytes": 35113,
+      "kind": "current-guide-or-reference",
+      "path": "docs/product-status.md",
+      "sha256": "0ef672912dbef232b5831033ea146fd9cd7c2d015db3fa10d41c360e3fea9d97"
+    },
+    {
+      "bytes": 3635,
+      "kind": "dated-evidence-or-media",
+      "path": "docs/project-assessment-2026-10-30.md",
+      "sha256": "e8e7235bbaf6423fdc37d57a57f7f6e22079c03c9d6a1ea51ef3a0fab0cc3d0f"
+    },
+    {
+      "bytes": 6510,
+      "kind": "current-guide-or-reference",
+      "path": "docs/public-webcams.md",
+      "sha256": "74b3b4447fb08186254c2e2b23b8c4dbee97bfdd48ba90400386dddddf191c86"
+    },
+    {
+      "bytes": 7276,
+      "kind": "current-guide-or-reference",
+      "path": "docs/qa/monitor-design-qa.md",
+      "sha256": "bbc3adea6ec03bf2a338fa884b23e77697ecf9639619474de1aa92c429839acb"
+    },
+    {
+      "bytes": 7855,
+      "kind": "current-guide-or-reference",
+      "path": "docs/recording-coverage.md",
+      "sha256": "a9ec8716d043dded06cac064326ce57272123fa1ddddc6305c9f53046f7d1c70"
+    },
+    {
+      "bytes": 17443,
+      "kind": "current-guide-or-reference",
+      "path": "docs/recording-recognition.md",
+      "sha256": "e4a53c8afcc8594aeaa1ffe97265a94876a408b0fb972969a6cca0155beef740"
+    },
+    {
+      "bytes": 8176,
+      "kind": "current-guide-or-reference",
+      "path": "docs/recording-workflow.md",
+      "sha256": "092425daf06e048392785d92aaa1403b69e1bd49049a1cf4cbec7f9b08d4b3e6"
+    },
+    {
+      "bytes": 10871,
+      "kind": "current-guide-or-reference",
+      "path": "docs/resource-controls.md",
+      "sha256": "21b6b3bf697856da7237942346d545db0c851c6f4cd024d0b2790ba04084442b"
+    },
+    {
+      "bytes": 7691,
+      "kind": "dated-evidence-or-media",
+      "path": "docs/review-2026-10-30.md",
+      "sha256": "af94adec6ae2dea16cecfc69d509f921e678aa48207dc80d258824efa7707653"
+    },
+    {
+      "bytes": 8956,
+      "kind": "current-guide-or-reference",
+      "path": "docs/review-and-events.md",
+      "sha256": "6012fe932cec562656aee55d9c28a94ee32ac1c1f9c3cc28661a1cceabccc74c"
+    },
+    {
+      "bytes": 13620,
+      "kind": "current-guide-or-reference",
+      "path": "docs/roadmap.md",
+      "sha256": "a4662d5ff603c2730af28f0a2fee922dfb10c24b5324a75539640aa1f84c8608"
+    },
+    {
+      "bytes": 5057,
+      "kind": "current-guide-or-reference",
+      "path": "docs/saved-facilities.md",
+      "sha256": "3cb9d6df46f302b57b16cfc1b93880f320e2eab043b0a0a5b5d54e6d7925d357"
+    },
+    {
+      "bytes": 27841,
+      "kind": "current-guide-or-reference",
+      "path": "docs/science-and-algorithms.md",
+      "sha256": "b2c72db28635dff0ad21bf21ad6ecc9136751dde4bf23086b4a37089353e7d86"
+    },
+    {
+      "bytes": 8335,
+      "kind": "current-guide-or-reference",
+      "path": "docs/setup-linux.md",
+      "sha256": "02f644f674aee32ce5fdfbca700f21e32693312b1cb9f0be1c2edad6cefea9c1"
+    },
+    {
+      "bytes": 8063,
+      "kind": "current-guide-or-reference",
+      "path": "docs/setup-macos.md",
+      "sha256": "3b22a199c3a0f757e6c16aef16f3e55c3fa58acd9998786ab658ae2e84271dd9"
+    },
+    {
+      "bytes": 7120,
+      "kind": "current-guide-or-reference",
+      "path": "docs/setup-windows.md",
+      "sha256": "d03b4c7b7b2d12dc0936538f9edfb8b064648028aec156036b15b7d3c3cdcc10"
+    },
+    {
+      "bytes": 6275,
+      "kind": "current-guide-or-reference",
+      "path": "docs/third-party-notices.md",
+      "sha256": "18b3268a7a749680c5ead15647d252fefbc86242ad51f99cbbbdbf3888ee2281"
+    },
+    {
+      "bytes": 11730,
+      "kind": "current-guide-or-reference",
+      "path": "docs/tracking-evaluation.md",
+      "sha256": "ffb7fd8198abef25c3bdc93d87efd6608c9efcdef7b496c1cd52b06a1e9d9b14"
+    },
+    {
+      "bytes": 19278,
+      "kind": "current-guide-or-reference",
+      "path": "docs/training.md",
+      "sha256": "b5c065cca85d13306cdd987aa2df968349642c728fbdd1bf32b84c21968432b7"
+    },
+    {
+      "bytes": 10408,
+      "kind": "current-guide-or-reference",
+      "path": "docs/troubleshooting.md",
+      "sha256": "93318d617c421a0043fed727ac9c8104e8763de537a7ef89cf7e3f1962dac808"
+    },
+    {
+      "bytes": 9067,
+      "kind": "dated-evidence-or-media",
+      "path": "docs/verification/2026-10-27/README.md",
+      "sha256": "ed7ca0785665f3914bb41c8b960628ca18aa516167a7f6f9af76f414f7a5f8ae"
+    },
+    {
+      "bytes": 18374,
+      "kind": "dated-evidence-or-media",
+      "path": "docs/verification/README.md",
+      "sha256": "67a58994389d866aae3ceb22b96173ff7bac07d2fded3fd5975336a9610fcebc"
+    },
+    {
+      "bytes": 1618,
+      "kind": "dated-evidence-or-media",
+      "path": "docs/verification/acceptance-receipts-2026-11-09/README.md",
+      "sha256": "9f0f6a4ffd29bb7737007cbae6c6fa32b1ca00b4a65ec989aac86a0eadacaccd"
+    },
+    {
+      "bytes": 3305,
+      "kind": "dated-evidence-or-media",
+      "path": "docs/verification/analysis-recovery-2026-10-29/README.md",
+      "sha256": "dcfdd5744e00c2d5862eec3c8877fe748a4c488f2b2281b566123dfca9c8892d"
+    },
+    {
+      "bytes": 12351,
+      "kind": "dated-evidence-or-media",
+      "path": "docs/verification/batching-2026-10-28/README.md",
+      "sha256": "87afdfef56b912c33073b674cb6cbadbf4b7313958f085cde0b0b1ed3a5fd24f"
+    },
+    {
+      "bytes": 5050,
+      "kind": "dated-evidence-or-media",
+      "path": "docs/verification/bounded-image-storage-2026-11-11/README.md",
+      "sha256": "8777162dd1871cf92165092f856239e7d01a384e023a3267aba2137f44a4164e"
+    },
+    {
+      "bytes": 7158,
+      "kind": "dated-evidence-or-media",
+      "path": "docs/verification/calibration-projective-math-2026-11-12/README.md",
+      "sha256": "fb919633c66e198bf69f2cf36d2c0c49339b01e3e04be8dd058d9f6cab359e57"
+    },
+    {
+      "bytes": 9693,
+      "kind": "new-integration-evidence",
+      "path": "docs/verification/coordinate-integrity-math-2026-11-12/README.md",
+      "sha256": "8b07b8e717cd6607007c7a311c94a15b68ac79e97e3db61a4b103d8a177038db"
+    },
+    {
+      "bytes": 7363,
+      "kind": "new-integration-evidence",
+      "path": "docs/verification/coordinate-integrity-math-2026-11-12/calibration-boundary/README.md",
+      "sha256": "07d020e1c3db8aa51328545f5d158d06a8c81e795370f0af3986b97b3bafdf0b"
+    },
+    {
+      "bytes": 4097,
+      "kind": "new-integration-evidence",
+      "path": "docs/verification/coordinate-integrity-math-2026-11-12/calibration-boundary/derivation.md",
+      "sha256": "e0794309062360e488c4cbeebb4d3990bc599a0ca16aa61b3605192500afd07a"
+    },
+    {
+      "bytes": 6330,
+      "kind": "new-integration-evidence",
+      "path": "docs/verification/coordinate-integrity-math-2026-11-12/orientation/README.md",
+      "sha256": "c1a6525ce7ae371977916000315b16e4b348208ec47dc84f2e5ac7a2c9b8c790"
+    },
+    {
+      "bytes": 3777,
+      "kind": "new-integration-evidence",
+      "path": "docs/verification/coordinate-integrity-math-2026-11-12/reorigin/README.md",
+      "sha256": "dac54bc2f418d58ce2c902c780b0dd02cbdb37d231e2e311e68de94e068fbe36"
+    },
+    {
+      "bytes": 4293,
+      "kind": "dated-evidence-or-media",
+      "path": "docs/verification/copy-only-oem-2026-11-09/README.md",
+      "sha256": "3de4436d6fffee1589bb97cc781946cf63fb64936c83d99864fa1a556d44a26d"
+    },
+    {
+      "bytes": 10636,
+      "kind": "dated-evidence-or-media",
+      "path": "docs/verification/cuda-2026-10-28/README.md",
+      "sha256": "3df856bf6185e235d6b1f731257471494fbff6743dfb3f33c93d0ef1bd81fa9a"
+    },
+    {
+      "bytes": 5872,
+      "kind": "dated-evidence-or-media",
+      "path": "docs/verification/cumulative-training-2026-11-02/README.md",
+      "sha256": "9861887ba9dcc5973caebd7a599d32145357fd8f836bc0479e003cb0bdba9f0e"
+    },
+    {
+      "bytes": 5406,
+      "kind": "dated-evidence-or-media",
+      "path": "docs/verification/documentation-alignment-2026-11-12/README.md",
+      "sha256": "5bf1a532d218c96c3c2c0a0836aeafccdb8d64e4cbd309ad146362da0d81edee"
+    },
+    {
+      "bytes": 4401,
+      "kind": "dated-evidence-or-media",
+      "path": "docs/verification/documentation-complete-2026-11-12/README.md",
+      "sha256": "3ca1212d98887023ed9a10136e96f3924b7185de9e7c3dd18d7541eb9ece3762"
+    },
+    {
+      "bytes": 3432,
+      "kind": "dated-evidence-or-media",
+      "path": "docs/verification/documentation-refresh-2026-11-11/README.md",
+      "sha256": "60bd7dba22eb4d3fee081245872a23ff07fdd3a978bf10b7019aa427635144fe"
+    },
+    {
+      "bytes": 6312,
+      "kind": "dated-evidence-or-media",
+      "path": "docs/verification/dori-projection-2026-11-12/README.md",
+      "sha256": "7c5d732bf71c5d2f78d162d48cfe22398eb5a9fd55cd8a4c0726a92f3c3fe956"
+    },
+    {
+      "bytes": 8317,
+      "kind": "dated-evidence-or-media",
+      "path": "docs/verification/dori-projection-2026-11-12/ci-followup-2026-11-12.md",
+      "sha256": "41b46bfe906bd581787075f43b249852a0a5630d2f83d6d0efaba0d2e244f105"
+    },
+    {
+      "bytes": 8754,
+      "kind": "dated-evidence-or-media",
+      "path": "docs/verification/durable-overload-2026-10-28/README.md",
+      "sha256": "4013ba9e3caccbaf4dc70deda0071d371d0476d3ddf3e84aa961f6727c669d7d"
+    },
+    {
+      "bytes": 3162,
+      "kind": "dated-evidence-or-media",
+      "path": "docs/verification/enhancement-2026-10-30/README.md",
+      "sha256": "96ad6b8eba9250325670a80df02635d988f569541d93046bd5c010c86e2a30ea"
+    },
+    {
+      "bytes": 6691,
+      "kind": "dated-evidence-or-media",
+      "path": "docs/verification/evaluation-binding-2026-11-11/README.md",
+      "sha256": "1518b4150155e5e0c117e81679c7c0e943d7d9ccef7372d436746e9031915405"
+    },
+    {
+      "bytes": 5360,
+      "kind": "dated-evidence-or-media",
+      "path": "docs/verification/experience-2026-11-09/README.md",
+      "sha256": "1a2caa5ba09ed1b721bcafcceb2c2b1d6b625280bfb1b41680dbac5aafa657a9"
+    },
+    {
+      "bytes": 3497,
+      "kind": "dated-evidence-or-media",
+      "path": "docs/verification/facility-2026-10-27/README.md",
+      "sha256": "1fd04a50f62f778e338424f3762abbda1c0415e28e56401433b78a142287661e"
+    },
+    {
+      "bytes": 4365,
+      "kind": "dated-evidence-or-media",
+      "path": "docs/verification/facility-2026-10-28/README.md",
+      "sha256": "0e793f596e15ba8191fd87ff64db4cb40492453cf57e4e4fd230c505a39c799a"
+    },
+    {
+      "bytes": 2237,
+      "kind": "dated-evidence-or-media",
+      "path": "docs/verification/facility-doorways-2026-11-01/README.md",
+      "sha256": "5860f5c312353335aad0bf65495edcebb0422ed56a981e3fdd9c3a2eb9d7d0db"
+    },
+    {
+      "bytes": 3965,
+      "kind": "dated-evidence-or-media",
+      "path": "docs/verification/facility-recovery-2026-11-09/README.md",
+      "sha256": "a4a709a643e64004155cc7796adfb6a7ce6dc11440307b1783f98901c43c7e2a"
+    },
+    {
+      "bytes": 1955,
+      "kind": "dated-evidence-or-media",
+      "path": "docs/verification/facility-stairs-2026-11-01/README.md",
+      "sha256": "a408dc2490ceee6027a59d98df2e4ae42988b69982bda7033d1302e97f58cd14"
+    },
+    {
+      "bytes": 1599,
+      "kind": "dated-evidence-or-media",
+      "path": "docs/verification/facility-windows-2026-11-01/README.md",
+      "sha256": "b61fbe6d36570395d723ba7bf31cecb95abbe8c3e7e94dbfcabf61f8423d3dc5"
+    },
+    {
+      "bytes": 4298,
+      "kind": "dated-evidence-or-media",
+      "path": "docs/verification/gpu-default-2026-11-03/README.md",
+      "sha256": "002ab728275c63b35355fa4d16ba173a3a83fcbb7b1de020f129d62e58a6a5bb"
+    },
+    {
+      "bytes": 13743,
+      "kind": "dated-evidence-or-media",
+      "path": "docs/verification/ground-frustum-math-2026-11-12/README.md",
+      "sha256": "0d698419f5d95b82ce00676f99f1fcc08cf9bd443c02899f5f6de4b3d400dbbc"
+    },
+    {
+      "bytes": 9051,
+      "kind": "dated-evidence-or-media",
+      "path": "docs/verification/ground-frustum-math-2026-11-12/consumer-review/README.md",
+      "sha256": "16ccfd1579680b1f07bdd7bf825a392b299fe66db98678066126f353d5e09fe2"
+    },
+    {
+      "bytes": 8021,
+      "kind": "dated-evidence-or-media",
+      "path": "docs/verification/ground-frustum-math-2026-11-12/independent/README.md",
+      "sha256": "171ffd22f8cac883b47dd16d8f8b5d669402b9384d47b6dc4b03a9fe69fa34ce"
+    },
+    {
+      "bytes": 5429,
+      "kind": "dated-evidence-or-media",
+      "path": "docs/verification/ground-frustum-math-2026-11-12/independent/derivation.md",
+      "sha256": "147cbbe88cbdab283cddd9da8bbe69a45c89820c28b2aa0389500fb8fb8e045c"
+    },
+    {
+      "bytes": 7926,
+      "kind": "dated-evidence-or-media",
+      "path": "docs/verification/guided-experience-2026-11-11/README.md",
+      "sha256": "77f83c74fc1cd1d79c00a8291d39728e57689e99d31a2179d83dfc0279125a31"
+    },
+    {
+      "bytes": 4294,
+      "kind": "dated-evidence-or-media",
+      "path": "docs/verification/guided-experience-2026-11-11/review.md",
+      "sha256": "75b32140fdd7bcc7632fb175f104a741f90acc20cf26d238d15fd3f869278801"
+    },
+    {
+      "bytes": 5826,
+      "kind": "dated-evidence-or-media",
+      "path": "docs/verification/hardware-2026-10-27/README.md",
+      "sha256": "9ea23e5a239708e621a81e9a5915a6fe3acbead557bb0b86550c219deb28e359"
+    },
+    {
+      "bytes": 24588,
+      "kind": "dated-evidence-or-media",
+      "path": "docs/verification/host-2026-10-28/README.md",
+      "sha256": "4641d7dd69e0ba3aa4898f43d756ae6bb71fcf23aab216e0dcacd7629bf2a628"
+    },
+    {
+      "bytes": 10880,
+      "kind": "dated-evidence-or-media",
+      "path": "docs/verification/image-diagnostics-math-2026-11-12/README.md",
+      "sha256": "69af29456eb06310003dc0e7e23ebbb8c3367e7624899685784169ea2d37429d"
+    },
+    {
+      "bytes": 10555,
+      "kind": "dated-evidence-or-media",
+      "path": "docs/verification/journal-2026-10-28/README.md",
+      "sha256": "7618512119ddc3b835babf3d6405efb79ebf894ec0e38bad36690500c5bf15ec"
+    },
+    {
+      "bytes": 4423,
+      "kind": "dated-evidence-or-media",
+      "path": "docs/verification/lan-recorder-2026-10-30/README.md",
+      "sha256": "f1b81e409e73587734578b8eab03f6bf3552245584ec3a8c7467cccc3fd47d09"
+    },
+    {
+      "bytes": 4816,
+      "kind": "dated-evidence-or-media",
+      "path": "docs/verification/launcher-recovery-2026-10-29/README.md",
+      "sha256": "729bb6014dad49a8024ddb33f2fe08cf2ec423bda5c8d24f10bdb4a68a7445d2"
+    },
+    {
+      "bytes": 3899,
+      "kind": "dated-evidence-or-media",
+      "path": "docs/verification/live-catalogue-recovery-2026-11-11/README.md",
+      "sha256": "753bbc8285ee36f2938cdceaa77326ed2acad22a42693e4e788694e365bf3d66"
+    },
+    {
+      "bytes": 6530,
+      "kind": "dated-evidence-or-media",
+      "path": "docs/verification/live-gpu-2026-11-02/README.md",
+      "sha256": "bd865561e8a3b1c95bd5b7801a4d69c98961ff4bb1ece78c5ea997f5a74033b7"
+    },
+    {
+      "bytes": 5307,
+      "kind": "dated-evidence-or-media",
+      "path": "docs/verification/live-reply-validation-2026-11-11/README.md",
+      "sha256": "5dbf79186c99cee3f6993065c3bb4ee1eb9b5894939ab4acad16bf60fd75d147"
+    },
+    {
+      "bytes": 5015,
+      "kind": "dated-evidence-or-media",
+      "path": "docs/verification/live-review-retention-2026-11-11/README.md",
+      "sha256": "60d2e7485c23a8584410c76785bcba53e9cea246dfc09fdacdf9a06b156420f2"
+    },
+    {
+      "bytes": 4055,
+      "kind": "dated-evidence-or-media",
+      "path": "docs/verification/local-analysis-2026-10-29/README.md",
+      "sha256": "72ad71991c52554f206ac56614f4dd912a2b8f6fb52091f5d0bbb22da9f671a1"
+    },
+    {
+      "bytes": 4217,
+      "kind": "dated-evidence-or-media",
+      "path": "docs/verification/local-feeds-2026-10-29/README.md",
+      "sha256": "5223a9eca5aeb3954ccbfaad4a40fcf230bbfb559656e7f7be761e12944707e9"
+    },
+    {
+      "bytes": 4658,
+      "kind": "dated-evidence-or-media",
+      "path": "docs/verification/mac-setup-2026-11-01/README.md",
+      "sha256": "3f88c0eb21b8374b4bc6b17923dac50aa1ef0bcec5ee600970394341cca509b7"
+    },
+    {
+      "bytes": 2601,
+      "kind": "dated-evidence-or-media",
+      "path": "docs/verification/media-coverage-2026-10-30/README.md",
+      "sha256": "7f2898e1c5fcfddef1bcb3c02b1bcfe569bf8d2945eff53275b42c9dff5aa086"
+    },
+    {
+      "bytes": 3070,
+      "kind": "dated-evidence-or-media",
+      "path": "docs/verification/merged-baseline-2026-11-09/README.md",
+      "sha256": "9d1a7a7743814a9af83041f052d4a71f6e5856de6123a7cf23f84b07ed6c1944"
+    },
+    {
+      "bytes": 4989,
+      "kind": "dated-evidence-or-media",
+      "path": "docs/verification/native-2026-10-28/README.md",
+      "sha256": "ab903c1c219a0b8d0ead724c52e77d3440f9916632c4d299f0797d6c17969564"
+    },
+    {
+      "bytes": 3490,
+      "kind": "dated-evidence-or-media",
+      "path": "docs/verification/oem-backup-2026-11-03/README.md",
+      "sha256": "c9bd66e2bf27aca4b55ffbc6a8cb9b438182b52b525fa79dbea7dd64f49c1a51"
+    },
+    {
+      "bytes": 1193,
+      "kind": "dated-evidence-or-media",
+      "path": "docs/verification/oem-continuity-2026-11-09/README.md",
+      "sha256": "8e7fef77f616334a07654d6119b5fb38d3454a8451457668aa6d4388ed48b72f"
+    },
+    {
+      "bytes": 3458,
+      "kind": "dated-evidence-or-media",
+      "path": "docs/verification/oem-field-acceptance-2026-11-05/README.md",
+      "sha256": "81ea226639d73343c0f23cff746c8dff8397a19d70e6995926c97c40c91946df"
+    },
+    {
+      "bytes": 10393,
+      "kind": "dated-evidence-or-media",
+      "path": "docs/verification/profiling-2026-10-28/README.md",
+      "sha256": "27337d8e1ac39ee01c9040e1faca3ac45e139a53327a5f25bb33bd395aeececb"
+    },
+    {
+      "bytes": 4386,
+      "kind": "dated-evidence-or-media",
+      "path": "docs/verification/recognition-2026-10-29/README.md",
+      "sha256": "a4f84e7f51f89d342ac84d2cfce9e0b839e0648fafe120c01f593cb5d36ed82a"
+    },
+    {
+      "bytes": 5581,
+      "kind": "dated-evidence-or-media",
+      "path": "docs/verification/recognition-transfer-2026-11-11/README.md",
+      "sha256": "6b417583d88f1205a3028dc6cf5d560c71c1f1a820eaab15c62fa5edef5d1fb0"
+    },
+    {
+      "bytes": 12737,
+      "kind": "dated-evidence-or-media",
+      "path": "docs/verification/recovery-2026-10-28/README.md",
+      "sha256": "7a7ed84f947f084a49b48cf4473d902ed2eac1121a1144670ac73b6532ae154b"
+    },
+    {
+      "bytes": 5619,
+      "kind": "dated-evidence-or-media",
+      "path": "docs/verification/repository-checks-2026-11-03/README.md",
+      "sha256": "cb2a9802cddaa1443720d3968e8ea761d079f277d2dab29bb11d769990d7859b"
+    },
+    {
+      "bytes": 5333,
+      "kind": "dated-evidence-or-media",
+      "path": "docs/verification/review-fixes-2026-10-30/README.md",
+      "sha256": "5f874d599390840eb00a370249c1733c0d82f8d05b4d81c821903bc5e6cdfd9e"
+    },
+    {
+      "bytes": 5604,
+      "kind": "dated-evidence-or-media",
+      "path": "docs/verification/route-coverage-math-2026-11-12/README.md",
+      "sha256": "0adc025c56af8edebaddf3690148ec48a93a34b7169bbaf59a0518e2002aa869"
+    },
+    {
+      "bytes": 6703,
+      "kind": "dated-evidence-or-media",
+      "path": "docs/verification/runtime-and-handoffs-2026-11-09/README.md",
+      "sha256": "cd48c446dc465095f66cfb12ce7ecb5ec4206ecd3b80e2f1803c632493e89f75"
+    },
+    {
+      "bytes": 4753,
+      "kind": "dated-evidence-or-media",
+      "path": "docs/verification/science-math-2026-11-11/README.md",
+      "sha256": "e12f849a0adcaefc2be6e259d13e5d2355a0029aac76395f5be2d6fc03208e16"
+    },
+    {
+      "bytes": 2697,
+      "kind": "dated-evidence-or-media",
+      "path": "docs/verification/tracking-2026-11-02/README.md",
+      "sha256": "967c42c8c50599885e7ab3c454f15e819cddd57a803b485ac898738464d44a9e"
+    },
+    {
+      "bytes": 8524,
+      "kind": "dated-evidence-or-media",
+      "path": "docs/verification/tracking-algorithms-2026-11-11/README.md",
+      "sha256": "c94082b24b154791ff253dfc56bfaa3d955180bf6d182f3fa698c952a78a1925"
+    },
+    {
+      "bytes": 6861,
+      "kind": "dated-evidence-or-media",
+      "path": "docs/verification/tracking-algorithms-2026-11-11/review.md",
+      "sha256": "8ca562740ab77afdd0b8578550e4f3bdd0fb6e6fe34b4736d1f43e336c192b33"
+    },
+    {
+      "bytes": 6750,
+      "kind": "dated-evidence-or-media",
+      "path": "docs/verification/tracking-frame-size-2026-11-11/README.md",
+      "sha256": "1fe33eb631fe11b7edafdb6f2254caa43065577a64a195a5443704e254fc2042"
+    },
+    {
+      "bytes": 3252,
+      "kind": "dated-evidence-or-media",
+      "path": "docs/verification/training-studio-2026-11-02/README.md",
+      "sha256": "5f6162aa1959fe65d4fe296c4a3a68f75e4fa4623318ee60ece669a1aad185b5"
+    },
+    {
+      "bytes": 4122,
+      "kind": "dated-evidence-or-media",
+      "path": "docs/verification/visual-documentation-2026-11-01/README.md",
+      "sha256": "c78a99213f3c3bfdfd86e94b6d1a3df14d78f8809586e84e9d537f95aaab4fa5"
+    },
+    {
+      "bytes": 5524,
+      "kind": "dated-evidence-or-media",
+      "path": "docs/verification/work-preservation-2026-11-09/README.md",
+      "sha256": "7c7940472783ba83232f96c0609c8da0ab292f6d412041e26498effa0b514409"
+    },
+    {
+      "bytes": 8955,
+      "kind": "dated-evidence-or-media",
+      "path": "docs/verification/workers-2026-10-28/README.md",
+      "sha256": "b4a790e35f123391dcf77dc60b7c329970d2ac690839d523d1a068b448877d9a"
+    },
+    {
+      "bytes": 5870,
+      "kind": "dated-evidence-or-media",
+      "path": "docs/verification/workspace-experience-2026-11-09/README.md",
+      "sha256": "921a4f24e85429844babac0eb9fb3df97950ead84de97caac080412ddaf5f2ba"
+    },
+    {
+      "bytes": 6905,
+      "kind": "dated-evidence-or-media",
+      "path": "docs/verification/workspace-recovery-followup-2026-11-09/README.md",
+      "sha256": "eaf910636dbae61fdadb08cf047f446760967d7e9378898ebdc1a86fd3a8515a"
+    },
+    {
+      "bytes": 11148,
+      "kind": "dated-evidence-or-media",
+      "path": "docs/verification/zone-area-math-2026-11-12/README.md",
+      "sha256": "ee661b2fb9d09398e7309e2e0cd28c11cb0cb1459d61c750086148d6a12d9876"
+    },
+    {
+      "bytes": 8379,
+      "kind": "dated-evidence-or-media",
+      "path": "docs/verification/zone-area-math-2026-11-12/oracle.md",
+      "sha256": "d4eeb1ad4a827bcf17dc818aab84a04d0efa982a2b7643c07da65cfd11a5a5dd"
+    },
+    {
+      "bytes": 9267,
+      "kind": "current-guide-or-reference",
+      "path": "docs/visual-atlas.md",
+      "sha256": "eb244cc803957694d3c64aea6e94e79a730ab892c12fdb0746829eeefe6bc4f6"
+    },
+    {
+      "bytes": 6986,
+      "kind": "current-guide-or-reference",
+      "path": "docs/visual-tour.md",
+      "sha256": "302ba22840fa23e8053e62b73578ce88a380456b1d316da791e9d0b1378d5144"
+    },
+    {
+      "bytes": 27950,
+      "kind": "generated-wiki",
+      "path": "docs/wiki/100-camera-plan.md",
+      "sha256": "08faa31d61f4735945ce2b1b9f7688f65b8038dec7604d0438e2d6f623505c26"
+    },
+    {
+      "bytes": 19629,
+      "kind": "generated-wiki",
+      "path": "docs/wiki/Architecture-and-data.md",
+      "sha256": "254643c724f5596baa01f9b76c60b2701209e7c6651d7d913ab8da06bef828f7"
+    },
+    {
+      "bytes": 4094,
+      "kind": "generated-wiki",
+      "path": "docs/wiki/Assessment-2026-10-30.md",
+      "sha256": "1410bc3447e37cbcc8994cde9d4fd4ec7004592e02b9eb4419b6f9470a9f7cb9"
+    },
+    {
+      "bytes": 12495,
+      "kind": "generated-wiki",
+      "path": "docs/wiki/Camera-sources.md",
+      "sha256": "c7cd31ec147e766440b9480edab83064da077e7bccacb68ea14732b8f689234c"
+    },
+    {
+      "bytes": 1640,
+      "kind": "generated-wiki",
+      "path": "docs/wiki/Contributing.md",
+      "sha256": "ed6694b49b51381ee1e8a8feac96f36391224940f2803d455fee0ae369284bd3"
+    },
+    {
+      "bytes": 16548,
+      "kind": "generated-wiki",
+      "path": "docs/wiki/Development-and-checks.md",
+      "sha256": "47568db163802e7ee444761b7c8c44fd57291b43fcb94f3e7c187ca24c171dba"
+    },
+    {
+      "bytes": 18634,
+      "kind": "generated-wiki",
+      "path": "docs/wiki/Edge-CLI.md",
+      "sha256": "a6addcbc38d67ace9912a3d5217f183e1e5c24aeb494db98db07259a8fc3c90d"
+    },
+    {
+      "bytes": 10155,
+      "kind": "generated-wiki",
+      "path": "docs/wiki/Enhancement-comparison.md",
+      "sha256": "9b455192cd5c3189ffa3022e2108642262f6ecc4a45c1f2819f4a3250b794116"
+    },
+    {
+      "bytes": 23918,
+      "kind": "generated-wiki",
+      "path": "docs/wiki/Evidence-and-validation.md",
+      "sha256": "83d9a7c3ac95e8d669d092c385e55e87dedf5672b522b8a46524f177eff53537"
+    },
+    {
+      "bytes": 7851,
+      "kind": "generated-wiki",
+      "path": "docs/wiki/Experience-review-2026-10-29.md",
+      "sha256": "49d01e9c43c1c8446c42d4e7da2bbd22f2d48584a429720794cf2f0694ac9e88"
+    },
+    {
+      "bytes": 34967,
+      "kind": "generated-wiki",
+      "path": "docs/wiki/Facility-planning.md",
+      "sha256": "76ab92cbc4e4f36a1a3667c73024275cea35980b886ccf247d5726e0238e6211"
+    },
+    {
+      "bytes": 9859,
+      "kind": "generated-wiki",
+      "path": "docs/wiki/Facility-setup-reliability.md",
+      "sha256": "a1a39e7ca55d087e48b650db154601e7b5430310c11f2019f7f44b28edafb984"
+    },
+    {
+      "bytes": 16249,
+      "kind": "generated-wiki",
+      "path": "docs/wiki/Facility-setup-research.md",
+      "sha256": "020b0eb752a007c62c1bf370649c7d7a229ba6531b5e55e7066d92c3555c86c5"
+    },
+    {
+      "bytes": 4271,
+      "kind": "generated-wiki",
+      "path": "docs/wiki/Facility-study-kit.md",
+      "sha256": "1e5315ceec8270a7c8d54ab5beb349d092b60f239e3710ea9f7fb7624c944383"
+    },
+    {
+      "bytes": 9522,
+      "kind": "generated-wiki",
+      "path": "docs/wiki/Facility-upgrades-2026-10-29.md",
+      "sha256": "a234f17dae497e952888e436cbecd5c11a9714bb27901dc2d6120da9aa93ed16"
+    },
+    {
+      "bytes": 15582,
+      "kind": "generated-wiki",
+      "path": "docs/wiki/Field-acceptance.md",
+      "sha256": "4381f589ec57914a327ebd57194a9efe2c3bd2fcd736bcd84704b2ef1b32abb0"
+    },
+    {
+      "bytes": 10758,
+      "kind": "generated-wiki",
+      "path": "docs/wiki/GPU-planning.md",
+      "sha256": "85eadf70c5b737f701feda6a59ddb93ce9989441fe55565ca672dd744e51cd37"
+    },
+    {
+      "bytes": 11260,
+      "kind": "generated-wiki",
+      "path": "docs/wiki/Getting-started.md",
+      "sha256": "b2c1be8eb19047178d941920afb833dc2b916c9aef3d4e56f8278aefbb69781f"
+    },
+    {
+      "bytes": 13460,
+      "kind": "generated-wiki",
+      "path": "docs/wiki/Guide-index.md",
+      "sha256": "dedc55519be2de3d77dd346f471e097f45d581871d7b8acee0c220c06fa6c761"
+    },
+    {
+      "bytes": 2618,
+      "kind": "generated-wiki",
+      "path": "docs/wiki/Guided-experience-visual-provenance.md",
+      "sha256": "ecef19930a1e6c42df2e5248e8606ded9ac8ed60dc2ce1fad9d512f87fc95fd7"
+    },
+    {
+      "bytes": 20497,
+      "kind": "generated-wiki",
+      "path": "docs/wiki/Guided-training.md",
+      "sha256": "cfe49f54e804e8a318f75e54c42d44d3ee3f76f880b7350f0fef499d853690e3"
+    },
+    {
+      "bytes": 14935,
+      "kind": "generated-wiki",
+      "path": "docs/wiki/Hardware-guide.md",
+      "sha256": "918a06a99ba2a02228afdae955c67d3f655ddda6a6a0855415ada7d3bc6ea6a2"
+    },
+    {
+      "bytes": 7768,
+      "kind": "generated-wiki",
+      "path": "docs/wiki/Historical-visual-provenance.md",
+      "sha256": "6b246ff8713676afa432eead61e9aaa34e1ba817b600e3450d99872c84647681"
+    },
+    {
+      "bytes": 17786,
+      "kind": "generated-wiki",
+      "path": "docs/wiki/Home.md",
+      "sha256": "1ff2e20de3e984ba35953f1430342117c07c16ad4a23ae795ffc6233094d295d"
+    },
+    {
+      "bytes": 10189,
+      "kind": "generated-wiki",
+      "path": "docs/wiki/Image-diagnostics.md",
+      "sha256": "0b840d2755c0f8dc718db9537ebf69d6b48c493778d53cb79c6a91d2dc38c015"
+    },
+    {
+      "bytes": 20768,
+      "kind": "generated-wiki",
+      "path": "docs/wiki/LAN-recording.md",
+      "sha256": "0af34fef30f8af8bcaceb3271b85522c39e9374fb6a5ffa8c8d2c9151be9df4c"
+    },
+    {
+      "bytes": 9583,
+      "kind": "generated-wiki",
+      "path": "docs/wiki/Linux-setup.md",
+      "sha256": "d2723713bc18109e9e053559016be6d5d4af9228c0db2629d44c6488ee918d0f"
+    },
+    {
+      "bytes": 21292,
+      "kind": "generated-wiki",
+      "path": "docs/wiki/Live-AI-and-tracking.md",
+      "sha256": "19692e476838fe62ac21f6b255a32a8d8623563f5ae74201220791b4f9eab4d0"
+    },
+    {
+      "bytes": 9642,
+      "kind": "generated-wiki",
+      "path": "docs/wiki/Live-GPU.md",
+      "sha256": "0ff5fd95fb6e254049cbda68fc5b99e9e5fbb8c66ec4f0d3389625821780050d"
+    },
+    {
+      "bytes": 20067,
+      "kind": "generated-wiki",
+      "path": "docs/wiki/Local-analysis-service.md",
+      "sha256": "6ec390de174a5b79ddc62a23bc17325745fb2dd0752fcd80126e529898fa15f4"
+    },
+    {
+      "bytes": 4443,
+      "kind": "generated-wiki",
+      "path": "docs/wiki/Local-map-services.md",
+      "sha256": "7a96bbda6ddce5568f74a361631f07d1674a37254348859ed0146c087db03e9c"
+    },
+    {
+      "bytes": 8951,
+      "kind": "generated-wiki",
+      "path": "docs/wiki/Mac-setup.md",
+      "sha256": "94599b9df802016303afe096b4d1095d81e238241a9505fcbc984645e9fdfc52"
+    },
+    {
+      "bytes": 10916,
+      "kind": "generated-wiki",
+      "path": "docs/wiki/Maps-and-shapes.md",
+      "sha256": "8dec12f6a920b536333d00f93f995d72ba61fa55d7e3642926f9443c8d5173d9"
+    },
+    {
+      "bytes": 23329,
+      "kind": "generated-wiki",
+      "path": "docs/wiki/Model-qualification-2026-10-26.md",
+      "sha256": "281cdc6fb6117b847354048700504ffc2c42fc68fff4f8d6ca5ad71593738b35"
+    },
+    {
+      "bytes": 14056,
+      "kind": "generated-wiki",
+      "path": "docs/wiki/OEM-backup.md",
+      "sha256": "0a2640a977eeb428a837e7ccc851d6c48e9dd326380b634b5de204d7f46fdfd9"
+    },
+    {
+      "bytes": 18514,
+      "kind": "generated-wiki",
+      "path": "docs/wiki/OEM-field-acceptance.md",
+      "sha256": "e637a2d12720944f1844ad8d451b9b67fa9d7556ee41119c655ec1a7f6ff4dfa"
+    },
+    {
+      "bytes": 15488,
+      "kind": "generated-wiki",
+      "path": "docs/wiki/Offline-evaluation.md",
+      "sha256": "5d60c666d8e57bbbac593f0f1dbfd1e774358b80376a36d6fd2900766da3fb0e"
+    },
+    {
+      "bytes": 7098,
+      "kind": "generated-wiki",
+      "path": "docs/wiki/Offline-qualification.md",
+      "sha256": "afd6804fb234a472ff3e553788b9a81d3763ea3dd9e69e9651d8d5d969fc5a5c"
+    },
+    {
+      "bytes": 24501,
+      "kind": "generated-wiki",
+      "path": "docs/wiki/PC-testing.md",
+      "sha256": "9db46c0baa98b9f2cb93236b74a3de68f717d33c3e8ee044d102a5ffc3a7fcc5"
+    },
+    {
+      "bytes": 6714,
+      "kind": "generated-wiki",
+      "path": "docs/wiki/PR61-visual-provenance.md",
+      "sha256": "a6794fc9741bb1b80bef05e2d41d147b698665d2c60a04118b5f7552a1f54520"
+    },
+    {
+      "bytes": 8648,
+      "kind": "generated-wiki",
+      "path": "docs/wiki/Person-enrollment.md",
+      "sha256": "01327d771657746636ea54ff449780f54a7dd9d8be86c87b66daf516bb4df5f2"
+    },
+    {
+      "bytes": 6965,
+      "kind": "generated-wiki",
+      "path": "docs/wiki/Pilot-scope.md",
+      "sha256": "27a60a68e739a6a0d44089a33ca51f7a2aa86e3390d1c443067d390a40721a0e"
+    },
+    {
+      "bytes": 7760,
+      "kind": "generated-wiki",
+      "path": "docs/wiki/Planar-calibration.md",
+      "sha256": "1447c93f6519579bbe9c1f6d6cfe9e37bd65b760de46b619f6b2ed043e9a6f94"
+    },
+    {
+      "bytes": 42193,
+      "kind": "generated-wiki",
+      "path": "docs/wiki/Product-status.md",
+      "sha256": "271866191a8e70a21f5934e5a651e359eb721450279312c3992e3d15e590bf88"
+    },
+    {
+      "bytes": 7096,
+      "kind": "generated-wiki",
+      "path": "docs/wiki/Public-webcams.md",
+      "sha256": "4466a6e61c37f74dbd17ade595686dd32023293599a620862ad9b7b3c80b10c3"
+    },
+    {
+      "bytes": 2740,
+      "kind": "generated-wiki",
+      "path": "docs/wiki/README.md",
+      "sha256": "601d88034152ba6327d792381ad97558300f17cbdee144a33035e9133a7039ac"
+    },
+    {
+      "bytes": 18725,
+      "kind": "generated-wiki",
+      "path": "docs/wiki/Recognition-details.md",
+      "sha256": "d89918ec1c9bd116d3a8e958103f61a2d63d980089ff71b8951bda8af886d113"
+    },
+    {
+      "bytes": 8554,
+      "kind": "generated-wiki",
+      "path": "docs/wiki/Recording-coverage.md",
+      "sha256": "eae5190b6994a6a67547981aaa32828d58c1515cba6170679150a66a0b4be005"
+    },
+    {
+      "bytes": 9194,
+      "kind": "generated-wiki",
+      "path": "docs/wiki/Recording-workflow.md",
+      "sha256": "65388d6b4c7446f374a479f2327892f95faaaaea6465b0a16b39de2c62306b06"
+    },
+    {
+      "bytes": 11868,
+      "kind": "generated-wiki",
+      "path": "docs/wiki/Resource-controls.md",
+      "sha256": "a011dcd79be2460f4e1bdaa98ec05862735056aea3a9a7aaf51a2bcd38f9ab53"
+    },
+    {
+      "bytes": 8466,
+      "kind": "generated-wiki",
+      "path": "docs/wiki/Review-2026-10-30.md",
+      "sha256": "f77a4855cda18e9ebc86e1943e354925324f07955661a7b09e38ecdde5d81218"
+    },
+    {
+      "bytes": 9705,
+      "kind": "generated-wiki",
+      "path": "docs/wiki/Review-and-events.md",
+      "sha256": "62ae325300f2ad25f6879ba103c6949852a97c53bc4c1607a1de029dd36cad98"
+    },
+    {
+      "bytes": 15730,
+      "kind": "generated-wiki",
+      "path": "docs/wiki/Roadmap.md",
+      "sha256": "f7c2aa22fcc2ebf183a2c539bc2461920623a11f02bf5456c2fc5e484d10bb92"
+    },
+    {
+      "bytes": 5641,
+      "kind": "generated-wiki",
+      "path": "docs/wiki/Saved-facilities.md",
+      "sha256": "29fc265bd818082392a9d68a5429f138c332c41d667e562926466d88113a1358"
+    },
+    {
+      "bytes": 29202,
+      "kind": "generated-wiki",
+      "path": "docs/wiki/Science-and-algorithms.md",
+      "sha256": "aefad12d6c544a9258a988aa9ed74c9d45b200c8438d2ad300ad52c2194a9721"
+    },
+    {
+      "bytes": 16837,
+      "kind": "generated-wiki",
+      "path": "docs/wiki/Security-boundary.md",
+      "sha256": "980718595d0f1f7de06847e33142e80087a43edc9240597307b1a9de0759e620"
+    },
+    {
+      "bytes": 7455,
+      "kind": "generated-wiki",
+      "path": "docs/wiki/Third-party-notices.md",
+      "sha256": "15084948e745e9099fb6fd44c0e3e9a3ebc5769d5b805c45d88d8c2fc3db7544"
+    },
+    {
+      "bytes": 12370,
+      "kind": "generated-wiki",
+      "path": "docs/wiki/Tracking-evaluation.md",
+      "sha256": "27cffad59b8eb45ae98c310bea0aa6a71977c333bbb68e8a7bd3171765e6d4af"
+    },
+    {
+      "bytes": 11876,
+      "kind": "generated-wiki",
+      "path": "docs/wiki/Troubleshooting.md",
+      "sha256": "077d956e34aeb30da06713f67b9cbd56e2ca720d4dc6a0c88450564f1f0da833"
+    },
+    {
+      "bytes": 12883,
+      "kind": "generated-wiki",
+      "path": "docs/wiki/Visual-atlas.md",
+      "sha256": "053882a99d183d51cd7672f4d5ed633fa14ea16c4db015c0b5cb5bb77a5eabf7"
+    },
+    {
+      "bytes": 21785,
+      "kind": "generated-wiki",
+      "path": "docs/wiki/Visual-handbook.md",
+      "sha256": "46cf9e8776b4b9d0299e3b058c3f90f6321ae21ed95cbc57af379b92ef8d2389"
+    },
+    {
+      "bytes": 6233,
+      "kind": "generated-wiki",
+      "path": "docs/wiki/Visual-provenance.md",
+      "sha256": "e92ebae208f005dd5eb3ea9ae2fc57c6d49ab6f44c94095d84bcf42a94a02b19"
+    },
+    {
+      "bytes": 10082,
+      "kind": "generated-wiki",
+      "path": "docs/wiki/Visual-tour.md",
+      "sha256": "2e2ce910182853963fe50e6f799da7ae77c0e0723cb99f9b12265cecc8f55c61"
+    },
+    {
+      "bytes": 3061,
+      "kind": "generated-wiki",
+      "path": "docs/wiki/Wiki-publication.md",
+      "sha256": "1b9a97c33f83c3f9d2b7b79c4c72211c891cb728fa6baa3cc22fcfaf3f8f91e9"
+    },
+    {
+      "bytes": 8150,
+      "kind": "generated-wiki",
+      "path": "docs/wiki/Windows-setup.md",
+      "sha256": "d1edc87c92dc0926380910fc01124432a87aad865f5e3aa555b8f6837424f8fc"
+    },
+    {
+      "bytes": 10340,
+      "kind": "generated-wiki",
+      "path": "docs/wiki/Workspace-audit-2026-10-31.md",
+      "sha256": "d0f602f8a528015cbc4ebbacb5edba9852639c90f509cf834336666f39ee00ec"
+    },
+    {
+      "bytes": 3585,
+      "kind": "generated-wiki",
+      "path": "docs/wiki/Zones.md",
+      "sha256": "bfe11eaeec2be4916740cbc46b71c97d4e50f3d13de18591c5c823e1a43b469e"
+    },
+    {
+      "bytes": 599,
+      "kind": "generated-wiki",
+      "path": "docs/wiki/_Footer.md",
+      "sha256": "898abd2f7f5d3260ece985a0476fef2a21bd2c07e629be8d3f7f25c989831fb8"
+    },
+    {
+      "bytes": 6950,
+      "kind": "generated-wiki",
+      "path": "docs/wiki/_Sidebar.md",
+      "sha256": "1a8bbdca5c95cb53a952633037c91a9ccffc183a1a082773fdaa1b2c0baf3004"
+    },
+    {
+      "bytes": 9687,
+      "kind": "dated-evidence-or-media",
+      "path": "docs/workspace-ux-audit-2026-10-31.md",
+      "sha256": "477a253f97fa1eb74eba8a16767a588bfd087563daf13a47ba717d514e1fe763"
+    },
+    {
+      "bytes": 3053,
+      "kind": "current-guide-or-reference",
+      "path": "docs/zones.md",
+      "sha256": "d859153e3adbdc1ec1493ca4fcbd1212d498d9fbc3b8888eec512960284c9183"
+    },
+    {
+      "bytes": 16689,
+      "kind": "current-guide-or-reference",
+      "path": "edge/README.md",
+      "sha256": "8fc4909e4c7d0648b4e31f72d56f21d544b541bc737944635f8b308e26d8af31"
+    },
+    {
+      "bytes": 1410,
+      "kind": "current-guide-or-reference",
+      "path": "edge/_vendor/trackeval/README.md",
+      "sha256": "601494cfd0e3a93ae183183775ffebd5f9c68de1509cbbfe2e1bfb4ef28346c8"
+    },
+    {
+      "bytes": 1738,
+      "kind": "current-guide-or-reference",
+      "path": "tests/fixtures/facility/README.md",
+      "sha256": "f8a28b1c2724f34fb7fb8eab0ac6835c52e7f883406c110add5b37c103824f5c"
+    }
+  ],
+  "method": "Public tracked and non-ignored new Markdown/reStructuredText files, including canonical guides, generated Wiki and dated evidence. Link/asset checks cover every discovered public guide; dated records preserve original source/qualification boundaries. Inventory itself is JSON and excluded from its file list.",
+  "paths": 217,
+  "schema": "dvr.documentation-inventory.v1"
+}

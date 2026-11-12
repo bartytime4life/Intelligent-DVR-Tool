@@ -1,0 +1,75 @@
+{
+  "browser": {
+    "corrected": {
+      "duration": 6001.93,
+      "expected": 2,
+      "flaky": 0,
+      "skipped": 0,
+      "startTime": "2026-11-12T10:52:27.437Z",
+      "unexpected": 0
+    },
+    "correctedReport": "integration-replays/browser-corrected.json",
+    "finalDistinctScenariosPassed": 77,
+    "initial": {
+      "duration": 247376.143,
+      "expected": 75,
+      "flaky": 0,
+      "skipped": 0,
+      "startTime": "2026-11-12T10:46:51.947Z",
+      "unexpected": 2
+    },
+    "initialFailureCause": "The new test assumed Add fit point inserted a fifth fit before the default check. It actually appends the new fit as row6, leaving row5 as check. Initial fixture assigned outside corner(0,1) to the check; ruler correctly remained locked. Corrected only test marker-row order and check-edit row5; production source unchanged.",
+    "initialReport": "integration-replays/browser-initial.json",
+    "reporting": "75 original passes plus2 corrected focused passes; this is not a single clean77-case run. Both original failures retained."
+  },
+  "build": {
+    "pass": true,
+    "warning": "Existing large application chunks exceed500kB; retained warning, no bundle-size guarantee."
+  },
+  "date": "2026-11-12",
+  "documentation": "Final check counts and logs in documentation-checks.json after regeneration.",
+  "environment": {
+    "chromium": "141.0.7390.37 (build1194)",
+    "node": "22.13.1",
+    "npm": "10.9.2",
+    "playwright": "1.56.1",
+    "python": "3.10.9"
+  },
+  "independent": {
+    "adapterAssertions": 3900,
+    "calibrationBoundaryAssertions": 15195,
+    "consumer42Assertions": 39075,
+    "extremeTurnAssertions": 150,
+    "orientationAssertions": 8121,
+    "projectiveCases": 2049,
+    "rawIdealGate": {
+      "assertions": 365,
+      "failures": 2,
+      "reason": "Retained ideal-circle boundary differences from declared256-sided inscribed range polygon.",
+      "strictExit": 1
+    },
+    "sobelAssertions": 10472,
+    "sobelCases": 611,
+    "wall250Assertions": 94758,
+    "wall42Assertions": 76717
+  },
+  "node": {
+    "command": "DVR_TEST_SOCKETS=1 npm test",
+    "fail": 0,
+    "log": "integration-replays/node-tests.tap",
+    "pass": 680,
+    "skip": 0
+  },
+  "notExecuted": [
+    "Full native Python application suite for this coordinate/documentation slice",
+    "Native camera/inference browser lanes on the new integrated patch",
+    "Installed-machine, physical-camera, OEM, optical/recognition quality and100-camera acceptance"
+  ],
+  "schema": "dvr.coordinate-integrity-validation.v1",
+  "sites": {
+    "command": "npm run test:sites",
+    "fail": 0,
+    "pass": 4,
+    "skip": 0
+  }
+}

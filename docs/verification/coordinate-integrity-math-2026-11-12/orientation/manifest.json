@@ -1,0 +1,80 @@
+{
+  "schema": "intelligent-dvr-exact-orientation-manifest-v1",
+  "date": "2026-11-12",
+  "sources": {
+    "src/planar-predicates.mjs": "50101ba8edd52a893cddf71557f9338abd251451a7ba372777e2607f7cb303e9",
+    "src/facility-calibration.mjs": "6dd984785eb2b348d72c8df19b695d3d687165f1e841a8d12d0b422252a6b9e7",
+    "tests/planar-predicates.test.mjs": "f3b5e0cb36f4e840ed7e2bdcb1a40c2339ccd8c069b214c5953c8f5495ee7f9f"
+  },
+  "artifacts": {
+    "README.md": {
+      "sha256": "c1a6525ce7ae371977916000315b16e4b348208ec47dc84f2e5ac7a2c9b8c790",
+      "bytes": 6330
+    },
+    "actual-helper-receipt.json": {
+      "sha256": "f99548f19fa5b66b493dc7bf48722fa72df5e42a3de15f93241b25689f854a3f",
+      "bytes": 940
+    },
+    "check-orientation.mjs": {
+      "sha256": "4262e3f6f6255904060db588c340ee3ac5bafd5c9de6d576441515f8694a1cc9",
+      "bytes": 3199
+    },
+    "expected.json.gz": {
+      "sha256": "953f0d792dd9cb9c51348d43d20809a5de0ab3230baa0c759058c354a3ea3f9a",
+      "bytes": 476,
+      "decompressedSha256": "268d2b4c4c9f14f52fbda9e224fa52609f7afaa9e1bbdf482a91fb347825c12a",
+      "decompressedBytes": 6387
+    },
+    "focused-tests.tap": {
+      "sha256": "0d1be1581f2410a9dabcd14cbc63a0c2130d7ad2752de4bfe8a9e614cf03e2b1",
+      "bytes": 547
+    },
+    "historical-prototype-receipt.json": {
+      "sha256": "37e4789c30ebaa8742e3ba7246cfff1770a6f08df317d519dab1ed0f74e1dc0e",
+      "bytes": 473
+    },
+    "historical-review-wrapper-receipt.json": {
+      "sha256": "fff06e98988b88e141403fa9e65d16e283e1ac595e166eca2cf1664cad2d3fc6",
+      "bytes": 682
+    },
+    "inputs.json.gz": {
+      "sha256": "99a5376f4e35aeede8ae679e32f6fb308f191017d8b2360be86e587d9566c6c6",
+      "bytes": 152753,
+      "decompressedSha256": "053566499b241abc8a3135a4e9b0b3c6b046f2b64f5968ebbd3db9f032dba0a5",
+      "decompressedBytes": 372912
+    },
+    "make-cases.py": {
+      "sha256": "98f2249e7b0fb41d3e39d0b319c11a0566ecdf0776cc9293dc2563ba0b8743a4",
+      "bytes": 1690
+    },
+    "prototype-replay-receipt.json": {
+      "sha256": "b3dd95b9c2e17f836dde8f6a30b3eb743c1ee08511cccd406bd69761e535c80f",
+      "bytes": 943
+    },
+    "prototype.mjs": {
+      "sha256": "d492a968854cb2274c9c8ad58c70742d57821d4a6309830e7d12a53e39658595",
+      "bytes": 1119
+    }
+  },
+  "results": {
+    "actualHelper": {
+      "cases": 2707,
+      "assertions": 8121,
+      "failures": 0,
+      "exitCode": 0
+    },
+    "prototypeReplay": {
+      "cases": 2707,
+      "assertions": 8121,
+      "failures": 0,
+      "exitCode": 0
+    },
+    "focusedTests": {
+      "passed": 2,
+      "failed": 0,
+      "skipped": 0
+    },
+    "generatorReproducesFrozenBytes": true
+  },
+  "limits": "Generated exact signs of represented binary64 inputs; no physical or homography-error qualification."
+}

@@ -1,0 +1,12 @@
+{
+  "status": "PASS",
+  "convex_cases": 55,
+  "exact_subset_intersections": 1745,
+  "scalar_equalities": 220,
+  "failures": [],
+  "input_sha256": "1cc1553b86d844df042fec7752afefb9bccd3fcd57e43a6bbc75d13e375b1089",
+  "reference_sha256": "dcada5ab717234399b37c7d157052fa63825589db7ec7ac0d139cd3c90814fb5",
+  "arrangement_expected_sha256": "21fdd3c8bc2ff9aa94a36b9184cfc12ba5de8d5179606dd939d30a6d441258cd",
+  "strict_exit_enabled": true,
+  "proof": "For m distinct camera sets, >=1 indicator has subset coefficient(-1)^(k+1); >=2 indicator has coefficient(-1)^k*(k-1). Convex subset intersections are exact rational half-plane clips."
+}

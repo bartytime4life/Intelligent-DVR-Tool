@@ -139,6 +139,9 @@ test('collapsing the map-draft panel keeps a partial pointer area until it is fi
   expect(await savedPlan(page)).toEqual(before);
   await discard(page).click();
   await expect(pending(page)).toHaveCount(0);
+  // The child notice clears before its pending-state effect reaches the parent.
+  // Observe the parent navigation guard becoming ready before changing tasks.
+  await expect(page.getByLabel('Saved facility',{exact:true})).toBeEnabled();
   await page.getByLabel('Jump to facility task',{exact:true}).selectOption('1');
   await expect(page.getByRole('heading',{name:'Shape a building',exact:true})).toBeVisible();
 });

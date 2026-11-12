@@ -1,0 +1,260 @@
+TAP version 13
+# Subtest: coverage task binds its request, terminates after one response, and clears the deadline
+ok 1 - coverage task binds its request, terminates after one response, and clears the deadline
+  ---
+  duration_ms: 1.545676
+  ...
+# Subtest: another request cannot satisfy a pending coverage task
+ok 2 - another request cannot satisfy a pending coverage task
+  ---
+  duration_ms: 0.132538
+  ...
+# Subtest: superseding a coverage task closes queued responses and errors before starting its successor
+ok 3 - superseding a coverage task closes queued responses and errors before starting its successor
+  ---
+  duration_ms: 0.129582
+  ...
+# Subtest: coverage deadline terminates work and rejects late success without inventing metrics
+ok 4 - coverage deadline terminates work and rejects late success without inventing metrics
+  ---
+  duration_ms: 0.104856
+  ...
+# Subtest: a result past the monotonic deadline is refused even before a delayed timer callback runs
+ok 5 - a result past the monotonic deadline is refused even before a delayed timer callback runs
+  ---
+  duration_ms: 0.139751
+  ...
+# Subtest: a successful reply cannot turn null or missing zone numbers into displayed zero
+ok 6 - a successful reply cannot turn null or missing zone numbers into displayed zero
+  ---
+  duration_ms: 0.478437
+  ...
+# Subtest: worker errors and unreadable messages remain recoverable, with no numeric fallback
+ok 7 - worker errors and unreadable messages remain recoverable, with no numeric fallback
+  ---
+  duration_ms: 0.093184
+  ...
+# Subtest: malformed or error replies close the task instead of displaying incomplete metrics
+ok 8 - malformed or error replies close the task instead of displaying incomplete metrics
+  ---
+  duration_ms: 0.451867
+  ...
+# Subtest: worker creation and post failures settle the task without an orphan deadline
+ok 9 - worker creation and post failures settle the task without an orphan deadline
+  ---
+  duration_ms: 0.22402
+  ...
+# Subtest: cleanup stays closed even when worker termination itself throws
+ok 10 - cleanup stays closed even when worker termination itself throws
+  ---
+  duration_ms: 0.221536
+  ...
+# Subtest: coverage refuses missing, unaccepted or different-plan visibility before creating a worker
+ok 11 - coverage refuses missing, unaccepted or different-plan visibility before creating a worker
+  ---
+  duration_ms: 0.148729
+  ...
+# Subtest: unknown visibility preserves null zone/route metrics and refuses fabricated numeric totals
+ok 12 - unknown visibility preserves null zone/route metrics and refuses fabricated numeric totals
+  ---
+  duration_ms: 0.254076
+  ...
+# Subtest: successful route metrics require finite consistent lengths and an actual source route
+ok 13 - successful route metrics require finite consistent lengths and an actual source route
+  ---
+  duration_ms: 0.150532
+  ...
+# Subtest: actual coverage worker uses the supplied low-wall hole snapshot without recomputing a legacy fan
+ok 14 - actual coverage worker uses the supplied low-wall hole snapshot without recomputing a legacy fan
+  ---
+  duration_ms: 25.608987
+  ...
+# Subtest: low-wall hole and raised-wall recovery agree across area, route and rehearsal
+ok 15 - low-wall hole and raised-wall recovery agree across area, route and rehearsal
+  ---
+  duration_ms: 23.450994
+  ...
+# Subtest: hole interiors are excluded from route length while their closed boundaries remain visible
+ok 16 - hole interiors are excluded from route length while their closed boundaries remain visible
+  ---
+  duration_ms: 0.463318
+  ...
+# Subtest: disconnected pieces retain one distinct-camera overlap vote and preserve holes by area
+ok 17 - disconnected pieces retain one distinct-camera overlap vote and preserve holes by area
+  ---
+  duration_ms: 2.402291
+  ...
+# Subtest: any unknown enabled camera withholds coverage and handoff conclusions
+ok 18 - any unknown enabled camera withholds coverage and handoff conclusions
+  ---
+  duration_ms: 0.335649
+  ...
+# Subtest: disabled views remain successful empty after shared exhaustion and cached poses reuse geometry
+ok 19 - disabled views remain successful empty after shared exhaustion and cached poses reuse geometry
+  ---
+  duration_ms: 0.690915
+  ...
+# Subtest: Boolean wrapper restores caller precision on both success and failure
+ok 20 - Boolean wrapper restores caller precision on both success and failure
+  ---
+  duration_ms: 0.480981
+  ...
+# Subtest: nonfinite or out-of-range Boolean output is rejected as unavailable
+ok 21 - nonfinite or out-of-range Boolean output is rejected as unavailable
+  ---
+  duration_ms: 3.359994
+  ...
+# Subtest: direct visibility refuses a Boolean result inside the axis box but outside the horizontal range disk
+ok 22 - direct visibility refuses a Boolean result inside the axis box but outside the horizontal range disk
+  ---
+  duration_ms: 1.471066
+  ...
+# Subtest: prepared point queries preserve camera order, holes and disconnected tiny gaps
+ok 23 - prepared point queries preserve camera order, holes and disconnected tiny gaps
+  ---
+  duration_ms: 0.385502
+  ...
+# Subtest: mutable generated geometry cannot reuse stale prepared bounds across point or rehearsal calls
+ok 24 - mutable generated geometry cannot reuse stale prepared bounds across point or rehearsal calls
+  ---
+  duration_ms: 0.388027
+  ...
+# Subtest: a tiny positive triangle keeps its boundary without a distant visibility halo
+ok 25 - a tiny positive triangle keeps its boundary without a distant visibility halo
+  ---
+  duration_ms: 0.157105
+  ...
+# Subtest: a redundant zero-length edge cannot label arbitrary ground as visible
+ok 26 - a redundant zero-length edge cannot label arbitrary ground as visible
+  ---
+  duration_ms: 0.078397
+  ...
+# Subtest: rehearsal prepares shared and distinct camera shapes once without reducing50500camera observations
+ok 27 - rehearsal prepares shared and distinct camera shapes once without reducing50500camera observations
+  ---
+  duration_ms: 21.252966
+  ...
+# Subtest: visibility task accepts one complete reply, freezes it and binds its exact plan source
+ok 28 - visibility task accepts one complete reply, freezes it and binds its exact plan source
+  ---
+  duration_ms: 1.952067
+  ...
+# Subtest: reply identity, cancellation and changed-plan successors close every queued old callback
+ok 29 - reply identity, cancellation and changed-plan successors close every queued old callback
+  ---
+  duration_ms: 0.195426
+  ...
+# Subtest: timer and monotonic deadline both refuse late geometry without binding it
+ok 30 - timer and monotonic deadline both refuse late geometry without binding it
+  ---
+  duration_ms: 0.134152
+  ...
+# Subtest: validation time counts against the monotonic acceptance deadline
+ok 31 - validation time counts against the monotonic acceptance deadline
+  ---
+  duration_ms: 0.169738
+  ...
+# Subtest: partial geometry is a ready bound snapshot with explicit unknown camera, never an empty successful view
+ok 32 - partial geometry is a ready bound snapshot with explicit unknown camera, never an empty successful view
+  ---
+  duration_ms: 0.096911
+  ...
+# Subtest: malformed geometry, stale IDs, nonfinite coordinates and null success cannot cross the visibility reply gate
+ok 33 - malformed geometry, stale IDs, nonfinite coordinates and null success cannot cross the visibility reply gate
+  ---
+  duration_ms: 0.387295
+  ...
+# Subtest: disabled views stay successful empty and unknown views cannot fabricate numeric success
+ok 34 - disabled views stay successful empty and unknown views cannot fabricate numeric success
+  ---
+  duration_ms: 0.106129
+  ...
+# Subtest: camera-count and per-camera wire budgets reject oversized results before walking coordinates
+ok 35 - camera-count and per-camera wire budgets reject oversized results before walking coordinates
+  ---
+  duration_ms: 1.088249
+  ...
+# Subtest: shared cached geometry can serve500 distinct camera IDs without multiplying geometry work or losing binding
+ok 36 - shared cached geometry can serve500 distinct camera IDs without multiplying geometry work or losing binding
+  ---
+  duration_ms: 1.059735
+  ...
+# Subtest: worker failures, malformed messages and clone failures remain recoverable without orphan deadlines
+ok 37 - worker failures, malformed messages and clone failures remain recoverable without orphan deadlines
+  ---
+  duration_ms: 0.287329
+  ...
+# Subtest: actual visibility worker returns source-ordered generated geometry through the validated protocol
+ok 38 - actual visibility worker returns source-ordered generated geometry through the validated protocol
+  ---
+  duration_ms: 9.788328
+  ...
+# Subtest: inverse image rays round-trip through all permitted view extremes
+ok 39 - inverse image rays round-trip through all permitted view extremes
+  ---
+  duration_ms: 2.01202
+  ...
+# Subtest: an oblique image edge uses camera-axis depth instead of a fixed ground azimuth
+ok 40 - an oblique image edge uses camera-axis depth instead of a fixed ground azimuth
+  ---
+  duration_ms: 0.768981
+  ...
+# Subtest: a view crossing nadir includes ground below and behind the mount
+ok 41 - a view crossing nadir includes ground below and behind the mount
+  ---
+  duration_ms: 0.523812
+  ...
+# Subtest: closed ideal image edges survive tan45 rounding without a fixed spatial buffer
+ok 42 - closed ideal image edges survive tan45 rounding without a fixed spatial buffer
+  ---
+  duration_ms: 0.076713
+  ...
+# Subtest: bounded frustum corners and their trapezoid area agree with image rays
+ok 43 - bounded frustum corners and their trapezoid area agree with image rays
+  ---
+  duration_ms: 0.308368
+  ...
+# Subtest: horizontal range is an inscribed circle with an explicit radial chord bound
+ok 44 - horizontal range is an inscribed circle with an explicit radial chord bound
+  ---
+  duration_ms: 0.703208
+  ...
+# Subtest: a low wall casts a finite hole and distant ground becomes visible again
+ok 45 - a low wall casts a finite hole and distant ground becomes visible again
+  ---
+  duration_ms: 9.424035
+  ...
+# Subtest: a raised wall leaves ground before its projected base visible
+ok 46 - a raised wall leaves ground before its projected base visible
+  ---
+  duration_ms: 6.750958
+  ...
+# Subtest: walls entirely above mount height cast no downward ground shadow
+ok 47 - walls entirely above mount height cast no downward ground shadow
+  ---
+  duration_ms: 0.929371
+  ...
+# Subtest: multiple low walls retain separate islands and camera rotation/translation preserves area
+ok 48 - multiple low walls retain separate islands and camera rotation/translation preserves area
+  ---
+  duration_ms: 8.164506
+  ...
+# Subtest: mount clearance remains an explicit policy and can be disabled for geometry checks
+ok 49 - mount clearance remains an explicit policy and can be disabled for geometry checks
+  ---
+  duration_ms: 0.948347
+  ...
+# Subtest: resource limits and clipping failures remain unavailable rather than successful empty output
+ok 50 - resource limits and clipping failures remain unavailable rather than successful empty output
+  ---
+  duration_ms: 0.360786
+  ...
+1..50
+# tests 50
+# suites 0
+# pass 50
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 92.309387

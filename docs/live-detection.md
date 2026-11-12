@@ -234,6 +234,14 @@ so live and recording observations mean the same thing: a class was present in a
 zone for the dwell time. Per-track zone time is reported alongside, but rule
 observations are not yet triggered by individual tracks.
 
+A qualifying sample at the maximum-gap boundary continues the presence run;
+reaching dwell emits once. Live and recording rules now share a bounded binary64
+comparison with the browser training counter, preventing ordinary fractional
+timestamps from falsely breaking a run. Real gaps still reset it. The
+[timing record](verification/rule-time-boundaries-2026-11-12/README.md) separates
+numerical resolution from physical-clock or tracking accuracy. The change is in
+the presence rule engine; per-track zone-duration arithmetic is unchanged.
+
 ## In Recognition
 
 New recording analyses add a `track` number to tracked boxes in the frame trace and

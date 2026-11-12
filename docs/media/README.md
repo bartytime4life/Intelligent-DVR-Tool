@@ -1,6 +1,6 @@
 # Motion with provenance
 
-[November 11 captures](guided-experience-2026-11-11/README.md) · [November 1 handbook imagery](guide/README.md) · [Current screenshot atlas](../visual-atlas.md) · [PR #61 collection](current/README.md)
+[November 12 coordinate-integrity proposal captures](coordinate-integrity-2026-11-12/README.md) · [November 11 captures](guided-experience-2026-11-11/README.md) · [November 1 handbook imagery](guide/README.md) · [Current screenshot atlas](../visual-atlas.md) · [PR #61 collection](current/README.md)
 
 ## Dated software screenshots and illustrations
 

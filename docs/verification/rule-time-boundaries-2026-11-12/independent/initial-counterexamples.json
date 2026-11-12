@@ -1,0 +1,65 @@
+{
+  "head": "9e88a57b377ca53a991519cae9bdbbcf25cb7924",
+  "rulesSha256": "b6614c4a3a36e726beadbf5d444fbf8b78c5d40a844bc4ac77b468b6ea2a74fb",
+  "cases": [
+    {
+      "fps": 25,
+      "stride": 5,
+      "samples": 150,
+      "gap": 0.2,
+      "dwell": 1,
+      "actual_event_seconds": [],
+      "expected_event_seconds": [
+        1.0
+      ],
+      "floating_resets": 54,
+      "first_false_split": {
+        "from": 0.6,
+        "to": 0.8,
+        "computed_gap": 0.20000000000000007,
+        "nominal_gap": "1/5"
+      }
+    },
+    {
+      "fps": 10,
+      "stride": 1,
+      "samples": 100,
+      "gap": 0.1,
+      "dwell": 0.5,
+      "actual_event_seconds": [],
+      "expected_event_seconds": [
+        0.5
+      ],
+      "floating_resets": 44,
+      "first_false_split": {
+        "from": 0.3,
+        "to": 0.4,
+        "computed_gap": 0.10000000000000003,
+        "nominal_gap": "1/10"
+      }
+    },
+    {
+      "fps": 25,
+      "stride": 5,
+      "samples": 20,
+      "gap": 0.2,
+      "dwell": 0.4,
+      "actual_event_seconds": [
+        0.4,
+        1.4
+      ],
+      "expected_event_seconds": [
+        0.4
+      ],
+      "floating_resets": 7,
+      "first_false_split": {
+        "from": 0.6,
+        "to": 0.8,
+        "computed_gap": 0.20000000000000007,
+        "nominal_gap": "1/5"
+      }
+    }
+  ],
+  "sourceUnchanged": true,
+  "limits": "Generated constant-cadence metadata and known detections. Exact Fraction timing oracle uses integer frame index/FPS and configured decimal seconds. No video, cameras or inference."
+}

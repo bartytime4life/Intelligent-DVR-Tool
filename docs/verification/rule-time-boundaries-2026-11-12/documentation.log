@@ -1,0 +1,8 @@
+Host summaries verified: 300 distinct images; reference/queue/rate/parity/source/default invariants checked. No experiments rerun.
+CUDA evidence checks passed: parity, queue accounting, runtime scope and publication bounds.
+Worker evidence checks passed: initial/final trials, parity, queue accounting and publication scope.
+Recovery evidence checks passed: native proof, generations/reaping, fault intervals, outcome/queue accounting and privacy scope.
+Journal evidence checks passed: native proof, interrupted work, acknowledgment/redelivery, replay accounting and measured durability cost.
+Batching evidence checks passed: atomic native exits, version compatibility, indexed delivery, matched medians and honest queue/delivery accounting.
+Owner synthetic record: source/policy bindings, 142 tests per environment, legacy recovery, CUDA block and all loss identities verified.
+Documentation checks passed: 1893 local links, 14 historical media hashes, 11 PR61 visual blobs, 2,381,700 historical + 185,432 PR61 + 1,626,214 guide + 222,707 guided-experience media bytes, test-count consistency.

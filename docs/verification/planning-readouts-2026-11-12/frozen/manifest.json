@@ -1,0 +1,41 @@
+{
+  "schema": "dvr.planning-readouts.freeze.v1",
+  "source_revision": "6ce57a5180655693f7d3d6d2e91d8c68693f1961",
+  "files": [
+    {
+      "path": "FacilityBuilder.jsx",
+      "sha256": "bf96ab4c0d75f92d5ea6562d84f6640850cc9c46564f3bfd92954df40f6fb4bb",
+      "bytes": 105792
+    },
+    {
+      "path": "SystemSetup.jsx",
+      "sha256": "408ee697b36cc304c9042b9bbdbf3dd26c77892d0bced71f68e3973b5be51e19",
+      "bytes": 20915
+    },
+    {
+      "path": "before.json",
+      "sha256": "1243eeae6414b64904d73b48ce14e70db4c2acbb2f14a158fba996b5e322617d",
+      "bytes": 4539
+    },
+    {
+      "path": "facility-installer.mjs",
+      "sha256": "92704eae223955f72388e8ee76a91f01c2efccffd8ee336ed04caabe1d181878",
+      "bytes": 10738
+    },
+    {
+      "path": "facility-measurements.mjs",
+      "sha256": "79b9e46f965ef8d6c0653b3b4f7ef0c3eda50c34892a38cdcf3caf4ce5882431",
+      "bytes": 9119
+    },
+    {
+      "path": "inputs.json",
+      "sha256": "e4affd3a11d8d25fe88a99e443070fca943161f9c761c3e8e3aecdcb653f19f0",
+      "bytes": 2052
+    },
+    {
+      "path": "resources.mjs",
+      "sha256": "fe176b58fc29107a53ebf54f20114f9dc721471c70cc4317fba032eea821b6c1",
+      "bytes": 10135
+    }
+  ]
+}

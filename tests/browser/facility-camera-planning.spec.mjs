@@ -1,9 +1,8 @@
 import {test, expect} from '@playwright/test';
 import {readFileSync} from 'node:fs';
 import {savedPlan as saved} from './facility-test-helpers.mjs';
-import {blankFacility, validateFacility, wallObstacles} from '../../src/facility.mjs';
+import {blankFacility, validateFacility} from '../../src/facility.mjs';
 import {createLibrary, LIBRARY_KEY} from '../../src/facility-library.mjs';
-import {coverageMetrics, fanCache} from '../../src/facility-coverage.mjs';
 
 const rect = (x0,y0,x1,y1) => [[x0,y0],[x1,y0],[x1,y1],[x0,y1],[x0,y0]];
 const zone = (id,name,footprint,extra={}) => ({id,name,type:'restricted',footprint,enabled:true,expectedClasses:['person'],dwellSeconds:2,...extra});
@@ -12,9 +11,44 @@ const fixture = validateFacility({...blankFacility(),name:'Coverage fixture',
   cameras:[{id:'C1',name:'North yard',x:0,y:0,z:4,bearing:0,tilt:30,hfov:90,vfov:60,range:50,enabled:true,pixelsWide:1920,channel:'NVR-1 ch 1'}],
   zones:[zone('z-yard','Yard apron',rect(-30,10,30,20)),zone('z-hall','Hall store',rect(45,45,50,50),{buildingId:'b1',level:0})],
   route:[[0,-10],[0,20]]});
-const expected = coverageMetrics(fixture, fanCache()(wallObstacles(fixture)));
+// At each forward y, the pinhole image spans width 2*(cos(30°)*y+4*sin(30°)).
+// The zone lies wholly between vertical bounds and within range: integrate
+// that width from y=10 to 20, independently of the production geometry.
+const expectedYardCoverage=(300*Math.sqrt(3)/2+40)/600;
 const percent = v => `${(Math.round(v*1000)/10).toFixed(1)}%`;
 const value = async (page,label) => Number(await page.getByLabel(label,{exact:true}).inputValue());
+const boundaryPlan = () => validateFacility({...fixture,
+  // At tilt 0 these two image side planes are exactly world y=0 and y=.8.
+  // Their covered zone strips are beyond the forward vertical near bound.
+  cameras:[{...fixture.cameras[0],bearing:45,tilt:0},{...fixture.cameras[0],id:'C2',name:'Second view',bearing:45,tilt:0,y:.8}],
+  zones:[zone('edge','Boundary strip',rect(10,-.1,20,.9)),fixture.zones[1]],route:[]});
+
+// Hold only coverage requests until the test releases them to the real worker.
+// A fixed delay can finish before Playwright observes the pending state.
+async function holdCoverage(page) {
+  await page.addInitScript(()=>{
+    const NativeWorker=window.Worker;
+    const queued=new Map();
+    window.__coverageGate={
+      bearings:()=>Array.from(queued.values(),entry=>entry.message.plan.cameras.find(camera=>camera.id==='C1').bearing),
+      release:bearing=>{
+        const matches=Array.from(queued.entries()).filter(([,entry])=>entry.message.plan.cameras.find(camera=>camera.id==='C1').bearing===bearing);
+        if(matches.length!==1)throw new Error('Expected one current coverage request');
+        const [worker,entry]=matches[0];queued.delete(worker);entry.post(entry.message);
+      },
+    };
+    window.Worker=function(url,options){
+      const worker=new NativeWorker(url,options);
+      if(String(url).includes('facility-coverage-worker')){
+        const post=worker.postMessage.bind(worker),terminate=worker.terminate.bind(worker);
+        worker.postMessage=message=>{queued.set(worker,{message,post});};
+        worker.terminate=()=>{queued.delete(worker);terminate();};
+      }
+      return worker;
+    };
+    window.Worker.prototype=NativeWorker.prototype;
+  });
+}
 
 async function openFixture(page,plan=fixture) {
   await page.route('**/*', route => new URL(route.request().url()).hostname === '127.0.0.1' ? route.continue() : route.abort());
@@ -34,6 +68,88 @@ async function centreCamera(page) {
   const box = await page.locator('.facility-map').boundingBox();
   return [box.x + box.width / 2, box.y + box.height / 2];
 }
+
+for(const width of [1440,375]) test(`zone area finds coverage and overlap between old grid centres at ${width}px`,async({page},testInfo)=>{
+  await page.setViewportSize({width,height:1000});
+  const errors=[];page.on('pageerror',e=>errors.push(e.message));
+  await openFixture(page,boundaryPlan());
+  await page.getByRole('button',{name:/^5 Coverage/}).click();
+  const metrics=page.getByRole('region',{name:'Estimated coverage metrics'}),row=metrics.getByRole('row',{name:/Boundary strip/});
+  await expect(row).toContainText('90.0%10.0%');
+  await expect(metrics.getByRole('columnheader')).toHaveCount(4);
+  await expect(row).toContainText('10.0 m² planned area');
+  await expect(metrics).toContainText('Overlap requires two different cameras.');
+  const before=await saved(page),toggle=metrics.getByRole('button',{name:'Blind spots for Boundary strip',exact:true});
+  await toggle.click();
+  await expect(metrics.getByRole('status')).toHaveText('Map shows uncovered areas in Boundary strip.');
+  await expect(page.locator('.blind-spot-key')).toHaveCount(1);
+  expect(await metrics.evaluate(el=>el.scrollWidth<=el.clientWidth)).toBe(true);
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+  await metrics.screenshot({path:testInfo.outputPath(`zone-area-${width}.png`)});
+  await page.getByLabel('Direction from north',{exact:true}).fill('225');
+  await expect(row).toContainText('10.0%0.0%');
+  await expect(metrics).toContainText('Includes the unsaved camera preview.');
+  expect(await saved(page)).toEqual(before);
+  await page.getByRole('button',{name:'Save camera',exact:true}).click();
+  await expect.poll(async()=>(await saved(page)).cameras[0].bearing).toBe(225);
+  await page.getByRole('button',{name:'Undo edit',exact:true}).click();
+  await expect(row).toContainText('90.0%10.0%');
+  await expect.poll(()=>saved(page)).toEqual(before);
+  await toggle.click();await expect(page.locator('.blind-spot-key')).toHaveCount(0);
+  expect(errors).toEqual([]);
+});
+
+test('background coverage clears old numbers during draft changes and survives navigation',async({page})=>{
+  await holdCoverage(page);await openFixture(page,boundaryPlan());
+  await page.getByRole('button',{name:/^5 Coverage/}).click();
+  const metrics=page.getByRole('region',{name:'Estimated coverage metrics'}),row=metrics.getByRole('row',{name:/Boundary strip/});
+  const pending=()=>page.evaluate(()=>window.__coverageGate.bearings());
+  await expect.poll(pending).toEqual([45]);
+  await expect(metrics.getByRole('status')).toContainText('Updating coverage');
+  await expect(row).toHaveCount(0);
+  await page.evaluate(()=>window.__coverageGate.release(45));
+  await expect(row).toContainText('90.0%10.0%');
+  await metrics.getByRole('button',{name:'Blind spots for Boundary strip',exact:true}).click();
+  await expect(page.locator('.blind-spot-key')).toHaveCount(1);
+  await page.getByLabel('Direction from north',{exact:true}).fill('225');
+  await expect.poll(pending).toEqual([225]);
+  await expect(metrics.getByRole('status')).toContainText('Updating coverage');
+  await expect(row).toHaveCount(0);await expect(page.locator('.blind-spot-key')).toHaveCount(0);
+  await expect(page.getByRole('button',{name:'Save camera',exact:true})).toBeEnabled();
+  await page.getByLabel('Direction from north',{exact:true}).fill('45');
+  // The held old-bearing request must be terminated rather than released later.
+  await expect.poll(pending).toEqual([45]);
+  await page.evaluate(()=>window.__coverageGate.release(45));
+  await expect(row).toContainText('90.0%10.0%');
+  // Leaving the task cancels outstanding work and clears the selected overlay.
+  await page.getByLabel('Direction from north',{exact:true}).fill('225');
+  await expect.poll(pending).toEqual([225]);
+  await expect(metrics.getByRole('status')).toContainText('Updating coverage');
+  await page.getByRole('button',{name:'Discard preview',exact:true}).click();
+  await page.getByRole('combobox',{name:'Jump to facility task'}).selectOption('3');
+  await expect.poll(pending).toEqual([]);
+  await expect(metrics).toHaveCount(0);await expect(page.locator('.blind-spot-key')).toHaveCount(0);
+  await page.getByRole('combobox',{name:'Jump to facility task'}).selectOption('4');
+  await expect.poll(pending).toEqual([45]);
+  await expect(metrics.getByRole('status')).toContainText('Updating coverage');
+  await expect(row).toHaveCount(0);
+  await page.evaluate(()=>window.__coverageGate.release(45));
+  await expect(row).toContainText('90.0%10.0%');
+});
+
+test('a coverage worker load failure is explicit and retry recovers the real calculation',async({page})=>{
+  await openFixture(page,boundaryPlan());
+  const block=route=>route.abort();await page.route('**/*facility-coverage-worker*',block);
+  await page.getByRole('button',{name:/^5 Coverage/}).click();
+  const metrics=page.getByRole('region',{name:'Estimated coverage metrics'});
+  await expect(metrics.getByRole('status')).toContainText('Coverage could not be calculated');
+  await expect(metrics.getByRole('row',{name:/Boundary strip/})).toHaveCount(0);
+  await expect(page.locator('.blind-spot-key')).toHaveCount(0);
+  await expect(page.getByRole('button',{name:'Add with coordinates',exact:true})).toBeEnabled();
+  await page.unroute('**/*facility-coverage-worker*',block);
+  await metrics.getByRole('button',{name:'Try coverage again',exact:true}).click();
+  await expect(metrics.getByRole('row',{name:/Boundary strip/})).toContainText('90.0%10.0%');
+});
 
 test('drag, rotate handle and keyboard edits change only the camera draft until Save camera',async({page})=>{
   const errors=[];page.on('pageerror',error=>errors.push(error.message));
@@ -85,7 +201,7 @@ test('drag, rotate handle and keyboard edits change only the camera draft until 
   expect(errors).toEqual([]);
 });
 
-test('coverage distinguishes narrow covered areas, unsampled areas and unsupported indoor zones',async({page})=>{
+test('coverage measures narrow and diagonal areas while retaining unsupported indoor zones',async({page})=>{
   const angle=23*Math.PI/180,diagonal=rect(0,0,1000,.002).map(([x,y])=>[x*Math.cos(angle)-y*Math.sin(angle),x*Math.sin(angle)+y*Math.cos(angle)]);
   const plan=validateFacility({...fixture,cameras:[fixture.cameras[0],{...fixture.cameras[0],id:'C2',name:'Second planned camera'}],
     zones:[...fixture.zones,zone('narrow','Narrow walkway',rect(0,10,.1,30)),zone('diagonal','Fine diagonal area',diagonal)]});
@@ -95,15 +211,14 @@ test('coverage distinguishes narrow covered areas, unsampled areas and unsupport
   await expect(metrics.getByRole('row',{name:/Narrow walkway/})).toContainText('100.0%100.0%');
   const narrow=metrics.getByRole('button',{name:'Blind spots for Narrow walkway',exact:true});
   await narrow.click();
-  await expect(metrics.getByRole('status')).toContainText('No uncovered sample cells in Narrow walkway.');
+  await expect(metrics.getByRole('status')).toContainText('No uncovered area in Narrow walkway.');
   await page.getByLabel('Direction from north',{exact:true}).fill('180');
   await expect(metrics.getByRole('row',{name:/Narrow walkway/})).toContainText('100.0%0.0%');
   await page.getByRole('button',{name:'Discard preview',exact:true}).click();
-  const unsampled=metrics.getByRole('row',{name:/Fine diagonal area/});
-  await expect(unsampled).toContainText('Not estimated · this area needs a finer grid');
-  await expect(unsampled).not.toContainText('0.0%');
-  await expect(unsampled).not.toContainText('indoor');
-  await expect(unsampled.getByRole('button')).toHaveCount(0);
+  const diagonalArea=metrics.getByRole('row',{name:/Fine diagonal area/});
+  await expect(diagonalArea).toContainText('planned area');
+  await expect(diagonalArea).not.toContainText('Not estimated');
+  await expect(diagonalArea.getByRole('button',{name:'Blind spots for Fine diagonal area',exact:true})).toBeEnabled();
   await expect(metrics.getByRole('row',{name:/Hall store/})).toContainText('indoor');
   await expect(metrics.getByRole('row',{name:/Hall store/})).toContainText('Not estimated · ground-plane only');
 });
@@ -150,7 +265,7 @@ test('coverage step reports zone and route coverage, marks indoor zones and togg
   await openFixture(page);
   await page.getByRole('button',{name:/^5 Coverage/}).click();
   const metrics=page.getByRole('region',{name:'Estimated coverage metrics'});
-  const yard=expected.zones.find(z=>z.id==='z-yard');
+  const yard={coverage:expectedYardCoverage};
   expect(yard.coverage).toBeGreaterThan(.45);expect(yard.coverage).toBeLessThan(.55);
   await expect(metrics.getByRole('row',{name:/Yard apron/})).toContainText(percent(yard.coverage));
   await expect(metrics.getByRole('row',{name:/Yard apron/})).toContainText('0.0%');
@@ -162,7 +277,7 @@ test('coverage step reports zone and route coverage, marks indoor zones and togg
   const toggle=metrics.getByRole('button',{name:'Blind spots for Yard apron',exact:true});
   await toggle.click();
   await expect(toggle).toHaveAttribute('aria-pressed','true');
-  await expect(metrics.getByRole('status')).toContainText('Map shows uncovered sample cells in Yard apron');
+  await expect(metrics.getByRole('status')).toContainText('Map shows uncovered areas in Yard apron');
   await expect(page.locator('.facility-map-legend')).toContainText('Blind spot · estimate');
   // A turned draft camera updates the estimate before saving.
   await page.getByLabel('Direction from north',{exact:true}).fill('180');
@@ -179,7 +294,9 @@ test('pixel density table, lens preset and installer sheet download use the save
   await page.getByRole('button',{name:/^4 Cameras/}).click();
   const density=page.getByRole('group',{name:'Pixel density estimate'});
   await expect(density).toContainText('Planning estimate — assumes ideal focus and no compression');
-  await expect(density.getByRole('row',{name:/Detect/})).toContainText('2.3 m–38.2 m');
+  await expect(density.getByRole('row',{name:/Detect/})).toContainText('2.3 m–42.0 m');
+  await expect(density.getByRole('columnheader')).toHaveCount(3);
+  await expect(density.getByRole('columnheader',{name:'Centreline ground range'})).toBeVisible();
   await expect(density.getByRole('row',{name:/Identify/})).toContainText('Not reached');
   await expect(page.locator('.facility-dori-label').first()).toBeAttached();
   await page.getByLabel('Lens preset (typical)',{exact:true}).selectOption('6');
@@ -199,9 +316,44 @@ test('pixel density table, lens preset and installer sheet download use the save
   expect(html).toContain(`<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'">`);
   expect(html).toContain('<svg class="plan"');
   expect(html).toContain('NVR-1 ch 1');
-  expect(html).toContain('≤ 38.2 m');
+  expect(html).toContain('2.3 m–42.0 m');
+  expect(html).toContain('centreline ground ranges (from–to)');
   expect(html).toContain('Planning estimate — assumes ideal focus and no compression');
   expect(html).not.toMatch(/<script|<img|data:/);
+});
+
+for (const tilt of [60, 89]) for (const width of [1440, 375]) test(`projected ground detail remains readable at tilt ${tilt} and ${width}px`,async({page},testInfo)=>{
+  await page.setViewportSize({width,height:1000});
+  const errors=[];page.on('pageerror',error=>errors.push(error.message));
+  const plan=validateFacility({...blankFacility(),name:'Coverage fixture',cameras:[{
+    id:'C1',name:'Generated steep camera',x:0,y:0,z:4,bearing:0,tilt,hfov:90,vfov:60,
+    range:50,enabled:true,pixelsWide:tilt===60 ? 1920 : 2000}]});
+  await openFixture(page,plan);
+  await page.getByRole('button',{name:/^4 Cameras/}).click();
+  const density=page.getByRole('group',{name:'Pixel density estimate'});
+  await expect(density.getByRole('columnheader')).toHaveCount(3);
+  await expect(density).not.toContainText('Slant');
+  await expect(density.getByRole('row',{name:/Identify/})).toContainText(tilt===60 ? '0.0 m–0.8 m' : '0.000 m–0.035 m');
+  await expect(density).toContainText('Planning estimate — assumes ideal focus and no compression');
+  await expect(density).toContainText('perpendicular to the camera’s bearing');
+  if (tilt===60) await expect(page.locator('.facility-dori-label').filter({hasText:'Identify · 250 px/m'})).toBeAttached();
+  if (tilt===60 && width===1440) {
+    await centreCamera(page);
+    await page.locator('.facility-map').screenshot({path:testInfo.outputPath('dori-map-60-1440.png')});
+  }
+  await density.scrollIntoViewIfNeeded();
+  expect(await density.evaluate(el=>el.scrollWidth<=el.clientWidth)).toBe(true);
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+  await density.screenshot({path:testInfo.outputPath(`dori-${tilt}-${width}.png`)});
+  await page.getByLabel('Measurement units',{exact:true}).selectOption('imperial');
+  await expect(density.getByRole('row',{name:/Identify/})).toContainText(tilt===60 ? '0.0 ft–2.5 ft' : '0.0 ft–0.1 ft');
+  const downloaded=page.waitForEvent('download');
+  await page.getByRole('button',{name:'Download installer sheet',exact:true}).click();
+  const html=readFileSync(await (await downloaded).path(),'utf8');
+  expect(html).toContain(tilt===60 ? '0.0 ft–2.5 ft' : '0.0 ft–0.1 ft');
+  expect(html).not.toContain('√(d²−z²)');
+  expect((await saved(page)).cameras).toEqual(plan.cameras);
+  expect(errors).toEqual([]);
 });
 
 for (const width of [1440, 375]) test(`route percentages measure length between narrow camera fans at ${width}px`,async({page},testInfo)=>{
@@ -215,15 +367,17 @@ for (const width of [1440, 375]) test(`route percentages measure length between 
   const metrics=page.getByRole('region',{name:'Estimated coverage metrics'});
   const route=metrics.getByRole('row',{name:/Handoff route/});
   await expect(route).toContainText('5.0 m path length');
-  await expect(route).toContainText('17.5%0.0%');
+  // Depth at forward1 is(1+.5)/sqrt2, so11 evenly spaced cameras cover
+  // 20*tan(2.5°)*depth metres after the endpoint half-intervals are clipped.
+  await expect(route).toContainText('18.5%0.0%');
   await expect(metrics.getByLabel('Route coverage details')).toHaveText('4.1 m of the route is outside the drawn coverage. Longest continuous gap: 0.4 m.');
   await expect(metrics).toContainText('Planning estimate; verify on site.');
   expect((await saved(page)).route).toEqual(plan.route);
   await metrics.screenshot({path:testInfo.outputPath(`route-coverage-${width}.png`)});
   await page.getByLabel('Measurement units',{exact:true}).selectOption('imperial');
   await expect(route).toContainText('16.4 ft path length');
-  await expect(route).toContainText('17.5%0.0%');
-  await expect(metrics.getByLabel('Route coverage details')).toHaveText('13.5 ft of the route is outside the drawn coverage. Longest continuous gap: 1.4 ft.');
+  await expect(route).toContainText('18.5%0.0%');
+  await expect(metrics.getByLabel('Route coverage details')).toHaveText('13.4 ft of the route is outside the drawn coverage. Longest continuous gap: 1.3 ft.');
   expect((await saved(page)).route).toEqual(plan.route);
   expect(errors).toEqual([]);
 });

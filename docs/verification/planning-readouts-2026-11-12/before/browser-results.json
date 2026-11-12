@@ -1,0 +1,380 @@
+{
+  "config": {
+    "configFile": "<repo>/qa-local/readouts-before.config.mjs",
+    "rootDir": "<repo>/tests/browser",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "reporter": [
+      [
+        "list",
+        null
+      ],
+      [
+        "json",
+        {
+          "outputFile": "<repo>/qa-local/readouts-before-results.json"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "quiet": false,
+    "projects": [
+      {
+        "outputDir": "<repo>/qa-local/readouts-before-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "",
+        "name": "",
+        "testDir": "<repo>/tests/browser",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "shard": null,
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.56.1",
+    "workers": 1,
+    "webServer": {
+      "command": "npm run dev -- --host 127.0.0.1 --port 4182 --strictPort",
+      "url": "http://127.0.0.1:4182",
+      "reuseExistingServer": false,
+      "timeout": 20000,
+      "cwd": "<baseline>"
+    }
+  },
+  "suites": [
+    {
+      "title": "planning-readouts.spec.mjs",
+      "file": "planning-readouts.spec.mjs",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "System small readouts keep nonzero estimates and exact exports at 1440px",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 6327,
+                  "error": {
+                    "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoContainText\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator: locator('.system-metrics > div').filter({ hasText: 'Camera network payload' })\nExpected substring: \u001b[32m\"0.01\"\u001b[39m\nReceived string:    \u001b[31m\"Camera network payload0 Mbit/s\"\u001b[39m\nTimeout: 5000ms\n\nCall log:\n\u001b[2m  - Expect \"toContainText\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for locator('.system-metrics > div').filter({ hasText: 'Camera network payload' })\u001b[22m\n\u001b[2m    9 × locator resolved to <div>…</div>\u001b[22m\n\u001b[2m      - unexpected value \"Camera network payload0 Mbit/s\"\u001b[22m\n",
+                    "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoContainText\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator: locator('.system-metrics > div').filter({ hasText: 'Camera network payload' })\nExpected substring: \u001b[32m\"0.01\"\u001b[39m\nReceived string:    \u001b[31m\"Camera network payload0 Mbit/s\"\u001b[39m\nTimeout: 5000ms\n\nCall log:\n\u001b[2m  - Expect \"toContainText\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for locator('.system-metrics > div').filter({ hasText: 'Camera network payload' })\u001b[22m\n\u001b[2m    9 × locator resolved to <div>…</div>\u001b[22m\n\u001b[2m      - unexpected value \"Camera network payload0 Mbit/s\"\u001b[22m\n\n    at <repo>/tests/browser/planning-readouts.spec.mjs:47:97",
+                    "location": {
+                      "file": "<repo>/tests/browser/planning-readouts.spec.mjs",
+                      "column": 97,
+                      "line": 47
+                    },
+                    "snippet": "  45 |  await writeFile(testInfo.outputPath('system-observed.json'),JSON.stringify(initial,null,2));\n  46 |  await page.locator('.system-metrics').screenshot({path:testInfo.outputPath(`system-small-${width}.png`)});\n> 47 |  await expect(page.locator('.system-metrics > div').filter({hasText:'Camera network payload'})).toContainText('0.01');\n     |                                                                                                 ^\n  48 |  await expect(page.locator('.system-metrics > div').filter({hasText:'Recording write estimate'})).toContainText('0.001');\n  49 |  await expect(page.locator('.system-capacity-label')).toContainText('0.0001 TB');\n  50 |  await expect(page.locator('.system-reading').filter({hasText:'estimated workers'})).toContainText('0.02 GiB');"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "<repo>/tests/browser/planning-readouts.spec.mjs",
+                        "column": 97,
+                        "line": 47
+                      },
+                      "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoContainText\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator: locator('.system-metrics > div').filter({ hasText: 'Camera network payload' })\nExpected substring: \u001b[32m\"0.01\"\u001b[39m\nReceived string:    \u001b[31m\"Camera network payload0 Mbit/s\"\u001b[39m\nTimeout: 5000ms\n\nCall log:\n\u001b[2m  - Expect \"toContainText\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for locator('.system-metrics > div').filter({ hasText: 'Camera network payload' })\u001b[22m\n\u001b[2m    9 × locator resolved to <div>…</div>\u001b[22m\n\u001b[2m      - unexpected value \"Camera network payload0 Mbit/s\"\u001b[22m\n\n\n  45 |  await writeFile(testInfo.outputPath('system-observed.json'),JSON.stringify(initial,null,2));\n  46 |  await page.locator('.system-metrics').screenshot({path:testInfo.outputPath(`system-small-${width}.png`)});\n> 47 |  await expect(page.locator('.system-metrics > div').filter({hasText:'Camera network payload'})).toContainText('0.01');\n     |                                                                                                 ^\n  48 |  await expect(page.locator('.system-metrics > div').filter({hasText:'Recording write estimate'})).toContainText('0.001');\n  49 |  await expect(page.locator('.system-capacity-label')).toContainText('0.0001 TB');\n  50 |  await expect(page.locator('.system-reading').filter({hasText:'estimated workers'})).toContainText('0.02 GiB');\n    at <repo>/tests/browser/planning-readouts.spec.mjs:47:97"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-12T11:16:31.037Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "<repo>/qa-local/readouts-before-results/planning-readouts-System-s-bd6dd-and-exact-exports-at-1440px/test-failed-1.png"
+                    },
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "<repo>/qa-local/readouts-before-results/planning-readouts-System-s-bd6dd-and-exact-exports-at-1440px/error-context.md"
+                    },
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "<repo>/qa-local/readouts-before-results/planning-readouts-System-s-bd6dd-and-exact-exports-at-1440px/trace.zip"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "<repo>/tests/browser/planning-readouts.spec.mjs",
+                    "column": 97,
+                    "line": 47
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "57be338d09b1157f4a69-2eb1947afd28004290d0",
+          "file": "planning-readouts.spec.mjs",
+          "line": 34,
+          "column": 31
+        },
+        {
+          "title": "System small readouts keep nonzero estimates and exact exports at 375px",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 6283,
+                  "error": {
+                    "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoContainText\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator: locator('.system-metrics > div').filter({ hasText: 'Camera network payload' })\nExpected substring: \u001b[32m\"0.01\"\u001b[39m\nReceived string:    \u001b[31m\"Camera network payload0 Mbit/s\"\u001b[39m\nTimeout: 5000ms\n\nCall log:\n\u001b[2m  - Expect \"toContainText\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for locator('.system-metrics > div').filter({ hasText: 'Camera network payload' })\u001b[22m\n\u001b[2m    9 × locator resolved to <div>…</div>\u001b[22m\n\u001b[2m      - unexpected value \"Camera network payload0 Mbit/s\"\u001b[22m\n",
+                    "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoContainText\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator: locator('.system-metrics > div').filter({ hasText: 'Camera network payload' })\nExpected substring: \u001b[32m\"0.01\"\u001b[39m\nReceived string:    \u001b[31m\"Camera network payload0 Mbit/s\"\u001b[39m\nTimeout: 5000ms\n\nCall log:\n\u001b[2m  - Expect \"toContainText\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for locator('.system-metrics > div').filter({ hasText: 'Camera network payload' })\u001b[22m\n\u001b[2m    9 × locator resolved to <div>…</div>\u001b[22m\n\u001b[2m      - unexpected value \"Camera network payload0 Mbit/s\"\u001b[22m\n\n    at <repo>/tests/browser/planning-readouts.spec.mjs:47:97",
+                    "location": {
+                      "file": "<repo>/tests/browser/planning-readouts.spec.mjs",
+                      "column": 97,
+                      "line": 47
+                    },
+                    "snippet": "  45 |  await writeFile(testInfo.outputPath('system-observed.json'),JSON.stringify(initial,null,2));\n  46 |  await page.locator('.system-metrics').screenshot({path:testInfo.outputPath(`system-small-${width}.png`)});\n> 47 |  await expect(page.locator('.system-metrics > div').filter({hasText:'Camera network payload'})).toContainText('0.01');\n     |                                                                                                 ^\n  48 |  await expect(page.locator('.system-metrics > div').filter({hasText:'Recording write estimate'})).toContainText('0.001');\n  49 |  await expect(page.locator('.system-capacity-label')).toContainText('0.0001 TB');\n  50 |  await expect(page.locator('.system-reading').filter({hasText:'estimated workers'})).toContainText('0.02 GiB');"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "<repo>/tests/browser/planning-readouts.spec.mjs",
+                        "column": 97,
+                        "line": 47
+                      },
+                      "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoContainText\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator: locator('.system-metrics > div').filter({ hasText: 'Camera network payload' })\nExpected substring: \u001b[32m\"0.01\"\u001b[39m\nReceived string:    \u001b[31m\"Camera network payload0 Mbit/s\"\u001b[39m\nTimeout: 5000ms\n\nCall log:\n\u001b[2m  - Expect \"toContainText\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for locator('.system-metrics > div').filter({ hasText: 'Camera network payload' })\u001b[22m\n\u001b[2m    9 × locator resolved to <div>…</div>\u001b[22m\n\u001b[2m      - unexpected value \"Camera network payload0 Mbit/s\"\u001b[22m\n\n\n  45 |  await writeFile(testInfo.outputPath('system-observed.json'),JSON.stringify(initial,null,2));\n  46 |  await page.locator('.system-metrics').screenshot({path:testInfo.outputPath(`system-small-${width}.png`)});\n> 47 |  await expect(page.locator('.system-metrics > div').filter({hasText:'Camera network payload'})).toContainText('0.01');\n     |                                                                                                 ^\n  48 |  await expect(page.locator('.system-metrics > div').filter({hasText:'Recording write estimate'})).toContainText('0.001');\n  49 |  await expect(page.locator('.system-capacity-label')).toContainText('0.0001 TB');\n  50 |  await expect(page.locator('.system-reading').filter({hasText:'estimated workers'})).toContainText('0.02 GiB');\n    at <repo>/tests/browser/planning-readouts.spec.mjs:47:97"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-12T11:16:37.724Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "<repo>/qa-local/readouts-before-results/planning-readouts-System-s-8884f--and-exact-exports-at-375px/test-failed-1.png"
+                    },
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "<repo>/qa-local/readouts-before-results/planning-readouts-System-s-8884f--and-exact-exports-at-375px/error-context.md"
+                    },
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "<repo>/qa-local/readouts-before-results/planning-readouts-System-s-8884f--and-exact-exports-at-375px/trace.zip"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "<repo>/tests/browser/planning-readouts.spec.mjs",
+                    "column": 97,
+                    "line": 47
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "57be338d09b1157f4a69-5cc0a3795457e6057542",
+          "file": "planning-readouts.spec.mjs",
+          "line": 34,
+          "column": 31
+        },
+        {
+          "title": "Planning readouts retain the40mmgap, blind area and portable geometry at 1440px",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 7464,
+                  "error": {
+                    "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoHaveText\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator:  getByRole('region', { name: 'Estimated coverage metrics' }).getByRole('row', { name: /Boundary zone/ }).getByRole('cell').first()\nExpected: \u001b[32m\"\u001b[7m>99.9\u001b[27m%\"\u001b[39m\nReceived: \u001b[31m\"\u001b[7m100.0\u001b[27m%\"\u001b[39m\nTimeout:  5000ms\n\nCall log:\n\u001b[2m  - Expect \"toHaveText\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('region', { name: 'Estimated coverage metrics' }).getByRole('row', { name: /Boundary zone/ }).getByRole('cell').first()\u001b[22m\n\u001b[2m    9 × locator resolved to <td>100.0%</td>\u001b[22m\n\u001b[2m      - unexpected value \"100.0%\"\u001b[22m\n",
+                    "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoHaveText\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator:  getByRole('region', { name: 'Estimated coverage metrics' }).getByRole('row', { name: /Boundary zone/ }).getByRole('cell').first()\nExpected: \u001b[32m\"\u001b[7m>99.9\u001b[27m%\"\u001b[39m\nReceived: \u001b[31m\"\u001b[7m100.0\u001b[27m%\"\u001b[39m\nTimeout:  5000ms\n\nCall log:\n\u001b[2m  - Expect \"toHaveText\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('region', { name: 'Estimated coverage metrics' }).getByRole('row', { name: /Boundary zone/ }).getByRole('cell').first()\u001b[22m\n\u001b[2m    9 × locator resolved to <td>100.0%</td>\u001b[22m\n\u001b[2m      - unexpected value \"100.0%\"\u001b[22m\n\n    at <repo>/tests/browser/planning-readouts.spec.mjs:78:46",
+                    "location": {
+                      "file": "<repo>/tests/browser/planning-readouts.spec.mjs",
+                      "column": 46,
+                      "line": 78
+                    },
+                    "snippet": "  76 |   mapLabels:await page.locator('.facility-dimension-label').allTextContents(),exported},null,2));\n  77 |  await metrics.screenshot({path:testInfo.outputPath(`planning-small-${width}.png`)});\n> 78 |  await expect(row.getByRole('cell').first()).toHaveText('>99.9%');\n     |                                              ^\n  79 |  await expect(metrics.getByRole('row',{name:/Handoff route/}).getByRole('cell').first()).toHaveText('>99.9%');\n  80 |  await expect(metrics.getByLabel('Route coverage details')).toHaveText('0.04 m of the route is outside the drawn coverage. Longest continuous gap: 0.04 m.');\n  81 |  await expect(page.locator('.facility-route-dimension').filter({hasText:/^0\\.04 m$/})).toHaveCount(1);"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "<repo>/tests/browser/planning-readouts.spec.mjs",
+                        "column": 46,
+                        "line": 78
+                      },
+                      "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoHaveText\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator:  getByRole('region', { name: 'Estimated coverage metrics' }).getByRole('row', { name: /Boundary zone/ }).getByRole('cell').first()\nExpected: \u001b[32m\"\u001b[7m>99.9\u001b[27m%\"\u001b[39m\nReceived: \u001b[31m\"\u001b[7m100.0\u001b[27m%\"\u001b[39m\nTimeout:  5000ms\n\nCall log:\n\u001b[2m  - Expect \"toHaveText\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('region', { name: 'Estimated coverage metrics' }).getByRole('row', { name: /Boundary zone/ }).getByRole('cell').first()\u001b[22m\n\u001b[2m    9 × locator resolved to <td>100.0%</td>\u001b[22m\n\u001b[2m      - unexpected value \"100.0%\"\u001b[22m\n\n\n  76 |   mapLabels:await page.locator('.facility-dimension-label').allTextContents(),exported},null,2));\n  77 |  await metrics.screenshot({path:testInfo.outputPath(`planning-small-${width}.png`)});\n> 78 |  await expect(row.getByRole('cell').first()).toHaveText('>99.9%');\n     |                                              ^\n  79 |  await expect(metrics.getByRole('row',{name:/Handoff route/}).getByRole('cell').first()).toHaveText('>99.9%');\n  80 |  await expect(metrics.getByLabel('Route coverage details')).toHaveText('0.04 m of the route is outside the drawn coverage. Longest continuous gap: 0.04 m.');\n  81 |  await expect(page.locator('.facility-route-dimension').filter({hasText:/^0\\.04 m$/})).toHaveCount(1);\n    at <repo>/tests/browser/planning-readouts.spec.mjs:78:46"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-12T11:16:44.352Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "<repo>/qa-local/readouts-before-results/planning-readouts-Planning-48d8b-portable-geometry-at-1440px/test-failed-1.png"
+                    },
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "<repo>/qa-local/readouts-before-results/planning-readouts-Planning-48d8b-portable-geometry-at-1440px/error-context.md"
+                    },
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "<repo>/qa-local/readouts-before-results/planning-readouts-Planning-48d8b-portable-geometry-at-1440px/trace.zip"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "<repo>/tests/browser/planning-readouts.spec.mjs",
+                    "column": 46,
+                    "line": 78
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "57be338d09b1157f4a69-3a7565e84988cc32763d",
+          "file": "planning-readouts.spec.mjs",
+          "line": 62,
+          "column": 31
+        },
+        {
+          "title": "Planning readouts retain the40mmgap, blind area and portable geometry at 375px",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 30000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 3,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 6851,
+                  "error": {
+                    "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoHaveText\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator:  getByRole('region', { name: 'Estimated coverage metrics' }).getByRole('row', { name: /Boundary zone/ }).getByRole('cell').first()\nExpected: \u001b[32m\"\u001b[7m>99.9\u001b[27m%\"\u001b[39m\nReceived: \u001b[31m\"\u001b[7m100.0\u001b[27m%\"\u001b[39m\nTimeout:  5000ms\n\nCall log:\n\u001b[2m  - Expect \"toHaveText\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('region', { name: 'Estimated coverage metrics' }).getByRole('row', { name: /Boundary zone/ }).getByRole('cell').first()\u001b[22m\n\u001b[2m    9 × locator resolved to <td>100.0%</td>\u001b[22m\n\u001b[2m      - unexpected value \"100.0%\"\u001b[22m\n",
+                    "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoHaveText\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator:  getByRole('region', { name: 'Estimated coverage metrics' }).getByRole('row', { name: /Boundary zone/ }).getByRole('cell').first()\nExpected: \u001b[32m\"\u001b[7m>99.9\u001b[27m%\"\u001b[39m\nReceived: \u001b[31m\"\u001b[7m100.0\u001b[27m%\"\u001b[39m\nTimeout:  5000ms\n\nCall log:\n\u001b[2m  - Expect \"toHaveText\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('region', { name: 'Estimated coverage metrics' }).getByRole('row', { name: /Boundary zone/ }).getByRole('cell').first()\u001b[22m\n\u001b[2m    9 × locator resolved to <td>100.0%</td>\u001b[22m\n\u001b[2m      - unexpected value \"100.0%\"\u001b[22m\n\n    at <repo>/tests/browser/planning-readouts.spec.mjs:78:46",
+                    "location": {
+                      "file": "<repo>/tests/browser/planning-readouts.spec.mjs",
+                      "column": 46,
+                      "line": 78
+                    },
+                    "snippet": "  76 |   mapLabels:await page.locator('.facility-dimension-label').allTextContents(),exported},null,2));\n  77 |  await metrics.screenshot({path:testInfo.outputPath(`planning-small-${width}.png`)});\n> 78 |  await expect(row.getByRole('cell').first()).toHaveText('>99.9%');\n     |                                              ^\n  79 |  await expect(metrics.getByRole('row',{name:/Handoff route/}).getByRole('cell').first()).toHaveText('>99.9%');\n  80 |  await expect(metrics.getByLabel('Route coverage details')).toHaveText('0.04 m of the route is outside the drawn coverage. Longest continuous gap: 0.04 m.');\n  81 |  await expect(page.locator('.facility-route-dimension').filter({hasText:/^0\\.04 m$/})).toHaveCount(1);"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "<repo>/tests/browser/planning-readouts.spec.mjs",
+                        "column": 46,
+                        "line": 78
+                      },
+                      "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoHaveText\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator:  getByRole('region', { name: 'Estimated coverage metrics' }).getByRole('row', { name: /Boundary zone/ }).getByRole('cell').first()\nExpected: \u001b[32m\"\u001b[7m>99.9\u001b[27m%\"\u001b[39m\nReceived: \u001b[31m\"\u001b[7m100.0\u001b[27m%\"\u001b[39m\nTimeout:  5000ms\n\nCall log:\n\u001b[2m  - Expect \"toHaveText\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('region', { name: 'Estimated coverage metrics' }).getByRole('row', { name: /Boundary zone/ }).getByRole('cell').first()\u001b[22m\n\u001b[2m    9 × locator resolved to <td>100.0%</td>\u001b[22m\n\u001b[2m      - unexpected value \"100.0%\"\u001b[22m\n\n\n  76 |   mapLabels:await page.locator('.facility-dimension-label').allTextContents(),exported},null,2));\n  77 |  await metrics.screenshot({path:testInfo.outputPath(`planning-small-${width}.png`)});\n> 78 |  await expect(row.getByRole('cell').first()).toHaveText('>99.9%');\n     |                                              ^\n  79 |  await expect(metrics.getByRole('row',{name:/Handoff route/}).getByRole('cell').first()).toHaveText('>99.9%');\n  80 |  await expect(metrics.getByLabel('Route coverage details')).toHaveText('0.04 m of the route is outside the drawn coverage. Longest continuous gap: 0.04 m.');\n  81 |  await expect(page.locator('.facility-route-dimension').filter({hasText:/^0\\.04 m$/})).toHaveCount(1);\n    at <repo>/tests/browser/planning-readouts.spec.mjs:78:46"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-12T11:16:52.203Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "<repo>/qa-local/readouts-before-results/planning-readouts-Planning-a6860--portable-geometry-at-375px/test-failed-1.png"
+                    },
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "<repo>/qa-local/readouts-before-results/planning-readouts-Planning-a6860--portable-geometry-at-375px/error-context.md"
+                    },
+                    {
+                      "name": "trace",
+                      "contentType": "application/zip",
+                      "path": "<repo>/qa-local/readouts-before-results/planning-readouts-Planning-a6860--portable-geometry-at-375px/trace.zip"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "<repo>/tests/browser/planning-readouts.spec.mjs",
+                    "column": 46,
+                    "line": 78
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "57be338d09b1157f4a69-ce7249ebec960f434b5f",
+          "file": "planning-readouts.spec.mjs",
+          "line": 62,
+          "column": 31
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-11-12T11:16:30.201Z",
+    "duration": 28969.245,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 4,
+    "flaky": 0
+  }
+}

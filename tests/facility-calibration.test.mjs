@@ -86,7 +86,7 @@ test('calibration: safe zero and near-zero h33 do not require a finite image ori
   const mapping=(x,y)=>[1/(x+offset),y/(x+offset)];
   const refs=[...square.map(p=>reference(mapping,p)),reference(mapping,[.5,.5],'check')];
   const c=fitPlanarCalibration(refs);
-  assert.equal(c.method,'normalized-householder-dlt-v2');
+  assert.equal(c.method,'normalized-householder-dlt-v3');
   assert.equal(c.verified,false);assert.equal(c.checkInsideHull,true);
   assert.ok(c.fit.max<1e-10);assert.ok(c.holdout.max<1e-10);
   assert.ok(Math.abs(Math.hypot(...c.matrix)-1)<1e-14);
@@ -154,4 +154,43 @@ test('calibration: non-collinear noisy observations still require a nonsingular 
  }
  refs.push(reference(x=>[x,2*x],[.5,.5],'check'));
  assert.throws(()=>fitPlanarCalibration(refs),/singular|rank deficient/);
+});
+
+test('calibration: a short reference edge cannot authorize an outside ruler or holdout',()=>{
+ const mapping=(x,y)=>[.01*x/(2-x-y),.01*y/(2-x-y)];
+ const points=[[0,0],[1,0],[1,.9999],[.9999,1],[0,1]];
+ const refs=points.map(p=>reference(mapping,p));
+ const outside=[.999954,.999954];
+ const c=fitPlanarCalibration([...refs,reference(mapping,[.9,.9],'check')]);
+ assert.ok(c.fit.max<1e-6);assert.ok(c.holdout.max<1e-6);
+ assert.equal(c.checkInsideHull,true);
+ assert.equal(insideReferenceHull(outside,c.fittingHull),false);
+ assert.equal(calibratedGroundDistance(c,[.9,.9],outside),null);
+ assert.ok(calibratedGroundDistance(c,[.9,.9],[.99,.99]).metres>0);
+ const unchecked=fitPlanarCalibration([...refs,reference(mapping,outside,'check')]);
+ assert.ok(unchecked.holdout.max<1e-6);
+ assert.equal(unchecked.checkInsideHull,false);
+});
+
+test('calibration: every represented positive hull turn survives while true collinearity does not',()=>{
+ const mapping=(x,y)=>[100*x,100*y];
+ for(const extraY of [.9,.9+1e-12,.9-1e-12]){
+  const refs=[[.1,.1],[.9,.1],[.9,.9],[.1,.9],[.5,extraY]].map(p=>reference(mapping,p));
+  const c=fitPlanarCalibration([...refs,reference(mapping,[.5,.5],'check')]);
+  assert.equal(c.fittingHull.length,extraY>.9?5:4);
+  assert.equal(insideReferenceHull([.5,extraY],c.fittingHull),true);
+ }
+});
+
+test('calibration: closed hull boundaries refuse next-representable outside points without an epsilon halo',()=>{
+ const bits=new DataView(new ArrayBuffer(8));
+ bits.setFloat64(0,.9);bits.setBigUint64(0,bits.getBigUint64(0)+1n);
+ const outside=bits.getFloat64(0), vertices=[[.1,.1],[.9,.1],[.9,.9],[.1,.9]];
+ for(const hull of [vertices,vertices.slice().reverse(),[...vertices,vertices[0],vertices[2]]]){
+  assert.equal(insideReferenceHull([.9,.5],hull),true);
+  assert.equal(insideReferenceHull([outside,.5],hull),false);
+ }
+ for(const bad of [Array(3),[[0,0],[1,0],Array(2)],[[0,0],[1,0],[2,0]]])
+  assert.equal(insideReferenceHull([.5,0],bad),false);
+ assert.equal(insideReferenceHull(Array(2),vertices),false);
 });

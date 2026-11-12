@@ -5,6 +5,141 @@ This guide connects the delivered mathematics to the problems it solves. The
 scores, pixels and assignment matrices. They establish software behavior, not
 physical-camera accuracy, detector throughput or 100-camera capacity.
 
+The [current integrated proposal](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/coordinate-integrity-math-2026-11-12/README.md)
+combines visible-ground geometry, pixel density, zone area, projective calibration,
+image diagnostics and site-coordinate preservation. The model below describes
+this branch; [product status](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Product-status) separates it from merged source,
+installed software and physical qualification.
+
+## Preserve the meaning of planning readouts
+
+Display precision must not erase a calculated nonzero amount or turn a fraction
+below one into complete coverage. System and facility scalar labels keep their
+ordinary precision, increasing decimals only when rounding would erase a
+nonzero value or its sign. Precision is bounded at 12 fractional digits, then a
+compact scientific label is used. Exact signed zero displays as ordinary zero;
+nonfinite or invalid quantities are withheld with **—**.
+
+For coverage and overlap, a positive fraction that would round to **0.0%** reads
+**<0.1%**; a fraction below one that would round to **100.0%** reads **>99.9%**.
+These strict inequalities also cover the smallest positive represented fraction
+and the represented value immediately below one. Distance intervals retain
+their separate endpoints in the selected metres/feet units. The formatting
+changes neither the numerical models nor exported setup/plan JSON. More visible
+decimals are not additional physical precision. See the
+[generated counterexamples and browser/export checks](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/planning-readouts-2026-11-12/README.md).
+
+## Project the visible ground footprint
+
+An ideal pinhole camera has a rectangular image plane. Intersecting that view
+with the ground generally does not produce a radial sector. Sensor edges depend
+on forward camera depth, low walls cast finite shadows and a steeply tilted image
+can include ground behind its mount. The projection starts from the
+[OpenCV camera model](https://docs.opencv.org/4.13.0/d9/d0c/group__calib3d.html)
+and [projective camera geometry](https://pbr-book.org/4ed/Cameras_and_Film/Projective_Camera_Models);
+the following ground and wall construction is derived for this planner.
+
+Let `X` be horizontal right, `Y` horizontal forward along the entered bearing,
+`h` the mount height, `theta` downward tilt and `R` horizontal range:
+
+```text
+D = Y cos(theta) + h sin(theta)       camera-axis depth
+V = h cos(theta) - Y sin(theta)       vertical image numerator
+
+D > 0
+|X| <= tan(HFOV/2) D
+|V| <= tan(VFOV/2) D
+X² + Y² <= R²
+```
+
+Five linear half-planes clip a local, range-normalized 256-sided inscribed
+polygon. Its largest inward radial error from the true range circle is
+`R * (1 - cos(pi/256))`, at most about 0.0226 m for an allowed 300 m range.
+This is a declared geometric approximation, not a tolerance for optical error.
+An independent ideal-circle point check retains two exact-circle-boundary
+disagreements; its raw strict result is retained as a failure in the record.
+The ideal image-edge predicate allows only scale-relative arithmetic roundoff.
+
+For a vertical opaque wall with horizontal endpoints `A`, `B`, base `b` and
+top `t`, projection from the mount scales the segment outward. If `b < h`, the
+shadow starts at scale `h/(h-b)`. When `t < h`, it ends at `h/(h-t)`;
+otherwise it extends beyond the range boundary. A wall entirely at or above the
+mount casts no positive-area downward ground shadow. Shadows are clipped to a
+proved containing square before union and subtraction. Low walls can create
+holes, and elevated walls can split the visible ground into separate pieces.
+The existing 0.5 m facade clearance is an explicit planning policy.
+
+Method `pinhole-ground-shadows-v1` keeps the complete MultiPolygon for each
+camera ID. One captured plan snapshot supplies map shading, selected-camera 3D,
+DORI lines, zone areas, route distance, sampled rehearsal and installer SVG.
+Closed visible-polygon boundaries, including shadow-hole boundaries, use one
+shared convention. A diagnostic exact 3D ray can classify an occluding boundary
+differently; it does not silently replace the displayed polygon in another view.
+
+Projected vertices exposed reproducible reconstruction failures in the prior
+Boolean engine and in ordinary finite precision. The branch pins
+[polyclip-ts 0.16.8](https://github.com/luizbarboza/polyclip-ts)
+and BigNumber.js 9.3.1, running synchronous Boolean operations with 80 decimal
+places and restoring the caller's arithmetic configuration afterward. Decimal
+conversion and division still have finite precision. Agreement at 80 and 120
+places on the frozen generated corpus is evidence for those inputs, not a proof
+for every valid polygon. Exact binary64 signed-area fallback distinguishes
+truly collapsed output from small nonzero features without a metre-sized cutoff.
+
+A separate point-membership audit found a dimensional error in the earlier
+closed-edge tolerance: comparing area-like cross/dot products with an unscaled
+length tolerance could give a tiny edge a many-metre halo. For edge length `L`
+and arithmetic length tolerance `delta`, the corrected cross bound is
+`delta * L`, and the dot interval is `[-delta * L, L² + delta * L]`.
+Prepared edge data, conservative spatial bins and shared-geometry queries reduce
+rehearsal work while retaining the same samples, camera order and closed boundaries.
+
+Work caps bound half-plane and Boolean operations, edge visits and input/output
+vertices. A disposable worker and ten-second elapsed-time acceptance gate reject
+stale, cancelled, invalid and late snapshots. Partial geometry cannot yield a
+total coverage claim, a rehearsal blind spot or an installer export. Source-bound
+budgets, independent rational/ray checks and raw failures are in the
+[geometry record](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/ground-frustum-math-2026-11-12/README.md).
+Flat ground, ideal roll-free optics and modeled opaque walls still need physical
+qualification; floor slabs, terrain, lens distortion and recognition are outside
+this model.
+
+## Project ground detail through the camera
+
+The camera planner estimates **horizontal detail across a flat ground plane**,
+perpendicular to the entered bearing. Under the
+[ideal pinhole model](https://docs.opencv.org/4.13.0/d9/d0c/group__calib3d.html),
+horizontal image position depends on camera-axis depth. Euclidean slant distance
+can substitute for that depth only on the optical axis.
+
+For horizontal resolution `W`, downward tilt `theta`, mount height `z`, forward
+ground distance `Y` along the bearing and transverse ground coordinate `X`:
+
+```text
+fx                      = W / (2 tan(HFOV/2))
+camera-axis depth Zc    = Y cos(theta) + z sin(theta)
+horizontal image offset = fx X / Zc
+horizontal px/metre      = fx / Zc
+threshold ground limit  = (fx / threshold - z sin(theta)) / cos(theta)
+```
+
+The table clips the centreline interval to the modeled near/far view. Map
+thresholds are straight ground lines perpendicular to the bearing, clipped to
+the current visible-ground snapshot. A wall shadow can leave several disconnected
+fragments; they are not joined across the shadow. The table describes the
+nonnegative forward centreline before wall occlusion. Steep views can have rear
+ground contours even when that table has no forward interval. Contours do not
+change coverage or simulated rehearsal.
+
+At height 4 m, tilt 60°, HFOV 90° and width 1920 pixels, an independently
+projected transverse target at forward distance 0.5 m gives about 258.47 px/m.
+The previous slant calculation gave 238.15 px/m and missed a positive 250 px/m
+centreline interval. [Generated projection and contour checks](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/dori-projection-2026-11-12/README.md)
+bind the correction to its source. The existing thresholds remain planning
+figures, not recognition guarantees. That earlier record retains its original
+radial-sector footprint. The current ground construction is described above;
+ideal optics, roll-free pose and flat ground require separate physical validation.
+
 ## Preserve valid planar reference geometry
 
 A homography maps image points to a single measured plane using homogeneous
@@ -28,6 +163,89 @@ The [calibration guide](https://github.com/bartytime4life/Intelligent-DVR-Tool/w
 keep the independent-marker, operator-declaration, residual-tolerance and
 no-extrapolation gates. They do not establish physical marker accuracy, lens
 calibration, depth or survey acceptance.
+
+## Keep measured-plane queries inside their references
+
+A convex-hull orientation test uses the sign of
+`(ax-ox)*(by-oy) - (ay-oy)*(bx-ox)`. A fixed tolerance on that area-like quantity
+can admit outside points beside short edges and erase real small turns in the
+fitting hull. [Shewchuk's robustness research](https://www.cs.cmu.edu/~quake/robust.html)
+explains why determinant signs need care near zero.
+
+The v3 calibration boundary decodes each finite
+[ECMAScript binary64 number](https://tc39.es/ecma262/multipage/ecmascript-data-types-and-values.html#sec-ecmascript-language-types-number-type)
+as an integer times a power of two. It shifts the six coordinates to a common
+power-of-two grid and evaluates the determinant with BigInt. This is an original,
+always-exact sign implementation for represented inputs, rather than a port of
+Shewchuk's adaptive expansion code. Zero/duplicate coordinates are handled
+explicitly; malformed/sparse pairs are refused. The monotone-chain hull removes
+only true collinear or clockwise turns, and closed-boundary membership uses no
+outward epsilon. Calibration still enforces the existing reference-span, distinct
+withheld-marker, rank, horizon and operator-residual gates.
+
+The reproduced perspective example admitted an outside point near a short edge
+and returned about 153.648 m, despite tiny fitting and check residuals. The
+[integration record](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/coordinate-integrity-math-2026-11-12/README.md)
+retains exact-rational membership truth, baseline failures and candidate replays.
+The predicate is exact for stored numbers; physical uncertainty and floating-point
+homography fitting remain separate.
+
+## Preserve map positions when correcting the site
+
+The facility grid uses longitude scaled by the cosine of its origin latitude.
+Changing from origin `(lon0,lat0)` to `(lon1,lat1)` while keeping geographic
+positions gives one affine map under that existing model:
+
+```text
+s  = cos(lat1) / cos(lat0)
+x' = s*x + (lon0-lon1)*111320*cos(lat1)
+y' = y   + (lat0-lat1)*111320
+```
+
+Cosines use latitude in radians; longitude/latitude differences use degrees.
+Applying one map avoids per-vertex geographic round trips and micrometre snapping
+that previously moved boundary rooms outside a rotated exterior wall. Aperture
+widths use the same linear map on wall-direction vectors before translation.
+Physical stair/camera sizes and poses retain their existing schema semantics;
+anchors move with the grid. The model is a local planning projection, not a
+survey or a globally exact geodesic transformation. The [operator guide](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Facility-planning)
+describes the explicit keep-position choice, refusal recovery and Undo.
+
+## Compare sampled rule times at their numerical resolution
+
+An exact 0.2-second cadence can produce `0.8 - 0.6 = 0.20000000000000007` in
+binary64. Strict subtraction previously reset a valid presence run at a 0.2-second
+maximum gap; at 25 FPS with stride 5, a generated continuous run emitted no
+observation instead of one at 1 second. The same issue affected the browser
+training counter. Decimal representation and per-operation rounding are described
+in the [Python floating-point reference](https://docs.python.org/3.12/tutorial/floatingpoint.html).
+
+The Python rule engine and JavaScript counter now use the same left-associated
+full-ULP budget, where ULP is the spacing described by
+[`math.ulp`](https://docs.python.org/3.12/library/math.html#math.ulp):
+
+```text
+elapsed = now - then
+roundoff = ((ulp(now) + ulp(then)) + ulp(boundary)) + ulp(elapsed)
+```
+
+A comparison coalesces to equality only for a positive boundary, a difference no
+greater than `roundoff`, and `roundoff <= boundary * 2**-26`. Exact equality still
+holds. The relative-resolution guard is a declared numerical policy, limiting
+any forgiven difference to about 1.49e-8 of the configured interval. Coarse clocks,
+zero boundaries and intervals whose cap underflows retain strict comparisons.
+There is no fixed millisecond grace period. This treats representation residue;
+it cannot recover physical time or clock uncertainty from underresolved numbers.
+
+An independently frozen exact-rational corpus has 1,579 runs/54,614 samples, plus
+nine invalid-input/recovery cases. The original Python engine fails 822 of 1,597
+assertions; the candidate passes all. The original JavaScript counter fails 716
+of 1,579 count checks; the candidate passes all. The APIs expose different results,
+so these totals must not be added into a footage-quality claim. The
+[timing record](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/rule-time-boundaries-2026-11-12/README.md) preserves
+both baselines, unchanged checkers, extreme-clock ambiguity and normal generated
+CPU analyzer/review/evaluation checks. The changed rule-engine hash requires new
+traces for current evaluation; historical evidence must retain its original hash.
 
 ## Choose a useful detection threshold
 
@@ -119,7 +337,7 @@ tracking evaluation requires fresh source-matched traces.
 ## Measure the route by covered distance
 
 Counting regularly spaced points can overestimate or miss narrow coverage.
-Instead, intersect every route segment with the drawn ground-fan polygons and
+Instead, intersect every route segment with the visible ground polygons and
 measure the resulting intervals. This uses the distinction between a point and
 a positive-length segment described in the
 [CGAL intersection reference](https://doc.cgal.org/latest/Kernel_23/group__intersection__linear__grp.html).
@@ -140,13 +358,15 @@ coverage       = covered length / route length
 
 Polygon crossings divide each segment into intervals where that count is
 constant. Union intervals belonging to the same camera before counting distinct
-cameras. Shared vertices use half-open crossing parity; collinear polygon edges
+cameras, subtracting strict hole interiors and retaining closed hole boundaries.
+Shared vertices use half-open crossing parity; collinear polygon edges
 contribute positive boundary length and isolated touches contribute none.
-Fully collapsed zero-area fans are ignored. Repeated/backtracking passages count
+Fully collapsed zero-area pieces are ignored. Repeated/backtracking passages count
 on every visit, preserving the route’s traversal rather than spatially merging
 it. The longest uncovered run continues across route vertices.
 
-The old 0.5 m sample grid reported 100% for eleven narrow fans on a 5 m route.
+The earlier radial-sector counterexample reported 100% from the old 0.5 m sample
+grid for eleven narrow fans on a 5 m route.
 Their drawn coverage is `20 * tan(2.5 degrees) = 0.873218858… m`, or about 17.5%.
 The [independent generated checks](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/route-coverage-math-2026-11-12/README.md)
 compare the implementation with rational rectangle clipping and analytic cases.
@@ -155,13 +375,76 @@ segment length; tiny roundoff-scale gaps can coalesce. A nearly collinear edge
 can be treated as closed boundary even if raw binary vertices sit a few rounding
 units on its opposite side; an exactly coincident route is sensitive to that
 choice. The small errors in ordinary oracle cases are not a universal error bound.
-Outdoor zone percentages still use a bounded grid. The separate handoff
+Those historical fan dimensions remain in their dated record; they are not
+recalculated as though they came from the new pinhole model. The zone-area
+proposal below replaces the earlier outdoor grid. The separate handoff
 rehearsal defaults to `max(2, min(601, ceil(route_length_metres) + 1))`
 distance-spaced positions and assumes 1.4 m/s. Its simulated duration is
 `route_length_metres / 1.4`; the UI uses an integer playback multiplier for
 simulations longer than 60 seconds. These sampled proposals are not actual
 tracking, and exact integration of drawn polygons does not establish physical
 visibility. [Rehearsal documentation correction](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/documentation-alignment-2026-11-12/README.md).
+
+## Measure zone coverage by area
+
+A regular grid can miss gaps between its sample centres. A validated 10 × 1 m
+zone crossing an ordinary fan edge has 90% covered area, yet the old grid reports
+100%. A second camera covers a 10% strip between grid rows but produces 0% sampled
+overlap. Narrow views repeated at grid centres can amplify this aliasing: a
+validated 500-camera fixture reports 100% where the drawn fans cover about 0.175%.
+These are generated numerical counterexamples, not observations of field failure.
+
+For each camera ID, union its visible pieces and clip them to the zone. For a group
+of distinct cameras, keep two masks: `U` for at least one view and `O` for at least
+two. Combining disjoint camera groups A and B gives:
+
+```text
+U(A ∪ B) = U(A) ∪ U(B)
+O(A ∪ B) = O(A) ∪ O(B) ∪ (U(A) ∩ U(B))
+coverage = area(U) / area(zone)
+overlap  = area(O) / area(zone)
+blind    = zone \ U
+```
+
+Implementation first clips each footprint to a strictly expanded axis-aligned bounding
+rectangle `B` containing the zone `Z`, then combines masks and clips final results
+to `Z`. The identity `Z ∩ F = Z ∩ (F ∩ B)` preserves the measured set while removing
+irrelevant arcs. Padding is 1% of each normalized bounding-box span, with a
+32-machine-epsilon minimum; the zone itself is neither enlarged nor snapped.
+This operation order avoids reproduced floating boundary-reconstruction failures.
+
+The recurrence counts every point with at least two distinct cameras, including
+triple overlap, exactly once as a set. A balanced merge avoids repeatedly scanning
+one growing union. This branch uses the same pinned high-precision Boolean
+wrapper as ground visibility, returning components with outer rings and holes.
+The earlier area record used polygon-clipping 0.15.7, retained for other callers.
+Area uses locally anchored,
+compensated cross products, subtracting holes from their outer rings; the
+[CGAL signed-area reference](https://doc.cgal.org/latest/Polygon/group__PkgPolygon2Functions.html)
+describes the orientation convention. CGAL is not added as a dependency.
+
+Method `polygon-area-v1` translates/scales a copied zone and footprints into a local
+frame, integrates the resulting polygonal areas, and checks area ordering and
+coverage-plus-blind conservation within a stated floating tolerance. Failed
+geometry is unavailable, not zero. Collapsed pieces are excluded before clipping.
+The blind overlay carries full MultiPolygon topology rather than grid rectangles.
+These calculations now measure the captured pinhole ground regions, preserving
+their holes and separate components. Polygonal range, wall and ground-plane
+assumptions remain approximations of real visibility.
+
+Per-zone and aggregate clipping budgets bound submitted operations and vertex
+visits. Repeated identical zone footprints reuse their result within one plan.
+The worker is disposable, rejects responses at or beyond a ten-second monotonic
+elapsed-time deadline and is cancelled
+when its plan is superseded or Coverage closes. The UI accepts only the current
+plan/attempt response and clears old numbers/shading while it waits. Browser
+scheduling can delay a timeout callback; the counters are computational limits,
+not a proof of real-time performance or 100-camera ingest/inference capacity.
+
+The [independent area record](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/zone-area-math-2026-11-12/README.md)
+compares generated cases with exact rational horizontal-slab integration and
+checks scalar areas, blind geometry, distinct-camera counts, invariance and
+failure recovery. Numerical agreement does not establish optical calibration.
 
 ## Bind metrics to evaluated bytes
 
@@ -174,6 +457,51 @@ binding. The report's `input_binding` describes these semantics, without claimin
 an atomic multi-file snapshot or loaded-code provenance.
 [Generated replacement-race evidence](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/evaluation-binding-2026-11-11/README.md)
 checks consistency independently of detection quality.
+
+## Normalize image edge strength
+
+The image laboratory uses the standard unscaled 3×3 horizontal and vertical
+[Sobel kernels and Euclidean gradient magnitude](https://docs.opencv.org/4.13.0/d2/d2c/tutorial_sobel_derivatives.html).
+This is a JavaScript calculation; it does not execute OpenCV's example pipeline,
+its additional blur, border padding or display conversion.
+
+For rounded 8-bit channel-weighted sRGB luma `I`, the kernels are:
+
+```text
+Kx = [-1 0 1; -2 0 2; -1 0 1]
+Ky = [-1 -2 -1; 0 0 0; 1 2 1]
+g  = sqrt((Kx · I)^2 + (Ky · I)^2)
+```
+
+The squared norm of this linear map is convex over `[0,255]^9`. Every patch is a
+convex combination of the cube's binary vertices, so its squared response is at
+most the largest vertex response. Exact integer enumeration of all 512 binary
+patches gives `max(g²) = 20 × 255² = 1,300,500`. The patch
+`[0 0 255; 0 0 255; 0 255 255]` attains it with gradients `(1020, 510)`.
+Thus the tight maximum is **`255 × √20`**, rather than the previous `4 × 255`.
+This bound is derived here; the linked reference supplies the kernels.
+
+Method `srgb-luma-sobel-max-v2` averages each interior centre's
+`sqrt((gx² + gy²) / (20 × 255²))`, then multiplies by 100. Normalizing before
+summation keeps the result within 0–100% without clipping. The bounded byte
+gradients and their squares are exact integers in JavaScript; square roots and
+averages retain floating-point roundoff. This is a mean of magnitudes, not RMS,
+not an edge fraction and not a calibrated sharpness or recognition score.
+
+An effective region of width `w` and height `h` supports
+`max(0,w-2) × max(0,h-2)` centres, each with its entire neighbourhood inside the
+region. No centres means **unavailable / JSON null**, while a supported flat
+region measures zero. The new [v2 export contract](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Image-diagnostics#export-version-and-compatibility)
+preserves that distinction and identifies the changed scale. Other diagnostics
+and A/B difference thresholds retain their earlier definitions.
+
+The [independent verification](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/image-diagnostics-math-2026-11-12/README.md)
+compares all binary patches plus generated grayscale, alpha, random-RGBA,
+ROI-boundary and thin-region cases against rational luma and high-precision
+kernel-dot-product calculations. The mathematical bound applies to every rounded
+luma-byte patch; the finite corpus is software regression evidence, not universal
+accuracy evidence for arbitrary malformed arrays, browser resizing, optical focus
+or physical cameras.
 
 ## Next experiments need independent observations
 

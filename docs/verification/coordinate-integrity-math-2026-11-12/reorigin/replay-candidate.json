@@ -1,0 +1,16 @@
+{
+  "schema": "dvr.coordinate-integrity.replay.v1",
+  "baseline_source_revision": "33fedd1bc364fc07cdb9331594aefef06bf52e6e",
+  "baseline_source_sha256": "1ef907792316c57251d5609b89cce27db79bea8721eee8842cd00d8c5cfcc33b",
+  "original_receipt_sha256": "916a7e9e2c16a9c5f80b0a7cb261673a92dadf39078c22e7c8590c1de47bb866",
+  "candidate_source_sha256": "ef184ab2f34bb18a56fce592d6a65066dd879fd31f820b640fd5e601147c47e3",
+  "generated_input_valid": true,
+  "independent_affine_plan_valid": true,
+  "baseline_plan_valid": false,
+  "baseline_error": "Rooms must fit inside their building and reference an existing floor. Check room “A” in Workshop.",
+  "candidate_plan_valid": true,
+  "candidate_error": null,
+  "maximum_affine_error_metres": 0,
+  "boundary_midpoint_error_metres": 0,
+  "passed": true
+}

@@ -1,0 +1,11 @@
+2026-11-12T11:06:19.0683965Z   ✘   27 tests/browser/facility-camera-planning.spec.mjs:94:1 › background coverage clears old numbers during draft changes and survives navigation (8.6s)
+2026-11-12T11:24:27.8905441Z   1) tests/browser/facility-camera-planning.spec.mjs:94:1 › background coverage clears old numbers during draft changes and survives navigation 
+2026-11-12T11:24:27.8908363Z     Expected substring: "Updating coverage"
+2026-11-12T11:24:27.8908751Z     Timeout: 5000ms
+2026-11-12T11:24:27.8909493Z     Error: element(s) not found
+2026-11-12T11:24:27.8912393Z     >  98 |   await expect(metrics.getByRole('status')).toContainText('Updating coverage');
+2026-11-12T11:24:27.8915373Z         at /home/runner/work/Intelligent-DVR-Tool/Intelligent-DVR-Tool/tests/browser/facility-camera-planning.spec.mjs:98:45
+2026-11-12T11:24:27.8920852Z   1 failed
+2026-11-12T11:24:27.8921740Z     tests/browser/facility-camera-planning.spec.mjs:94:1 › background coverage clears old numbers during draft changes and survives navigation 
+2026-11-12T11:24:27.8922484Z   258 passed (20.9m)
+2026-11-12T11:24:27.9367141Z ##[error]Process completed with exit code 1.

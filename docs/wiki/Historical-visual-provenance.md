@@ -1,6 +1,6 @@
 # Motion with provenance
 
-[November 11 captures](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Guided-experience-visual-provenance) · [November 1 handbook imagery](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-provenance) · [Current screenshot atlas](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-atlas) · [PR #61 collection](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/PR61-visual-provenance)
+[November 12 coordinate-integrity proposal captures](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/media/coordinate-integrity-2026-11-12/README.md) · [November 11 captures](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Guided-experience-visual-provenance) · [November 1 handbook imagery](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-provenance) · [Current screenshot atlas](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-atlas) · [PR #61 collection](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/PR61-visual-provenance)
 
 ## Dated software screenshots and illustrations
 

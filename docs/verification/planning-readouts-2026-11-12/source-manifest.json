@@ -1,0 +1,144 @@
+{
+  "schema": "dvr.planning-readouts.sources.v1",
+  "base": "6ce57a5180655693f7d3d6d2e91d8c68693f1961",
+  "sources": [
+    {
+      "path": "src/BuildingShapePicker.jsx",
+      "sha256": "e44c9dc07737b363540b266c0403704f9681844a5ec3316faf851df3719e1bab"
+    },
+    {
+      "path": "src/FacilityBuilder.jsx",
+      "sha256": "a977925828a29060e4c9930fd7e2d4ab608eda350d6cad1cf4bcc1fdc4ba8b29"
+    },
+    {
+      "path": "src/FacilityDoorways.jsx",
+      "sha256": "b3288da4cecce0e5ae182dfdd9099393f995430d77bc91ee9bd3c1ee2ba3df8b"
+    },
+    {
+      "path": "src/FacilityLevels.jsx",
+      "sha256": "39cc24237c9c333199878a5dbe554f9a7a8cd2b29640b1a845f6d10fc933452d"
+    },
+    {
+      "path": "src/FacilityStairs.jsx",
+      "sha256": "4393e1319c96231992c789c5154bab041f6a847b1b403d4a1b40ffed528fc2e7"
+    },
+    {
+      "path": "src/FacilityStarter.jsx",
+      "sha256": "793585b1002bcacd2f0ad9052edf971db15f09fb14549a9d51bb43709097182c"
+    },
+    {
+      "path": "src/FacilityWindows.jsx",
+      "sha256": "75201f783324fee18ea15e2c4d3f683d742921e521d0eaac33fae438417f0726"
+    },
+    {
+      "path": "src/FacilityZones.jsx",
+      "sha256": "202f081e958daf740773935c3f754bb826fe3326d3a707227f5854d7515bdb86"
+    },
+    {
+      "path": "src/LineDimensions.jsx",
+      "sha256": "d6c75402260bf363cbf10e025b4933298a34a2edd4eec3d044daa9e1e160dbbf"
+    },
+    {
+      "path": "src/RoomSketch.jsx",
+      "sha256": "aaf69a65ee478126270e43a27cb0e6107ad98591a18bc3a4f7792b0e783a439a"
+    },
+    {
+      "path": "src/RoomSketchCanvas.jsx",
+      "sha256": "3ede648deb067c9ca8e8711ad62bd8cfe299a3ed270fac8aef37e30507b37574"
+    },
+    {
+      "path": "src/RoomWallEditor.jsx",
+      "sha256": "e9f225445c28abbbfc912d57f4b60b41066579cc75afa52bddec54becbd00950"
+    },
+    {
+      "path": "src/ShapeDimensions.jsx",
+      "sha256": "de773f20a5246c20f214dad007009c7df7553b1070edf69fc7eabc657e5b673d"
+    },
+    {
+      "path": "src/SystemSetup.jsx",
+      "sha256": "7cd4431db644312228b32e8b0ac24b2b4fee9b87c13c717b45c6b64409086e29"
+    },
+    {
+      "path": "src/facility-installer.mjs",
+      "sha256": "abb636b454fec778f8f1f6329cdbc33374aa9ad00708bfc5a9db2c34b080a779"
+    },
+    {
+      "path": "src/facility-map.mjs",
+      "sha256": "3dbb02ef0170bb04054c4e708ec43a3677e401eef70689ba2b37c411378a7920"
+    },
+    {
+      "path": "src/facility-measurements.mjs",
+      "sha256": "a3e512652de0e21c1dbc435d5a1aeb336e4612f7553b92721a2568308897ce85"
+    },
+    {
+      "path": "src/facility-window-map.mjs",
+      "sha256": "0abc5aa5ae9446d2e47fc72dfe3e3fff113bcc2f4a321b79b32d73cb66364d6a"
+    },
+    {
+      "path": "src/readout-format.mjs",
+      "sha256": "ed487cfae16ab17c6810f4b27ddba6d9fa026c7d05e18d1148f036dc7a24f676"
+    },
+    {
+      "path": "tests/readout-format.test.mjs",
+      "sha256": "6d5160698f8c86aa274b9cafaeb94b4d0a4319f8acb79fd128725fe5cfd2fcc9"
+    },
+    {
+      "path": "tests/browser/planning-readouts.spec.mjs",
+      "sha256": "72f05e5b90b9405f19d12e5393cb9599f814fa88b8e7742f3ea7e2e2b747a1f5"
+    },
+    {
+      "path": "package.json",
+      "sha256": "1e67982e85ee8ab853fbb215b4d6c969d53f6c29689a2b499242bc62e5773735"
+    },
+    {
+      "path": "package-lock.json",
+      "sha256": "357d5c99d06572af20430a4cbbc41d238336f3ab8c45b06a06db28422444ca65"
+    },
+    {
+      "path": "playwright.facility.config.mjs",
+      "sha256": "4518e92f938580984c097e6386c825a1c4903e16ba43843ed21671056e0cc572"
+    }
+  ],
+  "unchanged_models": [
+    {
+      "path": "src/resources.mjs",
+      "sha256": "fe176b58fc29107a53ebf54f20114f9dc721471c70cc4317fba032eea821b6c1",
+      "unchanged_from_base": true
+    },
+    {
+      "path": "src/facility.mjs",
+      "sha256": "ef184ab2f34bb18a56fce592d6a65066dd879fd31f820b640fd5e601147c47e3",
+      "unchanged_from_base": true
+    },
+    {
+      "path": "src/facility-coverage.mjs",
+      "sha256": "ee7a36dcfc79ee8c4d5c5fc9e12e71a47a13d0debd0ef0e0897312de8f46c9a2",
+      "unchanged_from_base": true
+    },
+    {
+      "path": "src/facility-visibility.mjs",
+      "sha256": "9207e0aeab51e2578cab9f3f82f28aa0fcd6cd3f1714a2bac5350a451587cf36",
+      "unchanged_from_base": true
+    },
+    {
+      "path": "src/facility-dori.mjs",
+      "sha256": "21a82c0c865e2fcb1960a7195335690f749d4bcb244ab8463b0d289820d9f56d",
+      "unchanged_from_base": true
+    },
+    {
+      "path": "src/facility-stairs.mjs",
+      "sha256": "4ce62cab36971dd528a4af8667168e6cc39f723e5aecbfc619e091106c05a544",
+      "unchanged_from_base": true
+    },
+    {
+      "path": "src/facility-shape-edit.mjs",
+      "sha256": "8424931d68ad650ce5148699af57461056a05299061d063a1bbc93b1bebca420",
+      "unchanged_from_base": true
+    },
+    {
+      "path": "src/facility-line-edit.mjs",
+      "sha256": "075952b496f3f4a1a25190f80b8d2d43e8e060eb497e29bd6006cac0ac5b3037",
+      "unchanged_from_base": true
+    }
+  ]
+}

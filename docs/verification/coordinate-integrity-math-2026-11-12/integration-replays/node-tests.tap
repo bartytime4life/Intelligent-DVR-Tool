@@ -1,0 +1,3416 @@
+
+> intelligent-dvr@0.0.0 test
+> node --test tests/ollama.test.mjs tests/lab-receipt.test.mjs tests/domain.test.mjs tests/facility.test.mjs tests/facility-starter.test.mjs tests/resources.test.mjs tests/facility-services.test.mjs tests/facility-geometry.test.mjs tests/facility-delivery.test.mjs tests/facility-study.test.mjs tests/recognition.test.mjs tests/workspace-state.test.mjs tests/local-analysis.test.mjs tests/status-announcements.test.mjs tests/live-feeds.test.mjs tests/facility-measurements.test.mjs tests/facility-camera-preview.test.mjs tests/facility-planning.test.mjs tests/facility-route-coverage.test.mjs tests/facility-zone-area.test.mjs tests/facility-coverage-task.test.mjs tests/facility-shape-edit.test.mjs tests/facility-stairs.test.mjs tests/facility-line-edit.test.mjs tests/facility-library.test.mjs tests/facility-save.test.mjs tests/recognition-report.test.mjs tests/clip-capture.test.mjs tests/training.test.mjs tests/training-library.test.mjs tests/training-evidence.test.mjs tests/training-time.test.mjs tests/training-selection.test.mjs tests/training-scorecard.test.mjs tests/training-capture.test.mjs tests/lan-recorder.test.mjs tests/review-transfer.test.mjs tests/enhancement.test.mjs tests/media-coverage.test.mjs tests/review-queue.test.mjs tests/zone-rules.test.mjs tests/image-science.test.mjs tests/planar-predicates.test.mjs tests/facility-calibration.test.mjs tests/facility-reorigin.test.mjs tests/facility-room-sketch.test.mjs tests/facility-doorways.test.mjs tests/facility-windows.test.mjs tests/facility-basemap.test.mjs tests/facility-location.test.mjs tests/live-ai.test.mjs tests/live-reply.test.mjs tests/live-review.test.mjs tests/backup-library.test.mjs tests/local-images.test.mjs tests/image-database.test.mjs tests/dev-server.test.mjs tests/person-session.test.mjs tests/workspace-tasks.test.mjs tests/people-operation.test.mjs tests/training-analysis.test.mjs tests/zone-images.test.mjs tests/thumbnail-retention.test.mjs tests/acceptance-receipts.test.mjs tests/goal-guide.test.mjs tests/facility-visibility.test.mjs tests/facility-visibility-integration.test.mjs tests/facility-visibility-task.test.mjs tests/facility-visibility-presentation.test.mjs
+
+TAP version 13
+# Subtest: normalizes only bounded byte-check evidence and fingerprints the exact file
+ok 1 - normalizes only bounded byte-check evidence and fingerprints the exact file
+  ---
+  duration_ms: 4.058931
+  ...
+# Subtest: rejects oversize or changed-size files before interpretation
+ok 2 - rejects oversize or changed-size files before interpretation
+  ---
+  duration_ms: 0.364032
+  ...
+# Subtest: malformed JSON and invalid UTF-8 receive generic errors without echoed content
+ok 3 - malformed JSON and invalid UTF-8 receive generic errors without echoed content
+  ---
+  duration_ms: 0.281487
+  ...
+# Subtest: rejects recognition reviews, invented acceptance and invalid source correspondence
+ok 4 - rejects recognition reviews, invented acceptance and invalid source correspondence
+  ---
+  duration_ms: 0.328716
+  ...
+# Subtest: failure receipts do not promote residual review or byte claims
+ok 5 - failure receipts do not promote residual review or byte claims
+  ---
+  duration_ms: 0.161052
+  ...
+# Subtest: reported CPU, CUDA and partial coverage remain separate metadata fields
+ok 6 - reported CPU, CUDA and partial coverage remain separate metadata fields
+  ---
+  duration_ms: 0.138499
+  ...
+# Subtest: compares matching source bytes without claiming an earlier-receipt link
+ok 7 - compares matching source bytes without claiming an earlier-receipt link
+  ---
+  duration_ms: 1.54298
+  ...
+# Subtest: validates an optional earlier-receipt link against the actual selected file hash
+ok 8 - validates an optional earlier-receipt link against the actual selected file hash
+  ---
+  duration_ms: 0.762408
+  ...
+# Subtest: rejects mismatched source, scope, revision, verifier, order and failed checks
+ok 9 - rejects mismatched source, scope, revision, verifier, order and failed checks
+  ---
+  duration_ms: 1.637016
+  ...
+# Subtest: task search makes acceptance checks discoverable in the existing backup path
+ok 10 - task search makes acceptance checks discoverable in the existing backup path
+  ---
+  duration_ms: 0.805148
+  ...
+# Subtest: folder settings accept explicit integers and send only known fields
+ok 11 - folder settings accept explicit integers and send only known fields
+  ---
+  duration_ms: 1.666571
+  ...
+# Subtest: folder settings refuse same directories, absent paths and invalid resource bounds
+ok 12 - folder settings refuse same directories, absent paths and invalid resource bounds
+  ---
+  duration_ms: 0.62479
+  ...
+# Subtest: camera setup accepts explicit private channel and preserves credentials only in body
+ok 13 - camera setup accepts explicit private channel and preserves credentials only in body
+  ---
+  duration_ms: 10.234627
+  ...
+# Subtest: camera setup refuses public, loopback, ambiguous or URL host inputs and undocumented path forms
+ok 14 - camera setup refuses public, loopback, ambiguous or URL host inputs and undocumented path forms
+  ---
+  duration_ms: 0.464139
+  ...
+# Subtest: status is read only; actions require bodies; local endpoint errors preserve status and explanation
+ok 15 - status is read only; actions require bodies; local endpoint errors preserve status and explanation
+  ---
+  duration_ms: 1.564129
+  ...
+# Subtest: backup review reuses recognition parser and verifies result and exact copied source
+ok 16 - backup review reuses recognition parser and verifies result and exact copied source
+  ---
+  duration_ms: 9.239924
+  ...
+# Subtest: incomplete, invalid-id, oversized and cancelled reviews cannot replace a current review
+ok 17 - incomplete, invalid-id, oversized and cancelled reviews cannot replace a current review
+  ---
+  duration_ms: 0.973743
+  ...
+# Subtest: cancelling a backup review terminates its hashing worker
+ok 18 - cancelling a backup review terminates its hashing worker
+  ---
+  duration_ms: 1.323178
+  ...
+# Subtest: coverage is absent until completion and remains qualified for partial or missing metadata
+ok 19 - coverage is absent until completion and remains qualified for partial or missing metadata
+  ---
+  duration_ms: 0.305452
+  ...
+# Subtest: capture excludes audio and waits for final data before publishing a clip
+ok 20 - capture excludes audio and waits for final data before publishing a clip
+  ---
+  duration_ms: 1.113716
+  ...
+# Subtest: size overflow discards the entire clip and explicit recording can retry
+ok 21 - size overflow discards the entire clip and explicit recording can retry
+  ---
+  duration_ms: 0.198051
+  ...
+# Subtest: paused time counts toward neither the 60-second limit nor the clip length
+ok 22 - paused time counts toward neither the 60-second limit nor the clip length
+  ---
+  duration_ms: 0.527748
+  ...
+# Subtest: missing camera and recorder errors never publish successful clips
+ok 23 - missing camera and recorder errors never publish successful clips
+  ---
+  duration_ms: 0.316994
+  ...
+# Subtest: recording import hashes exact bytes and uses same-origin binary endpoint
+ok 24 - recording import hashes exact bytes and uses same-origin binary endpoint
+  ---
+  duration_ms: 16.054106
+  ...
+# Subtest: development serves the frontend but refuses private runtime files and raw module requests
+ok 25 - development serves the frontend but refuses private runtime files and raw module requests
+  ---
+  duration_ms: 391.458065
+  ...
+# Subtest: zone geometry cannot extend beyond image
+ok 26 - zone geometry cannot extend beyond image
+  ---
+  duration_ms: 0.509304
+  ...
+# Subtest: review records decision without contaminating another event
+ok 27 - review records decision without contaminating another event
+  ---
+  duration_ms: 1.798899
+  ...
+# Subtest: offline receipts remain separate from simulated camera evidence
+ok 28 - offline receipts remain separate from simulated camera evidence
+  ---
+  duration_ms: 0.214802
+  ...
+# Subtest: invalid receipts and duplicate ids are rejected
+ok 29 - invalid receipts and duplicate ids are rejected
+  ---
+  duration_ms: 0.114765
+  ...
+# Subtest: receipt provenance rejects malformed metadata rather than rendering objects
+ok 30 - receipt provenance rejects malformed metadata rather than rendering objects
+  ---
+  duration_ms: 0.100197
+  ...
+# Subtest: corrupt browser snapshots recover to the initial workspace
+ok 31 - corrupt browser snapshots recover to the initial workspace
+  ---
+  duration_ms: 0.333344
+  ...
+# Subtest: paired display and reports retain original events and separate candidate counts
+ok 32 - paired display and reports retain original events and separate candidate counts
+  ---
+  duration_ms: 10.161892
+  ...
+# Subtest: old review files remain usable; malformed paired provenance fails closed
+ok 33 - old review files remain usable; malformed paired provenance fails closed
+  ---
+  duration_ms: 3.372155
+  ...
+# Subtest: candidate text is escaped in offline reports and thresholds affect both counts only
+ok 34 - candidate text is escaped in offline reports and thresholds affect both counts only
+  ---
+  duration_ms: 0.702245
+  ...
+# Subtest: grid is the default layer and the only one that requests nothing
+ok 35 - grid is the default layer and the only one that requests nothing
+  ---
+  duration_ms: 0.955299
+  ...
+# Subtest: street tiles identify the app origin and preserve normal browser caching
+ok 36 - street tiles identify the app origin and preserve normal browser caching
+  ---
+  duration_ms: 15.42088
+  ...
+# Subtest: layer preferences are validated and survive storage failures
+ok 37 - layer preferences are validated and survive storage failures
+  ---
+  duration_ms: 0.230441
+  ...
+# Subtest: blocked browser storage falls back to Grid instead of throwing
+ok 38 - blocked browser storage falls back to Grid instead of throwing
+  ---
+  duration_ms: 0.104565
+  ...
+# Subtest: aerial coverage is limited to the contiguous United States box
+ok 39 - aerial coverage is limited to the contiguous United States box
+  ---
+  duration_ms: 0.201447
+  ...
+# Subtest: the site photo is a square centred on the site at about 0.6 m per pixel
+ok 40 - the site photo is a square centred on the site at about 0.6 m per pixel
+  ---
+  duration_ms: 0.331521
+  ...
+# Subtest: site photos are fetched without credentials and bounded in type and size
+ok 41 - site photos are fetched without credentials and bounded in type and size
+  ---
+  duration_ms: 2.641397
+  ...
+# Subtest: calibration: exact perspective and independent holdout solve to near-zero residual
+ok 42 - calibration: exact perspective and independent holdout solve to near-zero residual
+  ---
+  duration_ms: 1.759295
+  ...
+# Subtest: calibration: additional fit points and noisy holdout errors stay visible instead of being treated as accuracy
+ok 43 - calibration: additional fit points and noisy holdout errors stay visible instead of being treated as accuracy
+  ---
+  duration_ms: 0.949709
+  ...
+# Subtest: calibration: degenerate or coincident references are refused
+ok 44 - calibration: degenerate or coincident references are refused
+  ---
+  duration_ms: 0.632004
+  ...
+# Subtest: calibration: no extrapolation outside the reference hull or invalid projection
+ok 45 - calibration: no extrapolation outside the reference hull or invalid projection
+  ---
+  duration_ms: 0.557154
+  ...
+# Subtest: calibration: reference bounds and holdouts are validated
+ok 46 - calibration: reference bounds and holdouts are validated
+  ---
+  duration_ms: 0.16589
+  ...
+# Subtest: calibration: holdout outside fitting hull is flagged, never automatically accepted
+ok 47 - calibration: holdout outside fitting hull is flagged, never automatically accepted
+  ---
+  duration_ms: 0.592791
+  ...
+# Subtest: calibration: projective horizon inside fitting hull is rejected even when corner residuals fit
+ok 48 - calibration: projective horizon inside fitting hull is rejected even when corner residuals fit
+  ---
+  duration_ms: 0.494055
+  ...
+# Subtest: calibration: a copied fitted point cannot masquerade as an independent check
+ok 49 - calibration: a copied fitted point cannot masquerade as an independent check
+  ---
+  duration_ms: 0.230843
+  ...
+# Subtest: calibration: safe zero and near-zero h33 do not require a finite image origin
+ok 50 - calibration: safe zero and near-zero h33 do not require a finite image origin
+  ---
+  duration_ms: 1.718899
+  ...
+# Subtest: calibration: projection is invariant under finite global matrix scale and sign
+ok 51 - calibration: projection is invariant under finite global matrix scale and sign
+  ---
+  duration_ms: 0.562574
+  ...
+# Subtest: calibration: horizon cancellation refusal is relative to matrix scale
+ok 52 - calibration: horizon cancellation refusal is relative to matrix scale
+  ---
+  duration_ms: 0.164998
+  ...
+# Subtest: calibration: normalized rank checks preserve translated planes and reference permutations
+ok 53 - calibration: normalized rank checks preserve translated planes and reference permutations
+  ---
+  duration_ms: 2.01279
+  ...
+# Subtest: calibration: five collinear ground fits cannot enable a collapsed plane with a distinct check
+ok 54 - calibration: five collinear ground fits cannot enable a collapsed plane with a distinct check
+  ---
+  duration_ms: 1.017215
+  ...
+# Subtest: calibration: non-collinear noisy observations still require a nonsingular fitted plane
+ok 55 - calibration: non-collinear noisy observations still require a nonsingular fitted plane
+  ---
+  duration_ms: 0.913251
+  ...
+# Subtest: calibration: a short reference edge cannot authorize an outside ruler or holdout
+ok 56 - calibration: a short reference edge cannot authorize an outside ruler or holdout
+  ---
+  duration_ms: 0.620131
+  ...
+# Subtest: calibration: every represented positive hull turn survives while true collinearity does not
+ok 57 - calibration: every represented positive hull turn survives while true collinearity does not
+  ---
+  duration_ms: 0.825526
+  ...
+# Subtest: calibration: closed hull boundaries refuse next-representable outside points without an epsilon halo
+ok 58 - calibration: closed hull boundaries refuse next-representable outside points without an epsilon halo
+  ---
+  duration_ms: 0.32067
+  ...
+# Subtest: planned bearings wrap around north and do not infer calibration
+ok 59 - planned bearings wrap around north and do not infer calibration
+  ---
+  duration_ms: 1.026593
+  ...
+# Subtest: facility source choices include only bounded configured LAN source IDs
+ok 60 - facility source choices include only bounded configured LAN source IDs
+  ---
+  duration_ms: 0.167073
+  ...
+# Subtest: constructing the preview makes no requests and cannot connect arbitrary URLs or public sources
+ok 61 - constructing the preview makes no requests and cannot connect arbitrary URLs or public sources
+  ---
+  duration_ms: 0.447609
+  ...
+# Subtest: network preview retains one bounded JPEG and disconnect revokes it with authenticated cleanup
+ok 62 - network preview retains one bounded JPEG and disconnect revokes it with authenticated cleanup
+  ---
+  duration_ms: 3.318324
+  ...
+# Subtest: cancelling while a network connect is pending cleans up the late session without polling it
+ok 63 - cancelling while a network connect is pending cleans up the late session without polling it
+  ---
+  duration_ms: 0.456955
+  ...
+# Subtest: malformed session IDs never become request paths
+ok 64 - malformed session IDs never become request paths
+  ---
+  duration_ms: 0.178184
+  ...
+# Subtest: oversized and non-JPEG frames are discarded and their sessions stopped
+ok 65 - oversized and non-JPEG frames are discarded and their sessions stopped
+  ---
+  duration_ms: 1.092286
+  ...
+# Subtest: webcam requests remain video-only and camera changes cancel late permission results
+ok 66 - webcam requests remain video-only and camera changes cancel late permission results
+  ---
+  duration_ms: 0.47012
+  ...
+# Subtest: cancel during network cleanup prevents a pending webcam activation
+ok 67 - cancel during network cleanup prevents a pending webcam activation
+  ---
+  duration_ms: 0.614771
+  ...
+# Subtest: a superseded webcam promise cannot stop the newer preview
+ok 68 - a superseded webcam promise cannot stop the newer preview
+  ---
+  duration_ms: 0.686786
+  ...
+# Subtest: coverage task binds its request, terminates after one response, and clears the deadline
+ok 69 - coverage task binds its request, terminates after one response, and clears the deadline
+  ---
+  duration_ms: 2.108799
+  ...
+# Subtest: another request cannot satisfy a pending coverage task
+ok 70 - another request cannot satisfy a pending coverage task
+  ---
+  duration_ms: 0.167573
+  ...
+# Subtest: superseding a coverage task closes queued responses and errors before starting its successor
+ok 71 - superseding a coverage task closes queued responses and errors before starting its successor
+  ---
+  duration_ms: 0.161202
+  ...
+# Subtest: coverage deadline terminates work and rejects late success without inventing metrics
+ok 72 - coverage deadline terminates work and rejects late success without inventing metrics
+  ---
+  duration_ms: 0.122379
+  ...
+# Subtest: a result past the monotonic deadline is refused even before a delayed timer callback runs
+ok 73 - a result past the monotonic deadline is refused even before a delayed timer callback runs
+  ---
+  duration_ms: 0.191358
+  ...
+# Subtest: a successful reply cannot turn null or missing zone numbers into displayed zero
+ok 74 - a successful reply cannot turn null or missing zone numbers into displayed zero
+  ---
+  duration_ms: 0.713306
+  ...
+# Subtest: worker errors and unreadable messages remain recoverable, with no numeric fallback
+ok 75 - worker errors and unreadable messages remain recoverable, with no numeric fallback
+  ---
+  duration_ms: 0.122229
+  ...
+# Subtest: malformed or error replies close the task instead of displaying incomplete metrics
+ok 76 - malformed or error replies close the task instead of displaying incomplete metrics
+  ---
+  duration_ms: 0.110316
+  ...
+# Subtest: worker creation and post failures settle the task without an orphan deadline
+ok 77 - worker creation and post failures settle the task without an orphan deadline
+  ---
+  duration_ms: 0.799608
+  ...
+# Subtest: cleanup stays closed even when worker termination itself throws
+ok 78 - cleanup stays closed even when worker termination itself throws
+  ---
+  duration_ms: 0.317846
+  ...
+# Subtest: coverage refuses missing, unaccepted or different-plan visibility before creating a worker
+ok 79 - coverage refuses missing, unaccepted or different-plan visibility before creating a worker
+  ---
+  duration_ms: 0.226965
+  ...
+# Subtest: unknown visibility preserves null zone/route metrics and refuses fabricated numeric totals
+ok 80 - unknown visibility preserves null zone/route metrics and refuses fabricated numeric totals
+  ---
+  duration_ms: 0.359894
+  ...
+# Subtest: successful route metrics require finite consistent lengths and an actual source route
+ok 81 - successful route metrics require finite consistent lengths and an actual source route
+  ---
+  duration_ms: 0.177021
+  ...
+# Subtest: actual coverage worker uses the supplied low-wall hole snapshot without recomputing a legacy fan
+ok 82 - actual coverage worker uses the supplied low-wall hole snapshot without recomputing a legacy fan
+  ---
+  duration_ms: 44.207181
+  ...
+# Subtest: disabled delivery and unknown routes cannot make upstream requests
+ok 83 - disabled delivery and unknown routes cannot make upstream requests
+  ---
+  duration_ms: 1.011514
+  ...
+# Subtest: only fixed loopback services receive minimized input; cookies/auth/URLs are never forwarded
+ok 84 - only fixed loopback services receive minimized input; cookies/auth/URLs are never forwarded
+  ---
+  duration_ms: 3.670053
+  ...
+# Subtest: cross-origin, rebinding, method and arbitrary-query attempts never call upstream
+ok 85 - cross-origin, rebinding, method and arbitrary-query attempts never call upstream
+  ---
+  duration_ms: 3.015818
+  ...
+# Subtest: forged loopback headers do not authorize a remote TCP client
+ok 86 - forged loopback headers do not authorize a remote TCP client
+  ---
+  duration_ms: 0.292478
+  ...
+# Subtest: bounded canonical Overpass queries work; invalid, partial and oversized responses fail closed
+ok 87 - bounded canonical Overpass queries work; invalid, partial and oversized responses fail closed
+  ---
+  duration_ms: 5.191102
+  ...
+# Subtest: rate limits and active request bounds are enforced across clients without automatic retries
+ok 88 - rate limits and active request bounds are enforced across clients without automatic retries
+  ---
+  duration_ms: 0.762649
+  ...
+# Subtest: real HTTP loopback middleware round trip (opt-in on CI)
+ok 89 - real HTTP loopback middleware round trip (opt-in on CI)
+  ---
+  duration_ms: 28.782434
+  ...
+# Subtest: shared walls combine collinear subdivisions and exclude overlaps, corner touches and other levels
+ok 90 - shared walls combine collinear subdivisions and exclude overlaps, corner touches and other levels
+  ---
+  duration_ms: 1.963267
+  ...
+# Subtest: placement clamps at wall ends, avoids another doorway, and validates before serialization
+ok 91 - placement clamps at wall ends, avoids another doorway, and validates before serialization
+  ---
+  duration_ms: 4.002706
+  ...
+# Subtest: a doorway opens both room walls below its lintel and cannot cross a floor void
+ok 92 - a doorway opens both room walls below its lintel and cannot cross a floor void
+  ---
+  duration_ms: 1.58596
+  ...
+# Subtest: doors follow shared-wall movement, room splitting, merging and rigid building motion
+ok 93 - doors follow shared-wall movement, room splitting, merging and rigid building motion
+  ---
+  duration_ms: 6.577298
+  ...
+# Subtest: floor copying duplicates doorways with new IDs and room references
+ok 94 - floor copying duplicates doorways with new IDs and room references
+  ---
+  duration_ms: 1.996139
+  ...
+# Subtest: v3 exports preserve v2 geometry and upgrade earlier plans without allowing geometry downgrades
+ok 95 - v3 exports preserve v2 geometry and upgrade earlier plans without allowing geometry downgrades
+  ---
+  duration_ms: 3.645687
+  ...
+# Subtest: invalid courtyard topology, including enclosing a hole with a room, is rejected atomically
+ok 96 - invalid courtyard topology, including enclosing a hole with a room, is rejected atomically
+  ---
+  duration_ms: 1.471907
+  ...
+# Subtest: courtyard translations/resizes keep all rings aligned and room edits remain validated
+ok 97 - courtyard translations/resizes keep all rings aligned and room edits remain validated
+  ---
+  duration_ms: 0.21329
+  ...
+# Subtest: coverage uses inner walls and permits rays below raised bases
+ok 98 - coverage uses inner walls and permits rays below raised bases
+  ---
+  duration_ms: 0.451586
+  ...
+# Subtest: complete courtyard relations assemble split inner rings and retain source/export
+ok 99 - complete courtyard relations assemble split inner rings and retain source/export
+  ---
+  duration_ms: 1.361891
+  ...
+# Subtest: independent parts preserve raised bases; conflicting envelopes/parts are excluded together
+ok 100 - independent parts preserve raised bases; conflicting envelopes/parts are excluded together
+  ---
+  duration_ms: 1.204957
+  ...
+# Subtest: custom AOI filters the enclosing rectangle while retaining whole intersecting shells
+ok 101 - custom AOI filters the enclosing rectangle while retaining whole intersecting shells
+  ---
+  duration_ms: 0.939981
+  ...
+# Subtest: rooms, indoor zones and stairs may share a courtyard wall or corner but not overlap the courtyard
+ok 102 - rooms, indoor zones and stairs may share a courtyard wall or corner but not overlap the courtyard
+  ---
+  duration_ms: 3.290552
+  ...
+# Subtest: a new install reads as one blank facility without creating a sample or writing storage
+ok 103 - a new install reads as one blank facility without creating a sample or writing storage
+  ---
+  duration_ms: 5.104661
+  ...
+# Subtest: legacy v1 and v2 plans migrate into an independent collection without altering their backup
+ok 104 - legacy v1 and v2 plans migrate into an independent collection without altering their backup
+  ---
+  duration_ms: 3.640628
+  ...
+# Subtest: new saves take priority over a stale legacy key and preserve the selected facility across reload
+ok 105 - new saves take priority over a stale legacy key and preserve the selected facility across reload
+  ---
+  duration_ms: 0.48594
+  ...
+# Subtest: corrupt, over-limit and unreadable storage stays untouched with a blocked blank recovery state
+ok 106 - corrupt, over-limit and unreadable storage stays untouched with a blocked blank recovery state
+  ---
+  duration_ms: 6.326889
+  ...
+# Subtest: a corrupt legacy save exposes exact recovery bytes without changing the new-key revision
+ok 107 - a corrupt legacy save exposes exact recovery bytes without changing the new-key revision
+  ---
+  duration_ms: 0.243957
+  ...
+# Subtest: saving detects a changed stored revision and refuses to overwrite or mutate either side
+ok 108 - saving detects a changed stored revision and refuses to overwrite or mutate either side
+  ---
+  duration_ms: 0.597168
+  ...
+# Subtest: quota/read failures never report success or advance the in-memory revision
+ok 109 - quota/read failures never report success or advance the in-memory revision
+  ---
+  duration_ms: 0.343623
+  ...
+# Subtest: adding, switching, replacing and duplicating isolate facilities while keeping exact geometry
+ok 110 - adding, switching, replacing and duplicating isolate facilities while keeping exact geometry
+  ---
+  duration_ms: 1.314802
+  ...
+# Subtest: collections reject bad revisions, IDs, timestamps, active IDs, counts and oversized plans
+ok 111 - collections reject bad revisions, IDs, timestamps, active IDs, counts and oversized plans
+  ---
+  duration_ms: 27.560475
+  ...
+# Subtest: portable single-facility and complete-collection files validate before any plan is returned
+ok 112 - portable single-facility and complete-collection files validate before any plan is returned
+  ---
+  duration_ms: 11.453951
+  ...
+# Subtest: imported collection records get fresh IDs when added and cannot replace a matching saved name
+ok 113 - imported collection records get fresh IDs when added and cannot replace a matching saved name
+  ---
+  duration_ms: 0.430536
+  ...
+# Subtest: a complete 30-facility backup fits a fresh install by replacing only its automatic starter
+ok 114 - a complete 30-facility backup fits a fresh install by replacing only its automatic starter
+  ---
+  duration_ms: 31.157632
+  ...
+# Subtest: imports preserve authored or previously edited blank facilities and remain all-or-nothing
+ok 115 - imports preserve authored or previously edited blank facilities and remain all-or-nothing
+  ---
+  duration_ms: 50.826438
+  ...
+# Subtest: download filenames contain no path, control, device-name or Unicode surprises
+ok 116 - download filenames contain no path, control, device-name or Unicode surprises
+  ---
+  duration_ms: 0.430987
+  ...
+# Subtest: removing a facility keeps at least one, opens a neighbour and leaves the others untouched
+ok 117 - removing a facility keeps at least one, opens a neighbour and leaves the others untouched
+  ---
+  duration_ms: 14.227816
+  ...
+# Subtest: examples and imports get distinct names without changing their geometry
+ok 118 - examples and imports get distinct names without changing their geometry
+  ---
+  duration_ms: 2.316819
+  ...
+# Subtest: resize translates the downstream path while keeping earlier vertices and later lengths
+ok 119 - resize translates the downstream path while keeping earlier vertices and later lengths
+  ---
+  duration_ms: 1.183296
+  ...
+# Subtest: feet input is stored as metres and conversion does not round geometry
+ok 120 - feet input is stored as metres and conversion does not round geometry
+  ---
+  duration_ms: 0.226484
+  ...
+# Subtest: editing one vertex leaves every other point unchanged
+ok 121 - editing one vertex leaves every other point unchanged
+  ---
+  duration_ms: 0.422932
+  ...
+# Subtest: invalid or out-of-bounds edits fail without mutating input
+ok 122 - invalid or out-of-bounds edits fail without mutating input
+  ---
+  duration_ms: 0.312997
+  ...
+# Subtest: empty, oversized, malformed and degenerate loop inputs are refused
+ok 123 - empty, oversized, malformed and degenerate loop inputs are refused
+  ---
+  duration_ms: 0.270156
+  ...
+# Subtest: the maximum-size line stays bounded and detached from the input
+ok 124 - the maximum-size line stays bounded and detached from the input
+  ---
+  duration_ms: 0.309269
+  ...
+# Subtest: keyboard point lists accept one east, north pair per line in metres or feet
+ok 125 - keyboard point lists accept one east, north pair per line in metres or feet
+  ---
+  duration_ms: 0.468919
+  ...
+# Subtest: closed loop routes stay editable and stay closed
+ok 126 - closed loop routes stay editable and stay closed
+  ---
+  duration_ms: 0.241001
+  ...
+# Subtest: entered feet and metres are stored to 0.1 mm without float noise
+ok 127 - entered feet and metres are stored to 0.1 mm without float noise
+  ---
+  duration_ms: 0.23494
+  ...
+# Subtest: location search has a wall-clock deadline and drops late callbacks
+ok 128 - location search has a wall-clock deadline and drops late callbacks
+  ---
+  duration_ms: 1.20118
+  ...
+# Subtest: unknown accuracy and stale readings never replace site coordinates
+ok 129 - unknown accuracy and stale readings never replace site coordinates
+  ---
+  duration_ms: 0.190707
+  ...
+# Subtest: cancelling a pending request releases the watch and suppresses late readings
+ok 130 - cancelling a pending request releases the watch and suppresses late readings
+  ---
+  duration_ms: 0.160521
+  ...
+# (node:2513410) ExperimentalWarning: The MockTimers API is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: short positive planning ranges remain visible in metres and feet
+ok 131 - short positive planning ranges remain visible in metres and feet
+  ---
+  duration_ms: 11.610304
+  ...
+# Subtest: blind-spot map geometry keeps holes and separate components, and clears unavailable results
+ok 132 - blind-spot map geometry keeps holes and separate components, and clears unavailable results
+  ---
+  duration_ms: 0.81682
+  ...
+# Subtest: polygon measurements subtract courtyards and count their boundaries
+ok 133 - polygon measurements subtract courtyards and count their boundaries
+  ---
+  duration_ms: 0.219481
+  ...
+# Subtest: line lengths use actual segments, including diagonals and open paths
+ok 134 - line lengths use actual segments, including diagonals and open paths
+  ---
+  duration_ms: 0.141906
+  ...
+# Subtest: imperial display converts length and area independently
+ok 135 - imperial display converts length and area independently
+  ---
+  duration_ms: 0.259236
+  ...
+# Subtest: labels include selected polygon, courtyards and complete route total
+ok 136 - labels include selected polygon, courtyards and complete route total
+  ---
+  duration_ms: 0.76865
+  ...
+# Subtest: map label budget holds for maximum route and polygon sizes
+ok 137 - map label budget holds for maximum route and polygon sizes
+  ---
+  duration_ms: 2.669429
+  ...
+# Subtest: floor measurement labels exclude rooms belonging to another building
+ok 138 - floor measurement labels exclude rooms belonging to another building
+  ---
+  duration_ms: 0.153959
+  ...
+# Subtest: floor-scoped zone measurements are hidden outside their matching floor
+ok 139 - floor-scoped zone measurements are hidden outside their matching floor
+  ---
+  duration_ms: 0.556142
+  ...
+# Subtest: floor slab area subtracts only openings on the selected level
+ok 140 - floor slab area subtracts only openings on the selected level
+  ---
+  duration_ms: 1.209766
+  ...
+# Subtest: stair measurement summary reports footprint size and actual modeled rise
+ok 141 - stair measurement summary reports footprint size and actual modeled rise
+  ---
+  duration_ms: 0.659394
+  ...
+# Subtest: floor paths retain per-segment and total distance only on their own floor
+ok 142 - floor paths retain per-segment and total distance only on their own floor
+  ---
+  duration_ms: 0.301695
+  ...
+# Subtest: floor path ribbons stay bounded to segment count and ignore duplicate points
+ok 143 - floor path ribbons stay bounded to segment count and ignore duplicate points
+  ---
+  duration_ms: 0.226714
+  ...
+# Subtest: a wholly open floor has no misleading slab area or edge measurements
+ok 144 - a wholly open floor has no misleading slab area or edge measurements
+  ---
+  duration_ms: 0.370504
+  ...
+# Subtest: floor display preserves the slab below while the drawing view has one flat coordinate plane
+ok 145 - floor display preserves the slab below while the drawing view has one flat coordinate plane
+  ---
+  duration_ms: 0.211286
+  ...
+# Subtest: floor rendering clamps a stale level when a building loses upper floors
+ok 146 - floor rendering clamps a stale level when a building loses upper floors
+  ---
+  duration_ms: 0.090379
+  ...
+# Subtest: small-geometry labels retain selected summary and suppress colliding edges
+ok 147 - small-geometry labels retain selected summary and suppress colliding edges
+  ---
+  duration_ms: 0.246271
+  ...
+# Subtest: selected polygon and floor path summaries are marked as required
+ok 148 - selected polygon and floor path summaries are marked as required
+  ---
+  duration_ms: 0.310421
+  ...
+# Subtest: retained cutouts do not display measurements while their entire floor is open
+ok 149 - retained cutouts do not display measurements while their entire floor is open
+  ---
+  duration_ms: 0.275356
+  ...
+# Subtest: legacy facilities gain empty zones and current zones round trip without URLs or arbitrary metadata
+ok 150 - legacy facilities gain empty zones and current zones round trip without URLs or arbitrary metadata
+  ---
+  duration_ms: 4.193394
+  ...
+# Subtest: zones reject invalid IDs, polygons, class inventories, type, dwell, floor and image rules
+ok 151 - zones reject invalid IDs, polygons, class inventories, type, dwell, floor and image rules
+  ---
+  duration_ms: 1.996428
+  ...
+# Subtest: indoor zones require solid modeled floor space and a valid level
+ok 152 - indoor zones require solid modeled floor space and a valid level
+  ---
+  duration_ms: 1.157328
+  ...
+# Subtest: add-top-level keeps earlier floor and room elevations, base, footprint and source metadata
+ok 153 - add-top-level keeps earlier floor and room elevations, base, footprint and source metadata
+  ---
+  duration_ms: 1.850626
+  ...
+# Subtest: copy rooms upstairs preserves geometry and creates independent IDs, while refusing collisions and limits
+ok 154 - copy rooms upstairs preserves geometry and creates independent IDs, while refusing collisions and limits
+  ---
+  duration_ms: 1.19033
+  ...
+# Subtest: restricted rules and unexpected-class rules use explicit matching-camera image bounds
+ok 155 - restricted rules and unexpected-class rules use explicit matching-camera image bounds
+  ---
+  duration_ms: 0.43242
+  ...
+# Subtest: replacing a facility clears zones while appending retains them
+ok 156 - replacing a facility clears zones while appending retains them
+  ---
+  duration_ms: 6.111676
+  ...
+# Subtest: v3 protects independent slab openings while accepting earlier plans without advanced shapes
+ok 157 - v3 protects independent slab openings while accepting earlier plans without advanced shapes
+  ---
+  duration_ms: 1.136589
+  ...
+# Subtest: floor openings reject invalid floors, overlap, courtyard crossings and touching outer walls
+ok 158 - floor openings reject invalid floors, overlap, courtyard crossings and touching outer walls
+  ---
+  duration_ms: 1.732925
+  ...
+# Subtest: opening and camera IDs share a namespace and room copying does not duplicate slab openings
+ok 159 - opening and camera IDs share a namespace and room copying does not duplicate slab openings
+  ---
+  duration_ms: 1.382459
+  ...
+# Subtest: stairs persist bounded physical parameters and reject invalid floors or courtyard footprint
+ok 160 - stairs persist bounded physical parameters and reject invalid floors or courtyard footprint
+  ---
+  duration_ms: 2.891675
+  ...
+# Subtest: per-floor pathways stay within solid floor and reject concave shortcuts and missing levels
+ok 161 - per-floor pathways stay within solid floor and reject concave shortcuts and missing levels
+  ---
+  duration_ms: 2.150307
+  ...
+# Subtest: whole open levels omit their slabs and open only the corresponding ceiling below
+ok 162 - whole open levels omit their slabs and open only the corresponding ceiling below
+  ---
+  duration_ms: 0.369222
+  ...
+# Subtest: open level inventories reject duplicates, invalid levels and schema downgrades; paths need solid floors
+ok 163 - open level inventories reject duplicates, invalid levels and schema downgrades; paths need solid floors
+  ---
+  duration_ms: 0.739224
+  ...
+# Subtest: opening and pathway helpers retain exact converted imperial dimensions without centimetre snapping
+ok 164 - opening and pathway helpers retain exact converted imperial dimensions without centimetre snapping
+  ---
+  duration_ms: 0.43784
+  ...
+# Subtest: DORI centreline intervals use camera-axis depth and agree with projected steep-camera targets
+ok 165 - DORI centreline intervals use camera-axis depth and agree with projected steep-camera targets
+  ---
+  duration_ms: 2.143915
+  ...
+# Subtest: DORI density agrees with projected targets across supported optical bounds and tilt
+ok 166 - DORI density agrees with projected targets across supported optical bounds and tilt
+  ---
+  duration_ms: 2.441492
+  ...
+# Subtest: DORI rejects invalid optical drafts and map poses without NaN or infinity
+ok 167 - DORI rejects invalid optical drafts and map poses without NaN or infinity
+  ---
+  duration_ms: 0.566712
+  ...
+# Subtest: DORI threshold contact has no positive interval while a positive band and view limit are retained
+ok 168 - DORI threshold contact has no positive interval while a positive band and view limit are retained
+  ---
+  duration_ms: 0.194264
+  ...
+# Subtest: DORI contours are straight projected-density limits clipped to fans and wall shadows
+ok 169 - DORI contours are straight projected-density limits clipped to fans and wall shadows
+  ---
+  duration_ms: 1.205377
+  ...
+# Subtest: DORI contour clipping preserves concave splits, closed edges, small gaps and zero-measure tangencies
+ok 170 - DORI contour clipping preserves concave splits, closed edges, small gaps and zero-measure tangencies
+  ---
+  duration_ms: 0.370383
+  ...
+# Subtest: DORI contours obey both sensor dimensions even when a supplied fan extends beyond them
+ok 171 - DORI contours obey both sensor dimensions even when a supplied fan extends beyond them
+  ---
+  duration_ms: 0.227416
+  ...
+# Subtest: DORI retains rear contour fragments when the forward centreline band has zero length
+ok 172 - DORI retains rear contour fragments when the forward centreline band has zero length
+  ---
+  duration_ms: 1.508244
+  ...
+# Subtest: DORI contour fragments are invariant under winding, rotation and translated camera poses
+ok 173 - DORI contour fragments are invariant under winding, rotation and translated camera poses
+  ---
+  duration_ms: 0.540662
+  ...
+# Subtest: coverage metrics integrate shared cached fans by area, including overlap and blind polygons
+ok 174 - coverage metrics integrate shared cached fans by area, including overlap and blind polygons
+  ---
+  duration_ms: 30.227039
+  ...
+# Subtest: coverage metrics list enabled ground zones and the route; indoor zones are not estimated
+ok 175 - coverage metrics list enabled ground zones and the route; indoor zones are not estimated
+  ---
+  duration_ms: 5.061109
+  ...
+# Subtest: narrow valid zones retain their complete polygon area and blind geometry
+ok 176 - narrow valid zones retain their complete polygon area and blind geometry
+  ---
+  duration_ms: 4.382828
+  ...
+# Subtest: valid diagonal areas with no old grid samples are estimated from their polygon area
+ok 177 - valid diagonal areas with no old grid samples are estimated from their polygon area
+  ---
+  duration_ms: 0.442309
+  ...
+# Subtest: installer sheet is offline, escaped, CSP-restricted HTML with an inline SVG plan and closing limits
+ok 178 - installer sheet is offline, escaped, CSP-restricted HTML with an inline SVG plan and closing limits
+  ---
+  duration_ms: 16.59535
+  ...
+# Subtest: installer density intervals retain the near limit and positive steep-camera detail in both units
+ok 179 - installer density intervals retain the near limit and positive steep-camera detail in both units
+  ---
+  duration_ms: 1.732194
+  ...
+# Subtest: a seven-metre origin correction preserves rotated rooms touching exterior walls
+ok 180 - a seven-metre origin correction preserves rotated rooms touching exterior walls
+  ---
+  duration_ms: 3.989291
+  ...
+# Subtest: rotated boundary partitions survive longitude and latitude translations across supported latitudes
+ok 181 - rotated boundary partitions survive longitude and latitude translations across supported latitudes
+  ---
+  duration_ms: 16.219255
+  ...
+# Subtest: all plan geometry and metadata survive one affine change of grid
+ok 182 - all plan geometry and metadata survive one affine change of grid
+  ---
+  duration_ms: 4.826079
+  ...
+# Subtest: no-op origins retain every coordinate and declared dimension exactly
+ok 183 - no-op origins retain every coordinate and declared dimension exactly
+  ---
+  duration_ms: 2.192015
+  ...
+# Subtest: repeated latitude changes and return trips preserve validated topology and geographic positions
+ok 184 - repeated latitude changes and return trips preserve validated topology and geographic positions
+  ---
+  duration_ms: 4.579927
+  ...
+# Subtest: translation-only changes cannot shrink minimum aperture widths through endpoint cancellation
+ok 185 - translation-only changes cannot shrink minimum aperture widths through endpoint cancellation
+  ---
+  duration_ms: 2.514229
+  ...
+# Subtest: invalid and far origins reject without mutating the recoverable plan
+ok 186 - invalid and far origins reject without mutating the recoverable plan
+  ---
+  duration_ms: 2.625096
+  ...
+# Subtest: both hallway orientations leave the exact strip clear and save valid rooms on a rotated floor
+ok 187 - both hallway orientations leave the exact strip clear and save valid rooms on a rotated floor
+  ---
+  duration_ms: 10.519551
+  ...
+# Subtest: concave shells trim and separate disconnected parts rather than bridge the gap
+ok 188 - concave shells trim and separate disconnected parts rather than bridge the gap
+  ---
+  duration_ms: 0.676307
+  ...
+# Subtest: courtyards, floor-specific reservations and both stair landings stay clear
+ok 189 - courtyards, floor-specific reservations and both stair landings stay clear
+  ---
+  duration_ms: 12.03534
+  ...
+# Subtest: a room cannot silently enclose an opening; a kept group also reserves its space
+ok 190 - a room cannot silently enclose an opening; a kept group also reserves its space
+  ---
+  duration_ms: 1.404139
+  ...
+# Subtest: empty/fully open floors, small fragments, hall width and facility capacity are explicit
+ok 191 - empty/fully open floors, small fragments, hall width and facility capacity are explicit
+  ---
+  duration_ms: 1.657435
+  ...
+# Subtest: magnet aligns to existing coordinates independently and grid can be disabled
+ok 192 - magnet aligns to existing coordinates independently and grid can be disabled
+  ---
+  duration_ms: 0.238717
+  ...
+# Subtest: two landmarks scale and rotate a tracing reference without distorting it
+ok 193 - two landmarks scale and rotate a tracing reference without distorting it
+  ---
+  duration_ms: 0.253585
+  ...
+# Subtest: image headers are inspected before a reference goes to the browser decoder
+ok 194 - image headers are inspected before a reference goes to the browser decoder
+  ---
+  duration_ms: 0.227687
+  ...
+# Subtest: split and slide on a rotated floor preserve both footprints together, wall heights, IDs and unaffected rooms
+ok 195 - split and slide on a rotated floor preserve both footprints together, wall heights, IDs and unaffected rooms
+  ---
+  duration_ms: 2.752034
+  ...
+# Subtest: only adjoining outlines can merge; concave unions keep their shape, blocked floors and enclosed voids fail visibly
+ok 196 - only adjoining outlines can merge; concave unions keep their shape, blocked floors and enclosed voids fail visibly
+  ---
+  duration_ms: 3.923919
+  ...
+# Subtest: arclength coverage does not mistake regularly spaced narrow views for a fully visible route
+ok 197 - arclength coverage does not mistake regularly spaced narrow views for a fully visible route
+  ---
+  duration_ms: 5.518145
+  ...
+# Subtest: short route views between sample positions retain their positive length
+ok 198 - short route views between sample positions retain their positive length
+  ---
+  duration_ms: 0.461875
+  ...
+# Subtest: a single visible endpoint has zero visible arclength
+ok 199 - a single visible endpoint has zero visible arclength
+  ---
+  duration_ms: 0.271599
+  ...
+# Subtest: distinct camera IDs get one overlap vote after unioning all of their intervals
+ok 200 - distinct camera IDs get one overlap vote after unioning all of their intervals
+  ---
+  duration_ms: 0.217938
+  ...
+# Subtest: concave boundaries give separate interior intervals and closed collinear lengths
+ok 201 - concave boundaries give separate interior intervals and closed collinear lengths
+  ---
+  duration_ms: 0.178845
+  ...
+# Subtest: vertex tangencies have zero measure and shared crossing vertices keep parity
+ok 202 - vertex tangencies have zero measure and shared crossing vertices keep parity
+  ---
+  duration_ms: 0.113212
+  ...
+# Subtest: fully collapsed rings do not turn zero-area traces into coverage
+ok 203 - fully collapsed rings do not turn zero-area traces into coverage
+  ---
+  duration_ms: 0.476673
+  ...
+# Subtest: blind stretches continue across route vertices and zero-length segments
+ok 204 - blind stretches continue across route vertices and zero-length segments
+  ---
+  duration_ms: 0.174677
+  ...
+# Subtest: backtracking counts each passage and preserves the blind stretch around a turn
+ok 205 - backtracking counts each passage and preserves the blind stretch around a turn
+  ---
+  duration_ms: 0.670485
+  ...
+# Subtest: rotation, translation, route subdivision and ring winding preserve arclength
+ok 206 - rotation, translation, route subdivision and ring winding preserve arclength
+  ---
+  duration_ms: 0.459681
+  ...
+# Subtest: tiny nonzero routes and translated positive gaps above floating noise are retained
+ok 207 - tiny nonzero routes and translated positive gaps above floating noise are retained
+  ---
+  duration_ms: 0.262953
+  ...
+# Subtest: zero-length routes remain absent and an empty scene is wholly blind
+ok 208 - zero-length routes remain absent and an empty scene is wholly blind
+  ---
+  duration_ms: 0.12285
+  ...
+# Subtest: all 199 route segments and 500 camera IDs are processed without mutating a maximum-size plan
+ok 209 - all 199 route segments and 500 camera IDs are processed without mutating a maximum-size plan
+  ---
+  duration_ms: 489.19684
+  ...
+# Subtest: queued facility edits save the latest complete collection under a shared lock
+ok 210 - queued facility edits save the latest complete collection under a shared lock
+  ---
+  duration_ms: 4.717916
+  ...
+# Subtest: concurrent tabs cannot overwrite a shared baseline and either choice preserves the other version
+ok 211 - concurrent tabs cannot overwrite a shared baseline and either choice preserves the other version
+  ---
+  duration_ms: 2.682424
+  ...
+# Subtest: corrupt collection recovery preserves exact original bytes and corrupt legacy stays untouched
+ok 212 - corrupt collection recovery preserves exact original bytes and corrupt legacy stays untouched
+  ---
+  duration_ms: 0.577702
+  ...
+# Subtest: a delayed choice refuses changed remote data, local edits and new uncommitted previews
+ok 213 - a delayed choice refuses changed remote data, local edits and new uncommitted previews
+  ---
+  duration_ms: 1.058903
+  ...
+# Subtest: recovery refuses full backup slots and failed backups before replacing facilities
+ok 214 - recovery refuses full backup slots and failed backups before replacing facilities
+  ---
+  duration_ms: 0.958415
+  ...
+# Subtest: saved copies require downloading exact bytes before locked removal
+ok 215 - saved copies require downloading exact bytes before locked removal
+  ---
+  duration_ms: 0.624309
+  ...
+# Subtest: deleted saves can be explicitly restored or restarted without dropping the current collection
+ok 216 - deleted saves can be explicitly restored or restarted without dropping the current collection
+  ---
+  duration_ms: 0.620862
+  ...
+# Subtest: unsupported locking and storage write failures keep facilities in memory and allow retry
+ok 217 - unsupported locking and storage write failures keep facilities in memory and allow retry
+  ---
+  duration_ms: 0.382867
+  ...
+# Subtest: downloaded conflict copies restore validated facilities with the normal importer
+ok 218 - downloaded conflict copies restore validated facilities with the normal importer
+  ---
+  duration_ms: 0.48039
+  ...
+# Subtest: large conflict copies download original importable bytes rather than an oversized escaped envelope
+ok 219 - large conflict copies download original importable bytes rather than an oversized escaped envelope
+  ---
+  duration_ms: 218.820718
+  ...
+# Subtest: address search validates queries, bounds, and remote labels as text
+ok 220 - address search validates queries, bounds, and remote labels as text
+  ---
+  duration_ms: 1.307659
+  ...
+# Subtest: submitted address requests omit credentials, cache only in memory, and rate-limit
+ok 221 - submitted address requests omit credentials, cache only in memory, and rate-limit
+  ---
+  duration_ms: 17.849488
+  ...
+# Subtest: concurrent and aborted searches cannot be cached as successes
+ok 222 - concurrent and aborted searches cannot be cached as successes
+  ---
+  duration_ms: 1.090162
+  ...
+# Subtest: bounded readers reject oversized, empty, malformed and rate-limited bodies
+ok 223 - bounded readers reject oversized, empty, malformed and rate-limited bodies
+  ---
+  duration_ms: 1.387779
+  ...
+# Subtest: complete relation outers stitch reversed segments and preserve source on export
+ok 224 - complete relation outers stitch reversed segments and preserve source on export
+  ---
+  duration_ms: 2.376141
+  ...
+# Subtest: disjoint outers split; invalid holes/nesting are excluded and independent parts retain their role
+ok 225 - disjoint outers split; invalid holes/nesting are excluded and independent parts retain their role
+  ---
+  duration_ms: 1.884249
+  ...
+# Subtest: recorded licensed exterior extracts import; the real courtyard stays excluded
+ok 226 - recorded licensed exterior extracts import; the real courtyard stays excluded
+  ---
+  duration_ms: 2.804983
+  ...
+# Subtest: pinned extract bytes match the source manifest
+ok 227 - pinned extract bytes match the source manifest
+  ---
+  duration_ms: 0.68344
+  ...
+# Subtest: retraced edges and nonconsecutive duplicate vertices cannot invent a simple shell
+ok 228 - retraced edges and nonconsecutive duplicate vertices cannot invent a simple shell
+  ---
+  duration_ms: 0.221284
+  ...
+# Subtest: feet entry converts exact physical geometry without unit-toggle mutation
+ok 229 - feet entry converts exact physical geometry without unit-toggle mutation
+  ---
+  duration_ms: 0.798164
+  ...
+# Subtest: resizing and moving preserve courtyard relation and immutable original
+ok 230 - resizing and moving preserve courtyard relation and immutable original
+  ---
+  duration_ms: 0.566701
+  ...
+# Subtest: individual edge length updates its end and maintains ring closure
+ok 231 - individual edge length updates its end and maintains ring closure
+  ---
+  duration_ms: 0.282218
+  ...
+# Subtest: rotation turns every ring counter-clockwise about the bounds center and rejects non-finite input
+ok 232 - rotation turns every ring counter-clockwise about the bounds center and rejects non-finite input
+  ---
+  duration_ms: 0.240049
+  ...
+# Subtest: feet entry converts only changed numbers, stores 0.1 mm and words messages in the active unit
+ok 233 - feet entry converts only changed numbers, stores 0.1 mm and words messages in the active unit
+  ---
+  duration_ms: 0.449622
+  ...
+# Subtest: suggestions leave space near existing buildings, including beside site limits
+ok 234 - suggestions leave space near existing buildings, including beside site limits
+  ---
+  duration_ms: 2.612192
+  ...
+# Subtest: repeated building names stay unique within the plan name limit
+ok 235 - repeated building names stay unique within the plan name limit
+  ---
+  duration_ms: 0.213209
+  ...
+# Subtest: default stair uses actual adjacent level rise and exact inch-to-metre reference values
+ok 236 - default stair uses actual adjacent level rise and exact inch-to-metre reference values
+  ---
+  duration_ms: 3.938686
+  ...
+# Subtest: stair reservation includes both landings and rotates around its center without changing area
+ok 237 - stair reservation includes both landings and rotates around its center without changing area
+  ---
+  duration_ms: 0.552354
+  ...
+# Subtest: solid tread geometry rises monotonically and arrives exactly at the next floor
+ok 238 - solid tread geometry rises monotonically and arrives exactly at the next floor
+  ---
+  duration_ms: 0.426158
+  ...
+# Subtest: dimension edits can represent existing stairs while visibly identifying reference departures
+ok 239 - dimension edits can represent existing stairs while visibly identifying reference departures
+  ---
+  duration_ms: 0.384359
+  ...
+# Subtest: validation rejects malformed dimensions and identical or nonexistent levels without arbitrary metadata
+ok 240 - validation rejects malformed dimensions and identical or nonexistent levels without arbitrary metadata
+  ---
+  duration_ms: 0.50172
+  ...
+# Subtest: single-level buildings cannot create an impossible upward stair and top-floor defaults use the floor below
+ok 241 - single-level buildings cannot create an impossible upward stair and top-floor defaults use the floor below
+  ---
+  duration_ms: 0.276378
+  ...
+# Subtest: short-rise existing layouts still produce increasing solid geometry
+ok 242 - short-rise existing layouts still produce increasing solid geometry
+  ---
+  duration_ms: 0.239288
+  ...
+# Subtest: default placement finds solid space in courtyard and concave U-shaped buildings
+ok 243 - default placement finds solid space in courtyard and concave U-shaped buildings
+  ---
+  duration_ms: 3.54523
+  ...
+# Subtest: default placement reports a bounded-search failure when the reservation cannot fit
+ok 244 - default placement reports a bounded-search failure when the reservation cannot fit
+  ---
+  duration_ms: 1.774213
+  ...
+# Subtest: turning and changing direction or destination keep the clicked landing fixed
+ok 245 - turning and changing direction or destination keep the clicked landing fixed
+  ---
+  duration_ms: 1.295506
+  ...
+# Subtest: a descending two-level reservation uses the full modeled rise and survives export without an implicit opening
+ok 246 - a descending two-level reservation uses the full modeled rise and survives export without an implicit opening
+  ---
+  duration_ms: 0.986667
+  ...
+# Subtest: placement excludes voids at either landing but permits an independently cut run and recovery from a bad position
+ok 247 - placement excludes voids at either landing but permits an independently cut run and recovery from a bad position
+  ---
+  duration_ms: 1.358675
+  ...
+# Subtest: suggesting a position searches beyond a cutout under the default landing
+ok 248 - suggesting a position searches beyond a cutout under the default landing
+  ---
+  duration_ms: 0.533149
+  ...
+# Subtest: all common footprints remain simple and dimensioned after rotation
+ok 249 - all common footprints remain simple and dimensioned after rotation
+  ---
+  duration_ms: 9.34916
+  ...
+# Subtest: bounded search does not accept blank, oversized or invalid coordinates
+ok 250 - bounded search does not accept blank, oversized or invalid coordinates
+  ---
+  duration_ms: 0.287688
+  ...
+# Subtest: height tags honor meter and foot units without guessing unparseable heights
+ok 251 - height tags honor meter and foot units without guessing unparseable heights
+  ---
+  duration_ms: 0.266008
+  ...
+# Subtest: OSM shells preserve provenance and distinguish tags from placeholder dimensions
+ok 252 - OSM shells preserve provenance and distinguish tags from placeholder dimensions
+  ---
+  duration_ms: 1.939232
+  ...
+# Subtest: relations never become solid courtyards, and invalid/duplicate/outside features are bounded
+ok 253 - relations never become solid courtyards, and invalid/duplicate/outside features are bounded
+  ---
+  duration_ms: 1.57504
+  ...
+# Subtest: raised and uncertain bases are not flattened into ground-level shells
+ok 254 - raised and uncertain bases are not flattened into ground-level shells
+  ---
+  duration_ms: 0.423874
+  ...
+# Subtest: network adapter caps response bytes and reports service failure
+ok 255 - network adapter caps response bytes and reports service failure
+  ---
+  duration_ms: 22.083428
+  ...
+# Subtest: replacement previews accept 98 drafts without retaining the old 3 buildings or cameras
+ok 256 - replacement previews accept 98 drafts without retaining the old 3 buildings or cameras
+  ---
+  duration_ms: 4.11112
+  ...
+# Subtest: an empty study and unavailable imagery flow cannot become measured acceptance
+ok 257 - an empty study and unavailable imagery flow cannot become measured acceptance
+  ---
+  duration_ms: 0.751707
+  ...
+# Subtest: five to eight distinct novices are required and sessions cannot be duplicated or fabricated for unavailable flows
+ok 258 - five to eight distinct novices are required and sessions cannot be duplicated or fabricated for unavailable flows
+  ---
+  duration_ms: 0.476302
+  ...
+# Subtest: failed and aided attempts stay in denominators and timing; height identification is required
+ok 259 - failed and aided attempts stay in denominators and timing; height identification is required
+  ---
+  duration_ms: 1.2441
+  ...
+# Subtest: unavailable third flow keeps comparison open and incomplete cohorts cannot be compared
+ok 260 - unavailable third flow keeps comparison open and incomplete cohorts cannot be compared
+  ---
+  duration_ms: 0.210494
+  ...
+# Subtest: low-wall hole and raised-wall recovery agree across area, route and rehearsal
+ok 261 - low-wall hole and raised-wall recovery agree across area, route and rehearsal
+  ---
+  duration_ms: 60.312163
+  ...
+# Subtest: hole interiors are excluded from route length while their closed boundaries remain visible
+ok 262 - hole interiors are excluded from route length while their closed boundaries remain visible
+  ---
+  duration_ms: 0.537496
+  ...
+# Subtest: disconnected pieces retain one distinct-camera overlap vote and preserve holes by area
+ok 263 - disconnected pieces retain one distinct-camera overlap vote and preserve holes by area
+  ---
+  duration_ms: 4.754183
+  ...
+# Subtest: any unknown enabled camera withholds coverage and handoff conclusions
+ok 264 - any unknown enabled camera withholds coverage and handoff conclusions
+  ---
+  duration_ms: 0.940421
+  ...
+# Subtest: disabled views remain successful empty after shared exhaustion and cached poses reuse geometry
+ok 265 - disabled views remain successful empty after shared exhaustion and cached poses reuse geometry
+  ---
+  duration_ms: 1.391636
+  ...
+# Subtest: Boolean wrapper restores caller precision on both success and failure
+ok 266 - Boolean wrapper restores caller precision on both success and failure
+  ---
+  duration_ms: 0.709649
+  ...
+# Subtest: nonfinite or out-of-range Boolean output is rejected as unavailable
+ok 267 - nonfinite or out-of-range Boolean output is rejected as unavailable
+  ---
+  duration_ms: 7.297647
+  ...
+# Subtest: direct visibility refuses a Boolean result inside the axis box but outside the horizontal range disk
+ok 268 - direct visibility refuses a Boolean result inside the axis box but outside the horizontal range disk
+  ---
+  duration_ms: 2.883941
+  ...
+# Subtest: prepared point queries preserve camera order, holes and disconnected tiny gaps
+ok 269 - prepared point queries preserve camera order, holes and disconnected tiny gaps
+  ---
+  duration_ms: 0.749804
+  ...
+# Subtest: mutable generated geometry cannot reuse stale prepared bounds across point or rehearsal calls
+ok 270 - mutable generated geometry cannot reuse stale prepared bounds across point or rehearsal calls
+  ---
+  duration_ms: 0.547345
+  ...
+# Subtest: a tiny positive triangle keeps its boundary without a distant visibility halo
+ok 271 - a tiny positive triangle keeps its boundary without a distant visibility halo
+  ---
+  duration_ms: 0.212598
+  ...
+# Subtest: a redundant zero-length edge cannot label arbitrary ground as visible
+ok 272 - a redundant zero-length edge cannot label arbitrary ground as visible
+  ---
+  duration_ms: 0.099657
+  ...
+# Subtest: rehearsal prepares shared and distinct camera shapes once without reducing50500camera observations
+ok 273 - rehearsal prepares shared and distinct camera shapes once without reducing50500camera observations
+  ---
+  duration_ms: 48.028268
+  ...
+# Subtest: map visibility retains every component and hole and withholds unavailable or dragged cameras
+ok 274 - map visibility retains every component and hole and withholds unavailable or dragged cameras
+  ---
+  duration_ms: 1.355168
+  ...
+# Subtest: 3D ground caps triangulate separate components without covering a hole or bridging a gap
+ok 275 - 3D ground caps triangulate separate components without covering a hole or bridging a gap
+  ---
+  duration_ms: 1.237848
+  ...
+# Subtest: density contours subtract hole interiors and retain disconnected components and closed hole edges
+ok 276 - density contours subtract hole interiors and retain disconnected components and closed hole edges
+  ---
+  duration_ms: 1.406224
+  ...
+# Subtest: rearward density contours are independent of forward-only centreline table reach
+ok 277 - rearward density contours are independent of forward-only centreline table reach
+  ---
+  duration_ms: 0.265787
+  ...
+# Subtest: installer uses supplied full visibility only and explicitly withholds missing or partial geometry
+ok 278 - installer uses supplied full visibility only and explicitly withholds missing or partial geometry
+  ---
+  duration_ms: 17.911605
+  ...
+# Subtest: installer handles an accepted aggregate above 150,000 vertices without argument overflow
+ok 279 - installer handles an accepted aggregate above 150,000 vertices without argument overflow
+  ---
+  duration_ms: 185.399678
+  ...
+# Subtest: visibility task accepts one complete reply, freezes it and binds its exact plan source
+ok 280 - visibility task accepts one complete reply, freezes it and binds its exact plan source
+  ---
+  duration_ms: 3.148275
+  ...
+# Subtest: reply identity, cancellation and changed-plan successors close every queued old callback
+ok 281 - reply identity, cancellation and changed-plan successors close every queued old callback
+  ---
+  duration_ms: 0.236032
+  ...
+# Subtest: timer and monotonic deadline both refuse late geometry without binding it
+ok 282 - timer and monotonic deadline both refuse late geometry without binding it
+  ---
+  duration_ms: 0.156343
+  ...
+# Subtest: validation time counts against the monotonic acceptance deadline
+ok 283 - validation time counts against the monotonic acceptance deadline
+  ---
+  duration_ms: 0.195115
+  ...
+# Subtest: partial geometry is a ready bound snapshot with explicit unknown camera, never an empty successful view
+ok 284 - partial geometry is a ready bound snapshot with explicit unknown camera, never an empty successful view
+  ---
+  duration_ms: 0.12235
+  ...
+# Subtest: malformed geometry, stale IDs, nonfinite coordinates and null success cannot cross the visibility reply gate
+ok 285 - malformed geometry, stale IDs, nonfinite coordinates and null success cannot cross the visibility reply gate
+  ---
+  duration_ms: 0.484307
+  ...
+# Subtest: disabled views stay successful empty and unknown views cannot fabricate numeric success
+ok 286 - disabled views stay successful empty and unknown views cannot fabricate numeric success
+  ---
+  duration_ms: 0.150472
+  ...
+# Subtest: camera-count and per-camera wire budgets reject oversized results before walking coordinates
+ok 287 - camera-count and per-camera wire budgets reject oversized results before walking coordinates
+  ---
+  duration_ms: 1.614163
+  ...
+# Subtest: shared cached geometry can serve500 distinct camera IDs without multiplying geometry work or losing binding
+ok 288 - shared cached geometry can serve500 distinct camera IDs without multiplying geometry work or losing binding
+  ---
+  duration_ms: 1.09438
+  ...
+# Subtest: worker failures, malformed messages and clone failures remain recoverable without orphan deadlines
+ok 289 - worker failures, malformed messages and clone failures remain recoverable without orphan deadlines
+  ---
+  duration_ms: 0.374692
+  ...
+# Subtest: actual visibility worker returns source-ordered generated geometry through the validated protocol
+ok 290 - actual visibility worker returns source-ordered generated geometry through the validated protocol
+  ---
+  duration_ms: 21.814665
+  ...
+# Subtest: inverse image rays round-trip through all permitted view extremes
+ok 291 - inverse image rays round-trip through all permitted view extremes
+  ---
+  duration_ms: 4.102583
+  ...
+# Subtest: an oblique image edge uses camera-axis depth instead of a fixed ground azimuth
+ok 292 - an oblique image edge uses camera-axis depth instead of a fixed ground azimuth
+  ---
+  duration_ms: 1.994315
+  ...
+# Subtest: a view crossing nadir includes ground below and behind the mount
+ok 293 - a view crossing nadir includes ground below and behind the mount
+  ---
+  duration_ms: 0.687497
+  ...
+# Subtest: closed ideal image edges survive tan45 rounding without a fixed spatial buffer
+ok 294 - closed ideal image edges survive tan45 rounding without a fixed spatial buffer
+  ---
+  duration_ms: 0.104356
+  ...
+# Subtest: bounded frustum corners and their trapezoid area agree with image rays
+ok 295 - bounded frustum corners and their trapezoid area agree with image rays
+  ---
+  duration_ms: 0.346549
+  ...
+# Subtest: horizontal range is an inscribed circle with an explicit radial chord bound
+ok 296 - horizontal range is an inscribed circle with an explicit radial chord bound
+  ---
+  duration_ms: 2.075537
+  ...
+# Subtest: a low wall casts a finite hole and distant ground becomes visible again
+ok 297 - a low wall casts a finite hole and distant ground becomes visible again
+  ---
+  duration_ms: 15.395563
+  ...
+# Subtest: a raised wall leaves ground before its projected base visible
+ok 298 - a raised wall leaves ground before its projected base visible
+  ---
+  duration_ms: 23.720243
+  ...
+# Subtest: walls entirely above mount height cast no downward ground shadow
+ok 299 - walls entirely above mount height cast no downward ground shadow
+  ---
+  duration_ms: 1.820249
+  ...
+# Subtest: multiple low walls retain separate islands and camera rotation/translation preserves area
+ok 300 - multiple low walls retain separate islands and camera rotation/translation preserves area
+  ---
+  duration_ms: 33.130347
+  ...
+# Subtest: mount clearance remains an explicit policy and can be disabled for geometry checks
+ok 301 - mount clearance remains an explicit policy and can be disabled for geometry checks
+  ---
+  duration_ms: 1.985369
+  ...
+# Subtest: resource limits and clipping failures remain unavailable rather than successful empty output
+ok 302 - resource limits and clipping failures remain unavailable rather than successful empty output
+  ---
+  duration_ms: 0.831497
+  ...
+# Subtest: outside wall spans fold collinear vertices across the ring seam; courtyards, rotated walls and empty interiors work
+ok 303 - outside wall spans fold collinear vertices across the ring seam; courtyards, rotated walls and empty interiors work
+  ---
+  duration_ms: 2.977476
+  ...
+# Subtest: placement finds a free span; moving and resizing stop at neighbors and corners, keeping the opposite end fixed
+ok 304 - placement finds a free span; moving and resizing stop at neighbors and corners, keeping the opposite end fixed
+  ---
+  duration_ms: 1.994866
+  ...
+# Subtest: window geometry respects sill, head and pane direction; glazing does not enlarge camera estimates
+ok 305 - window geometry respects sill, head and pane direction; glazing does not enlarge camera estimates
+  ---
+  duration_ms: 1.200919
+  ...
+# Subtest: v5 round trips windows, imports older formats, rejects downgrades, and carries floor/origin edits
+ok 306 - v5 round trips windows, imports older formats, rejects downgrades, and carries floor/origin edits
+  ---
+  duration_ms: 4.168046
+  ...
+# Subtest: ordinary validated camera plans retain a ten-centimetre blind strip and a second-camera overlap strip
+ok 307 - ordinary validated camera plans retain a ten-centimetre blind strip and a second-camera overlap strip
+  ---
+  duration_ms: 42.123168
+  ...
+# Subtest: forty ordinary narrow cameras do not alias into a fully covered valid one-square-metre zone
+ok 308 - forty ordinary narrow cameras do not alias into a fully covered valid one-square-metre zone
+  ---
+  duration_ms: 148.968779
+  ...
+# Subtest: 500 narrow camera footprints retain the small positive coverage of a valid one-square-metre zone
+ok 309 - 500 narrow camera footprints retain the small positive coverage of a valid one-square-metre zone
+  ---
+  duration_ms: 587.766873
+  ...
+# Subtest: camera fragments union before voting and triple overlaps contribute area only once
+ok 310 - camera fragments union before voting and triple overlaps contribute area only once
+  ---
+  duration_ms: 5.730582
+  ...
+# Subtest: blind geometry preserves a covered island as a hole and separated gaps as distinct polygons
+ok 311 - blind geometry preserves a covered island as a hole and separated gaps as distinct polygons
+  ---
+  duration_ms: 1.514888
+  ...
+# Subtest: concave and diagonal zone boundaries clip blind polygons to the actual zone
+ok 312 - concave and diagonal zone boundaries clip blind polygons to the actual zone
+  ---
+  duration_ms: 0.713557
+  ...
+# Subtest: touching, collinear and wall-collapsed fans have zero area and do not invent coverage
+ok 313 - touching, collinear and wall-collapsed fans have zero area and do not invent coverage
+  ---
+  duration_ms: 1.135307
+  ...
+# Subtest: rotation, reversed winding and translations near facility limits preserve all measured areas
+ok 314 - rotation, reversed winding and translations near facility limits preserve all measured areas
+  ---
+  duration_ms: 7.37939
+  ...
+# Subtest: very thin diagonal zones retain supported positive area without requiring a grid centre
+ok 315 - very thin diagonal zones retain supported positive area without requiring a grid centre
+  ---
+  duration_ms: 1.213533
+  ...
+# Subtest: an independent axis-aligned arrangement oracle agrees across deterministic fragmented multi-camera scenes
+ok 316 - an independent axis-aligned arrangement oracle agrees across deterministic fragmented multi-camera scenes
+  ---
+  duration_ms: 41.658468
+  ...
+# Subtest: no cameras is a successful measured zero; invalid or failed geometry is unavailable with null fields
+ok 317 - no cameras is a successful measured zero; invalid or failed geometry is unavailable with null fields
+  ---
+  duration_ms: 1.681359
+  ...
+# Subtest: a failure after a successful partial clip discards the entire result
+ok 318 - a failure after a successful partial clip discards the entire result
+  ---
+  duration_ms: 0.508232
+  ...
+# Subtest: per-zone operation, input and post-call output limits fail closed and account for observed work
+ok 319 - per-zone operation, input and post-call output limits fail closed and account for observed work
+  ---
+  duration_ms: 0.644006
+  ...
+# Subtest: a shared plan budget prevents later zones from submitting work; exact footprint reuse preserves successful geometry
+ok 320 - a shared plan budget prevents later zones from submitting work; exact footprint reuse preserves successful geometry
+  ---
+  duration_ms: 4.337303
+  ...
+# Subtest: 500 spatially separated cameras and 500 zones complete within shared work caps without mutating inputs
+ok 321 - 500 spatially separated cameras and 500 zones complete within shared work caps without mutating inputs
+  ---
+  duration_ms: 2426.264461
+  ...
+# Subtest: 500 coincident cameras and 500 identical zones calculate geometry once with distinct-camera overlap
+ok 322 - 500 coincident cameras and 500 identical zones calculate geometry once with distinct-camera overlap
+  ---
+  duration_ms: 307.379662
+  ...
+# Subtest: sample and empty facility round trip through the bounded public contract
+ok 323 - sample and empty facility round trip through the bounded public contract
+  ---
+  duration_ms: 4.069141
+  ...
+# Subtest: coordinate projection preserves local-meter geometry at Kansas latitude
+ok 324 - coordinate projection preserves local-meter geometry at Kansas latitude
+  ---
+  duration_ms: 0.232025
+  ...
+# Subtest: polygons reject self crossings, degenerate areas and unclosed rings
+ok 325 - polygons reject self crossings, degenerate areas and unclosed rings
+  ---
+  duration_ms: 0.116228
+  ...
+# Subtest: ground plane coverage respects direction, near limit, far limit and enabled state
+ok 326 - ground plane coverage respects direction, near limit, far limit and enabled state
+  ---
+  duration_ms: 0.247794
+  ...
+# Subtest: opaque walls block lines of sight while a low obstacle can be seen over
+ok 327 - opaque walls block lines of sight while a low obstacle can be seen over
+  ---
+  duration_ms: 0.527187
+  ...
+# Subtest: narrow downward views cannot claim ground coverage before their near distance
+ok 328 - narrow downward views cannot claim ground coverage before their near distance
+  ---
+  duration_ms: 0.105137
+  ...
+# Subtest: route interpolation follows distance, including repeated points
+ok 329 - route interpolation follows distance, including repeated points
+  ---
+  duration_ms: 0.191569
+  ...
+# Subtest: rehearsal returns explicit gaps instead of inferred observations
+ok 330 - rehearsal returns explicit gaps instead of inferred observations
+  ---
+  duration_ms: 0.381955
+  ...
+# Subtest: bad imports reject non-finite values, duplicates, invalid room floor and oversize JSON
+ok 331 - bad imports reject non-finite values, duplicates, invalid room floor and oversize JSON
+  ---
+  duration_ms: 2.345683
+  ...
+# Subtest: import only retains declared geometry and text fields, never media URLs or HTML properties
+ok 332 - import only retains declared geometry and text fields, never media URLs or HTML properties
+  ---
+  duration_ms: 0.894726
+  ...
+# Subtest: 100-camera metadata inventory remains valid without making a video throughput claim
+ok 333 - 100-camera metadata inventory remains valid without making a video throughput claim
+  ---
+  duration_ms: 5.356602
+  ...
+# Subtest: room must stay within its building footprint and building deletion cannot leave orphan rooms
+ok 334 - room must stay within its building footprint and building deletion cannot leave orphan rooms
+  ---
+  duration_ms: 0.396192
+  ...
+# Subtest: rooms cannot bridge outside a concave building even when every vertex is inside
+ok 335 - rooms cannot bridge outside a concave building even when every vertex is inside
+  ---
+  duration_ms: 0.346669
+  ...
+# Subtest: a facade camera a few centimetres inside its building sees out like one just outside; other walls still occlude
+ok 336 - a facade camera a few centimetres inside its building sees out like one just outside; other walls still occlude
+  ---
+  duration_ms: 0.753121
+  ...
+# Subtest: drawn vertices up to 30 cm outside solid floor snap to the wall; larger misses name the vertex or edge
+ok 337 - drawn vertices up to 30 cm outside solid floor snap to the wall; larger misses name the vertex or edge
+  ---
+  duration_ms: 6.026587
+  ...
+# Subtest: moving or rotating a building carries its rooms, floor items, indoor zones, labels and wall cameras
+ok 338 - moving or rotating a building carries its rooms, floor items, indoor zones, labels and wall cameras
+  ---
+  duration_ms: 2.189801
+  ...
+# Subtest: resizes keep contents in place with a named error, and level cuts list what still uses them
+ok 339 - resizes keep contents in place with a named error, and level cuts list what still uses them
+  ---
+  duration_ms: 1.281209
+  ...
+# Subtest: re-centring the site origin can keep every item at its map position and dimensions
+ok 340 - re-centring the site origin can keep every item at its map position and dimensions
+  ---
+  duration_ms: 1.045458
+  ...
+# Subtest: a rectangular room is placed inside solid floor, even in concave buildings, avoiding existing rooms
+ok 341 - a rectangular room is placed inside solid floor, even in concave buildings, avoiding existing rooms
+  ---
+  duration_ms: 14.406441
+  ...
+# Subtest: indoor labels keep a building level, ground labels stay valid, and level cuts name them
+ok 342 - indoor labels keep a building level, ground labels stay valid, and level cuts name them
+  ---
+  duration_ms: 2.567539
+  ...
+# Subtest: rehearsal time follows route distance at walking pace and samples at most every metre
+ok 343 - rehearsal time follows route distance at walking pace and samples at most every metre
+  ---
+  duration_ms: 1.049856
+  ...
+# Subtest: optional camera resolution and channel labels round trip, strip unknown fields and reject bad values
+ok 344 - optional camera resolution and channel labels round trip, strip unknown fields and reject bad values
+  ---
+  duration_ms: 1.771638
+  ...
+# Subtest: goal shortcuts retain the existing task identities and guarded destinations
+ok 345 - goal shortcuts retain the existing task identities and guarded destinations
+  ---
+  duration_ms: 0.972361
+  ...
+# Subtest: each workspace has its own next-step guidance without unrelated camera starts
+ok 346 - each workspace has its own next-step guidance without unrelated camera starts
+  ---
+  duration_ms: 0.371886
+  ...
+# Subtest: image reads and writes share an open connection and resolve only at commit
+ok 347 - image reads and writes share an open connection and resolve only at commit
+  ---
+  duration_ms: 0.985746
+  ...
+# Subtest: a stalled open fails on deadline without accumulating uncancellable requests
+ok 348 - a stalled open fails on deadline without accumulating uncancellable requests
+  ---
+  duration_ms: 29.683712
+  ...
+# Subtest: blocked opens fail promptly, close late handles and do not block future recovery
+ok 349 - blocked opens fail promptly, close late handles and do not block future recovery
+  ---
+  duration_ms: 0.28303
+  ...
+# Subtest: an abandoned open cannot create its schema after the deadline
+ok 350 - an abandoned open cannot create its schema after the deadline
+  ---
+  duration_ms: 0.68879
+  ...
+# Subtest: transaction deadlines abort work and ignore a late completion, even after commit
+ok 351 - transaction deadlines abort work and ignore a late completion, even after commit
+  ---
+  duration_ms: 0.420577
+  ...
+# Subtest: opening and transaction work share one operation deadline
+ok 352 - opening and transaction work share one operation deadline
+  ---
+  duration_ms: 0.228357
+  ...
+# Subtest: version changes and forced connection closure release cached handles for retry
+ok 353 - version changes and forced connection closure release cached handles for retry
+  ---
+  duration_ms: 0.269535
+  ...
+# Subtest: open, transaction and work failures release operation state for another explicit attempt
+ok 354 - open, transaction and work failures release operation state for another explicit attempt
+  ---
+  duration_ms: 0.279693
+  ...
+# Subtest: image diagnostics: black and white regions retain bounded histogram totals and clipping
+ok 355 - image diagnostics: black and white regions retain bounded histogram totals and clipping
+  ---
+  duration_ms: 2.233032
+  ...
+# Subtest: image diagnostics: explicit ROI never includes pixels outside its bounds
+ok 356 - image diagnostics: explicit ROI never includes pixels outside its bounds
+  ---
+  duration_ms: 0.443951
+  ...
+# Subtest: image diagnostics: region bounds clamp invalid input and leave nonempty region
+ok 357 - image diagnostics: region bounds clamp invalid input and leave nonempty region
+  ---
+  duration_ms: 0.785771
+  ...
+# Subtest: image diagnostics: frame comparison uses exact matching dimensions and threshold
+ok 358 - image diagnostics: frame comparison uses exact matching dimensions and threshold
+  ---
+  duration_ms: 0.356578
+  ...
+# Subtest: image diagnostics: pixel ruler reports image pixels, not fake metres
+ok 359 - image diagnostics: pixel ruler reports image pixels, not fake metres
+  ---
+  duration_ms: 0.128651
+  ...
+# Subtest: image diagnostics: RGBA alpha is composited over black for luma and frame differences
+ok 360 - image diagnostics: RGBA alpha is composited over black for luma and frame differences
+  ---
+  duration_ms: 0.219651
+  ...
+# Subtest: image diagnostics: one- and two-pixel ROI dimensions have no Sobel support
+ok 361 - image diagnostics: one- and two-pixel ROI dimensions have no Sobel support
+  ---
+  duration_ms: 0.565309
+  ...
+# Subtest: image diagnostics: enumerating all 512 binary patches proves the exact reachable Sobel L2 maximum
+ok 362 - image diagnostics: enumerating all 512 binary patches proves the exact reachable Sobel L2 maximum
+  ---
+  duration_ms: 9.464075
+  ...
+# Subtest: image diagnostics: Sobel is invariant under quarter rotation, transpose and luma complement
+ok 363 - image diagnostics: Sobel is invariant under quarter rotation, transpose and luma complement
+  ---
+  duration_ms: 0.643034
+  ...
+# Subtest: image diagnostics: reported Sobel is the mean of magnitudes, not RMS or an edge-pixel percentage
+ok 364 - image diagnostics: reported Sobel is the mean of magnitudes, not RMS or an edge-pixel percentage
+  ---
+  duration_ms: 0.348433
+  ...
+# Subtest: image diagnostics: Sobel black-alpha composition matches the equivalent opaque grayscale raster
+ok 365 - image diagnostics: Sobel black-alpha composition matches the equivalent opaque grayscale raster
+  ---
+  duration_ms: 0.243045
+  ...
+# Subtest: image diagnostics: Sobel neighbours stay inside the selected ROI and match an explicit crop
+ok 366 - image diagnostics: Sobel neighbours stay inside the selected ROI and match an explicit crop
+  ---
+  duration_ms: 0.399578
+  ...
+# Subtest: recounts only held-out frames, enforces one-to-one matching and strips private fields
+ok 367 - recounts only held-out frames, enforces one-to-one matching and strips private fields
+  ---
+  duration_ms: 6.705478
+  ...
+# Subtest: validates the exported payload hash as well as the counts in a newly sealed receipt
+ok 368 - validates the exported payload hash as well as the counts in a newly sealed receipt
+  ---
+  duration_ms: 2.047305
+  ...
+# Subtest: rejects unreviewed data, unsupported engines, repeated sources and oversized input
+ok 369 - rejects unreviewed data, unsupported engines, repeated sources and oversized input
+  ---
+  duration_ms: 1.371629
+  ...
+# Subtest: recording predictions keep their declared provenance and exclude irrelevant suggestions
+ok 370 - recording predictions keep their declared provenance and exclude irrelevant suggestions
+  ---
+  duration_ms: 0.950961
+  ...
+# Subtest: a receipt prompt contains only aggregate measurements; model text cannot supply facts or controls
+ok 371 - a receipt prompt contains only aggregate measurements; model text cannot supply facts or controls
+  ---
+  duration_ms: 18.93988
+  ...
+# Subtest: a stalled recorder session times out and a later explicit connection can succeed
+ok 372 - a stalled recorder session times out and a later explicit connection can succeed
+  ---
+  duration_ms: 39.008796
+  ...
+# Subtest: closing a recorder session preserves explicit cancellation
+ok 373 - closing a recorder session preserves explicit cancellation
+  ---
+  duration_ms: 0.485089
+  ...
+# Subtest: retained segment uses existing review parser and exact source matching
+ok 374 - retained segment uses existing review parser and exact source matching
+  ---
+  duration_ms: 5.309714
+  ...
+# Subtest: changed source, changed result and incomplete segment cannot open
+ok 375 - changed source, changed result and incomplete segment cannot open
+  ---
+  duration_ms: 1.903645
+  ...
+# Subtest: stop is explicit and API tokens stay out of URLs and bodies
+ok 376 - stop is explicit and API tokens stay out of URLs and bodies
+  ---
+  duration_ms: 0.330058
+  ...
+# Subtest: status and storage failures remain actionable
+ok 377 - status and storage failures remain actionable
+  ---
+  duration_ms: 0.332342
+  ...
+# Subtest: cancelled opening never replaces the current review
+ok 378 - cancelled opening never replaces the current review
+  ---
+  duration_ms: 0.190166
+  ...
+# Subtest: cancelling segment verification terminates its hashing worker
+ok 379 - cancelling segment verification terminates its hashing worker
+  ---
+  duration_ms: 2.238802
+  ...
+# Subtest: recorder codes are explained and unknown text is never echoed as an explanation
+ok 380 - recorder codes are explained and unknown text is never echoed as an explanation
+  ---
+  duration_ms: 0.394819
+  ...
+# Subtest: live setup uses validated, independent choices without changing the service reply
+ok 381 - live setup uses validated, independent choices without changing the service reply
+  ---
+  duration_ms: 1.753734
+  ...
+# Subtest: incomplete live setup is unavailable instead of reaching rendering or activation
+ok 382 - incomplete live setup is unavailable instead of reaching rendering or activation
+  ---
+  duration_ms: 0.551293
+  ...
+# Subtest: disabled, older and empty live catalogues stay unavailable without invented choices
+ok 383 - disabled, older and empty live catalogues stay unavailable without invented choices
+  ---
+  duration_ms: 0.157525
+  ...
+# Subtest: the tile labels actual execution and each CPU fallback reason
+ok 384 - the tile labels actual execution and each CPU fallback reason
+  ---
+  duration_ms: 0.223839
+  ...
+# Subtest: live counts, labels and box freshness describe only the analyzed frame
+ok 385 - live counts, labels and box freshness describe only the analyzed frame
+  ---
+  duration_ms: 0.317304
+  ...
+# Subtest: a live observation becomes a pending, recording-free queue entry that survives storage validation
+ok 386 - a live observation becomes a pending, recording-free queue entry that survives storage validation
+  ---
+  duration_ms: 14.185928
+  ...
+# Subtest: the detector starts explicitly, sends one frame at a time and keeps observations with their still
+ok 387 - the detector starts explicitly, sends one frame at a time and keeps observations with their still
+  ---
+  duration_ms: 10.374399
+  ...
+# Subtest: start and frame failures stop the detector with the service message
+ok 388 - start and frame failures stop the detector with the service message
+  ---
+  duration_ms: 2.914208
+  ...
+# Subtest: an expired start session exposes its recovery code and preserves unsent stills
+ok 389 - an expired start session exposes its recovery code and preserves unsent stills
+  ---
+  duration_ms: 0.645409
+  ...
+# Subtest: an expired frame session exposes its recovery code and preserves unsent stills
+ok 390 - an expired frame session exposes its recovery code and preserves unsent stills
+  ---
+  duration_ms: 2.498098
+  ...
+# Subtest: retained live observations keep their original session and stable completion ID after prepend
+ok 391 - retained live observations keep their original session and stable completion ID after prepend
+  ---
+  duration_ms: 3.428911
+  ...
+# Subtest: slow inference does not make already-stale capture boxes fresh
+ok 392 - slow inference does not make already-stale capture boxes fresh
+  ---
+  duration_ms: 3.410487
+  ...
+# Subtest: recognition results carry validated short-lived tracks
+ok 393 - recognition results carry validated short-lived tracks
+  ---
+  duration_ms: 2.920439
+  ...
+# Subtest: a restarted detector keeps the previous run’s unsent observations
+ok 394 - a restarted detector keeps the previous run’s unsent observations
+  ---
+  duration_ms: 0.634919
+  ...
+# Subtest: live AI bounds a stalled response headers
+ok 395 - live AI bounds a stalled response headers
+  ---
+  duration_ms: 20.978669
+  ...
+# Subtest: live AI bounds a stalled response body
+ok 396 - live AI bounds a stalled response body
+  ---
+  duration_ms: 21.46518
+  ...
+# Subtest: a stalled live AI start releases active state and keeps unsent observations
+ok 397 - a stalled live AI start releases active state and keeps unsent observations
+  ---
+  duration_ms: 21.791021
+  ...
+# Subtest: a stalled live AI frame releases active state and keeps unsent observations
+ok 398 - a stalled live AI frame releases active state and keeps unsent observations
+  ---
+  duration_ms: 22.529514
+  ...
+# Subtest: late startup from a cancelled run cannot replace a newer live AI session
+ok 399 - late startup from a cancelled run cannot replace a newer live AI session
+  ---
+  duration_ms: 0.72635
+  ...
+# Subtest: live results distinguish waiting, stale and fresh frames, including a zero clock
+ok 400 - live results distinguish waiting, stale and fresh frames, including a zero clock
+  ---
+  duration_ms: 0.156743
+  ...
+# Subtest: invalid frame replies stop only the accepted session and preserve earlier review atomically
+ok 401 - invalid frame replies stop only the accepted session and preserve earlier review atomically
+  ---
+  duration_ms: 5.353015
+  ...
+# Subtest: malformed startup replies cannot submit frames or interpolate untrusted session paths
+ok 402 - malformed startup replies cannot submit frames or interpolate untrusted session paths
+  ---
+  duration_ms: 0.438972
+  ...
+# Subtest: a cancelled startup reply cannot choose another camera session to stop
+ok 403 - a cancelled startup reply cannot choose another camera session to stop
+  ---
+  duration_ms: 0.224481
+  ...
+# Subtest: busy and rejected-frame counters publish even when the next reply stalls
+ok 404 - busy and rejected-frame counters publish even when the next reply stalls
+  ---
+  duration_ms: 0.907289
+  ...
+# Subtest: bounded live observations count unsent replacements but not already-sent copies
+ok 405 - bounded live observations count unsent replacements but not already-sent copies
+  ---
+  duration_ms: 0.944989
+  ...
+# Subtest: initial live observation bounds also account for discarded unsent input
+ok 406 - initial live observation bounds also account for discarded unsent input
+  ---
+  duration_ms: 0.180759
+  ...
+# Subtest: stopping an unused webcam keeps the source absent after network-only previews
+ok 407 - stopping an unused webcam keeps the source absent after network-only previews
+  ---
+  duration_ms: 3.057045
+  ...
+# Subtest: webcam is explicit, video-only, bounded and releases tracks on disconnect
+ok 408 - webcam is explicit, video-only, bounded and releases tracks on disconnect
+  ---
+  duration_ms: 0.250099
+  ...
+# Subtest: cancel while permission is pending stops a late stream and never opens it
+ok 409 - cancel while permission is pending stops a late stream and never opens it
+  ---
+  duration_ms: 0.154099
+  ...
+# Subtest: permission errors are actionable and reconnect recovers
+ok 410 - permission errors are actionable and reconnect recovers
+  ---
+  duration_ms: 0.326301
+  ...
+# Subtest: switching a webcam cancels superseded permission results
+ok 411 - switching a webcam cancels superseded permission results
+  ---
+  duration_ms: 0.110507
+  ...
+# Subtest: local bridge requires exact loopback origin and authenticates mutations
+ok 412 - local bridge requires exact loopback origin and authenticates mutations
+  ---
+  duration_ms: 0.451616
+  ...
+# Subtest: webcam failures never echo native error details
+ok 413 - webcam failures never echo native error details
+  ---
+  duration_ms: 0.113723
+  ...
+# Subtest: one, two and four visible feed limits always include the selected source
+ok 414 - one, two and four visible feed limits always include the selected source
+  ---
+  duration_ms: 0.185668
+  ...
+# Subtest: previews are delayed after 2 s, or after the next refresh for snapshot sources
+ok 415 - previews are delayed after 2 s, or after the next refresh for snapshot sources
+  ---
+  duration_ms: 0.312405
+  ...
+# Subtest: live replies keep independent displayed evidence and discard unused payload fields
+ok 416 - live replies keep independent displayed evidence and discard unused payload fields
+  ---
+  duration_ms: 1.597793
+  ...
+# Subtest: live session metadata is valid before it reaches the tile
+ok 417 - live session metadata is valid before it reaches the tile
+  ---
+  duration_ms: 2.334522
+  ...
+# Subtest: start choices and frame provenance remain bound to the accepted camera and run
+ok 418 - start choices and frame provenance remain bound to the accepted camera and run
+  ---
+  duration_ms: 0.422933
+  ...
+# Subtest: malformed or oversized live frames cannot become rendered detections
+ok 419 - malformed or oversized live frames cannot become rendered detections
+  ---
+  duration_ms: 0.759302
+  ...
+# Subtest: invalid observations reject the whole reply before review or still handoff
+ok 420 - invalid observations reject the whole reply before review or still handoff
+  ---
+  duration_ms: 0.526286
+  ...
+# Subtest: valid boundary rounding, idle timing and worker collection limits remain accepted
+ok 421 - valid boundary rounding, idle timing and worker collection limits remain accepted
+  ---
+  duration_ms: 1.839035
+  ...
+# Subtest: disconnected observations remain reviewable without becoming a camera preview
+ok 422 - disconnected observations remain reviewable without becoming a camera preview
+  ---
+  duration_ms: 2.052283
+  ...
+# Subtest: sent or dismissed disconnected snapshots release their still references
+ok 423 - sent or dismissed disconnected snapshots release their still references
+  ---
+  duration_ms: 2.079805
+  ...
+# Subtest: starting and live AI reserve review capacity before their first observation
+ok 424 - starting and live AI reserve review capacity before their first observation
+  ---
+  duration_ms: 0.327003
+  ...
+# Subtest: four review snapshots bound retained observations to eighty
+ok 425 - four review snapshots bound retained observations to eighty
+  ---
+  duration_ms: 0.269635
+  ...
+# Subtest: repeated empty terminal sources do not accumulate invisible snapshots
+ok 426 - repeated empty terminal sources do not accumulate invisible snapshots
+  ---
+  duration_ms: 7.002855
+  ...
+# Subtest: active reservations survive source removal until Stop releases them
+ok 427 - active reservations survive source removal until Stop releases them
+  ---
+  duration_ms: 1.207521
+  ...
+# Subtest: local service controls never connect from hosted origins
+ok 428 - local service controls never connect from hosted origins
+  ---
+  duration_ms: 0.681206
+  ...
+# Subtest: successful job opens existing parsed contract with exact source match
+ok 429 - successful job opens existing parsed contract with exact source match
+  ---
+  duration_ms: 23.02961
+  ...
+# Subtest: mismatched source and mixed bundles never open
+ok 430 - mismatched source and mixed bundles never open
+  ---
+  duration_ms: 2.420062
+  ...
+# Subtest: failed and cancelled jobs cannot open results
+ok 431 - failed and cancelled jobs cannot open results
+  ---
+  duration_ms: 0.5871
+  ...
+# Subtest: bounded reading checks declared and streaming size
+ok 432 - bounded reading checks declared and streaming size
+  ---
+  duration_ms: 0.809817
+  ...
+# Subtest: bounded reading cancels rejected downloads and releases the stream lock
+ok 433 - bounded reading cancels rejected downloads and releases the stream lock
+  ---
+  duration_ms: 1.140155
+  ...
+# Subtest: cancelling a pending bounded read stops it even when the fetcher ignores its signal
+ok 434 - cancelling a pending bounded read stops it even when the fetcher ignores its signal
+  ---
+  duration_ms: 0.476603
+  ...
+# Subtest: API keeps token in header, refuses redirects and surfaces actionable failure
+ok 435 - API keeps token in header, refuses redirects and surfaces actionable failure
+  ---
+  duration_ms: 0.626012
+  ...
+# Subtest: abandoned result opening cannot publish
+ok 436 - abandoned result opening cannot publish
+  ---
+  duration_ms: 0.258384
+  ...
+# Subtest: cancelling job verification terminates its hashing worker
+ok 437 - cancelling job verification terminates its hashing worker
+  ---
+  duration_ms: 1.785113
+  ...
+# Subtest: recording backend labels distinguish preference, verified execution and CPU fallback
+ok 438 - recording backend labels distinguish preference, verified execution and CPU fallback
+  ---
+  duration_ms: 0.294943
+  ...
+# Subtest: image keys keep source/model/session evidence separate despite conflicting unsigned IDs
+ok 439 - image keys keep source/model/session evidence separate despite conflicting unsigned IDs
+  ---
+  duration_ms: 2.163491
+  ...
+# Subtest: an already cancelled still capture creates no decoder or object URL
+ok 440 - an already cancelled still capture creates no decoder or object URL
+  ---
+  duration_ms: 2.703123
+  ...
+# Subtest: cancel during still load releases media and ignores late work
+ok 441 - cancel during still load releases media and ignores late work
+  ---
+  duration_ms: 0.671087
+  ...
+# Subtest: cancel during still seek releases media and ignores late work
+ok 442 - cancel during still seek releases media and ignores late work
+  ---
+  duration_ms: 1.664939
+  ...
+# Subtest: cancel during still encode releases media and ignores late work
+ok 443 - cancel during still encode releases media and ignores late work
+  ---
+  duration_ms: 0.664495
+  ...
+# Subtest: failed seek setup cleans its pending listeners and temporary source
+ok 444 - failed seek setup cleans its pending listeners and temporary source
+  ---
+  duration_ms: 0.268222
+  ...
+# Subtest: normal still capture keeps unique requested samples and leaves a borrowed URL owned by its caller
+ok 445 - normal still capture keeps unique requested samples and leaves a borrowed URL owned by its caller
+  ---
+  duration_ms: 0.316783
+  ...
+# Subtest: new completed coverage needs matching source, counts, anchors and declarations
+ok 446 - new completed coverage needs matching source, counts, anchors and declarations
+  ---
+  duration_ms: 3.351377
+  ...
+# Subtest: unknown inventory, deliberate caps and legacy results carry different explanations
+ok 447 - unknown inventory, deliberate caps and legacy results carry different explanations
+  ---
+  duration_ms: 9.399333
+  ...
+# Subtest: picker checks metadata only and excludes cloud aliases and embedding models
+ok 448 - picker checks metadata only and excludes cloud aliases and embedding models
+  ---
+  duration_ms: 21.512459
+  ...
+# Subtest: successful chat rechecks the model and reports measured wait and output cutoff
+ok 449 - successful chat rechecks the model and reports measured wait and output cutoff
+  ---
+  duration_ms: 1.36157
+  ...
+# Subtest: a changed model cannot receive evidence if it now points to the cloud
+ok 450 - a changed model cannot receive evidence if it now points to the cloud
+  ---
+  duration_ms: 1.30324
+  ...
+# Subtest: unusable chat response is not a successful answer
+ok 451 - unusable chat response is not a successful answer
+  ---
+  duration_ms: 1.001907
+  ...
+# Subtest: discovery distinguishes an empty installation and propagates cancellation
+ok 452 - discovery distinguishes an empty installation and propagates cancellation
+  ---
+  duration_ms: 1.058342
+  ...
+# Subtest: hosted UI refuses discovery before any request
+ok 453 - hosted UI refuses discovery before any request
+  ---
+  duration_ms: 0.407313
+  ...
+# Subtest: older Qwen3 thinking metadata still requests a short final answer
+ok 454 - older Qwen3 thinking metadata still requests a short final answer
+  ---
+  duration_ms: 0.730579
+  ...
+# Subtest: verified scorecard rejects wrong counts, decisions and invalid replies
+ok 455 - verified scorecard rejects wrong counts, decisions and invalid replies
+  ---
+  duration_ms: 7.132678
+  ...
+# Subtest: default production scorecard uses deterministic schema and cross-checks all returned fields
+ok 456 - default production scorecard uses deterministic schema and cross-checks all returned fields
+  ---
+  duration_ms: 1.214034
+  ...
+# Subtest: ranking requires two distinct checked cases and excludes failed or truncated answers
+ok 457 - ranking requires two distinct checked cases and excludes failed or truncated answers
+  ---
+  duration_ms: 0.343473
+  ...
+# Subtest: legacy Qwen3 uses its non-thinking assistant prefix only after local model verification
+ok 458 - legacy Qwen3 uses its non-thinking assistant prefix only after local model verification
+  ---
+  duration_ms: 0.799718
+  ...
+# Subtest: assisted profile supplies measured differences but requires the model to make the correct decision
+ok 459 - assisted profile supplies measured differences but requires the model to make the correct decision
+  ---
+  duration_ms: 0.591037
+  ...
+# Subtest: choosing a profile puts passing cases ahead of response time and respects a new digest
+ok 460 - choosing a profile puts passing cases ahead of response time and respects a new digest
+  ---
+  duration_ms: 0.204002
+  ...
+# Subtest: a longer output test keeps the same independent decision check
+ok 461 - a longer output test keeps the same independent decision check
+  ---
+  duration_ms: 0.546764
+  ...
+# Subtest: incomplete and unconfirmed fresh cases have an immediate measured explanation
+ok 462 - incomplete and unconfirmed fresh cases have an immediate measured explanation
+  ---
+  duration_ms: 0.267821
+  ...
+# Subtest: raw walkthrough shows only the completed final answer
+ok 463 - raw walkthrough shows only the completed final answer
+  ---
+  duration_ms: 0.568345
+  ...
+# Subtest: people summaries require complete, unique identities before replacing a verified list
+ok 464 - people summaries require complete, unique identities before replacing a verified list
+  ---
+  duration_ms: 1.942759
+  ...
+# Subtest: an initial malformed reply stays unknown rather than becoming an empty enrolled list
+ok 465 - an initial malformed reply stays unknown rather than becoming an empty enrolled list
+  ---
+  duration_ms: 0.456716
+  ...
+# Subtest: late older lists and errors cannot replace the newest verified list
+ok 466 - late older lists and errors cannot replace the newest verified list
+  ---
+  duration_ms: 1.484601
+  ...
+# Subtest: deletion is single-flight across rows and needs the matching acknowledgement plus refreshed absence
+ok 467 - deletion is single-flight across rows and needs the matching acknowledgement plus refreshed absence
+  ---
+  duration_ms: 0.445224
+  ...
+# Subtest: lost deletion reply never treats list omission as proof of file removal
+ok 468 - lost deletion reply never treats list omission as proof of file removal
+  ---
+  duration_ms: 0.376605
+  ...
+# Subtest: 500 deletion reply never treats list omission as proof of file removal
+ok 469 - 500 deletion reply never treats list omission as proof of file removal
+  ---
+  duration_ms: 0.165961
+  ...
+# Subtest: malformed deletion reply never treats list omission as proof of file removal
+ok 470 - malformed deletion reply never treats list omission as proof of file removal
+  ---
+  duration_ms: 0.209793
+  ...
+# Subtest: wrong-id deletion reply never treats list omission as proof of file removal
+ok 471 - wrong-id deletion reply never treats list omission as proof of file removal
+  ---
+  duration_ms: 0.194635
+  ...
+# Subtest: a confirmed deletion with failed refresh blocks its stale row until a successful read confirms absence
+ok 472 - a confirmed deletion with failed refresh blocks its stale row until a successful read confirms absence
+  ---
+  duration_ms: 0.448771
+  ...
+# Subtest: closing during a submitted delete never publishes a late result or starts a reconciliation request
+ok 473 - closing during a submitted delete never publishes a late result or starts a reconciliation request
+  ---
+  duration_ms: 0.48585
+  ...
+# Subtest: a later successful deletion never erases an earlier unresolved deletion warning
+ok 474 - a later successful deletion never erases an earlier unresolved deletion warning
+  ---
+  duration_ms: 0.36888
+  ...
+# Subtest: a stalled deletion reaches its deadline, reconciles read-only and keeps the row blocked
+ok 475 - a stalled deletion reaches its deadline, reconciles read-only and keeps the row blocked
+  ---
+  duration_ms: 20.714434
+  ...
+# Subtest: submitted server failures remain uncertain while native validation refusals allow retry
+ok 476 - submitted server failures remain uncertain while native validation refusals allow retry
+  ---
+  duration_ms: 0.532237
+  ...
+# Subtest: leaving during import never submits enrollment
+ok 477 - leaving during import never submits enrollment
+  ---
+  duration_ms: 0.572492
+  ...
+# Subtest: leaving during import never submits baseline refinement
+ok 478 - leaving during import never submits baseline refinement
+  ---
+  duration_ms: 0.109235
+  ...
+# Subtest: an already submitted template operation cannot deliver stale results after leaving
+ok 479 - an already submitted template operation cannot deliver stale results after leaving
+  ---
+  duration_ms: 3.532636
+  ...
+# Subtest: baseline refinement uses only the selected person and retained recording
+ok 480 - baseline refinement uses only the selected person and retained recording
+  ---
+  duration_ms: 0.377637
+  ...
+# Subtest: an incomplete or mismatched template reply cannot be accepted as a completed session
+ok 481 - an incomplete or mismatched template reply cannot be accepted as a completed session
+  ---
+  duration_ms: 0.409397
+  ...
+# Subtest: a stalled import reaches its deadline before submitting any template operation
+ok 482 - a stalled import reaches its deadline before submitting any template operation
+  ---
+  duration_ms: 20.896846
+  ...
+# Subtest: exact orientation retains signs through cancellation, underflow and overflow
+ok 483 - exact orientation retains signs through cancellation, underflow and overflow
+  ---
+  duration_ms: 0.960609
+  ...
+# Subtest: exact orientation rejects malformed finite-coordinate pairs including sparse arrays
+ok 484 - exact orientation rejects malformed finite-coordinate pairs including sparse arrays
+  ---
+  duration_ms: 1.1532
+  ...
+# Subtest: reports count repeated sampled detections and bind saved human decisions
+ok 485 - reports count repeated sampled detections and bind saved human decisions
+  ---
+  duration_ms: 11.58671
+  ...
+# Subtest: partial coverage and unmatched sources remain explicit; filter does not alter rules
+ok 486 - partial coverage and unmatched sources remain explicit; filter does not alter rules
+  ---
+  duration_ms: 0.659696
+  ...
+# Subtest: reports refuse conflicting review identities and malformed threshold/provenance
+ok 487 - reports refuse conflicting review identities and malformed threshold/provenance
+  ---
+  duration_ms: 0.533228
+  ...
+# Subtest: reports refuse a decision from another exact sample even when its displayed time matches
+ok 488 - reports refuse a decision from another exact sample even when its displayed time matches
+  ---
+  duration_ms: 1.07879
+  ...
+# Subtest: offline HTML escapes text and CSV neutralizes spreadsheet formulas
+ok 489 - offline HTML escapes text and CSV neutralizes spreadsheet formulas
+  ---
+  duration_ms: 0.446286
+  ...
+# Subtest: recognition review retains real class names, provenance and event-frame association
+ok 490 - recognition review retains real class names, provenance and event-frame association
+  ---
+  duration_ms: 7.637985
+  ...
+# Subtest: v2/v3 tracking imports the conventional even median and preserves v1 history
+ok 491 - v2/v3 tracking imports the conventional even median and preserves v1 history
+  ---
+  duration_ms: 2.594219
+  ...
+# Subtest: mixed-source/model/settings/observation bundles fail closed
+ok 492 - mixed-source/model/settings/observation bundles fail closed
+  ---
+  duration_ms: 0.546864
+  ...
+# Subtest: invalid geometry, timestamps, lengths and labels are rejected
+ok 493 - invalid geometry, timestamps, lengths and labels are rejected
+  ---
+  duration_ms: 0.807963
+  ...
+# Subtest: partial coverage is preserved and display filtering never changes rule observations
+ok 494 - partial coverage is preserved and display filtering never changes rule observations
+  ---
+  duration_ms: 0.246902
+  ...
+# Subtest: overlays require matched source and the paused, correctly sized sampled frame
+ok 495 - overlays require matched source and the paused, correctly sized sampled frame
+  ---
+  duration_ms: 0.177472
+  ...
+# Subtest: hash match admits exact local bytes and rejects changed/oversized/empty recordings
+ok 496 - hash match admits exact local bytes and rejects changed/oversized/empty recordings
+  ---
+  duration_ms: 6.479224
+  ...
+# Subtest: streaming SHA-256 matches node:crypto and WebCrypto across padding and slice boundaries
+ok 497 - streaming SHA-256 matches node:crypto and WebCrypto across padding and slice boundaries
+  ---
+  duration_ms: 294.737556
+  ...
+# Subtest: recording hashing yields between slices and stops on AbortSignal
+ok 498 - recording hashing yields between slices and stops on AbortSignal
+  ---
+  duration_ms: 17.474797
+  ...
+# Subtest: a module worker hashes off the page, and any worker failure falls back to the same thread
+ok 499 - a module worker hashes off the page, and any worker failure falls back to the same thread
+  ---
+  duration_ms: 21.051686
+  ...
+# Subtest: untrusted class text stays data and prototype-like labels can be counted
+ok 500 - untrusted class text stays data and prototype-like labels can be counted
+  ---
+  duration_ms: 0.268052
+  ...
+# Subtest: repeat import keeps decisions, and queue overflow does not silently discard records
+ok 501 - repeat import keeps decisions, and queue overflow does not silently discard records
+  ---
+  duration_ms: 0.497241
+  ...
+# Subtest: identical rounded display times cannot transfer reviews to a different sampled frame
+ok 502 - identical rounded display times cannot transfer reviews to a different sampled frame
+  ---
+  duration_ms: 0.275426
+  ...
+# Subtest: legacy reviews without numeric times remain readable without borrowing an exact timestamp
+ok 503 - legacy reviews without numeric times remain readable without borrowing an exact timestamp
+  ---
+  duration_ms: 0.15457
+  ...
+# Subtest: repeat imports preserve saved pending notes, including explicit clears, without weakening evidence checks
+ok 504 - repeat imports preserve saved pending notes, including explicit clears, without weakening evidence checks
+  ---
+  duration_ms: 0.312435
+  ...
+# Subtest: 100 × 4 Mbit × 30 days distinguishes raw, redundancy, overhead and reserve
+ok 505 - 100 × 4 Mbit × 30 days distinguishes raw, redundancy, overhead and reserve
+  ---
+  duration_ms: 3.099585
+  ...
+# Subtest: doubling bitrate halves retention; six 24TB dual-parity drives are inadequate for this full workload
+ok 506 - doubling bitrate halves retention; six 24TB dual-parity drives are inadequate for this full workload
+  ---
+  duration_ms: 0.452388
+  ...
+# Subtest: mirror and unprotected capacity are explicit and invalid arrays cannot be saved
+ok 507 - mirror and unprotected capacity are explicit and invalid arrays cannot be saved
+  ---
+  duration_ms: 1.159492
+  ...
+# Subtest: memory, byte-budget, drive-workload and power warnings never become capacity passes
+ok 508 - memory, byte-budget, drive-workload and power warnings never become capacity passes
+  ---
+  duration_ms: 0.225973
+  ...
+# Subtest: VRAM contexts include batch tensors and exceed the allowance without pretending to run GPU inference
+ok 509 - VRAM contexts include batch tensors and exceed the allowance without pretending to run GPU inference
+  ---
+  duration_ms: 0.352941
+  ...
+# Subtest: invalid imported values, prototype fields and unbounded JSON are rejected
+ok 510 - invalid imported values, prototype fields and unbounded JSON are rejected
+  ---
+  duration_ms: 2.702131
+  ...
+# Subtest: exported application policy matches the shared Python contract fixture
+ok 511 - exported application policy matches the shared Python contract fixture
+  ---
+  duration_ms: 0.530554
+  ...
+# Subtest: wall budget always preserves selected sources with at most the applied count
+ok 512 - wall budget always preserves selected sources with at most the applied count
+  ---
+  duration_ms: 0.120195
+  ...
+# Subtest: background sample playback respects the applied pause setting
+ok 513 - background sample playback respects the applied pause setting
+  ---
+  duration_ms: 0.234659
+  ...
+# Subtest: host import retains bounded numerical observations and drops private or unknown fields
+ok 514 - host import retains bounded numerical observations and drops private or unknown fields
+  ---
+  duration_ms: 0.584865
+  ...
+# Subtest: receipt events keep numeric clip seconds and older events fall back to their label
+ok 515 - receipt events keep numeric clip seconds and older events fall back to their label
+  ---
+  duration_ms: 1.216388
+  ...
+# Subtest: filters by camera and recording and sorts without losing queue order on ties
+ok 516 - filters by camera and recording and sorts without losing queue order on ties
+  ---
+  duration_ms: 7.2565
+  ...
+# Subtest: review advances to the next pending item in display order and wraps once
+ok 517 - review advances to the next pending item in display order and wraps once
+  ---
+  duration_ms: 0.30959
+  ...
+# Subtest: CSV export neutralizes spreadsheet formulas and keeps review notes
+ok 518 - CSV export neutralizes spreadsheet formulas and keeps review notes
+  ---
+  duration_ms: 2.681341
+  ...
+# Subtest: CSV export preserves analysis state and live capture provenance without inventing a recording
+ok 519 - CSV export preserves analysis state and live capture provenance without inventing a recording
+  ---
+  duration_ms: 0.281948
+  ...
+# Subtest: bulk dismissal undo restores only entries still carrying that decision
+ok 520 - bulk dismissal undo restores only entries still carrying that decision
+  ---
+  duration_ms: 0.372548
+  ...
+# Subtest: bulk undo preserves a later decision made at the same timestamp
+ok 521 - bulk undo preserves a later decision made at the same timestamp
+  ---
+  duration_ms: 0.171081
+  ...
+# Subtest: unchanged bulk decisions remain undoable after a review export JSON roundtrip
+ok 522 - unchanged bulk decisions remain undoable after a review export JSON roundtrip
+  ---
+  duration_ms: 0.444061
+  ...
+# Subtest: bulk undo keeps a later individual decision with an identical note and timestamp
+ok 523 - bulk undo keeps a later individual decision with an identical note and timestamp
+  ---
+  duration_ms: 0.479077
+  ...
+# Subtest: bulk undo keeps field edits even when an older client preserves the decision token
+ok 524 - bulk undo keeps field edits even when an older client preserves the decision token
+  ---
+  duration_ms: 0.495267
+  ...
+# Subtest: saving a note preserves the pending verdict, evidence, and existing review timestamp
+ok 525 - saving a note preserves the pending verdict, evidence, and existing review timestamp
+  ---
+  duration_ms: 0.377357
+  ...
+# Subtest: note saving refuses removed evidence, reused IDs, and concurrently changed human edits
+ok 526 - note saving refuses removed evidence, reused IDs, and concurrently changed human edits
+  ---
+  duration_ms: 0.440284
+  ...
+# Subtest: saved pending notes roundtrip through exports and later note edits survive bulk Undo
+ok 527 - saved pending notes roundtrip through exports and later note edits survive bulk Undo
+  ---
+  duration_ms: 0.405289
+  ...
+# Subtest: review intent spans independent panels and a rejected newer request still supersedes the old one
+ok 528 - review intent spans independent panels and a rejected newer request still supersedes the old one
+  ---
+  duration_ms: 0.942355
+  ...
+# Subtest: hidden Recognition refuses completions and returning does not revive an older intent
+ok 529 - hidden Recognition refuses completions and returning does not revive an older intent
+  ---
+  duration_ms: 0.104185
+  ...
+# Subtest: a panel refuses duplicate transfers and accepts another after completion
+ok 530 - a panel refuses duplicate transfers and accepts another after completion
+  ---
+  duration_ms: 1.267594
+  ...
+# Subtest: cancelled work cannot hand off or clear a newer transfer in its late finally
+ok 531 - cancelled work cannot hand off or clear a newer transfer in its late finally
+  ---
+  duration_ms: 0.281979
+  ...
+# Subtest: cancelling during asynchronous still storage prevents the Events handoff
+ok 532 - cancelling during asynchronous still storage prevents the Events handoff
+  ---
+  duration_ms: 0.187491
+  ...
+# Subtest: a deadline releases controls even if the underlying decoder stays pending
+ok 533 - a deadline releases controls even if the underlying decoder stays pending
+  ---
+  duration_ms: 24.762555
+  ...
+# Subtest: unmount invalidates active work and an already closed panel cannot begin
+ok 534 - unmount invalidates active work and an already closed panel cannot begin
+  ---
+  duration_ms: 0.32541
+  ...
+# Subtest: analysis phase announcements stay unchanged as frame and time counters advance
+ok 535 - analysis phase announcements stay unchanged as frame and time counters advance
+  ---
+  duration_ms: 0.767568
+  ...
+# Subtest: recording announcements distinguish loss, stopping and storage trouble without reading counters
+ok 536 - recording announcements distinguish loss, stopping and storage trouble without reading counters
+  ---
+  duration_ms: 0.198352
+  ...
+# Subtest: backup state transitions announce attention and optional analysis independently of copy progress
+ok 537 - backup state transitions announce attention and optional analysis independently of copy progress
+  ---
+  duration_ms: 0.233778
+  ...
+# Subtest: startup waits for an existing exclusive prune before allowing workspace reads
+ok 538 - startup waits for an existing exclusive prune before allowing workspace reads
+  ---
+  duration_ms: 3.886689
+  ...
+# Subtest: a peer lease protects Undo, unsaved and suspended-tab references without an expiry
+ok 539 - a peer lease protects Undo, unsaved and suspended-tab references without an expiry
+  ---
+  duration_ms: 1.259219
+  ...
+# Subtest: simultaneous prune attempts cannot both release their shared leases
+ok 540 - simultaneous prune attempts cannot both release their shared leases
+  ---
+  duration_ms: 0.68887
+  ...
+# Subtest: single-tab pruning keeps committed, Undo and archived evidence and removes only unreferenced images
+ok 541 - single-tab pruning keeps committed, Undo and archived evidence and removes only unreferenced images
+  ---
+  duration_ms: 0.522779
+  ...
+# Subtest: local references remain live and committed saves cannot race the IndexedDB cleanup
+ok 542 - local references remain live and committed saves cannot race the IndexedDB cleanup
+  ---
+  duration_ms: 0.231854
+  ...
+# Subtest: unreadable primary, backup and unavailable storage all skip destructive cleanup
+ok 543 - unreadable primary, backup and unavailable storage all skip destructive cleanup
+  ---
+  duration_ms: 1.012105
+  ...
+# Subtest: unsupported locks skip cleanup while a failed initial lock refuses unsafe startup
+ok 544 - unsupported locks skip cleanup while a failed initial lock refuses unsafe startup
+  ---
+  duration_ms: 0.231113
+  ...
+# Subtest: failed lease reacquisition holds the prune mutex until the mounted App closes
+ok 545 - failed lease reacquisition holds the prune mutex until the mounted App closes
+  ---
+  duration_ms: 1.390404
+  ...
+# Subtest: closing while startup waits cancels its pending shared lease
+ok 546 - closing while startup waits cancels its pending shared lease
+  ---
+  duration_ms: 0.328806
+  ...
+# Subtest: a verified start reply binds cancellation ownership only to the returned native job id
+ok 547 - a verified start reply binds cancellation ownership only to the returned native job id
+  ---
+  duration_ms: 1.213122
+  ...
+# Subtest: start response lost remains uncertain without another write
+ok 548 - start response lost remains uncertain without another write
+  ---
+  duration_ms: 0.425187
+  ...
+# Subtest: start response 403 remains uncertain without another write
+ok 549 - start response 403 remains uncertain without another write
+  ---
+  duration_ms: 0.156022
+  ...
+# Subtest: start response 408 remains uncertain without another write
+ok 550 - start response 408 remains uncertain without another write
+  ---
+  duration_ms: 0.083637
+  ...
+# Subtest: start response 500 remains uncertain without another write
+ok 551 - start response 500 remains uncertain without another write
+  ---
+  duration_ms: 0.083677
+  ...
+# Subtest: start response 502 remains uncertain without another write
+ok 552 - start response 502 remains uncertain without another write
+  ---
+  duration_ms: 1.048844
+  ...
+# Subtest: start response 503 remains uncertain without another write
+ok 553 - start response 503 remains uncertain without another write
+  ---
+  duration_ms: 0.120145
+  ...
+# Subtest: start response 504 remains uncertain without another write
+ok 554 - start response 504 remains uncertain without another write
+  ---
+  duration_ms: 0.099586
+  ...
+# Subtest: known native refusals remain retryable while malformed success cannot create ownership
+ok 555 - known native refusals remain retryable while malformed success cannot create ownership
+  ---
+  duration_ms: 0.645569
+  ...
+# Subtest: uncertain-start recovery only reads status and cannot adopt or cancel the retained job
+ok 556 - uncertain-start recovery only reads status and cannot adopt or cancel the retained job
+  ---
+  duration_ms: 0.660317
+  ...
+# Subtest: the full headers deadline bounds an uncertain analysis start even if fetch ignores abort
+ok 557 - the full headers deadline bounds an uncertain analysis start even if fetch ignores abort
+  ---
+  duration_ms: 20.656065
+  ...
+# Subtest: the full body deadline bounds an uncertain analysis start even if fetch ignores abort
+ok 558 - the full body deadline bounds an uncertain analysis start even if fetch ignores abort
+  ---
+  duration_ms: 20.078733
+  ...
+# Subtest: an aborted read ignores a late parsed reply
+ok 559 - an aborted read ignores a late parsed reply
+  ---
+  duration_ms: 1.019469
+  ...
+# Subtest: hiding during the restart countdown freezes capture and resets the countdown
+ok 560 - hiding during the restart countdown freezes capture and resets the countdown
+  ---
+  duration_ms: 1.433103
+  ...
+# Subtest: initial countdown never opens the recorder while hidden
+ok 561 - initial countdown never opens the recorder while hidden
+  ---
+  duration_ms: 0.129513
+  ...
+# Subtest: disconnected, truncated, and empty video cannot complete any training script
+ok 562 - disconnected, truncated, and empty video cannot complete any training script
+  ---
+  duration_ms: 1.236235
+  ...
+# Subtest: a muted track ends the attempt and late media after leaving cannot enter analysis
+ok 563 - a muted track ends the attempt and late media after leaving cannot enter analysis
+  ---
+  duration_ms: 0.275165
+  ...
+# Subtest: optional cue generates one or two speaker tones and cancellation releases every output
+ok 564 - optional cue generates one or two speaker tones and cancellation releases every output
+  ---
+  duration_ms: 0.604923
+  ...
+# Subtest: calibration reads the recorded numeric person rule and preserves backend defaults
+ok 565 - calibration reads the recorded numeric person rule and preserves backend defaults
+  ---
+  duration_ms: 2.643661
+  ...
+# Subtest: a specialized rule set can be measured but a new whole-view rule cannot replace it from Train
+ok 566 - a specialized rule set can be measured but a new whole-view rule cannot replace it from Train
+  ---
+  duration_ms: 0.209582
+  ...
+# Subtest: partial prefixes and interrupted recordings cannot be stretched over the full prompt schedule
+ok 567 - partial prefixes and interrupted recordings cannot be stretched over the full prompt schedule
+  ---
+  duration_ms: 0.230061
+  ...
+# Subtest: fresh checks require a distinct recording and matching detector, labels, rules and known camera
+ok 568 - fresh checks require a distinct recording and matching detector, labels, rules and known camera
+  ---
+  duration_ms: 0.282889
+  ...
+# Subtest: the receipt compares the frozen setting on both clips and only exports counts and recording provenance
+ok 569 - the receipt compares the frozen setting on both clips and only exports counts and recording provenance
+  ---
+  duration_ms: 1.758614
+  ...
+# Subtest: exported calibration and frozen fresh-check thresholds retain empirical precision
+ok 570 - exported calibration and frozen fresh-check thresholds retain empirical precision
+  ---
+  duration_ms: 1.370547
+  ...
+# Subtest: two independently saved sessions survive reopening and replay at a newly saved threshold
+ok 571 - two independently saved sessions survive reopening and replay at a newly saved threshold
+  ---
+  duration_ms: 2.982025
+  ...
+# Subtest: camera/view/model/labels/profile and other rule settings cannot be silently combined
+ok 572 - camera/view/model/labels/profile and other rule settings cannot be silently combined
+  ---
+  duration_ms: 0.331511
+  ...
+# Subtest: earlier calibration changes the suggestion and prevents a newest-session-only false alarm
+ok 573 - earlier calibration changes the suggestion and prevents a newest-session-only false alarm
+  ---
+  duration_ms: 0.922287
+  ...
+# Subtest: saved fresh checks guard changes but are excluded from fitting
+ok 574 - saved fresh checks guard changes but are excluded from fitting
+  ---
+  duration_ms: 1.493547
+  ...
+# Subtest: cumulative empirical search preserves every recording instead of hiding a regression in totals
+ok 575 - cumulative empirical search preserves every recording instead of hiding a regression in totals
+  ---
+  duration_ms: 0.455493
+  ...
+# Subtest: identical score distributions use the same margin tie policy alone or across independent recordings
+ok 576 - identical score distributions use the same margin tie policy alone or across independent recordings
+  ---
+  duration_ms: 0.308718
+  ...
+# Subtest: a long calibration clip has one session vote and equal weight for each prompt condition
+ok 577 - a long calibration clip has one session vote and equal weight for each prompt condition
+  ---
+  duration_ms: 6.500574
+  ...
+# Subtest: empirical sweep matches an exhaustive operating-state oracle on small generated sessions
+ok 578 - empirical sweep matches an exhaustive operating-state oracle on small generated sessions
+  ---
+  duration_ms: 122.691297
+  ...
+# Subtest: duplicates never inflate session counts, including cross-use of a saved check
+ok 579 - duplicates never inflate session counts, including cross-use of a saved check
+  ---
+  duration_ms: 1.027835
+  ...
+# Subtest: unsafe timing, too few samples and an unrelated fresh check cannot enter the library
+ok 580 - unsafe timing, too few samples and an unrelated fresh check cannot enter the library
+  ---
+  duration_ms: 0.791362
+  ...
+# Subtest: capacity, corrupt data and storage errors preserve previous evidence
+ok 581 - capacity, corrupt data and storage errors preserve previous evidence
+  ---
+  duration_ms: 6.422929
+  ...
+# Subtest: a decision holds the browser lock through service waits without deadlocking its own evidence save
+ok 582 - a decision holds the browser lock through service waits without deadlocking its own evidence save
+  ---
+  duration_ms: 0.666528
+  ...
+# Subtest: apply requires matching frozen thresholds, a compatible rule and a confirmed improvement
+ok 583 - apply requires matching frozen thresholds, a compatible rule and a confirmed improvement
+  ---
+  duration_ms: 300.106952
+  ...
+# Subtest: calibration allows exploration and the returned check locks the tested setting
+ok 584 - calibration allows exploration and the returned check locks the tested setting
+  ---
+  duration_ms: 5.586913
+  ...
+# Subtest: advanced sensitivity can select the same hundredth precision as the recommendation
+ok 585 - advanced sensitivity can select the same hundredth precision as the recommendation
+  ---
+  duration_ms: 1.790984
+  ...
+# Subtest: an empirical cutoff is shown exactly and the frozen fresh check does not round it to the slider
+ok 586 - an empirical cutoff is shown exactly and the frozen fresh check does not round it to the slider
+  ---
+  duration_ms: 3.350215
+  ...
+# Subtest: missing empty prompts are disclosed separately from zero person flags
+ok 587 - missing empty prompts are disclosed separately from zero person flags
+  ---
+  duration_ms: 2.211862
+  ...
+# Subtest: an improved fresh result cannot override regression on an earlier session
+ok 588 - an improved fresh result cannot override regression on an earlier session
+  ---
+  duration_ms: 4.03638
+  ...
+# Subtest: stores the checked detector and rule together and reads existing single-rule entries
+ok 589 - stores the checked detector and rule together and reads existing single-rule entries
+  ---
+  duration_ms: 1.181122
+  ...
+# Subtest: Recognition starts with the measured detector even when another compatible model is listed first
+ok 590 - Recognition starts with the measured detector even when another compatible model is listed first
+  ---
+  duration_ms: 0.175048
+  ...
+# Subtest: a removed or incompatible checked detector cannot silently transfer the checked rule
+ok 591 - a removed or incompatible checked detector cannot silently transfer the checked rule
+  ---
+  duration_ms: 0.19186
+  ...
+# Subtest: an explicit compatible choice survives refresh and an unavailable manual one falls back safely
+ok 592 - an explicit compatible choice survives refresh and an unavailable manual one falls back safely
+  ---
+  duration_ms: 0.160691
+  ...
+# Subtest: a checked setting pins detector weights, labels, profile, and the new rule file
+ok 593 - a checked setting pins detector weights, labels, profile, and the new rule file
+  ---
+  duration_ms: 0.614621
+  ...
+# Subtest: incomplete evidence bindings never downgrade to an unpinned ID pair
+ok 594 - incomplete evidence bindings never downgrade to an unpinned ID pair
+  ---
+  duration_ms: 0.11783
+  ...
+# Subtest: uses source PTS for prompt decisions and evidence seeking without changing the source trace
+ok 595 - uses source PTS for prompt decisions and evidence seeking without changing the source trace
+  ---
+  duration_ms: 1.764334
+  ...
+# Subtest: usable duration must agree with active recording and never extrapolates drifted evidence
+ok 596 - usable duration must agree with active recording and never extrapolates drifted evidence
+  ---
+  duration_ms: 1.31353
+  ...
+# Subtest: rejects missing, inconsistent, malformed or truncated timestamp evidence
+ok 597 - rejects missing, inconsistent, malformed or truncated timestamp evidence
+  ---
+  duration_ms: 0.38434
+  ...
+# Subtest: the script fits inside one 60-second clip and its segments are contiguous
+ok 598 - the script fits inside one 60-second clip and its segments are contiguous
+  ---
+  duration_ms: 0.985876
+  ...
+# Subtest: frames map onto the script and skip settling time after each prompt
+ok 599 - frames map onto the script and skip settling time after each prompt
+  ---
+  duration_ms: 0.229821
+  ...
+# Subtest: a frame’s script position comes from its place among decoded frames, not the declared frame rate
+ok 600 - a frame’s script position comes from its place among decoded frames, not the declared frame rate
+  ---
+  duration_ms: 0.172283
+  ...
+# Subtest: evaluation counts found frames, empty-room false alarms and rule-like observations
+ok 601 - evaluation counts found frames, empty-room false alarms and rule-like observations
+  ---
+  duration_ms: 0.259516
+  ...
+# Subtest: observations follow the rule engine: misses within max_gap keep one run
+ok 602 - observations follow the rule engine: misses within max_gap keep one run
+  ---
+  duration_ms: 0.089017
+  ...
+# Subtest: recommended sensitivity leaves headroom above the empty room and explains edge cases
+ok 603 - recommended sensitivity leaves headroom above the empty room and explains edge cases
+  ---
+  duration_ms: 1.209805
+  ...
+# Subtest: calibration preserves both counts and finds a useful cutoff even when the nominal margin would hide someone
+ok 604 - calibration preserves both counts and finds a useful cutoff even when the nominal margin would hide someone
+  ---
+  duration_ms: 0.420808
+  ...
+# Subtest: empirical thresholds separate nearby scores without sacrificing person finds
+ok 605 - empirical thresholds separate nearby scores without sacrificing person finds
+  ---
+  duration_ms: 0.29356
+  ...
+# Subtest: threshold text preserves the exact numeric cutoff instead of rounding to the manual grid
+ok 606 - threshold text preserves the exact numeric cutoff instead of rounding to the manual grid
+  ---
+  duration_ms: 0.20828
+  ...
+# Subtest: computed margin preferences drop arithmetic residue without rounding observed cutoffs
+ok 607 - computed margin preferences drop arithmetic residue without rounding observed cutoffs
+  ---
+  duration_ms: 0.439774
+  ...
+# Subtest: fresh-clip comparisons report separate person and empty-view counts for both frozen settings
+ok 608 - fresh-clip comparisons report separate person and empty-view counts for both frozen settings
+  ---
+  duration_ms: 0.221896
+  ...
+# Subtest: moments list false alarms first, then the weakest misses, spread at least 2 s apart
+ok 609 - moments list false alarms first, then the weakest misses, spread at least 2 s apart
+  ---
+  duration_ms: 0.199664
+  ...
+# Subtest: history keeps the last 50 valid sessions and reports storage failures
+ok 610 - history keeps the last 50 valid sessions and reports storage failures
+  ---
+  duration_ms: 1.585619
+  ...
+# Subtest: enrollment and baseline scripts are short and describe the baseline plainly
+ok 611 - enrollment and baseline scripts are short and describe the baseline plainly
+  ---
+  duration_ms: 0.134743
+  ...
+# Subtest: the default rule set id is validated before use
+ok 612 - the default rule set id is validated before use
+  ---
+  duration_ms: 0.237515
+  ...
+# Subtest: training navigation is unguarded before recording or editing enrollment
+ok 613 - training navigation is unguarded before recording or editing enrollment
+  ---
+  duration_ms: 0.094166
+  ...
+# Subtest: unfinished captures, analysis, calibration and fresh checks remain protected before a decision
+ok 614 - unfinished captures, analysis, calibration and fresh checks remain protected before a decision
+  ---
+  duration_ms: 0.081743
+  ...
+# Subtest: completed decisions release navigation only when requested browser saves succeeded
+ok 615 - completed decisions release navigation only when requested browser saves succeeded
+  ---
+  duration_ms: 0.070602
+  ...
+# Subtest: person sessions protect edited consent and active work while respecting already saved templates
+ok 616 - person sessions protect edited consent and active work while respecting already saved templates
+  ---
+  duration_ms: 0.0429
+  ...
+# Subtest: receipt reimport preserves human decisions, notes and review time
+ok 617 - receipt reimport preserves human decisions, notes and review time
+  ---
+  duration_ms: 3.436516
+  ...
+# Subtest: a fully cleared queue accepts a maximum 1000-observation run and remains restorable
+ok 618 - a fully cleared queue accepts a maximum 1000-observation run and remains restorable
+  ---
+  duration_ms: 6.956919
+  ...
+# Subtest: sample insertions and resets refuse overflow without dropping model observations
+ok 619 - sample insertions and resets refuse overflow without dropping model observations
+  ---
+  duration_ms: 7.423873
+  ...
+# Subtest: sample reset retains imported and reviewed sample decisions
+ok 620 - sample reset retains imported and reviewed sample decisions
+  ---
+  duration_ms: 0.239879
+  ...
+# Subtest: restore and undo merge with later decisions instead of overwriting them
+ok 621 - restore and undo merge with later decisions instead of overwriting them
+  ---
+  duration_ms: 0.122369
+  ...
+# Subtest: same observation ID with changed source, model or observation fields is rejected atomically
+ok 622 - same observation ID with changed source, model or observation fields is rejected atomically
+  ---
+  duration_ms: 0.199544
+  ...
+# Subtest: review restoration rejects malformed, duplicated and misbound saved evidence
+ok 623 - review restoration rejects malformed, duplicated and misbound saved evidence
+  ---
+  duration_ms: 0.19224
+  ...
+# Subtest: corrupt or unavailable storage is reported without replacing the saved entry
+ok 624 - corrupt or unavailable storage is reported without replacing the saved entry
+  ---
+  duration_ms: 0.225532
+  ...
+# Subtest: the first unreadable entry is backed up once before replacement
+ok 625 - the first unreadable entry is backed up once before replacement
+  ---
+  duration_ms: 0.20869
+  ...
+# Subtest: storage round trip includes empty queues and can recover after a quota error
+ok 626 - storage round trip includes empty queues and can recover after a quota error
+  ---
+  duration_ms: 0.22401
+  ...
+# Subtest: dialogs dismiss only for presses that start and end on the backdrop
+ok 627 - dialogs dismiss only for presses that start and end on the backdrop
+  ---
+  duration_ms: 0.17082
+  ...
+# Subtest: every workspace has a bookmark while skip links remain local anchors
+ok 628 - every workspace has a bookmark while skip links remain local anchors
+  ---
+  duration_ms: 0.084749
+  ...
+# Subtest: restored or undone human reviews replace matching pending entries only
+ok 629 - restored or undone human reviews replace matching pending entries only
+  ---
+  duration_ms: 0.211616
+  ...
+# Subtest: root history entry restores Monitor while the skip link leaves the workspace alone
+ok 630 - root history entry restores Monitor while the skip link leaves the workspace alone
+  ---
+  duration_ms: 0.057878
+  ...
+# Subtest: sample review exports refuse optional fields that would crash event consumers
+ok 631 - sample review exports refuse optional fields that would crash event consumers
+  ---
+  duration_ms: 0.18716
+  ...
+# Subtest: all file players pause when hidden, including a player started in a hidden page
+ok 632 - all file players pause when hidden, including a player started in a hidden page
+  ---
+  duration_ms: 0.260337
+  ...
+# Subtest: successive review decisions preserve the last edit while its shared save lock is pending
+ok 633 - successive review decisions preserve the last edit while its shared save lock is pending
+  ---
+  duration_ms: 0.867705
+  ...
+# Subtest: several review edits queued before a shared lock opens persist without replacing each other
+ok 634 - several review edits queued before a shared lock opens persist without replacing each other
+  ---
+  duration_ms: 0.374281
+  ...
+# Subtest: clean tabs adopt validated saves and removals without writing them back
+ok 635 - clean tabs adopt validated saves and removals without writing them back
+  ---
+  duration_ms: 0.323616
+  ...
+# Subtest: quota-failed local reviews survive another tab save and further local edits
+ok 636 - quota-failed local reviews survive another tab save and further local edits
+  ---
+  duration_ms: 0.461624
+  ...
+# Subtest: unsaved edits detect a competing write before their first save effect
+ok 637 - unsaved edits detect a competing write before their first save effect
+  ---
+  duration_ms: 0.222828
+  ...
+# Subtest: keeping this tab preserves the displaced remote snapshot before saving
+ok 638 - keeping this tab preserves the displaced remote snapshot before saving
+  ---
+  duration_ms: 0.574415
+  ...
+# Subtest: using the other tab preserves this tab before adopting its decisions
+ok 639 - using the other tab preserves this tab before adopting its decisions
+  ---
+  duration_ms: 0.408605
+  ...
+# Subtest: failed backup keeps both conflict versions and does not report resolution
+ok 640 - failed backup keeps both conflict versions and does not report resolution
+  ---
+  duration_ms: 0.313678
+  ...
+# Subtest: explicit choices refuse stale remote snapshots and refresh the conflict first
+ok 641 - explicit choices refuse stale remote snapshots and refresh the conflict first
+  ---
+  duration_ms: 0.402925
+  ...
+# Subtest: a write during backup is detected before the conflict choice replaces anything
+ok 642 - a write during backup is detected before the conflict choice replaces anything
+  ---
+  duration_ms: 0.366967
+  ...
+# Subtest: clear/remove with unsaved work requires explicit reset and retains a backup
+ok 643 - clear/remove with unsaved work requires explicit reset and retains a backup
+  ---
+  duration_ms: 0.206927
+  ...
+# Subtest: invalid remote data is preserved and cannot replace a valid local workspace
+ok 644 - invalid remote data is preserved and cannot replace a valid local workspace
+  ---
+  duration_ms: 0.244448
+  ...
+# Subtest: unreadable startup data is protected without marking untouched defaults unsaved
+ok 645 - unreadable startup data is protected without marking untouched defaults unsaved
+  ---
+  duration_ms: 0.184436
+  ...
+# Subtest: occupied backup slots never overwrite an earlier saved version
+ok 646 - occupied backup slots never overwrite an earlier saved version
+  ---
+  duration_ms: 0.431027
+  ...
+# Subtest: download then remove one reviewed backup frees a full store for an explicit choice
+ok 647 - download then remove one reviewed backup frees a full store for an explicit choice
+  ---
+  duration_ms: 1.412065
+  ...
+# Subtest: a downloaded backup changed while removal waits for the lock cannot be deleted
+ok 648 - a downloaded backup changed while removal waits for the lock cannot be deleted
+  ---
+  duration_ms: 0.435235
+  ...
+# Subtest: failed backup removal preserves both versions and every saved copy for retry
+ok 649 - failed backup removal preserves both versions and every saved copy for retry
+  ---
+  duration_ms: 0.279113
+  ...
+# Subtest: a stale download action cannot authorize removal of a replacement saved copy
+ok 650 - a stale download action cannot authorize removal of a replacement saved copy
+  ---
+  duration_ms: 0.149219
+  ...
+# Subtest: freeing a backup slot never bypasses a newer primary version check
+ok 651 - freeing a backup slot never bypasses a newer primary version check
+  ---
+  duration_ms: 0.212308
+  ...
+# Subtest: a startup read failure never grants permission to overwrite newly readable data
+ok 652 - a startup read failure never grants permission to overwrite newly readable data
+  ---
+  duration_ms: 0.171772
+  ...
+# Subtest: simultaneous tabs preserve different local backups in separate coordinated slots
+ok 653 - simultaneous tabs preserve different local backups in separate coordinated slots
+  ---
+  duration_ms: 0.343944
+  ...
+# Subtest: competing save choices serialize and require a fresh choice for the changed primary
+ok 654 - competing save choices serialize and require a fresh choice for the changed primary
+  ---
+  duration_ms: 0.413144
+  ...
+# Subtest: an edit while a conflict choice waits for the lock requires another explicit choice
+ok 655 - an edit while a conflict choice waits for the lock requires another explicit choice
+  ---
+  duration_ms: 0.237445
+  ...
+# Subtest: save coordination unavailable leaves edits exportable and never writes
+ok 656 - save coordination unavailable leaves edits exportable and never writes
+  ---
+  duration_ms: 0.100037
+  ...
+# Subtest: zone-rule edits receive the same failed-save conflict protection
+ok 657 - zone-rule edits receive the same failed-save conflict protection
+  ---
+  duration_ms: 0.414947
+  ...
+# Subtest: machine-plan restoration keeps the existing plain JSON format, validation and 64 KiB bound
+ok 658 - machine-plan restoration keeps the existing plain JSON format, validation and 64 KiB bound
+  ---
+  duration_ms: 0.563435
+  ...
+# Subtest: quota-failed applied machine plans keep their error and edits through a competing tab save
+ok 659 - quota-failed applied machine plans keep their error and edits through a competing tab save
+  ---
+  duration_ms: 0.397795
+  ...
+# Subtest: using another machine plan preserves this tab and valid saved copies import without an archive wrapper
+ok 660 - using another machine plan preserves this tab and valid saved copies import without an archive wrapper
+  ---
+  duration_ms: 0.406541
+  ...
+# Subtest: clean machine plans adopt valid remote changes and removal without writing defaults back
+ok 661 - clean machine plans adopt valid remote changes and removal without writing defaults back
+  ---
+  duration_ms: 0.275355
+  ...
+# Subtest: corrupt machine plans preserve the original and any earlier unreadable backup before an applied save
+ok 662 - corrupt machine plans preserve the original and any earlier unreadable backup before an applied save
+  ---
+  duration_ms: 0.175038
+  ...
+# Subtest: explicitly applying unchanged defaults repairs unreadable plans only after preserving the original bytes
+ok 663 - explicitly applying unchanged defaults repairs unreadable plans only after preserving the original bytes
+  ---
+  duration_ms: 0.172413
+  ...
+# Subtest: machine-plan choices waiting on a shared lock refuse a newly entered unapplied draft
+ok 664 - machine-plan choices waiting on a shared lock refuse a newly entered unapplied draft
+  ---
+  duration_ms: 0.460954
+  ...
+# Subtest: machine plans without shared save locks stay in memory and retain an unload-worthy unsaved state
+ok 665 - machine plans without shared save locks stay in memory and retain an unload-worthy unsaved state
+  ---
+  duration_ms: 0.15503
+  ...
+# Subtest: task catalog exposes each workspace without starting an operation
+ok 666 - task catalog exposes each workspace without starting an operation
+  ---
+  duration_ms: 0.70468
+  ...
+# Subtest: common user words find their destination and title matches rank first
+ok 667 - common user words find their destination and title matches rank first
+  ---
+  duration_ms: 1.525216
+  ...
+# Subtest: search handles punctuation, word order, case and empty results
+ok 668 - search handles punctuation, word order, case and empty results
+  ---
+  duration_ms: 0.291105
+  ...
+# Subtest: switching plans hides foreign pixels at render time before the new image effect runs
+ok 669 - switching plans hides foreign pixels at render time before the new image effect runs
+  ---
+  duration_ms: 0.958315
+  ...
+# Subtest: a delayed new-plan read shows a loading grid and cannot reuse the previous plan image
+ok 670 - a delayed new-plan read shows a loading grid and cannot reuse the previous plan image
+  ---
+  duration_ms: 0.239729
+  ...
+# Subtest: late storage replies from an abandoned plan create no URL or stale image state
+ok 671 - late storage replies from an abandoned plan create no URL or stale image state
+  ---
+  duration_ms: 0.139401
+  ...
+# Subtest: an old decode callback cannot replace the newly selected plan and its URL is released once
+ok 672 - an old decode callback cannot replace the newly selected plan and its URL is released once
+  ---
+  duration_ms: 0.147877
+  ...
+# Subtest: empty, failed and zero-dimension images never become a usable plan still
+ok 673 - empty, failed and zero-dimension images never become a usable plan still
+  ---
+  duration_ms: 0.325409
+  ...
+# Subtest: a save captures its plan and offer, blocks concurrent save/remove and preserves a newer offered frame
+ok 674 - a save captures its plan and offer, blocks concurrent save/remove and preserves a newer offered frame
+  ---
+  duration_ms: 0.281267
+  ...
+# Subtest: storage refusal and exceptions preserve the offer and release the explicit operation guard
+ok 675 - storage refusal and exceptions preserve the offer and release the explicit operation guard
+  ---
+  duration_ms: 0.209212
+  ...
+# Subtest: closing with a save in flight suppresses its late receipt and state callbacks
+ok 676 - closing with a save in flight suppresses its late receipt and state callbacks
+  ---
+  duration_ms: 0.098635
+  ...
+# Subtest: analyzer export matches the fixture that edge/rules.py loads
+ok 677 - analyzer export matches the fixture that edge/rules.py loads
+  ---
+  duration_ms: 1.093097
+  ...
+# Subtest: export trims the browser edge tolerance to the strict analyzer bound
+ok 678 - export trims the browser edge tolerance to the strict analyzer bound
+  ---
+  duration_ms: 0.141024
+  ...
+# Subtest: export refuses legacy labels, disabled rules and unusable gaps
+ok 679 - export refuses legacy labels, disabled rules and unusable gaps
+  ---
+  duration_ms: 0.252954
+  ...
+# Subtest: saved rules keep optional camera names and gaps, and old rules still load
+ok 680 - saved rules keep optional camera names and gaps, and old rules still load
+  ---
+  duration_ms: 0.31497
+  ...
+1..680
+# tests 680
+# suites 0
+# pass 680
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 3731.347227

@@ -1,0 +1,124 @@
+{
+  "date": "2026-11-12",
+  "localLinks": 1822,
+  "markdownPaths": 217,
+  "preRegeneration": [
+    {
+      "status": "fulfilled",
+      "value": {
+        "name": "wiki",
+        "command": "python3 scripts/build-wiki.py --check",
+        "chunk_id": "daba09",
+        "wall_time_seconds": 0.010441482,
+        "exit_code": 1,
+        "original_token_count": 22,
+        "output": "Wiki drift: Historical-visual-provenance.md; regenerate or stage the matching source\n"
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "name": "graphics",
+        "command": "python3 scripts/build-guide-graphics.py --check",
+        "chunk_id": "6b1fbe",
+        "wall_time_seconds": 0.000008696,
+        "exit_code": 0,
+        "original_token_count": 10,
+        "output": "Checked 10 editable workflow graphics.\n"
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "name": "wikiTests",
+        "command": "python3 -m unittest discover -s tests -p test_wiki_docs.py",
+        "chunk_id": "2be362",
+        "wall_time_seconds": 0.038322211,
+        "exit_code": 0,
+        "original_token_count": 27,
+        "output": "........\n----------------------------------------------------------------------\nRan 8 tests in 0.052s\n\nOK\n"
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "name": "diff",
+        "command": "git diff --check",
+        "chunk_id": "d38587",
+        "wall_time_seconds": 0.00001065,
+        "exit_code": 0,
+        "original_token_count": 0,
+        "output": ""
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "name": "orientation",
+        "command": "node docs/verification/coordinate-integrity-math-2026-11-12/orientation/check-orientation.mjs --output /tmp/dvr-coordinate-root-orientation-20261112.json --require-pass",
+        "chunk_id": "cce251",
+        "wall_time_seconds": 0.000010119,
+        "exit_code": 0,
+        "original_token_count": 62,
+        "output": "{\n  \"output\": \"/tmp/dvr-coordinate-root-orientation-20261112.json\",\n  \"evaluated\": \"actual-app-helper\",\n  \"cases\": 2707,\n  \"assertions\": 8121,\n  \"failures\": 0,\n  \"helperSha256\": \"50101ba8edd52a893cddf71557f9338abd251451a7ba372777e2607f7cb303e9\"\n}\n"
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "name": "reorigin",
+        "command": "node docs/verification/coordinate-integrity-math-2026-11-12/reorigin/replay.mjs --repo . --require-pass > /tmp/dvr-coordinate-root-reorigin-20261112.json",
+        "chunk_id": "71bf65",
+        "wall_time_seconds": 0.000009418,
+        "exit_code": 0,
+        "original_token_count": 0,
+        "output": ""
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "name": "calibrationPackage",
+        "command": "python3 docs/verification/coordinate-integrity-math-2026-11-12/calibration-boundary/replay.py verify",
+        "chunk_id": "43ef73",
+        "wall_time_seconds": 0.000006653,
+        "exit_code": 0,
+        "original_token_count": 6,
+        "output": "{\"verifiedFiles\": 30}\n"
+      }
+    }
+  ],
+  "final": [
+    {
+      "status": "fulfilled",
+      "value": {
+        "chunk_id": "63bfae",
+        "wall_time_seconds": 0.000011832,
+        "exit_code": 0,
+        "original_token_count": 11,
+        "output": "Wiki checked: 68 pages/navigation files.\n"
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "chunk_id": "786f96",
+        "wall_time_seconds": 0.041698408,
+        "exit_code": 0,
+        "original_token_count": 274,
+        "output": "Host summaries verified: 300 distinct images; reference/queue/rate/parity/source/default invariants checked. No experiments rerun.\nCUDA evidence checks passed: parity, queue accounting, runtime scope and publication bounds.\nWorker evidence checks passed: initial/final trials, parity, queue accounting and publication scope.\nRecovery evidence checks passed: native proof, generations/reaping, fault intervals, outcome/queue accounting and privacy scope.\nJournal evidence checks passed: native proof, interrupted work, acknowledgment/redelivery, replay accounting and measured durability cost.\nBatching evidence checks passed: atomic native exits, version compatibility, indexed delivery, matched medians and honest queue/delivery accounting.\nOwner synthetic record: source/policy bindings, 142 tests per environment, legacy recovery, CUDA block and all loss identities verified.\nDocumentation checks passed: 1822 local links, 14 historical media hashes, 11 PR61 visual blobs, 2,381,700 historical + 185,432 PR61 + 1,626,214 guide + 222,707 guided-experience media bytes, test-count consistency.\n"
+      }
+    },
+    {
+      "status": "fulfilled",
+      "value": {
+        "chunk_id": "272d3b",
+        "wall_time_seconds": 0.000009208,
+        "exit_code": 0,
+        "original_token_count": 0,
+        "output": ""
+      }
+    }
+  ],
+  "note": "Pre-regeneration check correctly found the newly edited media index's Wiki page stale. Generated68 outputs again; final Wiki/docs/whitespace checks pass. No historical source artifacts were changed."
+}

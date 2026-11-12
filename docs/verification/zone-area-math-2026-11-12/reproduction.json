@@ -1,0 +1,623 @@
+{
+  "source": {
+    "base": "git:63b06ba2aab3adcffc38f52310b55969fb538afe:src/facility-coverage.mjs",
+    "coverageSha256": "122dce3ca246afea2cb66f816dae27b40f4baf5ee8bfd9bee1b2b6cac8d5bfad"
+  },
+  "cases": [
+    {
+      "name": "grid misses ordinary ten-centimetre blind strip",
+      "validated": true,
+      "plan": {
+        "schema": "intelligent-dvr.facility.v6",
+        "name": "My facility",
+        "origin": [
+          -98,
+          38.5
+        ],
+        "buildings": [],
+        "cameras": [
+          {
+            "id": "C1",
+            "name": "C1",
+            "x": 0,
+            "y": 0,
+            "z": 4,
+            "bearing": 45,
+            "tilt": 30,
+            "hfov": 90,
+            "vfov": 60,
+            "range": 50,
+            "enabled": true
+          }
+        ],
+        "rooms": [],
+        "doorways": [],
+        "windows": [],
+        "labels": [],
+        "openings": [],
+        "stairs": [],
+        "paths": [],
+        "zones": [
+          {
+            "id": "zone",
+            "name": "zone",
+            "type": "object_watch",
+            "footprint": [
+              [
+                10,
+                -0.1
+              ],
+              [
+                20,
+                -0.1
+              ],
+              [
+                20,
+                0.9
+              ],
+              [
+                10,
+                0.9
+              ],
+              [
+                10,
+                -0.1
+              ]
+            ],
+            "enabled": true,
+            "expectedClasses": [],
+            "dwellSeconds": 0
+          }
+        ],
+        "route": []
+      },
+      "grid": {
+        "cells": 160,
+        "cell": 0.25,
+        "cellWidth": 0.25,
+        "cellHeight": 0.25,
+        "cameras": 1,
+        "estimated": true,
+        "coverage": 1,
+        "overlap": 0,
+        "blindSpotsCount": 0
+      },
+      "zoneArea": 10,
+      "polygonCoveredArea": 8.999999999999993,
+      "polygonCoverage": 0.8999999999999992,
+      "analytic": {
+        "zoneArea": 10,
+        "coveredArea": 9,
+        "coverage": 0.9,
+        "blindArea": 1
+      }
+    },
+    {
+      "name": "grid misses ordinary ten-centimetre visible strip",
+      "validated": true,
+      "plan": {
+        "schema": "intelligent-dvr.facility.v6",
+        "name": "My facility",
+        "origin": [
+          -98,
+          38.5
+        ],
+        "buildings": [],
+        "cameras": [
+          {
+            "id": "C1",
+            "name": "C1",
+            "x": 0,
+            "y": 0.9,
+            "z": 4,
+            "bearing": 45,
+            "tilt": 30,
+            "hfov": 90,
+            "vfov": 60,
+            "range": 50,
+            "enabled": true
+          }
+        ],
+        "rooms": [],
+        "doorways": [],
+        "windows": [],
+        "labels": [],
+        "openings": [],
+        "stairs": [],
+        "paths": [],
+        "zones": [
+          {
+            "id": "zone",
+            "name": "zone",
+            "type": "object_watch",
+            "footprint": [
+              [
+                10,
+                0
+              ],
+              [
+                20,
+                0
+              ],
+              [
+                20,
+                1
+              ],
+              [
+                10,
+                1
+              ],
+              [
+                10,
+                0
+              ]
+            ],
+            "enabled": true,
+            "expectedClasses": [],
+            "dwellSeconds": 0
+          }
+        ],
+        "route": []
+      },
+      "grid": {
+        "cells": 160,
+        "cell": 0.25,
+        "cellWidth": 0.25,
+        "cellHeight": 0.25,
+        "cameras": 1,
+        "estimated": true,
+        "coverage": 0,
+        "overlap": 0,
+        "blindSpotsCount": 4
+      },
+      "zoneArea": 10,
+      "polygonCoveredArea": 0.9999999999999909,
+      "polygonCoverage": 0.09999999999999909,
+      "analytic": {
+        "zoneArea": 10,
+        "coveredArea": 1,
+        "coverage": 0.1,
+        "blindArea": 9
+      },
+      "gridBlindArea": 10,
+      "gridBlindOutsideZoneArea": 0
+    },
+    {
+      "name": "diagonal drawn yard blind overlay leaves footprint",
+      "validated": true,
+      "plan": {
+        "schema": "intelligent-dvr.facility.v6",
+        "name": "My facility",
+        "origin": [
+          -98,
+          38.5
+        ],
+        "buildings": [],
+        "cameras": [
+          {
+            "id": "distant",
+            "name": "distant",
+            "x": 1000,
+            "y": 1000,
+            "z": 4,
+            "bearing": 45,
+            "tilt": 30,
+            "hfov": 90,
+            "vfov": 60,
+            "range": 50,
+            "enabled": true
+          }
+        ],
+        "rooms": [],
+        "doorways": [],
+        "windows": [],
+        "labels": [],
+        "openings": [],
+        "stairs": [],
+        "paths": [],
+        "zones": [
+          {
+            "id": "zone",
+            "name": "zone",
+            "type": "object_watch",
+            "footprint": [
+              [
+                0,
+                0
+              ],
+              [
+                10,
+                0
+              ],
+              [
+                2,
+                10
+              ],
+              [
+                0,
+                0
+              ]
+            ],
+            "enabled": true,
+            "expectedClasses": [],
+            "dwellSeconds": 0
+          }
+        ],
+        "route": []
+      },
+      "grid": {
+        "cells": 804,
+        "cell": 0.25,
+        "cellWidth": 0.25,
+        "cellHeight": 0.25,
+        "cameras": 0,
+        "estimated": true,
+        "coverage": 0,
+        "overlap": 0,
+        "blindSpotsCount": 39
+      },
+      "zoneArea": 50,
+      "polygonCoveredArea": 0,
+      "polygonCoverage": 0,
+      "analytic": {
+        "zoneArea": 50,
+        "coveredArea": 0,
+        "coverage": 0,
+        "blindArea": 50
+      },
+      "gridBlindArea": 50.25,
+      "gridBlindOutsideZoneArea": 0.8249999999999961
+    },
+    {
+      "name": "grid misses distinct second camera overlap strip",
+      "validated": true,
+      "plan": {
+        "schema": "intelligent-dvr.facility.v6",
+        "name": "My facility",
+        "origin": [
+          -98,
+          38.5
+        ],
+        "buildings": [],
+        "cameras": [
+          {
+            "id": "C1",
+            "name": "C1",
+            "x": 0,
+            "y": -1,
+            "z": 4,
+            "bearing": 45,
+            "tilt": 30,
+            "hfov": 90,
+            "vfov": 60,
+            "range": 50,
+            "enabled": true
+          },
+          {
+            "id": "C2",
+            "name": "C2",
+            "x": 0,
+            "y": 0.9,
+            "z": 4,
+            "bearing": 45,
+            "tilt": 30,
+            "hfov": 90,
+            "vfov": 60,
+            "range": 50,
+            "enabled": true
+          }
+        ],
+        "rooms": [],
+        "doorways": [],
+        "windows": [],
+        "labels": [],
+        "openings": [],
+        "stairs": [],
+        "paths": [],
+        "zones": [
+          {
+            "id": "overlap",
+            "name": "overlap",
+            "type": "object_watch",
+            "footprint": [
+              [
+                10,
+                0
+              ],
+              [
+                20,
+                0
+              ],
+              [
+                20,
+                1
+              ],
+              [
+                10,
+                1
+              ],
+              [
+                10,
+                0
+              ]
+            ],
+            "enabled": true,
+            "expectedClasses": [],
+            "dwellSeconds": 0
+          }
+        ],
+        "route": []
+      },
+      "grid": {
+        "cells": 160,
+        "cell": 0.25,
+        "cellWidth": 0.25,
+        "cellHeight": 0.25,
+        "cameras": 2,
+        "estimated": true,
+        "coverage": 1,
+        "overlap": 0
+      },
+      "polygonOverlap": 0.09999999999999909,
+      "analytic": {
+        "coverage": 1,
+        "overlap": 0.1
+      }
+    },
+    {
+      "name": "translated 0,0",
+      "validated": true,
+      "plan": {
+        "schema": "intelligent-dvr.facility.v6",
+        "name": "My facility",
+        "origin": [
+          -98,
+          38.5
+        ],
+        "buildings": [],
+        "cameras": [
+          {
+            "id": "C1",
+            "name": "C1",
+            "x": 0,
+            "y": 0,
+            "z": 4,
+            "bearing": 45,
+            "tilt": 30,
+            "hfov": 90,
+            "vfov": 60,
+            "range": 50,
+            "enabled": true
+          }
+        ],
+        "rooms": [],
+        "doorways": [],
+        "windows": [],
+        "labels": [],
+        "openings": [],
+        "stairs": [],
+        "paths": [],
+        "zones": [
+          {
+            "id": "zone",
+            "name": "zone",
+            "type": "object_watch",
+            "footprint": [
+              [
+                10,
+                -0.1
+              ],
+              [
+                20,
+                -0.1
+              ],
+              [
+                20,
+                0.9
+              ],
+              [
+                10,
+                0.9
+              ],
+              [
+                10,
+                -0.1
+              ]
+            ],
+            "enabled": true,
+            "expectedClasses": [],
+            "dwellSeconds": 0
+          }
+        ],
+        "route": []
+      },
+      "grid": {
+        "cells": 160,
+        "cell": 0.25,
+        "cellWidth": 0.25,
+        "cellHeight": 0.25,
+        "cameras": 1,
+        "estimated": true,
+        "coverage": 1,
+        "overlap": 0,
+        "blindSpotsCount": 0
+      },
+      "zoneArea": 10,
+      "polygonCoveredArea": 8.999999999999993,
+      "polygonCoverage": 0.8999999999999992,
+      "analytic": {
+        "coverage": 0.9
+      }
+    },
+    {
+      "name": "translated 1750,-1700",
+      "validated": true,
+      "plan": {
+        "schema": "intelligent-dvr.facility.v6",
+        "name": "My facility",
+        "origin": [
+          -98,
+          38.5
+        ],
+        "buildings": [],
+        "cameras": [
+          {
+            "id": "C1",
+            "name": "C1",
+            "x": 1750,
+            "y": -1700,
+            "z": 4,
+            "bearing": 45,
+            "tilt": 30,
+            "hfov": 90,
+            "vfov": 60,
+            "range": 50,
+            "enabled": true
+          }
+        ],
+        "rooms": [],
+        "doorways": [],
+        "windows": [],
+        "labels": [],
+        "openings": [],
+        "stairs": [],
+        "paths": [],
+        "zones": [
+          {
+            "id": "zone",
+            "name": "zone",
+            "type": "object_watch",
+            "footprint": [
+              [
+                1760,
+                -1700.1
+              ],
+              [
+                1770,
+                -1700.1
+              ],
+              [
+                1770,
+                -1699.1
+              ],
+              [
+                1760,
+                -1699.1
+              ],
+              [
+                1760,
+                -1700.1
+              ]
+            ],
+            "enabled": true,
+            "expectedClasses": [],
+            "dwellSeconds": 0
+          }
+        ],
+        "route": []
+      },
+      "grid": {
+        "cells": 160,
+        "cell": 0.25,
+        "cellWidth": 0.25,
+        "cellHeight": 0.25,
+        "cameras": 1,
+        "estimated": true,
+        "coverage": 1,
+        "overlap": 0,
+        "blindSpotsCount": 0
+      },
+      "zoneArea": 10,
+      "polygonCoveredArea": 9.00000000000091,
+      "polygonCoverage": 0.900000000000091,
+      "analytic": {
+        "coverage": 0.9
+      }
+    },
+    {
+      "name": "translated -1750,1700",
+      "validated": true,
+      "plan": {
+        "schema": "intelligent-dvr.facility.v6",
+        "name": "My facility",
+        "origin": [
+          -98,
+          38.5
+        ],
+        "buildings": [],
+        "cameras": [
+          {
+            "id": "C1",
+            "name": "C1",
+            "x": -1750,
+            "y": 1700,
+            "z": 4,
+            "bearing": 45,
+            "tilt": 30,
+            "hfov": 90,
+            "vfov": 60,
+            "range": 50,
+            "enabled": true
+          }
+        ],
+        "rooms": [],
+        "doorways": [],
+        "windows": [],
+        "labels": [],
+        "openings": [],
+        "stairs": [],
+        "paths": [],
+        "zones": [
+          {
+            "id": "zone",
+            "name": "zone",
+            "type": "object_watch",
+            "footprint": [
+              [
+                -1740,
+                1699.9
+              ],
+              [
+                -1730,
+                1699.9
+              ],
+              [
+                -1730,
+                1700.9
+              ],
+              [
+                -1740,
+                1700.9
+              ],
+              [
+                -1740,
+                1699.9
+              ]
+            ],
+            "enabled": true,
+            "expectedClasses": [],
+            "dwellSeconds": 0
+          }
+        ],
+        "route": []
+      },
+      "grid": {
+        "cells": 160,
+        "cell": 0.25,
+        "cellWidth": 0.25,
+        "cellHeight": 0.25,
+        "cameras": 1,
+        "estimated": true,
+        "coverage": 1,
+        "overlap": 0,
+        "blindSpotsCount": 0
+      },
+      "zoneArea": 10,
+      "polygonCoveredArea": 9.00000000000091,
+      "polygonCoverage": 0.900000000000091,
+      "analytic": {
+        "coverage": 0.9
+      }
+    }
+  ]
+}

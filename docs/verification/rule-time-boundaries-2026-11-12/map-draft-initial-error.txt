@@ -1,0 +1,373 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+  - link "Skip to workspace" [ref=e4] [cursor=pointer]:
+    - /url: "#workspace"
+  - banner [ref=e5]:
+    - img [ref=e7]
+    - generic [ref=e9]: Intelligent DVR
+    - generic [ref=e11]: Guided facility builder
+    - button "Open workspace settings" [ref=e12] [cursor=pointer]:
+      - text: Local workspace
+      - img [ref=e13]
+    - generic [ref=e15]:
+      - button "Find a task" [ref=e16] [cursor=pointer]:
+        - img [ref=e17]
+        - generic [ref=e19]: Find a task
+        - generic [ref=e20]: ⌘ / Ctrl K
+      - generic [ref=e21]: Local · human review
+      - button "About this pilot" [ref=e22] [cursor=pointer]:
+        - img [ref=e23]
+  - navigation "Main navigation" [ref=e25]:
+    - button "Monitor" [ref=e26] [cursor=pointer]:
+      - img [ref=e27]
+      - generic [ref=e29]: Monitor
+    - button "Recognition" [ref=e30] [cursor=pointer]:
+      - img [ref=e31]
+      - generic [ref=e33]: Recognition
+    - button "Train" [ref=e34] [cursor=pointer]:
+      - img [ref=e35]
+      - generic [ref=e37]: Train
+    - button "Facility" [ref=e38] [cursor=pointer]:
+      - img [ref=e39]
+      - generic [ref=e41]: Facility
+    - button "Events" [ref=e42] [cursor=pointer]:
+      - img [ref=e43]
+      - generic [ref=e45]: Events
+    - button "Zones" [ref=e46] [cursor=pointer]:
+      - img [ref=e47]
+      - generic [ref=e49]: Zones
+    - button "System" [ref=e50] [cursor=pointer]:
+      - img [ref=e51]
+      - generic [ref=e53]: System
+    - button "Settings" [ref=e54] [cursor=pointer]:
+      - img [ref=e55]
+      - generic [ref=e57]: Settings
+    - button "Pilot information" [ref=e58] [cursor=pointer]:
+      - img [ref=e59]
+  - status [ref=e61]
+  - main "Facility workspace" [ref=e62]:
+    - region "Guided facility builder" [ref=e63]:
+      - generic "Facility Studio toolbar" [ref=e64]:
+        - generic [ref=e65]:
+          - strong [ref=e66]: FACILITY STUDIO
+          - generic "My facility" [ref=e67]: My facility · 0 buildings · 0 cameras
+        - generic [ref=e68]:
+          - generic "Step 1 of 7" [ref=e69]: STEP 1 / 7
+          - generic [ref=e70]:
+            - text: Current task
+            - combobox "Jump to facility task" [ref=e71] [cursor=pointer]:
+              - option "1. Locate site" [selected]
+              - option "2. Buildings"
+              - option "3. Floors & labels"
+              - option "4. Cameras"
+              - option "5. Coverage"
+              - option "6. Handoffs"
+              - option "7. Zones & objects"
+          - generic "Set the site and map origin" [ref=e72]
+        - generic [ref=e73]:
+          - button "Focus facility map" [ref=e74] [cursor=pointer]: Focus map
+          - button "Help" [ref=e75] [cursor=pointer]
+      - complementary [ref=e76]:
+        - region "Your facilities" [ref=e77]:
+          - generic [ref=e78]:
+            - generic [ref=e79]: YOUR FACILITIES
+            - generic [ref=e80]: "1"
+          - generic [ref=e81]:
+            - img [ref=e82]
+            - combobox "Saved facility" [ref=e84]:
+              - option "My facility" [selected]
+          - paragraph [ref=e85]:
+            - text: 0 buildings
+            - generic [ref=e86]: ·
+            - text: 0 cameras
+          - generic [ref=e87]:
+            - button "New facility" [ref=e88] [cursor=pointer]:
+              - img [ref=e89]
+              - text: New facility
+            - button "Duplicate facility" [ref=e91] [cursor=pointer]:
+              - img [ref=e92]
+              - text: Duplicate facility
+          - status [ref=e94]: Saved in this browser · export a backup
+          - group [ref=e96]:
+            - generic "Backup & examples" [ref=e97] [cursor=pointer]
+        - paragraph [ref=e98]: FACILITY WORKSPACE
+        - heading "Design your coverage" [level=1] [ref=e99]
+        - paragraph [ref=e100]:
+          - text: Measure the space. Build each level.
+          - text: Place, aim and review your cameras.
+        - list [ref=e101]:
+          - listitem [ref=e102]:
+            - button "1 Locate site Set the site and map origin" [ref=e103] [cursor=pointer]:
+              - generic [ref=e104]: "1"
+              - generic [ref=e105]:
+                - strong [ref=e106]: Locate site
+                - generic [ref=e107]: Set the site and map origin
+          - listitem [ref=e108]:
+            - button "2 Buildings Draw footprints and set heights" [ref=e109] [cursor=pointer]:
+              - generic [ref=e110]: "2"
+              - generic [ref=e111]:
+                - strong [ref=e112]: Buildings
+                - generic [ref=e113]: Draw footprints and set heights
+          - listitem [ref=e114]:
+            - button "3 Floors & labels Name the spaces that matter" [ref=e115] [cursor=pointer]:
+              - generic [ref=e116]: "3"
+              - generic [ref=e117]:
+                - strong [ref=e118]: Floors & labels
+                - generic [ref=e119]: Name the spaces that matter
+          - listitem [ref=e120]:
+            - button "4 Cameras Place and aim each camera" [ref=e121] [cursor=pointer]:
+              - generic [ref=e122]: "4"
+              - generic [ref=e123]:
+                - strong [ref=e124]: Cameras
+                - generic [ref=e125]: Place and aim each camera
+          - listitem [ref=e126]:
+            - button "5 Coverage Inspect visibility and blind spots" [ref=e127] [cursor=pointer]:
+              - generic [ref=e128]: "5"
+              - generic [ref=e129]:
+                - strong [ref=e130]: Coverage
+                - generic [ref=e131]: Inspect visibility and blind spots
+          - listitem [ref=e132]:
+            - button "6 Handoffs Rehearse a route between cameras" [ref=e133] [cursor=pointer]:
+              - generic [ref=e134]: "6"
+              - generic [ref=e135]:
+                - strong [ref=e136]: Handoffs
+                - generic [ref=e137]: Rehearse a route between cameras
+          - listitem [ref=e138]:
+            - button "7 Zones & objects Define restricted areas and object rules" [ref=e139] [cursor=pointer]:
+              - generic [ref=e140]: "7"
+              - generic [ref=e141]:
+                - strong [ref=e142]: Zones & objects
+                - generic [ref=e143]: Define restricted areas and object rules
+        - generic [ref=e144]:
+          - heading "Camera inventory 0" [level=2] [ref=e145]:
+            - text: Camera inventory
+            - generic [ref=e146]: "0"
+          - generic [ref=e147]:
+            - img [ref=e148]
+            - textbox "Find a camera" [ref=e150]:
+              - /placeholder: Find a camera…
+          - paragraph [ref=e152]: No cameras match.
+        - generic [ref=e153]:
+          - button "Export plan" [ref=e154] [cursor=pointer]:
+            - img [ref=e155]
+            - text: Export plan
+          - button "Import plan" [ref=e157] [cursor=pointer]:
+            - img [ref=e158]
+            - text: Import plan
+          - button "Paste JSON" [ref=e160] [cursor=pointer]:
+            - img [ref=e161]
+            - text: Paste JSON
+          - button "Undo edit" [disabled] [ref=e163]:
+            - img [ref=e164]
+            - text: Undo edit
+          - button "Redo edit" [disabled] [ref=e166]:
+            - img [ref=e167]
+            - text: Redo edit
+        - status [ref=e169]: Ready to edit
+      - generic [ref=e170]:
+        - region "Start a blank facility" [ref=e171]:
+          - img [ref=e173]
+          - paragraph [ref=e176]: A CLEAN START
+          - heading "Your facility starts here" [level=2] [ref=e177]
+          - paragraph [ref=e178]: Find your site on a real map and trace its buildings, pick a building shape, or open a saved facility.
+          - button "Find my site on the map" [ref=e179] [cursor=pointer]:
+            - img [ref=e180]
+            - text: Find my site on the map
+          - generic [ref=e182]:
+            - button "Add first building" [ref=e183] [cursor=pointer]:
+              - img [ref=e184]
+              - text: Add first building
+            - button "Import saved facility" [ref=e186] [cursor=pointer]:
+              - img [ref=e187]
+              - text: Import saved facility
+          - generic [ref=e189]: Finding your site shows map pictures from USGS (U.S. aerial photos) or OpenStreetMap for the area you view. Your plan stays in this browser. No buildings, cameras or example layouts are added automatically.
+        - group "Facility map. Use arrow keys to pan; use the add-with-coordinates, rectangle and point-list controls to place items without drawing." [ref=e190]:
+          - region "Map" [ref=e191]
+          - generic:
+            - generic [ref=e192]: 30 m
+            - generic [ref=e193]:
+              - button "Zoom in" [ref=e194] [cursor=pointer]
+              - button "Zoom out" [ref=e196] [cursor=pointer]
+              - button "Drag to rotate map, click to reset north" [ref=e198]
+        - group "Map view" [ref=e200]:
+          - button "2D" [pressed] [ref=e201] [cursor=pointer]
+          - button "3D" [ref=e202] [cursor=pointer]
+          - button "Floors" [ref=e203] [cursor=pointer]
+          - button "Center facility" [ref=e204] [cursor=pointer]:
+            - img [ref=e205]
+          - button "Reset map view" [ref=e207] [cursor=pointer]:
+            - img [ref=e208]
+        - generic [ref=e210]:
+          - button "Point map north" [ref=e211] [cursor=pointer]:
+            - generic [ref=e212]: ↑
+            - generic [ref=e213]: "N"
+            - generic [ref=e214]: 0°
+          - group "Map layer" [ref=e215]:
+            - button "Grid" [pressed] [ref=e216] [cursor=pointer]
+            - button "Streets" [ref=e217] [cursor=pointer]:
+              - img [ref=e218]
+              - text: Streets
+            - button "Aerial" [ref=e220] [cursor=pointer]:
+              - img [ref=e221]
+              - text: Aerial
+            - button "Satellite" [ref=e223] [cursor=pointer]:
+              - img [ref=e224]
+              - text: Satellite
+          - generic [ref=e226]:
+            - checkbox "Dimensions" [checked] [ref=e227]
+            - text: Dimensions
+          - combobox "Measurement units" [ref=e228]:
+            - option "Meters · m / m²" [selected]
+            - option "Feet · ft / ft²"
+        - generic:
+          - text: My facility
+          - generic: Local grid · 20.0 m spacing · no map pictures requested
+        - generic:
+          - generic: Estimated visibility
+          - generic: Route / object watch
+          - generic: Restricted
+          - generic: Selected camera’s ground-view envelope is shown in 3D.
+      - complementary [ref=e229]:
+        - generic [ref=e230]:
+          - paragraph [ref=e231]: STEP 1 OF 7
+          - heading "Locate your facility" [level=2] [ref=e232]
+          - paragraph [ref=e233]: Set a geographic origin for your facility; dimensions use the local map grid.
+        - generic [ref=e234]:
+          - group "Map layer" [ref=e235]:
+            - generic [ref=e236]: Map layer
+            - generic [ref=e237]:
+              - generic [ref=e238]:
+                - radio "Local grid" [checked] [ref=e239]
+                - text: Local grid
+              - generic [ref=e240]:
+                - radio "Streets · OpenStreetMap" [ref=e241]
+                - text: Streets · OpenStreetMap
+              - generic [ref=e242]:
+                - radio "Aerial · USGS The National Map" [ref=e243]
+                - text: Aerial · USGS The National Map
+              - generic [ref=e244]:
+                - radio "Satellite + U.S. roof detail" [ref=e245]
+                - text: Satellite + U.S. roof detail
+            - generic [ref=e246]: Local plan geometry only. No map pictures are requested. Choose Satellite for a regional view and U.S. roof detail, or choose Streets or Aerial.
+          - button "Pick site on map" [ref=e247] [cursor=pointer]
+          - group [ref=e248]:
+            - generic "Find an address or place" [ref=e249] [cursor=pointer]
+            - generic [ref=e250]:
+              - generic [ref=e251]:
+                - generic [ref=e252]: Address search provider
+                - combobox "Address search provider" [ref=e253]:
+                  - option "Photon public demo" [selected]
+                  - option "Local Photon service"
+              - paragraph [ref=e254]: Search sends only the submitted text to photon.komoot.io (public demo; availability varies). No device position, camera plan or recordings are sent. Nothing is sent while typing. Avoid private addresses on public services.
+              - generic [ref=e255]:
+                - generic [ref=e256]: Address or place name
+                - searchbox "Address or place name" [ref=e257]
+              - button "Search address" [disabled] [ref=e258]
+            - status
+            - list "Address suggestions"
+            - paragraph [ref=e259]:
+              - text: Search locates a place, not a surveyed building boundary. ©
+              - link "OpenStreetMap contributors · ODbL" [ref=e260] [cursor=pointer]:
+                - /url: https://www.openstreetmap.org/copyright
+              - text: ·
+              - link "Photon terms" [ref=e261] [cursor=pointer]:
+                - /url: https://photon.komoot.io/
+          - generic [ref=e262]:
+            - button "Use my location" [ref=e263] [cursor=pointer]
+            - paragraph [ref=e264]: A new plan starts in central Kansas. Use my location asks your device for an estimate within 100 m. If the pin looks wrong, search for the facility address or pick its roof on the map.
+            - generic [ref=e265]:
+              - generic [ref=e266]: Facility name
+              - textbox "Facility name" [ref=e267]: My facility
+            - generic [ref=e268]:
+              - generic [ref=e269]: Latitude
+              - spinbutton "Latitude" [ref=e270]: "38.5"
+            - generic [ref=e271]:
+              - generic [ref=e272]: Longitude
+              - spinbutton "Longitude" [ref=e273]: "-98"
+            - paragraph [ref=e274]: Building and camera positions are meters east and north of this origin. Changing the origin moves the whole plan geographically. This is a local planning coordinate system, not a surveyed model.
+            - button "Save site" [ref=e275] [cursor=pointer]:
+              - text: Save site
+              - img [ref=e276]
+          - generic [ref=e278]:
+            - img [ref=e279]
+            - generic [ref=e281]:
+              - strong [ref=e282]: "Next: outline your buildings"
+              - paragraph [ref=e283]: Start from buildings already mapped around your site, then keep the ones that are yours. Or trace each roof yourself (turn on Streets or Aerial to see your real site). You can adjust every corner and dimension afterwards.
+              - generic [ref=e284]:
+                - button "Find mapped buildings" [ref=e285] [cursor=pointer]:
+                  - img [ref=e286]
+                  - text: Find mapped buildings
+                - button "Trace a building" [ref=e288] [cursor=pointer]:
+                  - img [ref=e289]
+                  - text: Trace a building
+              - generic [ref=e291]: Finding sends only the search area outlined on the map to the OpenStreetMap building service chosen below. Outlines are volunteer-mapped and may be missing or out of date.
+          - group [ref=e292]:
+            - generic "Draft buildings from OpenStreetMap" [ref=e293] [cursor=pointer]
+            - list "Building draft steps" [ref=e294]:
+              - listitem [ref=e295]: 1. Save location
+              - listitem [ref=e296]: 2. Confirm area
+              - listitem [ref=e297]: 3. Review outlines
+              - listitem [ref=e298]: 4. Apply selected
+            - paragraph [ref=e299]: "First save your address, GPS suggestion or coordinates above. This area is relative to the saved origin: 38.5, -98. Adjust its dimensions and offsets to select the area outlined on the map."
+            - generic [ref=e300]:
+              - generic [ref=e301]: Area shape
+              - combobox "Area shape" [ref=e302]:
+                - option "Rectangle" [selected]
+                - option "Custom polygon"
+            - button "Draw search area" [ref=e303] [cursor=pointer]
+            - generic [ref=e304]:
+              - generic [ref=e305]:
+                - generic [ref=e306]: Search width (m)
+                - spinbutton "Search width (m)" [ref=e307]: "250"
+              - generic [ref=e308]:
+                - generic [ref=e309]: Search depth (m)
+                - spinbutton "Search depth (m)" [ref=e310]: "250"
+            - generic [ref=e311]:
+              - generic [ref=e312]:
+                - generic [ref=e313]: Search east (m)
+                - spinbutton "Search east (m)" [ref=e314]: "0"
+              - generic [ref=e315]:
+                - generic [ref=e316]: Search north (m)
+                - spinbutton "Search north (m)" [ref=e317]: "0"
+            - generic [ref=e318]:
+              - generic [ref=e319]: Building source
+              - combobox "Building source" [ref=e320]:
+                - option "Private.coffee public Overpass" [selected]
+                - option "OSM public Overpass"
+                - option "Local Overpass service"
+            - paragraph [ref=e321]: Load sends only this area's coordinates to overpass.private.coffee. It does not send cameras, rooms or recordings. Public service availability varies; import an extract if unavailable. Requests are limited to 500 × 500 m, 300 features and 2 MB. No subscription or API key.
+            - paragraph [ref=e322]:
+              - link "Map service terms and privacy" [ref=e323] [cursor=pointer]:
+                - /url: https://overpass.private.coffee/
+              - text: · Used for draft planning only. Verify all geometry before operational use.
+            - button "Load open building drafts" [ref=e324] [cursor=pointer]
+            - status
+            - group [ref=e325]:
+              - generic "Open an offline OSM file or paste JSON" [ref=e326]
+            - paragraph [ref=e327]: Complete outer-only relations can be assembled or split into separate shells. Courtyards remain open and raised bases are retained. Independent, non-overlapping building parts are supported. Overlapping parts/envelopes and invalid or nested rings are excluded with reasons. Heights/floors may be placeholders. No interiors are inferred.
+            - button "Clear session map cache" [ref=e328] [cursor=pointer]
+            - paragraph [ref=e329]:
+              - text: ©
+              - link "OpenStreetMap contributors · ODbL" [ref=e330] [cursor=pointer]:
+                - /url: https://www.openstreetmap.org/copyright
+              - text: . Source and license are retained in plan exports. Review ODbL obligations before distributing a derived database.
+          - generic [ref=e331]:
+            - img [ref=e332]
+            - paragraph [ref=e334]: "Find your site, then trace buildings over the real map. Map pictures are a drawing guide, not a survey: verify dimensions on site. Imported files and examples open as separate facilities."
+        - generic [ref=e335]:
+          - alert [ref=e336]: Save or discard your preview before changing steps.
+          - generic [ref=e337]:
+            - button "Back" [disabled] [ref=e338]:
+              - img [ref=e339]
+              - text: Back
+            - button "Continue" [ref=e341] [cursor=pointer]:
+              - text: Continue
+              - img [ref=e342]
+  - contentinfo [ref=e344]:
+    - img [ref=e345]
+    - strong [ref=e347]: No camera preview active
+    - generic [ref=e349]: Locate your site, draw the spaces, then place cameras. Coverage is a planning estimate.
+    - generic [ref=e350]: Edge-first. Human-reviewed.
+```

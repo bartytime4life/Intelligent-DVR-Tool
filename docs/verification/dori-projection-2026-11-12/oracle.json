@@ -1,0 +1,47 @@
+{
+  "camera_cases": 236,
+  "counts": {
+    "contour_cases": 227,
+    "contour_fragments": 143,
+    "contour_points": 715,
+    "density_queries": 2043,
+    "invalid_cases": 9,
+    "table_bands": 908
+  },
+  "failure_count": 0,
+  "failure_samples": [],
+  "fixture_tolerances": {
+    "density_px_per_metre": 1e-05,
+    "geometry_metres": 2e-06
+  },
+  "generated_only": true,
+  "harness_sha256": "4050344a223803ca4b89a115908f73073d57ebe5e4bc48e4c28296c5de7a2caa",
+  "inputs_sha256": "3bb534c91d32404bf42d0481984c45dad164945669a767c6378237fc1ae54bbd",
+  "limits": [
+    "Generated double-precision pinhole projection, not measured optics, physical visibility, recognition quality, IEC compliance or capacity.",
+    "Independent generated radial polygon fixtures retain the existing declared groundRange near/far convention, including 89.9-degree near clamp; the oracle checks clipping within those supplied polygons, not coverageFan or physical visibility.",
+    "Reported fixture tolerances and observed maxima are not universal numerical error bounds.",
+    "Copied module snapshots bind exactly the bytes executed; no private footage, camera, inference, network or package installation is used."
+  ],
+  "maxima": {
+    "contour_density_error": 2.6830093702301383e-11,
+    "contour_geometry_metres_error": 1.2899903367724619e-11,
+    "density_absolute_error": 2.7360511012375355e-07,
+    "table_endpoint_metres_error": 1.1375789199519204e-11
+  },
+  "observations_sha256": "3b764f973a0b36405e5f5fe6390934df5db477ef146f425104db7f77ce3aef71",
+  "oracle_sha256": "1e94a185b44f71711f784e770f65f080156350a086ae6a36778ae9d6258a221c",
+  "reference": "https://docs.opencv.org/4.13.0/d9/d0c/group__calib3d.html",
+  "result": "PASS",
+  "schema": "intelligent-dvr.independent-dori-projection-proof.v1",
+  "source_mode": "captured-working-tree-module-snapshot",
+  "source_revision": "63b06ba2aab3adcffc38f52310b55969fb538afe",
+  "source_sha256": {
+    "src/facility-doorways.mjs": "dee737c4c8bdc7bce497ae7c4d82be0a76e45f2a132804f9b911cfc4d7c994fd",
+    "src/facility-dori.mjs": "323cee22e78d6663198e0a77c4c8db79b6f3c722a2625f1e981eb7253af2766e",
+    "src/facility-stairs.mjs": "4ce62cab36971dd528a4af8667168e6cc39f723e5aecbfc619e091106c05a544",
+    "src/facility-windows.mjs": "84cc16197f284680b86edb77b8fd6d49bdc53bb11c316b87332774879cac7ff4",
+    "src/facility-zones.mjs": "14080041069bed6d8eb2ad48ec22c0e004db8b0feaa7c82eabea581898355248",
+    "src/facility.mjs": "dc6d0a44a608c6c07df92ccff06b64b6ba082c6a574763589ba67c177ae53df6"
+  }
+}

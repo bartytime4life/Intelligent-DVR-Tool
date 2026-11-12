@@ -1,0 +1,22 @@
+{
+  "scope": "Earlier candidate failure retained; not a passing result.",
+  "source_sha256": "d6ce9f9afb2afa22f2f776154160cfdfd8a123b5f6192f46f78e2d4a41e04455",
+  "input_sha256": "1cc1553b86d844df042fec7752afefb9bccd3fcd57e43a6bbc75d13e375b1089",
+  "oracle_sha256": "1a38a271257fa371cb27460cf82d7d12da3ecfed4a50b4479349b6b9673db824",
+  "cases": 114,
+  "assertions_reached": 8336,
+  "failed_assertions": 16,
+  "failed_cases": [
+    "five-hundred-stripes",
+    "two-camera-90-10"
+  ],
+  "failure_classes": {
+    "geometry-contract": 2,
+    "metadata": 2,
+    "missing-numeric": 12
+  },
+  "receipt_file": "first-candidate-failed-receipt.json.gz",
+  "receipt_decompressed_sha256": "ae1c1d3dd7708d95010d708f9750f1c7a65ce7b44b1f11ed4aa6ad60e2411853",
+  "receipt_stored_sha256": "ef33da0100170cbc8c284fcdc16c7ae8027a875a832bb3515d2c6923b041addc",
+  "revised_candidate_passed_same_inputs_without_tolerance_changes": true
+}

@@ -1,15 +1,30 @@
 import { stairOnLevel, stairDimensions, stairFootprint } from "./facility-stairs.mjs";
+import {formatReadoutNumber} from './readout-format.mjs';
 // Measurements use the plan's local metre coordinates, not survey accuracy.
 const FEET_PER_METRE = 1 / 0.3048;
 const finitePoint = p => Array.isArray(p) && p.length >= 2 && Number.isFinite(p[0]) && Number.isFinite(p[1]);
-const number = value => value.toLocaleString('en-US', {maximumFractionDigits: 1, minimumFractionDigits: 1});
+const number = value => formatReadoutNumber(value,{digits:1,minimumDigits:1,locale:'en-US'});
 
 export function formatDistance(metres, units = 'metric') {
-  return `${number(metres * (units === 'imperial' ? FEET_PER_METRE : 1))} ${units === 'imperial' ? 'ft' : 'm'}`;
+  return `${number(Number.isFinite(metres) ? metres * (units === 'imperial' ? FEET_PER_METRE : 1) : NaN)} ${units === 'imperial' ? 'ft' : 'm'}`;
+}
+
+// Preserve positive short planning ranges without rounding them to an empty interval.
+export function formatDistanceRange(from, to, units = 'metric') {
+  if (![from, to].every(Number.isFinite) || from < 0 || to < from) return '—';
+  const scale = units === 'imperial' ? FEET_PER_METRE : 1, suffix = units === 'imperial' ? 'ft' : 'm';
+  const a = from===0 ? 0 : from * scale, b = to===0 ? 0 : to * scale;
+  const short = [a, b].some(value => value > 0 && value < .1);
+  for (let digits = short ? 3 : 1; digits <= 12; digits++) {
+    const render = value => value.toLocaleString('en-US', {minimumFractionDigits: digits, maximumFractionDigits: digits});
+    const start = render(a), end = render(b), zero = render(0);
+    if ((a === 0 || start !== zero) && (b === 0 || end !== zero) && (a === b || start !== end)) return `${start} ${suffix}–${end} ${suffix}`;
+  }
+  return `${a} ${suffix}–${b} ${suffix}`;
 }
 
 export function formatArea(squareMetres, units = 'metric') {
-  return `${number(squareMetres * (units === 'imperial' ? FEET_PER_METRE ** 2 : 1))} ${units === 'imperial' ? 'ft²' : 'm²'}`;
+  return `${number(Number.isFinite(squareMetres) ? squareMetres * (units === 'imperial' ? FEET_PER_METRE ** 2 : 1) : NaN)} ${units === 'imperial' ? 'ft²' : 'm²'}`;
 }
 
 export function lineMeasurements(points) {
