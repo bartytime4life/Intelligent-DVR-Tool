@@ -226,8 +226,18 @@ coverage on the Facility map is a different kind of geometry.
    divisions. Preview changes before saving; **Undo edit** reverses a saved edit.
 4. Place a doorway on a shared wall, a window on an outside wall, or a stair
    reservation between levels. Openings, elevations and dimensions stay editable.
-5. Place and aim planned cameras. Treat coverage, routes and planning measurements
-   as estimates. Export the named plan and collection backup when finished.
+5. Place and aim planned cameras. Release a drag to recalculate its estimated
+   ground view. **Updating estimated views** hides outdated geometry. If a view
+   fails, choose **Try views again**; incomplete views withhold totals and handoff
+   proposals. Leaving camera editing or changing the plan, camera, view or floor cancels an
+   unfinished drag; start a fresh one. Undo that changes the plan also cancels it.
+6. Save or discard edits and wait for complete saved-plan views before choosing
+   **Download installer sheet**. Named JSON plans and collection backups remain
+   available while geometry is pending after existing Save/Discard guards are
+   satisfied. Coverage and rehearsal remain estimates.
+
+These visibility/recovery changes belong to the [current branch proposal](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/ground-frustum-math-2026-11-12/README.md);
+[product status](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Product-status) identifies the merged baseline.
 
 [Full facility workflow](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Facility-planning) · [Maps and shapes](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Maps-and-shapes)
 · [Saved facilities](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Saved-facilities).

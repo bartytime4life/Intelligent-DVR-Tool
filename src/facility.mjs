@@ -351,7 +351,10 @@ function wallObstacles(plan) {
   })];
 }
 function groundRange(c) {
-  const near = c.z / Math.tan(rad(Math.min(89.9, c.tilt + c.vfov / 2)));
+  // Nonnegative forward centreline only, not a radial bound on the whole
+  // tilted image. A view crossing nadir includes distance zero; rear ground
+  // is represented by the full pinhole visibility geometry separately.
+  const near = c.tilt + c.vfov / 2 >= 90 ? 0 : c.z / Math.tan(rad(c.tilt + c.vfov / 2));
   const far = c.tilt - c.vfov / 2 <= 0 ? c.range : Math.min(c.range, c.z / Math.tan(rad(c.tilt - c.vfov / 2)));
   return { near: Math.max(0, near), far };
 }

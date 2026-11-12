@@ -1,10 +1,26 @@
 # Product status and evidence
 
-**Branch proposal under review:** [zone-area mathematics](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/zone-area-math-2026-11-12/README.md)
-replaces sampled outdoor-zone percentages and rectangles with polygon areas and
-hole-preserving blind geometry. Background calculation keeps editing available
-and withholds stale or unavailable results. This is separate from the merged
-baseline below, installed-machine state and physical-camera qualification.
+**Current branch proposal under review:** [coherent visible-ground geometry](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/ground-frustum-math-2026-11-12/README.md)
+replaces radial sectors and first-obstruction clipping with tilted pinhole ground
+regions and finite-elevation wall shadows. It preserves holes, separate pieces
+and rear ground views. Map shading, DORI contours, zone areas, route distance,
+rehearsal and installer SVG share one current-plan snapshot; pending or failed
+views withhold totals and proposals and offer retry. Installer export requires a
+clean saved plan and complete views. Calculation adds no new restriction to editing or JSON backups; existing
+Save/Discard guards still apply.
+
+This isolated branch locally integrates the unmerged
+[pixel-density proposal #119](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/119)
+and [zone-area proposal #121](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/121).
+Their original receipts remain dated evidence. A local integration does not merge
+either hosted PR. New geometry is a software planning estimate; installed-machine
+state, optical validation and physical-camera qualification remain separate.
+
+**Main readback November 12, 2026:** `63b06ba2`, the documentation alignment
+in [PR #116](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/116).
+The source capabilities below remain the merged baseline. The new
+[verification record](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/ground-frustum-math-2026-11-12/README.md)
+separately binds this branch's checks and refreshed proposal CI readback.
 
 **Merged source baseline verified November 12, 2026 (America/Chicago):**
 [PR #114](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/114) merged

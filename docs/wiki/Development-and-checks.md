@@ -113,7 +113,8 @@ outputs; publish only reviewed, source-bound documentation assets.
 | Evaluation | [evaluation.py](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/edge/evaluation.py), [tracking_evaluation.py](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/edge/tracking_evaluation.py) | [Detection manifest/labels](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Offline-evaluation), [anonymous track labels](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Tracking-evaluation) |
 | Guided threshold tuning | [training.mjs](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/src/training.mjs), [training-library.mjs](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/src/training-library.mjs) | [Calibration, fresh checks and saving](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Guided-training) |
 | Local assistant and Lab receipt | [ollama.mjs](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/src/ollama.mjs), [lab-receipt.mjs](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/src/lab-receipt.mjs) | [Optional assistant](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Guided-training#ask-the-local-training-assistant); Lab receipt is distinct from analyzer receipts |
-| Facility validation and coverage | [facility.mjs](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/src/facility.mjs), [facility-coverage.mjs](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/src/facility-coverage.mjs) | [Facility guide](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Facility-planning), [portable plans](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Saved-facilities) |
+| Facility validation | [facility.mjs](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/src/facility.mjs) | [Facility guide](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Facility-planning), [portable plans](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Saved-facilities) |
+| Visible ground and metrics | [facility-visibility.mjs](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/src/facility-visibility.mjs), [facility-visibility-protocol.mjs](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/src/facility-visibility-protocol.mjs), [use-facility-visibility.mjs](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/src/use-facility-visibility.mjs), [facility-coverage.mjs](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/src/facility-coverage.mjs) | [Projection mathematics](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Science-and-algorithms#project-the-visible-ground-footprint), [replayable geometry record](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/ground-frustum-math-2026-11-12/README.md) |
 | Browser still storage | [image-database.mjs](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/src/image-database.mjs), [local-images.mjs](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/src/local-images.mjs) | [Storage boundaries](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Architecture-and-data#where-data-goes) |
 
 The analyzer’s receipt, frame trace and browser review bundle serve different
@@ -122,6 +123,28 @@ recording/model/labels/rules or required implementation fingerprint. Current
 tracker method is `bytetrack-style-iou-kalman-v3`; historical v1/v2 review imports
 remain readable, while current tracking evaluation requires re-analysis with the
 current source. See [metric provenance](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Tracking-evaluation#metric-provenance-and-reproducibility).
+
+## Verify ground visibility changes
+
+The visibility protocol binds one immutable snapshot to the exact plan object.
+A structurally identical clone is a different plan revision. Keep full
+MultiPolygon topology and distinct camera IDs through every consumer; never
+replace missing geometry with an empty footprint or legacy radial-fan fallback.
+The direct point-ray diagnostic and closed polygon boundary policy have different
+boundary semantics, documented in the [science guide](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Science-and-algorithms#project-the-visible-ground-footprint).
+
+For focused generated checks:
+
+```bash
+node --test tests/facility-visibility.test.mjs tests/facility-visibility-integration.test.mjs tests/facility-visibility-task.test.mjs tests/facility-visibility-presentation.test.mjs tests/facility-coverage-task.test.mjs
+npx playwright test --config=playwright.facility.config.mjs tests/browser/facility-visibility.spec.mjs tests/browser/facility-camera-planning.spec.mjs
+```
+
+The [verification record](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/ground-frustum-math-2026-11-12/README.md)
+provides frozen independent inputs, replay instructions, numerical limits and
+raw failures. Retain its ideal-circle boundary disagreements when comparing the
+inscribed range polygon with an exact circle. Tests of generated geometry and
+worker recovery do not qualify optics, installed services or camera throughput.
 
 ## Keep documentation and evidence current
 

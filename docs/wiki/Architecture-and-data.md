@@ -49,7 +49,8 @@ not calibrated camera feeds. The browser performs no neural-network inference.
 | Guided training | `src/TrainingWorkspace.jsx`, `src/training.mjs`, `edge/local_service.py` | Scripted webcam session, local analysis and opt-in rule-threshold saving; no detector retraining |
 | Optional training assistant | `src/OllamaCoach.jsx`, `src/ollama.mjs`, `src/ollama-scorecard.mjs`, `src/lab-receipt.mjs` | Explicit browser-to-local-Ollama requests; checked score summaries and restricted review suggestions, separate from the detector and service |
 | Person enrollment and suggestions | `edge/people.py`, `edge/faces.py`, `edge/face_worker.py`, `src/RecognitionReview.jsx` | Consent-gated local face templates and explicit possible matches for human review; no verified identity or automatic decision |
-| Facility model | `src/facility.mjs` | Bounded plan validation, local-meter projection, estimated visibility and rehearsal |
+| Facility model | `src/facility.mjs` | Bounded plan validation, local-meter projection and forward centreline ranges |
+| Ground visibility and metrics | `src/facility-visibility.mjs`, `src/facility-visibility-worker.mjs`, `src/facility-visibility-protocol.mjs`, `src/facility-coverage.mjs` | Revision-bound ground regions with holes/components, bounded worker transport, area/arclength metrics and sampled rehearsal |
 | Facility renderer | `src/FacilityBuilder.jsx`, `src/facility-map.mjs` | Guided controls, MapLibre and selected-camera Three.js volume |
 | Map starter | `src/FacilityStarter.jsx`, `src/facility-starter.mjs` | Common shapes, dimensions, reviewed simple ways/supported outer and inner relations and source records |
 | Place search and services | `src/AddressSearch.jsx`, `src/facility-services.mjs` | Explicit submitted search, selectable public/local services and bounded responses |
@@ -132,9 +133,23 @@ each validator and reproduce the appropriate software checks.
 
 ## Visibility is geometry
 
-The planner estimates a pinhole view intersecting a horizontal ground plane. Wall intersections can shorten rays. The 3D volume illustrates that approximation; it does not add a calibrated optical model.
+The [current branch proposal](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/ground-frustum-math-2026-11-12/README.md)
+clips a tilted pinhole ground footprint to horizontal range and subtracts finite-
+elevation opaque-wall shadows. It retains holes and separate visible pieces.
+The selected-camera 3D rendering connects the mount to those ground regions;
+it illustrates an estimated envelope, not calibrated visibility through a volume.
+The merged baseline remains separately identified in [product status](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Product-status).
 
-Planned room doorway gaps and their opaque lintels affect the ray intersections;
+A disposable visibility worker produces one bounded, validated snapshot for the
+exact displayed plan and attempt. Hooks suppress stale snapshots during render;
+coverage workers reuse that geometry rather than recomputing a different model.
+The map, DORI contours, zone areas, route metrics, rehearsal and installer share
+its polygons and camera IDs. A saved-plan installer requires the exact accepted
+saved-plan snapshot. Pending or incomplete views withhold conclusions and offer
+recovery. Calculation adds no new editing, JSON backup or Undo restriction;
+existing Save/Discard guards still apply.
+
+Planned room doorway gaps and their opaque lintels affect the shadows;
 exterior glazing stays opaque. The estimate omits floor/roof slabs, furniture,
 terrain, lighting, lens distortion and recognition quality. Pixel density is a
 separate planning calculation. Rehearsal follows a planned route and proposes

@@ -1,0 +1,421 @@
+{
+  "camera_cases": 236,
+  "counts": {
+    "contour_cases": 227,
+    "contour_fragments": 127,
+    "contour_points": 2140,
+    "density_queries": 2043,
+    "invalid_cases": 9,
+    "table_bands": 908
+  },
+  "failure_count": 4621,
+  "failure_samples": [
+    {
+      "case": "grid-000",
+      "check": "nonpositive-depth",
+      "detail": {
+        "actual": 2388.5125168440813,
+        "distance": 0.0
+      }
+    },
+    {
+      "case": "grid-000",
+      "check": "density",
+      "detail": {
+        "actual": 2386.6039967496004,
+        "distance": 0.02,
+        "expected": 59712.812921102035
+      }
+    },
+    {
+      "case": "grid-000",
+      "check": "density",
+      "detail": {
+        "actual": 1688.9333976093976,
+        "distance": 0.5,
+        "expected": 2388.5125168440813
+      }
+    },
+    {
+      "case": "grid-000",
+      "check": "density",
+      "detail": {
+        "actual": 579.2993761798841,
+        "distance": 2.0,
+        "expected": 597.1281292110202
+      }
+    },
+    {
+      "case": "grid-000",
+      "check": "density",
+      "detail": {
+        "actual": 119.27662313185168,
+        "distance": 10.0,
+        "expected": 119.42562584220411
+      }
+    },
+    {
+      "case": "grid-000",
+      "check": "density",
+      "detail": {
+        "actual": 11.942413304987085,
+        "distance": 100.0,
+        "expected": 11.942562584220354
+      }
+    },
+    {
+      "case": "grid-000",
+      "check": "density",
+      "detail": {
+        "actual": 414.7608458846281,
+        "distance": 2.8356409098088546,
+        "expected": 421.1592004794934
+      }
+    },
+    {
+      "case": "grid-000",
+      "check": "density",
+      "detail": {
+        "actual": 119.27662313185168,
+        "distance": 10.0,
+        "expected": 119.42562584220411
+      }
+    },
+    {
+      "case": "grid-000",
+      "check": "density",
+      "detail": {
+        "actual": 185.52222109755542,
+        "distance": 6.417820454904428,
+        "expected": 186.08439840497613
+      }
+    },
+    {
+      "case": "grid-000",
+      "check": "table-to",
+      "detail": {
+        "actual": 9.540957640086953,
+        "band": "recognize",
+        "expected": 9.55405006737632
+      }
+    },
+    {
+      "case": "grid-000",
+      "check": "table-to",
+      "detail": {
+        "actual": 4.750786058378487,
+        "band": "identify",
+        "expected": 4.777025033688162
+      }
+    },
+    {
+      "case": "grid-000",
+      "check": "contour-projected-density",
+      "detail": {
+        "actual": 129.58710270919292,
+        "band": "recognize",
+        "expected": 125
+      }
+    },
+    {
+      "case": "grid-000",
+      "check": "contour-projected-density",
+      "detail": {
+        "actual": 128.52909753926747,
+        "band": "recognize",
+        "expected": 125
+      }
+    },
+    {
+      "case": "grid-000",
+      "check": "contour-projected-density",
+      "detail": {
+        "actual": 127.62378449370871,
+        "band": "recognize",
+        "expected": 125
+      }
+    },
+    {
+      "case": "grid-000",
+      "check": "contour-projected-density",
+      "detail": {
+        "actual": 126.86603678381252,
+        "band": "recognize",
+        "expected": 125
+      }
+    },
+    {
+      "case": "grid-000",
+      "check": "contour-projected-density",
+      "detail": {
+        "actual": 126.25162945253231,
+        "band": "recognize",
+        "expected": 125
+      }
+    },
+    {
+      "case": "grid-000",
+      "check": "contour-projected-density",
+      "detail": {
+        "actual": 125.77718076456546,
+        "band": "recognize",
+        "expected": 125
+      }
+    },
+    {
+      "case": "grid-000",
+      "check": "contour-projected-density",
+      "detail": {
+        "actual": 125.44010615702348,
+        "band": "recognize",
+        "expected": 125
+      }
+    },
+    {
+      "case": "grid-000",
+      "check": "contour-projected-density",
+      "detail": {
+        "actual": 125.2385835668675,
+        "band": "recognize",
+        "expected": 125
+      }
+    },
+    {
+      "case": "grid-000",
+      "check": "contour-projected-density",
+      "detail": {
+        "actual": 125.17152926078359,
+        "band": "recognize",
+        "expected": 125
+      }
+    },
+    {
+      "case": "grid-000",
+      "check": "contour-projected-density",
+      "detail": {
+        "actual": 125.23858356686748,
+        "band": "recognize",
+        "expected": 125
+      }
+    },
+    {
+      "case": "grid-000",
+      "check": "contour-projected-density",
+      "detail": {
+        "actual": 125.44010615702348,
+        "band": "recognize",
+        "expected": 125
+      }
+    },
+    {
+      "case": "grid-000",
+      "check": "contour-projected-density",
+      "detail": {
+        "actual": 125.77718076456546,
+        "band": "recognize",
+        "expected": 125
+      }
+    },
+    {
+      "case": "grid-000",
+      "check": "contour-projected-density",
+      "detail": {
+        "actual": 126.25162945253231,
+        "band": "recognize",
+        "expected": 125
+      }
+    },
+    {
+      "case": "grid-000",
+      "check": "contour-projected-density",
+      "detail": {
+        "actual": 126.86603678381255,
+        "band": "recognize",
+        "expected": 125
+      }
+    },
+    {
+      "case": "grid-000",
+      "check": "contour-projected-density",
+      "detail": {
+        "actual": 127.62378449370874,
+        "band": "recognize",
+        "expected": 125
+      }
+    },
+    {
+      "case": "grid-000",
+      "check": "contour-projected-density",
+      "detail": {
+        "actual": 128.52909753926747,
+        "band": "recognize",
+        "expected": 125
+      }
+    },
+    {
+      "case": "grid-000",
+      "check": "contour-endpoints",
+      "detail": {
+        "actual": [
+          [
+            -2.4693815457709047,
+            2.4693815457709047,
+            9.215857392089989
+          ]
+        ],
+        "band": "recognize",
+        "expected": [
+          [
+            -2.559999999999998,
+            2.5599999999999983,
+            9.55405006737632
+          ]
+        ]
+      }
+    },
+    {
+      "case": "grid-000",
+      "check": "label-outside-retained-fragments",
+      "detail": {
+        "band": "recognize",
+        "label": [
+          1.5541788114196824,
+          9.413522237296075
+        ]
+      }
+    },
+    {
+      "case": "grid-000",
+      "check": "contour-projected-density",
+      "detail": {
+        "actual": 260.24852360369266,
+        "band": "identify",
+        "expected": 250
+      }
+    },
+    {
+      "case": "grid-000",
+      "check": "contour-projected-density",
+      "detail": {
+        "actual": 258.12374206539334,
+        "band": "identify",
+        "expected": 250
+      }
+    },
+    {
+      "case": "grid-000",
+      "check": "contour-projected-density",
+      "detail": {
+        "actual": 256.30561064197116,
+        "band": "identify",
+        "expected": 250
+      }
+    },
+    {
+      "case": "grid-000",
+      "check": "contour-projected-density",
+      "detail": {
+        "actual": 254.78383325331293,
+        "band": "identify",
+        "expected": 250
+      }
+    },
+    {
+      "case": "grid-000",
+      "check": "contour-projected-density",
+      "detail": {
+        "actual": 253.5499249590918,
+        "band": "identify",
+        "expected": 250
+      }
+    },
+    {
+      "case": "grid-000",
+      "check": "contour-projected-density",
+      "detail": {
+        "actual": 252.5970942530441,
+        "band": "identify",
+        "expected": 250
+      }
+    },
+    {
+      "case": "grid-000",
+      "check": "contour-projected-density",
+      "detail": {
+        "actual": 251.92015058254668,
+        "band": "identify",
+        "expected": 250
+      }
+    },
+    {
+      "case": "grid-000",
+      "check": "contour-projected-density",
+      "detail": {
+        "actual": 251.51543471604117,
+        "band": "identify",
+        "expected": 250
+      }
+    },
+    {
+      "case": "grid-000",
+      "check": "contour-projected-density",
+      "detail": {
+        "actual": 251.3807702024069,
+        "band": "identify",
+        "expected": 250
+      }
+    },
+    {
+      "case": "grid-000",
+      "check": "contour-projected-density",
+      "detail": {
+        "actual": 251.51543471604117,
+        "band": "identify",
+        "expected": 250
+      }
+    },
+    {
+      "case": "grid-000",
+      "check": "contour-projected-density",
+      "detail": {
+        "actual": 251.92015058254668,
+        "band": "identify",
+        "expected": 250
+      }
+    }
+  ],
+  "fixture_tolerances": {
+    "density_px_per_metre": 1e-05,
+    "geometry_metres": 2e-06
+  },
+  "generated_only": true,
+  "harness_sha256": "4050344a223803ca4b89a115908f73073d57ebe5e4bc48e4c28296c5de7a2caa",
+  "inputs_sha256": "3bb534c91d32404bf42d0481984c45dad164945669a767c6378237fc1ae54bbd",
+  "limits": [
+    "Generated double-precision pinhole projection, not measured optics, physical visibility, recognition quality, IEC compliance or capacity.",
+    "Independent generated radial polygon fixtures retain the existing declared groundRange near/far convention, including 89.9-degree near clamp; the oracle checks clipping within those supplied polygons, not coverageFan or physical visibility.",
+    "Reported fixture tolerances and observed maxima are not universal numerical error bounds.",
+    "Copied module snapshots bind exactly the bytes executed; no private footage, camera, inference, network or package installation is used."
+  ],
+  "maxima": {
+    "contour_density_error": 842.0365573134909,
+    "contour_geometry_metres_error": 30.39523692420404,
+    "density_absolute_error": 0.0,
+    "table_endpoint_metres_error": 5.920711726780567
+  },
+  "observations_sha256": "92f5a53d3f30de2e53aa783abeda25882d4bf6371a3c8c628618efe84214e1a0",
+  "oracle_sha256": "1e94a185b44f71711f784e770f65f080156350a086ae6a36778ae9d6258a221c",
+  "reference": "https://docs.opencv.org/4.13.0/d9/d0c/group__calib3d.html",
+  "result": "FAIL",
+  "schema": "intelligent-dvr.independent-dori-projection-proof.v1",
+  "source_mode": "git-object-snapshot",
+  "source_revision": "63b06ba2aab3adcffc38f52310b55969fb538afe",
+  "source_sha256": {
+    "src/facility-doorways.mjs": "dee737c4c8bdc7bce497ae7c4d82be0a76e45f2a132804f9b911cfc4d7c994fd",
+    "src/facility-dori.mjs": "ed5c69e046875a1eb69dc6a46674dca5d7d3d10664ae451a93e01ddacf85f098",
+    "src/facility-stairs.mjs": "4ce62cab36971dd528a4af8667168e6cc39f723e5aecbfc619e091106c05a544",
+    "src/facility-windows.mjs": "84cc16197f284680b86edb77b8fd6d49bdc53bb11c316b87332774879cac7ff4",
+    "src/facility-zones.mjs": "14080041069bed6d8eb2ad48ec22c0e004db8b0feaa7c82eabea581898355248",
+    "src/facility.mjs": "dc6d0a44a608c6c07df92ccff06b64b6ba082c6a574763589ba67c177ae53df6"
+  }
+}

@@ -1,10 +1,22 @@
 # Verification index
 
+[Coherent pinhole ground visibility, November 12](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/ground-frustum-math-2026-11-12/README.md)
+records radial-sector and wall-shadow counterexamples, complete visible regions,
+shared revision-bound consumers, independent mathematical corpora and recovery
+checks. It preserves raw ideal-circle boundary disagreements and numerical
+limits. This local integration of unmerged proposals is separate from main,
+installed services and physical-camera acceptance.
+
 [Zone coverage by area, November 12](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/zone-area-math-2026-11-12/README.md)
 records sampled-grid counterexamples, distinct-camera area/overlap integration,
 hole-preserving blind polygons, independent rational checks and bounded,
 revision-bound background calculation. Proposed source remains separate from
 merged, installed and field-qualified behavior.
+
+[Ground pixel density through pinhole projection, November 12](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/dori-projection-2026-11-12/README.md)
+records reproduced slant/depth errors, centreline ground intervals, straight
+fan/sensor-clipped contours, an independent generated projection oracle and
+readable short ranges in the browser and installer exports.
 
 [Current documentation alignment, November 12](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/documentation-alignment-2026-11-12/README.md)
 follows the earlier 197-path audit, records the merged route/evaluation baseline and

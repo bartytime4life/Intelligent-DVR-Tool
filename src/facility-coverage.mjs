@@ -1,7 +1,7 @@
 import { coverageFan } from './facility.mjs';
-import clipping from 'polygon-clipping';
-// Each caller caches camera geometry until its wall set changes. The map and
-// background metrics worker use the same coverageFan algorithm.
+import * as clipping from './facility-polygon.mjs';
+// Compatibility helper for earlier radial-fan callers and generated fixtures.
+// Current planning views and metrics consume the accepted visibility snapshot.
 export function fanCache() {
   let walls = "", fans = new Map();
   return (obstacles) => {
@@ -17,7 +17,10 @@ export function fanCache() {
 const bounds = ring => [0, 1, 0, 1].map((k, i) => (i < 2 ? Math.min : Math.max)(...ring.map(p => p[k])));
 const overlaps = (a, b) => a[0] <= b[2] && a[2] >= b[0] && a[1] <= b[3] && a[3] >= b[1];
 export function enabledFans(plan, fanOf) {
-  return plan.cameras.filter(c => c.enabled).map(c => ({id:c.id, ring:fanOf(c)})).filter(f => hasArea(f.ring)).map(f => ({...f, box:bounds(f.ring)}));
+  return plan.cameras.filter(c=>c.enabled).flatMap(c=>{
+    const value=fanOf(c),polygons=Array.isArray(value) ? (hasArea(value) ? [[value]] : []) : value?.estimated ? value.polygons : [];
+    return polygons.filter(p=>hasArea(p[0])).map(p=>({id:c.id,polygon:p,ring:p[0],box:bounds(p[0])}));
+  });
 }
 
 // These caps bound work submitted to the synchronous clipping library, not wall
@@ -130,10 +133,11 @@ export function zoneCoverage(footprint, fans, {geometry = clipping, limits, shar
     for (const fan of fans) {
       if (!Array.isArray(fan.ring) || !fan.ring.every(p => Array.isArray(p) && p.length === 2 && p.every(Number.isFinite))) throw Error('Invalid fan.');
       if (!hasArea(fan.ring)) continue;
-      vertices([[fan.ring]]);
+      const polygon=fan.polygon || [fan.ring];
+      vertices([polygon]);
       if (!overlaps(bounds(fan.ring), box)) continue;
       if (!byCamera.has(fan.id)) byCamera.set(fan.id, []);
-      byCamera.get(fan.id).push([[transform(fan.ring)]]);
+      byCamera.get(fan.id).push([polygon.map(transform)]);
     }
     cameras = byCamera.size;
     const leaves = [];
@@ -206,24 +210,41 @@ function unionIntervals(intervals, epsilon) {
 // Intersect an infinite line with a closed ring, then clip its intervals to the
 // route segment. Half-open crossings preserve parity at vertices: repeated
 // crossings at a tangent cancel. Collinear edges contribute boundary intervals.
-function lineIntervals(ring, a, ux, uy, length, epsilon) {
+function lineIntervals(ring, a, ux, uy, length, epsilon, strict=false) {
   const projected = ring.map(p => {
     const x = p[0] - a[0], y = p[1] - a[1], side = ux * y - uy * x;
     return [ux * x + uy * y, Math.abs(side) <= epsilon ? 0 : side];
   });
-  const crossings = [], intervals = [];
+  const crossings = [], intervals = [], boundaries=[];
   const add = (from, to) => {
     const start = Math.max(0, Math.min(from, to)), end = Math.min(length, Math.max(from, to));
     if (end - start > epsilon) intervals.push([start, end]);
   };
   for (let i = 0, j = projected.length - 1; i < projected.length; j = i++) {
     const [x, y] = projected[j], [nextX, nextY] = projected[i];
-    if (y === 0 && nextY === 0) add(x, nextX);
+    if (y === 0 && nextY === 0) {
+      if(strict) boundaries.push([Math.max(0,Math.min(x,nextX)),Math.min(length,Math.max(x,nextX))]);
+      else add(x,nextX);
+    }
     else if ((y > 0) !== (nextY > 0)) crossings.push(x + (nextX - x) * y / (y - nextY));
   }
   crossings.sort((a, b) => a - b);
   for (let i = 0; i + 1 < crossings.length; i += 2) add(crossings[i], crossings[i + 1]);
-  return intervals;
+  return strict ? subtractIntervals(unionIntervals(intervals,epsilon),unionIntervals(boundaries.filter(([a,b])=>b>a),epsilon),epsilon) : intervals;
+}
+
+function subtractIntervals(outer,holes,epsilon) {
+  const result=[];
+  for(const [start,end] of outer) {
+    let at=start;
+    for(const [from,to] of holes) {
+      if(to<=at || from>=end) continue;
+      if(from-at>epsilon) result.push([at,Math.min(from,end)]);
+      at=Math.max(at,to);if(at>=end)break;
+    }
+    if(end-at>epsilon)result.push([at,end]);
+  }
+  return result;
 }
 
 // Exact for the drawn polygonal fans, within floating-point arithmetic tolerance;
@@ -234,8 +255,8 @@ export function routeCoverage(route, fans) {
   const lengths = route.slice(1).map((p, i) => Math.hypot(p[0] - route[i][0], p[1] - route[i][1]));
   const length = lengths.reduce((sum, value) => sum + value, 0);
   if (route.length < 2 || !(length > 0)) return null;
-  const prepared = fans.filter(f => hasArea(f.ring)).map(f => ({ ...f, box: f.box || bounds(f.ring),
-    scale: f.ring.reduce((largest, p) => Math.max(largest, Math.abs(p[0]), Math.abs(p[1])), 0) }));
+  const prepared = fans.filter(f => hasArea(f.ring)).map(f => ({ ...f, polygon:f.polygon || [f.ring],box:f.box || bounds(f.ring),
+    scale:(f.polygon || [f.ring]).flat().reduce((largest,p)=>Math.max(largest,Math.abs(p[0]),Math.abs(p[1])),0) }));
   const sums = [0, 0, 0], errors = [0, 0, 0];
   let blindRun = 0, longestBlindStretch = 0, segments = 0, intersectionTests = 0;
   const addSum = (index, value) => {
@@ -263,8 +284,10 @@ export function routeCoverage(route, fans) {
       if (!overlaps(box, fan.box)) continue;
       const tolerance = Math.min(8 * Number.EPSILON * Math.max(scale, fan.scale), size * 1e-10);
       epsilon = Math.max(epsilon, tolerance);
-      intersectionTests += fan.ring.length - (fan.ring[0][0] === fan.ring.at(-1)[0] && fan.ring[0][1] === fan.ring.at(-1)[1] ? 1 : 0);
-      const intervals = lineIntervals(fan.ring, a, ux, uy, size, tolerance);
+      intersectionTests += fan.polygon.reduce((sum,ring)=>sum+ring.length-1,0);
+      const outer=unionIntervals(lineIntervals(fan.ring,a,ux,uy,size,tolerance),tolerance);
+      const holes=unionIntervals(fan.polygon.slice(1).flatMap(r=>lineIntervals(r,a,ux,uy,size,tolerance,true)),tolerance);
+      const intervals=subtractIntervals(outer,holes,tolerance);
       if (intervals.length) {
         if (!byCamera.has(fan.id)) byCamera.set(fan.id, []);
         byCamera.get(fan.id).push(...intervals);
@@ -286,17 +309,22 @@ export function routeCoverage(route, fans) {
     span(size - at, count);
   }
   const [coveredLength, overlapLength, uncoveredLength] = sums;
-  return {method:'arclength-intervals-v1', length, coveredLength, overlapLength, uncoveredLength, longestBlindStretch,
+  return {method:'arclength-intervals-v1',estimated:true,length,coveredLength,overlapLength,uncoveredLength,longestBlindStretch,
     coverage:Math.max(0, Math.min(1, coveredLength / length)), overlap:Math.max(0, Math.min(1, overlapLength / length)),
     segments, intersectionTests};
 }
 // Enabled ground zones and the handoff route; indoor zones are listed but never estimated.
 export function coverageMetrics(plan, fanOf, {geometry = clipping, zoneLimits, planLimits} = {}) {
-  const fans = enabledFans(plan, fanOf), sharedBudget = budget(boundedLimits(planLimits, PLAN_COVERAGE_LIMITS)), cache = new Map();
+  const captured=new Map(plan.cameras.map(c=>[c.id,fanOf(c)]));
+  const unavailable=plan.cameras.some(c=>c.enabled && !Array.isArray(captured.get(c.id)) && !captured.get(c.id)?.estimated);
+  const fans=enabledFans(plan,c=>captured.get(c.id)),sharedBudget=budget(boundedLimits(planLimits,PLAN_COVERAGE_LIMITS)),cache=new Map();
+  const unavailableZone=()=>({method:'polygon-area-v1',estimated:false,estimateReason:'visibility-unavailable',cameras:null,
+    area:null,coveredArea:null,overlapArea:null,uncoveredArea:null,coverage:null,overlap:null,blindSpots:null});
   let cacheHits = 0;
-  return {cameras:fans.length,
+  return {cameras:new Set(fans.map(f=>f.id)).size,
     zones:(plan.zones || []).filter(z => z.enabled).map(z => z.buildingId !== undefined ? {id:z.id, name:z.name, type:z.type, estimated:false, estimateReason:'indoor'} :
       (() => {
+        if(unavailable) return {id:z.id,name:z.name,type:z.type,...unavailableZone()};
         const key = JSON.stringify(z.footprint);
         let result = cache.get(key);
         if (result) cacheHits++;
@@ -306,5 +334,10 @@ export function coverageMetrics(plan, fanOf, {geometry = clipping, zoneLimits, p
         }
         return {id:z.id, name:z.name, type:z.type, ...result};
       })()),
-    route:routeCoverage(plan.route, fans), work:{...sharedBudget.work}, cacheHits};
+    route:unavailable ? unavailableRoute(plan.route) : routeCoverage(plan.route,fans),work:{...sharedBudget.work},cacheHits};
+}
+function unavailableRoute(route) {
+  const length=route.slice(1).reduce((sum,p,i)=>sum+Math.hypot(p[0]-route[i][0],p[1]-route[i][1]),0);
+  return length>0 ? {method:'arclength-intervals-v1',estimated:false,estimateReason:'visibility-unavailable',length,
+    coveredLength:null,overlapLength:null,uncoveredLength:null,longestBlindStretch:null,coverage:null,overlap:null} : null;
 }

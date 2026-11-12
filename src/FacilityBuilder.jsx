@@ -34,13 +34,10 @@ import {
   validateFacility,
   uid,
   centroid,
-  rehearse,
   rehearsalSeconds,
   routeLength,
   WALK_SPEED,
   routePoint,
-  seesPoint,
-  wallObstacles,
   pointInPolygon,
   groundRange
 } from "./facility.mjs";
@@ -56,7 +53,7 @@ import FacilityStairs,{StairDestination} from './FacilityStairs.jsx';
 import {stairAtStart,suggestedStair,stairPlacementIssue} from './facility-stair-placement.mjs';
 import {addBuildingLevel} from './facility.mjs';
 import {unitFactor, displayLength, unitLabel, enteredLength, localizeLengths, nextBuildingName, rotateShape, shapeBounds, suggestBuildingOffset, translateShape} from './facility-shape-edit.mjs';
-import {formatDistance, formatArea} from './facility-measurements.mjs';
+import {formatDistance, formatDistanceRange, formatArea} from './facility-measurements.mjs';
 import {createFloorOpening,createFloorPath,snapToBuilding,solidSpaceProblem,applyBuildingEdit,buildingMotion,fittingRectangle,reoriginPlan,SNAP_TOLERANCE} from './facility.mjs';
 import {backdropDismiss} from './dialog-dismiss.mjs';
 import FacilityLevels from './FacilityLevels.jsx';
@@ -70,7 +67,9 @@ import {roomAdditions} from './facility-room-sketch.mjs';
 import FacilityZones from './FacilityZones.jsx';
 import { createFacilityZone } from './facility-zones.mjs';
 import FacilityCameraPreview from './FacilityCameraPreview.jsx';
-import { fanCache } from './facility-coverage.mjs';
+import {useFacilityVisibility} from './use-facility-visibility.mjs';
+import {rehearseVisibility,visibleAtPoint} from './facility-visibility.mjs';
+import './facility-visibility.css';
 import {useFacilityCoverage} from './use-facility-coverage.mjs';
 import { DORI_NOTE, LENS_PRESETS, lensPreset, doriDistances, densityAtGround, PIXELS_WIDE, pixelsWideOK } from './facility-dori.mjs';
 import { installerSheetHTML, installerSheetFilename } from './facility-installer.mjs';
@@ -158,7 +157,6 @@ function FacilityEditor({onPreviewCount,initialPlan,facilityControls,persistence
   const [replaceDrafts, setReplaceDrafts] = useState(false);
   // Mapped-building drafts under review (all of them, included or not), plus one-click load and map-click toggles.
   const [draftCandidates, setDraftCandidates] = useState([]), [draftLoad, setDraftLoad] = useState(0), [draftToggle, setDraftToggle] = useState(null);
-  const [draftPreviewError, setDraftPreviewError] = useState('');
   const [plan, setPlan] = useState(initial.current.plan), [step, setStep] = useState(0), [selected, setSelected] = useState(
     { kind: "camera", id: "" }
   ), [draft, setDraft] = useState(null), [view, setView] = useState("3d"), [floor, setFloor] = useState(
@@ -175,8 +173,7 @@ function FacilityEditor({onPreviewCount,initialPlan,facilityControls,persistence
     0
   ), [decisions, setDecisions] = useState({});
   useEffect(()=>{try{localStorage.setItem("dvr.facility.units",units);}catch{}},[units]);
-  const mapEl = useRef(), api = useRef(), input = useRef(), latest = useRef(), fans = useRef();
-  fans.current ||= fanCache();
+  const mapEl = useRef(), api = useRef(), input = useRef(), latest = useRef();
   const selectedItem = plan[keyOf[selected.kind]]?.find((x) => x.id === selected.id);
   const directPlacement=['window','doorway','stair'].includes(selected.kind);
   const propertyDirty = selected.kind!=='zone' && !!(draft && draft.id === selected.id && (selectedItem || directPlacement) && JSON.stringify(draft) !== JSON.stringify(selectedItem));
@@ -199,22 +196,9 @@ function FacilityEditor({onPreviewCount,initialPlan,facilityControls,persistence
     if(section)body.scrollTop+=section.getBoundingClientRect().top-body.getBoundingClientRect().top-12;
   },[stairEditor?.id]);
   const stairIssue=useMemo(()=>stairEditor ? stairPlacementIssue(plan,b,stairEditor) : '',[plan,b,stairEditor]);
-  const rehearsal = useMemo(() => plan.route.length > 1 ? rehearse(plan) : [], [plan]);
   // Simulated walking time; long routes play back faster so a run takes about a minute.
   const duration = useMemo(() => rehearsalSeconds(plan.route), [plan.route]), playRate = Math.max(1, Math.ceil(duration / 60));
   const position = plan.route.length > 1 ? routePoint(plan.route, duration ? seconds / duration : 0) : null;
-  const visibleAtPosition = useMemo(() => position ? plan.cameras.filter((c) => seesPoint(c, position, wallObstacles(plan))).
-  map((c) => c.id) : [], [plan, seconds]);
-  const proposals = useMemo(() => {
-    const out = [];
-    let last = null;
-    for (const s of rehearsal) {
-      const id = s.cameras.includes(last) ? last : s.cameras[0];
-      if (id && last && id !== last) out.push({ from: last, to: id, seconds: s.seconds, key: last + ">" + id + "@" + s.seconds });
-      if (id) last = id;
-    }
-    return out.slice(0, 20);
-  }, [rehearsal]);
   useEffect(() => {
     setDecisions({});
     setPlaying(false);
@@ -524,7 +508,7 @@ function FacilityEditor({onPreviewCount,initialPlan,facilityControls,persistence
     onDraftToggle: id => setDraftToggle(previous => ({id, serial: (previous?.serial || 0) + 1})) };
   useEffect(() => {
     try {
-      api.current = createFacilityMap(mapEl.current, Object.fromEntries(["onPlaceStair","onChangeStair","onPlaceWindow","onChangeWindow","onPlaceDoorway","onMoveDoorway","onDoorwayError","onBuildingPosition", "onBearing", "onAim", "onMoveCamera", "onCameraDrag", "onPin", "onDraw", "onPlace", "onSelect", "onCalibrationGround", "onToolDone", "onReady", "onError", "onBasemapStatus", "onDraftToggle"].map((k) => [k, (...args) => latest.current[k](...args)])), plan, {fans: fans.current});
+      api.current = createFacilityMap(mapEl.current, Object.fromEntries(["onPlaceStair","onChangeStair","onPlaceWindow","onChangeWindow","onPlaceDoorway","onMoveDoorway","onDoorwayError","onBuildingPosition", "onBearing", "onAim", "onMoveCamera", "onCameraDrag", "onPin", "onDraw", "onPlace", "onSelect", "onCalibrationGround", "onToolDone", "onReady", "onError", "onBasemapStatus", "onDraftToggle"].map((k) => [k, (...args) => latest.current[k](...args)])), plan);
     } catch (e) {
       setMapError("3D graphics are unavailable here. You can still edit numeric properties and export the plan. " + e.message);
     }
@@ -549,23 +533,47 @@ function FacilityEditor({onPreviewCount,initialPlan,facilityControls,persistence
       return { plan, error: e.message };
     }
   }, [plan, settledDraft, selected, propertyDirty]);
-  useEffect(() => {
-    let displayed = preview;
-    let failure = '';
-    if (mapDrafts.length) {
-      try { displayed = draftFacility(preview, mapDrafts, replaceDrafts); } catch(e) { failure = e.message; }
+  // Map, area metrics, routes and exports share one displayed-plan snapshot.
+  const {plan:displayed,error:draftPreviewError}=useMemo(()=>{
+    if(!mapDrafts.length) return {plan:preview,error:''};
+    try { return {plan:draftFacility(preview,mapDrafts,replaceDrafts),error:''}; }
+    catch(e) { return {plan:preview,error:e.message}; }
+  },[preview,mapDrafts,replaceDrafts]);
+  const visibility=useFacilityVisibility(displayed);
+  const draftPending=propertyDirty && settledDraft!==draft;
+  const currentSnapshot=visibility.status==='ready' && !draftPending ? visibility.snapshot : null;
+  const aggregateSnapshot=dragging ? null : currentSnapshot;
+  const viewsReady=!!aggregateSnapshot?.estimated;
+  const geometryOf=useMemo(()=>{
+    const entries=new Map((currentSnapshot?.cameras || []).map(entry=>[entry.id,entry]));
+    return camera=>dragging && camera.id===selected.id ? null : entries.get(camera.id) || null;
+  },[currentSnapshot,dragging,selected.id]);
+  const visibilityPending=visibility.status==='loading' || draftPending || !!dragging;
+  const viewsUnavailable=visibility.status==='error' || !!currentSnapshot && !currentSnapshot.estimated;
+  const savedViews=displayed===plan && !navigationDirty && viewsReady ? aggregateSnapshot : null;
+  const rehearsal=useMemo(()=>displayed.route.length>1 ? rehearseVisibility(displayed,aggregateSnapshot) : [],[displayed,aggregateSnapshot]);
+  const visibleAtPosition=useMemo(()=>position ? visibleAtPoint(aggregateSnapshot,position) : [],[aggregateSnapshot,position?.[0],position?.[1]]);
+  const proposals = useMemo(() => {
+    if (rehearsal === null) return null;
+    const out = [];
+    let last = null;
+    for (const s of rehearsal) {
+      const id = s.cameras.includes(last) ? last : s.cameras[0];
+      if (id && last && id !== last) out.push({ from: last, to: id, seconds: s.seconds, key: last + ">" + id + "@" + s.seconds });
+      if (id) last = id;
     }
-    setDraftPreviewError(failure);
-    api.current?.update(displayed, selected.id, view, floor, {measurements, units, floorBuildingId:b?.id, apertureEditing:directPlacement && step===2, stairEditor, apertureDragEnabled:!previewError, manipulate});
+    return out.slice(0, 20);
+  }, [rehearsal]);
+  useEffect(()=>{ if(!viewsReady) setPlaying(false); },[viewsReady]);
+  useEffect(() => {
+    api.current?.update(displayed, selected.id, view, floor, {geometryOf,measurements, units, floorBuildingId:b?.id, apertureEditing:directPlacement && step===2, stairEditor, apertureDragEnabled:!previewError, manipulate});
     if (ready && newBuildingFocus.current) {
       api.current?.centerSelection(newBuildingFocus.current);
       newBuildingFocus.current = null;
     }
-  }, [preview, previewError, mapDrafts, replaceDrafts, selected.id, view, floor, ready, measurements, units, b?.id, manipulate, stairEditor, directPlacement, step]);
+  }, [displayed, geometryOf, previewError, selected.id, view, floor, ready, measurements, units, b?.id, manipulate, stairEditor, directPlacement, step]);
   useEffect(() => api.current?.setBuildingPreview(step === 1 && shapeOpen ? shapePreview : null), [step,shapeOpen,shapePreview,ready]);
-  // Background metrics use the same fan algorithm and preview geometry as the
-  // map. Only a response bound to this plan/attempt can reach the display.
-  const {metrics:coverage, status:coverageStatus, error:coverageError, retry:retryCoverage} = useFacilityCoverage(preview, step === 4);
+  const {metrics:coverage, status:coverageStatus, error:coverageError, retry:retryCoverage} = useFacilityCoverage(displayed, step === 4, aggregateSnapshot);
   const blindSpots = useMemo(() => {
     const zone = coverage?.zones.find(z => z.id === blindZone && z.estimated);
     return zone?.blindSpots ?? null;
@@ -738,7 +746,7 @@ function FacilityEditor({onPreviewCount,initialPlan,facilityControls,persistence
 
   function downloadInstallerSheet() {
     try {
-      const url = URL.createObjectURL(new Blob([installerSheetHTML(plan, {units, fanOf:fans.current(wallObstacles(plan))})], {type:'text/html'}));
+      const url = URL.createObjectURL(new Blob([installerSheetHTML(plan, {units, snapshot:savedViews})], {type:'text/html'}));
       const a = document.createElement('a'); a.href = url; a.download = installerSheetFilename(plan); a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);
       setError(''); setStatus('Installer sheet downloaded — planning estimate, verify on site');
     } catch (x) { setError(x.message); }
@@ -902,16 +910,20 @@ label. Inside the active building it belongs to the current level; elsewhere it 
   }}>{Array.from({ length: b?.floors || 1 }, (_, i) => <option key={i} value={i}>{i === 0 ? b?.base ? `Lowest modeled floor (${formatDistance(b.base,units)})` : "Ground floor" : "Level " + (i +
   1)}</option>)}</select><button className="facility-secondary" aria-label="Center active building" onClick={()=>b&&api.current?.centerSelection(b.id)}><Crosshair size={17}/></button></div>}
       {step === 1 ? <div className="building-map-key">{(shapeOpen && shapePreview || tool === 'position-building') && ready
-        ? <><i/><span>Footprint preview</span>{measurements && shapeOpen && shapePreview && <strong>{formatDistance(shapePreview.width,units)} × {formatDistance(shapePreview.depth,units)}</strong>}</> : 'Building footprints'}</div> : <div className="facility-map-legend"><span><i className="coverage-key" />Estimated visibility</span><span><i className="route-key" />Route / object watch</span><span><i className="restricted-key" />Restricted</span><span>Only the selected camera’s 3D volume is shown.</span>{!!blindSpots?.length && <span><i className="blind-spot-key" />Blind spot · estimate</span>}</div>}
+        ? <><i/><span>Footprint preview</span>{measurements && shapeOpen && shapePreview && <strong>{formatDistance(shapePreview.width,units)} × {formatDistance(shapePreview.depth,units)}</strong>}</> : 'Building footprints'}</div> : <div className="facility-map-legend"><span><i className="coverage-key" />Estimated visibility</span><span><i className="route-key" />Route / object watch</span><span><i className="restricted-key" />Restricted</span><span>Selected camera’s ground-view envelope is shown in 3D.</span>{!!blindSpots?.length && <span><i className="blind-spot-key" />Blind spot · estimate</span>}</div>}
+      {step!==5 && (!!displayed.cameras.length || displayed.route.length>1) && (visibilityPending || viewsUnavailable) && <div className="facility-visibility-status" role="status">
+        {dragging ? 'Release to update this camera’s estimated view.' : visibilityPending ? 'Updating estimated views… You can keep editing.' : 'Some estimated views are unavailable. Coverage totals and handoff proposals are withheld; you can still edit, save and Undo.'}
+        {!visibilityPending && <button type="button" onClick={visibility.retry}>Try views again</button>}
+      </div>}
       {step === 5 && <div className="facility-rehearsal"><div className="facility-rehearsal-top"><button aria-label={playing ?
-  "Pause rehearsal" : "Play rehearsal"} disabled={plan.route.length < 2} onClick={() => {
+  "Pause rehearsal" : "Play rehearsal"} disabled={plan.route.length < 2 || !viewsReady} onClick={() => {
     if (seconds >= duration) setSeconds(0);
     setPlaying((v) => !v);
   }}>{playing ? <Pause weight="fill" /> : <Play weight="fill" />}</button><span>{seconds.toFixed(1)} / {duration.toFixed(1)} s{playRate > 1 ? ` · ${playRate}× playback` : ""}</span><input aria-label="Rehearsal time" type="range" min="0" max={duration.toFixed(1)} step=".1" value={Math.min(seconds, duration)} onChange={(e) => {
     setPlaying(false);
     setSeconds(+e.target.value);
-  }} /></div><p><strong>Simulated Track P-014</strong><span>{visibleAtPosition.length ? "In estimated view: " + visibleAtPosition.
-  join(", ") : "Blind spot \xB7 no camera observation"}</span></p><small>A planned route walked at an assumed {formatDistance(WALK_SPEED, units)}/s ({formatDistance(routeLength(plan.route), units)}), not measured movement or a person identity.</small></div>}
+  }} /></div><p><strong>Simulated Track P-014</strong><span>{visibleAtPosition===null ? (visibilityPending ? "Updating estimated visibility…" : "Estimated visibility unavailable") : visibleAtPosition.length ? "In estimated view: " + visibleAtPosition.
+  join(", ") : "Blind spot \xB7 no camera observation"}</span></p><small>A planned route walked at an assumed {formatDistance(WALK_SPEED, units)}/s ({formatDistance(routeLength(plan.route), units)}), not measured movement or a person identity.</small>{viewsUnavailable && !visibilityPending && <button type="button" className="facility-visibility-retry" onClick={visibility.retry}>Try views again</button>}</div>}
     </div>
     <aside className="facility-properties" ref={properties}>
       <header><p className="eyebrow">STEP {step + 1} OF {STEPS.length}</p><h2>{["Locate your facility", "Shape a building", "Define f\
@@ -1010,7 +1022,7 @@ pect its modeled view.", "Draw a route and review proposed camera transitions.",
     place("label", [0, 0]);
   }}>Add label at origin</button>
       </>}
-      {(step === 3 || step === 4) && <>{step === 4 && (coverage ? <CoverageMetrics metrics={coverage} blindZone={blindZone} onBlindZone={setBlindZone} blindSpots={blindSpots} dirty={propertyDirty} units={units}/> : <section className="facility-coverage-metrics" aria-label="Estimated coverage metrics"><h3 className="facility-subheading">Estimated coverage</h3><p className="facility-caption" role="status">{coverageStatus === 'error' ? coverageError : 'Updating coverage… You can keep editing your plan.'}</p>{coverageStatus === 'error' && <button type="button" className="facility-secondary" onClick={retryCoverage}>Try coverage again</button>}</section>)}<div className="facility-action-row"><button className="facility-secondary" disabled={!ready} onClick={() => startTool(
+      {(step === 3 || step === 4) && <>{step === 4 && (coverage ? <CoverageMetrics metrics={coverage} blindZone={blindZone} onBlindZone={setBlindZone} blindSpots={blindSpots} dirty={propertyDirty} units={units}/> : <section className="facility-coverage-metrics" aria-label="Estimated coverage metrics"><h3 className="facility-subheading">Estimated coverage</h3><p className="facility-caption" role="status">{viewsUnavailable && !visibilityPending ? 'Coverage is unavailable until estimated camera views recover.' : coverageStatus === 'error' ? coverageError : 'Updating coverage… You can keep editing your plan.'}</p>{coverageStatus === 'error' && <button type="button" className="facility-secondary" onClick={retryCoverage}>Try coverage again</button>}</section>)}<div className="facility-action-row"><button className="facility-secondary" disabled={!ready} onClick={() => startTool(
     "camera"
   )}><Plus />Place camera</button><button className="facility-link" onClick={() => place("camera", [0, -20])}>Add with coordinates</button></div>
         <label className="facility-field"><span>Selected camera</span><select aria-label="Selected camera" value={selected.
@@ -1066,17 +1078,16 @@ nabled", e.target.checked)} />Include in coverage estimates</label>
           {note}<button className="facility-primary" type="submit">Save camera<Check /></button>
         </form> : <p className="facility-caption">Select a camera in the inventory, or place the first camera.</p>}
         {step === 3 && <p className="hint">Use the source preview to compare your camera placement. View guides are estimates; centering moves the map, not a physical camera.</p>}
-        <button type="button" className="facility-secondary facility-installer-button" disabled={navigationDirty || !plan.cameras.length} title={navigationDirty ? 'Save or discard edits first' : undefined} onClick={downloadInstallerSheet}><Printer />Download installer sheet</button>
+        <button type="button" className="facility-secondary facility-installer-button" disabled={navigationDirty || !plan.cameras.length || !savedViews} title={navigationDirty ? 'Save or discard edits first' : !savedViews ? 'Estimated views must finish for the saved plan' : undefined} onClick={downloadInstallerSheet}><Printer />Download installer sheet</button>
         <p className="facility-caption">Printable offline page of the saved plan: mounts, angles, lenses and DORI distances. {DORI_NOTE}.</p>
       </>}
       {step === 2 && <><FloorGeometry pending={linePending} onPendingChange={setLinePending} pointDraftPending={pathPointsPending} onPointDraftChange={setPathPointsPending} plan={plan} building={b} floor={floor} selected={selected} draft={draft} onDraft={setDraft} onSelect={select} commit={commit} onDraw={startTool} disabled={dirty} ready={ready} units={units}/></>}
       {step === 5 && <><div className="facility-action-row"><button className="facility-primary" disabled={!ready} onClick={() => startTool(
     "route"
-  )}><Path />Draw route</button><button className="facility-secondary" disabled={plan.route.length < 2} onClick={() => {
+  )}><Path />Draw route</button><button className="facility-secondary" disabled={plan.route.length < 2 || !viewsReady} onClick={() => {
     setSeconds(0);
     setPlaying(true);
-  }}><Play />Run rehearsal</button></div><p className="facility-caption">Follow the route in the map and scrub the timeline. Coverage changes produce proposals for review; no identity matching is running.</p>{plan.route.length>1 && <><LineDimensions disabled={routePointsPending} onDirtyChange={setLinePending} points={plan.route} onChange={route=>commit({...plan,route},'Route dimensions saved — Undo available')} units={units}/><p className="facility-caption">Route dimension edits save immediately. Undo restores the previous geometry.</p></>}<PointListEntry label="Route points" units={units} disabled={linePending} submitLabel={plan.route.length>1?'Replace route with these points':'Save route points'} onSubmit={route=>commit({...plan,route},'Route saved from point list — Undo available')} onDirtyChange={setRoutePointsPending}/><h3 className="facility-subheading">Proposed transitions</h3>{proposals.
-  length ? proposals.map((p) => <div className="facility-proposal" key={p.key}><strong>{p.from}<CaretRight />{p.to}</strong><small>At {p.
+  }}><Play />Run rehearsal</button></div><p className="facility-caption">Follow the route in the map and scrub the timeline. Coverage changes produce proposals for review; no identity matching is running.</p>{plan.route.length>1 && <><LineDimensions disabled={routePointsPending} onDirtyChange={setLinePending} points={plan.route} onChange={route=>commit({...plan,route},'Route dimensions saved — Undo available')} units={units}/><p className="facility-caption">Route dimension edits save immediately. Undo restores the previous geometry.</p></>}<PointListEntry label="Route points" units={units} disabled={linePending} submitLabel={plan.route.length>1?'Replace route with these points':'Save route points'} onSubmit={route=>commit({...plan,route},'Route saved from point list — Undo available')} onDirtyChange={setRoutePointsPending}/><h3 className="facility-subheading">Proposed transitions</h3>{proposals===null ? <p className="facility-caption">{visibilityPending ? 'Updating estimated views before proposing transitions…' : 'Transitions are unavailable because the estimated views could not be completed.'}</p> : proposals.length ? proposals.map((p) => <div className="facility-proposal" key={p.key}><strong>{p.from}<CaretRight />{p.to}</strong><small>At {p.
   seconds.toFixed(1)} s · simulated, unverified</small><div><button aria-pressed={decisions[p.key] === "link"} onClick={() => setDecisions(
     (d) => ({ ...d, [p.key]: "link" })
   )}>Link in rehearsal</button><button aria-pressed={decisions[p.key] === "separate"} onClick={() => setDecisions(
@@ -1111,23 +1122,23 @@ const percent = v => `${(Math.round(v * 1000) / 10).toFixed(1)}%`;
 function PixelDensity({ camera, units }) {
   const bands = doriDistances(camera);
   if (!bands) return <p className="facility-caption facility-dori-empty">{pixelsWideOK(camera?.pixelsWide) ? 'Enter a valid height, viewing angles and range to estimate pixel-density distances.' : `Enter the horizontal resolution (${PIXELS_WIDE.min}–${PIXELS_WIDE.max} px) to estimate Detect, Observe, Recognize and Identify distances.`}</p>;
-  const { near, far } = groundRange(camera), d = v => formatDistance(v, units);
+  const { near, far } = groundRange(camera), farDensity = far > near ? densityAtGround(camera, far) : null;
   return <div className="facility-dori" role="group" aria-label="Pixel density estimate">
     <p className="facility-dori-note"><WarningCircle size={15} />{DORI_NOTE}</p>
-    <table><thead><tr><th>Band</th><th>≥ px/m</th><th>Slant ≤</th><th>Ground distance</th></tr></thead><tbody>{bands.map(band => <tr key={band.id}><th scope="row"><i style={{ background: band.color }} />{band.name}</th><td>{band.ppm}</td><td>{d(band.slant)}</td><td>{band.reached ? `${d(band.from)}–${d(band.to)}${band.limited ? ' · view limit' : ''}` : 'Not reached'}</td></tr>)}</tbody></table>
-    <p className="facility-caption">Slant d = width ÷ (2 · px/m · tan(HFOV ÷ 2)); ground distance √(d² − height²), clipped to the {d(near)}–{d(Math.max(near, far))} ground view. About {Math.round(densityAtGround(camera, far))} px/m at the far ground limit. IEC 62676-4 figures used as planning thresholds; colored arcs on the map mark each limit.</p>
+    <table><thead><tr><th scope="col">Band</th><th scope="col">≥ px/m</th><th scope="col">Centreline ground range</th></tr></thead><tbody>{bands.map(band => <tr key={band.id}><th scope="row"><i style={{ background: band.color }} />{band.name}</th><td>{band.ppm}</td><td>{band.reached ? <>{formatDistanceRange(band.from, band.to, units)}{band.limited && <small> · view limit</small>}</> : 'Not reached'}</td></tr>)}</tbody></table>
+    <p className="facility-caption">Estimated horizontal detail across the ground, perpendicular to the camera’s bearing. Ranges run forward from the mount along that bearing within the modeled view, before wall shadows.{farDensity !== null && <> About {Math.round(farDensity)} px/m at the far centreline limit.</>} Colored lines mark thresholds inside the estimated ground view, including off-axis areas. IEC 62676-4 figures are planning thresholds; verify detail on site.</p>
   </div>;
 }
 function CoverageMetrics({ metrics, blindZone, onBlindZone, blindSpots, dirty, units }) {
   const shown = metrics.zones.find(z => z.id === blindZone && z.estimated);
   return <section className="facility-coverage-metrics" aria-label="Estimated coverage metrics"><h3 className="facility-subheading">Estimated coverage</h3>
     {metrics.zones.length || metrics.route ? <table><thead><tr><th scope="col">Area</th><th scope="col">Coverage<small>≥1 camera</small></th><th scope="col">Overlap<small>≥2 cameras</small></th><th scope="col" aria-label="Blind-spot overlay" /></tr></thead><tbody>
-      {metrics.zones.map(z => <tr key={z.id}><th scope="row">{z.name}<small>{z.type === 'object_watch' ? 'Object watch' : 'Restricted'}{z.estimateReason === 'indoor' ? ' · indoor' : ''}</small>{z.estimated && <small>{formatArea(z.area, units)} planned area</small>}</th>{z.estimated ? <><td>{percent(z.coverage)}</td><td>{percent(z.overlap)}</td><td><button type="button" className="facility-blind-toggle" aria-pressed={blindZone === z.id} aria-label={`Blind spots for ${z.name}`} onClick={() => onBlindZone(blindZone === z.id ? '' : z.id)}>Blind spots</button></td></> : <td colSpan={3} className="facility-not-estimated">{z.estimateReason === 'indoor' ? 'Not estimated · ground-plane only' : z.estimateReason === 'geometry-limit' ? 'Not estimated · geometry is too complex' : 'Not estimated · geometry could not be resolved'}</td>}</tr>)}
-      {metrics.route && <tr><th scope="row">Handoff route<small>{formatDistance(metrics.route.length, units)} path length</small></th><td>{percent(metrics.route.coverage)}</td><td>{percent(metrics.route.overlap)}</td><td /></tr>}
+      {metrics.zones.map(z => <tr key={z.id}><th scope="row">{z.name}<small>{z.type === 'object_watch' ? 'Object watch' : 'Restricted'}{z.estimateReason === 'indoor' ? ' · indoor' : ''}</small>{z.estimated && <small>{formatArea(z.area, units)} planned area</small>}</th>{z.estimated ? <><td>{percent(z.coverage)}</td><td>{percent(z.overlap)}</td><td><button type="button" className="facility-blind-toggle" aria-pressed={blindZone === z.id} aria-label={`Blind spots for ${z.name}`} onClick={() => onBlindZone(blindZone === z.id ? '' : z.id)}>Blind spots</button></td></> : <td colSpan={3} className="facility-not-estimated">{z.estimateReason === 'indoor' ? 'Not estimated · ground-plane only' : z.estimateReason === 'visibility-unavailable' ? 'Not estimated · camera views unavailable' : z.estimateReason === 'geometry-limit' ? 'Not estimated · geometry is too complex' : 'Not estimated · geometry could not be resolved'}</td>}</tr>)}
+      {metrics.route && <tr><th scope="row">Handoff route<small>{formatDistance(metrics.route.length, units)} path length</small></th>{metrics.route.estimated===false ? <td colSpan={3} className="facility-not-estimated">Not estimated · camera views unavailable</td> : <><td>{percent(metrics.route.coverage)}</td><td>{percent(metrics.route.overlap)}</td><td /></>}</tr>}
     </tbody></table> : <p className="facility-caption">Add an enabled outdoor zone (step 7) or a handoff route (step 6) to estimate coverage.</p>}
     {shown && blindSpots && <p className="facility-caption" role="status">{blindSpots.length ? `Map shows uncovered areas in ${shown.name}.` : `No uncovered area in ${shown.name}.`}</p>}
     {metrics.zones.some(z => !z.estimated && z.estimateReason !== 'indoor') && <p className="facility-caption">Change or simplify the zone or camera plan to retry unavailable estimates. You can still edit, save and Undo.</p>}
-    {metrics.route && <p className="facility-caption" aria-label="Route coverage details">{formatDistance(metrics.route.uncoveredLength, units)} of the route is outside the drawn coverage. Longest continuous gap: {formatDistance(metrics.route.longestBlindStretch, units)}.</p>}
+    {metrics.route && metrics.route.estimated!==false && <p className="facility-caption" aria-label="Route coverage details">{formatDistance(metrics.route.uncoveredLength, units)} of the route is outside the drawn coverage. Longest continuous gap: {formatDistance(metrics.route.longestBlindStretch, units)}.</p>}
     <p className="facility-caption">Zone percentages measure area inside the drawn ground coverage. Overlap requires two different cameras. Routes measure path length for {metrics.cameras} included {metrics.cameras === 1 ? 'camera' : 'cameras'}. {dirty ? 'Includes the unsaved camera preview. ' : ''}Indoor and level zones are not estimated because coverage is ground-plane only. Planning estimate; verify on site.</p>
   </section>;
 }

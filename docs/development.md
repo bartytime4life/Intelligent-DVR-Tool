@@ -113,7 +113,8 @@ outputs; publish only reviewed, source-bound documentation assets.
 | Evaluation | [evaluation.py](../edge/evaluation.py), [tracking_evaluation.py](../edge/tracking_evaluation.py) | [Detection manifest/labels](offline-evaluation.md), [anonymous track labels](tracking-evaluation.md) |
 | Guided threshold tuning | [training.mjs](../src/training.mjs), [training-library.mjs](../src/training-library.mjs) | [Calibration, fresh checks and saving](training.md) |
 | Local assistant and Lab receipt | [ollama.mjs](../src/ollama.mjs), [lab-receipt.mjs](../src/lab-receipt.mjs) | [Optional assistant](training.md#ask-the-local-training-assistant); Lab receipt is distinct from analyzer receipts |
-| Facility validation and coverage | [facility.mjs](../src/facility.mjs), [facility-coverage.mjs](../src/facility-coverage.mjs) | [Facility guide](facility-builder.md), [portable plans](saved-facilities.md) |
+| Facility validation | [facility.mjs](../src/facility.mjs) | [Facility guide](facility-builder.md), [portable plans](saved-facilities.md) |
+| Visible ground and metrics | [facility-visibility.mjs](../src/facility-visibility.mjs), [facility-visibility-protocol.mjs](../src/facility-visibility-protocol.mjs), [use-facility-visibility.mjs](../src/use-facility-visibility.mjs), [facility-coverage.mjs](../src/facility-coverage.mjs) | [Projection mathematics](science-and-algorithms.md#project-the-visible-ground-footprint), [replayable geometry record](verification/ground-frustum-math-2026-11-12/README.md) |
 | Browser still storage | [image-database.mjs](../src/image-database.mjs), [local-images.mjs](../src/local-images.mjs) | [Storage boundaries](architecture.md#where-data-goes) |
 
 The analyzer’s receipt, frame trace and browser review bundle serve different
@@ -122,6 +123,28 @@ recording/model/labels/rules or required implementation fingerprint. Current
 tracker method is `bytetrack-style-iou-kalman-v3`; historical v1/v2 review imports
 remain readable, while current tracking evaluation requires re-analysis with the
 current source. See [metric provenance](tracking-evaluation.md#metric-provenance-and-reproducibility).
+
+## Verify ground visibility changes
+
+The visibility protocol binds one immutable snapshot to the exact plan object.
+A structurally identical clone is a different plan revision. Keep full
+MultiPolygon topology and distinct camera IDs through every consumer; never
+replace missing geometry with an empty footprint or legacy radial-fan fallback.
+The direct point-ray diagnostic and closed polygon boundary policy have different
+boundary semantics, documented in the [science guide](science-and-algorithms.md#project-the-visible-ground-footprint).
+
+For focused generated checks:
+
+```bash
+node --test tests/facility-visibility.test.mjs tests/facility-visibility-integration.test.mjs tests/facility-visibility-task.test.mjs tests/facility-visibility-presentation.test.mjs tests/facility-coverage-task.test.mjs
+npx playwright test --config=playwright.facility.config.mjs tests/browser/facility-visibility.spec.mjs tests/browser/facility-camera-planning.spec.mjs
+```
+
+The [verification record](verification/ground-frustum-math-2026-11-12/README.md)
+provides frozen independent inputs, replay instructions, numerical limits and
+raw failures. Retain its ideal-circle boundary disagreements when comparing the
+inscribed range polygon with an exact circle. Tests of generated geometry and
+worker recovery do not qualify optics, installed services or camera throughput.
 
 ## Keep documentation and evidence current
 

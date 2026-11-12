@@ -190,34 +190,132 @@ test('opening and pathway helpers retain exact converted imperial dimensions wit
   assert.equal(ring[0][0],left);assert.equal(points[0][0],left);
 });
 
-import {coverageFan} from '../src/facility.mjs';
-import {DORI_BANDS, DORI_NOTE, LENS_PRESETS, lensPreset, pixelsPerMetre, doriDistances, doriArcs} from '../src/facility-dori.mjs';
+import {coverageFan, pointInPolygon} from '../src/facility.mjs';
+import {groundVisibility} from '../src/facility-visibility.mjs';
+import {DORI_BANDS, DORI_NOTE, LENS_PRESETS, lensPreset, pixelsPerMetre, densityAtGround, doriDistances, doriArcs} from '../src/facility-dori.mjs';
 import {fanCache, enabledFans, zoneCoverage, routeCoverage, coverageMetrics} from '../src/facility-coverage.mjs';
 import {installerSheetHTML, installerRows, installerSheetFilename, INSTALLER_LIMITS} from '../src/facility-installer.mjs';
 const lens = {id:'C1',name:'North',x:0,y:0,z:4,bearing:0,tilt:30,hfov:90,vfov:60,range:50,enabled:true,pixelsWide:1920};
 const rect = (x0,y0,x1,y1) => [[x0,y0],[x1,y0],[x1,y1],[x0,y1],[x0,y0]];
 const near = (a,b,eps=1e-3) => assert.ok(Math.abs(a-b)<eps,`${a} ≉ ${b}`);
 
-test('DORI bands use W/(2·d·tan(hfov/2)) with ground distance √(d²−z²) clipped to the ground view',()=>{
+// Project two separate ground target endpoints with a rotated 3-D camera basis.
+// This reference does not invert the implementation's band-distance formula.
+const projectedTarget = (c, right, forward, targetWidth=.2) => {
+  const b=c.bearing*Math.PI/180,t=c.tilt*Math.PI/180;
+  const across=[Math.cos(b),-Math.sin(b),0], ahead=[Math.sin(b),Math.cos(b),0];
+  const axis=[ahead[0]*Math.cos(t),ahead[1]*Math.cos(t),-Math.sin(t)];
+  const down=[-ahead[0]*Math.sin(t),-ahead[1]*Math.sin(t),-Math.cos(t)];
+  const dot=(a,b)=>a.reduce((s,v,i)=>s+v*b[i],0),f=c.pixelsWide/(2*Math.tan(c.hfov*Math.PI/360));
+  const endpoints=[-.5,.5].map(k=>{
+    const p=[across[0]*(right+k*targetWidth)+ahead[0]*forward,across[1]*(right+k*targetWidth)+ahead[1]*forward,-c.z];
+    const depth=dot(axis,p);
+    return {u:f*dot(across,p)/depth,normalizedY:dot(down,p)/depth};
+  });
+  return {density:Math.abs(endpoints[1].u-endpoints[0].u)/targetWidth,endpoints};
+};
+
+test('DORI centreline intervals use camera-axis depth and agree with projected steep-camera targets',()=>{
   assert.deepEqual(DORI_BANDS.map(b=>b.ppm),[25,62.5,125,250]);
   near(pixelsPerMetre(1920,90,10),96,1e-9);
   const [detect,observe,recognize,identify]=doriDistances(lens);
-  near(detect.slant,38.4);near(detect.to,Math.sqrt(38.4**2-16));assert.equal(detect.limited,false);
-  near(observe.to,Math.sqrt(15.36**2-16));near(recognize.to,Math.sqrt(7.68**2-16));near(recognize.from,4/Math.tan(Math.PI/3));
+  near(detect.depth,38.4);assert.equal('slant' in detect,false);near(detect.to,42.03109959700476,1e-9);assert.equal(detect.limited,false);
+  for(const band of [detect,observe,recognize]) near(projectedTarget(lens,0,band.to).density,band.ppm,1e-9);
+  near(recognize.from,4/Math.tan(Math.PI/3));
   assert.equal(identify.reached,false);
   const short=doriDistances({...lens,range:20})[0];assert.equal(short.to,20);assert.equal(short.limited,true);
-  assert.equal(doriDistances({...lens,pixelsWide:undefined}),null);assert.equal(doriDistances({...lens,pixelsWide:100}),null);
+  for(const [c,distance,width,limit] of [[{...lens,tilt:60},.5,.2,.7517967697244916],[{...lens,tilt:89,pixelsWide:2000},.02,.01,.03490747116307891]]) {
+    validateFacility({...blankFacility(),cameras:[c]});
+    const reference=projectedTarget(c,0,distance,width), band=doriDistances(c).find(b=>b.id==='identify');
+    assert.ok(reference.density>250);near(densityAtGround(c,distance),reference.density,1e-8);
+    assert.ok(band.reached);near(band.to,limit,1e-10);near(projectedTarget(c,0,band.to,width).density,250,1e-8);
+    assert.ok(doriArcs(c,coverageFan(c,[])).some(a=>a.id==='identify'));
+  }
   assert.equal(lensPreset(84).id,'4');assert.equal(lensPreset(85),null);assert.ok(LENS_PRESETS.every(p=>p.hfov>=5&&p.hfov<=170));
   assert.match(DORI_NOTE,/^Planning estimate — assumes ideal focus and no compression$/);
 });
 
-test('DORI arcs follow the drawn fan and break where a wall shortens rays',()=>{
+test('DORI density agrees with projected targets across supported optical bounds and tilt',()=>{
+  for(const tilt of [0,30,60,89]) for(const z of [.5,4,150]) for(const hfov of [5,90,170]) {
+    const c={...lens,z,tilt,hfov,vfov:150,pixelsWide:7680,range:300};
+    validateFacility({...blankFacility(),cameras:[c]});
+    for(const forward of [.01,1,300]) near(densityAtGround(c,forward),projectedTarget(c,0,forward).density,1e-6);
+    for(const band of doriDistances(c)) {
+      assert.ok([band.depth,band.from,band.to,band.ground].every(Number.isFinite));
+      if(band.reached) {
+        assert.ok(band.to>band.from);assert.ok(projectedTarget(c,0,(band.to+band.from)/2).density>=band.ppm-1e-8);
+        if(!band.limited) near(projectedTarget(c,0,band.to).density,band.ppm,1e-7);
+      }
+    }
+  }
+});
+
+test('DORI rejects invalid optical drafts and map poses without NaN or infinity',()=>{
+  for(const [key,value] of [['z',.49],['z',151],['tilt',-1],['tilt',90],['hfov',4],['hfov',171],['vfov',4],['vfov',151],['range',.9],['range',301],['pixelsWide',319],['pixelsWide',7681],['pixelsWide',1920.5],['z',NaN],['tilt',Infinity]]) {
+    const c={...lens,[key]:value};assert.equal(doriDistances(c),null,`${key}=${value}`);assert.equal(densityAtGround(c,1),null);assert.deepEqual(doriArcs(c,rect(-10,1,10,50)),[]);
+  }
+  for(const [key,value] of [['x',2001],['y',-2001],['bearing',360],['bearing',NaN],['enabled',false]]) assert.deepEqual(doriArcs({...lens,[key]:value},coverageFan(lens,[])),[]);
+  for(const distance of [-1,NaN,Infinity]) assert.equal(densityAtGround(lens,distance),null);
+  assert.equal(densityAtGround({...lens,tilt:0},0),null);
+  for(const depth of [0,-1,Infinity,NaN,Number.MIN_VALUE]) assert.equal(pixelsPerMetre(1920,90,depth),null);
+  assert.ok(pixelsPerMetre(1920,90,Number.MAX_VALUE)>0);
+  assert.deepEqual(doriArcs(lens,null),[]);assert.deepEqual(doriArcs(lens,[[0,0],[NaN,1],[1,2]]),[]);
+});
+
+test('DORI threshold contact has no positive interval while a positive band and view limit are retained',()=>{
+  const depth=1920/(2*250*Math.tan(Math.PI/4)), c={...lens,tilt:0,vfov:2*Math.atan(4/depth)*180/Math.PI};
+  const touch=doriDistances(c).at(-1);near(touch.to,touch.from,1e-12);assert.equal(touch.reached,false);
+  assert.ok(doriDistances({...c,vfov:c.vfov+1e-5}).at(-1).reached);
+  const steep={...lens,tilt:60,vfov:90},limit=doriDistances(steep).find(b=>b.id==='recognize').ground;
+  const clipped=doriDistances({...steep,range:limit}).find(b=>b.id==='recognize');assert.ok(clipped.reached&&clipped.limited);near(clipped.to,limit,1e-10);
+  assert.ok(doriDistances({...lens,z:150,range:1}).every(b=>!b.reached));
+});
+
+test('DORI contours are straight projected-density limits clipped to fans and wall shadows',()=>{
   const open=doriArcs(lens,coverageFan(lens,[]));
   assert.deepEqual(open.map(a=>a.id),['detect','observe','recognize']);
-  for(const arc of open){assert.equal(arc.lines.length,1);assert.equal(arc.lines[0].length,49);for(const p of arc.lines[0])near(Math.hypot(...p),arc.to,1e-9);}
+  for(const arc of open){assert.equal(arc.lines.length,1);assert.equal(arc.lines[0].length,2);for(const [x,y] of [...arc.lines[0],arc.label])near(projectedTarget(lens,x,y).density,arc.ppm,1e-8);}
   const wall={polygon:rect(-2,10,2,10.5),base:0,top:6},blocked=doriArcs(lens,coverageFan(lens,[wall]));
   assert.equal(blocked.find(a=>a.id==='observe').lines.length,2);assert.equal(blocked.find(a=>a.id==='recognize').lines.length,1);
   assert.deepEqual(doriArcs({...lens,enabled:false},coverageFan({...lens,enabled:false},[])),[]);
+});
+
+test('DORI contour clipping preserves concave splits, closed edges, small gaps and zero-measure tangencies',()=>{
+  const c={...lens,pixelsWide:320,z:.5,tilt:0}, y=doriDistances(c)[0].ground;
+  const u=[[-4,4],[4,4],[4,9],[1,9],[1,5],[-1,5],[-1,9],[-4,9],[-4,4]];
+  const arc=doriArcs(c,u).find(a=>a.id==='detect');assert.deepEqual(arc.lines,[[[-4,y],[-1,y]],[[1,y],[4,y]]]);
+  assert.ok(arc.lines.some(([a,b])=>arc.label[0]>=a[0]&&arc.label[0]<=b[0]));
+  assert.equal(doriArcs(c,rect(-1,y,1,y+1)).find(a=>a.id==='detect').lines.length,1);
+  assert.ok(!doriArcs(c,[[0,y],[-1,y+1],[1,y+1],[0,y]]).some(a=>a.id==='detect'));
+  const gap=1e-8, narrow=[[-2,4],[2,4],[2,9],[gap,9],[gap,5],[0,5],[0,9],[-2,9],[-2,4]];
+  const lines=doriArcs(c,narrow).find(a=>a.id==='detect').lines;assert.equal(lines.length,2);near(lines[1][0][0]-lines[0][1][0],gap,1e-12);
+  assert.deepEqual(doriArcs(c,[[-1,y],[1,y],[-1,y]]),[]);
+});
+
+test('DORI contours obey both sensor dimensions even when a supplied fan extends beyond them',()=>{
+  const c={...lens,pixelsWide:320,z:.5,tilt:0},a=doriArcs(c,rect(-30,0,30,20)).find(a=>a.id==='detect');
+  near(a.lines[0][0][0],-6.4,1e-12);near(a.lines[0][1][0],6.4,1e-12);
+  for(const [x,y] of a.lines[0]) {const p=projectedTarget(c,x,y,.001).endpoints;near((p[0].u+p[1].u)/2,Math.sign(x)*c.pixelsWide/2,1e-8);}
+  assert.deepEqual(doriArcs({...lens,tilt:0,vfov:5},rect(-50,0,50,50)),[]);
+});
+
+test('DORI retains rear contour fragments when the forward centreline band has zero length',()=>{
+  const y=-.006,theta=Math.PI/3,c={...lens,tilt:60,vfov:80,hfov:2*Math.atan(1920/(2*250*(4*Math.sin(theta)+y*Math.cos(theta))))*180/Math.PI};
+  validateFacility({...blankFacility(),cameras:[c]});assert.equal(doriDistances(c).at(-1).reached,false);
+  const arc=doriArcs(c,groundVisibility(c).polygons).find(a=>a.id==='identify');assert.ok(arc);assert.equal(arc.lines.length,1);
+  for(const line of arc.lines) for(const [x,forward] of line) {near(forward,y,1e-12);near(projectedTarget(c,x,forward,.0001).density,250,1e-7);}
+});
+
+test('DORI contour fragments are invariant under winding, rotation and translated camera poses',()=>{
+  const c={...lens,pixelsWide:320,z:.5,tilt:0},ring=[[-4,4],[4,4],[4,9],[1,9],[1,5],[-1,5],[-1,9],[-4,9],[-4,4]];
+  const expected=doriArcs(c,ring).find(a=>a.id==='detect');
+  for(const bearing of [0,37,123,359.99]) {
+    const b=bearing*Math.PI/180,move=([x,y])=>[1990+Math.cos(b)*x+Math.sin(b)*y,-1980-Math.sin(b)*x+Math.cos(b)*y];
+    const camera={...c,x:1990,y:-1980,bearing},fan=ring.map(move).reverse(),snapshot=JSON.stringify({camera,fan});
+    const actual=doriArcs(camera,fan).find(a=>a.id==='detect');assert.equal(actual.lines.length,2);
+    actual.lines.forEach((line,i)=>line.forEach((p,j)=>{const q=move(expected.lines[i][j]);near(p[0],q[0],1e-9);near(p[1],q[1],1e-9);assert.ok(pointInPolygon(p,fan));}));
+    assert.equal(JSON.stringify({camera,fan}),snapshot);
+  }
 });
 
 test('coverage metrics integrate shared cached fans by area, including overlap and blind polygons',()=>{
@@ -290,7 +388,17 @@ test('installer sheet is offline, escaped, CSP-restricted HTML with an inline SV
   assert.equal(installerSheetFilename(plan),'dvr-yard-b-b-installer-sheet.html');
   const rows=installerRows(plan);
   assert.equal(rows[0].channel,'<script>alert(1)</script>');assert.equal(rows[0].resolution,'1920 px wide');
-  assert.equal(rows[0].dori.length,4);assert.match(rows[0].dori[0],/^≤ \d+\.\d m$/);assert.ok(rows[1].dori.every(v=>v==='—'));
+  assert.equal(rows[0].dori.length,4);assert.match(rows[0].dori[0],/^\d+\.\d m–\d+\.\d m$/);assert.ok(rows[1].dori.every(v=>v==='—'));
   assert.match(installerRows(plan,'imperial')[0].east,/ ft$/);
   assert.throws(()=>installerSheetHTML({...plan,cameras:[{...plan.cameras[0],pixelsWide:12}]}),/resolution/);
+});
+
+test('installer density intervals retain the near limit and positive steep-camera detail in both units',()=>{
+  const plan={...blankFacility(),cameras:[{...lens,tilt:89,pixelsWide:2000}]};
+  assert.equal(installerRows(plan)[0].dori[3],'0.000 m–0.035 m');
+  assert.equal(installerRows(plan,'imperial')[0].dori[3],'0.0 ft–0.1 ft');
+  const html=installerSheetHTML(plan,{generatedAt:'2026-11-12T00:00:00.000Z'});
+  assert.ok(html.includes('centreline ground ranges (from–to)'));
+  assert.ok(html.includes('Camera-axis depth, not slant distance'));
+  assert.ok(!html.includes('√(d²−z²)'));
 });

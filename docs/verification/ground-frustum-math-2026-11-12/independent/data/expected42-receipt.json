@@ -1,0 +1,13 @@
+{
+  "arrangementSha256": "e78a1d84a536d51b957eb6b8cf2370fa1d9fb9b4d0c4a769674eba2af9b90cf6",
+  "cases": 42,
+  "excludedBoundaryOrChordBand": 3,
+  "expectedSha256": "68da28a306c623041dd18335bd905f161f9ca0ece185528a51a42e44466ea98f",
+  "failures": [],
+  "geometryOracleSha256": "b8847f6ad2b38e2a980384dbb957387ede4a2c4fa5bc5657048186e3dc266c61",
+  "independentRayVsProjectedMaskChecks": 38193,
+  "inputsSha256": "4ba8fad33036f05c3c6478eb6e67cb809507a1b9b352db4c47bd6f6192bfa897",
+  "pass": true,
+  "queries": 38196,
+  "schema": "dvr-frustum-wall-expected-v1"
+}

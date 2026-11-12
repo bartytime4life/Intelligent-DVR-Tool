@@ -39,10 +39,14 @@ keeps analytic, independent-oracle and local browser evidence. Zone grids and
 the simulated handoff rehearsal remain separate; no optical calibration,
 real tracking or camera-capacity claim follows from these calculations.
 
-The separate [zone-area proposal](verification/zone-area-math-2026-11-12/README.md)
-replaces the outdoor grid with distinct-camera polygon area, coherent blind
-geometry and bounded background calculation. It remains under review until
-merged; generated geometry and worker checks do not qualify physical visibility.
+The current [visible-ground proposal](verification/ground-frustum-math-2026-11-12/README.md)
+locally integrates the unmerged pixel-density and zone-area proposals, then
+replaces radial sectors with a tilted pinhole footprint minus projected wall
+shadows. All planning consumers share current geometry, preserving holes and
+separate regions and withholding unavailable conclusions. Follow-up acceptance
+needs surveyed ground/pose measurements and independent physical targets,
+including low walls, raised structures and steep views. Generated mathematics
+and browser checks do not qualify physical visibility or installed software.
 
 [PR #112](https://github.com/bartytime4life/Intelligent-DVR-Tool/pull/112), merged
 as `cd6d1566`, replaces coarse automatic training cutoffs with empirical score

@@ -8,6 +8,11 @@
 
 *Concept illustration. Use the [current screenshot atlas](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Visual-atlas) for actual interface captures and their provenance.*
 
+The [current visibility proposal](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/ground-frustum-math-2026-11-12/README.md)
+aligns camera footprints, metrics, rehearsal and installer recovery. The
+[facility guide](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Facility-planning#visibility-model-and-evidence-limits) describes
+its controls and limits; [product status](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Product-status) identifies what is merged.
+
 ## Pick the outcome
 
 In the app, Monitor's **What’s next?** guide opens **Watch cameras**, **Analyze

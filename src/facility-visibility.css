@@ -1,0 +1,4 @@
+.facility-visibility-status{position:absolute;left:12px;bottom:90px;z-index:3;max-width:min(360px,calc(100% - 70px));padding:9px 11px;border:1px solid #806044;border-radius:8px;background:#292821f2;color:#ffe1b7;font-size:11px;line-height:1.5;box-shadow:0 4px 14px #020d1450}
+.facility-visibility-status button,.facility-visibility-retry{display:block;margin-top:7px;min-height:34px;border:1px solid #a87d4f;border-radius:5px;padding:6px 9px;background:#3a2e24;color:#ffe9cf;font:inherit;cursor:pointer}
+.facility-visibility-retry{font-size:11px;margin-left:auto}
+@media(max-width:620px){.facility-visibility-status{right:55px;max-width:none}}

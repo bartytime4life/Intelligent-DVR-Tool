@@ -8,6 +8,11 @@
 
 *Concept illustration. Use the [current screenshot atlas](visual-atlas.md) for actual interface captures and their provenance.*
 
+The [current visibility proposal](verification/ground-frustum-math-2026-11-12/README.md)
+aligns camera footprints, metrics, rehearsal and installer recovery. The
+[facility guide](facility-builder.md#visibility-model-and-evidence-limits) describes
+its controls and limits; [product status](product-status.md) identifies what is merged.
+
 ## Pick the outcome
 
 In the app, Monitor's **What’s next?** guide opens **Watch cameras**, **Analyze
