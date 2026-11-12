@@ -56,7 +56,7 @@ import FacilityStairs,{StairDestination} from './FacilityStairs.jsx';
 import {stairAtStart,suggestedStair,stairPlacementIssue} from './facility-stair-placement.mjs';
 import {addBuildingLevel} from './facility.mjs';
 import {unitFactor, displayLength, unitLabel, enteredLength, localizeLengths, nextBuildingName, rotateShape, shapeBounds, suggestBuildingOffset, translateShape} from './facility-shape-edit.mjs';
-import {formatDistance} from './facility-measurements.mjs';
+import {formatDistance, formatDistanceRange} from './facility-measurements.mjs';
 import {createFloorOpening,createFloorPath,snapToBuilding,solidSpaceProblem,applyBuildingEdit,buildingMotion,fittingRectangle,reoriginPlan,SNAP_TOLERANCE} from './facility.mjs';
 import {backdropDismiss} from './dialog-dismiss.mjs';
 import FacilityLevels from './FacilityLevels.jsx';
@@ -1109,11 +1109,11 @@ const percent = v => `${(Math.round(v * 1000) / 10).toFixed(1)}%`;
 function PixelDensity({ camera, units }) {
   const bands = doriDistances(camera);
   if (!bands) return <p className="facility-caption facility-dori-empty">{pixelsWideOK(camera?.pixelsWide) ? 'Enter a valid height, viewing angles and range to estimate pixel-density distances.' : `Enter the horizontal resolution (${PIXELS_WIDE.min}–${PIXELS_WIDE.max} px) to estimate Detect, Observe, Recognize and Identify distances.`}</p>;
-  const { near, far } = groundRange(camera), d = v => formatDistance(v, units);
+  const { near, far } = groundRange(camera), farDensity = far > near ? densityAtGround(camera, far) : null;
   return <div className="facility-dori" role="group" aria-label="Pixel density estimate">
     <p className="facility-dori-note"><WarningCircle size={15} />{DORI_NOTE}</p>
-    <table><thead><tr><th>Band</th><th>≥ px/m</th><th>Slant ≤</th><th>Ground distance</th></tr></thead><tbody>{bands.map(band => <tr key={band.id}><th scope="row"><i style={{ background: band.color }} />{band.name}</th><td>{band.ppm}</td><td>{d(band.slant)}</td><td>{band.reached ? `${d(band.from)}–${d(band.to)}${band.limited ? ' · view limit' : ''}` : 'Not reached'}</td></tr>)}</tbody></table>
-    <p className="facility-caption">Slant d = width ÷ (2 · px/m · tan(HFOV ÷ 2)); ground distance √(d² − height²), clipped to the {d(near)}–{d(Math.max(near, far))} ground view. About {Math.round(densityAtGround(camera, far))} px/m at the far ground limit. IEC 62676-4 figures used as planning thresholds; colored arcs on the map mark each limit.</p>
+    <table><thead><tr><th>Band</th><th>≥ px/m</th><th>Centreline ground range</th></tr></thead><tbody>{bands.map(band => <tr key={band.id}><th scope="row"><i style={{ background: band.color }} />{band.name}</th><td>{band.ppm}</td><td>{band.reached ? <>{formatDistanceRange(band.from, band.to, units)}{band.limited && <small> · view limit</small>}</> : 'Not reached'}</td></tr>)}</tbody></table>
+    <p className="facility-caption">Estimated horizontal detail across the ground, perpendicular to the camera’s bearing. Ranges run from the mount along that bearing within the modeled view, before wall shadows.{farDensity !== null && <> About {Math.round(farDensity)} px/m at the far centreline limit.</>} Colored lines mark thresholds inside the drawn fan and ideal sensor view. IEC 62676-4 figures are planning thresholds; verify detail on site.</p>
   </div>;
 }
 function CoverageMetrics({ metrics, blindZone, onBlindZone, blindSpots, dirty, units }) {

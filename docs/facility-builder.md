@@ -188,13 +188,21 @@ and no compression**. None of it is a calibration, compliance or
 recognition-quality claim.
 
 - **Pixel density (DORI).** An optional `pixelsWide` (integer 320–7680) gives
-  horizontal pixels per metre at slant distance *d* as `W / (2·d·tan(hfov/2))`.
+  ideal horizontal pixels per metre across the ground, perpendicular to the
+  camera bearing. Pinhole projection uses camera-axis depth, rather than slant
+  distance; tilt therefore matters even for targets close to the mount.
   The IEC 62676-4 figures — Detect 25, Observe 62.5, Recognize 125 and Identify
-  250 px/m — are used as planning thresholds. Each band's ground distance is
-  `√(d² − z²)` for mount height *z*, clipped to the camera's modeled near/far
-  ground range. The camera form shows a distance table; colored arcs on the
-  selected camera's fan mark each limit and break where modeled walls shorten
-  the view. Lens presets (2.8–12 mm) fill a **typical** horizontal view only;
+  250 px/m — are used as planning thresholds. The table and installer sheet show
+  **centreline ground ranges**, from the near view limit along the bearing to
+  each threshold or the far view limit. Short positive ranges retain enough
+  displayed precision to remain visible in metres or feet. These intervals
+  describe the ideal centreline view, before wall occlusion. Colored straight
+  lines show equal-density thresholds, clipped to the drawn fan and ideal
+  sensor bounds; wall shadows can split a line into separate fragments.
+  The fan itself remains a radial-sector ground approximation, rather than a
+  calibrated tilted rectangular camera footprint. [Projection mathematics and
+  generated checks](science-and-algorithms.md#project-ground-detail-through-the-camera).
+  Lens presets (2.8–12 mm) fill a **typical** horizontal view only;
   vertical view is unchanged, and a datasheet value always wins.
 - **Coverage metrics.** The Coverage step uses the same cached fans the map
   draws, including any unsaved camera preview. Outdoor zones use a grid (at most
@@ -227,7 +235,8 @@ recognition-quality claim.
   an inline SVG plan (buildings, outdoor zones, route, estimated fans and camera
   bearings), and a per-camera table of ID, name, an optional `channel` label
   (≤60 characters), east/north, mount height, bearing, tilt, H/V field of view,
-  range, resolution and DORI ground distances, followed by its interpretation
+  range, resolution and DORI centreline ground ranges (including both near and
+  far endpoints), followed by its interpretation
   limits. It contains no credentials, stream addresses or footage.
 
 The route is a planned, simulated path. Rehearsal assumes a walking pace of

@@ -680,8 +680,8 @@ e-stroke-width": 2 } });
     });
     const cam = plan.cameras.find((c) => c.id === selected);
     if (cam) specs.push({ className: "facility-map-label selected-camera-label", text: cam.id + " \xB7 " + cam.name, priority: 1, keep: false, anchor: "top", offset: [0, 14], lngLat: toLngLat([cam.x, cam.y], o) });
-    if (cam?.enabled) for (const arc of doriArcs(cam, fanOf(cam))) specs.push({ className: "facility-map-label facility-dori-label", text: `${arc.name} \u2264 ${formatDistance(arc.to, displayOptions.units)}`,
-      title: "Pixel-density planning estimate \u00b7 assumes ideal focus and no compression", priority: 3, keep: false, anchor: "center", offset: [0, 0], lngLat: toLngLat(arc.label, o) });
+    if (cam?.enabled) for (const arc of doriArcs(cam, fanOf(cam))) specs.push({ className: "facility-map-label facility-dori-label", text: `${arc.name} · ${arc.ppm} px/m`,
+      title: "Pixel-density planning estimate \u00b7 assumes ideal focus and no compression", priority: 3, keep: false, anchor: "bottom", offset: [0, -6], lngLat: toLngLat(arc.label, o) });
     if (displayOptions.measurements) for (const label of measurementLabels(plan, selected, {...displayOptions, floor, view: mode})) specs.push({
       className: `facility-map-label facility-dimension-label${label.summary ? " facility-measurement-summary" : ""}${label.route ? " facility-route-dimension" : ""}`,
       text: label.text, title: "Plan dimensions · verify on site", priority: label.primary ? 0 : label.summary ? 2 : 3, keep: !!label.primary,

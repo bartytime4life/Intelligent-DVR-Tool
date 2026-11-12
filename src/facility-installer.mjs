@@ -1,17 +1,17 @@
 import { validateFacility, buildingRings, wallObstacles, groundRange } from './facility.mjs';
 import { fanCache } from './facility-coverage.mjs';
 import { DORI_BANDS, DORI_NOTE, doriDistances } from './facility-dori.mjs';
-import { formatDistance } from './facility-measurements.mjs';
+import { formatDistance, formatDistanceRange } from './facility-measurements.mjs';
 import { facilityFilename } from './facility-library.mjs';
 
 const escapeHTML = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const n2 = v => +v.toFixed(2), deg = v => `${n2(v)}°`;
 export const installerSheetFilename = plan => facilityFilename(plan).replace(/\.json$/, '-installer-sheet.html');
 export const INSTALLER_LIMITS = Object.freeze([
-  `${DORI_NOTE}. Pixel density uses the entered horizontal resolution and horizontal field of view at the image centre; lens distortion, sensor cropping, focus, lighting, motion blur and video encoding reduce real detail.`,
+  `${DORI_NOTE}. Pixel density estimates horizontal detail across the ground, perpendicular to the camera bearing, using ideal pinhole projection; lens distortion, sensor cropping, focus, lighting, motion blur and video encoding affect real detail.`,
   'DORI bands use the IEC 62676-4 pixel-density figures (25, 62.5, 125 and 250 px/m) as planning thresholds. They are not a compliance, calibration or recognition-quality claim.',
-  'DORI distances are horizontal ground distances from the mount point, √(d²−z²) for slant distance d and mount height z, clipped to each camera’s modeled near and far ground limits.',
-  'Coverage shapes are ground-plane estimates that treat modeled building and room walls as opaque. They exclude floor slabs, openings, furniture, terrain, vegetation and lens effects.',
+  'DORI columns give centreline ground ranges from the mount along the bearing, clipped to the modeled near and far view before wall shadows. Camera-axis depth, not slant distance, sets projected horizontal detail. The drawn coverage fan remains a radial-sector approximation; density contours additionally use ideal sensor bounds.',
+  'Coverage shapes are ground-plane estimates with modeled doorway gaps and opaque lintels; exterior glazing stays opaque. Floor slabs, furniture, terrain, vegetation and lens effects are not modeled.',
   'Positions are meters east and north of the plan origin on a local planning grid, not a survey. Lens presets are typical values; use the lens datasheet.',
   'Channel labels are planner notes. This sheet contains no camera credentials, stream addresses or footage.',
 ]);
@@ -23,7 +23,7 @@ export function installerRows(plan, units = 'metric') {
     return {id:c.id, name:c.name, channel:c.channel || '', enabled:c.enabled, east:d(c.x), north:d(c.y), height:d(c.z), bearing:deg(c.bearing), tilt:deg(c.tilt),
       fov:`${n2(c.hfov)}° × ${n2(c.vfov)}°`, range:`${d(c.range)} · ground ${d(near)}–${d(Math.max(near, far))}`,
       resolution:c.pixelsWide ? `${c.pixelsWide} px wide` : 'Not set',
-      dori:DORI_BANDS.map((band, i) => !dori ? '—' : !dori[i].reached ? 'Not reached' : `≤ ${d(dori[i].to)}${dori[i].limited ? ' (view limit)' : ''}`)};
+      dori:DORI_BANDS.map((band, i) => !dori ? '—' : !dori[i].reached ? 'Not reached' : `${formatDistanceRange(dori[i].from, dori[i].to, units)}${dori[i].limited ? ' (view limit)' : ''}`)};
   });
 }
 const NICE = [1, 2, 5, 10, 20, 50, 100, 200, 500, 1000];
@@ -58,7 +58,7 @@ export function installerSheetHTML(plan, {units = 'metric', generatedAt = new Da
 <p class="notice"><strong>${h(DORI_NOTE)}</strong><br>Positions, angles and distances are planning values on a local grid. Verify each mount, bearing and lens on site before installation.</p>
 <h2>Plan</h2><p>Origin ${h(clean.origin[1])}, ${h(clean.origin[0])} (latitude, longitude) · ${rows.length} ${rows.length === 1 ? 'camera' : 'cameras'} · shaded areas are estimated ground visibility of included cameras.</p>
 ${installerPlanSVG(clean, units, fanOf)}
-<h2>Cameras</h2><p>East/north are from the plan origin; bearing is clockwise from north; tilt is downward. DORI columns give the estimated ground distance from the mount within which each pixel-density band holds.</p>
+<h2>Cameras</h2><p>East/north are from the plan origin; bearing is clockwise from north; tilt is downward. DORI columns give centreline ground ranges (from–to) along the bearing where each estimated horizontal pixel-density threshold holds.</p>
 <div class="scroll"><table><thead><tr><th>ID</th><th>Name</th><th>Channel</th><th>East</th><th>North</th><th>Mount height</th><th>Bearing</th><th>Tilt</th><th>H × V FOV</th><th>Range</th><th>Resolution</th>${DORI_BANDS.map(b => `<th>${h(b.name)}<br><span class="muted">≥ ${b.ppm} px/m</span></th>`).join('')}</tr></thead><tbody>${rows.map(r => `<tr><td>${h(r.id)}</td><td>${h(r.name)}${r.enabled ? '' : '<br><span class="muted">excluded from estimates</span>'}</td><td>${h(r.channel) || '—'}</td><td>${h(r.east)}</td><td>${h(r.north)}</td><td>${h(r.height)}</td><td>${h(r.bearing)}</td><td>${h(r.tilt)}</td><td>${h(r.fov)}</td><td>${h(r.range)}</td><td>${h(r.resolution)}</td>${r.dori.map(v => `<td>${h(v)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>
 <h2>Interpretation limits</h2><ul>${INSTALLER_LIMITS.map(v => `<li>${h(v)}</li>`).join('')}</ul></html>`;
 }

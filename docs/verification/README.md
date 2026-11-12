@@ -1,5 +1,10 @@
 # Verification index
 
+[Ground pixel density through pinhole projection, November 12](dori-projection-2026-11-12/README.md)
+records reproduced slant/depth errors, centreline ground intervals, straight
+fan/sensor-clipped contours, an independent generated projection oracle and
+readable short ranges in the browser and installer exports.
+
 [Current documentation alignment, November 12](documentation-alignment-2026-11-12/README.md)
 follows the earlier 197-path audit, records the merged route/evaluation baseline and
 corrects rehearsal duration/position wording without replacing historical receipts.

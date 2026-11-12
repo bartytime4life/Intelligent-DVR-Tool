@@ -179,7 +179,9 @@ test('pixel density table, lens preset and installer sheet download use the save
   await page.getByRole('button',{name:/^4 Cameras/}).click();
   const density=page.getByRole('group',{name:'Pixel density estimate'});
   await expect(density).toContainText('Planning estimate — assumes ideal focus and no compression');
-  await expect(density.getByRole('row',{name:/Detect/})).toContainText('2.3 m–38.2 m');
+  await expect(density.getByRole('row',{name:/Detect/})).toContainText('2.3 m–42.0 m');
+  await expect(density.getByRole('columnheader')).toHaveCount(3);
+  await expect(density.getByRole('columnheader',{name:'Centreline ground range'})).toBeVisible();
   await expect(density.getByRole('row',{name:/Identify/})).toContainText('Not reached');
   await expect(page.locator('.facility-dori-label').first()).toBeAttached();
   await page.getByLabel('Lens preset (typical)',{exact:true}).selectOption('6');
@@ -199,9 +201,44 @@ test('pixel density table, lens preset and installer sheet download use the save
   expect(html).toContain(`<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'">`);
   expect(html).toContain('<svg class="plan"');
   expect(html).toContain('NVR-1 ch 1');
-  expect(html).toContain('≤ 38.2 m');
+  expect(html).toContain('2.3 m–42.0 m');
+  expect(html).toContain('centreline ground ranges (from–to)');
   expect(html).toContain('Planning estimate — assumes ideal focus and no compression');
   expect(html).not.toMatch(/<script|<img|data:/);
+});
+
+for (const tilt of [60, 89]) for (const width of [1440, 375]) test(`projected ground detail remains readable at tilt ${tilt} and ${width}px`,async({page},testInfo)=>{
+  await page.setViewportSize({width,height:1000});
+  const errors=[];page.on('pageerror',error=>errors.push(error.message));
+  const plan=validateFacility({...blankFacility(),name:'Coverage fixture',cameras:[{
+    id:'C1',name:'Generated steep camera',x:0,y:0,z:4,bearing:0,tilt,hfov:90,vfov:60,
+    range:50,enabled:true,pixelsWide:tilt===60 ? 1920 : 2000}]});
+  await openFixture(page,plan);
+  await page.getByRole('button',{name:/^4 Cameras/}).click();
+  const density=page.getByRole('group',{name:'Pixel density estimate'});
+  await expect(density.getByRole('columnheader')).toHaveCount(3);
+  await expect(density).not.toContainText('Slant');
+  await expect(density.getByRole('row',{name:/Identify/})).toContainText(tilt===60 ? '0.007 m–0.752 m' : '0.007 m–0.035 m');
+  await expect(density).toContainText('Planning estimate — assumes ideal focus and no compression');
+  await expect(density).toContainText('perpendicular to the camera’s bearing');
+  if (tilt===60) await expect(page.locator('.facility-dori-label').filter({hasText:'Identify · 250 px/m'})).toBeAttached();
+  if (tilt===60 && width===1440) {
+    await centreCamera(page);
+    await page.locator('.facility-map').screenshot({path:testInfo.outputPath('dori-map-60-1440.png')});
+  }
+  await density.scrollIntoViewIfNeeded();
+  expect(await density.evaluate(el=>el.scrollWidth<=el.clientWidth)).toBe(true);
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+  await density.screenshot({path:testInfo.outputPath(`dori-${tilt}-${width}.png`)});
+  await page.getByLabel('Measurement units',{exact:true}).selectOption('imperial');
+  await expect(density.getByRole('row',{name:/Identify/})).toContainText(tilt===60 ? '0.023 ft–2.467 ft' : '0.023 ft–0.115 ft');
+  const downloaded=page.waitForEvent('download');
+  await page.getByRole('button',{name:'Download installer sheet',exact:true}).click();
+  const html=readFileSync(await (await downloaded).path(),'utf8');
+  expect(html).toContain(tilt===60 ? '0.023 ft–2.467 ft' : '0.023 ft–0.115 ft');
+  expect(html).not.toContain('√(d²−z²)');
+  expect((await saved(page)).cameras).toEqual(plan.cameras);
+  expect(errors).toEqual([]);
 });
 
 for (const width of [1440, 375]) test(`route percentages measure length between narrow camera fans at ${width}px`,async({page},testInfo)=>{

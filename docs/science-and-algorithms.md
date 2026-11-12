@@ -5,6 +5,39 @@ This guide connects the delivered mathematics to the problems it solves. The
 scores, pixels and assignment matrices. They establish software behavior, not
 physical-camera accuracy, detector throughput or 100-camera capacity.
 
+## Project ground detail through the camera
+
+The camera planner estimates **horizontal detail across a flat ground plane**,
+perpendicular to the entered bearing. Under the
+[ideal pinhole model](https://docs.opencv.org/4.13.0/d9/d0c/group__calib3d.html),
+horizontal image position depends on camera-axis depth. Euclidean slant distance
+can substitute for that depth only on the optical axis.
+
+For horizontal resolution `W`, downward tilt `theta`, mount height `z`, forward
+ground distance `Y` along the bearing and transverse ground coordinate `X`:
+
+```text
+fx                      = W / (2 tan(HFOV/2))
+camera-axis depth Zc    = Y cos(theta) + z sin(theta)
+horizontal image offset = fx X / Zc
+horizontal px/metre      = fx / Zc
+threshold ground limit  = (fx / threshold - z sin(theta)) / cos(theta)
+```
+
+The table clips the centreline interval to the modeled near/far view. Map
+thresholds are straight ground lines perpendicular to the bearing, clipped to
+the drawn fan and ideal horizontal/vertical sensor bounds. A wall shadow can
+leave several disconnected fragments; they are not joined across the shadow.
+These contours do not change zone coverage, route metrics or simulated rehearsal.
+
+At height 4 m, tilt 60°, HFOV 90° and width 1920 pixels, an independently
+projected transverse target at forward distance 0.5 m gives about 258.47 px/m.
+The previous slant calculation gave 238.15 px/m and missed a positive 250 px/m
+centreline interval. [Generated projection and contour checks](verification/dori-projection-2026-11-12/README.md)
+bind the correction to its source. The existing thresholds remain planning
+figures, not recognition guarantees. The radial-sector fan, ideal optics,
+roll-free pose and flat ground assumptions require separate physical validation.
+
 ## Choose a useful detection threshold
 
 A detector score is an ordering signal, not a calibrated probability that a

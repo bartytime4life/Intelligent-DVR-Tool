@@ -11,38 +11,115 @@ export const LENS_PRESETS = Object.freeze([
   {id:'8',label:'8 mm',hfov:41},{id:'12',label:'12 mm',hfov:27}]);
 export const lensPreset = hfov => LENS_PRESETS.find(p => p.hfov === hfov) || null;
 const tanHalf = hfov => Math.tan(hfov * Math.PI / 360);
-// Horizontal pixels per metre at slant distance d, at the image centre: W / (2·d·tan(hfov/2)).
-export const pixelsPerMetre = (pixelsWide, hfov, distance) => pixelsWide / (2 * distance * tanHalf(hfov));
-export const slantDistanceFor = (pixelsWide, hfov, ppm) => pixelsWide / (2 * ppm * tanHalf(hfov));
 export const pixelsWideOK = v => Number.isInteger(v) && v >= PIXELS_WIDE.min && v <= PIXELS_WIDE.max;
-// Each band holds from the near ground limit out to √(d²−z²), clipped to the far ground limit.
+const within = (value, low, high) => Number.isFinite(value) && value >= low && value <= high;
+// Optical drafts obey the same limits as validateFacility. Position is irrelevant
+// to scalar density; contours additionally require a valid map pose below.
+function optics(c) {
+  if (!c || !pixelsWideOK(c.pixelsWide) || !within(c.z,.5,150) || !within(c.tilt,0,89) ||
+      !within(c.hfov,5,170) || !within(c.vfov,5,150) || !within(c.range,1,300)) return null;
+  const tilt = c.tilt * Math.PI / 180;
+  return {focal:c.pixelsWide / (2 * tanHalf(c.hfov)), sin:Math.sin(tilt), cos:Math.cos(tilt)};
+}
+// Horizontal image pixels per metre parallel to camera-right at positive optical
+// axis depth. This parameter is Zc in u = fx*Xc/Zc + cx, not Euclidean slant range.
+export function pixelsPerMetre(pixelsWide, hfov, depth) {
+  const density = pixelsWideOK(pixelsWide) && within(hfov,5,170) && Number.isFinite(depth) && depth > 0
+    ? (pixelsWide / (2 * tanHalf(hfov))) / depth : null;
+  return Number.isFinite(density) ? density : null;
+}
+// Centreline forward-ground intervals only. At ground height, Zc = Y*cos(tilt)
+// + z*sin(tilt), so a threshold P holds for Y <= (fx/P-z*sin(tilt))/cos(tilt).
+// All supported tilts are below 90 degrees; no vertical/backward division occurs.
 export function doriDistances(c) {
-  if (!c || !pixelsWideOK(c.pixelsWide) || ![c.z, c.tilt, c.hfov, c.vfov, c.range].every(Number.isFinite) || c.z <= 0 || c.hfov <= 0 || c.hfov >= 180) return null;
-  const {near, far} = groundRange(c);
+  const model = optics(c);
+  if (!model) return null;
+  const {near, far} = groundRange(c), base = c.z * model.sin;
   return DORI_BANDS.map(band => {
-    const slant = slantDistanceFor(c.pixelsWide, c.hfov, band.ppm), ground = slant > c.z ? Math.sqrt(slant * slant - c.z * c.z) : 0;
-    return {...band, slant, ground, from:near, to:Math.min(ground, far), reached:ground > near && far > near, limited:ground >= far};
+    const depth = model.focal / band.ppm, ground = (depth - base) / model.cos;
+    // Contact within arithmetic error is not a positive-length band. Include
+    // the conditioning of the depth-to-ground conversion near vertical tilt.
+    const epsilon = 16 * Number.EPSILON * Math.max(depth,c.z,near * model.cos) / model.cos;
+    let to = Math.max(0, Math.min(ground, far));
+    if (Math.abs(ground - far) <= epsilon) to = far;
+    if (Math.abs(to - near) <= epsilon) to = near;
+    const reached = far - near > epsilon && to - near > epsilon;
+    return {...band, depth, ground, from:near, to, reached, limited:reached && ground >= far - epsilon};
   });
 }
+// Density of a horizontal transverse ground target at nonnegative centreline
+// forward distance. This does not assert that the point lies in the image/fan.
 export function densityAtGround(c, distance) {
-  return pixelsWideOK(c?.pixelsWide) && Number.isFinite(distance) ? pixelsPerMetre(c.pixelsWide, c.hfov, Math.hypot(distance, c.z)) : null;
+  const model = optics(c);
+  return model && Number.isFinite(distance) && distance >= 0
+    ? pixelsPerMetre(c.pixelsWide,c.hfov,distance * model.cos + c.z * model.sin) : null;
 }
-// Band arcs follow the selected camera's drawn fan and break wherever a wall shortens the ray; labels sit off the heading line.
+
+function positiveArea(ring) {
+  const [x,y] = ring[0];
+  let sum = 0, error = 0, magnitude = 0;
+  for (let i=1;i+1<ring.length;i++) {
+    const cross = (ring[i][0]-x)*(ring[i+1][1]-y)-(ring[i][1]-y)*(ring[i+1][0]-x), next = sum + cross;
+    error += Math.abs(sum) >= Math.abs(cross) ? (sum-next)+cross : (cross-next)+sum;
+    sum = next; magnitude += Math.abs(cross);
+  }
+  return Math.abs(sum + error) > 16 * Number.EPSILON * magnitude;
+}
+
+// Exact polygon cross-section within arithmetic tolerance. Half-open crossings
+// preserve parity at vertices; positive collinear closed boundaries count, while
+// isolated tangencies do not. Union fragments without bridging genuine gaps.
+function crossSection(ring, y, sensorHalfWidth, epsilon) {
+  const crossings = [], intervals = [];
+  const add = (a,b) => {
+    const from=Math.max(-sensorHalfWidth,Math.min(a,b)), to=Math.min(sensorHalfWidth,Math.max(a,b));
+    if (to-from>epsilon) intervals.push([from,to]);
+  };
+  for (let i=0,j=ring.length-1;i<ring.length;j=i++) {
+    const [x,py]=ring[j],[nx,qy]=ring[i];
+    const p=Math.abs(py-y)<=epsilon?0:py-y,q=Math.abs(qy-y)<=epsilon?0:qy-y;
+    if (p===0 && q===0) add(x,nx);
+    else if ((p>0)!==(q>0)) crossings.push(x+(nx-x)*(p/(p-q)));
+  }
+  crossings.sort((a,b)=>a-b);
+  for (let i=0;i+1<crossings.length;i+=2) add(crossings[i],crossings[i+1]);
+  intervals.sort((a,b)=>a[0]-b[0]||a[1]-b[1]);
+  const union=[];
+  for (const interval of intervals) {
+    const previous=union.at(-1);
+    if (previous && interval[0]<=previous[1]+epsilon) previous[1]=Math.max(previous[1],interval[1]);
+    else union.push(interval);
+  }
+  return union;
+}
+
+// Retained function name for map callers. Equal transverse-density contours are
+// straight local Y=constant lines, not circles. Clip to the actual positive-area
+// fan AND both pinhole sensor bounds. Neither centreline flag gates side pieces.
 export function doriArcs(c, fan) {
-  const bands = doriDistances(c), count = (fan.length - 1) / 2;
-  if (!bands || !Number.isInteger(count) || count < 2) return [];
-  const rays = fan.slice(0, count).map(p => Math.hypot(p[0] - c.x, p[1] - c.y));
-  return bands.filter(b => b.reached && !b.limited).map(b => {
-    const lines = [];
-    let line = [], label = null;
-    rays.forEach((d, i) => {
-      if (d + 1e-6 < b.to) { if (line.length > 1) lines.push(line); line = []; return; }
-      const a = (c.bearing - c.hfov / 2 + c.hfov * i / (count - 1)) * Math.PI / 180, p = [c.x + Math.sin(a) * b.to, c.y + Math.cos(a) * b.to];
-      line.push(p);
-      if (i === Math.round((count - 1) * .8)) label = p;
-    });
-    if (line.length > 1) lines.push(line);
-    if (!label && lines.length) label = lines[0][Math.floor(lines[0].length / 2)];
-    return {...b, lines, label};
-  }).filter(a => a.lines.length);
+  const bands=doriDistances(c),model=optics(c);
+  if (!bands || !within(c.x,-2000,2000) || !within(c.y,-2000,2000) || !within(c.bearing,0,359.99) || c.enabled!==true ||
+      // A production fan cannot escape the 2 km plan bounds plus its 300 m range.
+      !Array.isArray(fan) || fan.length<3 || !fan.every(p=>Array.isArray(p)&&p.length===2&&p.every(v=>within(v,-2300,2300)))) return [];
+  const angle=c.bearing*Math.PI/180,sin=Math.sin(angle),cos=Math.cos(angle);
+  let scale=Math.max(Math.abs(c.x),Math.abs(c.y),c.z,c.range),minY=Infinity,maxY=-Infinity;
+  const ring=fan.map(p=>{
+    scale=Math.max(scale,Math.abs(p[0]),Math.abs(p[1]));
+    const dx=p[0]-c.x,dy=p[1]-c.y,x=dx*cos-dy*sin,y=dx*sin+dy*cos;
+    minY=Math.min(minY,y);maxY=Math.max(maxY,y);return [x,y];
+  });
+  if (!positiveArea(ring)) return [];
+  const world=(x,y)=>[c.x+x*cos+y*sin,c.y-x*sin+y*cos],arcs=[];
+  for (const band of bands) {
+    const y=band.ground,epsilon=Math.max(8*Number.EPSILON*scale,16*Number.EPSILON*Math.max(band.depth,c.z)/model.cos);
+    if (y<minY-epsilon || y>maxY+epsilon) continue;
+    const vertical=c.z*model.cos-y*model.sin,limit=band.depth*tanHalf(c.vfov);
+    const sensorEpsilon=16*Number.EPSILON*Math.max(c.z,Math.abs(y),band.depth,limit);
+    if (Math.abs(vertical)>limit+sensorEpsilon) continue;
+    const intervals=crossSection(ring,y,c.pixelsWide/(2*band.ppm),epsilon);
+    if (!intervals.length) continue;
+    const longest=intervals.reduce((a,b)=>b[1]-b[0]>a[1]-a[0]?b:a);
+    arcs.push({...band,lines:intervals.map(([from,to])=>[world(from,y),world(to,y)]),label:world((longest[0]+longest[1])/2,y)});
+  }
+  return arcs;
 }

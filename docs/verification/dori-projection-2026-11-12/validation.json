@@ -1,0 +1,184 @@
+{
+  "base_commit": "63b06ba2aab3adcffc38f52310b55969fb538afe",
+  "generated_at_utc": "2026-11-12T07:56:33.459333+00:00",
+  "scope": "Generated ideal pinhole horizontal ground-density correction; no camera, detector or private input.",
+  "local_checks": {
+    "build": {
+      "result": "PASS",
+      "existing_large_chunk_advisory_retained": true
+    },
+    "node": {
+      "run": 583,
+      "passed": 583,
+      "failed": 0,
+      "skipped": 0,
+      "socket_opt_in": true
+    },
+    "sites": {
+      "run": 4,
+      "passed": 4
+    },
+    "browser": {
+      "distinct_scenarios": 12,
+      "result": "PASS",
+      "environment": "Local installed Chrome; generated geometry and browser save/export fixtures only."
+    },
+    "focused_independent_reviewer": {
+      "measurement_and_planning_tests": 48,
+      "failed": 0,
+      "skipped": 0
+    },
+    "python_application_suites": "Not rerun for JavaScript-only change."
+  },
+  "independent_oracle": {
+    "camera_cases": 236,
+    "density_queries": 2043,
+    "table_bands": 908,
+    "contour_cases": 227,
+    "contour_fragments": 143,
+    "sampled_contour_points": 715,
+    "invalid_cases": 9,
+    "candidate_failures": 0,
+    "baseline_failed_assertions": 4621,
+    "strict_cli_exit": {
+      "candidate": 0,
+      "baseline": 1
+    },
+    "inputs_sha256": "3bb534c91d32404bf42d0481984c45dad164945669a767c6378237fc1ae54bbd",
+    "root_replay_byte_identical_to_checked_in_candidate_receipt": true,
+    "limits": "Deliberately targeted generated corpus, not a field failure rate or universal error bound. See coverage-profile.json for actual tolerances."
+  },
+  "commands": [
+    "npm run build",
+    "DVR_TEST_SOCKETS=1 npm test",
+    "npm run test:sites",
+    "DVR_BROWSER_CHANNEL=chrome ./node_modules/.bin/playwright test --config=playwright.facility.config.mjs facility-camera-planning.spec.mjs",
+    "python3 docs/verification/dori-projection-2026-11-12/reproduce.py",
+    "python3 docs/verification/dori-projection-2026-11-12/oracle.py --repo . --inputs docs/verification/dori-projection-2026-11-12/inputs.json.gz --output A_NEW_OUTPUT_PATH --require-pass",
+    "python3 scripts/check-docs.py",
+    "python3 scripts/build-guide-graphics.py --check",
+    "python3 scripts/build-wiki.py --check",
+    "python3 -m unittest discover -s tests -p test_wiki_docs.py",
+    "git diff --check"
+  ],
+  "preservation": {
+    "protected_sha256": {
+      "edge/inference.py": "7e95beb9e25dd67ac5d8d977ec6c466874371d12d112119a85a619124687b2f1",
+      "edge/journal.py": "70f7a3419d05d76380ea32ad5de20ee440bc17256e25baf0f2289a86e46a495a",
+      "edge/supervision.py": "03f334d5fa072e5f3ad02bd90536fd2c00fc97ebfaa54ca1ef1c10b64b80a9cf",
+      "edge/scheduler.py": "8639b46d3ba2e1a14efaa7ff647f412e6be437685ec7be5717a00983835b9019",
+      "edge/profiling.py": "f7c0a3e4b831d7f996840aec51a73e3fe68e06627cdce854716c576068f80f91",
+      ".openai/hosting.json": "d532abb65cf9ae20634b464d954cb4a08a0de9f3cd3cdf7f9c3ec8948826d947",
+      "worker/index.js": "2dd0615a445143933d88d4271f54f5d63ee951421fcd08c5a7617bb09c564389",
+      "scripts/prepare-sites-build.mjs": "b6a6adaa4fab3234676116dd1c9cb6611275ab9d92dd26f5bf402393e3744bf6",
+      "tests/sites-worker.test.mjs": "96af7b48906c6460c793356d7b6952f7d5026dbf5a502bec0d9297ff04201c26"
+    },
+    "geometry_image_dependencies_sha256": {
+      "src/facility.mjs": "dc6d0a44a608c6c07df92ccff06b64b6ba082c6a574763589ba67c177ae53df6",
+      "src/facility-coverage.mjs": "122dce3ca246afea2cb66f816dae27b40f4baf5ee8bfd9bee1b2b6cac8d5bfad",
+      "src/image-science.mjs": "6f576c07939b35ed2a479494b1dc1ebdaeba8ba9fc1fe715dff814268124c7f9",
+      "package.json": "e1f73b14a9cb1299fed38514bbe7ef9396b2bfc970f5125f627b11a23da8f488",
+      "package-lock.json": "b71d95b16fe76f892c899ad4e832380add9298fed4e6c0973fc44d18b455f480"
+    },
+    "requirements_and_dependency_pins_unchanged": true,
+    "existing_media_and_historical_records_unchanged": true,
+    "zone_route_and_rehearsal_sources_unchanged": true,
+    "private_runtime_data": "Not opened or modified."
+  },
+  "publication": {
+    "new_head_hosted_ci": "Inspect exact published head separately; not established by local checks.",
+    "wiki_source_regenerated": true,
+    "separate_wiki_pushed": false,
+    "installed_service_replaced": false,
+    "camera_or_detector_started": false,
+    "merge_or_deployment_performed": false
+  },
+  "review": {
+    "source_ui_helper_and_math_consumer_review": "PASS by independent read-only reviewer.",
+    "rendered_evidence": "Requested separately after final capture."
+  },
+  "limits": [
+    "Ideal roll-free pinhole model for transverse targets on one flat ground plane; elevated targets and optical calibration are not modeled.",
+    "Drawn fan retains its existing radial-sector and 89.9-degree near-cap approximation.",
+    "Centreline table intervals precede wall shadows; contours clip to actual drawn fan and both ideal sensor dimensions.",
+    "No physical detail, visibility, recognition, compliance, endurance or 100-camera qualification."
+  ],
+  "environment": {
+    "node": "v22.13.1",
+    "python_standard_library": "3.10.9",
+    "playwright": "1.61.1",
+    "browser_channel": "chrome",
+    "native_service_or_model_execution": false
+  },
+  "documentation": {
+    "local_links": 1602,
+    "wiki_pages_and_navigation": 68,
+    "editable_graphics": 10,
+    "wiki_tests": {
+      "run": 8,
+      "passed": 8
+    },
+    "wiki_freshness": "PASS",
+    "diff_check": "PASS"
+  },
+  "source_and_record_sha256": {
+    "docs/facility-builder.md": "83a9c5d4f0fc4409c3cc8917b99c8f9900fad9d350e31ec925499249a915f259",
+    "docs/science-and-algorithms.md": "efcae93aebffcb2b14868933e9c1595466a9b25d558eea447cbba72f27f95fc9",
+    "docs/verification/README.md": "00247a8fb61f2098bf9d3e7ca0c51af792c7eb30bef13edd4b0797358fdf6ce1",
+    "docs/verification/dori-projection-2026-11-12/README.md": "7c5d732bf71c5d2f78d162d48cfe22398eb5a9fd55cd8a4c0726a92f3c3fe956",
+    "docs/verification/dori-projection-2026-11-12/baseline-oracle.json": "b774102c963ca3dd8fc0494a4f4b72481d149f7c23e4b133a7989df17f018095",
+    "docs/verification/dori-projection-2026-11-12/coverage-profile.json": "a6fd3f1253f3f87473c0476af0757e86f5e8cf20d9d9b3ec8c6567c1a6e3eddc",
+    "docs/verification/dori-projection-2026-11-12/dori-60-desktop.png": "adf136a6bbe33b7160cceca747dd1883ee540efa202d4f08afa6be93c3637a7a",
+    "docs/verification/dori-projection-2026-11-12/dori-89-mobile.png": "3951fe5a12b6efbc9e61ba911d0613b730656c2addc730b95291f8b825201381",
+    "docs/verification/dori-projection-2026-11-12/dori-map-desktop.png": "5578db87362c39c316c875b616d4b24da653dbcfd47a645835f748b471dd90f7",
+    "docs/verification/dori-projection-2026-11-12/inputs.json.gz": "da3f9a3bd25d5648979fef99f9b6c78402118fcea20915171e3450a52c2e4fa6",
+    "docs/verification/dori-projection-2026-11-12/oracle.json": "1d52ba0d4b410402063a07086a3f9b369fcb8738674bb2a52ab1d8a14a82c475",
+    "docs/verification/dori-projection-2026-11-12/oracle.py": "1e94a185b44f71711f784e770f65f080156350a086ae6a36778ae9d6258a221c",
+    "docs/verification/dori-projection-2026-11-12/proof.json": "450891ea5146db3790bb2cbbcaa734f619261a5459d1a8050e32342ad00f95ab",
+    "docs/verification/dori-projection-2026-11-12/reproduce.py": "8aa0274704b8c8e4ab864544ad744a672ef9e073e30d88a3fa624e8c67f4b1fb",
+    "docs/wiki/Evidence-and-validation.md": "571b1fa6e993b452e8c6eef45a0139a219da8d33f2745d79786425e0848b23cf",
+    "docs/wiki/Facility-planning.md": "2ab2fd6d8f4ac3602d94e936a088fd15632a79f9eebc1585fb8afdcaf5532b28",
+    "docs/wiki/Science-and-algorithms.md": "d43ee3b446bceb0765e97d5b6d0a55441b427db4a35d2e8d5b9ac862ac128224",
+    "src/FacilityBuilder.jsx": "a959fda3093704ef700e17e461bcdaca91770f9985daa9c6f57bf899d7ce5e19",
+    "src/facility-dori.mjs": "323cee22e78d6663198e0a77c4c8db79b6f3c722a2625f1e981eb7253af2766e",
+    "src/facility-installer.mjs": "cda233bc55fcaa370001bb03bcbef20443aff3e85ce6278c183989426554fac9",
+    "src/facility-map.mjs": "91609f8c404872542043d69129a9da85ed5fe1b4a956dc9a2e8435489e3f7da8",
+    "src/facility-measurements.mjs": "79b9e46f965ef8d6c0653b3b4f7ef0c3eda50c34892a38cdcf3caf4ce5882431",
+    "tests/browser/facility-camera-planning.spec.mjs": "604c33aca0675cde906eb755e8bb395af8acd16fd52b99cd1ac36027ed037b05",
+    "tests/facility-measurements.test.mjs": "0c93e9c98ccd535b25186e6dc55f5999bc7b3deaaed3af0909b24aa21463322a",
+    "tests/facility-planning.test.mjs": "31e1cf50c565b875ff642bd2d563a22546c323a8dd1f18fdee29dacd3806332e"
+  },
+  "local_check_logs": {
+    "build": {
+      "path": "/tmp/dvr-dori-build-final-20261112.log",
+      "sha256": "ab94d46e3807056718cc49e4817393a9af0ee8ad8c43a6d4e944aff21c45be47"
+    },
+    "node": {
+      "path": "/tmp/dvr-dori-node-final-20261112.log",
+      "sha256": "43ce07049a805bed8ae4ae6c15f002a51c778eaa3d2371661a15013fafa58982"
+    },
+    "sites": {
+      "path": "/tmp/dvr-dori-sites-20261112.log",
+      "sha256": "13b6b6aeddcaefd774c20e750fbcfeae3b2eb641be4c0abad5410e7f001f2afc"
+    },
+    "browser": {
+      "path": "/tmp/dvr-dori-browser-final-20261112.log",
+      "sha256": "e8ec73dc55533895238e486d453a2efc3f4b1eb0cab83242a2a55d890b62a3f7"
+    }
+  },
+  "rendered_evidence": {
+    "dori-60-desktop.png": {
+      "case": "tilt60 at1440px",
+      "kind": "actual-generated-fixture-browser-crop"
+    },
+    "dori-89-mobile.png": {
+      "case": "tilt89 at375px",
+      "kind": "actual-generated-fixture-browser-crop"
+    },
+    "dori-map-desktop.png": {
+      "case": "tilt60,2Dcenteredcamera at1440px",
+      "kind": "actual-generated-fixture-browser-capture",
+      "limit": "The0.752m contour is small at this map zoom; geometry is independently checked by the oracle."
+    }
+  }
+}

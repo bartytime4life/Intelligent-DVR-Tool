@@ -1,8 +1,18 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {formatDistance, formatArea, lineMeasurements, polygonMeasurements, measurementLabels, lineRibbonSegments, floorElevation, floorRenderPlan, visibleLabelIndices} from '../src/facility-measurements.mjs';
+import {formatDistance, formatDistanceRange, formatArea, lineMeasurements, polygonMeasurements, measurementLabels, lineRibbonSegments, floorElevation, floorRenderPlan, visibleLabelIndices} from '../src/facility-measurements.mjs';
 
 const box = (x, y, width, height) => [[x,y],[x+width,y],[x+width,y+height],[x,y+height],[x,y]];
+test('short positive planning ranges remain visible in metres and feet', () => {
+  assert.equal(formatDistanceRange(.006981324096755, .034907471163079), '0.007 m–0.035 m');
+  assert.equal(formatDistanceRange(.006981324096755, .034907471163079, 'imperial'), '0.023 ft–0.115 ft');
+  assert.equal(formatDistanceRange(2.3094010767585, 42.031099597), '2.3 m–42.0 m');
+  assert.equal(formatDistanceRange(2.301, 2.302), '2.301 m–2.302 m');
+  assert.equal(formatDistanceRange(0, .00000004), '0.00000000 m–0.00000004 m');
+  assert.equal(formatDistanceRange(0, 0), '0.0 m–0.0 m');
+  assert.equal(formatDistanceRange(NaN, 1), '—');
+  assert.equal(formatDistanceRange(2, 1), '—');
+});
 test('polygon measurements subtract courtyards and count their boundaries', () => {
   const result = polygonMeasurements(box(0,0,10,20), [box(2,2,3,4)]);
   assert.equal(result.area, 188);

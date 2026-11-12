@@ -1,0 +1,282 @@
+{
+  "after": [
+    {
+      "camera": {
+        "bearing": 0,
+        "enabled": true,
+        "hfov": 90,
+        "id": "C1",
+        "name": "Generated camera",
+        "pixelsWide": 1920,
+        "range": 50,
+        "tilt": 60,
+        "vfov": 60,
+        "x": 0,
+        "y": 0,
+        "z": 4
+      },
+      "density": 258.47434978280586,
+      "ground_view": {
+        "far": 6.92820323027551,
+        "near": 0.0069813240967550125
+      },
+      "identify": {
+        "color": "#ff8f9a",
+        "depth": 3.8400000000000003,
+        "from": 0.0069813240967550125,
+        "ground": 0.7517967697244916,
+        "id": "identify",
+        "limited": false,
+        "name": "Identify",
+        "ppm": 250,
+        "reached": true,
+        "to": 0.7517967697244916
+      },
+      "identify_contours": [
+        {
+          "color": "#ff8f9a",
+          "depth": 3.8400000000000003,
+          "from": 0.0069813240967550125,
+          "ground": 0.7517967697244916,
+          "id": "identify",
+          "label": [
+            -3.3306690738754696e-16,
+            0.7517967697244916
+          ],
+          "limited": false,
+          "lines": [
+            [
+              [
+                -0.7517967697244916,
+                0.7517967697244916
+              ],
+              [
+                0.7517967697244909,
+                0.7517967697244916
+              ]
+            ]
+          ],
+          "name": "Identify",
+          "ppm": 250,
+          "reached": true,
+          "to": 0.7517967697244916
+        }
+      ],
+      "target": {
+        "forward": 0.5,
+        "width": 0.2
+      },
+      "target_inside_drawn_fan": [
+        true,
+        true
+      ]
+    },
+    {
+      "camera": {
+        "bearing": 0,
+        "enabled": true,
+        "hfov": 90,
+        "id": "C1",
+        "name": "Generated camera",
+        "pixelsWide": 2000,
+        "range": 50,
+        "tilt": 89,
+        "vfov": 60,
+        "x": 0,
+        "y": 0,
+        "z": 4
+      },
+      "density": 250.01626176056624,
+      "ground_view": {
+        "far": 2.4034424761102424,
+        "near": 0.0069813240967550125
+      },
+      "identify": {
+        "color": "#ff8f9a",
+        "depth": 4.000000000000001,
+        "from": 0.0069813240967550125,
+        "ground": 0.03490747116307935,
+        "id": "identify",
+        "limited": false,
+        "name": "Identify",
+        "ppm": 250,
+        "reached": true,
+        "to": 0.03490747116307935
+      },
+      "identify_contours": [
+        {
+          "color": "#ff8f9a",
+          "depth": 4.000000000000001,
+          "from": 0.0069813240967550125,
+          "ground": 0.03490747116307935,
+          "id": "identify",
+          "label": [
+            5.898059818321144e-17,
+            0.03490747116307935
+          ],
+          "limited": false,
+          "lines": [
+            [
+              [
+                -0.034907471163079344,
+                0.03490747116307935
+              ],
+              [
+                0.03490747116307946,
+                0.03490747116307935
+              ]
+            ]
+          ],
+          "name": "Identify",
+          "ppm": 250,
+          "reached": true,
+          "to": 0.03490747116307935
+        }
+      ],
+      "target": {
+        "forward": 0.02,
+        "width": 0.01
+      },
+      "target_inside_drawn_fan": [
+        true,
+        true
+      ]
+    }
+  ],
+  "baseline_commit": "63b06ba2aab3adcffc38f52310b55969fb538afe",
+  "baseline_dori_sha256": "ed5c69e046875a1eb69dc6a46674dca5d7d3d10664ae451a93e01ddacf85f098",
+  "before": [
+    {
+      "camera": {
+        "bearing": 0,
+        "enabled": true,
+        "hfov": 90,
+        "id": "C1",
+        "name": "Generated camera",
+        "pixelsWide": 1920,
+        "range": 50,
+        "tilt": 60,
+        "vfov": 60,
+        "x": 0,
+        "y": 0,
+        "z": 4
+      },
+      "density": 238.1466904112803,
+      "ground_view": {
+        "far": 6.92820323027551,
+        "near": 0.0069813240967550125
+      },
+      "identify": {
+        "color": "#ff8f9a",
+        "from": 0.0069813240967550125,
+        "ground": 0,
+        "id": "identify",
+        "limited": false,
+        "name": "Identify",
+        "ppm": 250,
+        "reached": false,
+        "slant": 3.8400000000000003,
+        "to": 0
+      },
+      "identify_contours": [],
+      "target": {
+        "forward": 0.5,
+        "width": 0.2
+      },
+      "target_inside_drawn_fan": [
+        true,
+        true
+      ]
+    },
+    {
+      "camera": {
+        "bearing": 0,
+        "enabled": true,
+        "hfov": 90,
+        "id": "C1",
+        "name": "Generated camera",
+        "pixelsWide": 2000,
+        "range": 50,
+        "tilt": 89,
+        "vfov": 60,
+        "x": 0,
+        "y": 0,
+        "z": 4
+      },
+      "density": 249.99687505859256,
+      "ground_view": {
+        "far": 2.4034424761102424,
+        "near": 0.0069813240967550125
+      },
+      "identify": {
+        "color": "#ff8f9a",
+        "from": 0.0069813240967550125,
+        "ground": 8.429369702178807e-08,
+        "id": "identify",
+        "limited": false,
+        "name": "Identify",
+        "ppm": 250,
+        "reached": false,
+        "slant": 4.000000000000001,
+        "to": 8.429369702178807e-08
+      },
+      "identify_contours": [],
+      "target": {
+        "forward": 0.02,
+        "width": 0.01
+      },
+      "target_inside_drawn_fan": [
+        true,
+        true
+      ]
+    }
+  ],
+  "camera_or_detector_started": false,
+  "data_kind": "generated",
+  "independent_projection": [
+    {
+      "both_endpoints_inside_sensor": true,
+      "horizontal_pixels_per_metre": 258.47434978280586,
+      "projected_offsets": [
+        [
+          -25.84743497828059,
+          405.0260229963245
+        ],
+        [
+          25.84743497828059,
+          405.0260229963245
+        ]
+      ]
+    },
+    {
+      "both_endpoints_inside_sensor": true,
+      "horizontal_pixels_per_metre": 250.01626176056627,
+      "projected_offsets": [
+        [
+          -1.2500813088028313,
+          12.453978003244366
+        ],
+        [
+          1.2500813088028313,
+          12.453978003244366
+        ]
+      ]
+    }
+  ],
+  "input_sha256": "ae4e46f3ffd6ad871781598e3bb696971323dec391b977019b2a8cf9b33a3b48",
+  "limits": [
+    "Ideal pinhole, roll-free camera and horizontal transverse ground targets.",
+    "Drawn fans remain a radial-sector approximation; no field, optical, recognition or compliance qualification."
+  ],
+  "physical_qualification": "NOT_ESTABLISHED",
+  "result": "PASS",
+  "source_sha256": {
+    "src/FacilityBuilder.jsx": "a959fda3093704ef700e17e461bcdaca91770f9985daa9c6f57bf899d7ce5e19",
+    "src/facility-coverage.mjs": "122dce3ca246afea2cb66f816dae27b40f4baf5ee8bfd9bee1b2b6cac8d5bfad",
+    "src/facility-dori.mjs": "323cee22e78d6663198e0a77c4c8db79b6f3c722a2625f1e981eb7253af2766e",
+    "src/facility-installer.mjs": "cda233bc55fcaa370001bb03bcbef20443aff3e85ce6278c183989426554fac9",
+    "src/facility-map.mjs": "91609f8c404872542043d69129a9da85ed5fe1b4a956dc9a2e8435489e3f7da8",
+    "src/facility-measurements.mjs": "79b9e46f965ef8d6c0653b3b4f7ef0c3eda50c34892a38cdcf3caf4ce5882431",
+    "src/facility.mjs": "dc6d0a44a608c6c07df92ccff06b64b6ba082c6a574763589ba67c177ae53df6"
+  }
+}
