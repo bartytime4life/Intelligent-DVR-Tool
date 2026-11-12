@@ -10,7 +10,7 @@
 
 The experimental **Ground-plane calibration** panel links coordinates in **one frozen camera image** to points on a **single independently measured flat facility plane**. It is intended to help site engineers compare planned camera footprints with actual reference markers. It does not calibrate a camera lens, recover 3D depth, locate an elevated person or object, prove recognition accuracy, or create a survey-grade digital twin.
 
-The solver uses a normalized, Householder-QR planar homography (eight degrees of freedom). This relates two planes under a perspective projection; see the [OpenCV homography overview](https://docs.opencv.org/4.13.0/d9/dab/tutorial_homography.html). It is deterministic and runs in the local browser with no subscriptions, model inference, camera activation, upload or remote service.
+The solver uses a normalized, Householder-QR planar homography (eight degrees of freedom). This relates two planes under a perspective projection; see the [OpenCV homography overview](https://docs.opencv.org/4.13.0/d9/dab/tutorial_homography.html). Method `normalized-householder-dlt-v2` stores a unit-Frobenius matrix instead of requiring its bottom-right entry to be one. A valid transform can have that entry zero when its horizon lies outside the measured reference region. Projection and horizon checks respect the matrix's arbitrary global scale. The solver rejects collinear ground references and singular normalized transforms even when their residuals are tiny. It is deterministic and runs in the local browser with no subscriptions, model inference, camera activation, upload or remote service.
 
 ## Operator workflow
 
@@ -27,7 +27,7 @@ The solver uses a normalized, Householder-QR planar homography (eight degrees of
 
 | Area | Behavior |
 | --- | --- |
-| Geometry | Requires 4–24 points, at least four fits, no duplicate/near-coincident fitting or check markers, adequate width and height of both planes, no projective horizon through the fitted region, stable finite homography and in-bounds image/ground coordinates |
+| Geometry | Requires 4–24 points, at least four fits, no duplicate/near-coincident fitting or check markers, non-collinear references spanning both planes, no projective horizon through the fitted region, stable nonsingular finite homography and in-bounds image/ground coordinates |
 | Validation | Fit and independent held-out error reported separately; a check outside the fitting hull cannot authorize measurement |
 | Ruler | Only on the selected plane, only inside the fitted reference hull, only after user declaration and explicit residual tolerance |
 | Bounds | Image coordinates are fractions of the downsampled frame; facility coordinates are local east/north metres within ±2 km |
@@ -37,7 +37,7 @@ The solver uses a normalized, Householder-QR planar homography (eight degrees of
 
 ## Verification gates
 
-The `tests/facility-calibration.test.mjs` suite uses known synthetic perspective transforms, noisy held-out references, singular/collinear/duplicate points, bounds and extrapolation refusals. Facility Playwright tests cover reference entry, withheld checks, plane-only measurement and map-coordinate selection. Source/CI tests cannot qualify physical marker accuracy.
+The `tests/facility-calibration.test.mjs` suite uses known synthetic perspective transforms, noisy held-out references, singular/collinear/duplicate points, bounds and extrapolation refusals. Facility Playwright tests cover reference entry, withheld checks, plane-only measurement and map-coordinate selection. The [projective-mathematics record](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/calibration-projective-math-2026-11-12/README.md) reproduces the former zero-coefficient rejection and collapsed-plane acceptance, with generated checks for the corrected behavior. Source/CI tests cannot qualify physical marker accuracy.
 
 For field acceptance, use five or more measured, visible markers on a permitted real camera, record camera model/lens/codec/focus, original source frame and coordinate measurement method, and reserve one or more markers for withheld checks. Compare estimated distances against separately measured dimensions and report p50/p95/max error, not just the fitted residual. Repeat after moving or changing the camera or stream resolution. Do not claim field calibration before this evidence exists.
 

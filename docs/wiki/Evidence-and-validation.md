@@ -5,6 +5,11 @@ records reproduced slant/depth errors, centreline ground intervals, straight
 fan/sensor-clipped contours, an independent generated projection oracle and
 readable short ranges in the browser and installer exports.
 
+[Projective calibration mathematics, November 12](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/calibration-projective-math-2026-11-12/README.md)
+records valid zero-coefficient perspective maps, scale-invariant projection,
+collinear and noisy fitted-plane collapse refusals, independent exact-arithmetic
+comparisons and the existing operator-gated ruler workflow.
+
 [Current documentation alignment, November 12](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/documentation-alignment-2026-11-12/README.md)
 follows the earlier 197-path audit, records the merged route/evaluation baseline and
 corrects rehearsal duration/position wording without replacing historical receipts.
