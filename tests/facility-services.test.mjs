@@ -43,6 +43,50 @@ test('bounded readers reject oversized, empty, malformed and rate-limited bodies
   await assert.rejects(()=>boundedJson(new Response('',{status:429})),/busy/);
   await assert.rejects(()=>fetchOsmBuildings(bounds,undefined,async()=>new Response(JSON.stringify({elements:[],remark:'timeout'}))),/Incomplete/);
 });
+test('failed map responses are cancelled without reading their bodies',async()=>{
+  let cancelled=false;
+  const response=new Response(new ReadableStream({cancel(){cancelled=true;}}),{status:503});
+  response.json=()=>assert.fail('An HTTP failure must not be parsed as a result');
+  await assert.rejects(boundedJson(response),/503/);
+  assert.equal(cancelled,true);
+});
+test('declared map size is refused before downloading and cleanup cannot hide size errors',async()=>{
+  let cancelled=false;
+  const declared=new Response(new ReadableStream({start(c){c.enqueue(new TextEncoder().encode('{}'));c.close();},cancel(){cancelled=true;}}),{headers:{'content-length':'1000'}});
+  await assert.rejects(boundedJson(declared,10),/size limit/);
+  assert.equal(cancelled,true);
+  const streamed=new Response(new ReadableStream({start(c){c.enqueue(new Uint8Array(11));},cancel(){throw Error('cleanup failed');}}));
+  await assert.rejects(boundedJson(streamed,10),/size limit/);
+  assert.equal(streamed.body.locked,false);
+});
+test('cancelling a stalled address body releases the search for another request',async()=>{
+  let stream, cancelled=false, calls=0, time=0;
+  const response=new Response(new ReadableStream({start(c){stream=c;},cancel(){cancelled=true;}}));
+  const search=createPlaceSearch(async()=>++calls===1?response:Response.json(fc([place()])),()=>time);
+  const controller=new AbortController(),pending=search('Library one','public',controller.signal);
+  await new Promise(resolve=>setImmediate(resolve));
+  controller.abort();
+  let timer;
+  try {
+    await assert.rejects(Promise.race([pending,new Promise((_,reject)=>{timer=setTimeout(()=>reject(Error('Cancellation did not release the body')),250);})]),{name:'AbortError'});
+    assert.equal(cancelled,true);
+    assert.equal(response.body.locked,false);
+    time=2000;
+    assert.equal((await search('Library two','public'))[0].label,'Recorded example');
+    assert.equal(calls,2);
+  } finally {clearTimeout(timer);if(!cancelled)stream.close();await pending.catch(()=>{});}
+});
+test('footprint cancellation reaches a body even when its fetcher ignores abort',async()=>{
+  let stream,cancelled=false;
+  const response=new Response(new ReadableStream({start(c){stream=c;},cancel(){cancelled=true;}}));
+  const controller=new AbortController(),pending=fetchOsmBuildings(bounds,controller.signal,async()=>response);
+  await new Promise(resolve=>setImmediate(resolve));controller.abort();
+  let timer;
+  try {
+    await assert.rejects(Promise.race([pending,new Promise((_,reject)=>{timer=setTimeout(()=>reject(Error('Cancellation did not release the body')),250);})]),{name:'AbortError'});
+    assert.equal(cancelled,true);assert.equal(response.body.locked,false);
+  } finally {clearTimeout(timer);if(!cancelled)stream.close();await pending.catch(()=>{});}
+});
 test('complete relation outers stitch reversed segments and preserve source on export',()=>{
   const r=ring(),data={elements:[relation([member(r.slice(0,3),1),member([...r.slice(2)].reverse(),2)])]};
   const result=parseOsmBuildings(data,origin,bounds,'2026-10-27T00:00:00Z');

@@ -1,5 +1,10 @@
 # Verification index
 
+[Targeted Photo to 3D CAD lessons, November 17](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/photo-cad-lessons-2026-11-17/README.md)
+records reproduced image-import, frame-inspection, keyboard and map-body recovery
+defects, bounded local fixes, and their regression checks. This source branch is
+separate from installed-device or field acceptance.
+
 [Fractional rule-time boundaries, November 12](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/rule-time-boundaries-2026-11-12/README.md)
 records reproduced missed/duplicate observations, a shared bounded numerical
 policy, unchanged independent rational oracles, generated CPU analyzer/review/

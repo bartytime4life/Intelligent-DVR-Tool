@@ -9,6 +9,7 @@ const MAX_SIDE = 720;
 const clamp = (value, low = 0, high = 1) => Math.min(high, Math.max(low, Number.isFinite(value) ? value : low));
 const pct = value => value.toFixed(1) + '%';
 const sourceLabel = source => String(source || 'Local image').slice(0, 80);
+const freshInspection = () => ({region:FULL_FRAME, ruler:null});
 
 function freezeElement(element, width, height, source) {
   if (!width || !height || width < 1 || height < 1 || width * height > 24_000_000) throw Error('Image is empty or exceeds the 24 MP input limit.');
@@ -47,11 +48,25 @@ export default function FacilityImageLab({ capture, connected = false, sourceNam
   const [frames, setFrames] = useState({ a: null, b: null });
   const [clip, setClip] = useState(null);
   useEffect(() => () => {if (clip?.url) URL.revokeObjectURL(clip.url);}, [clip?.url]);
-  const [region, setRegion] = useState(FULL_FRAME);
+  const [inspections, setInspections] = useState(() => ({a:freshInspection(),b:freshInspection()}));
+  const {region,ruler} = inspections[slot];
+  const setInspection = (key,value) => setInspections(previous => ({...previous,[slot]:{
+    ...previous[slot],[key]:typeof value === 'function' ? value(previous[slot][key]) : value
+  }}));
+  const setRegion = value => setInspection('region',value);
+  const setRuler = value => setInspection('ruler',value);
   const [dragRegion, setDragRegion] = useState(null);
-  const [ruler, setRuler] = useState(null);
   const [tool, setTool] = useState('region');
   const [busy, setBusy] = useState(false), [error, setError] = useState('');
+  const importVersion = useRef(0);
+  // Browser decodes cannot be interrupted. Retire their results immediately,
+  // then close their bitmaps when decoding eventually settles.
+  useEffect(() => () => { importVersion.current++; }, []);
+  function retireImport() { importVersion.current++; setBusy(false); }
+  function chooseSlot(next) {
+    if (next === slot) return;
+    retireImport(); pointer.current = null; setDragRegion(null); setError(''); setSlot(next);
+  }
   // Never present Frame A's pixels as Frame B when the selected comparison slot is empty.
   const selected = frames[slot];
   const shownRegion = dragRegion || region;
@@ -60,6 +75,7 @@ export default function FacilityImageLab({ capture, connected = false, sourceNam
   const rulerPixels = selected && ruler ? pixelRuler(ruler.from, ruler.to, selected.image.width, selected.image.height) : null;
 
   function putFrame(frame) {
+    retireImport(); pointer.current = null;
     setFrames(previous => ({ ...previous, [slot]: frame }));
     setRegion(FULL_FRAME);
     setDragRegion(null);
@@ -79,20 +95,23 @@ export default function FacilityImageLab({ capture, connected = false, sourceNam
     const file = event.target.files?.[0];
     event.target.value = '';
     if (!file) return;
+    retireImport();
     if (!['image/png', 'image/jpeg', 'image/webp'].includes(file.type) || file.size > MAX_FILE || file.size === 0) {
       setError('Choose a PNG, JPEG or WebP image no larger than 12 MiB.');
       return;
     }
     setBusy(true); setError('');
+    const ticket = importVersion.current;
     let bitmap;
     try {
       bitmap = await createImageBitmap(file);
+      if (ticket !== importVersion.current) return;
       putFrame(freezeElement(bitmap, bitmap.width, bitmap.height, file.name));
     } catch (err) {
-      setError(err.message || 'This image could not be decoded for local analysis.');
+      if (ticket === importVersion.current) setError(err.message || 'This image could not be decoded for local analysis.');
     } finally {
       bitmap?.close();
-      setBusy(false);
+      if (ticket === importVersion.current) setBusy(false);
     }
   }
   function importVideo(event) {
@@ -182,16 +201,18 @@ export default function FacilityImageLab({ capture, connected = false, sourceNam
     <div className="facility-lab-content">
       <p className="facility-lab-note">Freeze a connected preview, sample a user-chosen local video frame, or open a still image. Everything stays on this computer; nothing is uploaded, saved in the plan, or used for recognition.</p>
       <div className="facility-lab-controls" role="group" aria-label="Choose diagnostics frame">
-        <button type="button" aria-pressed={slot === 'a'} onClick={() => setSlot('a')}>Frame A {frames.a ? '●' : '○'}</button>
-        <button type="button" aria-pressed={slot === 'b'} onClick={() => setSlot('b')}>Frame B {frames.b ? '●' : '○'}</button>
+        <button type="button" aria-pressed={slot === 'a'} onClick={() => chooseSlot('a')}>Frame A {frames.a ? '●' : '○'}</button>
+        <button type="button" aria-pressed={slot === 'b'} onClick={() => chooseSlot('b')}>Frame B {frames.b ? '●' : '○'}</button>
       </div>
       <div className="facility-lab-actions">
         <button type="button" disabled={!connected || busy} onClick={freezeCurrent}>Freeze live frame into {slot.toUpperCase()}</button>
         <button type="button" disabled={busy} onClick={() => fileInput.current?.click()}>Open local image</button>
-        <input ref={fileInput} aria-label="Open image for diagnostics" className="facility-lab-file" type="file" accept="image/png,image/jpeg,image/webp" onChange={importFile}/>
+        <input ref={fileInput} tabIndex={-1} aria-label="Open image for diagnostics" className="facility-lab-file" type="file" accept="image/png,image/jpeg,image/webp" onChange={importFile}/>
         <button type="button" onClick={() => videoInput.current?.click()}>Open local video</button>
-        <input ref={videoInput} aria-label="Open video for diagnostics" className="facility-lab-file" type="file" accept="video/webm,video/mp4" onChange={importVideo}/>
+        <input ref={videoInput} tabIndex={-1} aria-label="Open video for diagnostics" className="facility-lab-file" type="file" accept="video/webm,video/mp4" onChange={importVideo}/>
       </div>
+      {busy && <div className="facility-lab-actions"><span role="status">Opening image into Frame {slot.toUpperCase()}…</span>
+        <button type="button" onClick={retireImport}>Cancel image import</button></div>}
       {clip && <div className="facility-lab-video">
         <p><strong>Local video:</strong> {clip.name}</p>
         <video ref={clipVideo} src={clip.url} controls preload="metadata" playsInline muted
@@ -244,7 +265,8 @@ export default function FacilityImageLab({ capture, connected = false, sourceNam
         <div className="facility-lab-actions">
           <a href={selected.preview} download={'facility-frame-' + (slot.toUpperCase()) + '.png'}>Save frozen frame</a>
           <button type="button" onClick={exportData}>Export metrics JSON</button>
-          <button type="button" onClick={() => {setFrames({a:null,b:null}); setRegion(FULL_FRAME); setRuler(null); setError('');}}>Clear frames</button>
+          <button type="button" onClick={() => {retireImport(); pointer.current=null; setFrames({a:null,b:null});
+            setInspections({a:freshInspection(),b:freshInspection()}); setDragRegion(null); setError('');}}>Clear frames</button>
         </div>
         <FacilityCalibration frame={selected} slot={slot} camera={camera} facilityName={facilityName}
           origin={origin} mapPick={mapPick} onRequestMapPoint={onRequestMapPoint}/>

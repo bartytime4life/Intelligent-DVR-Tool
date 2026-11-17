@@ -90,6 +90,13 @@ bytes, hashes, provenance and ODbL notice.
 | Overpass | Explicit rectangle, 20 s server/30 s client deadline, 300 elements/2 MB, 15 s UI spacing, four-response in-memory cache |
 | Both | No credentials, referrer or redirects; no automatic retry/failover; errors preserve saved plans |
 
+Client deadlines and cancellation cover response-body reads as well as request
+headers. Failed HTTP replies and declared oversized bodies are cancelled before
+parsing; streamed bytes still have their own size check. Cancellation releases the
+reader and the active address-search slot even if a fetch adapter ignores its
+signal. Cleanup errors cannot hide the original failure. See the
+[November 17 recovery checks](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/photo-cad-lessons-2026-11-17/README.md).
+
 ## Local and offline delivery
 
 The [native local-delivery guide](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Local-map-services) describes fixed
