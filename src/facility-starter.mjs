@@ -180,7 +180,7 @@ async function fetchOsmBuildings(bounds, signal, fetcher = fetch, endpoint = OSM
   if (fetcher === fetch && footprintCache.has(key)) return structuredClone(footprintCache.get(key));
   const timed = AbortSignal.any([AbortSignal.timeout(30000), ...(signal ? [signal] : [])]);
   const response = await fetcher(endpoint,{method:'POST',body:new URLSearchParams({data:query}),signal:timed,credentials:'omit',referrerPolicy:'no-referrer',redirect:'error'});
-  const data = await boundedJson(response);
+  const data = await boundedJson(response, 2e6, {signal:timed});
   timed.throwIfAborted();
   if (data.remark || !Array.isArray(data.elements) || data.elements.length > 300) throw Error('Incomplete or oversized map response. Use a smaller area or an offline extract.');
   if (fetcher === fetch) { if (footprintCache.size>=4) footprintCache.delete(footprintCache.keys().next().value); footprintCache.set(key,data); }

@@ -10,21 +10,35 @@ export const FOOTPRINT_SERVICES = [
   { label: 'OSM public Overpass', url: 'https://overpass-api.de/api/interpreter' },
   { label: 'Local Overpass service', url: localPrefix + '/overpass' },
 ];
-export async function boundedJson(response, maxBytes = 2e6) {
-  if (!response.ok) throw Error(response.status === 429 ? 'Service is busy. Wait before retrying; no automatic retry is made.' : `Service unavailable (${response.status}). Use an offline extract or try later.`);
+export async function boundedJson(response, maxBytes = 2e6, {signal} = {}) {
+  const abortReason = () => signal.reason ?? new DOMException('Map request cancelled', 'AbortError');
+  // Refuse failed/oversized replies before reading them and stop the download.
+  if (signal?.aborted || !response.ok || Number(response.headers.get('content-length')) > maxBytes) {
+    void response.body?.cancel().catch(() => {});
+    if (signal?.aborted) throw abortReason();
+    if (!response.ok) throw Error(response.status === 429 ? 'Service is busy. Wait before retrying; no automatic retry is made.' : `Service unavailable (${response.status}). Use an offline extract or try later.`);
+    throw Error(`Response exceeds ${maxBytes === 2e6 ? '2 MB' : 'the size limit'}. Reduce the area.`);
+  }
   if (!response.body) throw Error('Service returned no response body.');
   const reader = response.body.getReader(), chunks = [];
+  const cancel = () => { void reader.cancel(abortReason()).catch(() => {}); };
+  signal?.addEventListener('abort', cancel, {once:true});
   let size = 0;
   try {
     while (true) {
+      if (signal?.aborted) throw abortReason();
       const { done, value } = await reader.read();
+      if (signal?.aborted) throw abortReason();
       if (done) break;
       size += value.byteLength;
       if (size > maxBytes) throw Error(`Response exceeds ${maxBytes === 2e6 ? '2 MB' : 'the size limit'}. Reduce the area.`);
       chunks.push(value);
     }
-  } catch (e) { await reader.cancel(); throw e; }
-  finally { reader.releaseLock(); }
+  } catch (e) {
+    // A broken or stalled cleanup must not replace the error or block recovery.
+    void reader.cancel(e).catch(() => {});
+    throw e;
+  } finally { signal?.removeEventListener('abort', cancel); reader.releaseLock(); }
   const bytes = new Uint8Array(size);
   let offset = 0;
   for (const chunk of chunks) { bytes.set(chunk, offset); offset += chunk.length; }
@@ -55,7 +69,7 @@ export function createPlaceSearch(fetcher = fetch, clock = Date.now) {
     try {
       const timed = AbortSignal.any([AbortSignal.timeout(12000), ...(signal ? [signal] : [])]);
       const response = await fetcher(service.url + '?' + new URLSearchParams({q, limit: '5', lang: 'en'}), {signal: timed, credentials: 'omit', referrerPolicy: 'no-referrer', redirect: 'error'});
-      const places = parsePlaces(await boundedJson(response, 100000));
+      const places = parsePlaces(await boundedJson(response, 100000, {signal:timed}));
       timed.throwIfAborted();
       if (cache.size >= 20) cache.delete(cache.keys().next().value);
       cache.set(key, places);

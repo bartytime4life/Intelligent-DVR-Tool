@@ -16,9 +16,17 @@ The Facility Studio is a **map-first planning workspace**. The compact **Current
 2. Explicitly connect an approved browser webcam or local RTSP preview, then click **Freeze live frame into A**. Alternatively, **Open local image** (PNG, JPEG or WebP, maximum 12 MiB and 24 megapixels). No camera is activated by opening the laboratory.
 3. For an approved recording, click **Open local video** (MP4 or WebM, maximum 128 MiB), scrub or pause the browser player to the desired time, and press **Freeze video frame into A/B**. Playback stays local; codec support depends on the browser. No automated frame scan, tracking or inference starts.
 4. Select **Frame B** to freeze another moment or choose a second image. A and B stay **only in browser memory** until the panel is unmounted, cleared or the page is left. Neither frame is uploaded, used for AI inference, saved in facility plans, nor automatically added to Events.
-5. Draw a rectangular **region of interest (ROI)** across a frozen frame, or edit its left/top/width/height as numeric percentages using the keyboard. Use **Full frame** to reset.
+5. Draw a rectangular **region of interest (ROI)** across a frozen frame, or edit its left/top/width/height as numeric percentages using the keyboard. Each frame keeps its own region and pixel ruler when switching between A and B. A/B difference uses the currently selected frame's region on both images. Use **Full frame** to reset the selected frame's inspection.
 6. Switch to **Pixel ruler** and drag a line. The line reads the number of pixels in the **downsampled** image, never metres or feet. A/B comparison requires identical sampled pixel dimensions.
 7. **Save frozen frame** or **Export metrics JSON** explicitly if the operator wishes to retain the work. Exports contain the image or measurements respectively; they do not create a signed chain-of-custody record.
+
+While an image opens, **Cancel image import** keeps the existing frames available.
+Switching A/B, clearing frames, or freezing a replacement also retires the pending
+import. A late decode or error cannot bring back a cleared image, replace newer
+pixels, or reset their inspection. The browser may finish decoding internally;
+its bitmap is closed when it settles. Replacing a frame resets only that frame's
+region and ruler. **Clear frames** resets both. The visible image/video buttons
+open the file chooser by keyboard without extra invisible tab stops.
 
 The browser samples no more than 720 pixels on the longest image side. It draws incoming transparent pixels onto an **explicit opaque black background** before both computing statistics and generating the frozen image, so the analyzed and displayed colors agree. Frozen images export as **lossless PNG** rather than lossy JPEG. The metrics JSON records the black backing and image format. A frame may be reduced relative to the original camera resolution, so image analysis cannot establish native pixel density or calibrated optical performance. A cross-origin source without browser permission to read its pixels fails safely instead of bypassing origin restrictions.
 
@@ -82,6 +90,10 @@ comparisons rather than mixing their scales.
 ## Verification and operational boundary
 
 The pure calculations have deterministic tests in `tests/image-science.test.mjs`, run by `npm test`. The [November 12 source-bound record](verification/image-diagnostics-math-2026-11-12/README.md) includes an independent generated-pixel oracle, the exact kernel bound, phone/desktop recovery, genuine measured zero, maximum response and actual JSON-download checks. The broader Studio suite also exercises focus-mode recovery, keyboard navigation and frame comparison. These are software tests using generated pixels; they do **not** establish performance on any physical camera.
+
+The [November 17 recovery record](verification/photo-cad-lessons-2026-11-17/README.md)
+adds delayed-decode cancellation, per-frame inspection recovery, export binding
+and keyboard-picker checks, alongside cancelled map-response bodies.
 
 Images are opened explicitly and read in the local browser. Frame data remain in session memory, not IndexedDB or localStorage. Do not use the tool to obtain images without camera-owner consent. Human-reviewed reports and original evidence should follow the [recording workflow](recording-workflow.md) and [field-acceptance runbook](field-acceptance.md) for identity, storage and recovery checks.
 

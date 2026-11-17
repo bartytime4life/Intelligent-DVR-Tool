@@ -1,0 +1,12 @@
+{
+  "schema": "intelligent-dvr.source-checks.v1",
+  "date": "2026-11-17",
+  "baseCommit": "9dfba23cf954f60531a7b541e5b482ee01d96c5c",
+  "files": {
+    "src/FacilityImageLab.jsx": "3f2f69e977d760ecbe361685685a878f5aec7612c58ecc359ef8459462fe968d",
+    "src/facility-services.mjs": "0a2b5c42eed04eb2e616a260c65899eb4d7eb268f793db34cfbab12ba0f7906f",
+    "src/facility-starter.mjs": "5434f1bc446fb058b02501b671b7830f5213ab05b8f17f44a717e2f86012354e",
+    "tests/facility-services.test.mjs": "8924c369a1b7a3544d07e016f9ea80edb0c15e8ba6d234450eb6daf981f33977",
+    "tests/browser/image-diagnostics-recovery.spec.mjs": "a1a9a5e98af5e13668c4b304e46b5fe416ae2b334efc822c5d4bda063c89db7e"
+  }
+}
