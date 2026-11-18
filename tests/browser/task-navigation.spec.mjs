@@ -120,6 +120,36 @@ test('keyboard skip preserves the workspace URL and one Back action closes a tra
   await expect(page.getByRole('main', {name:'Settings workspace'})).toBeFocused();
 });
 
+test('Back releases the local video preview just as closing the dialog does', async ({page}) => {
+  await offline(page);
+  await page.goto('/#monitor');
+  await nav(page,'Settings').click();
+  const input = page.locator('input[type="file"][accept="video/*"]');
+  const preview = page.getByRole('dialog',{name:'Local video preview'});
+  const selectVideo = async () => {
+    await input.setInputFiles({name:'preview.webm',mimeType:'video/webm',buffer:Buffer.from('local test bytes')});
+    await expect(preview).toBeVisible();
+    const url = await preview.locator('video').getAttribute('src');
+    expect(await hasPreviewBytes(url)).toBe(true);
+    return url;
+  };
+  const hasPreviewBytes = url => page.evaluate(async source => {
+    try {
+      const response = await fetch(source);
+      return (await response.text()) === 'local test bytes';
+    } catch { return false; }
+  }, url);
+
+  const closed = await selectVideo();
+  await preview.getByRole('button',{name:'Close dialog',exact:true}).click();
+  await expect.poll(() => hasPreviewBytes(closed)).toBe(false);
+  const abandoned = await selectVideo();
+  await page.goBack();
+  await expect(page).toHaveURL(/#monitor$/);
+  await expect(preview).toHaveCount(0);
+  await expect.poll(() => hasPreviewBytes(abandoned)).toBe(false);
+});
+
 test('workspace navigation stays reachable after scrolling a short mobile viewport', async ({page}) => {
   await offline(page);
   await page.setViewportSize({width:390,height:460});

@@ -40,6 +40,8 @@ Escape to close the finder.
 Choosing a task opens its workspace and relevant panel. Camera connections,
 recording and analysis still require their own explicit start controls.
 Cancel a leave warning to keep the current editor and search open.
+Tab to **Skip to workspace** and press Enter to move focus into the current
+workspace. The navigation rail stays available while you scroll.
 Folder backup and guided source setup need the PC DVR Companion or an
 analysis-enabled local service; the ordinary preview-only Start does not expose
 that service. Copy-only companion setup needs no detector model.
@@ -56,6 +58,7 @@ that service. Copy-only companion setup needs no detector model.
 | Set review zones | Zones |
 | Train recognition | Train; choose Start session or Enroll a person there |
 | Plan this machine | System |
+| Add a camera or DVR source | Recognition → Use my existing DVR → Connect an IP camera or LAN DVR |
 | Connections and local evidence | Settings |
 
 ## 1. Get ready
@@ -122,6 +125,10 @@ the controls. It demonstrates the workflow, not detector accuracy.*
 
 Importing copies a recording locally; it does not start inference. Save both the
 recognition JSON and its exact analyzed recording for later reopening.
+If you select a file that fails its fingerprint check, Recognition keeps your
+previously matched recording and selected sample. For local playback, choose
+**Settings → Open local video**. Closing the dialog or using Back releases the
+preview.
 To preserve finished OEM recordings instead, choose **Keep DVR copies** on
 Monitor or **Recognition → Use my existing DVR** in the companion or prepared
 analysis service. Connect, choose separate source

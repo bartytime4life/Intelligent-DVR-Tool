@@ -351,8 +351,8 @@ function WorkspaceApp({thumbnailRetention}) {
     [filter, setFilter] = useState("all"),
     [draft, setDraft] = useState(() => ruleFor(rules, 1)),
     [error, setError] = useState(""),
-    [note, setNote] = useState(""),
-    [video, setVideo] = useState(null);
+    [note, setNote] = useState("");
+  const video = modal?.type === "video" ? modal.video : null;
   const [noteDrafts, setNoteDrafts] = useState(() => new Map());
   const [liveCount, setLiveCount] = useState(0);
   const [capturedClip, setCapturedClip] = useState(null);
@@ -781,8 +781,7 @@ function WorkspaceApp({thumbnailRetention}) {
       setToast("Choose a supported video file.");
       return;
     }
-    setVideo({ url: URL.createObjectURL(f), name: f.name });
-    setModal({ type: "video" });
+    setModal({ type: "video", video: { url: URL.createObjectURL(f), name: f.name } });
   }
   const visible = filterEvents(events, { status: filter, mode: eventMode, source: sourceFilter, recording: recordingFilter, query, sort, label: (e) => cameraOf(e)?.name || e.cameraName });
   const choices = queueChoices(events), shownPending = visible.filter((e) => e.status === "pending").length;
@@ -1521,7 +1520,7 @@ function WorkspaceApp({thumbnailRetention}) {
         </Modal>
       )}
       {modal?.type === "video" && video && (
-        <Modal title="Local video preview" wide close={() => { setModal(null); setVideo(null); }}>
+        <Modal title="Local video preview" wide close={() => setModal(null)}>
           <p>{video.name}</p>
           <video
             className="local-video"
