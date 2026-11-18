@@ -71,3 +71,16 @@ test('empty DVR chooser opens guided setup, keeps explicit connection pending, t
   expect(state.requests.filter(request => request.method !== 'GET')).toEqual([]);
   expect(await page.evaluate(() => window.handoffCameraCalls)).toBe(0);
 });
+
+test('Find a task reaches camera setup with focus and no native requests', async ({page}) => {
+  const state = await setup(page);
+  await nav(page,'Settings').click();
+  await page.keyboard.press('Control+k');
+  const search = page.getByRole('combobox',{name:'Search tasks'});
+  await search.fill('add IP camera');
+  await search.press('Enter');
+  await expect(page.getByRole('region',{name:'Existing DVR backup'}).getByRole('button',{name:'Connect to this computer',exact:true})).toBeFocused();
+  expect(state.checks).toBe(0);
+  expect(state.requests.filter(request => request.method !== 'GET')).toEqual([]);
+  expect(await page.evaluate(() => window.handoffCameraCalls)).toBe(0);
+});

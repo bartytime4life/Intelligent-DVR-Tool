@@ -55,7 +55,7 @@ export async function feedRequest(path, {token='', body, signal} = {}, fetcher=f
   try {
     response = await fetcher(`/api/feeds${path}`, {method:body === undefined ? 'GET' : 'POST',
       headers:{...(token ? {'X-DVR-Token':token} : {}), ...(body === undefined ? {} : {'Content-Type':'application/json'})},
-      ...(body === undefined ? {} : {body:JSON.stringify(body)}), cache:'no-store', credentials:'same-origin', signal});
+      ...(body === undefined ? {} : {body:JSON.stringify(body)}), cache:'no-store', credentials:'omit', redirect:'error', signal});
   } catch (err) {
     if (err.name === 'AbortError' || err.name === 'TimeoutError') throw err;
     throw Error('Local DVR service is unavailable. Open the configured local app and retry.');

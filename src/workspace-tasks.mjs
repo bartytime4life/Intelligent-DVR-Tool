@@ -10,6 +10,7 @@ export const WORKSPACE_TASKS = Object.freeze([
   {id:'zones', group:'Plan & improve', title:'Set review zones', detail:'Choose where and when an observation needs attention.', workspace:'Zones', keywords:'rules area rectangle labels threshold motion'},
   {id:'train', group:'Plan & improve', title:'Train recognition', detail:'Run a guided check or manage local face templates.', workspace:'Train', keywords:'training person people enrollment verify accuracy compare'},
   {id:'system', group:'Set up', title:'Plan this machine', detail:'Balance camera load, storage and hardware.', workspace:'System', keywords:'gpu cpu memory ram disk resources capacity performance setup'},
+  {id:'camera-setup', group:'Set up', title:'Add a camera or DVR source', detail:'Open the form for a private LAN camera or DVR channel.', workspace:'Recognition', task:'camera-setup', keywords:'configure camera setup add authorized ip source'},
   {id:'settings', group:'Set up', title:'Connections and local evidence', detail:'Find camera setup, imports and privacy information.', workspace:'Settings', keywords:'settings local data privacy repository help'},
 ]);
 

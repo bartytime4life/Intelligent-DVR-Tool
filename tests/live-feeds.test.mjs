@@ -52,6 +52,8 @@ test('local bridge requires exact loopback origin and authenticates mutations',a
   for(const hostname of ['localhost','example.com','127.0.0.1.evil'])assert.equal(localFeedOrigin({protocol:'http:',hostname}),false);
   let called;await feedRequest('/connect',{token:'token',body:{source:'dock'}},async(...args)=>{called=args;return {ok:true};});
   assert.equal(called[0],'/api/feeds/connect');assert.equal(called[1].headers['X-DVR-Token'],'token');
+  assert.equal(called[1].credentials,'omit');
+  assert.equal(called[1].redirect,'error');
   assert.deepEqual(JSON.parse(called[1].body),{source:'dock'});
   await assert.rejects(feedRequest('/session',{},async()=>{throw Error('native secret');}),/service is unavailable/);
   await assert.rejects(feedRequest('/connect',{},async()=>({ok:false,json:async()=>({error:{message:'Select a configured source.'}})})),/configured source/);

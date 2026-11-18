@@ -141,7 +141,7 @@ receipts and do not modify human confirmations, rejections or face suggestions.
 | HOTA / DetA / AssA | Reference detection/association accuracy across 19 IoU thresholds, 0.05 through 0.95 |
 | Never-matched truth tracks | Anonymous labeled objects with no CLEAR match anywhere in the scored sequence |
 | Untracked detections | Above-threshold boxes without a confirmed track ID, listed by frame and detection index |
-| Error rows | Timestamped FN, FP and IDSW entries for manual inspection against original footage |
+| Error rows | Timestamped FN, FP and IDSW entries with source and trace SHA-256 values for inspection against the exact inputs |
 
 Scores are ratios, not percentages. Quality ratios are null when there are no
 truth boxes; raw false-positive counts remain available. A detection without a

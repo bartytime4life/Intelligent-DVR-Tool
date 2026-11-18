@@ -47,7 +47,7 @@ test('finder supports arrow selection, empty search recovery, Escape and focus r
   await input.press('Enter');
   await expect(finder(page)).toBeVisible();
   await finder(page).getByRole('button',{name:'Show all tasks'}).click();
-  await expect(finder(page).getByRole('option')).toHaveCount(11);
+  await expect(finder(page).getByRole('option')).toHaveCount(12);
   await input.press('Escape');
   await expect(finder(page)).toHaveCount(0);
   await expect(opener).toBeFocused();
@@ -101,6 +101,36 @@ test('workspace handoffs and browser history update title, landmark focus and an
   await nav(page,'Monitor').click();
   await page.getByRole('button',{name:'Analyze a recording',exact:true}).click();
   await expect(page.getByRole('group',{name:'Recognition tasks'}).getByRole('button',{name:/Analyze a recording/})).toHaveAttribute('aria-pressed','true');
+});
+
+test('keyboard skip preserves the workspace URL and one Back action closes a transient dialog', async ({page}) => {
+  await offline(page);
+  await page.goto('/#settings');
+  const skip = page.getByRole('link', {name:'Skip to workspace'});
+  await skip.focus();
+  await skip.press('Enter');
+  await expect(page).toHaveURL(/#settings$/);
+  await expect(page.getByRole('main', {name:'Settings workspace'})).toBeFocused();
+  await nav(page,'System').click();
+  await page.getByRole('button', {name:'Find a task',exact:true}).click();
+  await expect(finder(page)).toBeVisible();
+  await page.goBack();
+  await expect(page).toHaveURL(/#settings$/);
+  await expect(finder(page)).toHaveCount(0);
+  await expect(page.getByRole('main', {name:'Settings workspace'})).toBeFocused();
+});
+
+test('workspace navigation stays reachable after scrolling a short mobile viewport', async ({page}) => {
+  await offline(page);
+  await page.setViewportSize({width:390,height:460});
+  await page.goto('/#settings');
+  await page.getByRole('heading',{name:'Connections and local evidence',exact:true}).waitFor();
+  await page.evaluate(() => window.scrollTo(0, 700));
+  await expect(nav(page,'Monitor')).toBeInViewport({ratio:1});
+  await nav(page,'Settings').focus();
+  await expect(nav(page,'Settings')).toBeInViewport({ratio:1});
+  await nav(page,'Settings').press('Enter');
+  await expect(page.getByRole('main',{name:'Settings workspace'})).toBeFocused();
 });
 
 for (const width of [320,390,662,1024,1440]) {

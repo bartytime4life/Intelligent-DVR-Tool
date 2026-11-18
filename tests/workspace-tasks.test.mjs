@@ -5,10 +5,10 @@ import { WORKSPACE_TASKS, findWorkspaceTasks } from '../src/workspace-tasks.mjs'
 test('task catalog exposes each workspace without starting an operation', () => {
   assert.equal(new Set(WORKSPACE_TASKS.map(task => task.id)).size, WORKSPACE_TASKS.length);
   assert.deepEqual(new Set(WORKSPACE_TASKS.map(task => task.workspace)),new Set(['Monitor','Recognition','Train','Facility','Events','Zones','System','Settings']));
-  assert.deepEqual(WORKSPACE_TASKS.filter(task => task.task).map(task => task.task).sort(),['backup','import','recorder','recording']);
+  assert.deepEqual(WORKSPACE_TASKS.filter(task => task.task).map(task => task.task).sort(),['backup','camera-setup','import','recorder','recording']);
 });
 test('common user words find their destination and title matches rank first', () => {
-  for (const [query,id] of [['GPU','system'],['notes','review'],['floor plan','facility'],['backup folders','backup'],['saved results','import'],['Analyze a recording','recording'],['RTSP network','recorder']]) {
+  for (const [query,id] of [['GPU','system'],['notes','review'],['floor plan','facility'],['backup folders','backup'],['saved results','import'],['Analyze a recording','recording'],['RTSP network','recorder'],['add IP camera','camera-setup']]) {
     assert.equal(findWorkspaceTasks(query)[0]?.id,id,query);
   }
 });

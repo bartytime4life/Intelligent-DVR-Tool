@@ -155,6 +155,6 @@ export async function matchRecording(file, expectedHash, { signal, createWorker 
   require(hash(expectedHash), 'Invalid source fingerprint.');
   require(file && file.size > 0 && file.size <= MAX_VIDEO_BYTES, 'Choose a nonempty recording up to 512 MiB; split larger recordings before analysis.');
   const actual = await sha256File(file, { signal, createWorker });
-  require(actual === expectedHash, 'This recording does not match the analyzed source. Choose the original file; no boxes have been attached.');
+  require(actual === expectedHash, 'This recording does not match the analyzed source. Choose the original file.');
   return actual;
 }

@@ -126,6 +126,8 @@ def evaluate_tracking(manifest_path, score_threshold=.1, iou_threshold=.5):
         trace, trace_hash = read_json_snapshot(trace_path)
         require(trace_hash == detection['clips'][ci]['trace_sha256'],
                 'Trace changed during evaluation')
+        clip_evidence = {'camera': clip['camera'], 'source_sha256': clip['source_sha256'],
+                         'trace_sha256': trace_hash}
         tracking = validate_tracks(trace)
         frames, annotations = trace['frames'], clip['frames']
         require([a['frame_index'] for a in annotations] == [f['frame_index'] for f in frames],
@@ -169,23 +171,22 @@ def evaluate_tracking(manifest_path, score_threshold=.1, iou_threshold=.5):
             for fi, (gt, pred, frame) in enumerate(zip(truth, predicted, frames)):
                 matches = audit.get(fi, [])
                 gt_seen, pred_seen = set(), set()
+                location = {**clip_evidence, 'frame_index': frame['frame_index'],
+                            'seconds': frame['seconds'], 'label': label}
                 for gi, pi, switched in matches:
                     gt_seen.add(gi); pred_seen.add(pi); matched_truth.add(gt[gi]['track_id'])
                     if switched:
-                        errors.append({'camera': clip['camera'], 'frame_index': frame['frame_index'],
-                                       'seconds': frame['seconds'], 'label': label, 'outcome': 'IDSW',
+                        errors.append({**location, 'outcome': 'IDSW',
                                        'truth_id': gt[gi]['track_id'], 'prediction_id': pred[pi]['track'],
                                        'previous_prediction_id': last_match[gt[gi]['track_id']]})
                     last_match[gt[gi]['track_id']] = pred[pi]['track']
                 for gi, obj in enumerate(gt):
                     if gi not in gt_seen:
-                        errors.append({'camera': clip['camera'], 'frame_index': frame['frame_index'],
-                                       'seconds': frame['seconds'], 'label': label, 'outcome': 'FN',
+                        errors.append({**location, 'outcome': 'FN',
                                        'truth_id': obj['track_id'], 'prediction_id': None})
                 for pi, obj in enumerate(pred):
                     if pi not in pred_seen:
-                        errors.append({'camera': clip['camera'], 'frame_index': frame['frame_index'],
-                                       'seconds': frame['seconds'], 'label': label, 'outcome': 'FP',
+                        errors.append({**location, 'outcome': 'FP',
                                        'truth_id': None, 'prediction_id': obj['track'],
                                        'detection_index': obj['detection_index']})
             missed = sorted({o['track_id'] for f in truth for o in f}-matched_truth)
@@ -194,8 +195,7 @@ def evaluate_tracking(manifest_path, score_threshold=.1, iou_threshold=.5):
                       'label': d['label'], 'score': d['score']} for f in frames for di, d in enumerate(f['detections'])
                      if d['label'] in manifest['classes'] and d['score'] >= score_threshold and 'track' not in d]
         untracked_total += len(untracked)
-        per_clip.append({'camera': clip['camera'], 'source_sha256': clip['source_sha256'],
-                         'trace_sha256': trace_hash, 'tracker': {k: tracking[k] for k in
+        per_clip.append({**clip_evidence, 'tracker': {k: tracking[k] for k in
                              ('method', 'tracker_sha256', 'parameters', 'tracks_dropped')},
                          'frames_scored': len(frames), 'fps': clip['fps'], 'stride': trace['stride'],
                          'sample_interval_seconds': trace['stride']/clip['fps'],
