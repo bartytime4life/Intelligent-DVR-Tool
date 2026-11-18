@@ -113,6 +113,15 @@ test('a matched source opens its original observation frame, then ordinary navig
   await nav(page, 'Events').click(); await nav(page, 'Recognition').click();
   await expect(page.getByRole('main', {name:'Recognition workspace', exact:true})).toBeFocused();
   await expect(page.getByLabel('Analyzed sample', {exact:true})).toHaveValue('0');
+  const original = page.locator('.recognition-stage video');
+  const originalUrl = await original.getAttribute('src');
+  await page.getByLabel('Match original recording', {exact:true}).setInputFiles({
+    name:'different.webm', mimeType:'video/webm', buffer:Buffer.concat([buffer, Buffer.from('different bytes')]),
+  });
+  await expect(page.getByRole('alert').filter({hasText:/does not match/i})).toBeVisible();
+  await expect(original).toHaveAttribute('src',originalUrl);
+  await expect(page.getByLabel('Analyzed sample', {exact:true})).toHaveValue('0');
+  await expect(page.getByRole('list',{name:'Recording review progress'})).toContainText('generated-source.webm');
   expect(writes).toEqual([]);
 });
 

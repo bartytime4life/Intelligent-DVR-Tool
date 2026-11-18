@@ -7,7 +7,7 @@ import BackupLibrary from './BackupLibrary.jsx';
 import AcceptanceReceipts from './AcceptanceReceipts.jsx';
 import RecognitionReport from './RecognitionReport.jsx';
 import { coverageLabel } from './media-coverage.mjs';
-import { saveObservationStills, grabFrame } from './local-images.mjs';
+import { saveObservationStills } from './local-images.mjs';
 import { analysisRequest } from './local-analysis.mjs';
 import {createReviewOpening, createReviewTransfer} from './review-transfer.mjs';
 import { FileVideo, HardDrives, VideoCamera, FolderOpen } from '@phosphor-icons/react';
@@ -104,12 +104,13 @@ export default function RecognitionReview({ onImport, onValidateImport, active =
     if (!intent) return;
     transfer.current.cancel();
     const ticket = generation.current, sourceTicket = ++sourceGeneration.current;
-    setSource(null); setMedia({}); setError(''); setStatus('Verifying recording fingerprint…');
+    video.current?.pause();
+    setError(''); setStatus('Verifying recording fingerprint…');
     try {
       await matchRecording(file, run.receipt.source_sha256);
       if (ticket !== generation.current || sourceTicket !== sourceGeneration.current || !reviewOpening.current.isCurrent(intent)) return;
       transfer.current.cancel();
-      setSource({ url: URL.createObjectURL(file), name: file.name });
+      setMedia({}); setSource({ url: URL.createObjectURL(file), name: file.name });
       setStatus('Recording fingerprint matched. Review sampled frames and observations below.');
     } catch (err) {
       if (ticket === generation.current && sourceTicket === sourceGeneration.current && reviewOpening.current.isCurrent(intent)) { setError(err.message); setStatus(''); }
@@ -324,8 +325,9 @@ export default function RecognitionReview({ onImport, onValidateImport, active =
             <label>Sample {index+1} of {run.trace.frames.length}<input aria-label="Analyzed sample" type="range" min="0" max={run.trace.frames.length-1} value={index} onChange={e => seek(Number(e.target.value))} /></label>
             <button className="button" disabled={index === run.trace.frames.length-1} onClick={() => seek(index+1)}>Next sample</button>
           </div>
-          {onZoneStill && source && <button className="text-button recognition-zone-still" disabled={!media.ready || media.seeking} onClick={async () => {
-            try { onZoneStill(await grabFrame(video.current), `${run.receipt.camera} · +${(media.seconds ?? 0).toFixed(2)}s`); } catch (err) { setError(err.message); }
+          {onZoneStill && source && <button className="text-button recognition-zone-still" disabled={!media.ready || media.seeking} onClick={() => {
+            const picture = video.current;
+            if (picture && !picture.seeking) onZoneStill(picture, `${run.receipt.camera} · +${picture.currentTime.toFixed(2)}s`);
           }}>Use this frame for zones</button>}
         </div>
         <aside className="recognition-scene">

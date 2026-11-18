@@ -177,6 +177,13 @@ h3 {
 .sidebar {
   grid-column: 1;
   grid-row: 2;
+  position: sticky;
+  top: 0;
+  align-self: start;
+  height: 100%;
+  max-height: 100dvh;
+  overflow: auto;
+  scrollbar-width: thin;
   display: flex;
   align-items: stretch;
   flex-direction: column;
@@ -186,6 +193,7 @@ h3 {
 }
 .nav-item {
   height: 88px;
+  flex: none;
   position: relative;
   display: flex;
   flex-direction: column;
@@ -205,6 +213,9 @@ h3 {
 }
 .nav-item:hover {
   background: #122e40;
+}
+.sidebar button:focus-visible {
+  outline-offset: -3px;
 }
 .nav-count {
   position: absolute;

@@ -13,7 +13,7 @@ import { workspaceFromHash, reviewExport, parseReviewExport, pauseHiddenPlayback
 import { createWorkspaceSave } from './workspace-save.mjs';
 import { createThumbnailRetention } from './thumbnail-retention.mjs';
 import { backdropDismiss } from './dialog-dismiss.mjs';
-import { getImage, putImage, imageFileFrame, observationImageKey } from './local-images.mjs';
+import { getImage, putImage, grabFrame, imageFileFrame, observationImageKey } from './local-images.mjs';
 import {clearSavedZoneOffer, createZoneImageWriter, loadZoneImage, zoneImageForPlan} from './zone-images.mjs';
 import { ANALYZER_CLASSES, DEFAULT_MAX_GAP, analyzerRules, analyzerFilename } from './zone-rules.mjs';
 import { filterEvents, queueChoices, nextPending, queueCSV, dismissPending, restorePending } from './review-queue.mjs';
@@ -351,8 +351,8 @@ function WorkspaceApp({thumbnailRetention}) {
     [filter, setFilter] = useState("all"),
     [draft, setDraft] = useState(() => ruleFor(rules, 1)),
     [error, setError] = useState(""),
-    [note, setNote] = useState(""),
-    [video, setVideo] = useState(null);
+    [note, setNote] = useState("");
+  const video = modal?.type === "video" ? modal.video : null;
   const [noteDrafts, setNoteDrafts] = useState(() => new Map());
   const [liveCount, setLiveCount] = useState(0);
   const [capturedClip, setCapturedClip] = useState(null);
@@ -384,6 +384,7 @@ function WorkspaceApp({thumbnailRetention}) {
   const [navigationVersion, setNavigationVersion] = useState(0);
   const workspaceElement = useRef(), focusWorkspace = useRef(false);
   const navigationIdentity = useRef(0), cameraFocusRequest = useRef(null), monitorConnectControl = useRef(null);
+  const zoneCaptureIdentity = useRef(0);
   const completeCameraFocus = useCallback(() => {
     const request = cameraFocusRequest.current;
     if (!request?.owner) return; // The navigation landmark must receive focus first.
@@ -525,6 +526,8 @@ function WorkspaceApp({thumbnailRetention}) {
       if (next === tabRef.current) return; // popstate and hashchange can describe one transition.
       navigationIdentity.current++;
       cameraFocusRequest.current = null;
+      setModal(null);
+      setTaskFinderOpen(false);
       tabRef.current = next;
       focusWorkspace.current = true;
       updateTab(next);
@@ -573,7 +576,10 @@ function WorkspaceApp({thumbnailRetention}) {
   const [pageHidden, setPageHidden] = useState(document.hidden);
   useEffect(() => pauseHiddenPlayback(document), []);
   useEffect(() => {
-    const changed = () => setPageHidden(document.hidden);
+    const changed = () => {
+      if (document.hidden) zoneCaptureIdentity.current++;
+      setPageHidden(document.hidden);
+    };
     document.addEventListener("visibilitychange", changed);
     return () => document.removeEventListener("visibilitychange", changed);
   }, []);
@@ -607,9 +613,21 @@ function WorkspaceApp({thumbnailRetention}) {
   }, [tab, selected, zoneStillVersion]);
   useEffect(() => () => { if (stillOffer?.url) URL.revokeObjectURL(stillOffer.url); }, [stillOffer]);
   function offerZoneStill(frame, source) {
+    if (!setTab("Zones")) return;
     stillFileVersion.current++;
     setStillOffer({ ...frame, source, url: URL.createObjectURL(frame.blob) });
-    setTab("Zones");
+  }
+  async function captureZoneStill(workspace, picture, source) {
+    const navigation = navigationIdentity.current, capture = ++zoneCaptureIdentity.current;
+    const current = () => navigation === navigationIdentity.current &&
+      capture === zoneCaptureIdentity.current && tabRef.current === workspace && !document.hidden;
+    try {
+      if (!picture) throw Error("No frame is shown yet.");
+      const frame = await grabFrame(picture);
+      if (current() && picture.isConnected) offerZoneStill(frame, source);
+    } catch (problem) {
+      if (current() && (!picture || picture.isConnected)) setToast(problem.message);
+    }
   }
   async function useOfferedStill() {
     const result = await zoneImageWriter.current?.save(selected, stillOffer);
@@ -763,15 +781,17 @@ function WorkspaceApp({thumbnailRetention}) {
       setToast("Choose a supported video file.");
       return;
     }
-    setVideo({ url: URL.createObjectURL(f), name: f.name });
-    setModal({ type: "video" });
+    setModal({ type: "video", video: { url: URL.createObjectURL(f), name: f.name } });
   }
   const visible = filterEvents(events, { status: filter, mode: eventMode, source: sourceFilter, recording: recordingFilter, query, sort, label: (e) => cameraOf(e)?.name || e.cameraName });
   const choices = queueChoices(events), shownPending = visible.filter((e) => e.status === "pending").length;
   return (
     <StillVersion.Provider value={stillVersion}>
     <div className="app-shell">
-      <a className="skip-link" href="#workspace">
+      <a className="skip-link" href="#workspace" onClick={event => {
+        event.preventDefault();
+        workspaceElement.current?.focus();
+      }}>
         Skip to workspace
       </a>
       <header className="topbar">
@@ -872,14 +892,14 @@ function WorkspaceApp({thumbnailRetention}) {
               : downloadText(setupConflict.remoteRaw ?? 'null', 'dvr-unreadable-machine-setup-other-tab.json')} />
         </div>}
         {recognitionOpened && <div hidden={tab !== "Recognition"}><WorkspaceBoundary name="Recognition"><Suspense fallback={<div className="content-page"><h1>Opening recognition review…</h1></div>}>
-          <RecognitionReview taskRequest={recognitionTask} active={tab === "Recognition" && !pageHidden} onImport={addObservations} onValidateImport={added => addObservations(added, false, true)} clip={capturedClip} onClip={setCapturedClip} reviews={events} evidence={evidence} onClearEvidence={() => setEvidence(null)} onRecorderStatus={setRecorderStatus} onZoneStill={offerZoneStill} />
+          <RecognitionReview taskRequest={recognitionTask} active={tab === "Recognition" && !pageHidden} onImport={addObservations} onValidateImport={added => addObservations(added, false, true)} clip={capturedClip} onClip={setCapturedClip} reviews={events} evidence={evidence} onClearEvidence={() => setEvidence(null)} onRecorderStatus={setRecorderStatus} onZoneStill={(picture, source) => captureZoneStill("Recognition", picture, source)} />
         </Suspense></WorkspaceBoundary></div>}
         {tab === "Train" && <WorkspaceBoundary name="Train"><Suspense fallback={<div className="content-page"><h1>Opening training…</h1></div>}><TrainingWorkspace onOpenRecognition={() => setTab("Recognition")} onDirtyChange={reportTrainingDirty} /></Suspense></WorkspaceBoundary>}
         {tab === "Facility" && <WorkspaceBoundary name="Facility"><Suspense fallback={<div className="content-page"><h1>Opening facility builder…</h1></div>}><FacilityBuilder onPreviewCount={setLiveCount} onDirtyChange={(dirty) => { facilityDirty.current = dirty; }} /></Suspense></WorkspaceBoundary>}
         {tab === "System" && <WorkspaceBoundary name="System"><Suspense fallback={<div className="content-page"><h1>Opening machine setup…</h1></div>}><SystemSetup setup={resources}
           onApply={setResources} onDirtyChange={reportSystemDirty}
           storageError={setupSaveError} storagePending={setupUnsaved && !setupSaveError && !setupConflict} storageConflict={Boolean(setupConflict)} download={download} /></Suspense></WorkspaceBoundary>}
-        {tab === "Monitor" && <WorkspaceBoundary name="Monitor"><GoalGuide onChoose={openTask} /><Suspense fallback={<div className="content-page"><h1>Opening Monitor…</h1></div>}><LiveMonitor onConnectControlReady={reportMonitorConnectControl} onConfigureCamera={() => openTask({workspace:'Recognition',task:'camera-setup'})} onZoneStill={offerZoneStill} visibleTiles={resources.browser.visibleTiles} onCount={setLiveCount} pageHidden={pageHidden} clip={capturedClip} onClip={setCapturedClip} capturePending={capturePending} onCaptureBusy={setCapturePending} onReviewClip={() => setTab('Recognition')} onLiveObservation={addLiveObservation} onPendingLiveChange={reportPendingLive} queue={
+        {tab === "Monitor" && <WorkspaceBoundary name="Monitor"><GoalGuide onChoose={openTask} /><Suspense fallback={<div className="content-page"><h1>Opening Monitor…</h1></div>}><LiveMonitor onConnectControlReady={reportMonitorConnectControl} onConfigureCamera={() => openTask({workspace:'Recognition',task:'camera-setup'})} onZoneStill={(picture, source) => captureZoneStill("Monitor", picture, source)} visibleTiles={resources.browser.visibleTiles} onCount={setLiveCount} pageHidden={pageHidden} clip={capturedClip} onClip={setCapturedClip} capturePending={capturePending} onCaptureBusy={setCapturePending} onReviewClip={() => setTab('Recognition')} onLiveObservation={addLiveObservation} onPendingLiveChange={reportPendingLive} queue={
               <aside className="review-queue">
                 <div className="queue-heading">
                   <h2>
@@ -1246,7 +1266,7 @@ function WorkspaceApp({thumbnailRetention}) {
             <div className="settings-grid">
               <section>
                 <Camera size={28} />
-                <h2>Camera connections</h2><button className="button" onClick={() => setTab("Monitor")}>Open camera connections</button>
+                <h2>Camera connections</h2><button className="button" onClick={() => openTask({id:'watch',workspace:'Monitor'})}>Open camera connections</button>
                 <p>
                   Connect built-in or USB webcams and configured local DVR RTSP channels from Monitor. No camera starts automatically. ONVIF discovery is not included.
                 </p>
@@ -1500,7 +1520,7 @@ function WorkspaceApp({thumbnailRetention}) {
         </Modal>
       )}
       {modal?.type === "video" && video && (
-        <Modal title="Local video preview" wide close={() => { setModal(null); setVideo(null); }}>
+        <Modal title="Local video preview" wide close={() => setModal(null)}>
           <p>{video.name}</p>
           <video
             className="local-video"

@@ -4,7 +4,6 @@ import {feedRequest, localFeedOrigin, loopbackAddress, webcamController, visible
 import './live-feeds.css';
 import ClipCapture from './ClipCapture.jsx';
 import {backdropDismiss} from './dialog-dismiss.mjs';
-import {grabFrame} from './local-images.mjs';
 import {LiveOverlay, LiveTileAI} from './LiveDetection.jsx';
 import {liveDetector, captureJpeg, liveObservationEvent, liveSetupInfo} from './live-ai.mjs';
 import {analysisRequest} from './local-analysis.mjs';
@@ -286,7 +285,8 @@ export default function LiveMonitor({onZoneStill, queue, visibleTiles=4, onCount
   }
   function openSetup(kind = 'webcam') { setError(''); setSetup(kind); }
   function switchSetup(kind) {
-    if (kind !== setup && webcam.state === 'connecting') controller.current.stop('Camera connection cancelled.');
+    if (kind === setup) return;
+    if (webcam.state === 'connecting') controller.current.stop('Camera connection cancelled.');
     generation.current++; busy.current=false; setWorking(false); setError(''); setSource(''); setSetup(kind);
   }
   const tiles = [...sourceTiles, ...retainedLiveTiles(aiStates,liveSourceIds.current)];
@@ -349,9 +349,9 @@ export default function LiveMonitor({onZoneStill, queue, visibleTiles=4, onCount
           {(t.state === 'live' || aiStates[t.id]?.state === 'failed' || aiStates[t.id]?.observations?.length > 0) && <LiveTileAI ai={aiStates[t.id]} available={aiReady && t.state === 'live' && canStartLiveReview(aiStates,t.id)} reviewOnly={t.reviewOnly} disabledReason={reviewFull ? LIVE_REVIEW_LIMIT_MESSAGE : ''} sending={sendingIds} now={renderNow}
             onStart={() => startAi(t)} onStop={() => stopAi(t.id)} onSend={i => sendObservation(t.id, i)} onDismiss={i => dismissObservation(t.id, i)} />}
           {t.reviewOnly ? <p className="live-review-summary">Temporary review only · preview and AI stopped in this page</p> : <div className="live-tile-controls" onClick={e => e.stopPropagation()}><span>{t.id === 'webcam' ? 'Webcam · video only' : t.kind?.startsWith('public-') ? 'Internet source · local preview' : `DVR · sampled preview ≤ 4 fps${Number.isFinite(t.frame_age_seconds) ? ` · frame ${t.frame_age_seconds < 1 ? '<1' : Math.floor(t.frame_age_seconds)}s ago` : ''}`}</span>
-            {onZoneStill && t.state === 'live' && <button className="text-button" onClick={async e => {
+            {onZoneStill && t.state === 'live' && <button className="text-button" onClick={e => {
               const picture = e.currentTarget.closest('article')?.querySelector('.live-picture video, .live-picture > img');
-              try { if (!picture) throw Error('No frame is shown yet.'); onZoneStill(await grabFrame(picture), t.name); } catch (err) { setError(err.message); }
+              onZoneStill(picture, t.name);
             }}>Use for zones</button>}
             <button className="text-button" onClick={() => t.id === 'webcam'
               ? controller.current.stop(['failed','disconnected'].includes(t.state) ? 'No webcam connected' : 'Disconnected')

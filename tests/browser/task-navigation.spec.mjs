@@ -47,7 +47,7 @@ test('finder supports arrow selection, empty search recovery, Escape and focus r
   await input.press('Enter');
   await expect(finder(page)).toBeVisible();
   await finder(page).getByRole('button',{name:'Show all tasks'}).click();
-  await expect(finder(page).getByRole('option')).toHaveCount(11);
+  await expect(finder(page).getByRole('option')).toHaveCount(12);
   await input.press('Escape');
   await expect(finder(page)).toHaveCount(0);
   await expect(opener).toBeFocused();
@@ -101,6 +101,66 @@ test('workspace handoffs and browser history update title, landmark focus and an
   await nav(page,'Monitor').click();
   await page.getByRole('button',{name:'Analyze a recording',exact:true}).click();
   await expect(page.getByRole('group',{name:'Recognition tasks'}).getByRole('button',{name:/Analyze a recording/})).toHaveAttribute('aria-pressed','true');
+});
+
+test('keyboard skip preserves the workspace URL and one Back action closes a transient dialog', async ({page}) => {
+  await offline(page);
+  await page.goto('/#settings');
+  const skip = page.getByRole('link', {name:'Skip to workspace'});
+  await skip.focus();
+  await skip.press('Enter');
+  await expect(page).toHaveURL(/#settings$/);
+  await expect(page.getByRole('main', {name:'Settings workspace'})).toBeFocused();
+  await nav(page,'System').click();
+  await page.getByRole('button', {name:'Find a task',exact:true}).click();
+  await expect(finder(page)).toBeVisible();
+  await page.goBack();
+  await expect(page).toHaveURL(/#settings$/);
+  await expect(finder(page)).toHaveCount(0);
+  await expect(page.getByRole('main', {name:'Settings workspace'})).toBeFocused();
+});
+
+test('Back releases the local video preview just as closing the dialog does', async ({page}) => {
+  await offline(page);
+  await page.goto('/#monitor');
+  await nav(page,'Settings').click();
+  const input = page.locator('input[type="file"][accept="video/*"]');
+  const preview = page.getByRole('dialog',{name:'Local video preview'});
+  const selectVideo = async () => {
+    await input.setInputFiles({name:'preview.webm',mimeType:'video/webm',buffer:Buffer.from('local test bytes')});
+    await expect(preview).toBeVisible();
+    const url = await preview.locator('video').getAttribute('src');
+    expect(await hasPreviewBytes(url)).toBe(true);
+    return url;
+  };
+  const hasPreviewBytes = url => page.evaluate(async source => {
+    try {
+      const response = await fetch(source);
+      return (await response.text()) === 'local test bytes';
+    } catch { return false; }
+  }, url);
+
+  const closed = await selectVideo();
+  await preview.getByRole('button',{name:'Close dialog',exact:true}).click();
+  await expect.poll(() => hasPreviewBytes(closed)).toBe(false);
+  const abandoned = await selectVideo();
+  await page.goBack();
+  await expect(page).toHaveURL(/#monitor$/);
+  await expect(preview).toHaveCount(0);
+  await expect.poll(() => hasPreviewBytes(abandoned)).toBe(false);
+});
+
+test('workspace navigation stays reachable after scrolling a short mobile viewport', async ({page}) => {
+  await offline(page);
+  await page.setViewportSize({width:390,height:460});
+  await page.goto('/#settings');
+  await page.getByRole('heading',{name:'Connections and local evidence',exact:true}).waitFor();
+  await page.evaluate(() => window.scrollTo(0, 700));
+  await expect(nav(page,'Monitor')).toBeInViewport({ratio:1});
+  await nav(page,'Settings').focus();
+  await expect(nav(page,'Settings')).toBeInViewport({ratio:1});
+  await nav(page,'Settings').press('Enter');
+  await expect(page.getByRole('main',{name:'Settings workspace'})).toBeFocused();
 });
 
 for (const width of [320,390,662,1024,1440]) {

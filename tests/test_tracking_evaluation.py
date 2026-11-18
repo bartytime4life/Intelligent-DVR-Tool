@@ -61,6 +61,9 @@ class TrackingEvaluationTest(unittest.TestCase):
         self.assertAlmostEqual(result['IDF1'], .5)
         self.assertAlmostEqual(result['HOTA'], (1/3)**.5)
         self.assertEqual([e['frame_index'] for e in report['errors']], [4, 4])
+        for row in report['errors']:
+            self.assertEqual(row['source_sha256'], digest(self.root/'source.synthetic.txt'))
+            self.assertEqual(row['trace_sha256'], digest(self.root/'trace.json'))
 
     def test_false_track_and_never_matched_track_known_answers(self):
         truth = [[obj('A'), obj('B', .6)] for _ in range(3)]
@@ -74,6 +77,9 @@ class TrackingEvaluationTest(unittest.TestCase):
         self.assertEqual(report['clips'][0]['per_class']['person']['never_matched_truth_tracks'], ['B'])
         self.assertEqual(sum(e['outcome'] == 'FP' for e in report['errors']), 3)
         self.assertEqual(sum(e['outcome'] == 'FN' for e in report['errors']), 3)
+        for row in report['errors']:
+            self.assertEqual(row['source_sha256'], digest(self.root/'source.synthetic.txt'))
+            self.assertEqual(row['trace_sha256'], digest(self.root/'trace.json'))
 
     def test_hota_alpha_sweep_uses_reference_thresholds(self):
         truth = [[{'track_id': 'A', 'label': 'person', 'box': [0, 0, .3, .5]}]]
