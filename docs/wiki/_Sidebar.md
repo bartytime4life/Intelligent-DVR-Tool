@@ -65,6 +65,7 @@
 ### Engineering and evidence
 
 - [Development and checks](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Development-and-checks)
+- [Agent harness playbook](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Agent-harness-playbook)
 - [Contributing](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Contributing)
 - [Architecture and data](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Architecture-and-data)
 - [Science and algorithms](https://github.com/bartytime4life/Intelligent-DVR-Tool/wiki/Science-and-algorithms)
