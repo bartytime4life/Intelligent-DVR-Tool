@@ -215,6 +215,14 @@ not a file quota. This does not establish a native CUDA replay or physical-camer
 capacity gain. The qualification CLI accepts bounded `--offer-hz` stress settings
 and records actual SQLite policy and sampled WAL bytes; its default cadence stays 2.
 
+A [November 18 owner-PC native follow-up](verification/native-profile-2026-11-18/README.md)
+admitted CUDA and kept the five pinned core modules byte-identical. Current-code
+30-second journal/no-journal comparisons measured medians of 161.62/s and 182.05/s;
+the journaled 120-second repeat reached 170.93/s with 1,930 replaced opportunities
+and 49 pending. Separate profiles identify material durable commit work without
+claiming an exact causal decomposition. This closes native measurement availability,
+not the sustained loss-free or physical-camera capacity gate.
+
 | Boundary | Durable behavior |
 | --- | --- |
 | Before sending a dispatch batch | Commit camera/sequence, run-scoped token, generation, monotonic sample/dispatch times, payload size and SHA-256. Frame bytes are absent. |

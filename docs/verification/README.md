@@ -1,5 +1,11 @@
 # Verification index
 
+[Owner-PC native CUDA and durable-result profiling, November 18](native-profile-2026-11-18/README.md)
+records current hardware admission, recomputed CPU/GPU agreement on 100 saved
+frames, seven offline replay cases and separate bounded timing attribution.
+The five pinned core modules stayed unchanged; the result preserves observed
+analysis losses and does not qualify physical 100-camera capacity.
+
 [Targeted Photo to 3D CAD lessons, November 17](photo-cad-lessons-2026-11-17/README.md)
 records reproduced image-import, frame-inspection, keyboard and map-body recovery
 defects, bounded local fixes, and their regression checks. This source branch is
