@@ -1,0 +1,34 @@
+{
+  "source_commit": "c707962acdfa8c73e85d9588526cef3f0f43fd4f",
+  "core": {
+    "edge/inference.py": "7e95beb9e25dd67ac5d8d977ec6c466874371d12d112119a85a619124687b2f1",
+    "edge/journal.py": "70f7a3419d05d76380ea32ad5de20ee440bc17256e25baf0f2289a86e46a495a",
+    "edge/supervision.py": "03f334d5fa072e5f3ad02bd90536fd2c00fc97ebfaa54ca1ef1c10b64b80a9cf",
+    "edge/scheduler.py": "8639b46d3ba2e1a14efaa7ff647f412e6be437685ec7be5717a00983835b9019",
+    "edge/profiling.py": "f7c0a3e4b831d7f996840aec51a73e3fe68e06627cdce854716c576068f80f91"
+  },
+  "seconds": 120,
+  "post_step_sleep_ms": 0.5,
+  "profile": false,
+  "scope": "One descriptive baseline, not a candidate comparison or acceptance of a performance change.",
+  "metrics": {
+    "worker_end_age": "NativeProcessor ended minus source-clock captured_at; excludes result IPC and terminal commit.",
+    "durable_return_age": "Parent monotonic timestamp immediately after ProcessWorkers.step returns, minus captured_at; journal ID required. Before explicit consumer acknowledgment.",
+    "post_worker_return_gap": "Per-sample durable_return_age minus worker_end_age; not a difference of marginal percentiles.",
+    "drain": "Timestamp after close returns; reported separately and excluded from in-window throughput/latency distributions."
+  },
+  "criteria": {
+    "positive_journal_ids": true,
+    "parent_return_not_before_worker_end": true,
+    "complete_opportunity_accounting": true,
+    "all_children_reaped": true,
+    "no_source_worker_errors": true,
+    "latency_service_level_target": "not specified or qualified",
+    "physical_camera_capacity": "unqualified"
+  },
+  "harness_sha256": {
+    "run_return.py": "7ace880406075760591856eeef771aa906215fdba1394e949be50f50b14e9194",
+    "recovery_replay.py": "9ee1b0b7946bd4205b1be3bb8abcfa71a0511b978663d1ce8e72e337a62778cb",
+    "native_factory.py": "b4acebc582bd30b77360a441a0000eb5fd9a56353b4cc1077812cfaafa8e9c2e"
+  }
+}

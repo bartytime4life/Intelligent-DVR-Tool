@@ -284,6 +284,7 @@ def check():
     runpy.run_path(str(ROOT / 'docs/verification/durable-overload-2026-10-28/verify-results.py'))['check']()
     runpy.run_path(str(ROOT / 'docs/verification/native-profile-2026-11-18/verify-results.py'))['check']()
     runpy.run_path(str(ROOT / 'docs/verification/controller-cadence-2026-11-18/verify-results.py'))['check']()
+    runpy.run_path(str(ROOT / 'docs/verification/durable-return-2026-11-18/verify-results.py'))['check']()
     print(f'Documentation checks passed: {links} local links, {len(manifest["assets"])} historical media hashes, {len(current["assets"])} PR61 visual blobs, {total:,} historical + {current_total:,} PR61 + {guide_total:,} guide + {followup_total:,} guided-experience media bytes, test-count consistency.')
 
 

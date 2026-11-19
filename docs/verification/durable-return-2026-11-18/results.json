@@ -1,0 +1,227 @@
+{
+  "schema": "intelligent-dvr.durable-return-observation.v1",
+  "owner_date": "2026-11-18",
+  "source_commit": "c707962acdfa8c73e85d9588526cef3f0f43fd4f",
+  "scope": "One descriptive offline baseline; successful in-window samples only; no performance change or latency service level qualified.",
+  "report": {
+    "cameras": 100,
+    "workers": 4,
+    "physical_recordings": 30,
+    "mode": "none",
+    "seconds": 120.0,
+    "controller_elapsed_seconds": 120.02022409200436,
+    "requested_post_step_sleep_ms": 0.5,
+    "controller_step_starts_in_window": 114069,
+    "offered": 22497,
+    "completed": 19768,
+    "results_per_second": 164.73333333333332,
+    "drained_after_stop": 4,
+    "replaced": 2684,
+    "stale": 0,
+    "budget_dropped": 0,
+    "failed": 0,
+    "pending": 41,
+    "inflight": 0,
+    "active_decoders": 100,
+    "decoded_frames": 186368,
+    "errors": [],
+    "source_errors": [],
+    "min_available_bytes": 82796314624,
+    "max_combined_rss_bytes": 2164334592,
+    "terminal_outcomes_unique_and_ordered": true,
+    "journal_enabled": true,
+    "profiling_enabled": false,
+    "sqlite_settings": {
+      "journal_mode": "wal",
+      "synchronous": 2,
+      "wal_autocheckpoint": 512,
+      "user_version": 1
+    },
+    "delivery": {
+      "unique_ids": 19772,
+      "acknowledged": 19772,
+      "pruned": 19416,
+      "peak_entries": 504
+    },
+    "return_clock_order_valid": true,
+    "worker": {
+      "state": "closed",
+      "generation": 1,
+      "restarts": 0,
+      "active": 0,
+      "completed": 19772,
+      "failed": 0,
+      "process_failures": 0,
+      "journal_blocked": false,
+      "journal_error": null,
+      "received_uncommitted": 0,
+      "child_alive": false,
+      "unsent_bytes": 0,
+      "received_buffer_bytes": 0
+    },
+    "startup_probes": [
+      {
+        "backend": "ONNX Runtime CUDA",
+        "backend_id": "onnxruntime-cuda",
+        "onnxruntime": "1.31.1",
+        "threads": 4,
+        "fallback": "disabled",
+        "precision": "FP32, TF32 disabled",
+        "provider_options": {
+          "device_id": 0,
+          "use_tf32": 0,
+          "gpu_mem_limit": 1073741824,
+          "arena_extend_strategy": "kSameAsRequested",
+          "cudnn_conv_algo_search": "HEURISTIC",
+          "cudnn_conv_use_max_workspace": "0"
+        },
+        "startup_execution": {
+          "scope": "One synthetic zero-input startup probe, not per-frame profiling or capacity qualification.",
+          "warmup_runs_excluded": 1,
+          "node_execution_counts": {
+            "CUDAExecutionProvider": 203
+          },
+          "profile_sha256": "15a2bd2d39db7e8cf48fa601ca7d50d887d515688987e3c809c5b4825db14b63"
+        }
+      },
+      {
+        "backend": "ONNX Runtime CUDA",
+        "backend_id": "onnxruntime-cuda",
+        "onnxruntime": "1.31.1",
+        "threads": 4,
+        "fallback": "disabled",
+        "precision": "FP32, TF32 disabled",
+        "provider_options": {
+          "device_id": 0,
+          "use_tf32": 0,
+          "gpu_mem_limit": 1073741824,
+          "arena_extend_strategy": "kSameAsRequested",
+          "cudnn_conv_algo_search": "HEURISTIC",
+          "cudnn_conv_use_max_workspace": "0"
+        },
+        "startup_execution": {
+          "scope": "One synthetic zero-input startup probe, not per-frame profiling or capacity qualification.",
+          "warmup_runs_excluded": 1,
+          "node_execution_counts": {
+            "CUDAExecutionProvider": 203
+          },
+          "profile_sha256": "0a6ab0cc6621dedfcb6aeb17b684192e18125299b6dd6737f73530acd0ed1af5"
+        }
+      },
+      {
+        "backend": "ONNX Runtime CUDA",
+        "backend_id": "onnxruntime-cuda",
+        "onnxruntime": "1.31.1",
+        "threads": 4,
+        "fallback": "disabled",
+        "precision": "FP32, TF32 disabled",
+        "provider_options": {
+          "device_id": 0,
+          "use_tf32": 0,
+          "gpu_mem_limit": 1073741824,
+          "arena_extend_strategy": "kSameAsRequested",
+          "cudnn_conv_algo_search": "HEURISTIC",
+          "cudnn_conv_use_max_workspace": "0"
+        },
+        "startup_execution": {
+          "scope": "One synthetic zero-input startup probe, not per-frame profiling or capacity qualification.",
+          "warmup_runs_excluded": 1,
+          "node_execution_counts": {
+            "CUDAExecutionProvider": 203
+          },
+          "profile_sha256": "8f308f212e45b09719d98707d438d99fdd96c434da64ead6346edbff0b306545"
+        }
+      },
+      {
+        "backend": "ONNX Runtime CUDA",
+        "backend_id": "onnxruntime-cuda",
+        "onnxruntime": "1.31.1",
+        "threads": 4,
+        "fallback": "disabled",
+        "precision": "FP32, TF32 disabled",
+        "provider_options": {
+          "device_id": 0,
+          "use_tf32": 0,
+          "gpu_mem_limit": 1073741824,
+          "arena_extend_strategy": "kSameAsRequested",
+          "cudnn_conv_algo_search": "HEURISTIC",
+          "cudnn_conv_use_max_workspace": "0"
+        },
+        "startup_execution": {
+          "scope": "One synthetic zero-input startup probe, not per-frame profiling or capacity qualification.",
+          "warmup_runs_excluded": 1,
+          "node_execution_counts": {
+            "CUDAExecutionProvider": 203
+          },
+          "profile_sha256": "b955ae7cd420f59f4a26f3b8fdc9fcbe45cdcde5f61ae7d9d7aa9b5ad7340556"
+        }
+      }
+    ],
+    "journal": {
+      "entries": 356,
+      "reserved_bytes": 1091005,
+      "max_entries": 1000,
+      "max_bytes": 67108864,
+      "recovered_interrupted": 0,
+      "unacknowledged": 0,
+      "states": {
+        "succeeded": 356
+      },
+      "terminal_commits": 17859,
+      "terminal_rows": 19772,
+      "largest_terminal_batch": 4
+    },
+    "latencies": {
+      "worker_end": {
+        "count": 19768,
+        "p50_ms": 369.1627539228648,
+        "p95_ms": 534.2247350490652,
+        "maximum_ms": 628.8821460912004
+      },
+      "durable_parent_return": {
+        "count": 19768,
+        "p50_ms": 372.9400006704964,
+        "p95_ms": 543.5789829352871,
+        "maximum_ms": 632.5347010861151
+      },
+      "post_worker_return_gap": {
+        "count": 19768,
+        "p50_ms": 3.4487329539842904,
+        "p95_ms": 7.010233995970339,
+        "maximum_ms": 125.17913500778377
+      }
+    },
+    "camera_coverage": {
+      "completed_camera_contexts": 100,
+      "minimum_successes": 126,
+      "maximum_successes": 223,
+      "maximum_camera_p95_return_age_ms": 572.0054456614889
+    }
+  },
+  "measurement": {
+    "worker_end_boundary": "child processor end",
+    "durable_return_boundary": "parent monotonic clock immediately after ProcessWorkers.step returns with committed journal IDs",
+    "consumer_ack_included": false,
+    "drain_boundary": "after close returns; excluded from in-window percentiles and throughput",
+    "population": "successful in-window outcomes; replacements/pending have no completion latency",
+    "clock": "same-host Linux time.monotonic",
+    "percentile_method": "nearest rank ceil(q*n)",
+    "gap_method": "per-sample return age minus worker-end age, then percentile; not a difference of marginal percentiles"
+  },
+  "original_cadence_plan_and_decision_unchanged": true,
+  "optimization_adopted": false,
+  "latency_service_level_qualified": false,
+  "preservation": {
+    "core_files_unchanged": 5,
+    "primary_file_hashes_unchanged": 289,
+    "media_uploaded": false
+  },
+  "qualification": {
+    "physical_100_camera_capacity": "unqualified",
+    "full_resolution_production": "unqualified",
+    "field_accuracy": "unqualified",
+    "recording_continuity": "unqualified",
+    "power_loss_durability": "unqualified",
+    "24_hour_operation": "unqualified"
+  }
+}

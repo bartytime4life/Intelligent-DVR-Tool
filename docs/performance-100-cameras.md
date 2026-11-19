@@ -229,6 +229,13 @@ and median replacements rose from 739 to 880 despite fewer calls/commits.
 The private benchmark retains its 0.5 ms pause; no application default or frozen
 core implementation changed. Fewer controller calls alone are not a capacity gain.
 
+A [separate durable-return measurement](verification/durable-return-2026-11-18/README.md)
+clarifies that the older completion-age field stops inside the worker. One
+instrumented baseline measured 543.58 ms p95 through parent return after terminal
+commit, conditional on successful samples, while retaining 2,684 replacements and
+41 pending opportunities. This is a measured boundary, not a latency SLA or
+physical-camera acceptance.
+
 | Boundary | Durable behavior |
 | --- | --- |
 | Before sending a dispatch batch | Commit camera/sequence, run-scoped token, generation, monotonic sample/dispatch times, payload size and SHA-256. Frame bytes are absent. |
