@@ -1,5 +1,11 @@
 # Verification index
 
+[Durable parent-return latency and metric scope, November 18](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/durable-return-2026-11-18/README.md)
+clarifies that the earlier age metric ends inside the worker, preserves the
+original cadence receipts, and records one separately instrumented 120-second
+baseline through parent return after terminal commit. Its latency distribution
+is conditional on successful returns, with all replaced/pending work retained.
+
 [Rejected controller-pause experiment, November 18](https://github.com/bartytime4life/Intelligent-DVR-Tool/blob/main/docs/verification/controller-cadence-2026-11-18/README.md)
 records the next bounded native trial: a longer caller pause reduced controller
 calls but lowered throughput and increased replacements. All six cases, matching

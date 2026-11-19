@@ -1,0 +1,77 @@
+{
+  "interpreter_sha256": "e50d468e8b0adfb05733f5b87b3cff34829c4a8c1aea50c865aa8bdfe4bb150f",
+  "pyav": "19.0.2",
+  "ffmpeg_libraries": {
+    "libavutil": [
+      61,
+      1,
+      102
+    ],
+    "libavcodec": [
+      63,
+      1,
+      102
+    ],
+    "libavformat": [
+      63,
+      1,
+      102
+    ],
+    "libavdevice": [
+      63,
+      1,
+      102
+    ],
+    "libavfilter": [
+      12,
+      1,
+      102
+    ],
+    "libswscale": [
+      10,
+      1,
+      102
+    ],
+    "libswresample": [
+      7,
+      1,
+      102
+    ]
+  },
+  "python": "3.12.3",
+  "sqlite": "3.46.1",
+  "packages": {
+    "onnxruntime-gpu": "1.31.1",
+    "numpy": "2.5.4",
+    "opencv-python-headless": "4.13.0.92",
+    "onnx": "1.23.2",
+    "nvidia-cuda-runtime": "13.4.92",
+    "nvidia-cublas": "13.8.2.12",
+    "nvidia-cudnn-cu13": "9.27.0.42"
+  },
+  "kernel": "7.0.0-43-generic",
+  "system": "Linux",
+  "gpu": "NVIDIA GeForce RTX 5080, 580.178.04, 16303",
+  "filesystem": "ext4 /dev/nvme0n1p5",
+  "process_environment": {
+    "OPENCV_FFMPEG_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1",
+    "MALLOC_ARENA_MAX": "2"
+  },
+  "guard": {
+    "sha256": "f13ebd3434a9eeb157263908eeeb892dbe48e3573f4049ab2eb716f3ed995d84",
+    "checks": [
+      {
+        "family": 2,
+        "denied": true,
+        "errno": 1
+      },
+      {
+        "family": 10,
+        "denied": true,
+        "errno": 1
+      }
+    ],
+    "passed": true
+  }
+}

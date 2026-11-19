@@ -59,6 +59,12 @@ The throughput and replacement gates failed. Both the positive latency result
 and failed gates are retained. Two runs per variant on one busy owner PC do not
 establish statistical certainty or a universal scheduling rule.
 
+**Post-run metric-scope clarification:** `completion_age_p95_ms` ends at child
+processor completion, before result IPC, parent collection and terminal commit.
+Its gate did not qualify durable-return latency. The original plan/decision and
+numerical receipts remain unchanged. A [separate instrumented baseline](../durable-return-2026-11-18/README.md)
+defines and measures the later parent-return boundary.
+
 The A1/B1 traces shared **3,974 completed camera/sequence identities**, with
 30,057 matched predicted boxes. Counts, labels and confidence scores agreed;
 minimum box IoU was 0.9999999999999909 and maximum confidence delta was zero.
