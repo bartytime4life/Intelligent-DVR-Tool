@@ -1,0 +1,286 @@
+{
+  "source_commit": "d9fa29ebebe102d43202a38c1d67347f1f62b85c",
+  "core_source_sha256": {
+    "edge/inference.py": "7e95beb9e25dd67ac5d8d977ec6c466874371d12d112119a85a619124687b2f1",
+    "edge/journal.py": "70f7a3419d05d76380ea32ad5de20ee440bc17256e25baf0f2289a86e46a495a",
+    "edge/supervision.py": "03f334d5fa072e5f3ad02bd90536fd2c00fc97ebfaa54ca1ef1c10b64b80a9cf",
+    "edge/scheduler.py": "8639b46d3ba2e1a14efaa7ff647f412e6be437685ec7be5717a00983835b9019",
+    "edge/profiling.py": "f7c0a3e4b831d7f996840aec51a73e3fe68e06627cdce854716c576068f80f91"
+  },
+  "tested_file_sha256": {
+    "docs/verification/durable-overload-2026-10-28/check-cuda.py": "5af2870bac1cf8db142b0c646ada1a65f9da09bcc5994b217b49d82876ff5c74",
+    "edge/analyze.py": "4263d01d3bfbab83cac8af052b1c0bbf7b1bca9001de81655345da565f005ca4",
+    "edge/evaluation.py": "ec7a766815dae61e0726a2bd858b65288023edf46738d96db2cc8a394a05532c",
+    "edge/inference.py": "7e95beb9e25dd67ac5d8d977ec6c466874371d12d112119a85a619124687b2f1",
+    "edge/journal.py": "70f7a3419d05d76380ea32ad5de20ee440bc17256e25baf0f2289a86e46a495a",
+    "edge/labels/coco80.json": "76ce1473f01bd271bab54429737358a97160629cf970c5ec8384c2777dd0bae9",
+    "edge/model_profiles.py": "9a0cfffa5a0fbb7312de96d49c894106a92f5bbc3fec6fa9a5594c0bab06e6b2",
+    "edge/profiling.py": "f7c0a3e4b831d7f996840aec51a73e3fe68e06627cdce854716c576068f80f91",
+    "edge/scheduler.py": "8639b46d3ba2e1a14efaa7ff647f412e6be437685ec7be5717a00983835b9019",
+    "edge/supervision.py": "03f334d5fa072e5f3ad02bd90536fd2c00fc97ebfaa54ca1ef1c10b64b80a9cf",
+    "tests/test_journal.py": "db2b02b38c98eff7051152c43cd58fbd32c5e9b91737b1ba763072f0f195dbd7",
+    "tests/test_journal_batches.py": "ea7d28ea25dac3d1b514a320467d6e703bc7e2d520710ae08e5ebf35ba477b5b",
+    "tests/test_profiling.py": "13ad6ff95c979fa3d5b80f70ad5d822970c31cfdde823db0c3caf7536e1c8325",
+    "tests/test_supervision.py": "c01c486c57ccf8529164e4504612ff011ecfaf169363eb88025c05c902e578ff"
+  },
+  "harness_sha256": {
+    "collect_environment.py": "8d78074ff6ad23065d4cbfc669e4d9fb6b8c8da2f4b734d747a6faa344f081a6",
+    "run_checks.py": "ee71b64f31e08e6ab2bdc47081019556e7aac8f6632a2c723c3216d85d3a6c01",
+    "native_factory.py": "b4acebc582bd30b77360a441a0000eb5fd9a56353b4cc1077812cfaafa8e9c2e",
+    "offline_guard.py": "f13ebd3434a9eeb157263908eeeb892dbe48e3573f4049ab2eb716f3ed995d84",
+    "recovery_replay.py": "02081d603789693f8bf5e431a9e9c756af0db598a18a121d4f3124ff7ef3de72",
+    "process_parity.py": "1ad171967c26dba4b20b4a3ad3082aaf8ac11424d00f627e7938193e2081747e"
+  },
+  "model_sha256": "c5c2d13e59ae883e6af3b45daea64af4833a4951c92d116ec270d9ddbe998063",
+  "recordings": [
+    {
+      "bytes": 72549,
+      "sha256": "23667dad08d3481d6322f0ef8ea071aa9c7ac78b56ede6361f943a896ca20b4e"
+    },
+    {
+      "bytes": 228034,
+      "sha256": "7cc3ba8599b11885e58ea5f508997100f5eda4bbbe4a64da364fb47d5ad4a433"
+    },
+    {
+      "bytes": 142366,
+      "sha256": "90c3016141786ef161760a6c576a74bb5d59009433805abda51da3f53c2d6a09"
+    },
+    {
+      "bytes": 214973,
+      "sha256": "d8fcecbb2a3b2a7af7c12cb8a1c80758910f522e8291a78caa9383005c2c1c92"
+    },
+    {
+      "bytes": 187441,
+      "sha256": "afab4a0948d51ea5fe8b9217b08082e7d352702482eeb31e59d7962ab4ef7776"
+    },
+    {
+      "bytes": 144676,
+      "sha256": "b92824d9e731672ad21a927618d9f54d69a90e830499763235644458946ccaac"
+    },
+    {
+      "bytes": 83824,
+      "sha256": "2aaa91d228a7fbbb8f663fc7912589e5c9451809f5673578aac0f40173af8ec3"
+    },
+    {
+      "bytes": 174774,
+      "sha256": "b6190f2be69c7f95d963487e99da3c394fc2264bebbaa895c3748fc014f74421"
+    },
+    {
+      "bytes": 203887,
+      "sha256": "c785fe98a6480b4ba7770ad5e1f69e14e374d51164c0fff1fbf8ec88e86d6493"
+    },
+    {
+      "bytes": 194939,
+      "sha256": "52682a55bb2a87b902ee6bb2d34ed5431e1249b999954537b385fd7fe00f4a6b"
+    },
+    {
+      "bytes": 318135,
+      "sha256": "fd85da59407dff2e5caf939af3d9697382cb5f143b526be0f0898041412c2f22"
+    },
+    {
+      "bytes": 211836,
+      "sha256": "3e2d60669c18751cdd6d5fc01e99e4d0cb2c1d55b78fe54b78b87c058be76d1e"
+    },
+    {
+      "bytes": 317038,
+      "sha256": "8a3d76f8c9eb28bfe5d954112549f6d39f594e2657ec3abd0e9e66f3695afd3e"
+    },
+    {
+      "bytes": 271121,
+      "sha256": "8c28a83508041a968ca35ed4a6433d8603290026b90178db21b96cdf659cbb64"
+    },
+    {
+      "bytes": 297928,
+      "sha256": "fc91c8dccb3b32532380f99bdcc0264d66002eebdc7335910a17c721fcd5dfd0"
+    },
+    {
+      "bytes": 167376,
+      "sha256": "de284911afd8c09bdcf513856d179b590609f9750a23f4deff718cb9209d930d"
+    },
+    {
+      "bytes": 772991,
+      "sha256": "9f7f5c248ccc93bcd404eb837dfdf04aec3492d689afdaaaae1b44b1547e27bf"
+    },
+    {
+      "bytes": 152185,
+      "sha256": "218dcb92ef89076b4f7f187ece6c7c8db4b45d7a4bbec16095c8f94f1728c42e"
+    },
+    {
+      "bytes": 355587,
+      "sha256": "2a6898c7e0f4c6da237fe8b90821594b06f54581f81e26ef820db5b745007354"
+    },
+    {
+      "bytes": 316712,
+      "sha256": "a1b74c1bdb2a7aac851ea5eb500ca059e8e2592cb2ee402423e6fb258960bc3c"
+    },
+    {
+      "bytes": 214409,
+      "sha256": "bcf3b88cf082c170a10f93abd9cbabdec3acef1e2c926263750a3d4bf566bacd"
+    },
+    {
+      "bytes": 272462,
+      "sha256": "b8f01654e2ca5edd4ce85be72ef3c76de5d777314ff98b6d12f715fb728c0941"
+    },
+    {
+      "bytes": 221100,
+      "sha256": "f83c7f8f5ccdb4b1665743e4c9aa5c26236c9f6008601b4748cdf48ec9cc8f3e"
+    },
+    {
+      "bytes": 127679,
+      "sha256": "1bc266677e008011d93269a8feb6090d60bfdf77526cd40deafa2a8defddbe8f"
+    },
+    {
+      "bytes": 202827,
+      "sha256": "0de2e13fe1a16590766f0a7a1d2a1ef2040d9e0d4fb50af390fd1a446d7d163d"
+    },
+    {
+      "bytes": 474501,
+      "sha256": "6b85adf94fe9365e64430f755a24b49a5d110370a0651449c23974da4b6daecc"
+    },
+    {
+      "bytes": 177130,
+      "sha256": "5922aaa4c2466c3cd0b621a9b4febfa9661c9b5df1f499d85b292294b3c99a50"
+    },
+    {
+      "bytes": 287825,
+      "sha256": "2f298a43ff57e127da25b97ca4052eb5ecdf7adf33bcc9d58923a7bd13221194"
+    },
+    {
+      "bytes": 149374,
+      "sha256": "68d2f61bc9a3465e8944c2e6ca535595b23f6ea9f45acd26beed4b2017e680ce"
+    },
+    {
+      "bytes": 786072,
+      "sha256": "d94439e6793857af44578b1623667f7849b89be230c964cd24fc5495c29822c8"
+    }
+  ],
+  "parity_inputs": [
+    {
+      "kind": "vehicle",
+      "sha256": "7d51815f61ee9e0dd349171d02d9d08c74d9d166a2be58eab65895b1617ad6eb",
+      "bytes": 10835272,
+      "frame_indices": [
+        0,
+        15,
+        30,
+        45,
+        60,
+        75,
+        90,
+        105,
+        120,
+        135,
+        150,
+        165,
+        180,
+        195,
+        210,
+        225,
+        240,
+        255,
+        270,
+        285,
+        300,
+        315,
+        330,
+        345,
+        360,
+        375,
+        390,
+        405,
+        420,
+        435,
+        450,
+        465,
+        480,
+        495,
+        510,
+        525,
+        540,
+        555,
+        570,
+        585
+      ],
+      "frame_selector_sha256": "49e6408354d3adb34f9341b4354bfe5a91f1c5fdfff4e52498fa7732f969b6d3",
+      "width": 1920,
+      "height": 1080,
+      "fps": 30.0,
+      "frames": 600
+    },
+    {
+      "kind": "person",
+      "sha256": "9661a6f5602df23be9f013d3a1e3f8e03e7267e4f89a889cafc91f54e0994039",
+      "bytes": 73372866,
+      "frame_indices": [
+        0,
+        5,
+        10,
+        15,
+        20,
+        25,
+        30,
+        35,
+        40,
+        45,
+        50,
+        55,
+        60,
+        65,
+        70,
+        75,
+        80,
+        85,
+        90,
+        95,
+        100,
+        105,
+        110,
+        115,
+        120,
+        125,
+        130,
+        135,
+        140,
+        145,
+        150,
+        155,
+        160,
+        165,
+        170,
+        175,
+        180,
+        185,
+        190,
+        195,
+        200,
+        205,
+        210,
+        215,
+        220,
+        225,
+        230,
+        235,
+        240,
+        245,
+        250,
+        255,
+        260,
+        265,
+        270,
+        275,
+        280,
+        285,
+        290,
+        295
+      ],
+      "frame_selector_sha256": "1d390d3ebd0d37f71e9a370d816aa52c5d3dcb260d318e27084e50f7a53f7fe4",
+      "width": 1920,
+      "height": 1072,
+      "fps": 30.0,
+      "frames": 300
+    }
+  ],
+  "media_redistributed": false,
+  "standalone_public_reproduction": false,
+  "private_artifacts_retained": true
+}
