@@ -223,6 +223,12 @@ and 49 pending. Separate profiles identify material durable commit work without
 claiming an exact causal decomposition. This closes native measurement availability,
 not the sustained loss-free or physical-camera capacity gate.
 
+The [subsequent controller-pause trial](verification/controller-cadence-2026-11-18/README.md)
+rejected a 2 ms post-step sleep: median throughput fell from 161.98/s to 157.40/s
+and median replacements rose from 739 to 880 despite fewer calls/commits.
+The private benchmark retains its 0.5 ms pause; no application default or frozen
+core implementation changed. Fewer controller calls alone are not a capacity gain.
+
 | Boundary | Durable behavior |
 | --- | --- |
 | Before sending a dispatch batch | Commit camera/sequence, run-scoped token, generation, monotonic sample/dispatch times, payload size and SHA-256. Frame bytes are absent. |

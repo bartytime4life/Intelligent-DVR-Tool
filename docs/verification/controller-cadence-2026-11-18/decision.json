@@ -1,0 +1,22 @@
+{
+  "baseline_median_per_second": 161.98333333333332,
+  "candidate_median_per_second": 157.4,
+  "observed_median_gain": -0.02829509208766323,
+  "baseline_median_p95_age_ms": 534.3575681326911,
+  "candidate_maximum_p95_age_ms": 531.6937773604877,
+  "gates": {
+    "gain": false,
+    "latency": true,
+    "replacements": false,
+    "equal_offers": true,
+    "common_sample_agreement": true
+  },
+  "accepted_for_longer_confirmation": false,
+  "common_samples": {
+    "compared": 3974,
+    "matched_boxes": 30057,
+    "minimum_iou": 0.9999999999999909,
+    "maximum_score_delta": 0.0
+  },
+  "default_adopted": false
+}

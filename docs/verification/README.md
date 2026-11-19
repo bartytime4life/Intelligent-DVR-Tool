@@ -1,5 +1,11 @@
 # Verification index
 
+[Rejected controller-pause experiment, November 18](controller-cadence-2026-11-18/README.md)
+records the next bounded native trial: a longer caller pause reduced controller
+calls but lowered throughput and increased replacements. All six cases, matching
+predictions, separate profiles and failed acceptance gates are retained; the
+benchmark pause and pinned core remain unchanged.
+
 [Owner-PC native CUDA and durable-result profiling, November 18](native-profile-2026-11-18/README.md)
 records current hardware admission, recomputed CPU/GPU agreement on 100 saved
 frames, seven offline replay cases and separate bounded timing attribution.
