@@ -1,0 +1,46 @@
+{
+  "scope": "Synthetic startup admission only; not recording or capacity evidence",
+  "model_sha256": "c5c2d13e59ae883e6af3b45daea64af4833a4951c92d116ec270d9ddbe998063",
+  "onnxruntime": "1.31.1",
+  "requested_backend": "onnxruntime-cuda",
+  "available_providers": [
+    "TensorrtExecutionProvider",
+    "CUDAExecutionProvider",
+    "CPUExecutionProvider"
+  ],
+  "fallback_policy_requested": "disabled",
+  "cpu_fallback_used": false,
+  "recording_frames_processed": 0,
+  "visible_gpu_device_nodes": 1,
+  "source_sha256": {
+    "journal.py": "70f7a3419d05d76380ea32ad5de20ee440bc17256e25baf0f2289a86e46a495a",
+    "supervision.py": "03f334d5fa072e5f3ad02bd90536fd2c00fc97ebfaa54ca1ef1c10b64b80a9cf",
+    "scheduler.py": "8639b46d3ba2e1a14efaa7ff647f412e6be437685ec7be5717a00983835b9019",
+    "inference.py": "7e95beb9e25dd67ac5d8d977ec6c466874371d12d112119a85a619124687b2f1"
+  },
+  "status": "admitted",
+  "runtime": {
+    "backend": "ONNX Runtime CUDA",
+    "backend_id": "onnxruntime-cuda",
+    "onnxruntime": "1.31.1",
+    "threads": 4,
+    "fallback": "disabled",
+    "precision": "FP32, TF32 disabled",
+    "provider_options": {
+      "device_id": 0,
+      "use_tf32": 0,
+      "gpu_mem_limit": 1073741824,
+      "arena_extend_strategy": "kSameAsRequested",
+      "cudnn_conv_algo_search": "HEURISTIC",
+      "cudnn_conv_use_max_workspace": "0"
+    },
+    "startup_execution": {
+      "scope": "One synthetic zero-input startup probe, not per-frame profiling or capacity qualification.",
+      "warmup_runs_excluded": 1,
+      "node_execution_counts": {
+        "CUDAExecutionProvider": 203
+      },
+      "profile_sha256": "975d5471bc427fc9f362e0e5363b243b2347314688c0566b6a87dee6531a34df"
+    }
+  }
+}

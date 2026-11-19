@@ -1,0 +1,59 @@
+{
+  "source_commit": "80825904df5c2989aa546178c59c9d20b49f3977",
+  "core": {
+    "edge/inference.py": "7e95beb9e25dd67ac5d8d977ec6c466874371d12d112119a85a619124687b2f1",
+    "edge/journal.py": "70f7a3419d05d76380ea32ad5de20ee440bc17256e25baf0f2289a86e46a495a",
+    "edge/supervision.py": "03f334d5fa072e5f3ad02bd90536fd2c00fc97ebfaa54ca1ef1c10b64b80a9cf",
+    "edge/scheduler.py": "8639b46d3ba2e1a14efaa7ff647f412e6be437685ec7be5717a00983835b9019",
+    "edge/profiling.py": "f7c0a3e4b831d7f996840aec51a73e3fe68e06627cdce854716c576068f80f91"
+  },
+  "hypothesis": "A 2 ms post-step sleep may amortize durable reservation/completion commits through larger received batches; it may also reduce throughput or increase collection latency.",
+  "variants": {
+    "A": {
+      "post_step_sleep_ms": 0.5
+    },
+    "B": {
+      "post_step_sleep_ms": 2.0
+    }
+  },
+  "order": [
+    "A1",
+    "B1",
+    "B2",
+    "A2",
+    "profile-A",
+    "profile-B"
+  ],
+  "acceptance": {
+    "minimum_unprofiled_median_gain": 0.03,
+    "maximum_candidate_p95_age_increase_ms": 25,
+    "maximum_candidate_p95_age_ms": 1000,
+    "require_lower_median_replacements": true,
+    "require_equal_offers": true,
+    "minimum_common_completed_samples": 2500,
+    "minimum_box_iou": 0.99,
+    "maximum_score_delta": 0.001
+  },
+  "confirmation": "Only if the ABBA and common-sample agreement gates pass: unprofiled 120-second A then B; no runtime default adoption.",
+  "fixed": {
+    "virtual_streams": 100,
+    "recordings": 30,
+    "cuda_sessions": 4,
+    "nominal_samples_per_source_second": 2,
+    "source_timing": "fixed windows; outcomes at/after stop go to drain",
+    "journal_policy": "FULL/WAL/schema1/512 pages",
+    "consumer_minimum_interval_ms": 25,
+    "sql_tracing": false,
+    "prune_at_entries": 500,
+    "max_sample_bytes": 2097152,
+    "max_buffer_bytes": 67108864,
+    "max_age_seconds": 2,
+    "task_timeout_seconds": 2,
+    "post_step_pause_scope": "Caller sleeps after each main-window step; not a fixed polling period or a delay inside the protected core."
+  },
+  "harness_sha256": {
+    "run_cadence.py": "d6951668a32b67011c050669e74ea4c5815d6345a79c2c9ee1b124ddfeae15fc",
+    "recovery_replay.py": "db33772d8e800139ea67d4f785f1c378b4ce9add1f70f442057186182466cb5b",
+    "native_factory.py": "b4acebc582bd30b77360a441a0000eb5fd9a56353b4cc1077812cfaafa8e9c2e"
+  }
+}
